@@ -1,0 +1,22 @@
+<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <linearGradient id="c" x2="32" y1="16" y2="16" gradientTransform="translate(-10.144,5.8564)" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#227a28" offset="0"/>
+   <stop stop-color="#f0c338" offset="1"/>
+  </linearGradient>
+  <mask id="b" maskUnits="userSpaceOnUse">
+   <path id="d" d="m4.3875 4.3875h23.225v23.225h-23.225z" fill="#fff"/>
+   <rect transform="rotate(45)" x="14.878" y="-1.8982" width="15.5" height="3.7964" d="M 14.877663,-1.8981922 H 30.377172 V 1.8981929 H 14.877663 Z" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3005"/>
+  </mask>
+  <mask id="a" maskUnits="userSpaceOnUse">
+   <path id="e" d="m4.3875 4.3875h23.225v23.225h-23.225z" fill="#fff"/>
+   <rect transform="matrix(-.70711 .70711 .70711 .70711 0 0)" x="-7.7498" y="20.729" width="15.5" height="3.7964" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3005"/>
+  </mask>
+ </defs>
+ <circle transform="rotate(-30)" cx="5.8564" cy="21.856" r="16" fill="url(#c)" stroke-linecap="round" stroke-width="10.519"/>
+ <g>
+  <g mask="url(#a)">
+   <rect x="6.1875" y="6.1875" width="19.625" height="19.625" d="M 6.1874995,6.1875 H 25.812501 V 25.812502 H 6.1874995 Z" fill="#fff" mask="url(#b)" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+  </g>
+ </g>
+</svg>

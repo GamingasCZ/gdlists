@@ -1,0 +1,20 @@
+<svg id="svg2306" width="64mm" height="64mm" version="1.1" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+ <defs id="defs2303">
+  <mask id="mask-powermask-path-effect3593" maskUnits="userSpaceOnUse">
+   <path id="mask-powermask-path-effect3593_box" d="m-1-1h66v66h-66z" fill="#fff"/>
+   <path id="path3591" d="m16.346 41.836s5.9567 4.4133 15.654 4.2944c8.5692-0.10507 14.524-4.2944 14.524-4.2944v0" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.9963" style="paint-order:markers fill stroke"/>
+  </mask>
+  <clipPath id="clipPath3611">
+   <g id="g3617" display="none">
+    <rect id="rect3613" x="10.713" y="19.948" width="12.19" height="12.19" rx="3.9963" ry="3.9963" style="paint-order:markers fill stroke"/>
+    <rect id="rect3615" x="39.673" y="19.948" width="12.19" height="12.19" rx="3.9963" ry="3.9963" style="paint-order:markers fill stroke"/>
+   </g>
+   <path id="lpe_path-effect3619" class="powerclip" d="m-5-5h74v74h-74zm19.71 24.948c-2.214 0-3.9963 1.7824-3.9963 3.9963v4.1978c0 2.214 1.7824 3.9963 3.9963 3.9963h4.1978c2.214 0 3.9963-1.7824 3.9963-3.9963v-4.1978c0-2.214-1.7824-3.9963-3.9963-3.9963zm28.959 0c-2.214 0-3.9963 1.7824-3.9963 3.9963v4.1978c0 2.214 1.7824 3.9963 3.9963 3.9963h4.1978c2.214 0 3.9963-1.7824 3.9963-3.9963v-4.1978c0-2.214-1.7824-3.9963-3.9963-3.9963z"/>
+  </clipPath>
+ </defs>
+ <g id="layer1">
+  <g id="g3609" clip-path="url(#clipPath3611)">
+   <path id="path2427" d="m64 32a32 32 0 0 1-32 32 32 32 0 0 1-32-32 32 32 0 0 1 32-32 32 32 0 0 1 32 32z" fill="#fff" mask="url(#mask-powermask-path-effect3593)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.7008e-8" style="paint-order:markers fill stroke"/>
+  </g>
+ </g>
+</svg>
