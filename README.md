@@ -1,46 +1,21 @@
-# gdlists-vue
+# Geometry Dash Level Lists
 
-This template should help get you started developing with Vue 3 in Vite.
+Hi, I wanted to be really hip and cool, so I'm rewriting the frontend of GD Lists with *hyper-modern technologies*!!
 
-## Recommended IDE Setup
+## The hyper-modern stuff
+- Vue.js
+- Typescript
+- Tailwind
+- Vite
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+# About
+GD Lists is a website where you can make and easily share your lists of **Geometry Dash** levels!
+- **Check it out [here](https://gamingas.wz.cz/lofttop10/)**
 
-## Type Support for `.vue` Imports in TS
+## Also check out the original repo, if you feel like puking! (also contains the backend!!)
+#### [The lof-top10 repository](https://github.com/GamingasCZ/lof-top10)
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+# Screenshots
+- TBA
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+# Todo - [issue #1](https://github.com/GamingasCZ/gdlists-vue-frontend/issues/1)
