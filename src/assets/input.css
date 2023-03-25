@@ -48,3 +48,8 @@ input[type='checkbox']:checked::after {
   translate: -50% -50%;
   transition: width 0.2s;
 }
+
+.disabled {
+  opacity: 0.2;
+  filter: grayscale(100%);
+}

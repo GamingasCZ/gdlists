@@ -28,9 +28,11 @@ defineProps({
     </form>
   </header>
   <div class="flex justify-center gap-2 pt-8 text-base text-white">
-    <button class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3">
-      <img src="../images/plus.svg" alt="" class="w-6" />{{ $t('homepage.createList') }}
-    </button>
+    <RouterLink to="/editor">
+      <button class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3">
+        <img src="../images/plus.svg" alt="" class="w-6" />{{ $t('homepage.createList') }}
+      </button>
+    </RouterLink>
     <button class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3 sm:mr-14">
       <img src="../images/dice.svg" alt="" class="w-6" />{{ $t('homepage.tryLuck') }}
     </button>

@@ -6,8 +6,7 @@ import { levelList, addLevel } from '../Editor'
 import { ref } from 'vue';
 
 const nice = () => {
-  console.log(levelList)
-  console.log(currentlyOpenedCard.value)
+  console.log(levelList.value)
 }
 const currentlyOpenedCard = ref<number>(0)
 
