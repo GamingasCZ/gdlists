@@ -6,10 +6,10 @@ module.exports = {
     extend: {
       colors: {
         lof: {
-          100: "#08110b",
-          200: "#142019",
-          300: "#045124",
-          400: "#71d471"
+          100: "var(--siteBackground)",
+          200: "var(--secondaryColor)",
+          300: "var(--primaryColor)",
+          400: "var(--brightGreen)"
         }
       },
       backgroundImage: ({ theme }) => ({

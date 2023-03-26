@@ -35,6 +35,9 @@ export const messages = {
       noLevelsSaved: 'Zatím jsi neuložil žádné levely!',
       listsNonexistent: 'Neexistují tyto seznamy!'
     },
+    editor: {
+      tags: ["Pomalý","Rychlý","Hodně objektů","2P","Hacknutý","Layout","Dekorace","1.9","Šílený","Unratelý","Nemožný","Shitpost","Minihra","List Demon","Jam","Challenge","Ztracený","Přeglowovaný","Remake","Gimmicky","Kontroverzní","Barevný","Moderní","Bossfight","Dlouhý","Nevydaný","Nedoceněný"]
+    },
     other: {
       lockQuotes: [
         'Jestli se nepříhlásíš, nevydám 2.2 :D!',

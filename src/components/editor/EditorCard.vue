@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { levelList } from '@/Editor'
+import { levelList, moveLevel, deleteLevel } from '@/Editor'
 import chroma, { type Color } from 'chroma-js'
 import { ref } from 'vue';
 import type { Level } from '../../interfaces'
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
+import LevelTags from "./LevelTags.vue";
 
 const props = defineProps<{
   index?: number
@@ -14,12 +15,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "updateOpenedCard", newPos: number): void
+  (e: "openTagPopup"): void
 }>()
 
 // Colors
-const darkCol = () => chroma(levelList.value.levels[props.index!].color).darken().css()
-const changeHue = (newHue: number) => levelList.value.levels[props.index!].color = chroma.hsl(newHue, 0.5, chroma(props.data?.color!).hsl()[2]).hex()
-const changeVal = (newValue: number) => levelList.value.levels[props.index!].color = chroma.hsl(chroma(props.data?.color!).hsl()[0], 0.5, newValue * 0.015625).hex()
+const darkCol = () => chroma.hsl(...props.data?.color!).darken().css()
+const changeCardColors = (newColors: [number, number]) => levelList.value.levels[props.index!].color = [newColors[0], 0.5, newColors[1] / 64]
 
 // Difficulty Picker
 const changeRate = (newRating: number) => levelList.value.levels[props.index!].difficulty[1] = newRating
@@ -38,19 +39,6 @@ const changeProp = (e: Event) => {
   levelList.value.levels[props.index as number][target.name] = target.value
 }
 
-const deleteLevel = () => {
-  levelList.value.levels.splice(props.index!, 1)
-}
-
-const moveLevel = (from: number, to: number) => {
-  if (to < 0 || to >= levelList.value.levels.length) return
-
-  let currentCard = levelList.value.levels[from]
-  levelList.value.levels.splice(from, 1)
-  levelList.value.levels.splice(to, 0, currentCard)
-  emit("updateOpenedCard", to)
-}
-
 const openedPanel = ref<number>(0)
 </script>
 
@@ -58,13 +46,13 @@ const openedPanel = ref<number>(0)
   <section>
 
     <!-- Closed card content -->
-    <header :style="{ backgroundColor: data?.color }" class="rounded-md py-1 px-2 text-lg" v-show="!opened"
-      @click="emit('updateOpenedCard', index!)" draggable="true">
+    <header :style="{ backgroundColor: chroma.hsl(...data?.color!).hex()}" class="px-2 py-1 text-lg rounded-md" v-show="!opened"
+      @click="emit('updateOpenedCard', index!)">
       #{{ index! + 1 }} - {{ data?.levelName || 'Bezejmenný' }}
     </header>
 
     <!-- Card content -->
-    <main v-show="opened" :style="{ backgroundColor: data?.color, borderColor: darkCol() }"
+    <main v-show="opened" :style="{ backgroundColor: chroma.hsl(...data?.color!).hex(), borderColor: darkCol() }"
       class="flex flex-col gap-1.5 rounded-md border-[0.35rem] border-solid p-2">
       <div class="flex justify-between">
         <div class="box-border flex gap-2">
@@ -74,17 +62,17 @@ const openedPanel = ref<number>(0)
           <input
             class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
             type="text" name="levelID" @input="changeProp" :value="data?.levelID" placeholder="ID levelu" />
-          <img class="button transition-opacity duration-100 w-10 aspect-square rounded-full bg-black bg-opacity-30 p-1"
+          <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg" alt="" :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }" />
         </div>
         <div class="flex">
-          <img class="button w-10 aspect-square" src="../../images/showCommsU.svg" alt=""
-            @click="moveLevel(index!, index! - 1)" />
+          <img class="w-10 button aspect-square" src="../../images/showCommsU.svg" alt=""
+            @click="emit('updateOpenedCard', moveLevel(index!, index! - 1))" />
           <input
             class="w-12 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
             type="text" inputmode="numeric" @input="changeProp" :value="index! + 1" />
-          <img class="button w-10 aspect-square" src="../../images/showCommsD.svg" alt=""
-            @click="moveLevel(index!, index! + 1)" />
+          <img class="w-10 button aspect-square" src="../../images/showCommsD.svg" alt=""
+            @click="emit('updateOpenedCard', moveLevel(index!, index! + 1))" />
         </div>
       </div>
       <hr class="h-1 border-none" :style="{ backgroundColor: darkCol() }" />
@@ -97,19 +85,19 @@ const openedPanel = ref<number>(0)
           type="text" name="levelName" :value="data?.levelName" @input="changeProp" placeholder="Jméno levelu" />
 
         <!-- Level search -->
-        <hr class="h-1 transition-opacity duration-100 bg-white w-8"
+        <hr class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }" />
-        <img class="button transition-opacity duration-100 w-10 aspect-square rounded-full bg-black bg-opacity-30 p-1"
+        <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
           src="../../images/searchOpaque.svg" alt=""
           :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }" />
-        <hr class="h-1 transition-opacity duration-100 bg-white w-8"
+        <hr class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }" />
 
         <!-- Creator input -->
         <input
           class="max-w-[20vw] h-10 rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
           type="text" name="creator" :value="data?.creator" @input="changeProp" placeholder="Tvůrce" />
-        <img class="button w-10 aspect-square rounded-full bg-black bg-opacity-30 p-1" src="../../images/bytost.webp"
+        <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full button aspect-square" src="../../images/bytost.webp"
           alt="" />
       </div>
       <div class="flex justify-between items-center">
@@ -123,26 +111,27 @@ const openedPanel = ref<number>(0)
         </div>
 
         <!-- Extras buttons -->
-        <div class="flex items-start gap-2">
-          <img class="button w-10" @click="deleteLevel" src="../../images/delete.webp" alt="" />
-          <img class="button w-10" @click="openedPanel = openedPanel != 1 ? 1 : 0" src="../../images/colorSelect.webp"
+        <div class="flex gap-2 items-start">
+          <img class="w-10 button" @click="deleteLevel(props.index!)" src="../../images/delete.webp" alt="" />
+          <img class="w-10 button" @click="openedPanel = openedPanel != 1 ? 1 : 0" src="../../images/colorSelect.webp"
             alt="" />
-          <div class="flex justify-center items-center relative">
-            <img class="button w-10" @click="openedPanel = openedPanel != 2 ? 2 : 0"
+          <div class="flex relative justify-center items-center button">
+            <img class="w-10" @click="openedPanel = openedPanel != 2 ? 2 : 0"
               src="../../images/faces/diffContainer.webp" alt="" />
-            <img :src="`/src/images/faces/${levelList.levels[index!].difficulty[0]}.webp`" alt="" class="w-6 absolute z-20">
-            <img :src="getRateImage()" alt="" class="w-8 absolute z-10" :style="{zIndex: levelList.levels[index!].difficulty[1]-1 ? 10 : 30 }">
+            <img :src="`/src/images/faces/${levelList.levels[index!].difficulty[0]}.webp`" alt="" class="absolute z-20 w-6 pointer-events-none">
+            <img :src="getRateImage()" alt="" class="absolute z-10 w-8 pointer-events-none" :style="{zIndex: levelList.levels[index!].difficulty[1]-1 ? 10 : 30 }">
           </div>
-          <img class="button w-10" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tags.webp" alt=""/>
+          <img class="w-10 button" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tags.webp" alt=""/>
         </div>
       </div>
 
       <!-- Extras panel -->
-      <div class="bg-black bg-opacity-30 rounded-md p-2" v-show="openedPanel">
-        <ColorPicker v-if="openedPanel == 1" @hue-change="changeHue" @val-change="changeVal" />
+      <div class="p-2 bg-black bg-opacity-30 rounded-md" v-show="openedPanel">
+        <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" />
         <DifficultyPicker v-if="openedPanel == 2" :selected-rate="levelList.levels[props.index!].difficulty[1]"
-          :selected-face="levelList.levels[props.index!].difficulty[0]" @change-face="changeFace"
-          @change-rate="changeRate" />
+        :selected-face="levelList.levels[props.index!].difficulty[0]" @change-face="changeFace"
+        @change-rate="changeRate" />
+        <LevelTags :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')"/>
       </div>
     </main>
   </section>

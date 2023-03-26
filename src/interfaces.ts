@@ -9,7 +9,7 @@ export interface ListPreview {
 export interface LevelList {
   description: string
   diffGuesser: [boolean, boolean, boolean] // DG enabled, diffGuess, rateGuess
-  pageBGColor: string
+  pageBGColor: [number, number, number]
   titleImg: [string, number, number, number, boolean]
   translucent: boolean
   levels: Array<Level>
@@ -21,7 +21,7 @@ export interface Level {
   levelID: string | null
   video: string | null
   difficulty: [number, number]
-  color: string
+  color: [number, number, number]
   tags: LevelTag[]
 }
 
