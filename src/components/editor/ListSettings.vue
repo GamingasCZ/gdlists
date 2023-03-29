@@ -2,63 +2,60 @@
 import { levelList } from '../../Editor'
 import { ref } from 'vue'
 
-const changeTranslucency = (e: Event) =>
-  (levelList.value.translucent = (e.currentTarget as HTMLInputElement).checked)
-const changeDiffGuesser = (e: Event, index: number) => {
-  levelList.value.diffGuesser[index] = (e.currentTarget as HTMLInputElement).checked
-
-  if (index == 0) diffGuesserEnabled.value = levelList.value.diffGuesser[0]
-}
-
-const diffGuesserEnabled = ref<Boolean>(levelList.value.diffGuesser[0])
 </script>
 
 <template>
   <section class="w-80">
-    <h2 class="text-center text-xl font-bold">Nastavení</h2>
-    <div class="flex flex-col gap-2 rounded-md bg-white bg-opacity-5 px-2 py-2">
+    <h2 class="text-xl font-bold text-center">Nastavení</h2>
+    <div class="flex flex-col gap-2 px-2 py-2 bg-white bg-opacity-5 rounded-md">
       <div>
         <input
           type="checkbox"
           name="private"
-          class="button mr-2 h-6 w-6 border-none align-middle"
+          class="button"
         />
         <label for="private">Soukromý seznam</label>
       </div>
       <div>
         <input
           type="checkbox"
-          @input="changeDiffGuesser($event, 0)"
+          v-model="levelList.diffGuesser[0]"
           name="diffGuessing"
           id="nice"
-          class="button mr-2 h-6 w-6 border-none align-middle"
+          class="button"
         />
         <label for="diffGuessing" id="diffGuess">Hádání obtížnstí</label>
       </div>
       <Transition name="fade">
         <div
-          v-show="diffGuesserEnabled"
-          class="ml-8 box-border flex w-max items-center gap-2 rounded-md bg-black bg-opacity-25 py-2 px-3"
+          v-show="levelList.diffGuesser[0]"
+          class="box-border flex gap-2 items-center px-3 py-2 ml-8 w-max bg-black bg-opacity-25 rounded-md"
         >
           <span>Hádat: </span>
-          <img
-            src="../../images/faces/4.webp"
-            alt=""
-            class="button w-10 rounded-md bg-black bg-opacity-50 p-1"
-          />
-          <img
-            src="../../images/faces/epic.webp"
-            alt=""
-            class="button w-10 rounded-md bg-black bg-opacity-50 p-1"
-          />
+          <button @click="levelList.diffGuesser[1] = !levelList.diffGuesser[1]">
+            <img
+              src="../../images/faces/4.webp"
+              alt=""
+              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
+              :class="{disabled: !levelList.diffGuesser[1]}"
+            />
+          </button>
+          <button @click="levelList.diffGuesser[2] = !levelList.diffGuesser[2]">
+            <img
+              src="../../images/faces/epic.webp"
+              alt=""
+              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
+              :class="{disabled: !levelList.diffGuesser[2]}"
+            />
+          </button>
         </div>
       </Transition>
       <div>
         <input
-          @input="changeTranslucency"
+          v-model="levelList.translucent"
           type="checkbox"
           name="translucency"
-          class="button mr-2 h-6 w-6 border-none align-middle"
+          class="button"
         />
         <label for="translucency">Průsvitné karty</label>
       </div>

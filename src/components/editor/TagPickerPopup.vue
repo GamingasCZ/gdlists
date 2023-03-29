@@ -9,8 +9,8 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <dialog class="fixed top-0 left-0 z-50 w-full h-full text-white bg-black bg-opacity-80 backdrop-saturate-0" open>
-        <section class="max-w-[95vw] shadow-lg shadow-black w-max absolute top-1/2 left-1/2 p-2 rounded-lg -translate-x-1/2 -translate-y-1/2 bg-greenGradient">
+    <dialog open @click="emit('closePopup')" tabindex="0" @keyup.esc="emit('closePopup')">
+        <section @click.stop="" class="max-w-[95vw] text-white shadow-lg shadow-black w-max absolute top-1/2 left-1/2 p-2 rounded-lg -translate-x-1/2 -translate-y-1/2 bg-greenGradient">
             <div class="relative">
                 <h1 class="text-xl font-bold text-center">Štítky</h1>
                 <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')">

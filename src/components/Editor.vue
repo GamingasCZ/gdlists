@@ -4,6 +4,8 @@ import ListSettings from './editor/ListSettings.vue'
 import EditorCard from './editor/EditorCard.vue'
 import ColorPicker from './global/ColorPicker.vue'
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
+import BGImagePicker from './global/BackgroundImagePicker.vue'
+import DescriptionEditor from './global/TextEditor.vue'
 import { levelList, addLevel } from '../Editor'
 import { ref } from 'vue';
 import chroma from 'chroma-js';
@@ -13,7 +15,9 @@ const nice = () => {
 }
 const currentlyOpenedCard = ref<number>(0)
 const tagPopupOpen = ref<boolean>(false)
+const BGpickerPopupOpen = ref<boolean>(false)
 const bgColorPickerOpen = ref<boolean>(false)
+const descriptionEditorOpen = ref<boolean>(false)
 
 const modifyListBG = (newColors: number) => {
   document.documentElement.style.setProperty('--siteBackground', chroma(chroma.hsl(newColors[0], 0.36, newColors[1]*0.015625)).hex())
@@ -26,9 +30,12 @@ const modifyListBG = (newColors: number) => {
 <template>
   <NotLoggedIn class="hidden" mess="Pro vytvoření seznamu se prosím přihlaš!" />
   <TagPickerPopup v-show="tagPopupOpen" @close-popup="tagPopupOpen = false" @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"></TagPickerPopup>
+  <BGImagePicker v-if="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false"/>
+  <DescriptionEditor v-show="descriptionEditorOpen" editor-title="Editor popisku" @close-popup="descriptionEditorOpen = false"/>
 
   <form
     action="/editor"
+    @submit.prevent
     class="shadow-lg shadow-black mx-auto flex w-[70rem] max-w-[95vw] translate-y-20 flex-col items-center rounded-md bg-greenGradient pb-3 text-white"
   >
     <div
@@ -46,30 +53,38 @@ const modifyListBG = (newColors: number) => {
         type="text"
         class="h-16 max-w-[77vw] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         placeholder="Popis seznamu"
+        v-model="levelList.description"
       ></textarea>
-      <img
-        class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
-        src="../images/fullscreen.svg"
-        alt=""
-      />
+      <button type="button">
+        <img
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
+          src="../images/fullscreen.svg"
+          alt=""
+          @click="descriptionEditorOpen = true"
+        />
+      </button>
       <input
         autocomplete="off"
         type="text"
         class="h-8 max-w-[77vw] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         placeholder="Obrázek seznamu"
+        v-model="levelList.titleImg[0]"
       />
-      <img
-        class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
-        src="../images/gear.svg"
-        alt=""
-      />
+      <button type="button">
+        <img
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
+          src="../images/gear.svg"
+          alt=""
+          @click="BGpickerPopupOpen = true"
+        />
+      </button>
     </div>
 
     <div class="flex gap-2 items-center my-1">
       <span>Barva pozadí:</span>
       <button
         type="button"
-        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white button"
+        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focusOutline button"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
@@ -85,22 +100,27 @@ const modifyListBG = (newColors: number) => {
     >
       <span class="text-2xl font-black">Levely</span>
       <div class="box-border flex gap-3 mt-2">
-        <img
+        <button type="button">
+          <img
           class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
           src="../images/preview.svg"
           alt=""
         />
-        <img
+        </button>
+        <button type="button">
+          <img
           class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
           src="../images/addfromFaves.svg"
           alt=""
         />
-        <img
+        </button>
+        <button type="button" @click="addLevel">
+          <img
           class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
           src="../images/addLevel.svg"
           alt=""
-          @click="addLevel"
         />
+        </button>
       </div>
     </header>
 

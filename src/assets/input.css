@@ -41,8 +41,13 @@ input[type='checkbox'] {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 0.2rem;
   position: relative;
+  vertical-align: middle;
+  width: 1.5rem; height: 1.5rem;
+  margin-right: 0.5rem;
 }
 
+
+.focusOutline:focus-visible {outline: auto;}
 input[type='checkbox']:focus-visible { outline: auto; }
 
 input[type='checkbox']:checked::after {
@@ -62,3 +67,40 @@ input[type='checkbox']:checked::after {
   opacity: 0.2;
   filter: grayscale(100%);
 }
+
+dialog {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 50;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: saturate(0);
+}
+
+.slider::-moz-range-thumb {
+  background: #4d6c4f;
+  border: none;
+  box-shadow: black 0px 0px 7px;
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+.slider::-moz-range-track {
+  background: #ffffff1c;
+  height: 0.4em;
+  border-radius: 2em;
+}
+.slider::-moz-range-progress {
+  background: linear-gradient(9deg, #54c14b, #31fda7);
+  height: 0.4em;
+  border-radius: 2em;
+}
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.25);
+  cursor: pointer;
+}
+.slider::-moz-range-thumb:active {
+  transform: scale(1.4);
+}
+.slider {
+  background: none;
+ }  

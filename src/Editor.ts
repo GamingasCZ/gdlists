@@ -6,8 +6,8 @@ export const TAG_COUNT = 27
 
 export const levelList = ref<LevelList>({
   description: '',
-  diffGuesser: [false, false, false],
   pageBGColor: [0, 0, 0.2],
+  diffGuesser: [false, true, true],
   titleImg: ['', 0, 33, 1, true],
   translucent: false,
   levels: []
@@ -38,4 +38,15 @@ export const moveLevel = (from: number, to: number) => {
   levelList.value.levels.splice(from, 1)
   levelList.value.levels.splice(to, 0, currentCard)
   return to
+}
+
+export function testIfImageExists(url:string) {
+  return new Promise(loaded => {
+      let testImage = new Image
+      testImage.src = url
+
+      testImage.addEventListener('error', () => loaded(""))
+      testImage.addEventListener('load', () => loaded(url))
+      }
+  )
 }

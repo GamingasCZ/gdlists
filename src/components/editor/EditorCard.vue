@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { levelList, moveLevel, deleteLevel } from '@/Editor'
 import chroma, { type Color } from 'chroma-js'
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import type { Level } from '../../interfaces'
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
@@ -33,13 +33,17 @@ const getRateImage = () => {
   }
 }
 
-
 const changeProp = (e: Event) => {
   let target: HTMLInputElement = e.currentTarget as HTMLInputElement
   levelList.value.levels[props.index as number][target.name] = target.value
 }
 
 const openedPanel = ref<number>(0)
+const startMove = (toPosition: number) => {
+  emit('updateOpenedCard', moveLevel(props.index!, toPosition))
+  openedPanel.value = 0
+}
+
 </script>
 
 <template>
@@ -57,7 +61,7 @@ const openedPanel = ref<number>(0)
       <div class="flex justify-between">
         <div class="box-border flex gap-2">
 
-          <!-- Level position -->
+          <!-- Level ID input -->
           <img class="w-10 aspect-square" src="../../images/star.webp" alt="" />
           <input
             class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
@@ -65,14 +69,18 @@ const openedPanel = ref<number>(0)
           <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg" alt="" :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }" />
         </div>
+
         <div class="flex">
+          
+          <!-- Level position -->
           <img class="w-10 button aspect-square" src="../../images/showCommsU.svg" alt=""
-            @click="emit('updateOpenedCard', moveLevel(index!, index! - 1))" />
+            @click="startMove(props.index! - 1)"/>
           <input
+            style="appearance: textfield;"
             class="w-12 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
-            type="text" inputmode="numeric" @input="changeProp" :value="index! + 1" />
-          <img class="w-10 button aspect-square" src="../../images/showCommsD.svg" alt=""
-            @click="emit('updateOpenedCard', moveLevel(index!, index! + 1))" />
+            type="number" :value="index! + 1" @change="startMove(parseInt(($event.target as HTMLInputElement).value)-1)"/>
+            <img class="w-10 button aspect-square" src="../../images/showCommsD.svg" alt=""
+            @click="startMove(props.index! + 1)"/>
         </div>
       </div>
       <hr class="h-1 border-none" :style="{ backgroundColor: darkCol() }" />
@@ -87,9 +95,11 @@ const openedPanel = ref<number>(0)
         <!-- Level search -->
         <hr class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }" />
-        <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
-          src="../../images/searchOpaque.svg" alt=""
-          :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }" />
+        <button :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')" type="button">
+          <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
+            src="../../images/searchOpaque.svg" alt=""
+            :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }" />
+        </button>
         <hr class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }" />
 
