@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { levelList, moveLevel, deleteLevel } from '@/Editor'
+import axios, { type AxiosResponse } from 'axios';
 import chroma, { type Color } from 'chroma-js'
 import { ref, onUnmounted } from 'vue';
-import type { Level } from '../../interfaces'
+import type { Level, LevelSearchResponse } from '../../interfaces'
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
@@ -44,6 +45,20 @@ const startMove = (toPosition: number) => {
   openedPanel.value = 0
 }
 
+function searchLevel() {
+  let levelID = levelList.value.levels[props.index!].levelID
+  let levelName = levelList.value.levels[props.index!].levelName
+  let levelCreator = levelList.value.levels[props.index!].creator
+  axios.get("http://localhost:8000/php/rubLevelData.php?id="+levelID).then((response: AxiosResponse) => {
+    let level: LevelSearchResponse = response.data
+    levelList.value.levels[props.index!].levelID = level.id
+    levelList.value.levels[props.index!].levelName = level.name
+    levelList.value.levels[props.index!].creator = level.author
+    levelList.value.levels[props.index!].difficulty = [level.difficulty, level.cp]
+  }
+  )
+}
+
 </script>
 
 <template>
@@ -67,7 +82,7 @@ const startMove = (toPosition: number) => {
             class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
             type="text" name="levelID" @input="changeProp" :value="data?.levelID" placeholder="ID levelu" />
           <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt="" :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }" />
+            src="../../images/searchOpaque.svg" alt="" :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }" @click="searchLevel"/>
         </div>
 
         <div class="flex">
