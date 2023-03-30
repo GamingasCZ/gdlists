@@ -29,4 +29,12 @@ export interface LevelTag {
   tagID: number
   tagName: string | null
   tagLink: string
-} // Tag ID,
+}
+
+export interface LevelSearchResponse {
+  id: string
+  name: string
+  author: string
+  difficulty: number
+  cp: number
+}

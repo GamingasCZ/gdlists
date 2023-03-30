@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import axios from "axios";
 
 import './assets/input.css'
 
@@ -16,6 +15,5 @@ const i18n = createI18n({
 
 app.use(i18n)
 app.use(router)
-app.use(axios)
 
 app.mount('#app')
