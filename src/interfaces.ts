@@ -6,6 +6,11 @@ export interface ListPreview {
   rating: number
 }
 
+export interface ListCreatorInfo {
+  username: string
+  discord_id: string
+}
+
 export interface LevelList {
   description: string
   diffGuesser: [boolean, boolean, boolean] // DG enabled, diffGuess, rateGuess

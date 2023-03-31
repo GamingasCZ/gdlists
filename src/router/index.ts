@@ -12,6 +12,12 @@ const router = createRouter({
       path: '/editor',
       name: 'editor',
       component: () => import('../components/Editor.vue')
+    },
+    {
+      path: '/browse',
+      name: 'browser',
+      props: {browserName: "Komunitní seznamy"},
+      component: () => import('@/components/CommunityLists.vue')
     }
   ]
 })

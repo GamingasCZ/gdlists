@@ -45,17 +45,28 @@ const startMove = (toPosition: number) => {
   openedPanel.value = 0
 }
 
-function searchLevel() {
+function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   let levelID = levelList.value.levels[props.index!].levelID
   let levelName = levelList.value.levels[props.index!].levelName
   let levelCreator = levelList.value.levels[props.index!].creator
-  axios.get("http://localhost:8000/php/rubLevelData.php?id="+levelID).then((response: AxiosResponse) => {
+  let request: string = "";
+  if (searchingByID) request = `id=${levelID}` // Searching by ID
+  else {
+    if (levelName && levelCreator) { // Find level by specific creator
+      for (let i = 0; i < 5; i++) {
+        request = `userSearch=${levelCreator}&name=${levelName}&page=${userSearchPage}`
+      }
+    }
+    else request = `levelName=${levelName}` // Find level
+  }
+
+  axios.get("http://localhost:8000/php/rubLevelData.php?"+request).then((response: AxiosResponse) => {
     let level: LevelSearchResponse = response.data
     levelList.value.levels[props.index!].levelID = level.id
     levelList.value.levels[props.index!].levelName = level.name
     levelList.value.levels[props.index!].creator = level.author
     levelList.value.levels[props.index!].difficulty = [level.difficulty, level.cp]
-  }
+    }
   )
 }
 
@@ -79,10 +90,11 @@ function searchLevel() {
           <!-- Level ID input -->
           <img class="w-10 aspect-square" src="../../images/star.webp" alt="" />
           <input
+            autocomplete="off"
             class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
             type="text" name="levelID" @input="changeProp" :value="data?.levelID" placeholder="ID levelu" />
           <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt="" :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }" @click="searchLevel"/>
+            src="../../images/searchOpaque.svg" alt="" :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }" @click="searchLevel(true)"/>
         </div>
 
         <div class="flex">
@@ -91,6 +103,7 @@ function searchLevel() {
           <img class="w-10 button aspect-square" src="../../images/showCommsU.svg" alt=""
             @click="startMove(props.index! - 1)"/>
           <input
+            autocomplete="off"
             style="appearance: textfield;"
             class="w-12 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
             type="number" :value="index! + 1" @change="startMove(parseInt(($event.target as HTMLInputElement).value)-1)"/>
@@ -104,13 +117,14 @@ function searchLevel() {
         <!-- Level name input -->
         <img class="w-10 aspect-square" src="../../images/island.webp" alt="" />
         <input
+          autocomplete="off"
           class="max-w-[20vw] h-10 rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
           type="text" name="levelName" :value="data?.levelName" @input="changeProp" placeholder="Jméno levelu" />
 
         <!-- Level search -->
         <hr class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }" />
-        <button :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')" type="button">
+        <button :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')" type="button" @click="searchLevel(false)">
           <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg" alt=""
             :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }" />
@@ -120,6 +134,7 @@ function searchLevel() {
 
         <!-- Creator input -->
         <input
+          autocomplete="off"
           class="max-w-[20vw] h-10 rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
           type="text" name="creator" :value="data?.creator" @input="changeProp" placeholder="Tvůrce" />
         <img class="p-1 w-10 bg-black bg-opacity-30 rounded-full button aspect-square" src="../../images/bytost.webp"
@@ -131,6 +146,7 @@ function searchLevel() {
         <div class="flex gap-2">
           <img class="w-10 aspect-square" src="../../images/youtube.webp" alt="" />
           <input
+            autocomplete="off"
             class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80"
             type="text" name="video" @input="changeProp" :value="data?.video" placeholder="Video" />
         </div>

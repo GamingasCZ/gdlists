@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ListSection from './homepage/ListSection.vue'
 import LoginButton from './global/LoginButton.vue'
-import ListPreview from './global/ListPreview.vue'
 
 defineProps({
   isLoggedIn: Boolean
@@ -12,9 +11,10 @@ defineProps({
   <header
     class="flex h-[256px] items-end justify-center bg-[url(../images/introGrad2.webp)] bg-center"
   >
-    <form action="/browse" method="get" class="flex gap-2 items-center text-white translate-y-1/2">
+    <form action="./browse" method="get" class="flex gap-2 items-center text-white translate-y-1/2">
       <input
         type="text"
+        name="q"
         class="max-w-[70vw] rounded-md border-4 border-lof-300 bg-greenGradient py-2 px-1 outline-transparent placeholder:text-xl"
         :placeholder="$t('homepage.searchLists')"
       />
