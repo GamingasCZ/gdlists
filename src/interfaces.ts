@@ -31,6 +31,31 @@ export interface FavoritedLevel {
   timeAdded: number
 }
 
+export interface CollabData {
+  0: [string, number, string] // 'Host' name, Host verified, Host title
+  1: CollabRoles[]
+  2: CollabHumans[]
+}
+
+interface CollabRoles {
+  name: string
+  id: number
+}
+
+interface CollabHumans {
+  name: string
+  role: number
+  color: string
+  part: [string, string]
+  socials: HumanSocialLink[]
+  verified: boolean
+}
+
+interface HumanSocialLink {
+  0: number // Site ID
+  1: string // Site Link
+}
+
 export interface ListCreatorInfo {
   username: string
   discord_id: string
