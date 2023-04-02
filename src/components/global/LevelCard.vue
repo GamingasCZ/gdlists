@@ -3,6 +3,7 @@ import type { CollabData, FavoritedLevel, LevelTag } from '@/interfaces'
 import chroma from 'chroma-js';
 import { onMounted, ref } from 'vue';
 import CollabPreview from "../levelViewer/CollabPreview.vue";
+import Tag from '../levelViewer/Tag.vue'
 
 const props = defineProps<{
   levelName: string
@@ -14,6 +15,8 @@ const props = defineProps<{
   tags: LevelTag[]
   favorited: boolean | undefined
 }>()
+
+console.log(props.tags);
 
 
 const isFavorited = ref<boolean>(props.favorited)
@@ -67,5 +70,8 @@ const doFavoriteLevel = () => {
         <button class="button" v-if="levelID?.match(/\d+/)"><img src="@/images/modID.svg" alt=""></button>
         <button class="absolute top-0 right-0 button" @click="doFavoriteLevel" :class="{disabled: isFavorited}" v-if="favorited != undefined && levelID"><img src="@/images/star.webp" class="w-8" alt=""></button>
         <CollabPreview v-if="typeof creator == 'object'" :collab="creator" />
+        <section class="flex gap-2 mt-2">
+            <Tag v-for="tag in tags" :tag="tag" />
+        </section>
     </section>
 </template>

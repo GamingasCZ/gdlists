@@ -48,7 +48,7 @@ interface CollabHumans {
   color: string
   part: [string, string]
   socials: HumanSocialLink[]
-  verified: boolean
+  verified: number | number[]
 }
 
 interface HumanSocialLink {
@@ -81,9 +81,9 @@ export interface Level {
 }
 
 export interface LevelTag {
-  tagID: number
-  tagName: string | null
-  tagLink: string
+  0: number
+  1: string | -1
+  2: string
 }
 
 export interface LevelSearchResponse {
