@@ -18,6 +18,12 @@ const router = createRouter({
       name: 'browser',
       props: route => ({browserName: "Komunitní seznamy", query: route.query.q ?? ""}),
       component: () => import('@/components/CommunityLists.vue')
+    },
+    {
+      path: '/:id',
+      name: 'listViewer',
+      props: route => ({listID: route.params.id}),
+      component: () => import('@/components/ListView.vue')
     }
   ]
 })

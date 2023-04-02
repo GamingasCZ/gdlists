@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import chroma, { type Color } from 'chroma-js'
 import { reactive, ref } from 'vue';
+import { RouterLink } from "vue-router";
 const props = defineProps({
   rate_ratio: String,
   views: Number,
@@ -40,7 +41,7 @@ const uploadDate = reactive(new Date(props.timestamp!))
 </script>
 
 <template>
-  <a :href="id"
+  <RouterLink :to="id!"
     class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] transition-[background_position_y] duration-200 bg-center px-2 py-0.5 text-white hover:bg-left"
     :style="{ background: getGradient(), borderColor: listColor.darken(2).hex() }"
   >
@@ -61,6 +62,6 @@ const uploadDate = reactive(new Date(props.timestamp!))
       <h1 class="text-lg font-bold">{{ name }}</h1>
       <p class="text-xs">- {{  }} -</p>
     </section>
-  </a>
+  </RouterLink>
 </template>
 3

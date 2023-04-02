@@ -6,7 +6,7 @@ export const TAG_COUNT = 27
 
 export const levelList = ref<LevelList>({
   description: '',
-  pageBGColor: [0, 0, 0.2],
+  pageBGcolor: [0, 0, 0.2],
   diffGuesser: [false, true, true],
   titleImg: ['', 0, 33, 1, true],
   translucent: false,
@@ -49,4 +49,10 @@ export function testIfImageExists(url:string) {
       testImage.addEventListener('load', () => loaded(url))
       }
   )
+}
+
+export const modifyListBG = (newColors: number[]) => {
+  document.documentElement.style.setProperty('--siteBackground', chroma(chroma.hsl(newColors[0], 0.36, newColors[1] < 1 ? newColors[1] : newColors[1]*0.015625)).hex())
+  document.documentElement.style.setProperty('--primaryColor', chroma(chroma.hsl(newColors[0], 0.36, 0.167)).hex())
+  document.documentElement.style.setProperty('--secondaryColor', chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex())
 }

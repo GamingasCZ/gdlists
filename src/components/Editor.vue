@@ -6,9 +6,8 @@ import ColorPicker from './global/ColorPicker.vue'
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import BGImagePicker from './global/BackgroundImagePicker.vue'
 import DescriptionEditor from './global/TextEditor.vue'
-import { levelList, addLevel } from '../Editor'
+import { levelList, addLevel, modifyListBG } from '../Editor'
 import { ref } from 'vue';
-import chroma from 'chroma-js';
 
 const nice = () => {
   console.log(levelList.value)
@@ -18,12 +17,6 @@ const tagPopupOpen = ref<boolean>(false)
 const BGpickerPopupOpen = ref<boolean>(false)
 const bgColorPickerOpen = ref<boolean>(false)
 const descriptionEditorOpen = ref<boolean>(false)
-
-const modifyListBG = (newColors: number) => {
-  document.documentElement.style.setProperty('--siteBackground', chroma(chroma.hsl(newColors[0], 0.36, newColors[1]*0.015625)).hex())
-  document.documentElement.style.setProperty('--primaryColor', chroma(chroma.hsl(newColors[0], 0.36, 0.167)).hex())
-  document.documentElement.style.setProperty('--secondaryColor', chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex())
-}
 
 </script>
 
