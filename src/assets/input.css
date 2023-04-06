@@ -8,6 +8,12 @@
   src: url('../assets/Poppins-Medium.ttf');
 }
 
+@keyframes navbarSlide {
+  0% { translate: 0; }
+  50% { translate: 0 -100%; }
+  100% { translate: 0; }
+}
+
 :root {
   --siteBackground: #08110b;
   --primaryColor: #045124;
@@ -15,9 +21,14 @@
   --brightGreen:#71d471;
 }
 
+nav {
+  animation: navbarSlide 0.3s linear;
+}
+
 body {
   background-color: var(--siteBackground);
   font-family: poppins;
+  transition: background-color 0.3s;
 }
 
 .button {
