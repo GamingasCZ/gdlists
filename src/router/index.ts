@@ -33,6 +33,12 @@ const router = createRouter({
       props: (route) => ({ listID: route.params.id }),
       component: () => import("@/components/ListView.vue"),
     },
+    {
+      path: "/random",
+      name: "random",
+      props: (route) => ({ randomList: true }),
+      component: () => import("@/components/ListView.vue"),
+    }
   ],
 });
 

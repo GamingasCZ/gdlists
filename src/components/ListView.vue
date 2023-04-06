@@ -12,7 +12,8 @@ import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 
 const props = defineProps({
-  listID: { type: String, required: true },
+  listID: String,
+  randomList: Boolean
 });
 
 const favoritedIDs = ref<string[] | null>();
@@ -31,8 +32,12 @@ if (localStorage != undefined) {
 
 const LIST_DATA = ref<ListFetchResponse>();
 const LIST_COL = ref<number[]>([0, 0, 0]);
+
+let listURL = "id=" + props?.listID
+if (props.randomList) listURL = "random"
+
 axios
-  .get("http://localhost:8000/php/getLists.php?id=" + props.listID)
+  .get("http://localhost:8000/php/getLists.php?"+listURL)
   .then((res: AxiosResponse) => {
     LIST_DATA.value = res.data[0];
     if (!LIST_DATA.value?.data.levels) {

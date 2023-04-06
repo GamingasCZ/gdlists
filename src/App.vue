@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Footer from "./components/global/Footer.vue";
 import Navbar from "./components/Navbar.vue";
 
 if (localStorage) {
@@ -12,5 +13,6 @@ if (localStorage) {
 
 <template>
   <Navbar />
-  <RouterView />
+  <RouterView class="min-h-[90vh]" />
+  <Footer />
 </template>

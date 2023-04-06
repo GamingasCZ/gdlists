@@ -31,17 +31,20 @@ if (props.contentType?.startsWith("/")) {
 const getImage = () =>
   new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString();
 
-const clearViewed = () => localStorage.setItem("recentlyViewed", "[]");
+const clearViewed = () => {
+  localStorage.setItem("recentlyViewed", "[]");
+  lists.value = []
+}
 </script>
 
 <template>
   <section class="mt-6 ml-4">
-    <div class="flex items-center gap-4 text-white">
-      <img src="../../images/wave.svg" class="w-10 max-sm:w-5" alt="" />
-      <span class="text-3xl font-bold">{{ headerName }}</span>
+    <div class="flex gap-4 items-center text-white">
+      <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" />
+      <span class="text-2xl font-medium sm:text-3xl">{{ headerName }}</span>
       <button
         v-if="extraText?.length! > 0"
-        class="button ml-2 flex gap-2 rounded-full bg-lof-300 px-2 py-0.5"
+        class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
         @click="clearViewed()"
       >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
@@ -51,8 +54,8 @@ const clearViewed = () => localStorage.setItem("recentlyViewed", "[]");
     <div
       class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs sm:ml-14"
     >
-      <p class="text-yellow-200" v-if="!lists?.length">- {{ emptyText }} -</p>
-      <ListPreviewElement v-else v-for="list in lists" v-bind="list" />
+      <p class="text-yellow-200 max-sm:ml-12" v-if="!lists?.length">- {{ emptyText }} -</p>
+      <ListPreviewElement v-else v-for="list in lists" v-bind="list" class="max-sm:w-full" />
     </div>
   </section>
 </template>

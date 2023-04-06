@@ -43,14 +43,14 @@ const uploadDate = reactive(new Date(props.timeAdded!));
       borderColor: listColor.darken(2).hex(),
     }"
   >
-    <section class="flex flex-col items-center gap-1">
+    <section class="flex flex-col gap-1 items-center">
       <div
         v-if="timeAdded"
         class="flex gap-1 text-xs hover:cursor-help"
         :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`"
       >
         <img src="../../images/time.svg" alt="" class="w-4" />{{
-          parseElapsed()
+          parseElapsed(Date.now()/1000 - timeAdded/1000)
         }}
       </div>
     </section>

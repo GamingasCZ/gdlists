@@ -62,7 +62,7 @@ const doFavoriteLevel = () => {
   >
     <div class="relative w-8">
       <img
-        class="t-1/2 absolute left-1/2 z-10 w-4/5"
+        class="absolute left-1/2 z-10 w-4/5 t-1/2"
         :src="`/src/images/faces/${difficulty[0]}.webp`"
         alt=""
       />
@@ -90,7 +90,7 @@ const doFavoriteLevel = () => {
       <img src="@/images/modID.svg" alt="" />
     </button>
     <button
-      class="button absolute top-0 right-0"
+      class="absolute top-0 right-0 button"
       @click="doFavoriteLevel"
       :class="{ disabled: isFavorited }"
       v-if="favorited != undefined && levelID"
@@ -98,7 +98,7 @@ const doFavoriteLevel = () => {
       <img src="@/images/star.webp" class="w-8" alt="" />
     </button>
     <CollabPreview v-if="typeof creator == 'object'" :collab="creator" />
-    <section class="mt-2 flex gap-2">
+    <section class="flex flex-wrap gap-2 mt-2">
       <Tag v-for="tag in tags" :tag="tag" />
     </section>
   </section>

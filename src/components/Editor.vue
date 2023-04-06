@@ -7,7 +7,7 @@ import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import BGImagePicker from "./global/BackgroundImagePicker.vue";
 import DescriptionEditor from "./global/TextEditor.vue";
 import { levelList, addLevel, modifyListBG } from "../Editor";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 const nice = () => {
   console.log(levelList.value);
@@ -17,6 +17,30 @@ const tagPopupOpen = ref<boolean>(false);
 const BGpickerPopupOpen = ref<boolean>(false);
 const bgColorPickerOpen = ref<boolean>(false);
 const descriptionEditorOpen = ref<boolean>(false);
+
+const startAddLevel = () => {
+  addLevel()
+  currentlyOpenedCard.value = levelList.value.levels.length-1
+}
+
+const updatingPositions = ref<number>(-1)
+const updateOpenedCard = (newPos: number) => {
+  currentlyOpenedCard.value = newPos
+  if (newPos == -1) updatingPositions.value = currentlyOpenedCard.value
+}
+
+let oldOpenedPos = 0
+const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
+  if (pos == -1) { // Reset
+    updatingPositions.value = -1
+    currentlyOpenedCard.value = nowOpenedIndex
+    return
+  }
+  updatingPositions.value = currentlyOpenedCard.value
+  oldOpenedPos = currentlyOpenedCard.value
+  currentlyOpenedCard.value = -1
+}
+
 </script>
 
 <template>
@@ -60,7 +84,7 @@ const descriptionEditorOpen = ref<boolean>(false);
       ></textarea>
       <button type="button">
         <img
-          class="button w-8 rounded-full bg-black bg-opacity-50 p-1.5"
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
           src="../images/fullscreen.svg"
           alt=""
           @click="descriptionEditorOpen = true"
@@ -75,7 +99,7 @@ const descriptionEditorOpen = ref<boolean>(false);
       />
       <button type="button">
         <img
-          class="button w-8 rounded-full bg-black bg-opacity-50 p-1.5"
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
           src="../images/gear.svg"
           alt=""
           @click="BGpickerPopupOpen = true"
@@ -83,11 +107,11 @@ const descriptionEditorOpen = ref<boolean>(false);
       </button>
     </div>
 
-    <div class="my-1 flex items-center gap-2">
+    <div class="flex gap-2 items-center my-1">
       <span>Barva pozadí:</span>
       <button
         type="button"
-        class="focusOutline button box-border flex h-8 w-8 items-center justify-center rounded-md border-2 border-white"
+        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focusOutline button"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
@@ -96,33 +120,34 @@ const descriptionEditorOpen = ref<boolean>(false);
 
     <div
       v-show="bgColorPickerOpen"
-      class="my-2 w-9/12 rounded-md bg-black bg-opacity-40 px-3 py-2"
+      class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
     >
       <ColorPicker @colors-modified="modifyListBG" />
     </div>
 
     <header
-      class="flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2"
+      class="flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2 sticky -top-8 z-10"
+      id="editorHeader"
     >
       <span class="text-2xl font-black">Levely</span>
-      <div class="mt-2 box-border flex gap-3">
+      <div class="box-border flex gap-3 mt-2">
         <button type="button">
           <img
-            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/preview.svg"
             alt=""
           />
         </button>
         <button type="button">
           <img
-            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/addfromFaves.svg"
             alt=""
           />
         </button>
-        <button type="button" @click="addLevel">
+        <button type="button" @click="startAddLevel()">
           <img
-            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/addLevel.svg"
             alt=""
           />
@@ -136,7 +161,7 @@ const descriptionEditorOpen = ref<boolean>(false);
       <h2 v-if="!levelList.levels.length" class="mt-4">
         Kliknutím na
         <img
-          class="mx-2 inline w-10 rounded-full bg-black bg-opacity-50 p-1"
+          class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-full"
           src="../images/addLevel.svg"
         />
         přidáš level!
@@ -148,14 +173,17 @@ const descriptionEditorOpen = ref<boolean>(false);
         :data="level"
         :index="index"
         :opened="currentlyOpenedCard == index"
-        @update-opened-card="currentlyOpenedCard = $event"
+        :updating-positions="updatingPositions"
+        @update-opened-card="updateOpenedCard"
+        @start-move="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
+        class="levelCard"
       />
     </main>
     <ListSettings />
     <button
       type="submit"
-      class="button mt-3 flex items-center gap-2 rounded-md bg-lof-400 px-3 py-2 font-black text-black"
+      class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
     >
       <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
     </button>
