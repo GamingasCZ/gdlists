@@ -1,46 +1,53 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'home',
-      component: () => import('../components/Homepage.vue')
+      path: "/",
+      name: "home",
+      component: () => import("../components/Homepage.vue"),
     },
     {
-      path: '/editor',
-      name: 'editor',
-      component: () => import('../components/Editor.vue')
+      path: "/editor",
+      name: "editor",
+      component: () => import("../components/Editor.vue"),
     },
     {
-      path: '/browse',
-      name: 'browser',
-      props: route => ({browserName: "Komunitní seznamy", query: route.query.q ?? ""}),
-      component: () => import('@/components/CommunityLists.vue')
+      path: "/browse",
+      name: "browser",
+      props: (route) => ({
+        browserName: "Komunitní seznamy",
+        query: route.query.q ?? "",
+      }),
+      component: () => import("@/components/CommunityLists.vue"),
     },
     {
-      path: '/saved',
-      name: 'savedBrowser',
-      component: () => import('@/components/SavedLists.vue')
+      path: "/saved",
+      name: "savedBrowser",
+      component: () => import("@/components/SavedLists.vue"),
     },
     {
-      path: '/:id',
-      name: 'listViewer',
-      props: route => ({listID: route.params.id}),
-      component: () => import('@/components/ListView.vue')
-    }
-  ]
-})
+      path: "/:id",
+      name: "listViewer",
+      props: (route) => ({ listID: route.params.id }),
+      component: () => import("@/components/ListView.vue"),
+    },
+  ],
+});
 
 router.beforeEach(() => {
-  document.documentElement.style.setProperty('--siteBackground', "")
+  document.documentElement.style.setProperty("--siteBackground", "");
 
-  if (getComputedStyle(document.documentElement).getPropertyValue("--primaryColor") != document.documentElement.style.getPropertyValue("--primaryColor")) {
+  if (
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--primaryColor"
+    ) != document.documentElement.style.getPropertyValue("--primaryColor")
+  ) {
   }
 
-  document.documentElement.style.setProperty('--primaryColor', "")
-  document.documentElement.style.setProperty('--secondaryColor', "")
-})
+  document.documentElement.style.setProperty("--primaryColor", "");
+  document.documentElement.style.setProperty("--secondaryColor", "");
+});
 
-export default router
+export default router;

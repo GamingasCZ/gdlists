@@ -5,20 +5,26 @@
 
 @font-face {
   font-family: poppins;
-  src: url('../assets/Poppins-Medium.ttf');
+  src: url("../assets/Poppins-Medium.ttf");
 }
 
 @keyframes navbarSlide {
-  0% { translate: 0; }
-  50% { translate: 0 -100%; }
-  100% { translate: 0; }
+  0% {
+    translate: 0;
+  }
+  50% {
+    translate: 0 -100%;
+  }
+  100% {
+    translate: 0;
+  }
 }
 
 :root {
   --siteBackground: #08110b;
   --primaryColor: #045124;
   --secondaryColor: #142019;
-  --brightGreen:#71d471;
+  --brightGreen: #71d471;
 }
 
 nav {
@@ -46,23 +52,27 @@ body {
   scale: 1.15;
 }
 
-input[type='checkbox'] {
+input[type="checkbox"] {
   appearance: none;
   border: rgba(255, 255, 255, 0.5) solid 0.15rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 0.2rem;
   position: relative;
   vertical-align: middle;
-  width: 1.5rem; height: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
   margin-right: 0.5rem;
 }
 
+.focusOutline:focus-visible {
+  outline: auto;
+}
+input[type="checkbox"]:focus-visible {
+  outline: auto;
+}
 
-.focusOutline:focus-visible {outline: auto;}
-input[type='checkbox']:focus-visible { outline: auto; }
-
-input[type='checkbox']:checked::after {
-  content: '';
+input[type="checkbox"]:checked::after {
+  content: "";
   position: absolute;
   background: white;
   width: 60%;
@@ -81,9 +91,11 @@ input[type='checkbox']:checked::after {
 
 dialog {
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   z-index: 50;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: saturate(0);
 }
@@ -114,4 +126,4 @@ dialog {
 }
 .slider {
   background: none;
- }  
+}

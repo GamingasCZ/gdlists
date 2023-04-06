@@ -2,10 +2,9 @@
 import { ref } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
 
-defineProps({query: String})
-
+defineProps({ query: String });
 </script>
 
 <template>
-    <ListBrowser online-browser :search="query" />
+  <ListBrowser online-browser :search="query" />
 </template>

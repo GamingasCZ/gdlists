@@ -9,7 +9,14 @@
     xmlns:xlink="http://www.w3.org/1999/xlink"
   >
     <defs>
-      <linearGradient id="a" x1="3.9256" x2="60.074" y1="32" y2="32" gradientUnits="userSpaceOnUse">
+      <linearGradient
+        id="a"
+        x1="3.9256"
+        x2="60.074"
+        y1="32"
+        y2="32"
+        gradientUnits="userSpaceOnUse"
+      >
         <stop stop-color="#14ff74" offset="0" />
         <stop stop-color="#004d1d" offset="1" />
       </linearGradient>
