@@ -1,9 +1,10 @@
 export interface ListPreview {
   name: string
   creator: string
-  views: number
+  views?: number
   uploadDate: number
-  rating: number
+  rate_ratio?: number
+  id?: number | string
 }
 
 export interface ListFetchResponse {
@@ -64,8 +65,8 @@ export interface ListCreatorInfo {
 export interface LevelList {
   description: string
   diffGuesser: [boolean, boolean, boolean] // DG enabled, diffGuess, rateGuess
-  pageBGcolor: string | [number, number, number]
-  titleImg: [string, number, number, number, boolean]
+  pageBGcolor: string | [number, number, number] // hex | hsv array
+  titleImg: [string, number, number, number, boolean] // url, BG top offset [%], BG height, BG XAlign, gradient
   translucent: boolean
   levels: Array<Level>
 }
@@ -81,9 +82,9 @@ export interface Level {
 }
 
 export interface LevelTag {
-  0: number
-  1: string | -1
-  2: string
+  0: number // tag id
+  1: string | -1 // Tag name, -1 = default
+  2: string // Tag Link
 }
 
 export interface LevelSearchResponse {

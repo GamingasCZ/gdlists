@@ -14,10 +14,10 @@ const props = defineProps<{
   color: [number, number, number]
   tags: LevelTag[]
   favorited: boolean | undefined
+  levelIndex: number
+  listID: string
+  listName: string
 }>()
-
-console.log(props.tags);
-
 
 const isFavorited = ref<boolean>(props.favorited)
 const copyID = () => {
@@ -40,18 +40,18 @@ const doFavoriteLevel = () => {
         // TODO: add proper list name (list name may not always be sex)
         faves.push({
             levelName: props.levelName,
-            creator: isCollab ? props.creator[0][0] : props.creator,
+            creator: isCollab ? props.creator[0][0] : props.creator as string,
             levelColor: chroma(props.color!).hex(),
             levelID: props.levelID!,
-            listID: "1",
-            listName: "sex",
-            listPosition: 1,
-            timeAdded: 1
+            listID: props.listID,
+            listName: props.listName,
+            listPosition: props.levelIndex,
+            timeAdded: Date.now()
         })
     }
 
     localStorage.setItem("favorites", JSON.stringify(faves))
-    localStorage.setItem("favesIDs", JSON.stringify(favesIDs))
+    localStorage.setItem("favoriteIDs", JSON.stringify(favesIDs))
     isFavorited.value = !isFavorited.value
 }
 

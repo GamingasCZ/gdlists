@@ -9,14 +9,25 @@ const props = defineProps({
   headerName: {type: String, required: true},
   extraText: {type: String, required: true},
   extraIcon: {type: String, required: true},
-  emptyText: {type: String, required: true}
+  emptyText: {type: String, required: true},
+  contentType: {type: String}
 })
-
-const getImage = () => new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString()
 
 const lists = ref<ListPreview[]>()
 
-axios.get("http://localhost:8000/php/getLists.php?homepage=1").then((response: AxiosResponse) => lists.value = (response.data[0] as ListPreview[]))
+if (props.contentType?.startsWith("/")) { // link
+  axios.get("http://localhost:8000/php"+props.contentType).then((response: AxiosResponse) => lists.value = (response.data[0] as ListPreview[]))
+}
+else if (props.contentType?.startsWith("@")) {
+  lists.value = JSON.parse(localStorage.getItem(props.contentType.slice(1))!)
+}
+else {
+  lists.value = []
+}
+
+const getImage = () => new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString()
+
+const clearViewed = () => localStorage.setItem('recentlyViewed', '[]')
 </script>
 
 <template>
@@ -27,6 +38,7 @@ axios.get("http://localhost:8000/php/getLists.php?homepage=1").then((response: A
       <button
         v-if="extraText?.length! > 0"
         class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
+        @click="clearViewed()"
       >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
       </button>

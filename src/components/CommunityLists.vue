@@ -7,5 +7,5 @@ defineProps({query: String})
 </script>
 
 <template>
-    <ListBrowser :search="query" />
+    <ListBrowser online-browser :search="query" />
 </template>

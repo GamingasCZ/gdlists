@@ -20,12 +20,27 @@ const router = createRouter({
       component: () => import('@/components/CommunityLists.vue')
     },
     {
+      path: '/saved',
+      name: 'savedBrowser',
+      component: () => import('@/components/SavedLists.vue')
+    },
+    {
       path: '/:id',
       name: 'listViewer',
       props: route => ({listID: route.params.id}),
       component: () => import('@/components/ListView.vue')
     }
   ]
+})
+
+router.beforeEach(() => {
+  document.documentElement.style.setProperty('--siteBackground', "")
+
+  if (getComputedStyle(document.documentElement).getPropertyValue("--primaryColor") != document.documentElement.style.getPropertyValue("--primaryColor")) {
+  }
+
+  document.documentElement.style.setProperty('--primaryColor', "")
+  document.documentElement.style.setProperty('--secondaryColor', "")
 })
 
 export default router

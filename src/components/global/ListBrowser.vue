@@ -3,10 +3,12 @@ import type { ListPreview } from '@/interfaces';
 import ListPrevElement from '@/components/global/ListPreview.vue'
 import axios, { type AxiosResponse } from 'axios';
 import { ref, onMounted } from 'vue';
+import FavoritePreview from './FavoritePreview.vue';
 
 const props = defineProps({
     browserName: String,
-    search: String
+    search: String,
+    onlineBrowser: {type: Boolean, required: true}
 })
 
 const scrollingStart = (i: number) => i+2
@@ -17,6 +19,7 @@ const listScroll = () => Array.from({length: Math.min(5, maxPages.value-1)}, (_,
 const loadFailed = ref<boolean>(false)
 const searchNoResults = ref<boolean>(false)
 
+const LISTS_ON_PAGE = 8
 const PAGE = ref<number>(0)
 const maxPages = ref<number>(1)
 const pagesArray = ref<number[]>(listScroll())
@@ -39,7 +42,7 @@ function doSearch() {
 function refreshBrowser() {
     // document.querySelectorAll(".listPreviews").forEach((previews: Element) => previews.remove())
 
-    axios.get(`http://localhost:8000/php/getLists.php?startID=999999&searchQuery=${SEARCH_QUERY.value}&page=${PAGE.value}&path=%2Fphp%2FgetLists.php&fetchAmount=8&sort=0`)    
+    axios.get(`http://localhost:8000/php/getLists.php?startID=999999&searchQuery=${SEARCH_QUERY.value}&page=${PAGE.value}&path=%2Fphp%2FgetLists.php&fetchAmount=${LISTS_ON_PAGE}&sort=0`)    
     .then((res: AxiosResponse) => {
         if (res.status != 200) {loadFailed.value = true; return}
         if (res.data == 3) {searchNoResults.value = true; LISTS.value = []; maxPages.value = 0;return}
@@ -52,7 +55,12 @@ function refreshBrowser() {
 }
 
 onMounted(() => {
-    refreshBrowser()
+    if (props.onlineBrowser) refreshBrowser()
+    else { // Hardcoded for now, maybe change later
+        LISTS.value = JSON.parse(localStorage.getItem('favorites')!)
+        maxPages.value = Math.ceil(LISTS.value?.length!/LISTS_ON_PAGE)
+        pagesArray.value = listScroll()
+    }
 })
 
 </script>
@@ -94,7 +102,7 @@ onMounted(() => {
                         <img src="@/images/replay.svg" class="w-10 text-2xl" alt="">Načíst znova
                     </button>
                 </div>
-                <ListPrevElement class="min-w-full listPreviews" v-for="list in LISTS" v-bind="list"/>
+                <component :is="onlineBrowser ? ListPrevElement : FavoritePreview" class="min-w-full listPreviews" v-for="list in LISTS" v-bind="list"></component>
             </main>
         </main>
     </section>

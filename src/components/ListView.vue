@@ -1,22 +1,31 @@
 <script setup lang="ts">
 import axios, { type AxiosResponse } from 'axios';
-import type { ListFetchResponse, FavoritedLevel } from '@/interfaces'
+import type { ListFetchResponse, FavoritedLevel, ListPreview } from '@/interfaces'
 import LevelCard from './global/LevelCard.vue';
-import { ref } from 'vue';
+import ListDescription from './levelViewer/ListDescription.vue';
+import { ref, onMounted } from 'vue';
 import { modifyListBG } from '@/Editor';
-import chroma from 'chroma-js';
+import chroma, { hsl } from 'chroma-js';
 
 
 const props = defineProps({
-    listID: String
+    listID: {type: String, required: true}
 })
 
 const favoritedIDs = ref<string[] | null>()
+
+let addIntoRecentlyViewed = false
+let recentlyViewed: ListPreview[]
+
 if (localStorage != undefined) {
     favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!)
+    recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? []
+
+    addIntoRecentlyViewed = recentlyViewed.filter((list: ListPreview) => list.id == props.listID).length == 0 // Has not been viewed yet
 }
 
 const LIST_DATA = ref<ListFetchResponse>()
+const LIST_COL = ref<number[]>([0,0,0])
 axios.get("http://localhost:8000/php/getLists.php?id="+props.listID).then((res: AxiosResponse) => {
     LIST_DATA.value = res.data[0]
     if (!LIST_DATA.value?.data.levels) {
@@ -26,8 +35,20 @@ axios.get("http://localhost:8000/php/getLists.php?id="+props.listID).then((res: 
         })
     }
 
+    if (addIntoRecentlyViewed) {
+        let isListPrivate = Boolean(LIST_DATA.value?.hidden != "0")
+        recentlyViewed.push({
+            creator: LIST_DATA.value?.creator!,
+            id: (isListPrivate ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
+            name: LIST_DATA.value?.name!,
+            uploadDate: Date.now(),
+        })
+        localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed))
+    }
+
     let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor! // TODO: old lists have hex values
-    modifyListBG(typeof listColors == 'string' ? chroma(listColors).hsl() : listColors)
+    LIST_COL.value = typeof listColors == 'string' ? chroma(listColors).hsl() : listColors
+    modifyListBG(LIST_COL.value)
 
     let listBG = LIST_DATA.value?.data?.titleImg!
     document.querySelector("#listBG").style.backgroundImage = `url('${typeof listBG == 'string' ? listBG : listBG[0] ?? ""}')`
@@ -35,17 +56,24 @@ axios.get("http://localhost:8000/php/getLists.php?id="+props.listID).then((res: 
 
 const positionListBackground = () => ['left', 'center', 'right'][LIST_DATA.value?.data?.titleImg[3]! ?? 1]
 
+onMounted(() => {
+
+})
+
 </script>
 
 <template>
-    <div id="listBG" class="absolute top-0 left-0 w-full h-full bg-cover" :style="{backgroundPositionX: positionListBackground()}"></div>
+    <div id="listBG" class="fixed left-0 w-full h-full bg-cover top-[5%]" :style="{backgroundPositionX: positionListBackground(), height: LIST_DATA?.data.titleImg[2]+'%', backgroundPositionY: LIST_DATA?.data.titleImg[1]+'%'}">
+        <div v-if="LIST_DATA?.data.titleImg[4]" :style="{backgroundImage: `linear-gradient(0deg, ${chroma(chroma.hsl(LIST_COL[0], 0.36, LIST_COL[1] < 1 ? LIST_COL[1] : LIST_COL[1]*0.015625)).hex()}, transparent)`}" class="absolute w-full h-full"></div>
+    </div>
     <section class="text-white translate-y-10">
         <header>
             <div class=""></div>
             <h1>{{ LIST_DATA?.name }}</h1>
+            <ListDescription/>
         </header>
         <main class="flex flex-col gap-3">
-            <LevelCard v-for="(level, index) in LIST_DATA?.data.levels" v-bind="level" :favorited="favoritedIDs?.includes(level.levelID!)"/>
+            <LevelCard v-for="(level, index) in LIST_DATA?.data.levels" v-bind="level" :favorited="favoritedIDs?.includes(level.levelID!)" :level-index="index" :list-i-d="listID" :list-name="LIST_DATA?.name!"/>
         </main>
     </section>
 </template>
