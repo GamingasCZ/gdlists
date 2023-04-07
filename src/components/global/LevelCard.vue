@@ -17,6 +17,7 @@ const props = defineProps<{
   levelIndex: number;
   listID: string;
   listName: string;
+  disableStars: boolean
 }>();
 
 const isFavorited = ref<boolean>(props.favorited);
@@ -93,7 +94,7 @@ const doFavoriteLevel = () => {
       class="absolute top-0 right-0 button"
       @click="doFavoriteLevel"
       :class="{ disabled: isFavorited }"
-      v-if="favorited != undefined && levelID"
+      v-if="favorited != undefined && levelID?.match(/\d+/) && disableStars"
     >
       <img src="@/images/star.webp" class="w-8" alt="" />
     </button>

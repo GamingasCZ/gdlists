@@ -11,6 +11,7 @@ import { levelList, addLevel, modifyListBG } from "../Editor";
 import { ref, onMounted } from "vue";
 import type { FavoritedLevel, Level } from "@/interfaces";
 import chroma from "chroma-js";
+import LevelCard from "./global/LevelCard.vue";
 
 document.title = "Editor | GD Seznamy"
 
@@ -23,6 +24,7 @@ const BGpickerPopupOpen = ref<boolean>(false);
 const bgColorPickerOpen = ref<boolean>(false);
 const descriptionEditorOpen = ref<boolean>(false);
 const favoriteLevelPickerOpen = ref<boolean>(false);
+const previewingList = ref<boolean>(false)
 
 const startAddLevel = () => {
   addLevel()
@@ -85,10 +87,23 @@ const addFromFavorites = (level: FavoritedLevel) => {
     @select-option="addFromFavorites($event)"
   />
 
+  <h2 class="text-3xl text-center text-white translate-y-16" v-show="!previewingList">Editor</h2>
+  <section v-show="previewingList" class="translate-y-16">
+    <div class="flex relative justify-center items-center mx-5 text-white">
+      <button @click="previewingList = false" class="absolute left-0 button">
+        <img src="@/images/arrow-left.webp" class="w-12" alt="">
+      </button>
+      <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
+    </div>
+    <div class="flex flex-col gap-3 mt-12">
+      <LevelCard v-for="level in levelList.levels" v-bind="level" :disable-stars="true"/>
+    </div>
+  </section>
   <form
     action="/editor"
     @submit.prevent
     class="mx-auto flex w-[70rem] max-w-[95vw] translate-y-20 flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
+    v-show="!previewingList"
   >
     <div
       class="my-2 grid w-full grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3"
@@ -156,7 +171,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
     >
       <span class="text-2xl font-black">Levely</span>
       <div class="box-border flex gap-3 mt-2">
-        <button type="button">
+        <button type="button" @click="previewingList = true">
           <img
             class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/preview.svg"
