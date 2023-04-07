@@ -12,9 +12,11 @@ import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 
 const props = defineProps({
-  listID: String,
+  listID: {type: String, required: true},
   randomList: Boolean
 });
+
+const PRIVATE_LIST: boolean = Boolean(props?.listID.match(/^\d+$/g))
 
 const favoritedIDs = ref<string[] | null>();
 
@@ -33,7 +35,7 @@ if (localStorage != undefined) {
 const LIST_DATA = ref<ListFetchResponse>();
 const LIST_COL = ref<number[]>([0, 0, 0]);
 
-let listURL = "id=" + props?.listID
+let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`
 if (props.randomList) listURL = "random"
 
 axios

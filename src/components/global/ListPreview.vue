@@ -77,7 +77,7 @@ const uploadDate = reactive(new Date(props.timestamp!));
 
     <section class="flex flex-col justify-center">
       <h1 class="text-lg font-bold">{{ name }}</h1>
-      <p class="text-xs">- {{}} -</p>
+      <p class="text-xs">- {{ creator?.length ? creator : '' }} -</p>
     </section>
   </RouterLink>
 </template>

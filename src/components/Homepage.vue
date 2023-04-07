@@ -113,5 +113,6 @@ defineProps({
   <ListSection
     :header-name="$t('homepage.official')"
     :empty-text="$t('homepage.listsNonexistent')"
+    content-type="oldLists"
   />
 </template>

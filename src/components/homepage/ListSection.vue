@@ -4,6 +4,7 @@ import { ref } from "vue";
 import type { FavoritedLevel, ListPreview } from "../../interfaces";
 import FavoritePreview from "../global/FavoritePreview.vue";
 import ListPreviewElement from "../global/ListPreview.vue";
+import { oldLists } from './officialLists'
 
 const props = defineProps({
   headerName: { type: String, required: true },
@@ -31,6 +32,8 @@ if (props.contentType?.startsWith("/")) {
   if (props.randomizeContent) data = data.sort(() => (Math.random() > 0.5) ? 1 : -1)
   
   lists.value = data.slice(0, 3);
+} else if (props.contentType == "oldLists") {
+  lists.value = oldLists;
 } else {
   lists.value = [];
 }
