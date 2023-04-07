@@ -121,6 +121,7 @@ onMounted(() => {});
         :level-index="index"
         :list-i-d="listID!"
         :list-name="LIST_DATA?.name!"
+        :translucent-card="LIST_DATA?.data.translucent!"
       />
     </main>
   </section>

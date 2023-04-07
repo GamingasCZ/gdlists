@@ -17,7 +17,8 @@ const props = defineProps<{
   levelIndex: number;
   listID: string;
   listName: string;
-  disableStars: boolean
+  disableStars: boolean;
+  translucentCard: boolean;
 }>();
 
 const isFavorited = ref<boolean>(props.favorited);
@@ -58,8 +59,8 @@ const doFavoriteLevel = () => {
 
 <template>
   <section
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg px-2 py-3 text-white backdrop-blur-sm"
-    :style="{ background: chroma(color).css() }"
+    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg px-2 py-3 text-white backdrop-blur-lg shadow-[color:#0000008F] shadow-lg"
+    :style="{ backgroundColor: chroma(color).alpha(translucentCard ? 0.4 : 1).css() }"
   >
     <div class="relative w-8" v-if="difficulty">
       <img
@@ -75,8 +76,8 @@ const doFavoriteLevel = () => {
         alt=""
       />
     </div>
-    <h2 class="text-3xl font-black">{{ levelName }}</h2>
-    <h3 v-if="typeof creator == 'string'">{{ creator }}</h3>
+    <h2 class="text-3xl font-black">{{ levelName || 'Bezejmenný' }}</h2>
+    <h3 v-if="typeof creator == 'string'">{{ creator || 'Bezejmenný' }}</h3>
     <button class="button" v-if="video">
       <a :href="`https://youtu.be/${video}`"
         ><img src="@/images/modYT.svg" alt=""
