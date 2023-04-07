@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import axios, { type AxiosResponse } from "axios";
 import { ref } from "vue";
-import type { ListPreview } from "../../interfaces";
+import type { FavoritedLevel, ListPreview } from "../../interfaces";
+import FavoritePreview from "../global/FavoritePreview.vue";
 import ListPreviewElement from "../global/ListPreview.vue";
 
 const props = defineProps({
   headerName: { type: String, required: true },
-  extraText: { type: String, required: true },
-  extraIcon: { type: String, required: true },
+  extraText: { type: String, required: false },
+  extraIcon: { type: String, required: false },
+  extraAction: { type: String, required: false},
   emptyText: { type: String, required: true },
   contentType: { type: String },
+  listType: {type: Number, default: 0},
+  randomizeContent: {type: Boolean, default: false},
 });
 
-const lists = ref<ListPreview[]>();
+const lists = ref<ListPreview[] | FavoritedLevel[]>();
 
 if (props.contentType?.startsWith("/")) {
   // link
@@ -23,13 +27,22 @@ if (props.contentType?.startsWith("/")) {
         (lists.value = response.data[0] as ListPreview[])
     );
 } else if (props.contentType?.startsWith("@")) {
-  lists.value = JSON.parse(localStorage.getItem(props.contentType.slice(1))!);
+  let data: any[] = JSON.parse(localStorage.getItem(props.contentType.slice(1))!)
+  if (props.randomizeContent) data = data.sort(() => (Math.random() > 0.5) ? 1 : -1)
+  
+  lists.value = data.slice(0, 3);
 } else {
   lists.value = [];
 }
 
 const getImage = () =>
   new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString();
+
+const doFunction = (action: string) => {
+  let actionPick = ['clear'].indexOf(action)
+  let functionPick = [clearViewed][actionPick]
+  functionPick()
+}
 
 const clearViewed = () => {
   localStorage.setItem("recentlyViewed", "[]");
@@ -42,8 +55,20 @@ const clearViewed = () => {
     <div class="flex gap-4 items-center text-white">
       <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" />
       <span class="text-2xl font-medium sm:text-3xl">{{ headerName }}</span>
+
+      <!-- Link button -->
+      
+      <RouterLink v-if="extraText?.length! > 0 && extraAction?.startsWith('/')" :to="extraAction">
+        <button
+          class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
+        >
+          <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
+      </button>
+      </RouterLink>
+
+      <!-- Action button -->
       <button
-        v-if="extraText?.length! > 0"
+        v-if="extraText?.length! > 0 && extraAction?.startsWith('@')"
         class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
         @click="clearViewed()"
       >
@@ -55,7 +80,7 @@ const clearViewed = () => {
       class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs sm:ml-14"
     >
       <p class="text-yellow-200 max-sm:ml-12" v-if="!lists?.length">- {{ emptyText }} -</p>
-      <ListPreviewElement v-else v-for="list in lists" v-bind="list" class="max-sm:w-full" />
+      <component v-else v-for="level in lists" v-bind="level" class="max-sm:w-full" :hide-remove="true" :is="[ListPreviewElement, FavoritePreview][listType]" />
     </div>
   </section>
 </template>

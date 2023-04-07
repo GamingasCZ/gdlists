@@ -6,8 +6,13 @@ import ColorPicker from "./global/ColorPicker.vue";
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import BGImagePicker from "./global/BackgroundImagePicker.vue";
 import DescriptionEditor from "./global/TextEditor.vue";
+import PickerPopup from "./global/PickerPopup.vue";
 import { levelList, addLevel, modifyListBG } from "../Editor";
 import { ref, onMounted } from "vue";
+import type { FavoritedLevel, Level } from "@/interfaces";
+import chroma from "chroma-js";
+
+document.title = "Editor | GD Seznamy"
 
 const nice = () => {
   console.log(levelList.value);
@@ -17,6 +22,7 @@ const tagPopupOpen = ref<boolean>(false);
 const BGpickerPopupOpen = ref<boolean>(false);
 const bgColorPickerOpen = ref<boolean>(false);
 const descriptionEditorOpen = ref<boolean>(false);
+const favoriteLevelPickerOpen = ref<boolean>(false);
 
 const startAddLevel = () => {
   addLevel()
@@ -41,6 +47,19 @@ const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
   currentlyOpenedCard.value = -1
 }
 
+const addFromFavorites = (level: FavoritedLevel) => {
+  let addedLevel: Level = {
+    levelName: level.levelName,
+    creator: level.creator,
+    color: chroma(level.levelColor).hsv(),
+    levelID: level.levelID,
+    video: null,
+    difficulty: [0,0],
+    tags: []
+}
+  addLevel(addedLevel)
+}
+
 </script>
 
 <template>
@@ -58,6 +77,12 @@ const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
     v-show="descriptionEditorOpen"
     editor-title="Editor popisku"
     @close-popup="descriptionEditorOpen = false"
+  />
+  <PickerPopup
+    v-show="favoriteLevelPickerOpen"
+    browser-name="Uložené levely"
+    @close-popup="favoriteLevelPickerOpen = false"
+    @select-option="addFromFavorites($event)"
   />
 
   <form
@@ -138,7 +163,7 @@ const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
             alt=""
           />
         </button>
-        <button type="button">
+        <button type="button" @click="favoriteLevelPickerOpen = true">
           <img
             class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/addfromFaves.svg"

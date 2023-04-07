@@ -9,6 +9,7 @@ const props = defineProps({
   name: String,
   creator: String,
   id: String,
+  index: Number
 });
 
 const makeColor = () =>
@@ -59,7 +60,7 @@ const uploadDate = reactive(new Date(props.timestamp!));
       }}
     </section>
 
-    <section class="flex flex-col items-center gap-1">
+    <section class="flex flex-col gap-1 items-center">
       <div v-if="views" class="flex gap-1 text-xs">
         <img src="../../images/view.svg" alt="" class="w-4" />{{ views }}
       </div>

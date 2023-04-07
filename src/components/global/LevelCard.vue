@@ -60,7 +60,7 @@ const doFavoriteLevel = () => {
     class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg px-2 py-3 text-white backdrop-blur-sm"
     :style="{ background: chroma(color).css() }"
   >
-    <div class="relative w-8">
+    <div class="relative w-8" v-if="difficulty">
       <img
         class="absolute left-1/2 z-10 w-4/5 t-1/2"
         :src="`/src/images/faces/${difficulty[0]}.webp`"

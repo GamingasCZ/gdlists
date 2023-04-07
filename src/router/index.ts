@@ -46,14 +46,19 @@ router.beforeEach(() => {
   document.documentElement.style.setProperty("--siteBackground", "");
 
   if (
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--primaryColor"
-    ) != document.documentElement.style.getPropertyValue("--primaryColor")
+    getComputedStyle(document.documentElement).getPropertyValue("--primaryColor") == document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
-  }
+    document.querySelector("nav")?.classList.add("slidingNavbar")
 
-  document.documentElement.style.setProperty("--primaryColor", "");
-  document.documentElement.style.setProperty("--secondaryColor", "");
+    setTimeout(() => {
+      document.documentElement.style.setProperty("--primaryColor", "");
+      document.documentElement.style.setProperty("--secondaryColor", "");
+    }, 150)
+
+    setTimeout(() => {
+      document.querySelector("nav")?.classList.remove("slidingNavbar")
+    }, 300);
+  }
 });
 
 export default router;

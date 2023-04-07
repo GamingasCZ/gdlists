@@ -2,6 +2,8 @@
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 
+document.title = "GD Seznamy"
+
 defineProps({
   isLoggedIn: Boolean,
 });
@@ -71,6 +73,7 @@ defineProps({
     :extra-text="$t('homepage.more')"
     extra-icon="more"
     :empty-text="$t('homepage.listsUnavailable')"
+    extra-action="/browse"
     content-type="/getLists.php?homepage=1"
   />
 
@@ -90,7 +93,8 @@ defineProps({
   <ListSection
     :header-name="$t('homepage.visited')"
     :extra-text="$t('homepage.clear')"
-    extra-icon="close"
+    extra-icon="trash"
+    extra-action="@clear"
     :empty-text="$t('homepage.noListsVisited')"
     content-type="@recentlyViewed"
   />
@@ -100,6 +104,10 @@ defineProps({
     :extra-text="$t('homepage.more')"
     extra-icon="more"
     :empty-text="$t('homepage.noLevelsSaved')"
+    content-type="@favorites"
+    extra-action="/saved"
+    :randomize-content="true"
+    :list-type="1"
   />
 
   <ListSection

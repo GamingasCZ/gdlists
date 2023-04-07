@@ -60,13 +60,16 @@ axios
         name: LIST_DATA.value?.name!,
         uploadDate: Date.now(),
       });
+      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1) // Gets sliced to 3 on homepage
       localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+
     }
+    
+    document.title = `${LIST_DATA.value?.name} | GD Seznamy` 
 
     let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!; // TODO: old lists have hex values
-    LIST_COL.value =
-      typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
-    modifyListBG(LIST_COL.value);
+    LIST_COL.value = typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
+    if (LIST_COL != undefined) modifyListBG(LIST_COL.value);
 
     let listBG = LIST_DATA.value?.data?.titleImg!;
     document.querySelector("#listBG").style.backgroundImage = `url('${typeof listBG == "string" ? listBG : listBG[0] ?? ""}')`;
@@ -81,7 +84,7 @@ onMounted(() => {});
 <template>
   <div
     id="listBG"
-    class="fixed left-0 top-[5%] h-full w-full bg-cover"
+    class="fixed left-0 top-[5%] h-full w-full bg-cover -z-10"
     :style="{
       backgroundPositionX: positionListBackground(),
       height: LIST_DATA?.data.titleImg[2] + '%',
@@ -114,7 +117,7 @@ onMounted(() => {});
         v-bind="level"
         :favorited="favoritedIDs?.includes(level.levelID!)"
         :level-index="index"
-        :list-i-d="listID"
+        :list-i-d="listID!"
         :list-name="LIST_DATA?.name!"
       />
     </main>

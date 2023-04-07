@@ -3,6 +3,8 @@ import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref } from "vue";
 import { RouterLink } from "vue-router";
+
+const emit = defineEmits(['removeLevel'])
 const props = defineProps({
   levelName: String,
   creator: String,
@@ -12,6 +14,7 @@ const props = defineProps({
   listName: String,
   listPosition: Number,
   timeAdded: Number,
+  hideRemove: {type: Boolean, default: false}
 });
 
 const listColor = ref<Color>(chroma(props.levelColor!));
@@ -32,12 +35,13 @@ const getGradient = () =>
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
 const uploadDate = reactive(new Date(props.timeAdded!));
+
 </script>
 
 <template>
   <RouterLink
     :to="`${listID!}?${listPosition}`"
-    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background_position_y] duration-200 hover:bg-left"
+    class="flex w-5/6 max-w-6xl relative cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background_position_y] duration-200 hover:bg-left"
     :style="{
       background: getGradient(),
       borderColor: listColor.darken(2).hex(),
@@ -59,6 +63,10 @@ const uploadDate = reactive(new Date(props.timeAdded!));
       <h1 class="text-lg font-bold">{{ levelName }}</h1>
       <p class="text-xs">- {{ creator }} -</p>
     </section>
+
+    <button v-if="!hideRemove" class="box-border p-2 ml-auto w-10 bg-black bg-opacity-40 rounded-full button" @click.stop.prevent="emit('removeLevel', levelID)">
+      <img src="@/images/trash.svg" class="w-7" alt="">
+    </button>
   </RouterLink>
 </template>
 3

@@ -5,7 +5,7 @@
 
 @font-face {
   font-family: poppins;
-  src: url("../assets/SchibstedGrotesk-VariableFont_wght.ttf");
+  src: url("../assets/SofiaSans-VariableFont_wght.ttf");
 }
 
 @keyframes navbarSlide {
@@ -20,15 +20,15 @@
   }
 }
 
+.slidingNavbar {
+  animation: navbarSlide 300ms;
+}
+
 :root {
   --siteBackground: #08110b;
   --primaryColor: #045124;
   --secondaryColor: #142019;
   --brightGreen: #71d471;
-}
-
-nav {
-  animation: navbarSlide 0.3s linear;
 }
 
 body {
