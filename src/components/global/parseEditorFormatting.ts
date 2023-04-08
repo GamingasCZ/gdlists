@@ -7,7 +7,7 @@ export default function parseText(textToParse: string): string {
     textToParse = textToParse.replace(regex, `<${tags[i]}>$1</${tags[i]}>`);
     i++;
   });
-  textToParse = textToParse.replace(/#(.*?)\n/g, `<h1>$1</h1>\n`);
+  textToParse = textToParse.replace(/#(.*?)\n/g, `<h1 class="text-xl">$1</h1>\n`);
   textToParse = textToParse.replace(/\*(.*?)(\n|$)/g, `<li>$1</li>\n`);
 
   let urlRegex =

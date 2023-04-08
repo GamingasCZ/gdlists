@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { qa } from "./helpmenuQuestions"
+import HelpBubble from "./HelpBubble.vue"
 
 const emit = defineEmits(['closePopup'])
 
@@ -25,9 +27,9 @@ const emit = defineEmits(['closePopup'])
         />
       </div>
       <div class="mt-2">
-        <input type="text" placeholder="Hledat v nápovědě..." class="p-1 px-2 bg-white bg-opacity-10 rounded-full">
-        <div class="">
-            
+        <input type="text" placeholder="Hledat v nápovědě..." class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-full">
+        <div class="p-1 bg-white bg-opacity-10 flex flex-col gap-1">
+            <HelpBubble v-for="question in qa" v-bind="question" />
         </div>
       </div>
     </section>

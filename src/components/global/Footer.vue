@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import HelpMenu from './HelpMenu.vue';
+import HelpMenu from '../helpMenu/HelpMenu.vue';
 
 const helpMenuOpen = ref<boolean>(false)
 </script>
