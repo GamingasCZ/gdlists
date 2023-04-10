@@ -22,7 +22,7 @@ const lists = ref<ListPreview[] | FavoritedLevel[]>();
 if (props.contentType?.startsWith("/")) {
   // link
   axios
-    .get("http://localhost:8000/php" + props.contentType)
+    .get(import.meta.env.VITE_API+"/php" + props.contentType)
     .then(
       (response: AxiosResponse) =>
         (lists.value = response.data[0] as ListPreview[])

@@ -3,13 +3,13 @@ import { levelList } from "@/Editor";
 import LinkIcon from "@/svgs/LinkIcon.vue";
 import { ref, reactive } from "vue";
 
-const props = defineProps({
-  tagName: String,
-  tagID: Number,
-  tagLink: String,
-  cardIndex: Number,
-  tagIndex: Number,
-});
+const props = defineProps<{
+  tagName: string | number,
+  tagID: number,
+  tagLink: string,
+  cardIndex: number,
+  tagIndex: number,
+}>();
 
 const editingLink = ref<boolean>(false);
 

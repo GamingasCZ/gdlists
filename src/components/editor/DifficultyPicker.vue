@@ -5,6 +5,11 @@ defineProps({
 });
 
 const emit = defineEmits(["changeRate", "changeFace"]);
+
+function getDiffImage(ind: string) {
+  return new URL(`/public/faces/${ind}.webp`, import.meta.url).href
+}
+
 </script>
 
 <template>
@@ -16,30 +21,30 @@ const emit = defineEmits(["changeRate", "changeFace"]);
         v-for="diff in 12"
         :key="diff"
         type="button"
-        class="button aspect-square w-12 rounded-md bg-opacity-40 p-1"
+        class="p-1 w-12 bg-opacity-40 rounded-md button aspect-square"
         @click="emit('changeFace', diff - 1)"
         :class="{ 'bg-black': diff - 1 == selectedFace }"
       >
-        <img :src="'/src/images/faces/' + (diff - 1) + '.webp'" />
+        <img :src="getDiffImage((diff - 1).toString())"/>
       </button>
     </div>
     <div
-      class="box-border grid grid-cols-2 gap-1 rounded-md bg-black bg-opacity-20 p-2"
+      class="box-border grid grid-cols-2 gap-1 p-2 bg-black bg-opacity-20 rounded-md"
     >
       <button
         type="button"
-        class="aspect-square w-10 rounded-md bg-black bg-opacity-20 p-1"
+        class="p-1 w-10 bg-black bg-opacity-20 rounded-md aspect-square"
         v-for="(rate, index) in [
           'error',
           'star',
-          'faces/featured',
-          'faces/epic',
+          'featured',
+          'epic',
         ]"
         @click="emit('changeRate', index)"
       >
         <img
           class="button"
-          :src="'/src/images/' + rate + '.webp'"
+          :src="getDiffImage(rate)"
           :class="{ disabled: index != selectedRate }"
         />
       </button>

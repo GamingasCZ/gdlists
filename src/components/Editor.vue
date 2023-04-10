@@ -96,7 +96,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
     </div>
     <div class="flex flex-col gap-3 mt-12">
-      <LevelCard v-for="level in levelList.levels" v-bind="level" :disable-stars="true"/>
+      <LevelCard v-for="level in levelList.levels" v-bind="level" :disable-stars="true" :translucent-card="levelList.translucent" />
     </div>
   </section>
   <form

@@ -8,7 +8,7 @@ export default function parseText(textToParse: string): string {
     i++;
   });
   textToParse = textToParse.replace(/#(.*?)\n/g, `<h1 class="text-xl">$1</h1>\n`);
-  textToParse = textToParse.replace(/\*(.*?)(\n|$)/g, `<li>$1</li>\n`);
+  textToParse = textToParse.replace(/\*(.*?)(\n|$)/g, `<li class="mx-4">$1</li>\n`);
 
   let urlRegex =
     /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*))/g;

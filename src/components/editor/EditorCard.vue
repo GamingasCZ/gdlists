@@ -43,8 +43,8 @@ const getRateImage = () => {
   let rate = levelList.value.levels[props.index!].difficulty[1];
   if (rate == 0) return; // Unrated level
   else {
-    return `/src/images/${
-      ["star", "faces/featured", "faces/epic"][rate - 1]
+    return `/public/faces/${
+      ["star", "featured", "epic"][rate - 1]
     }.webp`;
   }
 };
@@ -82,7 +82,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   }
 
   axios
-    .get("http://localhost:8000/php/rubLevelData.php?" + request)
+    .get(import.meta.env.VITE_API+"/php/rubLevelData.php?" + request)
     .then((response: AxiosResponse) => {
       let level: LevelSearchResponse = response.data;
       levelList.value.levels[props.index!].levelID = level.id;
@@ -112,7 +112,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       </div>
     </header>
 
-    <!-- Card content -->
+  <!-- Card content -->
     <main
       v-show="opened"
       :style="{ backgroundColor: chroma.hsl(...data?.color!).hex(), borderColor: darkCol() }"
@@ -154,6 +154,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="w-12 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
             type="number"
             :value="index! + 1"
+            @click="mobileMoveLevel()"
             @change="
               startMove(parseInt(($event.target as HTMLInputElement).value) - 1)
             "
@@ -287,8 +288,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             <img
               class="w-10"
               @click="openedPanel = openedPanel != 2 ? 2 : 0"
-              src="../../images/faces/diffContainer.webp"
               alt=""
+              src="/public/faces/diffContainer.webp"
             />
             <img
               :src="`/src/images/faces/${levelList.levels[index!].difficulty[0]}.webp`"

@@ -13,15 +13,15 @@ export const levelList = ref<LevelList>({
   levels: [],
 });
 
-export function addLevel(values: Level = []) {
+export function addLevel(values: Level) {
   let levelInfo: Level = {
-    levelName: values.levelName ?? "",
-    creator: values.creator ?? "",
-    color: values.color ?? chroma.hsl(Math.floor(Math.random() * 360), 1, Math.random() / 2).hsl(),
-    levelID: values.levelID ?? "",
-    video: values.video ?? "",
-    difficulty: values.difficulty ?? [0, 0],
-    tags: values.tags ?? []
+    levelName: values?.levelName ?? "",
+    creator: values?.creator ?? "",
+    color: values?.color ?? chroma(Math.floor(Math.random() * 360), 1, Math.random() / 2, 'hsv').hsv(),
+    levelID: values?.levelID ?? "",
+    video: values?.video ?? "",
+    difficulty: values?.difficulty ?? [0, 0],
+    tags: values?.tags ?? []
   };
 
   levelList.value.levels.push(levelInfo);

@@ -29,7 +29,7 @@ const loadFailed = ref<boolean>(false);
 const searchNoResults = ref<boolean>(false);
 
 const LISTS_ON_PAGE = 8;
-const PAGE = ref<number>((new URLSearchParams(window.location.search).get("p") || 1)-1);
+const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
 const LISTS = ref<ListPreview[]>();
@@ -84,11 +84,12 @@ function refreshBrowser() {
 
   axios
     .get(
-      `http://localhost:8000/php/getLists.php?startID=999999&searchQuery=${SEARCH_QUERY.value}&page=${PAGE.value}&path=%2Fphp%2FgetLists.php&fetchAmount=${LISTS_ON_PAGE}&sort=0`
+      `${import.meta.env.VITE_API}/php/getLists.php?startID=999999&searchQuery=${SEARCH_QUERY.value}&page=${PAGE.value}&path=%2Fphp%2FgetLists.php&fetchAmount=${LISTS_ON_PAGE}&sort=0`
     )
     .then((res: AxiosResponse) => {
       if (res.status != 200) {
         loadFailed.value = true;
+        LISTS.value = []
         return;
       }
       if (res.data == 3) {
@@ -101,8 +102,9 @@ function refreshBrowser() {
       maxPages.value = res.data[2].maxPage;
       pagesArray.value = listScroll();
       LISTS.value = res.data[0];
+      loadFailed.value = false
     })
-    .catch(() => (loadFailed.value = true));
+    .catch(() => {LISTS.value = []; loadFailed.value = true});
 }
 
 const removeFavoriteLevel = (levelID: string) => {
@@ -236,7 +238,7 @@ onMounted(() => {
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">Nepodařilo se načíst obsah!</p>
           <button
-            class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
+            class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()"
           >
             <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />Načíst
             znova

@@ -24,9 +24,9 @@ const helpMenuOpen = ref<boolean>(false)
             <a href="https://github.com/GamingasCZ/gdlists-vue-frontend/">
                 <button class="p-1 bg-black bg-opacity-40 rounded-md">Zdrojový kód</button>
             </a>
-            <a href="https://github.com/GamingasCZ/gdlists-vue-frontend/issues/new?title=Bug:%20">
+            <!-- <a href="https://github.com/GamingasCZ/gdlists-vue-frontend/issues/new?title=Bug:%20">
                 <button class="p-1 bg-black bg-opacity-40 rounded-md">Nahlásit bug</button>
-            </a>
+            </a> -->
         </div>
     </section>
 </template>

@@ -39,7 +39,7 @@ let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`
 if (props.randomList) listURL = "random"
 
 axios
-  .get("http://localhost:8000/php/getLists.php?"+listURL)
+  .get(import.meta.env.VITE_API+"/php/getLists.php?"+listURL)
   .then((res: AxiosResponse) => {
     LIST_DATA.value = res.data[0];
     if (!LIST_DATA.value?.data.levels) {

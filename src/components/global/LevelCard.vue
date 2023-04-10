@@ -65,13 +65,13 @@ const doFavoriteLevel = () => {
     <div class="relative w-8" v-if="difficulty">
       <img
         class="absolute left-1/2 z-10 w-4/5 t-1/2"
-        :src="`/src/images/faces/${difficulty[0]}.webp`"
+        :src="`/public/faces/${difficulty[0]}.webp`"
         alt=""
       />
       <img
         class="absolute top-1/2 left-1/2 w-3/5"
-        :src="`/src/images/${
-          ['', 'star', 'faces/featured', 'faces/epic'][difficulty[1]]
+        :src="`/public/faces/${
+          ['', 'star', 'featured', 'epic'][difficulty[1]]
         }.webp`"
         alt=""
       />
