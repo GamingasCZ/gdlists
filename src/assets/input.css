@@ -127,3 +127,14 @@ dialog {
 .slider {
   background: none;
 }
+
+@keyframes flash {
+  0%, 40%, 80% {
+    filter: brightness(1.5);
+    box-shadow: rgb(233, 187, 60) 0px 0px 30px;
+  }
+  20%, 60%, 100% {
+    filter: brightness(1);
+    box-shadow: rgb(233, 187, 60) 0px 0px 0px;
+  }
+}

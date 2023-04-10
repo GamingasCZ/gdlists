@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
 const emit = defineEmits(['removeLevel'])
@@ -20,6 +20,10 @@ const props = defineProps({
 });
 
 const listColor = ref<Color>(chroma(props.levelColor!));
+
+watch(props, newProps => {
+  listColor.value = chroma(props.levelColor!)
+})
 
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
@@ -42,10 +46,10 @@ const uploadDate = reactive(new Date(props.timeAdded!));
 
 <template>
   <RouterLink
-    :to="`${listID!}?${listPosition}`"
-    class="flex w-5/6 max-w-6xl relative cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background_position_y] duration-200 hover:bg-left"
+    :to="`${listID!}?goto=${listPosition}`"
+    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
-      background: getGradient(),
+      backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
     }"
   >

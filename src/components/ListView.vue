@@ -7,7 +7,7 @@ import type {
 } from "@/interfaces";
 import LevelCard from "./global/LevelCard.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 
@@ -69,7 +69,7 @@ axios
       localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
 
     }
-    
+
     document.title = `${LIST_DATA.value?.name} | GD Seznamy` 
 
     // Set list colors
@@ -85,7 +85,21 @@ axios
 const positionListBackground = () =>
   ["left", "center", "right"][LIST_DATA.value?.data?.titleImg[3]! ?? 1];
 
-onMounted(() => {});
+const scrollToPosition = (pos: number) => {
+  // Scroll to card before to hopefully make it centered :)
+}
+const tryJumping = (ind: number) => {
+  let isJumpingFromFaves = new URLSearchParams(window.location.search).get("goto")
+  if (isJumpingFromFaves && parseInt(isJumpingFromFaves) == ind) {
+    let jumpedToCard = document.querySelectorAll(".levelCard")
+
+    if (parseInt(isJumpingFromFaves) > 1) {
+      jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves) - 2)].scrollIntoView()
+    }
+    jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))].style.animation = "flash 0.8s linear"
+  }
+}
+
 </script>
 
 <template>
@@ -127,6 +141,8 @@ onMounted(() => {});
         :list-i-d="listID!"
         :list-name="LIST_DATA?.name!"
         :translucent-card="LIST_DATA?.data.translucent!"
+        class="levelCard"
+        @vnode-mounted="tryJumping(index)"
       />
     </main>
   </section>
