@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import axios, { type AxiosResponse } from "axios";
 import { ref } from "vue";
-import type { FavoritedLevel, ListPreview } from "../../interfaces";
+import type { FavoritedLevel, ListCreatorInfo, ListPreview } from "../../interfaces";
 import FavoritePreview from "../global/FavoritePreview.vue";
 import ListPreviewElement from "../global/ListPreview.vue";
 import { oldLists } from './officialLists'
@@ -17,6 +17,7 @@ const props = defineProps({
   randomizeContent: {type: Boolean, default: false},
 });
 
+const users = ref<ListCreatorInfo[]>();
 const lists = ref<ListPreview[] | FavoritedLevel[]>();
 
 if (props.contentType?.startsWith("/")) {
@@ -24,8 +25,10 @@ if (props.contentType?.startsWith("/")) {
   axios
     .get(import.meta.env.VITE_API+"/php" + props.contentType)
     .then(
-      (response: AxiosResponse) =>
-        (lists.value = response.data[0] as ListPreview[])
+      (response: AxiosResponse) => {
+        lists.value = response.data[0]
+        users.value = response.data[1]
+      }
     );
 } else if (props.contentType?.startsWith("@")) {
   let data: any[] = JSON.parse(localStorage.getItem(props.contentType.slice(1))!)
@@ -83,7 +86,7 @@ const clearViewed = () => {
       class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs sm:ml-14"
     >
       <p class="text-yellow-200 max-sm:ml-12" v-if="!lists?.length">- {{ emptyText }} -</p>
-      <component v-else v-for="level in lists" v-bind="level" class="max-sm:w-full" :hide-remove="true" :is="[ListPreviewElement, FavoritePreview][listType]" />
+      <component v-else v-for="level in lists" v-bind="level" class="max-sm:w-full" :user-array="users" :hide-remove="true" :is="[ListPreviewElement, FavoritePreview][listType]" />
     </div>
   </section>
 </template>

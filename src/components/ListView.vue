@@ -42,6 +42,9 @@ axios
   .get(import.meta.env.VITE_API+"/php/getLists.php?"+listURL)
   .then((res: AxiosResponse) => {
     LIST_DATA.value = res.data[0];
+    let LIST_CREATOR: string = LIST_DATA.value?.creator! || res.data[1][0].username
+    
+    // Use new levelList structure (put levels into 'levels' array)
     if (!LIST_DATA.value?.data.levels) {
       LIST_DATA.value!.data.levels = [];
       Object.keys(LIST_DATA.value?.data!)
@@ -54,7 +57,7 @@ axios
     if (addIntoRecentlyViewed) {
       let isListPrivate = Boolean(LIST_DATA.value?.hidden != "0");
       recentlyViewed.push({
-        creator: LIST_DATA.value?.creator!,
+        creator: LIST_CREATOR,
         id: (isListPrivate
           ? LIST_DATA.value?.hidden!
           : LIST_DATA.value?.id!
@@ -69,12 +72,14 @@ axios
     
     document.title = `${LIST_DATA.value?.name} | GD Seznamy` 
 
-    let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!; // TODO: old lists have hex values
+    // Set list colors
+    let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;
     LIST_COL.value = typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
     if (LIST_COL != undefined) modifyListBG(LIST_COL.value);
 
+    // Set list background image
     let listBG = LIST_DATA.value?.data?.titleImg!;
-    document.querySelector("#listBG").style.backgroundImage = `url('${typeof listBG == "string" ? listBG : listBG[0] ?? ""}')`;
+    (document.querySelector("#listBG") as HTMLDivElement).style.backgroundImage = `url('${typeof listBG == "string" ? listBG : listBG[0] ?? ""}')`;
   });
 
 const positionListBackground = () =>

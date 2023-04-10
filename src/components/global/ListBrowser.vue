@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import type { FavoritedLevel, ListPreview } from "@/interfaces";
+import type { FavoritedLevel, ListCreatorInfo, ListPreview } from "@/interfaces";
 import ListPrevElement from "@/components/global/ListPreview.vue";
 import axios, { type AxiosResponse } from "axios";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import FavoritePreview from "./FavoritePreview.vue";
+
+const emit = defineEmits<{
+  (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
+}>();
 
 const props = defineProps({
   browserName: String,
   search: String,
   onlineBrowser: { type: Boolean, required: true },
+  onlineType: {type: String, default: "", immediate: true}
 });
 
 document.title = `${props.browserName} | GD Seznamy`
@@ -32,8 +37,9 @@ const LISTS_ON_PAGE = 8;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
+const USERS = ref<ListCreatorInfo[]>();
 const LISTS = ref<ListPreview[]>();
-const SEARCH_QUERY = ref<string>(props.search ?? "");
+const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
@@ -82,14 +88,24 @@ function refreshBrowser() {
     return
   }
 
+  let fetchType = ""
+  if (props.onlineType) fetchType = `&${props.onlineType}=1`
+
   axios
     .get(
-      `${import.meta.env.VITE_API}/php/getLists.php?startID=999999&searchQuery=${SEARCH_QUERY.value}&page=${PAGE.value}&path=%2Fphp%2FgetLists.php&fetchAmount=${LISTS_ON_PAGE}&sort=0`
+      `${import.meta.env.VITE_API}/php/getLists.php
+?startID=999999
+&searchQuery=${SEARCH_QUERY.value}
+&page=${PAGE.value}
+&path=%2Fphp%2FgetLists.php
+&fetchAmount=${LISTS_ON_PAGE}
+&sort=0${fetchType}`
     )
     .then((res: AxiosResponse) => {
       if (res.status != 200) {
         loadFailed.value = true;
         LISTS.value = []
+        maxPages.value = 0;
         return;
       }
       if (res.data == 3) {
@@ -102,9 +118,10 @@ function refreshBrowser() {
       maxPages.value = res.data[2].maxPage;
       pagesArray.value = listScroll();
       LISTS.value = res.data[0];
+      USERS.value = res.data[1];
       loadFailed.value = false
     })
-    .catch(() => {LISTS.value = []; loadFailed.value = true});
+    .catch(() => {LISTS.value = []; loadFailed.value = true; maxPages.value = 0;});
 }
 
 const removeFavoriteLevel = (levelID: string) => {
@@ -137,6 +154,12 @@ onMounted(() => {
     pagesArray.value = listScroll();
   }
 });
+
+// Changing browser types with browser buttons
+watch(props, (newBrowser) => {
+  refreshBrowser()
+})
+
 </script>
 
 <template>
@@ -144,19 +167,25 @@ onMounted(() => {
     <h2 class="text-3xl text-center">{{ browserName }}</h2>
 
     <main class="mt-3">
-      <header class="flex gap-3 justify-center" v-show="false">
+      <header class="flex gap-3 justify-center" v-show="onlineBrowser">
         <button
-          class="button rounded-full border-[0.1rem] border-solid border-green-800 bg-greenGradient px-4 py-0.5"
+          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{'bg-greenGradient': onlineType == ''}"
+          @click="emit('switchBrowser', '')"
         >
           Nejnovější
         </button>
         <button
           class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{'bg-greenGradient': onlineType == 'user'}"
+          @click="emit('switchBrowser', 'user')"
         >
           Moje
         </button>
         <button
           class="button box-border rounded-full border-[0.1rem] border-solid border-green-800"
+          :class="{'bg-greenGradient': onlineType == 'hidden'}"
+          @click="emit('switchBrowser', 'hidden')"
         >
           <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
         </button>
@@ -249,6 +278,7 @@ onMounted(() => {
           class="min-w-full listPreviews"
           v-for="(list, index) in LISTS"
           v-bind="list"
+          :user-array="USERS"
           @remove-level="removeFavoriteLevel"
         ></component>
       </main>

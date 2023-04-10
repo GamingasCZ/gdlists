@@ -1,16 +1,22 @@
 <script setup lang="ts">
+import type { ListCreatorInfo } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref } from "vue";
 import { RouterLink } from "vue-router";
-const props = defineProps({
-  rate_ratio: String,
-  views: Number,
-  timestamp: Number,
-  name: String,
-  creator: String,
-  id: String,
-  index: Number
-});
+
+const props = defineProps<{
+  rate_ratio: string
+  views: number
+  timestamp: number
+  name: string
+  creator: string
+  id: string
+  index: number
+  diffGuesser: 0 | 1
+  uid: string
+  
+  userArray: ListCreatorInfo[]
+}>();
 
 const makeColor = () =>
   chroma(
@@ -35,6 +41,12 @@ function parseElapsed(secs: number) {
   else if (secs < 1892160000)
     return Math.round(secs / 604800) + "w"; //w - weeks
   else return Math.round(secs / 1892160000) + "y"; //y - years
+}
+
+function getUsername() {
+  let listCreator: string = ""
+  props.userArray.forEach(user => {if (props.uid == user.discord_id) listCreator = user.username})
+  return listCreator
 }
 
 const getGradient = () =>
@@ -77,7 +89,7 @@ const uploadDate = reactive(new Date(props.timestamp!));
 
     <section class="flex flex-col justify-center">
       <h1 class="text-lg font-bold">{{ name }}</h1>
-      <p class="text-xs">- {{ creator?.length ? creator : '' }} -</p>
+      <p class="text-xs">- {{ creator?.length ? creator : getUsername() }} -</p>
     </section>
   </RouterLink>
 </template>

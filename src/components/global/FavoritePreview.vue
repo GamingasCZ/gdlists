@@ -14,7 +14,9 @@ const props = defineProps({
   listName: String,
   listPosition: Number,
   timeAdded: Number,
-  hideRemove: {type: Boolean, default: false}
+  hideRemove: {type: Boolean, default: false},
+
+  userArray: String
 });
 
 const listColor = ref<Color>(chroma(props.levelColor!));
