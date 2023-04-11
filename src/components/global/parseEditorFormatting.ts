@@ -12,7 +12,7 @@ export default function parseText(textToParse: string): string {
 
   let urlRegex =
     /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*))/g;
-  textToParse = textToParse.replace(urlRegex, `<a href="$1">$1</a>`);
+  textToParse = textToParse.replace(urlRegex, `<a class='text-blue-300 underline' href="$1">$1</a>`);
 
   return textToParse;
 }

@@ -100,6 +100,17 @@ dialog {
   backdrop-filter: saturate(0);
 }
 
+.descriptionFade::before {
+  content: "";
+	width: 100%;
+	height: 22px;
+	background: linear-gradient(0deg , var(--primaryColor), transparent);
+	position: absolute;
+	bottom: 0;
+	left: 0;
+  border-radius: inherit;
+}
+
 .slider::-moz-range-thumb {
   background: #4d6c4f;
   border: none;

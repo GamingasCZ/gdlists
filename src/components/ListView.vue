@@ -33,6 +33,7 @@ if (localStorage != undefined) {
 }
 
 const LIST_DATA = ref<ListFetchResponse>();
+const LIST_CREATOR = ref<string>("");
 const LIST_COL = ref<number[]>([0, 0, 0]);
 
 let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`
@@ -42,7 +43,7 @@ axios
   .get(import.meta.env.VITE_API+"/php/getLists.php?"+listURL)
   .then((res: AxiosResponse) => {
     LIST_DATA.value = res.data[0];
-    let LIST_CREATOR: string = LIST_DATA.value?.creator! || res.data[1][0].username
+    LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username
     
     // Use new levelList structure (put levels into 'levels' array)
     if (!LIST_DATA.value?.data.levels) {
@@ -57,7 +58,7 @@ axios
     if (addIntoRecentlyViewed) {
       let isListPrivate = Boolean(LIST_DATA.value?.hidden != "0");
       recentlyViewed.push({
-        creator: LIST_CREATOR,
+        creator: LIST_CREATOR.value,
         id: (isListPrivate
           ? LIST_DATA.value?.hidden!
           : LIST_DATA.value?.id!
@@ -126,11 +127,10 @@ const tryJumping = (ind: number) => {
       class="absolute w-full h-full"
     ></div>
   </div>
-  <section class="text-white translate-y-10">
+  <section class="text-white translate-y-20">
     <header>
       <div class=""></div>
-      <h1>{{ LIST_DATA?.name }}</h1>
-      <ListDescription />
+      <ListDescription v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID" />
     </header>
     <main class="flex flex-col gap-3">
       <LevelCard
