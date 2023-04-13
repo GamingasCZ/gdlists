@@ -9,7 +9,7 @@ const props = defineProps<{
   <div class="p-1.5 text-xs bg-black bg-opacity-40 rounded-full sm:text-sm">
     <img
       :src="`/src/images/badges/${tag[0]}.svg`"
-      class="inline mr-2 w-4 align-middle sm:w-6"
+      class="inline mr-2 w-3 align-middle sm:w-6"
       alt=""
     />
     <a

@@ -56,7 +56,7 @@ watch(toggleDescription, () => {
 
     <!-- Description -->
     <main class="relative grow">
-      <header class="relative bg-gray-900 bg-opacity-50 rounded-t-md">
+      <header class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
         <img src="@/images/defaultPFP.webp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid" alt="">
         <h1 class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
         <div class="flex gap-2 items-center py-0.5 ml-16 text-base">
@@ -67,7 +67,7 @@ watch(toggleDescription, () => {
           <span>{{ new Date(parseInt(timestamp!)*1000).toLocaleDateString() }}</span>
         </div>
       </header>
-      <pre id="listDescription" class="font-[poppins] leading-5 transition-[height] duration-75 ease-in-out overflow-y-hidden whitespace-pre-wrap px-2 h-24 text-white bg-gray-900 bg-opacity-40 rounded-b-md descriptionFade before:transition-opacity " :class="{'text-opacity-40': ['', undefined].includes(data?.description), 'before:opacity-0': !tallDescription || toggleDescription}" v-html="parseText(data.description ?? 'Seznam nemá popisek.')"></pre>
+      <pre id="listDescription" class="font-[poppins] leading-5 transition-[height] duration-75 ease-in-out overflow-y-hidden whitespace-pre-wrap px-2 h-24 text-white bg-gray-800 bg-opacity-80 rounded-b-md descriptionFade before:transition-opacity " :class="{'text-opacity-40': ['', undefined].includes(data?.description), 'before:opacity-0': !tallDescription || toggleDescription}" v-html="parseText(data.description ?? 'Seznam nemá popisek.')"></pre>
       <button v-if="tallDescription" class="absolute bottom-0 left-1/2 w-10 rounded-t-lg" :style="{'backgroundColor': getCol()}" @click="toggleDescription = !toggleDescription"><img src="@/images/descMore.svg" :class="{'-scale-y-100': toggleDescription}" class="p-1 mx-auto w-6" alt=""></button>
     </main>
   </section>

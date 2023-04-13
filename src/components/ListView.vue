@@ -130,9 +130,9 @@ const tryJumping = (ind: number) => {
   <section class="text-white translate-y-20">
     <header>
       <div class=""></div>
-      <ListDescription v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID" />
+      <ListDescription v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID" class="mb-8"/>
     </header>
-    <main class="flex flex-col gap-3">
+    <main class="flex flex-col gap-4">
       <LevelCard
         v-for="(level, index) in LIST_DATA?.data.levels"
         v-bind="level"
