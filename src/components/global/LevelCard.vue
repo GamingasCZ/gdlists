@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CollabData, FavoritedLevel, LevelTag } from "@/interfaces";
-import chroma from "chroma-js";
+import chroma, { type Color } from "chroma-js";
 import { onMounted, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
@@ -55,14 +55,21 @@ const doFavoriteLevel = () => {
   localStorage.setItem("favoriteIDs", JSON.stringify(favesIDs));
   isFavorited.value = !isFavorited.value;
 };
+
+const CARD_COL = ref<Color>()
+
+// Old lists may have broken colors!! (damn you, old Gamingas :D)
+try {CARD_COL.value = chroma(props.color)}
+catch (e) {CARD_COL.value = chroma.random()}
+
 </script>
 
 <template>
   <section
     class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white backdrop-blur-md shadow-[color:#0000008F] shadow-lg"
-    :style="{ backgroundImage: `linear-gradient(39deg, ${chroma(color).alpha(translucentCard ? 0.4 : 1).css()}, ${chroma(color).brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
+    :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
   >
-    <main class="flex justify-between items-center">
+    <main class="flex justify-between items-center max-sm:flex-col">
       <div>
         <header class="flex items-center">
           <!-- Level difficulty -->
@@ -98,19 +105,19 @@ const doFavoriteLevel = () => {
       </div>
 
       <!-- Card links -->
-      <div class="flex gap-1.5 mr-10">
+      <div class="flex gap-1.5 sm:mr-10 max-sm:my-2">
         <button class="button" v-if="video">
           <a :href="`https://youtu.be/${video}`"
-            ><img class="w-14" src="@/images/modYT.svg" alt=""
+            ><img class="w-14 max-sm:w-10" src="@/images/modYT.svg" alt=""
           /></a>
         </button>
-        <button class="button" v-if="levelID?.match(/\d+/)">
+        <button class="button" v-if="levelID?.match(/^\d+$/)">
           <a :href="`https://gdbrowser.com/${levelID}`"
-            ><img class="w-14" src="@/images/modGDB.svg" alt=""
+            ><img class="w-14 max-sm:w-10" src="@/images/modGDB.svg" alt=""
           /></a>
         </button>
-        <button class="button" v-if="levelID?.match(/\d+/)">
-          <img class="w-14" src="@/images/modID.svg" alt="" />
+        <button class="button" v-if="levelID?.match(/^\d+$/)">
+          <img class="w-14 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
       
@@ -121,7 +128,7 @@ const doFavoriteLevel = () => {
       class="absolute top-1 right-1 button"
       @click="doFavoriteLevel"
       :class="{ disabled: isFavorited }"
-      v-if="favorited != undefined && levelID?.match(/\d+/) && !disableStars"
+      v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars"
     >
       <img src="@/images/star.webp" class="w-8" alt="" />
     </button>

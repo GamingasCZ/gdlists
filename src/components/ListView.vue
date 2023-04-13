@@ -6,8 +6,9 @@ import type {
   ListPreview,
 } from "@/interfaces";
 import LevelCard from "./global/LevelCard.vue";
+import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onUnmounted } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 
@@ -15,6 +16,10 @@ const props = defineProps({
   listID: {type: String, required: true},
   randomList: Boolean
 });
+
+onUnmounted(() => {
+  document.querySelector("#listBG")?.remove()
+})
 
 const PRIVATE_LIST: boolean = Boolean(props?.listID.match(/^\d+$/g))
 
@@ -76,7 +81,7 @@ axios
     // Set list colors
     let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;
     LIST_COL.value = typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
-    if (LIST_COL != undefined) modifyListBG(LIST_COL.value);
+    if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]) ) modifyListBG(LIST_COL.value);
 
     // Set list background image
     let listBG = LIST_DATA.value?.data?.titleImg!;
@@ -101,12 +106,23 @@ const tryJumping = (ind: number) => {
   }
 }
 
+const getURL = () => `${window.location.host}/${props.listID}`
+const sharePopupOpen = ref<boolean>(false)
+
+const listActions = (action: string) => {
+  switch (action) {
+    case 'sharePopup':
+      sharePopupOpen.value = true; break;
+  }
+}
+
 </script>
 
 <template>
   <div
     id="listBG"
     class="fixed left-0 top-[5%] h-full w-full bg-cover -z-10"
+    v-if="LIST_DATA?.data.titleImg != undefined && typeof LIST_DATA.data.titleImg != 'string'"
     :style="{
       backgroundPositionX: positionListBackground(),
       height: LIST_DATA?.data.titleImg[2] + '%',
@@ -116,7 +132,7 @@ const tryJumping = (ind: number) => {
     <div
       v-if="LIST_DATA?.data.titleImg[4]"
       :style="{
-        backgroundImage: `linear-gradient(0deg, ${chroma(
+        backgroundImage: `linear-gradient(180deg, ${chroma(
           chroma.hsl(
             LIST_COL[0],
             0.36,
@@ -127,10 +143,13 @@ const tryJumping = (ind: number) => {
       class="absolute w-full h-full"
     ></div>
   </div>
+
+  <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
+
   <section class="text-white translate-y-20">
     <header>
       <div class=""></div>
-      <ListDescription v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID" class="mb-8"/>
+      <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID" class="mb-8"/>
     </header>
     <main class="flex flex-col gap-4">
       <LevelCard

@@ -15,6 +15,10 @@ import LevelCard from "./global/LevelCard.vue";
 
 document.title = "Editor | GD Seznamy"
 
+defineProps<{
+  isLoggedIn: boolean
+}>()
+
 const nice = () => {
   console.log(levelList.value);
 };
@@ -27,7 +31,7 @@ const favoriteLevelPickerOpen = ref<boolean>(false);
 const previewingList = ref<boolean>(false)
 
 const startAddLevel = () => {
-  addLevel()
+  addLevel(null)
   currentlyOpenedCard.value = levelList.value.levels.length-1
 }
 
@@ -65,7 +69,6 @@ const addFromFavorites = (level: FavoritedLevel) => {
 </script>
 
 <template>
-  <NotLoggedIn class="hidden" mess="Pro vytvoření seznamu se prosím přihlaš!" />
   <TagPickerPopup
     v-show="tagPopupOpen"
     @close-popup="tagPopupOpen = false"
@@ -88,6 +91,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
   />
 
   <h2 class="text-3xl text-center text-white translate-y-16" v-show="!previewingList">Editor</h2>
+  <NotLoggedIn v-if="!isLoggedIn" mess="Pro vytvoření seznamu se prosím přihlaš!" />
   <section v-show="previewingList" class="translate-y-16">
     <div class="flex relative justify-center items-center mx-5 text-white">
       <button @click="previewingList = false" class="absolute left-0 button">
@@ -104,6 +108,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
     @submit.prevent
     class="mx-auto flex w-[70rem] max-w-[95vw] translate-y-20 flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
     v-show="!previewingList"
+    v-if="isLoggedIn"
   >
     <div
       class="my-2 grid w-full grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3"
@@ -111,14 +116,14 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <input
         autocomplete="off"
         type="text"
-        class="h-8 max-w-[77vw] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
+        class="px-2 w-[77vw] h-8 bg-white bg-opacity-5 rounded-md placeholder:text-lg"
         placeholder="Jméno seznamu"
       />
       <div></div>
       <textarea
         autocomplete="off"
         type="text"
-        class="h-16 max-w-[77vw] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
+        class="px-2 w-[77vw] h-16 bg-white bg-opacity-5 rounded-md resize-none placeholder:text-lg"
         placeholder="Popis seznamu"
         v-model="levelList.description"
       ></textarea>
@@ -133,7 +138,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <input
         autocomplete="off"
         type="text"
-        class="h-8 max-w-[77vw] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
+        class="h-8 w-[77vw] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         placeholder="Obrázek seznamu"
         v-model="levelList.titleImg[0]"
       />

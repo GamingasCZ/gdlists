@@ -13,7 +13,8 @@ const props = defineProps({
   browserName: String,
   search: String,
   onlineBrowser: { type: Boolean, required: true },
-  onlineType: {type: String, default: "", immediate: true}
+  onlineType: {type: String, default: "", immediate: true},
+  isLoggedIn: Boolean
 });
 
 document.title = `${props.browserName} | GD Seznamy`
@@ -167,7 +168,7 @@ watch(props, (newBrowser) => {
     <h2 class="text-3xl text-center">{{ browserName }}</h2>
 
     <main class="mt-3">
-      <header class="flex gap-3 justify-center" v-show="onlineBrowser">
+      <header class="flex gap-3 justify-center" v-show="onlineBrowser" v-if="isLoggedIn">
         <button
           class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
           :class="{'bg-greenGradient': onlineType == ''}"

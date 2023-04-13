@@ -75,8 +75,8 @@ defineProps({
     :empty-text="$t('homepage.listsUnavailable')"
     extra-action="/browse"
     content-type="/getLists.php?homepage=1"
-  />
-
+    />
+    
   <ListSection
     :header-name="$t('homepage.pinned')"
     :empty-text="$t('homepage.noListsPinned')"
@@ -88,6 +88,8 @@ defineProps({
     :extra-text="$t('homepage.more')"
     extra-icon="more"
     :empty-text="$t('homepage.noListsUploaded')"
+    extra-action="/browse"
+    content-type="/getLists.php?homeUser"
   />
 
   <ListSection

@@ -13,7 +13,7 @@ export const levelList = ref<LevelList>({
   levels: [],
 });
 
-export function addLevel(values: Level) {
+export function addLevel(values: Level | null) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
     creator: values?.creator ?? "",
