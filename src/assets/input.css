@@ -106,6 +106,7 @@ dialog {
 	height: 22px;
 	background: linear-gradient(0deg , var(--primaryColor), transparent);
 	position: absolute;
+  opacity: 0.8;
 	bottom: 0;
 	left: 0;
   border-radius: inherit;
