@@ -111,20 +111,20 @@ const addFromFavorites = (level: FavoritedLevel) => {
     v-if="isLoggedIn"
   >
     <div
-      class="my-2 grid w-full grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3"
+      class="my-2 grid w-full sm:-mr-10 grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3"
     >
       <input
         autocomplete="off"
         type="text"
-        class="px-2 w-[77vw] h-8 bg-white bg-opacity-5 rounded-md placeholder:text-lg"
         placeholder="Jméno seznamu"
+        class="px-2 w-[77vw] max-w-[20em] h-8 bg-white bg-opacity-5 rounded-md placeholder:text-lg"
       />
       <div></div>
       <textarea
         autocomplete="off"
         type="text"
-        class="px-2 w-[77vw] h-16 bg-white bg-opacity-5 rounded-md resize-none placeholder:text-lg"
         placeholder="Popis seznamu"
+        class="px-2 w-[77vw] max-w-[20em] h-16 bg-white bg-opacity-5 rounded-md resize-none placeholder:text-lg"
         v-model="levelList.description"
       ></textarea>
       <button type="button">
@@ -138,8 +138,8 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <input
         autocomplete="off"
         type="text"
-        class="h-8 w-[77vw] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         placeholder="Obrázek seznamu"
+        class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         v-model="levelList.titleImg[0]"
       />
       <button type="button">

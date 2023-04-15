@@ -1,15 +1,35 @@
 <script setup lang="ts">
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
+import LoggedInPopup from "./homepage/LoggedInPopup.vue";
+import cookier from "cookier";
+import { onMounted, ref } from "vue";
 
 document.title = "GD Seznamy"
 
 defineProps({
   isLoggedIn: Boolean,
 });
+
+const returnedFromLogin = ref<boolean>(false)
+
+const returnfromLoginPFP = ref<string>('')
+onMounted(() => {
+  let loginCookie = cookier('logindata').get()
+  if (loginCookie != null) {
+    returnedFromLogin.value = true
+    
+    loginCookie = JSON.parse(loginCookie)
+    returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`
+    
+    cookier('logindata').remove()
+  }
+})
 </script>
 
 <template>
+  <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="returnedFromLogin" :pfplink="returnfromLoginPFP" />
+
   <header
     class="flex h-[256px] items-end justify-center bg-[url(../images/introGrad2.webp)] bg-center"
   >

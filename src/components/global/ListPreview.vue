@@ -14,6 +14,7 @@ const props = defineProps<{
   index: number
   diffGuesser: 0 | 1
   uid: string
+  hidden: string
   
   userArray: ListCreatorInfo[]
 }>();
@@ -59,6 +60,7 @@ const getGradient = () =>
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
 const uploadDate = reactive(new Date(props.timestamp!));
+
 </script>
 
 <template>
@@ -68,6 +70,11 @@ const uploadDate = reactive(new Date(props.timestamp!));
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
+    }"
+    :class="{
+      '!border-dotted': hidden != 0,
+      '!border-white': hidden != 0,
+      '!border-opacity-40': hidden != 0
     }"
   >
     <section v-if="rate_ratio" class="flex flex-col items-center text-xs">

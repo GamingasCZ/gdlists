@@ -1,11 +1,43 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
-import { ref } from "vue";
+import { nextTick, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 
+defineProps<{
+  isLoggedIn: boolean
+}>()
+
 const settingsShown = ref<Boolean>(false);
 const showSettings = () => (settingsShown.value = !settingsShown.value);
+
+const loginInfo = ref<string[]>()
+if (localStorage) {
+  loginInfo.value = JSON.parse(localStorage.getItem("account_info")!)
+}
+
+watch(settingsShown, () => {
+  nextTick(() => {
+    let pfp = (document.querySelector("#profilePicture") as HTMLImageElement)
+    let settings = (document.querySelector("#settingsMenu") as HTMLDivElement)
+    let settingsPos = [settings.offsetTop, settings.offsetLeft]
+    
+    let settingsWidth = settings.clientWidth
+  
+    if (settingsShown) {
+      pfp.style.transform = 'scale(1)'
+      pfp.style.top = `${settingsPos[0]}px`
+      pfp.style.left = `${settingsPos[1]}px`
+    }
+    else {
+      
+      pfp.style.transform = ''
+      pfp.style.top = ''
+      pfp.style.left = ''
+    }
+  })
+})
+
 </script>
 
 <template>
@@ -38,12 +70,21 @@ const showSettings = () => (settingsShown.value = !settingsShown.value);
         }}</RouterLink
       >
     </section>
-    <img
+    <img v-if="!isLoggedIn"
       @click="showSettings()"
       src="../images/user.svg"
       alt=""
       class="px-1 w-10 h-10 button"
     />
-    <SetingsMenu v-if="settingsShown" />
+    <div v-else class="box-border w-8 h-8">
+      <img
+        @click="showSettings()"
+        alt=""
+        :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
+        class="absolute top-0 right-0 w-8 h-8 rounded-full border-2 border-white border-solid button"
+        id="profilePicture"
+      />
+    </div>
+    <SetingsMenu :username="loginInfo ? loginInfo[0] : '' " :is-logged-in="isLoggedIn" v-show="settingsShown" id="settingsMenu"/>
   </nav>
 </template>

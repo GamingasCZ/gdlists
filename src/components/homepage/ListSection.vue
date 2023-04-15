@@ -4,6 +4,7 @@ import { ref } from "vue";
 import type { FavoritedLevel, ListCreatorInfo, ListPreview } from "../../interfaces";
 import FavoritePreview from "../global/FavoritePreview.vue";
 import ListPreviewElement from "../global/ListPreview.vue";
+import cookier from "cookier";
 import { oldLists } from './officialLists'
 
 const props = defineProps({
@@ -23,7 +24,7 @@ const lists = ref<ListPreview[] | FavoritedLevel[]>();
 if (props.contentType?.startsWith("/")) {
   // link
   axios
-    .get(import.meta.env.VITE_API+"/php" + props.contentType)
+    .get(import.meta.env.VITE_API+"/php" + props.contentType, {headers: {Authorization: cookier('access_token').get()}})
     .then(
       (response: AxiosResponse) => {
         lists.value = response.data[0]

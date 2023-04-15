@@ -4,6 +4,7 @@ import ListPrevElement from "@/components/global/ListPreview.vue";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import FavoritePreview from "./FavoritePreview.vue";
+import cookier from "cookier"
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
@@ -101,7 +102,7 @@ function refreshBrowser() {
 &path=%2Fphp%2FgetLists.php
 &fetchAmount=${LISTS_ON_PAGE}
 &sort=0${fetchType}`
-    )
+    , {headers: {Authorization: cookier('access_token').get()}})
     .then((res: AxiosResponse) => {
       if (res.status != 200) {
         loadFailed.value = true;
