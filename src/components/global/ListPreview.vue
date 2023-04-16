@@ -65,16 +65,16 @@ const uploadDate = reactive(new Date(props.timestamp!));
 
 <template>
   <RouterLink
-    :to="id!"
+    :to="hidden != '0' ? hidden ?? id : id!"
     class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
     }"
     :class="{
-      '!border-dotted': hidden != 0,
-      '!border-white': hidden != 0,
-      '!border-opacity-40': hidden != 0
+      '!border-dotted': hidden != '0',
+      '!border-white': hidden != '0',
+      '!border-opacity-40': hidden != '0'
     }"
   >
     <section v-if="rate_ratio" class="flex flex-col items-center text-xs">

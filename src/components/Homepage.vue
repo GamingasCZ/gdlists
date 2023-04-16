@@ -12,23 +12,39 @@ defineProps({
 });
 
 const returnedFromLogin = ref<boolean>(false)
+const firstTimeUser = ref<boolean>(false)
 
 const returnfromLoginPFP = ref<string>('')
-onMounted(() => {
-  let loginCookie = cookier('logindata').get()
-  if (loginCookie != null) {
-    returnedFromLogin.value = true
-    
-    loginCookie = JSON.parse(loginCookie)
-    returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`
-    
-    cookier('logindata').remove()
+const returnfromLoginName = ref<string>('')
+let loginCookie = cookier('logindata').get()
+if (loginCookie != null) {
+  returnedFromLogin.value = true
+  
+  loginCookie = JSON.parse(loginCookie)
+  returnfromLoginName.value = loginCookie[0]
+
+  // first-time user
+  firstTimeUser.value = loginCookie[3]
+  if (!firstTimeUser) {
+    let loginToast = document.getElementById('loginToast')
+    loginToast?.classList.remove('-translate-y-16')
+    setTimeout(() => {
+      loginToast?.classList.add('-translate-y-16')
+      setTimeout(() => loginToast?.remove(), 500);
+    }, 2500);
   }
-})
+  
+  returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`
+  
+  cookier('logindata').remove()
+}
 </script>
 
 <template>
-  <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="returnedFromLogin" :pfplink="returnfromLoginPFP" />
+  <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="firstTimeUser && returnedFromLogin" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
+  <div id="loginToast" v-if="!firstTimeUser" class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
+    Vítej zpět, <b>{{ returnfromLoginName }}</b>!
+  </div>
 
   <header
     class="flex h-[256px] items-end justify-center bg-[url(../images/introGrad2.webp)] bg-center"

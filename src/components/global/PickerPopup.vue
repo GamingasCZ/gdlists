@@ -1,15 +1,29 @@
 <script setup lang="ts">
-import type { FavoritedLevel } from '@/interfaces';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
+import FavoriteBubble from "./FavoriteBubble.vue"
+import LevelBubble from "./LevelBubble.vue"
+import chroma from 'chroma-js';
 
 
 const emit = defineEmits(['closePopup', 'selectOption'])
 const props = defineProps<{
-    browserName: string
+    browserName: string,
+    pickerData: Object[] | string
+    pickerDataType: 'favoriteLevel' | 'level'
 }>()
 
-const data = ref<FavoritedLevel[]>(JSON.parse(localStorage.getItem('favorites')!))
-const filteredData = ref<FavoritedLevel[]>([])
+const bubbleType = ref<number>(['favoriteLevel', 'level'].indexOf(props.pickerDataType))
+const filteredData = ref<Object[]>([])
+const data = ref<Object[]>([])
+if (typeof props.pickerData == 'string') {
+  if (props.pickerData.startsWith('@')) {
+    data.value = JSON.parse(localStorage.getItem(props.pickerData.slice(1))!)
+  }
+}
+else {
+  data.value = props.pickerData
+}
+
 filteredData.value = data.value
 
 </script>
@@ -44,10 +58,7 @@ filteredData.value = data.value
             <img src="@/images/searchOpaque.svg" class="w-36">
             <h2>Nebyly nalezeny žádné levely!</h2>
           </div>
-        <button v-for="level in filteredData" :style="{backgroundColor: level.levelColor}" class="px-2 py-1 leading-4 text-left rounded-md button" @click="emit('selectOption', level)">
-            <h3 class="font-bold">{{ level.levelName }}</h3>
-            <h5 class="text-xs font-normal opacity-70">{{ level.creator }}</h5>
-        </button>
+        <component v-for="level in filteredData" @click="emit('selectOption', level)" :is="[FavoriteBubble, LevelBubble][bubbleType]" :data="level"/>
     </main>
     </section>
   </dialog>

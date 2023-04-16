@@ -5,6 +5,7 @@ export interface ListPreview {
   uploadDate: number;
   rate_ratio?: number;
   id?: number | string;
+  hidden?: string
 }
 
 export interface ListFetchResponse {

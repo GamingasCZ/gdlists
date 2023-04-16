@@ -1,0 +1,12 @@
+<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+ <g fill="#fff" stroke-width=".86313">
+  <g transform="matrix(1.1586 0 0 1.1586 -5.0148 -2.6486)">
+   <rect x="5.9204" y="2.7176" width="4.1805" height="4.1805" rx=".63202" ry=".63202" style="paint-order:stroke markers fill"/>
+   <path d="m11.193 11.487h-6.4327s-2.2e-6 -4.0281 3.2459-4.0471c3.1868-0.018667 3.1868 4.0471 3.1868 4.0471z" style="paint-order:stroke markers fill"/>
+  </g>
+  <g transform="matrix(1.1586 0 0 1.1586 2.5322 2.1914)">
+   <rect x="5.9204" y="2.7176" width="4.1805" height="4.1805" rx=".63202" ry=".63202" style="paint-order:stroke markers fill"/>
+   <path d="m11.193 11.487h-6.4327s-2.2e-6 -4.0281 3.2459-4.0471c3.1868-0.018667 3.1868 4.0471 3.1868 4.0471z" style="paint-order:stroke markers fill"/>
+  </g>
+ </g>
+</svg>

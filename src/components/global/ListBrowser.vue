@@ -165,7 +165,7 @@ watch(props, (newBrowser) => {
 </script>
 
 <template>
-  <section class="mx-auto w-[80rem] max-w-[95vw] translate-y-16 text-white">
+  <section class="mx-auto w-[80rem] max-w-[95vw] mt-4 text-white">
     <h2 class="text-3xl text-center">{{ browserName }}</h2>
 
     <main class="mt-3">

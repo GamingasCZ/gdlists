@@ -18,7 +18,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: "doListAction", action: 'sharePopup'): void;
+  (e: "doListAction", action: 'sharePopup' | 'jumpPopup'): void;
 }>();
 
 const rating = ref<[number, number, -2 | 0 | 1]>()
@@ -87,7 +87,7 @@ watch(toggleDescription, () => {
 
       <div class="flex gap-2">
         <button @click="emit('doListAction', 'sharePopup')" class="button align-middle p-1 py-0.5 max-sm:!p-2 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)]" ><img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/share.svg" alt=""><label class="max-sm:hidden">Sdílet</label></button>
-        <button class="button align-middle p-1 py-0.5 max-sm:!p-2 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)]" ><img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/jumpto.svg" alt=""><label class="max-sm:hidden">Skočit na</label></button>
+        <button @click="emit('doListAction', 'jumpPopup')" class="button align-middle p-1 py-0.5 max-sm:!p-2 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)]" ><img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/jumpto.svg" alt=""><label class="max-sm:hidden">Skočit na</label></button>
         <button class="button align-middle p-1 py-0.5 max-sm:!p-2 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)]" ><img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/pin.svg" alt=""><label class="max-sm:hidden">Připnout</label></button>
         <button class="button align-middle p-1 py-0.5 max-sm:!p-2 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)]" ><img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/edit.svg" alt=""><label class="max-sm:hidden">Upravit</label></button>
       </div>

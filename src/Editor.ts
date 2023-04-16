@@ -69,4 +69,6 @@ export const modifyListBG = (newColors: number[]) => {
     "--secondaryColor",
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
+
+  (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute("theme-color", chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex())
 };

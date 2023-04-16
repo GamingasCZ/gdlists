@@ -88,11 +88,13 @@ const addFromFavorites = (level: FavoritedLevel) => {
     browser-name="Uložené levely"
     @close-popup="favoriteLevelPickerOpen = false"
     @select-option="addFromFavorites($event)"
+    picker-data="@favorites"
+    picker-data-type="favoriteLevel"
   />
 
-  <h2 class="text-3xl text-center text-white translate-y-16" v-show="!previewingList">Editor</h2>
+  <h2 class="my-4 text-3xl text-center text-white" v-show="!previewingList">Editor</h2>
   <NotLoggedIn v-if="!isLoggedIn" mess="Pro vytvoření seznamu se prosím přihlaš!" />
-  <section v-show="previewingList" class="translate-y-16">
+  <section v-show="previewingList">
     <div class="flex relative justify-center items-center mx-5 text-white">
       <button @click="previewingList = false" class="absolute left-0 button">
         <img src="@/images/arrow-left.webp" class="w-12" alt="">
@@ -106,7 +108,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
   <form
     action="/editor"
     @submit.prevent
-    class="mx-auto flex w-[70rem] max-w-[95vw] translate-y-20 flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
+    class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
     v-show="!previewingList"
     v-if="isLoggedIn"
   >

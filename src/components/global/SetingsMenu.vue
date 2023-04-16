@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import LoginButton from "./LoginButton.vue";
+import cookier from "cookier"
 
 defineProps<{
   isLoggedIn: boolean
   username: string
 }>()
+
+function logout() {
+  cookier('access_token').remove()
+  localStorage.removeItem('account_info')
+  window.location.reload()
+}
 
 </script>
 
@@ -13,10 +20,10 @@ defineProps<{
   <div
     class="flex fixed right-2 top-12 flex-col gap-3 p-2 text-white rounded-md bg-greenGradient"
   >
-    <LoginButton v-if="!isLoggedIn" class="w-full" />
-    <section class="flex flex-col gap-1 justify-center items-center py-2 pt-10 w-36 bg-black bg-opacity-50 rounded-md" v-else>
+    <LoginButton v-if="!isLoggedIn" class="w-full"/>
+    <section class="flex flex-col gap-1 justify-center items-center py-2 pt-6 w-36 bg-black bg-opacity-50 rounded-md" v-else>
       <h1 class="font-bold">{{ username }}</h1>
-      <button class="px-2 py-1 bg-white bg-opacity-10 rounded-full button"><img src="@/images/logout.svg" class="inline mr-2 w-5" alt="">Odhlásit se</button>
+      <button class="px-2 py-1 bg-white bg-opacity-10 rounded-full button" @click="logout"><img src="@/images/logout.svg" class="inline mr-2 w-5" alt="">Odhlásit se</button>
     </section>
 
     <section

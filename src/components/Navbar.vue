@@ -25,15 +25,15 @@ watch(settingsShown, () => {
     let settingsWidth = settings.clientWidth
   
     if (settingsShown) {
-      pfp.style.transform = 'scale(1)'
-      pfp.style.top = `${settingsPos[0]}px`
-      pfp.style.left = `${settingsPos[1]}px`
+      pfp.style.transform = 'scale(2)'
+      pfp.style.top = `calc(${settingsPos[0]}px - 1rem)`
+      pfp.style.left = `calc(${settingsPos[1]+settingsWidth/2}px - 1rem)`
     }
     else {
       
       pfp.style.transform = ''
-      pfp.style.top = ''
-      pfp.style.left = ''
+      pfp.style.top = '0'
+      pfp.style.left = '0'
     }
   })
 })
@@ -42,7 +42,7 @@ watch(settingsShown, () => {
 
 <template>
   <nav
-    class="box-border flex fixed z-30 justify-between items-center px-2 w-full shadow-md bg-greenGradient shadow-black"
+    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-md bg-greenGradient shadow-black"
   >
     <RouterLink to="/"><Logo class="w-10 h-10 button" /></RouterLink>
     <section
@@ -81,7 +81,7 @@ watch(settingsShown, () => {
         @click="showSettings()"
         alt=""
         :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
-        class="absolute top-0 right-0 w-8 h-8 rounded-full border-2 border-white border-solid button"
+        class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid button"
         id="profilePicture"
       />
     </div>

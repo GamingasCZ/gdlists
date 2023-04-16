@@ -4,6 +4,7 @@ import type {
   ListFetchResponse,
   FavoritedLevel,
   ListPreview,
+Level,
 } from "@/interfaces";
 import LevelCard from "./global/LevelCard.vue";
 import SharePopup from "./global/SharePopup.vue";
@@ -11,9 +12,10 @@ import ListDescription from "./levelViewer/ListDescription.vue";
 import { ref, onMounted, watch, onUnmounted } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
+import PickerPopup from "./global/PickerPopup.vue";
 
 const props = defineProps({
-  listID: {type: String, required: true},
+  listID: {type: String, required: false},
   randomList: Boolean
 });
 
@@ -21,7 +23,7 @@ onUnmounted(() => {
   document.querySelector("#listBG")?.remove()
 })
 
-const PRIVATE_LIST: boolean = Boolean(props?.listID.match(/^\d+$/g))
+const PRIVATE_LIST: boolean = !props.randomList.valueOf || Boolean(props?.listID.match(/^\d+$/g))
 
 const favoritedIDs = ref<string[] | null>();
 
@@ -70,6 +72,7 @@ axios
         ).toString(),
         name: LIST_DATA.value?.name!,
         uploadDate: Date.now(),
+        hidden: '0'
       });
       if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1) // Gets sliced to 3 on homepage
       localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
@@ -91,28 +94,33 @@ axios
 const positionListBackground = () =>
   ["left", "center", "right"][LIST_DATA.value?.data?.titleImg[3]! ?? 1];
 
-const scrollToPosition = (pos: number) => {
-  // Scroll to card before to hopefully make it centered :)
-}
-const tryJumping = (ind: number) => {
+const tryJumping = (ind: number, forceJump = false) => {
   let isJumpingFromFaves = new URLSearchParams(window.location.search).get("goto")
-  if (isJumpingFromFaves && parseInt(isJumpingFromFaves) == ind) {
+  if (forceJump) {
+    isJumpingFromFaves = ind.toString()
+    jumpToPopupOpen.value = false
+  }
+
+  if ((isJumpingFromFaves) && parseInt(isJumpingFromFaves) == ind) {
     let jumpedToCard = document.querySelectorAll(".levelCard")
 
     if (parseInt(isJumpingFromFaves) > 1) {
       jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves) - 2)].scrollIntoView()
     }
-    jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))].style.animation = "flash 0.8s linear"
+    (jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement).style.animation = "flash 0.8s linear"
   }
 }
 
 const getURL = () => `${window.location.host}/${props.listID}`
 const sharePopupOpen = ref<boolean>(false)
+const jumpToPopupOpen = ref<boolean>(false)
 
 const listActions = (action: string) => {
   switch (action) {
     case 'sharePopup':
       sharePopupOpen.value = true; break;
+    case 'jumpPopup':
+      jumpToPopupOpen.value = true; break;
   }
 }
 
@@ -122,7 +130,7 @@ const listActions = (action: string) => {
   <div
     id="listBG"
     class="fixed left-0 top-[5%] h-full w-full bg-cover -z-10"
-    v-if="LIST_DATA?.data.titleImg != undefined && typeof LIST_DATA.data.titleImg != 'string'"
+    v-show="LIST_DATA?.data.titleImg != undefined && typeof LIST_DATA.data.titleImg != 'string'"
     :style="{
       backgroundPositionX: positionListBackground(),
       height: LIST_DATA?.data.titleImg[2] + '%',
@@ -145,11 +153,12 @@ const listActions = (action: string) => {
   </div>
 
   <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
+  <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen" picker-data-type="level" :picker-data="LIST_DATA?.data.levels!" @close-popup="jumpToPopupOpen = false" browser-name="Skočit na" />
 
-  <section class="text-white translate-y-20">
+  <section class="mt-12 text-white">
     <header>
       <div class=""></div>
-      <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID" class="mb-8"/>
+      <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID!" class="mb-8"/>
     </header>
     <main class="flex flex-col gap-4">
       <LevelCard
