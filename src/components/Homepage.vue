@@ -5,45 +5,55 @@ import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
 import { onMounted, ref } from "vue";
 
-document.title = "GD Seznamy"
+document.title = "GD Seznamy";
 
 defineProps({
   isLoggedIn: Boolean,
 });
 
-const returnedFromLogin = ref<boolean>(false)
-const firstTimeUser = ref<boolean>(false)
+const returnedFromLogin = ref<boolean>(false);
+const firstTimeUser = ref<boolean>(false);
 
-const returnfromLoginPFP = ref<string>('')
-const returnfromLoginName = ref<string>('')
-let loginCookie = cookier('logindata').get()
+const returnfromLoginPFP = ref<string>("");
+const returnfromLoginName = ref<string>("");
+let loginCookie = cookier("logindata").get();
 if (loginCookie != null) {
-  returnedFromLogin.value = true
-  
-  loginCookie = JSON.parse(loginCookie)
-  returnfromLoginName.value = loginCookie[0]
+  returnedFromLogin.value = true;
+
+  loginCookie = JSON.parse(loginCookie);
+  returnfromLoginName.value = loginCookie[0];
 
   // first-time user
-  firstTimeUser.value = loginCookie[3]
+  firstTimeUser.value = loginCookie[3];
   if (!firstTimeUser) {
-    let loginToast = document.getElementById('loginToast')
-    loginToast?.classList.remove('-translate-y-16')
+    let loginToast = document.getElementById("loginToast");
+    loginToast?.classList.remove("-translate-y-16");
     setTimeout(() => {
-      loginToast?.classList.add('-translate-y-16')
+      loginToast?.classList.add("-translate-y-16");
       setTimeout(() => loginToast?.remove(), 500);
     }, 2500);
   }
-  
-  returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`
-  
-  cookier('logindata').remove()
+
+  returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`;
+
+  cookier("logindata").remove();
 }
 </script>
 
 <template>
-  <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="firstTimeUser && returnedFromLogin" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
-  <div id="loginToast" v-if="!firstTimeUser" class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
-    Vítej zpět, <b>{{ returnfromLoginName }}</b>!
+  <LoggedInPopup
+    @close-popup="returnedFromLogin = false"
+    v-if="firstTimeUser && returnedFromLogin"
+    :username="returnfromLoginName"
+    :pfplink="returnfromLoginPFP"
+  />
+  <div
+    id="loginToast"
+    v-if="!firstTimeUser"
+    class="absolute top-16 left-1/2 -translate-x-1/2 -translate-y-16 rounded-md bg-black bg-opacity-80 p-2 px-6 text-xl text-white transition-transform duration-75"
+  >
+    Vítej zpět, <b>{{ returnfromLoginName }}</b
+    >!
   </div>
 
   <header
@@ -52,7 +62,7 @@ if (loginCookie != null) {
     <form
       action="./browse"
       method="get"
-      class="flex gap-2 items-center text-white translate-y-1/2"
+      class="flex translate-y-1/2 items-center gap-2 text-white"
     >
       <input
         type="text"
@@ -64,15 +74,15 @@ if (loginCookie != null) {
         <img
           src="../images/searchOpaque.svg"
           alt=""
-          class="p-2 rounded-full button bg-greenGradient"
+          class="button rounded-full bg-greenGradient p-2"
         />
       </button>
     </form>
   </header>
-  <div class="flex gap-2 justify-center pt-8 text-base text-white">
+  <div class="flex justify-center gap-2 pt-8 text-base text-white">
     <RouterLink to="/editor">
       <button
-        class="flex gap-4 items-center px-2 py-3 rounded-md button bg-lof-300"
+        class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3"
       >
         <img src="../images/plus.svg" alt="" class="w-6" />{{
           $t("homepage.createList")
@@ -81,7 +91,7 @@ if (loginCookie != null) {
     </RouterLink>
     <RouterLink to="/random">
       <button
-        class="flex gap-4 items-center px-2 py-3 rounded-md button bg-lof-300 sm:mr-14"
+        class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3 sm:mr-14"
       >
         <img src="../images/dice.svg" alt="" class="w-6" />{{
           $t("homepage.tryLuck")
@@ -93,7 +103,7 @@ if (loginCookie != null) {
   <section class="flex justify-center">
     <div
       v-if="!isLoggedIn"
-      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient"
+      class="mx-4 mt-6 flex max-w-4xl items-center justify-center gap-3 rounded-md bg-greenGradient px-2 py-1 text-white"
     >
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
@@ -111,8 +121,8 @@ if (loginCookie != null) {
     :empty-text="$t('homepage.listsUnavailable')"
     extra-action="/browse"
     content-type="/getLists.php?homepage=1"
-    />
-    
+  />
+
   <ListSection
     :header-name="$t('homepage.pinned')"
     :empty-text="$t('homepage.noListsPinned')"

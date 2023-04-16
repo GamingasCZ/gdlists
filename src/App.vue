@@ -9,25 +9,37 @@ if (localStorage) {
   localStorage.getItem("favoriteIDs") ??
     localStorage.setItem("favoriteIDs", "[]");
   localStorage.getItem("favorites") ?? localStorage.setItem("favorites", "[]");
-  localStorage.getItem("pinnedLists") ?? localStorage.setItem("pinnedLists", "[]");
-  localStorage.getItem("account_info") ?? localStorage.setItem("pinnedLists", "[]");
+  localStorage.getItem("pinnedLists") ??
+    localStorage.setItem("pinnedLists", "[]");
+  localStorage.getItem("account_info") ??
+    localStorage.setItem("pinnedLists", "[]");
   localStorage.getItem("recentlyViewed") ??
     localStorage.setItem("recentlyViewed", "[]");
 }
 
-const loggedIn = ref<boolean>(false)
+const loggedIn = ref<boolean>(false);
 onMounted(() => {
-  axios.get(import.meta.env.VITE_API + "/php/accounts.php?check", {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    loggedIn.value = res.data.status == "logged_in"
-    if (res.data.status == "logged_in") {
-      localStorage.setItem("account_info", JSON.stringify([res.data.account_name, res.data.account_id, res.data.pfp_hash]))
-    }
-    else {
-      localStorage.removeItem("account_info")
-    }
-  }).catch(() => localStorage.removeItem("account_info"))
-})
-
+  axios
+    .get(import.meta.env.VITE_API + "/php/accounts.php?check", {
+      headers: { Authorization: cookier("access_token").get() },
+    })
+    .then((res: AxiosResponse) => {
+      loggedIn.value = res.data.status == "logged_in";
+      if (res.data.status == "logged_in") {
+        localStorage.setItem(
+          "account_info",
+          JSON.stringify([
+            res.data.account_name,
+            res.data.account_id,
+            res.data.pfp_hash,
+          ])
+        );
+      } else {
+        localStorage.removeItem("account_info");
+      }
+    })
+    .catch(() => localStorage.removeItem("account_info"));
+});
 </script>
 
 <template>

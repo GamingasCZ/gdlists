@@ -6,10 +6,10 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="p-1.5 text-xs bg-black bg-opacity-40 rounded-full sm:text-sm">
+  <div class="rounded-full bg-black bg-opacity-40 p-1.5 text-xs sm:text-sm">
     <img
       :src="`/src/images/badges/${tag[0]}.svg`"
-      class="inline mr-2 w-3 align-middle sm:w-6"
+      class="mr-2 inline w-3 align-middle sm:w-6"
       alt=""
     />
     <a

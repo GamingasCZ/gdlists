@@ -38,7 +38,7 @@ const router = createRouter({
       name: "random",
       props: (route) => ({ randomList: true }),
       component: () => import("@/components/ListView.vue"),
-    }
+    },
   ],
 });
 
@@ -46,17 +46,19 @@ router.beforeEach(() => {
   document.documentElement.style.setProperty("--siteBackground", "");
 
   if (
-    getComputedStyle(document.documentElement).getPropertyValue("--primaryColor") == document.documentElement.style.getPropertyValue("--primaryColor")
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--primaryColor"
+    ) == document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
-    document.querySelector("nav")?.classList.add("slidingNavbar")
+    document.querySelector("nav")?.classList.add("slidingNavbar");
 
     setTimeout(() => {
       document.documentElement.style.setProperty("--primaryColor", "");
       document.documentElement.style.setProperty("--secondaryColor", "");
-    }, 150)
+    }, 150);
 
     setTimeout(() => {
-      document.querySelector("nav")?.classList.remove("slidingNavbar")
+      document.querySelector("nav")?.classList.remove("slidingNavbar");
     }, 300);
   }
 });

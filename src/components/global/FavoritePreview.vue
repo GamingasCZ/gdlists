@@ -4,7 +4,7 @@ import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
-const emit = defineEmits(['removeLevel'])
+const emit = defineEmits(["removeLevel"]);
 const props = defineProps({
   levelName: String,
   creator: String,
@@ -14,16 +14,16 @@ const props = defineProps({
   listName: String,
   listPosition: Number,
   timeAdded: Number,
-  hideRemove: {type: Boolean, default: false},
+  hideRemove: { type: Boolean, default: false },
 
-  userArray: String
+  userArray: String,
 });
 
 const listColor = ref<Color>(chroma(props.levelColor!));
 
-watch(props, newProps => {
-  listColor.value = chroma(props.levelColor!)
-})
+watch(props, (newProps) => {
+  listColor.value = chroma(props.levelColor!);
+});
 
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
@@ -41,7 +41,6 @@ const getGradient = () =>
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
 const uploadDate = reactive(new Date(props.timeAdded!));
-
 </script>
 
 <template>
@@ -53,14 +52,14 @@ const uploadDate = reactive(new Date(props.timeAdded!));
       borderColor: listColor.darken(2).hex(),
     }"
   >
-    <section class="flex flex-col gap-1 items-center">
+    <section class="flex flex-col items-center gap-1">
       <div
         v-if="timeAdded"
         class="flex gap-1 text-xs hover:cursor-help"
         :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`"
       >
         <img src="../../images/time.svg" alt="" class="w-4" />{{
-          parseElapsed(Date.now()/1000 - timeAdded/1000)
+          parseElapsed(Date.now() / 1000 - timeAdded / 1000)
         }}
       </div>
     </section>
@@ -70,8 +69,12 @@ const uploadDate = reactive(new Date(props.timeAdded!));
       <p class="text-xs">- {{ creator }} -</p>
     </section>
 
-    <button v-if="!hideRemove" class="box-border p-2 ml-auto w-10 bg-black bg-opacity-40 rounded-full button" @click.stop.prevent="emit('removeLevel', levelID)">
-      <img src="@/images/trash.svg" class="w-7" alt="">
+    <button
+      v-if="!hideRemove"
+      class="button ml-auto box-border w-10 rounded-full bg-black bg-opacity-40 p-2"
+      @click.stop.prevent="emit('removeLevel', levelID)"
+    >
+      <img src="@/images/trash.svg" class="w-7" alt="" />
     </button>
   </RouterLink>
 </template>

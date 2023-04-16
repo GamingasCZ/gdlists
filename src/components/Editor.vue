@@ -13,11 +13,11 @@ import type { FavoritedLevel, Level } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
 
-document.title = "Editor | GD Seznamy"
+document.title = "Editor | GD Seznamy";
 
 defineProps<{
-  isLoggedIn: boolean
-}>()
+  isLoggedIn: boolean;
+}>();
 
 const nice = () => {
   console.log(levelList.value);
@@ -28,30 +28,31 @@ const BGpickerPopupOpen = ref<boolean>(false);
 const bgColorPickerOpen = ref<boolean>(false);
 const descriptionEditorOpen = ref<boolean>(false);
 const favoriteLevelPickerOpen = ref<boolean>(false);
-const previewingList = ref<boolean>(false)
+const previewingList = ref<boolean>(false);
 
 const startAddLevel = () => {
-  addLevel(null)
-  currentlyOpenedCard.value = levelList.value.levels.length-1
-}
+  addLevel(null);
+  currentlyOpenedCard.value = levelList.value.levels.length - 1;
+};
 
-const updatingPositions = ref<number>(-1)
+const updatingPositions = ref<number>(-1);
 const updateOpenedCard = (newPos: number) => {
-  currentlyOpenedCard.value = newPos
-  if (newPos == -1) updatingPositions.value = currentlyOpenedCard.value
-}
+  currentlyOpenedCard.value = newPos;
+  if (newPos == -1) updatingPositions.value = currentlyOpenedCard.value;
+};
 
-let oldOpenedPos = 0
+let oldOpenedPos = 0;
 const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
-  if (pos == -1) { // Reset
-    updatingPositions.value = -1
-    currentlyOpenedCard.value = nowOpenedIndex
-    return
+  if (pos == -1) {
+    // Reset
+    updatingPositions.value = -1;
+    currentlyOpenedCard.value = nowOpenedIndex;
+    return;
   }
-  updatingPositions.value = currentlyOpenedCard.value
-  oldOpenedPos = currentlyOpenedCard.value
-  currentlyOpenedCard.value = -1
-}
+  updatingPositions.value = currentlyOpenedCard.value;
+  oldOpenedPos = currentlyOpenedCard.value;
+  currentlyOpenedCard.value = -1;
+};
 
 const addFromFavorites = (level: FavoritedLevel) => {
   let addedLevel: Level = {
@@ -60,12 +61,11 @@ const addFromFavorites = (level: FavoritedLevel) => {
     color: chroma(level.levelColor).hsv(),
     levelID: level.levelID,
     video: null,
-    difficulty: [0,0],
-    tags: []
-}
-  addLevel(addedLevel)
-}
-
+    difficulty: [0, 0],
+    tags: [],
+  };
+  addLevel(addedLevel);
+};
 </script>
 
 <template>
@@ -92,17 +92,27 @@ const addFromFavorites = (level: FavoritedLevel) => {
     picker-data-type="favoriteLevel"
   />
 
-  <h2 class="my-4 text-3xl text-center text-white" v-show="!previewingList">Editor</h2>
-  <NotLoggedIn v-if="!isLoggedIn" mess="Pro vytvoření seznamu se prosím přihlaš!" />
+  <h2 class="my-4 text-center text-3xl text-white" v-show="!previewingList">
+    Editor
+  </h2>
+  <NotLoggedIn
+    v-if="!isLoggedIn"
+    mess="Pro vytvoření seznamu se prosím přihlaš!"
+  />
   <section v-show="previewingList">
-    <div class="flex relative justify-center items-center mx-5 text-white">
-      <button @click="previewingList = false" class="absolute left-0 button">
-        <img src="@/images/arrow-left.webp" class="w-12" alt="">
+    <div class="relative mx-5 flex items-center justify-center text-white">
+      <button @click="previewingList = false" class="button absolute left-0">
+        <img src="@/images/arrow-left.webp" class="w-12" alt="" />
       </button>
-      <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
+      <h1 class="text-center text-3xl text-white">Náhled seznamu</h1>
     </div>
-    <div class="flex flex-col gap-3 mt-12">
-      <LevelCard v-for="level in levelList.levels" v-bind="level" :disable-stars="true" :translucent-card="levelList.translucent" />
+    <div class="mt-12 flex flex-col gap-3">
+      <LevelCard
+        v-for="level in levelList.levels"
+        v-bind="level"
+        :disable-stars="true"
+        :translucent-card="levelList.translucent"
+      />
     </div>
   </section>
   <form
@@ -113,25 +123,25 @@ const addFromFavorites = (level: FavoritedLevel) => {
     v-if="isLoggedIn"
   >
     <div
-      class="my-2 grid w-full sm:-mr-10 grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3"
+      class="my-2 grid w-full grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3 sm:-mr-10"
     >
       <input
         autocomplete="off"
         type="text"
         placeholder="Jméno seznamu"
-        class="px-2 w-[77vw] max-w-[20em] h-8 bg-white bg-opacity-5 rounded-md placeholder:text-lg"
+        class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
       />
       <div></div>
       <textarea
         autocomplete="off"
         type="text"
         placeholder="Popis seznamu"
-        class="px-2 w-[77vw] max-w-[20em] h-16 bg-white bg-opacity-5 rounded-md resize-none placeholder:text-lg"
+        class="h-16 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         v-model="levelList.description"
       ></textarea>
       <button type="button">
         <img
-          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
+          class="button w-8 rounded-full bg-black bg-opacity-50 p-1.5"
           src="../images/fullscreen.svg"
           alt=""
           @click="descriptionEditorOpen = true"
@@ -146,7 +156,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       />
       <button type="button">
         <img
-          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
+          class="button w-8 rounded-full bg-black bg-opacity-50 p-1.5"
           src="../images/gear.svg"
           alt=""
           @click="BGpickerPopupOpen = true"
@@ -154,11 +164,11 @@ const addFromFavorites = (level: FavoritedLevel) => {
       </button>
     </div>
 
-    <div class="flex gap-2 items-center my-1">
+    <div class="my-1 flex items-center gap-2">
       <span>Barva pozadí:</span>
       <button
         type="button"
-        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focusOutline button"
+        class="focusOutline button box-border flex h-8 w-8 items-center justify-center rounded-md border-2 border-white"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
@@ -167,34 +177,34 @@ const addFromFavorites = (level: FavoritedLevel) => {
 
     <div
       v-show="bgColorPickerOpen"
-      class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
+      class="my-2 w-9/12 rounded-md bg-black bg-opacity-40 px-3 py-2"
     >
       <ColorPicker @colors-modified="modifyListBG" />
     </div>
 
     <header
-      class="flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2 sticky -top-8 z-10"
+      class="sticky -top-8 z-10 flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2"
       id="editorHeader"
     >
       <span class="text-2xl font-black">Levely</span>
-      <div class="box-border flex gap-3 mt-2">
+      <div class="mt-2 box-border flex gap-3">
         <button type="button" @click="previewingList = true">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
+            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
             src="../images/preview.svg"
             alt=""
           />
         </button>
         <button type="button" @click="favoriteLevelPickerOpen = true">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
+            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
             src="../images/addfromFaves.svg"
             alt=""
           />
         </button>
         <button type="button" @click="startAddLevel()">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
+            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
             src="../images/addLevel.svg"
             alt=""
           />
@@ -208,7 +218,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <h2 v-if="!levelList.levels.length" class="mt-4">
         Kliknutím na
         <img
-          class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-full"
+          class="mx-2 inline w-10 rounded-full bg-black bg-opacity-50 p-1"
           src="../images/addLevel.svg"
         />
         přidáš level!
@@ -230,7 +240,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
     <ListSettings />
     <button
       type="submit"
-      class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
+      class="button mt-3 flex items-center gap-2 rounded-md bg-lof-400 px-3 py-2 font-black text-black"
     >
       <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
     </button>

@@ -4,7 +4,7 @@ import type {
   ListFetchResponse,
   FavoritedLevel,
   ListPreview,
-Level,
+  Level,
 } from "@/interfaces";
 import LevelCard from "./global/LevelCard.vue";
 import SharePopup from "./global/SharePopup.vue";
@@ -15,15 +15,16 @@ import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
 
 const props = defineProps({
-  listID: {type: String, required: false},
-  randomList: Boolean
+  listID: { type: String, required: false },
+  randomList: Boolean,
 });
 
 onUnmounted(() => {
-  document.querySelector("#listBG")?.remove()
-})
+  document.querySelector("#listBG")?.remove();
+});
 
-const PRIVATE_LIST: boolean = !props.randomList.valueOf || Boolean(props?.listID.match(/^\d+$/g))
+const PRIVATE_LIST: boolean =
+  !props.randomList.valueOf || Boolean(props?.listID.match(/^\d+$/g));
 
 const favoritedIDs = ref<string[] | null>();
 
@@ -43,15 +44,15 @@ const LIST_DATA = ref<ListFetchResponse>();
 const LIST_CREATOR = ref<string>("");
 const LIST_COL = ref<number[]>([0, 0, 0]);
 
-let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`
-if (props.randomList) listURL = "random"
+let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
+if (props.randomList) listURL = "random";
 
 axios
-  .get(import.meta.env.VITE_API+"/php/getLists.php?"+listURL)
+  .get(import.meta.env.VITE_API + "/php/getLists.php?" + listURL)
   .then((res: AxiosResponse) => {
     LIST_DATA.value = res.data[0];
-    LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username
-    
+    LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
+
     // Use new levelList structure (put levels into 'levels' array)
     if (!LIST_DATA.value?.data.levels) {
       LIST_DATA.value!.data.levels = [];
@@ -72,65 +73,80 @@ axios
         ).toString(),
         name: LIST_DATA.value?.name!,
         uploadDate: Date.now(),
-        hidden: '0'
+        hidden: "0",
       });
-      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1) // Gets sliced to 3 on homepage
+      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
       localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
-
     }
 
-    document.title = `${LIST_DATA.value?.name} | GD Seznamy` 
+    document.title = `${LIST_DATA.value?.name} | GD Seznamy`;
 
     // Set list colors
     let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;
-    LIST_COL.value = typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
-    if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]) ) modifyListBG(LIST_COL.value);
+    LIST_COL.value =
+      typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
+    if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
+      modifyListBG(LIST_COL.value);
 
     // Set list background image
     let listBG = LIST_DATA.value?.data?.titleImg!;
-    (document.querySelector("#listBG") as HTMLDivElement).style.backgroundImage = `url('${typeof listBG == "string" ? listBG : listBG[0] ?? ""}')`;
+    (
+      document.querySelector("#listBG") as HTMLDivElement
+    ).style.backgroundImage = `url('${
+      typeof listBG == "string" ? listBG : listBG[0] ?? ""
+    }')`;
   });
 
 const positionListBackground = () =>
   ["left", "center", "right"][LIST_DATA.value?.data?.titleImg[3]! ?? 1];
 
 const tryJumping = (ind: number, forceJump = false) => {
-  let isJumpingFromFaves = new URLSearchParams(window.location.search).get("goto")
+  let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
+    "goto"
+  );
   if (forceJump) {
-    isJumpingFromFaves = ind.toString()
-    jumpToPopupOpen.value = false
+    isJumpingFromFaves = ind.toString();
+    jumpToPopupOpen.value = false;
   }
 
-  if ((isJumpingFromFaves) && parseInt(isJumpingFromFaves) == ind) {
-    let jumpedToCard = document.querySelectorAll(".levelCard")
+  if (isJumpingFromFaves && parseInt(isJumpingFromFaves) == ind) {
+    let jumpedToCard = document.querySelectorAll(".levelCard");
 
     if (parseInt(isJumpingFromFaves) > 1) {
-      jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves) - 2)].scrollIntoView()
+      jumpedToCard[
+        Math.max(0, parseInt(isJumpingFromFaves) - 2)
+      ].scrollIntoView();
     }
-    (jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement).style.animation = "flash 0.8s linear"
+    (
+      jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
+    ).style.animation = "flash 0.8s linear";
   }
-}
+};
 
-const getURL = () => `${window.location.host}/${props.listID}`
-const sharePopupOpen = ref<boolean>(false)
-const jumpToPopupOpen = ref<boolean>(false)
+const getURL = () => `${window.location.host}/${props.listID}`;
+const sharePopupOpen = ref<boolean>(false);
+const jumpToPopupOpen = ref<boolean>(false);
 
 const listActions = (action: string) => {
   switch (action) {
-    case 'sharePopup':
-      sharePopupOpen.value = true; break;
-    case 'jumpPopup':
-      jumpToPopupOpen.value = true; break;
+    case "sharePopup":
+      sharePopupOpen.value = true;
+      break;
+    case "jumpPopup":
+      jumpToPopupOpen.value = true;
+      break;
   }
-}
-
+};
 </script>
 
 <template>
   <div
     id="listBG"
-    class="fixed left-0 top-[5%] h-full w-full bg-cover -z-10"
-    v-show="LIST_DATA?.data.titleImg != undefined && typeof LIST_DATA.data.titleImg != 'string'"
+    class="fixed left-0 top-[5%] -z-10 h-full w-full bg-cover"
+    v-show="
+      LIST_DATA?.data.titleImg != undefined &&
+      typeof LIST_DATA.data.titleImg != 'string'
+    "
     :style="{
       backgroundPositionX: positionListBackground(),
       height: LIST_DATA?.data.titleImg[2] + '%',
@@ -148,17 +164,34 @@ const listActions = (action: string) => {
           )
         ).hex()}, transparent)`,
       }"
-      class="absolute w-full h-full"
+      class="absolute h-full w-full"
     ></div>
   </div>
 
-  <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
-  <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen" picker-data-type="level" :picker-data="LIST_DATA?.data.levels!" @close-popup="jumpToPopupOpen = false" browser-name="Skočit na" />
+  <SharePopup
+    v-show="sharePopupOpen"
+    @close-popup="sharePopupOpen = false"
+    :share-text="getURL()"
+  />
+  <PickerPopup
+    @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)"
+    v-show="jumpToPopupOpen"
+    picker-data-type="level"
+    :picker-data="LIST_DATA?.data.levels!"
+    @close-popup="jumpToPopupOpen = false"
+    browser-name="Skočit na"
+  />
 
   <section class="mt-12 text-white">
     <header>
       <div class=""></div>
-      <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :id="listID!" class="mb-8"/>
+      <ListDescription
+        @do-list-action="listActions"
+        v-bind="LIST_DATA"
+        :creator="LIST_CREATOR"
+        :id="listID!"
+        class="mb-8"
+      />
     </header>
     <main class="flex flex-col gap-4">
       <LevelCard

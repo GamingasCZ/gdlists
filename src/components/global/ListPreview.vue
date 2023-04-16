@@ -5,18 +5,18 @@ import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
 const props = defineProps<{
-  rate_ratio: string
-  views: number
-  timestamp: number
-  name: string
-  creator: string
-  id: string
-  index: number
-  diffGuesser: 0 | 1
-  uid: string
-  hidden: string
-  
-  userArray: ListCreatorInfo[]
+  rate_ratio: string;
+  views: number;
+  timestamp: number;
+  name: string;
+  creator: string;
+  id: string;
+  index: number;
+  diffGuesser: 0 | 1;
+  uid: string;
+  hidden: string;
+
+  userArray: ListCreatorInfo[];
 }>();
 
 const makeColor = () =>
@@ -34,9 +34,9 @@ const makeColor = () =>
 
 const listColor = ref<Color>(makeColor());
 
-watch(props, newProps => {
-  listColor.value = makeColor()
-})
+watch(props, (newProps) => {
+  listColor.value = makeColor();
+});
 
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
@@ -49,9 +49,11 @@ function parseElapsed(secs: number) {
 }
 
 function getUsername() {
-  let listCreator: string = ""
-  props.userArray.forEach(user => {if (props.uid == user.discord_id) listCreator = user.username})
-  return listCreator
+  let listCreator: string = "";
+  props.userArray.forEach((user) => {
+    if (props.uid == user.discord_id) listCreator = user.username;
+  });
+  return listCreator;
 }
 
 const getGradient = () =>
@@ -60,7 +62,6 @@ const getGradient = () =>
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
 const uploadDate = reactive(new Date(props.timestamp!));
-
 </script>
 
 <template>
@@ -74,7 +75,7 @@ const uploadDate = reactive(new Date(props.timestamp!));
     :class="{
       '!border-dotted': hidden != '0',
       '!border-white': hidden != '0',
-      '!border-opacity-40': hidden != '0'
+      '!border-opacity-40': hidden != '0',
     }"
   >
     <section v-if="rate_ratio" class="flex flex-col items-center text-xs">
@@ -83,7 +84,7 @@ const uploadDate = reactive(new Date(props.timestamp!));
       }}
     </section>
 
-    <section class="flex flex-col gap-1 items-center">
+    <section class="flex flex-col items-center gap-1">
       <div v-if="views" class="flex gap-1 text-xs">
         <img src="../../images/view.svg" alt="" class="w-4" />{{ views }}
       </div>

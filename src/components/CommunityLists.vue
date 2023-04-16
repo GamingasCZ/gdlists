@@ -4,10 +4,14 @@ import ListBrowser from "./global/ListBrowser.vue";
 
 defineProps({ query: String });
 
-const browser = ref<'' | 'user' | 'hidden'>('')
-
+const browser = ref<"" | "user" | "hidden">("");
 </script>
 
 <template>
-  <ListBrowser online-browser :search="query" :online-type="browser" @switch-browser="browser = $event"/>
+  <ListBrowser
+    online-browser
+    :search="query"
+    :online-type="browser"
+    @switch-browser="browser = $event"
+  />
 </template>

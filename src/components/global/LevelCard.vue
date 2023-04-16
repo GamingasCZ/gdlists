@@ -56,42 +56,54 @@ const doFavoriteLevel = () => {
   isFavorited.value = !isFavorited.value;
 };
 
-const CARD_COL = ref<Color>()
+const CARD_COL = ref<Color>();
 
 // Old lists may have broken colors!! (damn you, old Gamingas :D)
-try {CARD_COL.value = chroma(props.color)}
-catch (e) {CARD_COL.value = chroma.random()}
-
+try {
+  CARD_COL.value = chroma(props.color);
+} catch (e) {
+  CARD_COL.value = chroma.random();
+}
 </script>
 
 <template>
   <section
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white backdrop-blur-md shadow-[color:#0000008F] shadow-lg"
+    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F] backdrop-blur-md"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
   >
-    <main class="flex justify-between items-center max-sm:flex-col">
+    <main class="flex items-center justify-between max-sm:flex-col">
       <div>
         <header class="flex items-center">
           <!-- Level difficulty -->
-          <div class="relative m-1 mr-0.5 ml-0" v-if="difficulty" :class="{'!mx-2': difficulty[1] > 0}">
-          <img
+          <div
+            class="relative m-1 mr-0.5 ml-0"
+            v-if="difficulty"
+            :class="{ '!mx-2': difficulty[1] > 0 }"
+          >
+            <img
               class="z-10 w-10"
               :src="`/public/faces/${difficulty[0]}.webp`"
-              :class="{'scale-[1.3]': difficulty[0] > 5}"
+              :class="{ 'scale-[1.3]': difficulty[0] > 5 }"
               alt=""
             />
-            <img v-if="difficulty[1] == 2"
-              class="absolute top-0 w-full scale-[1.4] -z-10"
-              :class="{'!scale-[1.7] !-top-0.5': difficulty[0] > 5, '!scale-[1.48] !-top-0.5': difficulty[0] == 10}"
+            <img
+              v-if="difficulty[1] == 2"
+              class="absolute top-0 -z-10 w-full scale-[1.4]"
+              :class="{
+                '!-top-0.5 !scale-[1.7]': difficulty[0] > 5,
+                '!-top-0.5 !scale-[1.48]': difficulty[0] == 10,
+              }"
               :src="`/public/faces/featured.webp`"
               alt=""
             />
-            <img v-else-if="difficulty[1] == 3"
-              class="absolute -top-1 w-full scale-[1.6] -z-10"
+            <img
+              v-else-if="difficulty[1] == 3"
+              class="absolute -top-1 -z-10 w-full scale-[1.6]"
               :src="`/public/faces/epic.webp`"
               alt=""
             />
-            <img v-else-if="difficulty[1] == 1"
+            <img
+              v-else-if="difficulty[1] == 1"
               class="absolute -right-0 -bottom-0 z-20 w-4 scale-150"
               :src="`/public/faces/star.webp`"
               alt=""
@@ -99,13 +111,14 @@ catch (e) {CARD_COL.value = chroma.random()}
           </div>
 
           <!-- Level name -->
-          <h2 class="ml-2 text-3xl font-black">{{ levelName || 'Bezejmenný' }}</h2>
-
+          <h2 class="ml-2 text-3xl font-black">
+            {{ levelName || "Bezejmenný" }}
+          </h2>
         </header>
       </div>
 
       <!-- Card links -->
-      <div class="flex gap-1.5 sm:mr-10 max-sm:my-2">
+      <div class="flex gap-1.5 max-sm:my-2 sm:mr-10">
         <button class="button" v-if="video">
           <a :href="`https://youtu.be/${video}`"
             ><img class="w-14 max-sm:w-10" src="@/images/modYT.svg" alt=""
@@ -120,12 +133,11 @@ catch (e) {CARD_COL.value = chroma.random()}
           <img class="w-14 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
-      
     </main>
 
     <!-- Favorite star -->
     <button
-      class="absolute top-1 right-1 button"
+      class="button absolute top-1 right-1"
       @click="doFavoriteLevel"
       :class="{ disabled: isFavorited }"
       v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars"
@@ -134,11 +146,11 @@ catch (e) {CARD_COL.value = chroma.random()}
     </button>
 
     <!-- Level creator -->
-    <h3 v-if="typeof creator == 'string'">{{ creator || 'Bezejmenný' }}</h3>
+    <h3 v-if="typeof creator == 'string'">{{ creator || "Bezejmenný" }}</h3>
     <CollabPreview v-if="typeof creator == 'object'" :collab="creator" />
 
     <!-- Level Tags -->
-    <section class="flex flex-wrap gap-2 mt-2">
+    <section class="mt-2 flex flex-wrap gap-2">
       <Tag v-for="tag in tags" :tag="tag" />
     </section>
   </section>

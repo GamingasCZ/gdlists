@@ -17,11 +17,18 @@ export function addLevel(values: Level | null) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
     creator: values?.creator ?? "",
-    color: values?.color ?? chroma(Math.floor(Math.random() * 360), 1, Math.random() / 2, 'hsv').hsv(),
+    color:
+      values?.color ??
+      chroma(
+        Math.floor(Math.random() * 360),
+        1,
+        Math.random() / 2,
+        "hsv"
+      ).hsv(),
     levelID: values?.levelID ?? "",
     video: values?.video ?? "",
     difficulty: values?.difficulty ?? [0, 0],
-    tags: values?.tags ?? []
+    tags: values?.tags ?? [],
   };
 
   levelList.value.levels.push(levelInfo);
@@ -70,5 +77,8 @@ export const modifyListBG = (newColors: number[]) => {
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
 
-  (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute("theme-color", chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex())
+  (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute(
+    "theme-color",
+    chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
+  );
 };
