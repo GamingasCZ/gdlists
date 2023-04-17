@@ -20,6 +20,7 @@ const props = defineProps({
   contentType: { type: String },
   listType: { type: Number, default: 0 },
   randomizeContent: { type: Boolean, default: false },
+  maxItems: {type: Number, default: 3}
 });
 
 const users = ref<ListCreatorInfo[]>();
@@ -39,10 +40,10 @@ if (props.contentType?.startsWith("/")) {
   let data: any[] = JSON.parse(
     localStorage.getItem(props.contentType.slice(1))!
   );
-  if (props.randomizeContent)
+  if (props?.randomizeContent)
     data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
 
-  lists.value = data.slice(0, 3);
+  lists.value = data.slice(0, props.maxItems);
 } else if (props.contentType == "oldLists") {
   lists.value = oldLists;
 } else {
@@ -66,7 +67,7 @@ const clearViewed = () => {
 
 <template>
   <section class="mt-6 ml-4">
-    <div class="flex items-center gap-4 text-white">
+    <div class="flex gap-4 items-center text-white">
       <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" />
       <span class="text-2xl font-medium sm:text-3xl">{{ headerName }}</span>
 
@@ -77,7 +78,7 @@ const clearViewed = () => {
         :to="extraAction"
       >
         <button
-          class="button ml-2 flex gap-2 rounded-full bg-lof-300 px-2 py-0.5"
+          class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
         >
           <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
         </button>
@@ -86,7 +87,7 @@ const clearViewed = () => {
       <!-- Action button -->
       <button
         v-if="extraText?.length! > 0 && extraAction?.startsWith('@')"
-        class="button ml-2 flex gap-2 rounded-full bg-lof-300 px-2 py-0.5"
+        class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
         @click="clearViewed()"
       >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
@@ -107,6 +108,7 @@ const clearViewed = () => {
         :user-array="users"
         :hide-remove="true"
         :is="[ListPreviewElement, FavoritePreview][listType]"
+        @unpin-list="lists.splice($event, 1)"
       />
     </div>
   </section>

@@ -1,6 +1,12 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-const SETTINGS = ref({
-  scrolling: 1,
+export const SETTINGS = ref({
+  scrolling: 0,
   language: 0,
 });
+
+watch(SETTINGS, () => {
+  if (localStorage) {
+    localStorage.setItem("settings", JSON.stringify(SETTINGS.value))
+  }
+}, {deep: true})

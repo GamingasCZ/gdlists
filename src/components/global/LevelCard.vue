@@ -11,7 +11,7 @@ const props = defineProps<{
   levelID: string | null;
   video: string | null;
   difficulty: [number, number];
-  color: [number, number, number];
+  color: [number, number, number] | string;
   tags: LevelTag[];
   favorited: boolean | undefined;
   levelIndex: number;
@@ -22,7 +22,11 @@ const props = defineProps<{
 }>();
 
 const isFavorited = ref<boolean>(props.favorited);
+const copyingID = ref<boolean>(false)
 const copyID = () => {
+  copyingID.value = true
+  setTimeout(() => copyingID.value = false, 2500);
+  
   navigator.clipboard.writeText(props.levelID!);
 };
 const doFavoriteLevel = () => {
@@ -60,7 +64,7 @@ const CARD_COL = ref<Color>();
 
 // Old lists may have broken colors!! (damn you, old Gamingas :D)
 try {
-  CARD_COL.value = chroma(props.color);
+  CARD_COL.value = typeof props.color == 'string' ? chroma(props.color) : chroma.hsl(...props.color);
 } catch (e) {
   CARD_COL.value = chroma.random();
 }
@@ -71,7 +75,14 @@ try {
     class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F] backdrop-blur-md"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
   >
-    <main class="flex items-center justify-between max-sm:flex-col">
+    <!-- ID copy popup -->
+    <article v-if="copyingID" class="absolute top-1/2 left-1/2 z-10 px-4 py-2 w-max text-2xl text-center bg-black bg-opacity-80 rounded-lg -translate-x-1/2 -translate-y-1/2">
+      <h2 class="font-black">ID zkopírováno!</h2>
+      <hr class="rounded-full border-2 opacity-80">
+      <h3>{{ levelID }}</h3>
+    </article>
+
+    <main class="flex justify-between items-center max-sm:flex-col">
       <div>
         <header class="flex items-center">
           <!-- Level difficulty -->
@@ -129,7 +140,7 @@ try {
             ><img class="w-14 max-sm:w-10" src="@/images/modGDB.svg" alt=""
           /></a>
         </button>
-        <button class="button" v-if="levelID?.match(/^\d+$/)">
+        <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID">
           <img class="w-14 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
@@ -137,7 +148,7 @@ try {
 
     <!-- Favorite star -->
     <button
-      class="button absolute top-1 right-1"
+      class="absolute top-1 right-1 button"
       @click="doFavoriteLevel"
       :class="{ disabled: isFavorited }"
       v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars"
@@ -150,7 +161,7 @@ try {
     <CollabPreview v-if="typeof creator == 'object'" :collab="creator" />
 
     <!-- Level Tags -->
-    <section class="mt-2 flex flex-wrap gap-2">
+    <section class="flex flex-wrap gap-2 mt-2">
       <Tag v-for="tag in tags" :tag="tag" />
     </section>
   </section>

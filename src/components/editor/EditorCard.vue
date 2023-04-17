@@ -100,28 +100,40 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
     <!-- Closed card content -->
     <header
       :style="{ backgroundColor: chroma.hsl(...data?.color!).hex()}"
-      class="relative rounded-md px-2 py-1 text-lg"
+      class="relative px-2 py-1 text-lg rounded-md"
       v-show="!opened"
       @click="updatingPositions != -1 ? 0 : emit('updateOpenedCard', index!)"
     >
       #{{ index! + 1 }} - {{ data?.levelName || "Bezejmenný" }}
       <div
-        v-show="updatingPositions != -1 && index != updatingPositions"
+        v-show="updatingPositions != -1"
         class="absolute right-0 top-2"
       >
+        <!-- Move Up -->
         <button
           v-show="index! < updatingPositions"
-          class="button w-12"
+          class="w-12 button"
           @click="startMove(index!)"
         >
           <img src="@/images/showCommsU.svg" />
         </button>
+
+        <!-- Move down -->
         <button
           v-show="index! > updatingPositions"
-          class="button w-12"
+          class="w-12 button"
           @click="startMove(index!)"
         >
           <img src="@/images/showCommsD.svg" />
+        </button>
+
+        <!-- Cancel Move -->
+        <button
+          v-show="index! == updatingPositions"
+          class="mr-2.5 w-6 button"
+          @click="startMove(index!)"
+        >
+          <img src="@/images/close.svg" />
         </button>
       </div>
     </header>
@@ -135,7 +147,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       <div class="flex justify-between">
         <div class="box-border inline-flex gap-2">
           <!-- Level ID input -->
-          <img class="aspect-square w-10" src="../../images/star.webp" alt="" />
+          <img class="w-10 aspect-square" src="../../images/star.webp" alt="" />
           <input
             autocomplete="off"
             class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
@@ -146,7 +158,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             placeholder="ID levelu"
           />
           <img
-            class="button aspect-square w-10 rounded-full bg-black bg-opacity-30 p-1 transition-opacity duration-100"
+            class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }"
@@ -157,7 +169,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         <div class="flex max-sm:hidden">
           <!-- Level position -->
           <img
-            class="button aspect-square w-10"
+            class="w-10 button aspect-square"
             src="../../images/showCommsU.svg"
             alt=""
             @click="startMove(props.index! - 1)"
@@ -174,7 +186,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             "
           />
           <img
-            class="button aspect-square w-10"
+            class="w-10 button aspect-square"
             src="../../images/showCommsD.svg"
             alt=""
             @click="startMove(props.index! + 1)"
@@ -182,20 +194,20 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         </div>
 
         <!-- Mobile move button -->
-        <button type="button" @click="mobileMoveLevel()" class="sm:hidden">
+        <button type="button" @click="mobileMoveLevel()" class="sm:hidden" v-if="levelList.levels.length > 1">
           <img
-            class="button w-10 rounded-md bg-black bg-opacity-30 p-1 transition-opacity duration-100"
+            class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button"
             src="../../images/move.svg"
             alt=""
           />
         </button>
       </div>
       <hr class="h-1 border-none" :style="{ backgroundColor: darkCol() }" />
-      <div class="flex items-center gap-2 max-sm:flex-col">
+      <div class="flex gap-2 items-center max-sm:flex-col">
         <!-- Level name input -->
         <div class="flex gap-2">
           <img
-            class="aspect-square w-10 max-sm:hidden"
+            class="w-10 aspect-square max-sm:hidden"
             src="../../images/island.webp"
             alt=""
           />
@@ -206,7 +218,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="sm:hidden"
           >
             <img
-              class="button aspect-square w-10 rounded-full bg-black bg-opacity-30 p-1 transition-opacity duration-100"
+              class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
               src="../../images/searchOpaque.svg"
               alt=""
               :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
@@ -224,9 +236,9 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         </div>
 
         <!-- Level search -->
-        <div class="flex items-center gap-2 max-sm:hidden">
+        <div class="flex gap-2 items-center max-sm:hidden">
           <hr
-            class="h-1 w-8 bg-white transition-opacity duration-100"
+            class="w-8 h-1 bg-white transition-opacity duration-100"
             :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }"
           />
           <button
@@ -235,14 +247,14 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             @click="searchLevel(false)"
           >
             <img
-              class="button aspect-square w-10 rounded-full bg-black bg-opacity-30 p-1 transition-opacity duration-100"
+              class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
               src="../../images/searchOpaque.svg"
               alt=""
               :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
             />
           </button>
           <hr
-            class="h-1 w-8 bg-white transition-opacity duration-100"
+            class="w-8 h-1 bg-white transition-opacity duration-100"
             :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }"
           />
         </div>
@@ -259,17 +271,17 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             placeholder="Tvůrce"
           />
           <img
-            class="button aspect-square w-10 rounded-full bg-black bg-opacity-30 p-1"
+            class="p-1 w-10 bg-black bg-opacity-30 rounded-full button aspect-square"
             src="../../images/bytost.webp"
             alt=""
           />
         </div>
       </div>
-      <div class="flex items-center justify-between max-sm:flex-col">
+      <div class="flex justify-between items-center max-sm:flex-col">
         <!-- Video input -->
         <div class="flex gap-2">
           <img
-            class="aspect-square w-10"
+            class="w-10 aspect-square"
             src="../../images/youtube.webp"
             alt=""
           />
@@ -285,20 +297,20 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         </div>
 
         <!-- Extras buttons -->
-        <div class="flex items-start gap-2 max-sm:mt-3">
+        <div class="flex gap-2 items-start max-sm:mt-3">
           <img
-            class="button w-10"
+            class="w-10 button"
             @click="deleteLevel(props.index!)"
             src="../../images/delete.webp"
             alt=""
           />
           <img
-            class="button w-10"
+            class="w-10 button"
             @click="openedPanel = openedPanel != 1 ? 1 : 0"
             src="../../images/colorSelect.webp"
             alt=""
           />
-          <div class="button relative flex items-center justify-center">
+          <div class="flex relative justify-center items-center button">
             <img
               class="w-10"
               @click="openedPanel = openedPanel != 2 ? 2 : 0"
@@ -308,17 +320,17 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             <img
               :src="`/src/images/faces/${levelList.levels[index!].difficulty[0]}.webp`"
               alt=""
-              class="pointer-events-none absolute z-20 w-6"
+              class="absolute z-20 w-6 pointer-events-none"
             />
             <img
               :src="getRateImage()"
               alt=""
-              class="pointer-events-none absolute z-10 w-8"
+              class="absolute z-10 w-8 pointer-events-none"
               :style="{zIndex: levelList.levels[index!].difficulty[1]-1 ? 10 : 30 }"
             />
           </div>
           <img
-            class="button w-10"
+            class="w-10 button"
             @click="openedPanel = openedPanel != 3 ? 3 : 0"
             src="../../images/tags.webp"
             alt=""
@@ -327,7 +339,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       </div>
 
       <!-- Extras panel -->
-      <div class="rounded-md bg-black bg-opacity-30 p-2" v-show="openedPanel">
+      <div class="p-2 bg-black bg-opacity-30 rounded-md" v-show="openedPanel">
         <ColorPicker
           v-if="openedPanel == 1"
           @colors-modified="changeCardColors"

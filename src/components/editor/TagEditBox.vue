@@ -27,18 +27,18 @@ const moveTagPos = (from: number, to: number) => {
 
 <template>
   <div
-    class="flex items-center gap-2 rounded-md bg-black bg-opacity-20 px-1 py-2"
+    class="flex gap-2 items-center px-1 py-2 min-w-max bg-black bg-opacity-20 rounded-md"
   >
     <img
       src="@/images/showCommsL.svg"
-      class="button w-4"
+      class="w-4 button"
       alt=""
       @click="moveTagPos(tagIndex!, tagIndex! - 1)"
     />
-    <div class="flex flex-col items-center gap-2">
+    <div class="flex flex-col gap-2 items-center">
       <div class="flex items-center">
         <LinkIcon
-          class="button w-5"
+          class="w-5 button"
           @click="editingLink = !editingLink"
           :editing="editingLink"
           :modified="!!tagLink?.length"
@@ -51,7 +51,7 @@ const moveTagPos = (from: number, to: number) => {
         <img
           src="@/images/close.svg"
           alt=""
-          class="button w-5"
+          class="w-5 button"
           @click="levelList.levels[cardIndex!].tags.splice(tagIndex!, 1)"
         />
       </div>
@@ -65,7 +65,7 @@ const moveTagPos = (from: number, to: number) => {
         type="text"
         :value="tagName || $t('editor.tags[' + tagID + ']')"
         placeholder="Text štítku"
-        class="w-28 rounded-full bg-black bg-opacity-20 px-1 text-center text-sm"
+        class="px-1 w-28 text-sm text-center bg-black bg-opacity-20 rounded-full"
       />
       <input
         v-else
@@ -77,12 +77,12 @@ const moveTagPos = (from: number, to: number) => {
         "
         :value="tagLink"
         placeholder="Odkaz štítku"
-        class="w-28 rounded-full bg-black bg-opacity-20 px-1 text-center text-sm"
+        class="px-1 w-28 text-sm text-center bg-black bg-opacity-20 rounded-full"
       />
     </div>
     <img
       src="@/images/showComms.svg"
-      class="button w-4"
+      class="w-4 button"
       alt=""
       @click="moveTagPos(tagIndex!, tagIndex! + 1)"
     />

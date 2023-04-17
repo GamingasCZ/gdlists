@@ -4,6 +4,7 @@ import Footer from "./components/global/Footer.vue";
 import Navbar from "./components/Navbar.vue";
 import { onMounted, ref } from "vue";
 import cookier from "cookier";
+import { SETTINGS } from "./siteSettings";
 
 if (localStorage) {
   localStorage.getItem("favoriteIDs") ??
@@ -15,6 +16,10 @@ if (localStorage) {
     localStorage.setItem("pinnedLists", "[]");
   localStorage.getItem("recentlyViewed") ??
     localStorage.setItem("recentlyViewed", "[]");
+
+  localStorage.getItem("settings") ??
+    localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
+  SETTINGS.value = JSON.parse(localStorage.getItem("settings")!)
 }
 
 const loggedIn = ref<boolean>(false);

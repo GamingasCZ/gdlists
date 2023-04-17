@@ -20,7 +20,7 @@ function getDiffImage(ind: string) {
         v-for="diff in 12"
         :key="diff"
         type="button"
-        class="button aspect-square w-12 rounded-md bg-opacity-40 p-1"
+        class="p-1 w-12 h-12 bg-opacity-40 rounded-md button aspect-square"
         @click="emit('changeFace', diff - 1)"
         :class="{ 'bg-black': diff - 1 == selectedFace }"
       >
@@ -28,11 +28,11 @@ function getDiffImage(ind: string) {
       </button>
     </div>
     <div
-      class="box-border grid grid-cols-2 gap-1 rounded-md bg-black bg-opacity-20 p-2"
+      class="box-border grid grid-cols-2 gap-1 p-2 min-w-max bg-black bg-opacity-20 rounded-md"
     >
       <button
         type="button"
-        class="aspect-square w-10 rounded-md bg-black bg-opacity-20 p-1"
+        class="p-1 w-10 bg-black bg-opacity-20 rounded-md aspect-square"
         v-for="(rate, index) in ['error', 'star', 'featured', 'epic']"
         @click="emit('changeRate', index)"
       >

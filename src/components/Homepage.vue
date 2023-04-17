@@ -50,7 +50,7 @@ if (loginCookie != null) {
   <div
     id="loginToast"
     v-if="!firstTimeUser"
-    class="absolute top-16 left-1/2 -translate-x-1/2 -translate-y-16 rounded-md bg-black bg-opacity-80 p-2 px-6 text-xl text-white transition-transform duration-75"
+    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16"
   >
     Vítej zpět, <b>{{ returnfromLoginName }}</b
     >!
@@ -62,27 +62,27 @@ if (loginCookie != null) {
     <form
       action="./browse"
       method="get"
-      class="flex translate-y-1/2 items-center gap-2 text-white"
+      class="flex gap-2 items-center text-white translate-y-1/2"
     >
       <input
         type="text"
         name="q"
-        class="max-w-[70vw] rounded-md border-4 border-lof-300 bg-greenGradient py-2 px-1 outline-transparent placeholder:text-xl"
+        class="max-w-[70vw] w-80 rounded-md border-4 border-lof-300 bg-greenGradient py-2 px-1 outline-transparent placeholder:text-xl"
         :placeholder="$t('homepage.searchLists')"
       />
       <button type="submit">
         <img
           src="../images/searchOpaque.svg"
           alt=""
-          class="button rounded-full bg-greenGradient p-2"
+          class="p-2 rounded-full button bg-greenGradient"
         />
       </button>
     </form>
   </header>
-  <div class="flex justify-center gap-2 pt-8 text-base text-white">
+  <div class="flex gap-2 justify-center pt-8 text-base text-white">
     <RouterLink to="/editor">
       <button
-        class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3"
+        class="flex gap-4 items-center px-2 py-3 rounded-md button bg-lof-300"
       >
         <img src="../images/plus.svg" alt="" class="w-6" />{{
           $t("homepage.createList")
@@ -91,7 +91,7 @@ if (loginCookie != null) {
     </RouterLink>
     <RouterLink to="/random">
       <button
-        class="button flex items-center gap-4 rounded-md bg-lof-300 px-2 py-3 sm:mr-14"
+        class="flex gap-4 items-center px-2 py-3 rounded-md button bg-lof-300 sm:mr-14"
       >
         <img src="../images/dice.svg" alt="" class="w-6" />{{
           $t("homepage.tryLuck")
@@ -103,7 +103,7 @@ if (loginCookie != null) {
   <section class="flex justify-center">
     <div
       v-if="!isLoggedIn"
-      class="mx-4 mt-6 flex max-w-4xl items-center justify-center gap-3 rounded-md bg-greenGradient px-2 py-1 text-white"
+      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient"
     >
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
@@ -126,6 +126,8 @@ if (loginCookie != null) {
   <ListSection
     :header-name="$t('homepage.pinned')"
     :empty-text="$t('homepage.noListsPinned')"
+    content-type="@pinnedLists"
+    :max-items="5"
   />
 
   <ListSection
@@ -133,8 +135,8 @@ if (loginCookie != null) {
     :header-name="$t('homepage.uploaded')"
     :extra-text="$t('homepage.more')"
     extra-icon="more"
-    :empty-text="$t('homepage.noListsUploaded')"
     extra-action="/browse"
+    :empty-text="$t('homepage.noListsUploaded')"
     content-type="/getLists.php?homeUser"
   />
 

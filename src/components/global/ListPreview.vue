@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import type { ListCreatorInfo } from "@/interfaces";
+import type { ListCreatorInfo, ListPreview } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
 const props = defineProps<{
   rate_ratio: string;
-  views: number;
-  timestamp: number;
+  views: string;
+  timestamp: string;
   name: string;
   creator: string;
   id: string;
   index: number;
-  diffGuesser: 0 | 1;
+  diffGuesser: '0' | '1';
   uid: string;
   hidden: string;
+  isPinned: boolean
 
   userArray: ListCreatorInfo[];
 }>();
@@ -33,6 +34,8 @@ const makeColor = () =>
   );
 
 const listColor = ref<Color>(makeColor());
+
+const emit = defineEmits(['unpinList'])
 
 watch(props, (newProps) => {
   listColor.value = makeColor();
@@ -62,11 +65,26 @@ const getGradient = () =>
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
 const uploadDate = reactive(new Date(props.timestamp!));
+
+const unpinList = () => {
+  let pinned: ListPreview[] = JSON.parse(localStorage.getItem('pinnedLists')!)
+  let i = 0
+  let removedIndex = -1
+  pinned.forEach((pin: ListPreview) => {
+    if (pin.id == props.id) {
+      pinned.splice(i, 1)
+      removedIndex = i
+    }
+    i++
+  })
+  localStorage.setItem("pinnedLists", JSON.stringify(pinned))
+  emit('unpinList', removedIndex)
+}
 </script>
 
 <template>
   <RouterLink
-    :to="hidden != '0' ? hidden ?? id : id!"
+    :to="hidden != '0' ? hidden ?? id.toString() : id.toString()!"
     class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
@@ -84,7 +102,7 @@ const uploadDate = reactive(new Date(props.timestamp!));
       }}
     </section>
 
-    <section class="flex flex-col items-center gap-1">
+    <section class="flex flex-col gap-1 items-center">
       <div v-if="views" class="flex gap-1 text-xs">
         <img src="../../images/view.svg" alt="" class="w-4" />{{ views }}
       </div>
@@ -103,6 +121,10 @@ const uploadDate = reactive(new Date(props.timestamp!));
       <h1 class="text-lg font-bold">{{ name }}</h1>
       <p class="text-xs">- {{ creator?.length ? creator : getUsername() }} -</p>
     </section>
+
+    <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-full button">
+      <img src="@/images/unpin.svg" alt="">
+    </button>
   </RouterLink>
 </template>
 3

@@ -9,6 +9,7 @@ import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import FavoritePreview from "./FavoritePreview.vue";
 import cookier from "cookier";
+import { SETTINGS } from "@/siteSettings";
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
@@ -24,13 +25,22 @@ const props = defineProps({
 
 document.title = `${props.browserName} | GD Seznamy`;
 
+// Infinite scrolling / Pages watch
+const usingPagesScrolling = ref<boolean>(Boolean(SETTINGS.value.scrolling))
+watch(SETTINGS.value, () => {
+  usingPagesScrolling.value = Boolean(SETTINGS.value.scrolling)
+  PAGE.value = 0
+  LISTS.value = []
+  refreshBrowser()
+})
+
 const scrollingStart = (i: number) => i + 2;
-const scrollingBetween = (i: number) => i + PAGE.value - 1;
+const scrollingBetween = (i: number) => i + PAGE.value! - 1;
 const scrollingEnd = (i: number) => maxPages.value - (5 - i);
 const listScroll = () =>
   Array.from({ length: Math.min(5, maxPages.value - 1) }, (_, i) =>
-    PAGE.value >= 3 && maxPages.value > 4
-      ? PAGE.value < maxPages.value - 4
+    PAGE.value! >= 3 && maxPages.value > 4
+      ? PAGE.value! < maxPages.value - 4
         ? scrollingBetween(i)
         : scrollingEnd(i)
       : scrollingStart(i)
@@ -41,12 +51,12 @@ const searchNoResults = ref<boolean>(false);
 
 const LISTS_ON_PAGE = 8;
 const PAGE = ref<number>(
-  (parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1
-);
+  usingPagesScrolling.value ? (parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1 : 0
+  );
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
 const USERS = ref<ListCreatorInfo[]>();
-const LISTS = ref<ListPreview[]>();
+const LISTS = ref<ListPreview[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
@@ -62,13 +72,8 @@ let filtered; // Search results from offline browsers
 function doSearch() {
   PAGE.value = 0;
   searchNoResults.value = false;
+  LISTS.value = []
   if (!props.onlineBrowser) {
-    // Stop using filtered array
-    if (SEARCH_QUERY.value == "") {
-      filtered = [];
-      return;
-    }
-
     filtered = favoriteLevels.filter((x) =>
       x.levelName.includes(SEARCH_QUERY.value)
     );
@@ -86,21 +91,22 @@ function doSearch() {
 }
 
 function refreshBrowser() {
-  // document.querySelectorAll(".listPreviews").forEach((previews: Element) => previews.remove())
   if (!props.onlineBrowser) {
-    if (filtered) {
-      LISTS.value = filtered.slice(
-        LISTS_ON_PAGE * PAGE.value,
-        LISTS_ON_PAGE * PAGE.value + LISTS_ON_PAGE
+    let hasSearch = [favoriteLevels, filtered][filtered | 0]
+    if (usingPagesScrolling.value) {
+      LISTS.value = hasSearch.slice(
+        LISTS_ON_PAGE * PAGE.value!,
+        LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
       );
-      maxPages.value = Math.ceil(filtered.length / LISTS_ON_PAGE);
-    } else {
-      LISTS.value = favoriteLevels.slice(
-        LISTS_ON_PAGE * PAGE.value,
-        LISTS_ON_PAGE * PAGE.value + LISTS_ON_PAGE
-      );
-      maxPages.value = Math.ceil(favoriteLevels.length / LISTS_ON_PAGE);
     }
+    else {
+      hasSearch.slice(
+        LISTS_ON_PAGE * PAGE.value!,
+        LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
+      ).forEach((x: ListPreview) => LISTS.value!.push(x))
+      infiniteListsLoading = false
+    }
+    maxPages.value = Math.ceil(hasSearch.length / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
     return;
   }
@@ -135,11 +141,17 @@ function refreshBrowser() {
 
       maxPages.value = res.data[2].maxPage;
       pagesArray.value = listScroll();
-      LISTS.value = res.data[0];
+
+      if (usingPagesScrolling.value) LISTS.value = res.data[0];
+      else {
+        res.data[0].forEach((x: ListPreview) => LISTS.value!.push(x))
+        infiniteListsLoading = false
+      }
+
       USERS.value = res.data[1];
       loadFailed.value = false;
     })
-    .catch(() => {
+    .catch(e => {
       LISTS.value = [];
       loadFailed.value = true;
       maxPages.value = 0;
@@ -161,6 +173,8 @@ const removeFavoriteLevel = (levelID: string) => {
 
   localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
   localStorage.setItem("favoriteIDs", JSON.stringify(levelIDs));
+
+  document.querySelectorAll(".listPreviews").forEach(x => x.remove())
   refreshBrowser();
 };
 
@@ -173,8 +187,8 @@ onMounted(() => {
   else {
     // Hardcoded for now, maybe change later
     LISTS.value = favoriteLevels.slice(
-      LISTS_ON_PAGE * PAGE.value,
-      LISTS_ON_PAGE * PAGE.value + LISTS_ON_PAGE
+      LISTS_ON_PAGE * PAGE.value!,
+      LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
     );
     maxPages.value = Math.ceil(favoriteLevels.length! / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
@@ -185,15 +199,28 @@ onMounted(() => {
 watch(props, (newBrowser) => {
   refreshBrowser();
 });
+
+let infiniteListsLoading = false
+function infiniteScroll() {
+  if (!infiniteListsLoading && !usingPagesScrolling.value) {
+    let page = document.documentElement
+    if (page.scrollTop+page.clientHeight+page.clientHeight/2 > page.scrollHeight) {
+      infiniteListsLoading = true
+      switchPage(PAGE.value! + 1)
+    }
+  }
+}
+
+window.addEventListener("scroll", infiniteScroll)
 </script>
 
 <template>
   <section class="mx-auto mt-4 w-[80rem] max-w-[95vw] text-white">
-    <h2 class="text-center text-3xl">{{ browserName }}</h2>
+    <h2 class="text-3xl text-center">{{ browserName }}</h2>
 
     <main class="mt-3">
       <header
-        class="flex justify-center gap-3"
+        class="flex gap-3 justify-center"
         v-show="onlineBrowser"
         v-if="isLoggedIn"
       >
@@ -216,48 +243,48 @@ watch(props, (newBrowser) => {
           :class="{ 'bg-greenGradient': onlineType == 'hidden' }"
           @click="emit('switchBrowser', 'hidden')"
         >
-          <img class="w-7 p-1" src="@/images/hidden.svg" alt="" />
+          <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
         </button>
       </header>
       <header
-        class="flex justify-between gap-3 max-sm:flex-col max-sm:items-center"
+        class="flex gap-3 justify-between max-sm:flex-col max-sm:items-center"
       >
         <form
           action=""
-          class="flex items-center gap-2"
+          class="flex gap-2 items-center"
           @submit.prevent="doSearch"
         >
           <input
             v-model="SEARCH_QUERY"
             type="text"
             max="30"
-            class="h-11 w-64 rounded-full bg-white bg-opacity-10 px-3 text-xl"
+            class="px-3 w-64 h-11 text-xl bg-white bg-opacity-10 rounded-full"
             placeholder="Hledat..."
           />
           <button
             type="submit"
             class="box-border rounded-full bg-greenGradient"
           >
-            <img src="@/images/searchOpaque.svg" alt="" class="w-11 p-2" />
+            <img src="@/images/searchOpaque.svg" alt="" class="p-2 w-11" />
           </button>
         </form>
-        <div class="flex items-center gap-2" v-if="maxPages > 1">
-          <button class="button mr-2" @click="switchPage(PAGE - 1)">
+        <div class="flex gap-2 items-center" v-show="usingPagesScrolling" v-if="maxPages > 1">
+          <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
             <img src="@/images/showCommsL.svg" class="w-4" alt="" />
           </button>
           <button
-            class="button w-8 rounded-md bg-white bg-opacity-5"
+            class="w-8 bg-white bg-opacity-5 rounded-md button"
             :class="{ 'bg-greenGradient': PAGE == 0 }"
             @click="switchPage(0)"
           >
             1
           </button>
           <hr
-            v-if="PAGE > 3"
-            class="h-4 w-1 rounded-full border-none bg-greenGradient"
+            v-if="PAGE! > 3"
+            class="w-1 h-4 rounded-full border-none bg-greenGradient"
           />
           <button
-            class="button w-8 rounded-md bg-white bg-opacity-5"
+            class="w-8 bg-white bg-opacity-5 rounded-md button"
             :class="{ 'bg-greenGradient': index - 1 == PAGE }"
             @click="switchPage(index - 1)"
             v-for="index in pagesArray"
@@ -265,38 +292,38 @@ watch(props, (newBrowser) => {
             {{ index }}
           </button>
           <hr
-            v-if="PAGE < maxPages - 4"
-            class="h-4 w-1 rounded-full border-none bg-greenGradient"
+            v-if="PAGE! < maxPages - 4"
+            class="w-1 h-4 rounded-full border-none bg-greenGradient"
           />
           <button
             v-if="maxPages > 4"
-            class="button w-8 rounded-md bg-white bg-opacity-5"
+            class="w-8 bg-white bg-opacity-5 rounded-md button"
             :class="{ 'bg-greenGradient': PAGE == maxPages - 1 }"
             @click="switchPage(maxPages - 1)"
           >
             {{ maxPages }}
           </button>
-          <button class="button ml-2" @click="switchPage(PAGE + 1)">
+          <button class="ml-2 button" @click="switchPage(PAGE! + 1)">
             <img src="@/images/showComms.svg" class="w-4" alt="" />
           </button>
         </div>
       </header>
-      <main class="mt-6 flex flex-col items-center gap-3">
+      <main class="flex flex-col gap-3 items-center mt-6">
         <div
           v-if="searchNoResults"
-          class="flex flex-col items-center justify-center gap-3"
+          class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">Žádné výsledky!</p>
         </div>
         <div
           v-if="loadFailed"
-          class="flex flex-col items-center justify-center gap-3"
+          class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">Nepodařilo se načíst obsah!</p>
           <button
-            class="button flex items-center gap-3 rounded-md bg-greenGradient px-2"
+            class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             @click="refreshBrowser()"
           >
             <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />Načíst
@@ -305,10 +332,11 @@ watch(props, (newBrowser) => {
         </div>
         <component
           :is="onlineBrowser ? ListPrevElement : FavoritePreview"
-          class="listPreviews min-w-full"
+          class="min-w-full listPreviews"
           v-for="(list, index) in LISTS"
           v-bind="list"
           :user-array="USERS"
+          :index="index"
           @remove-level="removeFavoriteLevel"
         ></component>
       </main>

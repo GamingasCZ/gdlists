@@ -12,13 +12,13 @@ const isCollab = ref<boolean>(typeof props.data.creator != "string");
 <template>
   <button
     :style="{ backgroundColor: chroma(data.color).hex() }"
-    class="button rounded-md px-2 py-1 text-left leading-4"
+    class="px-2 py-1 leading-4 text-left rounded-md button focus-visible:!outline"
   >
     <h3 class="font-bold">
       <img
         v-if="isCollab"
         src="@/images/collab.svg"
-        class="mr-1 inline w-4"
+        class="inline mr-1 w-4"
         alt=""
       />{{ data.levelName }}
     </h3>

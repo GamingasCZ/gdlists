@@ -6,6 +6,7 @@ export interface ListPreview {
   rate_ratio?: number;
   id?: number | string;
   hidden?: string;
+  isPinned?: boolean
 }
 
 export interface ListFetchResponse {
@@ -78,7 +79,7 @@ export interface Level {
   levelID: string | null;
   video: string | null;
   difficulty: [number, number];
-  color: [number, number, number];
+  color: [number, number, number, number];
   tags: LevelTag[];
 }
 

@@ -20,7 +20,7 @@ const props = defineProps({
 });
 
 onUnmounted(() => {
-  document.querySelector("#listBG")?.remove();
+  document.body.style.backgroundImage = '';
 });
 
 const PRIVATE_LIST: boolean =
@@ -40,7 +40,7 @@ if (localStorage != undefined) {
       .length == 0; // Has not been viewed yet
 }
 
-const LIST_DATA = ref<ListFetchResponse>();
+const LIST_DATA = ref<ListFetchResponse>({data: {levels: []}});
 const LIST_CREATOR = ref<string>("");
 const LIST_COL = ref<number[]>([0, 0, 0]);
 
@@ -91,14 +91,21 @@ axios
     // Set list background image
     let listBG = LIST_DATA.value?.data?.titleImg!;
     (
-      document.querySelector("#listBG") as HTMLDivElement
+      document.body as HTMLBodyElement
     ).style.backgroundImage = `url('${
       typeof listBG == "string" ? listBG : listBG[0] ?? ""
     }')`;
+    positionListBackground()
+
+    // Check pinned status
+    if (localStorage) {
+      JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
+        if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
+      });
+    }
   });
 
-const positionListBackground = () =>
-  ["left", "center", "right"][LIST_DATA.value?.data?.titleImg[3]! ?? 1];
+const positionListBackground = () => ["left", "center", "right"][LIST_DATA.value.data.titleImg?.[3]];
 
 const tryJumping = (ind: number, forceJump = false) => {
   let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
@@ -123,6 +130,36 @@ const tryJumping = (ind: number, forceJump = false) => {
   }
 };
 
+const listPinned = ref<boolean>(false)
+const toggleListPin = () => {
+  if (localStorage) {
+    let pinned: ListPreview[] = JSON.parse(localStorage.getItem('pinnedLists')!)
+    if (listPinned.value) { // Remove from pinned
+      let i = 0
+      pinned.forEach((pin: ListPreview) => {
+        if (pin.id == LIST_DATA.value.id) pinned.splice(i, 1)
+        i++
+      })
+    }
+    else {
+      pinned.push({
+        name: LIST_DATA.value.name,
+        creator: LIST_CREATOR.value,
+        uploadDate: Date.now(),
+        id: LIST_DATA.value.id,
+        hidden: LIST_DATA.value.hidden,
+        isPinned: true
+      })
+    }
+    if (pinned.length > 5) { // Remove last pinned level
+      pinned.splice(0, 1)
+    }
+
+    listPinned.value = !listPinned.value
+    localStorage.setItem("pinnedLists", JSON.stringify(pinned))
+  }
+}
+
 const getURL = () => `${window.location.host}/${props.listID}`;
 const sharePopupOpen = ref<boolean>(false);
 const jumpToPopupOpen = ref<boolean>(false);
@@ -135,26 +172,22 @@ const listActions = (action: string) => {
     case "jumpPopup":
       jumpToPopupOpen.value = true;
       break;
+    case "pinList":
+      toggleListPin()
+      break;
   }
 };
 </script>
 
 <template>
   <div
-    id="listBG"
-    class="fixed left-0 top-[5%] -z-10 h-full w-full bg-cover"
-    v-show="
-      LIST_DATA?.data.titleImg != undefined &&
-      typeof LIST_DATA.data.titleImg != 'string'
-    "
     :style="{
-      backgroundPositionX: positionListBackground(),
-      height: LIST_DATA?.data.titleImg[2] + '%',
-      backgroundPositionY: LIST_DATA?.data.titleImg[1] + '%',
+      height: (LIST_DATA?.data?.titleImg?.[2] ?? 0) + '%',
+      backgroundPositionY: (LIST_DATA?.data?.titleImg?.[1] ?? 0) + '%',
     }"
   >
     <div
-      v-if="LIST_DATA?.data.titleImg[4]"
+      v-if="LIST_DATA?.data.titleImg?.[4]"
       :style="{
         backgroundImage: `linear-gradient(180deg, ${chroma(
           chroma.hsl(
@@ -164,7 +197,7 @@ const listActions = (action: string) => {
           )
         ).hex()}, transparent)`,
       }"
-      class="absolute h-full w-full"
+      class="absolute w-full h-full"
     ></div>
   </div>
 
@@ -177,7 +210,7 @@ const listActions = (action: string) => {
     @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)"
     v-show="jumpToPopupOpen"
     picker-data-type="level"
-    :picker-data="LIST_DATA?.data.levels!"
+    :picker-data="LIST_DATA.data.levels"
     @close-popup="jumpToPopupOpen = false"
     browser-name="Skočit na"
   />
@@ -190,6 +223,7 @@ const listActions = (action: string) => {
         v-bind="LIST_DATA"
         :creator="LIST_CREATOR"
         :id="listID!"
+        :list-pinned="listPinned"
         class="mb-8"
       />
     </header>

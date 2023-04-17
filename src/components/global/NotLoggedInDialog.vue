@@ -12,13 +12,13 @@ let pick = Math.floor(Math.random() * faces.value.length);
 
 <template>
   <section
-    class="m-auto flex w-[40rem] max-w-[95vw] translate-y-20 flex-col items-center justify-around gap-4 rounded-lg bg-greenGradient px-8 py-3 text-white"
+    class="m-auto flex w-[40rem] max-w-[95vw] flex-col items-center justify-around gap-4 rounded-lg bg-greenGradient px-8 py-3 text-white"
   >
     <div
-      class="flex items-center gap-2 rounded-lg bg-black bg-opacity-50 px-3 py-2"
+      class="flex gap-2 items-center px-3 py-2 bg-black bg-opacity-50 rounded-lg"
     >
       <img :src="`/src/images/emoji/${faces[pick]}.webp`" alt="" class="w-14" />
-      <span class="font-black italic"
+      <span class="italic font-black"
         >„{{ $t(`other.lockQuotes[${pick}]`) }}”</span
       >
     </div>

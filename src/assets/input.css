@@ -35,6 +35,9 @@ body {
   background-color: var(--siteBackground);
   font-family: poppins;
   transition: background-color 0.3s;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .button {

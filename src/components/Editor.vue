@@ -92,7 +92,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
     picker-data-type="favoriteLevel"
   />
 
-  <h2 class="my-4 text-center text-3xl text-white" v-show="!previewingList">
+  <h2 class="my-4 text-3xl text-center text-white" v-show="!previewingList">
     Editor
   </h2>
   <NotLoggedIn
@@ -100,13 +100,13 @@ const addFromFavorites = (level: FavoritedLevel) => {
     mess="Pro vytvoření seznamu se prosím přihlaš!"
   />
   <section v-show="previewingList">
-    <div class="relative mx-5 flex items-center justify-center text-white">
-      <button @click="previewingList = false" class="button absolute left-0">
+    <div class="flex relative justify-center items-center mx-5 text-white">
+      <button @click="previewingList = false" class="absolute left-0 button">
         <img src="@/images/arrow-left.webp" class="w-12" alt="" />
       </button>
-      <h1 class="text-center text-3xl text-white">Náhled seznamu</h1>
+      <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
     </div>
-    <div class="mt-12 flex flex-col gap-3">
+    <div class="flex flex-col gap-3 mt-12">
       <LevelCard
         v-for="level in levelList.levels"
         v-bind="level"
@@ -141,7 +141,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       ></textarea>
       <button type="button">
         <img
-          class="button w-8 rounded-full bg-black bg-opacity-50 p-1.5"
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
           src="../images/fullscreen.svg"
           alt=""
           @click="descriptionEditorOpen = true"
@@ -156,7 +156,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       />
       <button type="button">
         <img
-          class="button w-8 rounded-full bg-black bg-opacity-50 p-1.5"
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
           src="../images/gear.svg"
           alt=""
           @click="BGpickerPopupOpen = true"
@@ -164,11 +164,11 @@ const addFromFavorites = (level: FavoritedLevel) => {
       </button>
     </div>
 
-    <div class="my-1 flex items-center gap-2">
+    <div class="flex gap-2 items-center my-1">
       <span>Barva pozadí:</span>
       <button
         type="button"
-        class="focusOutline button box-border flex h-8 w-8 items-center justify-center rounded-md border-2 border-white"
+        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focusOutline button"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
@@ -177,7 +177,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
 
     <div
       v-show="bgColorPickerOpen"
-      class="my-2 w-9/12 rounded-md bg-black bg-opacity-40 px-3 py-2"
+      class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
     >
       <ColorPicker @colors-modified="modifyListBG" />
     </div>
@@ -187,24 +187,24 @@ const addFromFavorites = (level: FavoritedLevel) => {
       id="editorHeader"
     >
       <span class="text-2xl font-black">Levely</span>
-      <div class="mt-2 box-border flex gap-3">
+      <div class="box-border flex gap-3 mt-2" v-if="updatingPositions == -1">
         <button type="button" @click="previewingList = true">
           <img
-            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/preview.svg"
             alt=""
           />
         </button>
         <button type="button" @click="favoriteLevelPickerOpen = true">
           <img
-            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/addfromFaves.svg"
             alt=""
           />
         </button>
         <button type="button" @click="startAddLevel()">
           <img
-            class="button w-10 rounded-full bg-black bg-opacity-50 p-1.5"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/addLevel.svg"
             alt=""
           />
@@ -218,7 +218,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <h2 v-if="!levelList.levels.length" class="mt-4">
         Kliknutím na
         <img
-          class="mx-2 inline w-10 rounded-full bg-black bg-opacity-50 p-1"
+          class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-full"
           src="../images/addLevel.svg"
         />
         přidáš level!
@@ -240,7 +240,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
     <ListSettings />
     <button
       type="submit"
-      class="button mt-3 flex items-center gap-2 rounded-md bg-lof-400 px-3 py-2 font-black text-black"
+      class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
     >
       <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
     </button>
