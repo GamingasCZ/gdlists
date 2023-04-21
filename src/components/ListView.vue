@@ -13,6 +13,7 @@ import { ref, onMounted, watch, onUnmounted } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
+import router from "@/router";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -24,7 +25,7 @@ onUnmounted(() => {
 });
 
 const PRIVATE_LIST: boolean =
-  !props.randomList.valueOf || Boolean(props?.listID.match(/^\d+$/g));
+  props.randomList ? false : Boolean(props?.listID?.match(/^\d+$/g));
 
 const favoritedIDs = ref<string[] | null>();
 
@@ -174,6 +175,9 @@ const listActions = (action: string) => {
       break;
     case "pinList":
       toggleListPin()
+      break;
+    case "editList":
+      router.push(`/${props.listID}/edit`)
       break;
   }
 };

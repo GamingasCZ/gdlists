@@ -7,17 +7,54 @@ import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import BGImagePicker from "./global/BackgroundImagePicker.vue";
 import DescriptionEditor from "./global/TextEditor.vue";
 import PickerPopup from "./global/PickerPopup.vue";
-import { levelList, addLevel, modifyListBG } from "../Editor";
-import { ref, onMounted } from "vue";
-import type { FavoritedLevel, Level } from "@/interfaces";
+import RemoveListPopup from "./editor/RemoveListPopup.vue"
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeListColor } from "../Editor";
+import { ref, onMounted, nextTick } from "vue";
+import type { FavoritedLevel, Level, ListUpdateFetch, LevelList } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
+import axios, { type AxiosResponse } from "axios";
+import cookier from "cookier"
+import router from "@/router";
 
 document.title = "Editor | GD Seznamy";
 
-defineProps<{
+const props = defineProps<{
   isLoggedIn: boolean;
+  editing: boolean
+  listID: string | number
 }>();
+
+onMounted(() => {
+  levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
+})
+
+var isNowHidden: Boolean
+if (props.editing) {
+  axios.post(import.meta.env.VITE_API+"/php/pwdCheckAction.php", {id: props.listID}, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
+    let listData: ListUpdateFetch = res.data;
+    let list: LevelList = listData.data;
+    (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
+    (document.getElementById("levelName") as HTMLInputElement).disabled = true;
+    levelList.value.description = list.description;
+
+    isNowHidden = listData.hidden != '0';
+    (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden
+
+    // Old list have levels scattered in levelList
+    if (list.levels == undefined) {
+      list.levels = []
+      Object.keys(list).filter(x => x.match(/^\d+$/)).forEach(level => list.levels.push(list[parseInt(level)]));
+    }
+
+    list.levels.forEach(level => addLevel(level))
+
+    levelList.value.pageBGcolor = makeListColor(list.pageBGcolor)
+    
+    // Color is most likely #020202, the default color
+    if (!isNaN(levelList.value.pageBGcolor[0])) modifyListBG(levelList.value.pageBGcolor)
+  })
+}
 
 const nice = () => {
   console.log(levelList.value);
@@ -28,6 +65,7 @@ const BGpickerPopupOpen = ref<boolean>(false);
 const bgColorPickerOpen = ref<boolean>(false);
 const descriptionEditorOpen = ref<boolean>(false);
 const favoriteLevelPickerOpen = ref<boolean>(false);
+const removeListPopupOpen = ref<boolean>(false);
 const previewingList = ref<boolean>(false);
 
 const startAddLevel = () => {
@@ -66,6 +104,51 @@ const addFromFavorites = (level: FavoritedLevel) => {
   };
   addLevel(addedLevel);
 };
+
+function uploadList() {
+  axios.post(import.meta.env.VITE_API+"/php/sendList.php", {
+    listData: JSON.stringify(levelList.value),
+    lName: (document.getElementById("levelName") as HTMLInputElement).value,
+    diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
+    hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked | 0
+  }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
+
+  })
+}
+
+function updateList() {
+  axios.post(import.meta.env.VITE_API+"/php/updateList.php", {
+    listData: JSON.stringify(levelList.value),
+    id: props.listID,
+    isNowHidden: isNowHidden ? "true" : "false",
+    diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
+    hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked | 0
+  }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
+    router.push(`/${res.data[0]}`)
+  })
+}
+
+function removeList() {
+  axios.post(import.meta.env.VITE_API+"/php/removeList.php", {
+    id: props.listID,
+    hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked ? "1" : "0"
+  }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
+    if (res.data == 3) {
+      router.replace('/browse')
+    }
+  })
+
+  let timeoutLength = Math.trunc(1/levelList.value.levels.length*1000)
+  let levelCards = document.querySelectorAll(".levelCard")
+
+  let i = 0
+  let hide = setInterval(() => {
+    (levelCards[i] as HTMLDivElement).style.display = "none"
+    i++
+    if (i == levelCards.length) clearInterval(hide)
+  }, timeoutLength)
+  
+}
 </script>
 
 <template>
@@ -92,21 +175,23 @@ const addFromFavorites = (level: FavoritedLevel) => {
     picker-data-type="favoriteLevel"
   />
 
+  <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>
+
   <h2 class="my-4 text-3xl text-center text-white" v-show="!previewingList">
-    Editor
+    {{ editing ? 'Upravování' : 'Editor' }}
   </h2>
   <NotLoggedIn
     v-if="!isLoggedIn"
     mess="Pro vytvoření seznamu se prosím přihlaš!"
   />
-  <section v-show="previewingList">
-    <div class="flex relative justify-center items-center mx-5 text-white">
-      <button @click="previewingList = false" class="absolute left-0 button">
-        <img src="@/images/arrow-left.webp" class="w-12" alt="" />
+  <section v-show="previewingList" class="mt-4">
+    <div class="flex fixed top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-9/12 text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
+      <button @click="previewingList = false" class="absolute top-1 left-1 button">
+        <img src="@/images/arrow-left.webp" class="w-10" alt="" />
       </button>
       <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
     </div>
-    <div class="flex flex-col gap-3 mt-12">
+    <div class="flex flex-col gap-3 mt-20">
       <LevelCard
         v-for="level in levelList.levels"
         v-bind="level"
@@ -128,6 +213,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <input
         autocomplete="off"
         type="text"
+        id="levelName"
         placeholder="Jméno seznamu"
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
       />
@@ -135,6 +221,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <textarea
         autocomplete="off"
         type="text"
+        id="description"
         placeholder="Popis seznamu"
         class="h-16 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         v-model="levelList.description"
@@ -168,7 +255,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
       <span>Barva pozadí:</span>
       <button
         type="button"
-        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focusOutline button"
+        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus-visible:outline button"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
@@ -238,12 +325,33 @@ const addFromFavorites = (level: FavoritedLevel) => {
       />
     </main>
     <ListSettings />
-    <button
-      type="submit"
-      class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
-    >
-      <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
-    </button>
+
+    <section class="flex gap-3">
+      <button
+        type="submit"
+        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
+        @click="uploadList"
+        v-if="!editing"
+      >
+        <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
+      </button>
+      <button
+        type="submit"
+        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
+        @click="updateList"
+        v-if="editing"
+      >
+        <img src="../images/upload.svg" class="w-6" alt="" />Aktualizovat
+      </button>
+      <button
+        type="submit"
+        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black bg-red-400 rounded-md button"
+        @click="removeListPopupOpen = true"
+        v-if="editing"
+      >
+        <img src="../images/del.svg" class="w-6" alt="" />Smazat
+      </button>
+    </section>
   </form>
   <button @click="nice" class="translate-y-20">dwdsasad</button>
 </template>

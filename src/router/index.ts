@@ -17,8 +17,9 @@ const router = createRouter({
       path: "/browse",
       name: "browser",
       props: (route) => ({
-        browserName: "Komunitní seznamy",
         query: route.query.q ?? "",
+        onlineType: route.query.type ?? "",
+        browserName: "Komunitní seznamy"
       }),
       component: () => import("@/components/CommunityLists.vue"),
     },
@@ -32,6 +33,12 @@ const router = createRouter({
       name: "listViewer",
       props: (route) => ({ listID: route.params.id }),
       component: () => import("@/components/ListView.vue"),
+    },
+    {
+      path: "/:id/edit",
+      name: "editing",
+      props: (route) => ({ listID: route.params.id, editing: true }),
+      component: () => import("@/components/Editor.vue"),
     },
     {
       path: "/random",

@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar.vue";
 import { onMounted, ref } from "vue";
 import cookier from "cookier";
 import { SETTINGS } from "./siteSettings";
+import router from "./router";
 
 if (localStorage) {
   localStorage.getItem("favoriteIDs") ??
@@ -19,7 +20,17 @@ if (localStorage) {
 
   localStorage.getItem("settings") ??
     localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
-  SETTINGS.value = JSON.parse(localStorage.getItem("settings")!)
+
+  let loadedSettings: any = JSON.parse(localStorage.getItem("settings")!);
+  let loadedSettingsKeys: any = Object.keys(loadedSettings);
+  let settingsKeys: any = Object.keys(SETTINGS.value);
+  if (loadedSettingsKeys.length < settingsKeys.length) {
+    settingsKeys.forEach(setting => {
+      if (!loadedSettingsKeys.includes(setting)) loadedSettings[setting] = SETTINGS.value[setting]
+    })
+    localStorage.setItem("settings", JSON.stringify(loadedSettings))
+  }
+  SETTINGS.value = loadedSettings
 }
 
 const loggedIn = ref<boolean>(false);

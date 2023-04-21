@@ -23,6 +23,19 @@ export interface ListFetchResponse {
   hidden: string;
 }
 
+export interface ListUpdateFetch {
+  creator: ""
+  name: string
+  data: LevelList
+  id: number
+  timestamp: string
+  hidden: string
+  uid: string
+  rate_ratio: number
+  views: number
+  diffGuesser: number
+}
+
 export interface FavoritedLevel {
   levelName: string;
   creator: string;
@@ -75,11 +88,11 @@ export interface LevelList {
 
 export interface Level {
   levelName: string;
-  creator: string;
+  creator: string | CollabData;
   levelID: string | null;
   video: string | null;
   difficulty: [number, number];
-  color: [number, number, number, number];
+  color: [number, number, number];
   tags: LevelTag[];
 }
 

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
+import router from "@/router";
 
-defineProps({ query: String });
+const props = defineProps<{
+  query: string
+  onlineType: "" | "user" | "hidden"
+}>();
 
-const browser = ref<"" | "user" | "hidden">("");
+const browser = ref<"" | "user" | "hidden">(props.onlineType);
 </script>
 
 <template>

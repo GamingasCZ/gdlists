@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList"): void;
+  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList"): void;
 }>();
 
 const rating = ref<[number, number, -2 | 0 | 1]>();
@@ -46,6 +46,12 @@ watch(toggleDescription, () => {
     description.style.height = 20 + description.scrollHeight + "px";
   else description.style.height = "";
 });
+
+const userUID = ref<string>("")
+if (localStorage) {
+  userUID.value = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? ""
+}
+
 </script>
 
 <template>
@@ -203,6 +209,8 @@ watch(toggleDescription, () => {
         <!-- Edit list -->
         <button
           class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
+          @click="emit('doListAction', 'editList')"
+          v-if="userUID == uid"
         >
           <img
             class="inline w-4 max-sm:w-6 sm:mr-2"

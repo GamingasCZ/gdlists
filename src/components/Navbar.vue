@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
-import { nextTick, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 
-defineProps<{
+const props = defineProps<{
   isLoggedIn: boolean;
 }>();
 
@@ -12,9 +12,12 @@ const settingsShown = ref<Boolean>(false);
 const showSettings = () => (settingsShown.value = !settingsShown.value);
 
 const loginInfo = ref<string[]>();
-if (localStorage) {
-  loginInfo.value = JSON.parse(localStorage.getItem("account_info")!);
-}
+
+watch(props, () => {
+    if (localStorage && props.isLoggedIn) {
+      loginInfo.value = JSON.parse(localStorage.getItem("account_info")!);
+    }
+})
 
 watch(settingsShown, () => {
   nextTick(() => {

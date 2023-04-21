@@ -3,11 +3,12 @@ import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { SETTINGS } from "@/siteSettings";
 
 document.title = "GD Seznamy";
 
-defineProps({
+const props = defineProps({
   isLoggedIn: Boolean,
 });
 
@@ -16,28 +17,32 @@ const firstTimeUser = ref<boolean>(false);
 
 const returnfromLoginPFP = ref<string>("");
 const returnfromLoginName = ref<string>("");
-let loginCookie = cookier("logindata").get();
-if (loginCookie != null) {
-  returnedFromLogin.value = true;
 
-  loginCookie = JSON.parse(loginCookie);
-  returnfromLoginName.value = loginCookie[0];
-
-  // first-time user
-  firstTimeUser.value = loginCookie[3];
-  if (!firstTimeUser) {
-    let loginToast = document.getElementById("loginToast");
-    loginToast?.classList.remove("-translate-y-16");
-    setTimeout(() => {
-      loginToast?.classList.add("-translate-y-16");
-      setTimeout(() => loginToast?.remove(), 500);
-    }, 2500);
+watch(props, () => {
+  let loginCookie = cookier("logindata").get();
+  if (props.isLoggedIn && loginCookie != null) {
+    returnedFromLogin.value = true;
+  
+    loginCookie = JSON.parse(loginCookie);
+    returnfromLoginName.value = loginCookie[0];
+  
+    // first-time user
+    firstTimeUser.value = loginCookie[3];
+    if (!firstTimeUser.value) {
+      let loginToast = document.getElementById("loginToast");
+      loginToast?.classList.remove("-translate-y-16");
+      setTimeout(() => {
+        loginToast?.classList.add("-translate-y-16");
+        setTimeout(() => loginToast?.remove(), 500);
+      }, 2500);
+    }
+  
+    returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`;
+  
+    cookier("logindata").remove();
   }
+})
 
-  returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`;
-
-  cookier("logindata").remove();
-}
 </script>
 
 <template>
@@ -114,55 +119,58 @@ if (loginCookie != null) {
     </div>
   </section>
 
-  <ListSection
-    :header-name="$t('homepage.newest')"
-    :extra-text="$t('homepage.more')"
-    extra-icon="more"
-    :empty-text="$t('homepage.listsUnavailable')"
-    extra-action="/browse"
-    content-type="/getLists.php?homepage=1"
-  />
+  <main id="homepageSections" class="grid" :style="{gridTemplateColumns: '1fr '.repeat(SETTINGS.homepageColumns)}">
+    <ListSection
+      :header-name="$t('homepage.newest')"
+      :extra-text="$t('homepage.more')"
+      extra-icon="more"
+      :empty-text="$t('homepage.listsUnavailable')"
+      extra-action="/browse"
+      content-type="/getLists.php?homepage=1"
+    />
+  
+    <ListSection
+      :header-name="$t('homepage.pinned')"
+      :empty-text="$t('homepage.noListsPinned')"
+      content-type="@pinnedLists"
+      :max-items="5"
+    />
+  
+    <ListSection
+      v-if="isLoggedIn"
+      :header-name="$t('homepage.uploaded')"
+      :extra-text="$t('homepage.more')"
+      extra-icon="more"
+      extra-action="/browse?type=user"
+      :empty-text="$t('homepage.noListsUploaded')"
+      content-type="/getLists.php?homeUser"
+    />
+  
+    <ListSection
+      :header-name="$t('homepage.visited')"
+      :extra-text="$t('homepage.clear')"
+      extra-icon="trash"
+      extra-action="@clear"
+      :empty-text="$t('homepage.noListsVisited')"
+      content-type="@recentlyViewed"
+    />
+  
+    <ListSection
+      :header-name="$t('homepage.savedMix')"
+      :extra-text="$t('homepage.more')"
+      extra-icon="more"
+      :empty-text="$t('homepage.noLevelsSaved')"
+      content-type="@favorites"
+      extra-action="/saved"
+      :randomize-content="true"
+      :list-type="1"
+    />
+  
+    <ListSection
+      :header-name="$t('homepage.official')"
+      :empty-text="$t('homepage.listsNonexistent')"
+      content-type="oldLists"
+    />
+  </main>
 
-  <ListSection
-    :header-name="$t('homepage.pinned')"
-    :empty-text="$t('homepage.noListsPinned')"
-    content-type="@pinnedLists"
-    :max-items="5"
-  />
-
-  <ListSection
-    v-if="isLoggedIn"
-    :header-name="$t('homepage.uploaded')"
-    :extra-text="$t('homepage.more')"
-    extra-icon="more"
-    extra-action="/browse"
-    :empty-text="$t('homepage.noListsUploaded')"
-    content-type="/getLists.php?homeUser"
-  />
-
-  <ListSection
-    :header-name="$t('homepage.visited')"
-    :extra-text="$t('homepage.clear')"
-    extra-icon="trash"
-    extra-action="@clear"
-    :empty-text="$t('homepage.noListsVisited')"
-    content-type="@recentlyViewed"
-  />
-
-  <ListSection
-    :header-name="$t('homepage.savedMix')"
-    :extra-text="$t('homepage.more')"
-    extra-icon="more"
-    :empty-text="$t('homepage.noLevelsSaved')"
-    content-type="@favorites"
-    extra-action="/saved"
-    :randomize-content="true"
-    :list-type="1"
-  />
-
-  <ListSection
-    :header-name="$t('homepage.official')"
-    :empty-text="$t('homepage.listsNonexistent')"
-    content-type="oldLists"
-  />
 </template>

@@ -4,27 +4,34 @@ import type { LevelList, Level, LevelTag } from "./interfaces";
 
 export const TAG_COUNT = 27;
 
-export const levelList = ref<LevelList>({
+export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
   pageBGcolor: [0, 0, 0.2],
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
   levels: [],
-});
+}
+
+export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
+
+export function makeListColor(col?: [number, number, number] | string): [number, number, number] {
+  // Random color
+  if (typeof col == 'object' && col.length) return col
+  else if (typeof col == 'string') return chroma(col).hsl()
+  else {
+    let randomColor = chroma.hsv(
+      Math.floor(Math.random() * 360), 1, Math.random() / 2
+    ).hsv()
+    return randomColor
+  }
+}
 
 export function addLevel(values: Level | null) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
     creator: values?.creator ?? "",
-    color:
-      values?.color ??
-      chroma(
-        Math.floor(Math.random() * 360),
-        1,
-        Math.random() / 2,
-        "hsv"
-      ).hsv(),
+    color: makeListColor(values?.color),
     levelID: values?.levelID ?? "",
     video: values?.video ?? "",
     difficulty: values?.difficulty ?? [0, 0],
@@ -57,7 +64,10 @@ export function testIfImageExists(url: string) {
   });
 }
 
-export const modifyListBG = (newColors: number[]) => {
+export const modifyListBG = (newColors: number[] | string) => {
+  // Old lists - hex colors
+  if (typeof newColors == 'string') newColors = chroma(newColors).hsl()
+
   document.documentElement.style.setProperty(
     "--siteBackground",
     chroma(
@@ -82,3 +92,22 @@ export const modifyListBG = (newColors: number[]) => {
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
 };
+
+export function checkList(listName: string) {
+  let error = (errorText: string, errorPos?: number) => { return {valid: false, error: errorText, listPos: errorPos ?? -1} }
+
+  if (listName.length <= 3) return error("Jméno seznamu je moc krátké!")
+
+  if (levelList.value.levels.length == 0) return error("Snažíš se poslat prázdný seznam lmao :D.")
+  
+  let i = 1
+  levelList.value.levels.forEach(level => {
+    if (level.levelName.length == 0) return error(`Level na ${i}. místě nemá jméno!`, i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) return error(`Level na ${i}. místě nemá tvůrce!`, i)
+    if (level.levelID?.match(/^\d+$/)) return error(`Level na ${i}. místě má neplatné ID levelu!`, i)
+    i++
+  })
+
+  let listSize = JSON.stringify(levelList.value).length
+  if (listSize > 25000) return(`Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o ${(listSize/25000).toFixed(2)}% nad limitem.`)
+}

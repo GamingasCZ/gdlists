@@ -32,46 +32,15 @@
 }
 
 body {
-  background-color: var(--siteBackground);
-  font-family: poppins;
-  transition: background-color 0.3s;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
+  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins]
 }
 
 .button {
-  transition: scale 0.05s linear;
-  scale: 1;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-}
-
-.button:hover {
-  scale: 1.05;
-}
-.button:active {
-  scale: 1.15;
+  @apply transition-transform scale-100 outline-none cursor-pointer duration-[50ms] ease-linear hover:scale-105 active:scale-110 
 }
 
 input[type="checkbox"] {
-  appearance: none;
-  border: rgba(255, 255, 255, 0.5) solid 0.15rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 0.2rem;
-  position: relative;
-  vertical-align: middle;
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-right: 0.5rem;
-}
-
-.focusOutline:focus-visible {
-  outline: auto;
-}
-input[type="checkbox"]:focus-visible {
-  outline: auto;
+  @apply appearance-none border-white border-opacity-50 border-solid border-[0.15rem] bg-white bg-opacity-20 rounded relative align-middle w-6 h-6 mr-2 focus-visible:outline
 }
 
 input[type="checkbox"]:checked::after {
@@ -88,19 +57,11 @@ input[type="checkbox"]:checked::after {
 }
 
 .disabled {
-  opacity: 0.2;
-  filter: grayscale(100%);
+  @apply opacity-20 grayscale
 }
 
 dialog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 50;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: saturate(0);
+  @apply fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-80 backdrop-saturate-0
 }
 
 .descriptionFade::before {
@@ -116,31 +77,22 @@ dialog {
 }
 
 .slider::-moz-range-thumb {
-  background: #4d6c4f;
-  border: none;
-  box-shadow: black 0px 0px 7px;
-  transform: scale(1.2);
-  transition: transform 0.2s;
+  @apply border-none scale-125 transition-transform duration-200 bg-[#4d6c4f] shadow-lg shadow-black
 }
 .slider::-moz-range-track {
-  background: #ffffff1c;
-  height: 0.4em;
-  border-radius: 2em;
+  @apply bg-black bg-opacity-10 h-2 rounded-full
 }
 .slider::-moz-range-progress {
-  background: linear-gradient(9deg, #54c14b, #31fda7);
-  height: 0.4em;
-  border-radius: 2em;
+  @apply from-[#54c14b] to-[#31fda7] bg-gradient-to-l h-2 rounded-full
 }
 .slider::-moz-range-thumb:hover {
-  transform: scale(1.25);
-  cursor: pointer;
+  @apply scale-[1.25] cursor-pointer
 }
 .slider::-moz-range-thumb:active {
-  transform: scale(1.4);
+  @apply scale-[1.4]
 }
 .slider {
-  background: none;
+  @apply bg-none
 }
 
 @keyframes flash {

@@ -22,7 +22,7 @@ const emit = defineEmits<{
 }>();
 
 // Colors
-const darkCol = () =>
+const darkCol = () => 
   chroma
     .hsl(...props.data?.color!)
     .darken()
