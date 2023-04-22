@@ -197,6 +197,8 @@ onMounted(() => {
 
 // Changing browser types with browser buttons
 watch(props, (newBrowser) => {
+  LISTS.value = []
+  filtered = []
   refreshBrowser();
 });
 
@@ -337,6 +339,7 @@ window.addEventListener("scroll", infiniteScroll)
           v-bind="list"
           :user-array="USERS"
           :index="index"
+          :is-pinned="false"
           @remove-level="removeFavoriteLevel"
         ></component>
       </main>
