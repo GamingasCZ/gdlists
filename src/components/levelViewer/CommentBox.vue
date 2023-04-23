@@ -1,0 +1,97 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { makeColor, EMOJI_COUNT } from '@/Editor'
+import chroma from 'chroma-js'
+import ColorPicker from '../global/ColorPicker.vue'
+import Editor from 'pure-editor'
+
+
+const loggedIn = ref<boolean>(true)
+
+const pfp = ref<string>("")
+const username = ref<string>("")
+if (localStorage) {
+    let userInfo = JSON.parse(localStorage.getItem("account_info")!)
+    if (userInfo == null) loggedIn.value = false
+    else {
+        pfp.value = `https://cdn.discordapp.com/avatars/${userInfo[1]}/${userInfo[2]}.png`
+        username.value = userInfo[0]
+    }
+}
+
+function getEmoji(ind: number) {
+    const path = `../../images/emoji/${ind.toString().padStart(2, '0')}.webp`;
+    return new URL(path, import.meta.url).toString()
+}
+
+
+const listColor = ref<number[]>(makeColor())
+const parsedColor = ref<string>(chroma(listColor.value).hex())
+const darkParsedColor = ref<string>(chroma(listColor.value).darken(4).hex())
+
+const dropdownOpen = ref<number>(-1)
+const openDropdown = (ind: number) => dropdownOpen.value = dropdownOpen.value == ind ? -1 : ind
+
+var COMMENT_BOX
+onMounted(() => {
+    COMMENT_BOX = new Editor(document.getElementById("commentBox"), {
+        emoji: {
+            render(emoji) {
+                const img = document.createElement('img')
+                img.classList.add('inline-block', 'w-4',)
+                img.src = getEmoji(emoji.id)
+                img.draggable = false
+                // const img = document.createElement('kbd')
+                // img.classList.add('inline-block', 'w-4', 'h-4', 'bg-cover')
+                // img.style.backgroundImage = `url(${getEmoji(emoji.id)})`
+                // img.draggable = true
+                return img
+            },
+        },
+        submit: {
+            will: e => e.key === 'Enter' && e.ctrlKey,
+            done: console.log,
+        },
+    })
+})
+
+
+
+function sendComment() {
+    console.log(COMMENT_BOX.submit())
+}
+
+</script>
+
+<template>
+    <section v-if="!loggedIn">
+
+    </section>
+
+    <section v-else class="z-10 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
+        <pre contenteditable="true" id="commentBox" class="overflow-y-auto font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-20" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
+        
+        <!-- Color Picker -->
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-md" v-show="dropdownOpen == 0">
+            <ColorPicker @colors-modified="listColor = chroma.hsl(...$event).hsl()" />
+        </div>
+
+        <!-- Emoji Picker -->
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
+            <button v-for="index in EMOJI_COUNT" class="w-8 h-8 bg-cover select-none button" :style="{backgroundImage: `url(${getEmoji(index)})`}" @click="COMMENT_BOX.insertEmoji({ id: index })" @drag=""></button>
+        </div>
+
+        <footer class="flex justify-between mt-1">
+            <div>
+                <img :src="pfp" class="inline mr-2 w-8 rounded-full" alt="">
+                <label>{{ username }}</label>
+            </div>
+
+            <div class="flex gap-2">
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="sendComment"><img src="@/images/send.svg" class="inline" alt=""></button>
+            </div>
+        </footer>
+    </section>
+</template>

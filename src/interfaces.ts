@@ -23,6 +23,18 @@ export interface ListFetchResponse {
   hidden: string;
 }
 
+export interface CommentFetchResponse {
+  username: string
+  comment: string
+  comType: string
+  bgcolor: string
+  listID: string
+  comID: string
+  verified: string
+  timestamp: string
+  uid: string
+}
+
 export interface ListUpdateFetch {
   creator: ""
   name: string

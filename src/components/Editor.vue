@@ -8,7 +8,7 @@ import BGImagePicker from "./global/BackgroundImagePicker.vue";
 import DescriptionEditor from "./global/TextEditor.vue";
 import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeListColor } from "../Editor";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeColor } from "../Editor";
 import { ref, onMounted, nextTick } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList } from "@/interfaces";
 import chroma from "chroma-js";
@@ -49,7 +49,7 @@ if (props.editing) {
 
     list.levels.forEach(level => addLevel(level))
 
-    levelList.value.pageBGcolor = makeListColor(list.pageBGcolor)
+    levelList.value.pageBGcolor = makeColor(list.pageBGcolor)
     
     // Color is most likely #020202, the default color
     if (!isNaN(levelList.value.pageBGcolor[0])) modifyListBG(levelList.value.pageBGcolor)

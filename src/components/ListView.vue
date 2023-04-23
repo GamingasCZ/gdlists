@@ -6,6 +6,7 @@ import type {
   ListPreview,
   Level,
 } from "@/interfaces";
+import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
@@ -174,12 +175,16 @@ const toggleListPin = () => {
   }
 }
 
-const getURL = () => `${window.location.host}/${PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`;
+const getURL = () => `${window.location.host}/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`;
 const sharePopupOpen = ref<boolean>(false);
 const jumpToPopupOpen = ref<boolean>(false);
+const commentsShowing = ref<boolean>(false)
 
 const listActions = (action: string) => {
   switch (action) {
+    case "comments":
+      commentsShowing.value = !commentsShowing.value;
+      break;
     case "sharePopup":
       sharePopupOpen.value = true;
       break;
@@ -198,12 +203,12 @@ const listActions = (action: string) => {
 </script>
 
 <template>
-  <div
+  <!-- <div
     :style="{
       height: (LIST_DATA?.data?.titleImg?.[2] ?? 0) + '%',
       backgroundPositionY: (LIST_DATA?.data?.titleImg?.[1] ?? 0) + '%',
     }"
-  >
+  > -->
     <div
       v-if="LIST_DATA?.data.titleImg?.[4]"
       :style="{
@@ -215,9 +220,9 @@ const listActions = (action: string) => {
           )
         ).hex()}, transparent)`,
       }"
-      class="absolute w-full h-full"
+      class="absolute w-full h-full -z-20"
     ></div>
-  </div>
+  <!-- </div> -->
 
   <SharePopup
     v-show="sharePopupOpen"
@@ -247,6 +252,8 @@ const listActions = (action: string) => {
       />
     </header>
     <main class="flex flex-col gap-4">
+
+      <!-- Nonexistent list -->
       <section v-if="nonexistentList" class="flex flex-col items-center my-20 text-white">
         <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
         <h2 class="mt-2 text-2xl font-bold opacity-60">Tento seznam neexistuje!</h2>
@@ -260,6 +267,7 @@ const listActions = (action: string) => {
         </div>
       </section>
 
+      <!-- List -->
       <LevelCard
         v-for="(level, index) in LIST_DATA?.data.levels"
         v-bind="level"
@@ -270,8 +278,11 @@ const listActions = (action: string) => {
         :translucent-card="LIST_DATA?.data.translucent!"
         class="levelCard"
         :disable-stars="false"
+        v-show="!commentsShowing"
         @vnode-mounted="tryJumping(index)"
       />
+
+      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"/>
     </main>
   </section>
 </template>

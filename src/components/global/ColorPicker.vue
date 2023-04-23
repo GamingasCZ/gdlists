@@ -17,10 +17,10 @@ const giveValue = (
 <template>
   <section class="w-full">
     <div>
-      <img src="@/images/rgb.webp" alt="" class="h-6 w-full rounded-md" />
+      <img src="@/images/rgb.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
       <input
         type="range"
-        class="colorPickerSlider w-full"
+        class="w-full colorPickerSlider"
         min="0"
         max="360"
         :value="color[0]"
@@ -34,10 +34,10 @@ const giveValue = (
     </div>
 
     <div>
-      <img src="@/images/value.webp" alt="" class="h-6 w-full rounded-md" />
+      <img src="@/images/value.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
       <input
         type="range"
-        class="colorPickerSlider w-full"
+        class="w-full colorPickerSlider"
         min="0"
         max="32"
         :value="color[1]"

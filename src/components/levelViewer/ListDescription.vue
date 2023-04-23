@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList"): void;
+  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments"): void;
 }>();
 
 const rating = ref<[number, number, -2 | 0 | 1]>();
@@ -148,7 +148,7 @@ if (localStorage) {
   
         <!-- Comments button -->
         <div class="sm:ml-9">
-          <button class="relative p-2 rounded-md button bg-greenGradient">
+          <button class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
             <img src="@/images/comment.svg" class="inline w-6 sm:mr-2" /><label
               class="max-sm:hidden"
               >Komentáře</label

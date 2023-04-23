@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import type {
-  FavoritedLevel,
-  ListCreatorInfo,
-  ListPreview,
-} from "@/interfaces";
+import type { ListCreatorInfo, ListPreview } from "@/interfaces";
+import CommentPreview from "@/components/levelViewer/CommentPreview.vue";
 import ListPrevElement from "@/components/global/ListPreview.vue";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
@@ -21,6 +18,8 @@ const props = defineProps({
   onlineBrowser: { type: Boolean, required: true },
   onlineType: { type: String, default: "", immediate: true },
   isLoggedIn: Boolean,
+  hideSearch: {type: Boolean, default: false},
+  commentID: {type: String, default: 0}
 });
 
 document.title = `${props.browserName} | GD Seznamy`;
@@ -111,19 +110,34 @@ function refreshBrowser() {
     return;
   }
 
-  let fetchType = "";
-  if (props.onlineType) fetchType = `&${props.onlineType}=1`;
+  let fetchURI: string
+  let fetchQuery: Object
+  if (props?.onlineType != 'comments') {
+    fetchURI = `${import.meta.env.VITE_API}/php/getLists.php`
+    fetchQuery = {
+      startID: 999999,
+      searchQuery: SEARCH_QUERY.value,
+      page: PAGE.value,
+      path: "/php/getLists.php",
+      fetchAmount: LISTS_ON_PAGE,
+      sort: 0
+    }
+    if (props?.onlineType) fetchQuery[props.onlineType] = 1
+  }
+  else {
+    fetchURI = `${import.meta.env.VITE_API}/php/getComments.php`
+    fetchQuery = {
+      page: PAGE.value,
+      startID: 999999,
+      path: "/php/getComments.php",
+      fetchAmount: LISTS_ON_PAGE,
+      listid: props.commentID
+    }
+  }
 
   axios
-    .get(
-      `${import.meta.env.VITE_API}/php/getLists.php
-?startID=999999
-&searchQuery=${SEARCH_QUERY.value}
-&page=${PAGE.value}
-&path=%2Fphp%2FgetLists.php
-&fetchAmount=${LISTS_ON_PAGE}
-&sort=0${fetchType}`,
-      { headers: { Authorization: cookier("access_token").get() } }
+    .get(fetchURI,
+      { headers: { Authorization: cookier("access_token").get() }, params: fetchQuery }
     )
     .then((res: AxiosResponse) => {
       if (res.status != 200) {
@@ -255,6 +269,7 @@ window.addEventListener("scroll", infiniteScroll)
           action=""
           class="flex gap-2 items-center"
           @submit.prevent="doSearch"
+          v-if="!hideSearch"
         >
           <input
             v-model="SEARCH_QUERY"
@@ -312,7 +327,7 @@ window.addEventListener("scroll", infiniteScroll)
       </header>
       <main class="flex flex-col gap-3 items-center mt-6">
         <div
-          v-if="searchNoResults"
+          v-if="searchNoResults && LISTS.length == 0"
           class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
@@ -333,7 +348,7 @@ window.addEventListener("scroll", infiniteScroll)
           </button>
         </div>
         <component
-          :is="onlineBrowser ? ListPrevElement : FavoritePreview"
+          :is="onlineType == 'comments' ? CommentPreview : (onlineBrowser ? ListPrevElement : FavoritePreview)"
           class="min-w-full listPreviews"
           v-for="(list, index) in LISTS"
           v-bind="list"

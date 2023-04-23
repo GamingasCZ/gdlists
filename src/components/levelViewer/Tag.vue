@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import type { LevelTag } from "@/interfaces";
+import { ref } from "vue";
 const props = defineProps<{
   tag: LevelTag;
 }>();
+
+const tagImage = ref<string>("")
+import(`../../images/badges/${props.tag[0]}.svg`).then(res => tagImage.value = res.default)
+
 </script>
 
 <template>
-  <div class="rounded-full bg-black bg-opacity-40 p-1.5 text-xs sm:text-sm">
+  <div class="p-1.5 text-xs bg-black bg-opacity-40 rounded-full sm:text-sm">
     <img
-      :src="`/src/images/badges/${tag[0]}.svg`"
-      class="mr-2 inline w-3 align-middle sm:w-6"
+      :src="tagImage"
+      class="inline mr-2 w-3 align-middle sm:w-6"
       alt=""
     />
     <a

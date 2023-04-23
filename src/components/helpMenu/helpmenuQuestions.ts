@@ -49,4 +49,16 @@ export const qa: question[] = [
     question: "Licence",
     answer: "todo",
   },
+  {
+    question: "Použité balíčky",
+    answer: `
+vue \n
+tailwind \n
+axios\n
+typescript\n
+chroma-js\n
+cookier\n
+pure-editor\n
+    `,
+  },
 ];

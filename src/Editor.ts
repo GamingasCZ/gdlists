@@ -3,6 +3,7 @@ import { ref } from "vue";
 import type { LevelList, Level, LevelTag } from "./interfaces";
 
 export const TAG_COUNT = 27;
+export const EMOJI_COUNT = 18;
 
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
@@ -15,7 +16,7 @@ export const DEFAULT_LEVELLIST: LevelList = {
 
 export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
 
-export function makeListColor(col?: [number, number, number] | string): [number, number, number] {
+export function makeColor(col?: [number, number, number] | string): [number, number, number] {
   // Random color
   if (typeof col == 'object' && col.length) return col
   else if (typeof col == 'string') return chroma(col).hsl()
@@ -31,7 +32,7 @@ export function addLevel(values: Level | null) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
     creator: values?.creator ?? "",
-    color: makeListColor(values?.color),
+    color: makeColor(values?.color),
     levelID: values?.levelID ?? "",
     video: values?.video ?? "",
     difficulty: values?.difficulty ?? [0, 0],
