@@ -1,0 +1,55 @@
+<?php
+/*
+Return codes: 
+0 - Connection error
+1 - Empty request
+2 - Invalid password
+3 - Success!
+*/
+
+header("Access-Control-Allow-Origin: *");
+header('Access-Control-Allow-Headers: authorization,content-type');
+require("globals.php");
+header('Content-type: application/json'); // Return as JSON
+
+$mysqli = new mysqli($hostname, $username, $password, $database);
+
+if ($mysqli -> connect_errno) {
+  http_response_code(500);
+  echo "0";
+  exit();
+}
+
+// Checking request
+
+$DATA = json_decode(file_get_contents("php://input"), true);
+
+$fuckupData = sanitizeInput(array($DATA["id"]));
+
+// Password check
+if ($DATA["hidden"] == 0) {
+  $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [strval($fuckupData[0])], "i");
+}
+else {
+  $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [strval($fuckupData[0])], "s");
+}
+
+// This causes passwords to not work, hopefully no one minds :)
+$creatorCheck = checkListOwnership($mysqli, $listData["uid"]);
+if (!$creatorCheck) {
+  $mysqli -> close();
+  http_response_code(401);
+  die("2");
+}
+
+// Removing list
+if ($DATA["hidden"] == 0) {
+  doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
+}
+else {
+  doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");
+}
+echo "3";
+
+$mysqli -> close();
+?>

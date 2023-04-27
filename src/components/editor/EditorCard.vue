@@ -81,7 +81,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   }
 
   axios
-    .get(import.meta.env.VITE_API + "/php/rubLevelData.php?" + request)
+    .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
     .then((response: AxiosResponse) => {
       let level: LevelSearchResponse = response.data;
       levelList.value.levels[props.index!].levelID = level.id;

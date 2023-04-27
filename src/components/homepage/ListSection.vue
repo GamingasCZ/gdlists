@@ -29,7 +29,7 @@ const lists = ref<ListPreview[] | FavoritedLevel[]>();
 if (props.contentType?.startsWith("/")) {
   // link
   axios
-    .get(import.meta.env.VITE_API + "/php" + props.contentType, {
+    .get(import.meta.env.VITE_API + props.contentType, {
       headers: { Authorization: cookier("access_token").get() },
     })
     .then((response: AxiosResponse) => {

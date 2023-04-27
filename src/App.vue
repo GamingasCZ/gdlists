@@ -36,7 +36,7 @@ if (localStorage) {
 const loggedIn = ref<boolean>(false);
 onMounted(() => {
   axios
-    .get(import.meta.env.VITE_API + "/php/accounts.php?check", {
+    .get(import.meta.env.VITE_API + "/accounts.php?check", {
       headers: { Authorization: cookier("access_token").get() },
     })
     .then((res: AxiosResponse) => {

@@ -31,7 +31,7 @@ onMounted(() => {
 
 var isNowHidden: Boolean
 if (props.editing) {
-  axios.post(import.meta.env.VITE_API+"/php/pwdCheckAction.php", {id: props.listID}, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
+  axios.post(import.meta.env.VITE_API+"/pwdCheckAction.php", {id: props.listID}, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     let listData: ListUpdateFetch = res.data;
     let list: LevelList = listData.data;
     (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
@@ -106,7 +106,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
 };
 
 function uploadList() {
-  axios.post(import.meta.env.VITE_API+"/php/sendList.php", {
+  axios.post(import.meta.env.VITE_API+"/sendList.php", {
     listData: JSON.stringify(levelList.value),
     lName: (document.getElementById("levelName") as HTMLInputElement).value,
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
@@ -117,7 +117,7 @@ function uploadList() {
 }
 
 function updateList() {
-  axios.post(import.meta.env.VITE_API+"/php/updateList.php", {
+  axios.post(import.meta.env.VITE_API+"/updateList.php", {
     listData: JSON.stringify(levelList.value),
     id: props.listID,
     isNowHidden: isNowHidden ? "true" : "false",
@@ -129,7 +129,7 @@ function updateList() {
 }
 
 function removeList() {
-  axios.post(import.meta.env.VITE_API+"/php/removeList.php", {
+  axios.post(import.meta.env.VITE_API+"/removeList.php", {
     id: props.listID,
     hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked ? "1" : "0"
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {

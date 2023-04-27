@@ -19,10 +19,14 @@ const props = defineProps({
   onlineType: { type: String, default: "", immediate: true },
   isLoggedIn: Boolean,
   hideSearch: {type: Boolean, default: false},
-  commentID: {type: String, default: 0}
+  commentID: {type: String, default: 0},
+  refreshButton: {type: Boolean, default: false}
 });
 
-document.title = `${props.browserName} | GD Seznamy`;
+// Page title
+if (props.browserName) {
+  document.title = `${props.browserName} | GD Seznamy`;
+}
 
 // Infinite scrolling / Pages watch
 const usingPagesScrolling = ref<boolean>(Boolean(SETTINGS.value.scrolling))
@@ -113,23 +117,23 @@ function refreshBrowser() {
   let fetchURI: string
   let fetchQuery: Object
   if (props?.onlineType != 'comments') {
-    fetchURI = `${import.meta.env.VITE_API}/php/getLists.php`
+    fetchURI = `${import.meta.env.VITE_API}/getLists.php`
     fetchQuery = {
       startID: 999999,
       searchQuery: SEARCH_QUERY.value,
       page: PAGE.value,
-      path: "/php/getLists.php",
+      path: "/getLists.php",
       fetchAmount: LISTS_ON_PAGE,
       sort: 0
     }
     if (props?.onlineType) fetchQuery[props.onlineType] = 1
   }
   else {
-    fetchURI = `${import.meta.env.VITE_API}/php/getComments.php`
+    fetchURI = `${import.meta.env.VITE_API}/getComments.php`
     fetchQuery = {
       page: PAGE.value,
       startID: 999999,
-      path: "/php/getComments.php",
+      path: "/getComments.php",
       fetchAmount: LISTS_ON_PAGE,
       listid: props.commentID
     }
@@ -228,6 +232,8 @@ function infiniteScroll() {
 }
 
 window.addEventListener("scroll", infiniteScroll)
+
+const headerEmpty = () => document.getElementById("browserHeader")?.childElementCount == 0
 </script>
 
 <template>
@@ -264,7 +270,10 @@ window.addEventListener("scroll", infiniteScroll)
       </header>
       <header
         class="flex gap-3 justify-between max-sm:flex-col max-sm:items-center"
+        id="browserHeader"
       >
+
+        <!-- Search box -->
         <form
           action=""
           class="flex gap-2 items-center"
@@ -285,7 +294,14 @@ window.addEventListener("scroll", infiniteScroll)
             <img src="@/images/searchOpaque.svg" alt="" class="p-2 w-11" />
           </button>
         </form>
-        <div class="flex gap-2 items-center" v-show="usingPagesScrolling" v-if="maxPages > 1">
+
+        <!-- Refresh Button -->
+        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="refreshBrowser()">
+          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">Obnovit</label>
+        </button>
+
+        <!-- Page Switcher -->
+        <div class="flex gap-2 items-center" v-if="maxPages > 1 && usingPagesScrolling">
           <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
             <img src="@/images/showCommsL.svg" class="w-4" alt="" />
           </button>
@@ -325,7 +341,9 @@ window.addEventListener("scroll", infiniteScroll)
           </button>
         </div>
       </header>
-      <main class="flex flex-col gap-3 items-center mt-6">
+      <main class="flex flex-col gap-3 items-center" :class="{'mt-6': !headerEmpty()}">
+
+        <!-- No results BG -->
         <div
           v-if="searchNoResults && LISTS.length == 0"
           class="flex flex-col gap-3 justify-center items-center"
@@ -333,6 +351,8 @@ window.addEventListener("scroll", infiniteScroll)
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">Žádné výsledky!</p>
         </div>
+
+        <!-- Loading error BG -->
         <div
           v-if="loadFailed"
           class="flex flex-col gap-3 justify-center items-center"
@@ -347,6 +367,8 @@ window.addEventListener("scroll", infiniteScroll)
             znova
           </button>
         </div>
+
+        <!-- Previews -->
         <component
           :is="onlineType == 'comments' ? CommentPreview : (onlineBrowser ? ListPrevElement : FavoritePreview)"
           class="min-w-full listPreviews"

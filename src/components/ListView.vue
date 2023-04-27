@@ -50,7 +50,7 @@ function main() {
   nonexistentList.value = false
   
   axios
-    .get(import.meta.env.VITE_API + "/php/getLists.php?" + listURL)
+    .get(import.meta.env.VITE_API + "/getLists.php?" + listURL)
     .then((res: AxiosResponse) => {
       if (res.data == 2) {
         nonexistentList.value = true

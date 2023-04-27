@@ -25,7 +25,7 @@ const rating = ref<[number, number, -2 | 0 | 1]>();
 const rate = ref<number>();
 onMounted(() => {
   axios
-    .get(import.meta.env.VITE_API + `/php/rateAction.php/?id=${props.id}`)
+    .get(import.meta.env.VITE_API + `/rateAction.php/?id=${props.id}`)
     .then((res: AxiosResponse) => {
       rating.value = res.data;
       rate.value = res.data[0] - res.data[1];
