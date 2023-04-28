@@ -7,8 +7,6 @@ Return codes:
 3 - Success!
 */
 
-header("Access-Control-Allow-Origin: *");
-header('Access-Control-Allow-Headers: authorization,content-type');
 require("globals.php");
 header('Content-type: application/json'); // Return as JSON
 

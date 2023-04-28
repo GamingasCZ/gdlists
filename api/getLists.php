@@ -9,8 +9,6 @@ Return codes:
 */
 
 header("Content-Type: application/json"); // Return as JSON
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: authorization');
 require("globals.php");
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -54,7 +52,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       doRequest($mysqli, "UPDATE lists SET views = views+1 WHERE id=?", [$rows["id"]], "i");
       $rows["views"] += 1;
     }
-    setcookie("lastViewed", $rows["id"], time()+300);
+    setcookie("lastViewed", $rows["id"], time()+300, "/");
 
     // Fetch comment amount
     $commAmount = doRequest($mysqli, "SELECT COUNT(*) FROM comments WHERE listID = ?", [list_id($rows)], "s");

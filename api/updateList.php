@@ -8,8 +8,6 @@ Return codes:
 4 - No changes made to list
 */
 
-header("Access-Control-Allow-Origin: *");
-header('Access-Control-Allow-Headers: authorization,content-type');
 require("globals.php");
 header('Content-type: application/json'); // Return as JSON
 

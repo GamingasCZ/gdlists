@@ -10,8 +10,6 @@ Return codes:
 6 - Comment sent!!
 */
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: authorization');
 require("globals.php");
 header('Content-type: application/json'); // Return as JSON
 
