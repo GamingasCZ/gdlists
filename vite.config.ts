@@ -26,10 +26,13 @@ export default defineConfig(mode => {
     },
     server: {
       proxy: {
-        '/api': {
+        '/gdlists/api': {
           target: env.VITE_ENDPOINT,
           changeOrigin: true,
-          prependPath: true
+          prependPath: true,
+          cookieDomainRewrite: {
+            "*": "http://localhost:8000"
+          }
         }
       }
     },

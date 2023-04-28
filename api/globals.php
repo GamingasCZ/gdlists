@@ -88,7 +88,11 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
     foreach ($data as $key => $value) {
         $data[$key] = curl_unescape($curl, $value);
     }
-    if ($needsRURL) { $data["redirect_uri"] = $GDL_ENDPOINT . "/accounts.php"; }
+
+    // This may cause problems. 
+    $https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
+
+    if ($needsRURL) { $data["redirect_uri"] = $https . $_SERVER["HTTP_HOST"] . $_SERVER["PHP_SELF"]; }
 
     curl_setopt($curl, CURLINFO_HEADER_OUT, true);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -156,10 +160,8 @@ function removeCookie($cookie) {
 }
 
 function getAuthorization() {
-    // bro
-    $headers = getallheaders();
-    if (isset($headers["authorization"])) return $headers["authorization"];
-    else if (isset($headers["Authorization"])) return $headers["Authorization"];
+    // bro (oh, it's ok now :D)
+    if (isset($_COOKIE["access_token"])) return $_COOKIE["access_token"];
     else return false;
 }
 

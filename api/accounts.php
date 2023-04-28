@@ -4,9 +4,7 @@ Return codes:
 0 - Every error
 1 - Account already created
 */
-header("Access-Control-Allow-Origin: *");
 header('Content-type: application/json'); // Return as JSON
-header('Access-Control-Allow-Headers: authorization');
 require("globals.php");
 
 if (sizeof($_GET) == 1) {
@@ -29,7 +27,6 @@ if (sizeof($_GET) == 1) {
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
     $baseURL = "https://discord.com/api/v10/oauth2/token";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 1), true);
-    print_r($accessInfo);
     if (array_key_exists("error", $accessInfo)) die(0);
 
     // Get user data
@@ -64,7 +61,8 @@ if (sizeof($_GET) == 1) {
 
     $mysqli -> close();
 
-    header("Location: " . $_SERVER["HTTP_REFERER"]."/gdlists/");
+    $https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
+    header("Location: " . $https . $_SERVER["HTTP_HOST"] . '/gdlists');
 }
 else {
     http_response_code(401);

@@ -1,6 +1,5 @@
 <?php
 require("globals.php");
-header("Access-Control-Allow-Origin: *");
 header('Content-type: application/json'); // Return as JSON
 /*
 Return codes:

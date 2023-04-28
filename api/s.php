@@ -25,7 +25,7 @@ function parseResult($rows) {
 
   // Single list
   $rows["data"] = json_decode(htmlspecialchars_decode($rows["data"]));
-  setcookie("lastViewed", $rows["id"], time()+300);
+  setcookie("lastViewed", $rows["id"], time()+300, "/");
 
   // Fetch comment amount
   $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);                  
