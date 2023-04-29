@@ -8,8 +8,9 @@ import BGImagePicker from "./global/BackgroundImagePicker.vue";
 import DescriptionEditor from "./global/TextEditor.vue";
 import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
+import CollabEditor from "./editor/CollabEditor.vue"
 import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeColor } from "../Editor";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, watch } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
@@ -29,10 +30,21 @@ onMounted(() => {
   levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
 })
 
-var isNowHidden: Boolean
+var isNowHidden: boolean
+
+const listExists = ref<boolean>(true)
+const listBelongsToYou = ref<boolean>(true)
 if (props.editing) {
   axios.post(import.meta.env.VITE_API+"/pwdCheckAction.php", {id: props.listID}, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    let listData: ListUpdateFetch = res.data;
+    let listData: ListUpdateFetch | number = res.data;
+    if (typeof listData == 'number') {
+      switch (listData) {
+        case 2: listBelongsToYou.value = false; break;
+        case 3: listExists.value = false; break;
+      }
+      return
+    }
+
     let list: LevelList = listData.data;
     (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
     (document.getElementById("levelName") as HTMLInputElement).disabled = true;
@@ -49,11 +61,11 @@ if (props.editing) {
 
     list.levels.forEach(level => addLevel(level))
 
-    levelList.value.pageBGcolor = makeColor(list.pageBGcolor)
+    levelList.value.pageBGcolor = [NaN, 0, 2]
     
     // Color is most likely #020202, the default color
     if (!isNaN(levelList.value.pageBGcolor[0])) modifyListBG(levelList.value.pageBGcolor)
-  })
+  }).catch(() => listExists.value = false)
 }
 
 const nice = () => {
@@ -66,6 +78,7 @@ const bgColorPickerOpen = ref<boolean>(false);
 const descriptionEditorOpen = ref<boolean>(false);
 const favoriteLevelPickerOpen = ref<boolean>(false);
 const removeListPopupOpen = ref<boolean>(false);
+const collabEditorOpen = ref<boolean>(false);
 const previewingList = ref<boolean>(false);
 
 const startAddLevel = () => {
@@ -149,23 +162,42 @@ function removeList() {
   }, timeoutLength)
   
 }
+
 </script>
 
 <template>
-  <TagPickerPopup
-    v-show="tagPopupOpen"
-    @close-popup="tagPopupOpen = false"
-    @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
-  ></TagPickerPopup>
-  <BGImagePicker
+  <Transition name="fade">
+    <TagPickerPopup
+      v-show="tagPopupOpen"
+      @close-popup="tagPopupOpen = false"
+      @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
+    ></TagPickerPopup>
+  </Transition>
+  
+  <Transition name="fade">
+    <BGImagePicker
     v-if="BGpickerPopupOpen"
     @close-popup="BGpickerPopupOpen = false"
-  />
-  <DescriptionEditor
-    v-show="descriptionEditorOpen"
-    editor-title="Editor popisku"
-    @close-popup="descriptionEditorOpen = false"
-  />
+    />
+  </Transition>
+
+  <Transition name="fade">
+    <DescriptionEditor
+      v-show="descriptionEditorOpen"
+      editor-title="Editor popisku"
+      @close-popup="descriptionEditorOpen = false"
+    />
+  </Transition>
+
+  <Transition name="fade">
+    <CollabEditor
+      v-show="collabEditorOpen"
+      v-if="levelList.levels.length > 0"
+      :index="currentlyOpenedCard"
+      @close-popup="collabEditorOpen = false"
+    />
+  </Transition>
+
   <PickerPopup
     v-show="favoriteLevelPickerOpen"
     browser-name="Uložené levely"
@@ -184,32 +216,62 @@ function removeList() {
     v-if="!isLoggedIn"
     mess="Pro vytvoření seznamu se prosím přihlaš!"
   />
-  <section v-show="previewingList" class="mt-4">
-    <div class="flex fixed top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-9/12 text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
-      <button @click="previewingList = false" class="absolute top-1 left-1 button">
-        <img src="@/images/arrow-left.webp" class="w-10" alt="" />
-      </button>
-      <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
-    </div>
-    <div class="flex flex-col gap-3 mt-20">
-      <LevelCard
-        v-for="level in levelList.levels"
-        v-bind="level"
-        :disable-stars="true"
-        :translucent-card="levelList.translucent"
-      />
-    </div>
+
+  <!-- List Preview -->
+  <Transition name="fadeSlide">
+    <section v-show="previewingList" class="mt-4">
+      <div class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
+        <button @click="previewingList = false" class="absolute top-1 left-1 button">
+          <img src="@/images/arrow-left.webp" class="w-10" alt="" />
+        </button>
+        <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
+      </div>
+      <div class="flex flex-col gap-3 mt-20">
+        <LevelCard
+          v-for="level in levelList.levels"
+          v-bind="level"
+          :disable-stars="true"
+          :translucent-card="levelList.translucent"
+        />
+      </div>
+    </section>
+  </Transition>
+
+  <!-- Edit error - List doesn't exist -->
+  <section
+    class="flex flex-col items-center mx-auto my-11 w-max text-2xl font-bold text-center text-white opacity-40"
+    v-if="!listExists"
+  >
+    <img src="@/images/listError.svg" class="mb-4 w-48" alt="">
+    <p>Tento seznam neexistuje!</p>
   </section>
+
+
+  <!-- Edit error - List doesn't belong to you -->
+  <section
+    class="flex flex-col items-center mx-auto my-11 w-max text-2xl font-bold text-center text-white opacity-40"
+    v-if="!listBelongsToYou"
+  >
+    <div class="relative mb-4">
+      <img src="@/images/edit.svg" class="w-48" alt="">
+      <img src="@/images/close.svg" class="absolute right-0 bottom-5 w-12" alt="">
+    </div>
+    <p>Tento seznam ti nepatří!</p>
+  </section>
+
+  <!-- Editor -->
   <form
     action="/editor"
     @submit.prevent
     class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
     v-show="!previewingList"
-    v-if="isLoggedIn"
+    v-if="isLoggedIn && listExists && listBelongsToYou"
   >
     <div
       class="my-2 grid w-full grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3 sm:-mr-10"
     >
+    
+      <!-- List name -->
       <input
         autocomplete="off"
         type="text"
@@ -218,6 +280,8 @@ function removeList() {
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
       />
       <div></div>
+
+      <!-- List description -->
       <textarea
         autocomplete="off"
         type="text"
@@ -234,6 +298,8 @@ function removeList() {
           @click="descriptionEditorOpen = true"
         />
       </button>
+
+      <!-- List Background -->
       <input
         autocomplete="off"
         type="text"
@@ -249,6 +315,7 @@ function removeList() {
           @click="BGpickerPopupOpen = true"
         />
       </button>
+
     </div>
 
     <div class="flex gap-2 items-center my-1">
@@ -321,6 +388,7 @@ function removeList() {
         @update-opened-card="updateOpenedCard"
         @start-move="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
+        @open-collab-tools="collabEditorOpen = true"
         class="levelCard"
       />
     </main>

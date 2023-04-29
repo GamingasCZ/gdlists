@@ -8,7 +8,7 @@ Return codes:
 4 - Invalid listID
 */
 
-require("secrets.php");
+require("globals.php");
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli->connect_errno) {
@@ -27,20 +27,24 @@ function parseResult($rows) {
   $rows["data"] = json_decode(htmlspecialchars_decode($rows["data"]));
   setcookie("lastViewed", $rows["id"], time()+300, "/");
 
-  // Fetch comment amount
-  $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);                  
-  
-  $result = $mysqli -> query($query) or die($mysqli -> error);
-  $users = $result -> fetch_all(MYSQLI_ASSOC);
-  $listLen = sizeof(array_filter(array_keys((array)$rows["data"]), "mtch"));
-  $desc = sprintf("Check out the %s levels this Geometry Dash list contains!", $listLen, $rows["views"]);
-  //echo $rows["name"];
+  $listMaker;
+  if ($rows["creator"] == "") {
+    // Fetch comment amount
+    $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);
+
+    $result = $mysqli -> query($query) or die($mysqli -> error);
+    $users = $result -> fetch_all(MYSQLI_ASSOC);
+    $listMaker = $users[0]["username"];
+  }
+  else $listMaker = $rows["creator"];
+  $desc = "Check these levels out on GD Lists!";
+
   echo "<head>";
   echo '<meta name="twitter:card" content="summary">';
   echo '<meta name="twitter:image" content="http://gamingas.wz.cz/lofttop10/images/twitImg.webp">';
-  echo '<meta name="twitter:title" property="og:title" itemprop="name" content="'.$rows["name"].' by '.$users[0]["username"].' | GD Lists">';
+  echo '<meta name="twitter:title" property="og:title" itemprop="name" content="'.$rows["name"].' by '.$listMaker.' | GD Lists">';
   echo '<meta name="twitter:description" property="og:description" itemprop="description" content="'.$desc.'">';
-  echo '<script>window.location.replace("http://gamingas.wz.cz/lofttop10/#' . $rows["id"] . '")</script>';
+  echo '<script>window.location.replace("https://gamingas.wz.cz/gdlists/' . $rows["id"] . '")</script>';
   echo "</head><body></body></html>";
 }
 

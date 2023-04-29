@@ -36,7 +36,7 @@ onMounted(() => {
 });
 
 const getCol = () =>
-  document.documentElement.style.getPropertyValue("--primaryColor");
+document.documentElement.style.getPropertyValue("--primaryColor")
 
 const toggleDescription = ref<boolean>(false);
 const tallDescription = ref<boolean>(false);

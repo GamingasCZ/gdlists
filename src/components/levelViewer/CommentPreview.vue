@@ -58,6 +58,9 @@ else if (Math.floor(datePassed/604800) <= 4) time.value = `před ${Math.floor(da
 else if (Math.floor(datePassed/2419200) <= 4) time.value = `před 1 měsícem`
 else time.value = `před ${Math.floor(datePassed/2419200)} měsíci`
 
+const parsedComment = ref<string>("")
+parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5" src="' + new URL(`../../images/emoji/$1.webp`, import.meta.url).href + '" alt="">')
+
 </script>
 
 <template>
@@ -69,6 +72,6 @@ else time.value = `před ${Math.floor(datePassed/2419200)} měsíci`
           <h5 class="text-xs opacity-50 cursor-help" :title="dateString">{{ time }}</h5>
         </div>
       </header>
-      <article class="overflow-y-auto p-1 mt-1 max-h-32 rounded-md border-4 border-solid" :style="{borderColor: bgcolor , boxShadow: `0px 0px 10px ${bgcolor}`, backgroundColor: chroma(bgcolor).darken(4).hex() }">{{ comment }}</article>
+      <article class="overflow-y-auto p-1 mt-1 max-h-32 rounded-md border-4 border-solid" :style="{borderColor: bgcolor , boxShadow: `0px 0px 10px ${bgcolor}`, backgroundColor: chroma(bgcolor).darken(4).hex() }" v-html="parsedComment"></article>
     </section>
 </template>

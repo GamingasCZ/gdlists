@@ -75,7 +75,7 @@ function main() {
         recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
   
         addIntoRecentlyViewed =
-          recentlyViewed.filter((list: ListPreview) => list.id == (PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
+          recentlyViewed.filter((list: ListPreview) => list.id == (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
           .length == 0; // Has not been viewed yet
       }
   
@@ -245,7 +245,7 @@ const listActions = (action: string) => {
         @do-list-action="listActions"
         v-bind="LIST_DATA"
         :creator="LIST_CREATOR"
-        :id="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+        :id="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
         :list-pinned="listPinned"
         class="mb-8"
         v-if="LIST_DATA.name != undefined && !nonexistentList"
@@ -282,7 +282,7 @@ const listActions = (action: string) => {
         @vnode-mounted="tryJumping(index)"
       />
 
-      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"/>
+      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"/>
     </main>
   </section>
 </template>

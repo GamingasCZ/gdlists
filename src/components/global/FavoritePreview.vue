@@ -21,10 +21,6 @@ const props = defineProps({
 
 const listColor = ref<Color>(chroma(props.levelColor!));
 
-watch(props, (newProps) => {
-  listColor.value = chroma(props.levelColor!);
-});
-
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
   else if (secs < 3600) return Math.round(secs / 60) + "m"; //m - minutes
@@ -52,7 +48,7 @@ const uploadDate = reactive(new Date(props.timeAdded!));
       borderColor: listColor.darken(2).hex(),
     }"
   >
-    <section class="flex flex-col items-center gap-1">
+    <section class="flex flex-col gap-1 items-center">
       <div
         v-if="timeAdded"
         class="flex gap-1 text-xs hover:cursor-help"
@@ -71,7 +67,7 @@ const uploadDate = reactive(new Date(props.timeAdded!));
 
     <button
       v-if="!hideRemove"
-      class="button ml-auto box-border w-10 rounded-full bg-black bg-opacity-40 p-2"
+      class="box-border p-2 ml-auto w-10 bg-black bg-opacity-40 rounded-full button"
       @click.stop.prevent="emit('removeLevel', levelID)"
     >
       <img src="@/images/trash.svg" class="w-7" alt="" />

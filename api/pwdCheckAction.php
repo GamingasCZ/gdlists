@@ -3,9 +3,9 @@
 Return codes:
 0 - Error connecting to database
 1 - Empty/incomplete request
-2 - Incorrect password
-3 - List needs password
-4 - Success!!
+2 - Not your list
+3 - List doesn't exist
+[LIST_DATA] - Success!!
 */
 
 require("globals.php");
@@ -33,10 +33,14 @@ else {
 $datacheck = sanitizeInput([$listType[0]]);
 
 $listData = doRequest($mysqli, sprintf("SELECT * FROM `lists` WHERE `%s`= ?", $listType[1]), [$datacheck[0]], "s");
+if ($listData === null) {
+    die("3");
+}
 
 $owner = checkListOwnership($mysqli, $listData["uid"]);
 if ($owner) {
     $listData["data"] = json_decode(htmlspecialchars_decode($listData["data"]));
     echo json_encode($listData);
 }
+else die("2");
 ?>

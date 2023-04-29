@@ -18,11 +18,11 @@ function logout() {
 
 <template>
   <div
-    class="flex fixed right-2 top-12 flex-col gap-3 p-2 text-white rounded-md bg-greenGradient"
+    class="flex fixed right-2 top-16 flex-col gap-3 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
-      class="flex flex-col gap-1 justify-center items-center py-2 pt-6 w-36 bg-black bg-opacity-50 rounded-md"
+      class="flex flex-col gap-1 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
       v-else
     >
       <h1 class="font-bold">{{ username }}</h1>

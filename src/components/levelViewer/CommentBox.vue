@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { makeColor, EMOJI_COUNT } from '@/Editor'
 import chroma from 'chroma-js'
 import ColorPicker from '../global/ColorPicker.vue'
@@ -30,15 +30,21 @@ function getEmoji(ind: number) {
 }
 
 
-const listColor = ref<number[]>(makeColor())
-const parsedColor = ref<string>(chroma(listColor.value).hex())
-const darkParsedColor = ref<string>(chroma(listColor.value).darken(4).hex())
+const listColor = ref<number[]>([Math.floor(Math.random()*360), 8+Math.random()*24])
+const parsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).hex())
+const darkParsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).darken(4).hex())
+watch(listColor, () => {
+    parsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).hex()
+    darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).darken(4).hex()
+}, {deep: true})
 
 const dropdownOpen = ref<number>(-1)
 const openDropdown = (ind: number) => dropdownOpen.value = dropdownOpen.value == ind ? -1 : ind
 
 var COMMENT_BOX
 onMounted(() => {
+    if (document.getElementById("commentBox") == null) return
+
     COMMENT_BOX = new Editor(document.getElementById("commentBox"), {
         emoji: {
             render(emoji) {
@@ -108,8 +114,8 @@ function sendComment() {
         </div>
 
         <!-- Emoji Picker -->
-        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
-            <button v-for="index in EMOJI_COUNT" class="w-8 h-8 bg-cover select-none button" :style="{backgroundImage: `url(${getEmoji(index)})`}" @click="COMMENT_BOX.insertEmoji({ id: index })" @drag=""></button>
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
+            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${getEmoji(index)})`}" @click="COMMENT_BOX.insertEmoji({ id: index })" @drag=""></button>
         </div>
 
         <footer class="flex justify-between mt-1">
@@ -124,5 +130,6 @@ function sendComment() {
                 <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="sendComment"><img src="@/images/send.svg" class="inline" alt=""></button>
             </div>
         </footer>
+        <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-1 mx-auto mt-6 mb-6 max-sm:hidden">
     </section>
 </template>

@@ -216,6 +216,7 @@ onMounted(() => {
 // Changing browser types with browser buttons
 watch(props, (newBrowser) => {
   LISTS.value = []
+  PAGE.value = 0
   filtered = []
   refreshBrowser();
 });
@@ -242,7 +243,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
 
     <main class="mt-3">
       <header
-        class="flex gap-3 justify-center"
+        class="flex gap-3 justify-center mb-3"
         v-show="onlineBrowser"
         v-if="isLoggedIn"
       >
@@ -378,6 +379,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           :index="index"
           :is-pinned="false"
           @remove-level="removeFavoriteLevel"
+          :key="Math.random()"
         ></component>
       </main>
     </main>

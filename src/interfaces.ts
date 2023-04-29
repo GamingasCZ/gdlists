@@ -100,7 +100,7 @@ export interface LevelList {
 
 export interface Level {
   levelName: string;
-  creator: string | CollabData;
+  creator: CollabData | string;
   levelID: string | null;
   video: string | null;
   difficulty: [number, number];

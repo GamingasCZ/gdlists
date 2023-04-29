@@ -11,7 +11,7 @@ const props = defineProps<{
 const settingsShown = ref<Boolean>(false);
 const showSettings = () => (settingsShown.value = !settingsShown.value);
 
-const loginInfo = ref<string[]>();
+const loginInfo = ref<string[]>([]);
 
 watch(props, () => {
     if (localStorage && props.isLoggedIn) {
@@ -19,25 +19,6 @@ watch(props, () => {
     }
 })
 
-watch(settingsShown, () => {
-  nextTick(() => {
-    let pfp = document.querySelector("#profilePicture") as HTMLImageElement;
-    let settings = document.querySelector("#settingsMenu") as HTMLDivElement;
-    let settingsPos = [settings.offsetTop, settings.offsetLeft];
-
-    let settingsWidth = settings.clientWidth;
-
-    if (settingsShown) {
-      pfp.style.transform = "scale(2)";
-      pfp.style.top = `calc(${settingsPos[0]}px - 1rem)`;
-      pfp.style.left = `calc(${settingsPos[1] + settingsWidth / 2}px - 1rem)`;
-    } else {
-      pfp.style.transform = "";
-      pfp.style.top = "0";
-      pfp.style.left = "0";
-    }
-  });
-});
 </script>
 
 <template>
@@ -77,20 +58,22 @@ watch(settingsShown, () => {
       alt=""
       class="px-1 w-10 h-10 button"
     />
-    <div v-else class="box-border w-8 h-8">
+    <div v-else @click="showSettings()" class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
       <img
-        @click="showSettings()"
         alt=""
         :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
-        class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid button"
+        :class="{'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown}"
+        class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid !transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture"
       />
     </div>
-    <SetingsMenu
-      :username="loginInfo ? loginInfo[0] : ''"
-      :is-logged-in="isLoggedIn"
-      v-show="settingsShown"
-      id="settingsMenu"
-    />
+    <Transition name="fadeSlide">
+      <SetingsMenu
+        :username="loginInfo ? loginInfo[0] : ''"
+        :is-logged-in="isLoggedIn"
+        v-show="settingsShown"
+        id="settingsMenu"
+      />
+    </Transition>
   </nav>
 </template>

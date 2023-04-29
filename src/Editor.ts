@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, LevelTag } from "./interfaces";
+import type { LevelList, Level, LevelTag, CollabData } from "./interfaces";
 
 export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
@@ -111,4 +111,8 @@ export function checkList(listName: string) {
 
   let listSize = JSON.stringify(levelList.value).length
   if (listSize > 25000) return(`Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o ${(listSize/25000).toFixed(2)}% nad limitem.`)
+}
+
+export function creatorToCollab(currentName: string): CollabData {
+  return [[currentName, 0, "Host"], [], []]
 }

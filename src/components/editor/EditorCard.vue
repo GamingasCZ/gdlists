@@ -19,6 +19,7 @@ const emit = defineEmits<{
   (e: "updateOpenedCard", newPos: number): void;
   (e: "startMove", pos: number, newInd: number): void;
   (e: "openTagPopup"): void;
+  (e: "openCollabTools", levelIndex: number): void;
 }>();
 
 // Colors
@@ -274,6 +275,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="p-1 w-10 bg-black bg-opacity-30 rounded-full button aspect-square"
             src="../../images/bytost.webp"
             alt=""
+            @click="emit('openCollabTools', index!)"
           />
         </div>
       </div>

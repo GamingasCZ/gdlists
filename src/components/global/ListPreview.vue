@@ -37,10 +37,6 @@ const listColor = ref<Color>(makeColor());
 
 const emit = defineEmits(['unpinList'])
 
-watch(props, (newProps) => {
-  listColor.value = makeColor();
-});
-
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
   else if (secs < 3600) return Math.round(secs / 60) + "m"; //m - minutes
