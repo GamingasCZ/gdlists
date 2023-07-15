@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { LevelList } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import parseText from "../global/parseEditorFormatting";
 import chroma from "chroma-js";
 
@@ -14,14 +14,15 @@ const props = defineProps<{
   data: LevelList;
   id: string;
   commAmount: number;
-  listPinned: boolean
+  listPinned: boolean;
+  creatorData: {username: string, discord_id: string, avatar_hash: string} | false;
 }>();
 
 const emit = defineEmits<{
-  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments"): void;
+  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras"): void;
 }>();
 
-const rating = ref<[number, number, -2 | 0 | 1]>();
+const rating = ref<[number, number, -2 | -1 | 0 | 1]>();
 const rate = ref<number>();
 onMounted(() => {
   axios
@@ -52,6 +53,12 @@ if (localStorage) {
   userUID.value = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? ""
 }
 
+const pfp = ref("")
+if (!props.creatorData) {
+  import(`../../images/oldPFP.png`).then(res => {pfp.value = res.default})
+}
+else pfp.value = `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
+
 </script>
 
 <template>
@@ -79,7 +86,7 @@ if (localStorage) {
       <main class="relative grow">
         <header class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
           <img
-            src="@/images/defaultPFP.webp"
+            :src="pfp"
             class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid"
             alt=""
           />
@@ -223,7 +230,7 @@ if (localStorage) {
       <!-- Mobile show actions button -->
       <div class="sm:hidden">
         <button
-          @click="emit('doListAction', 'jumpPopup')"
+          @click="emit('doListAction', 'mobileExtras')"
           class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
         >
           <img

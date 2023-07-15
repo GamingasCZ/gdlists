@@ -16,6 +16,7 @@ import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
 import { loadRouteLocation } from "vue-router";
+import MobileExtras from "./levelViewer/MobileExtras.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -37,18 +38,19 @@ const favoritedIDs = ref<string[] | null>();
 let addIntoRecentlyViewed = false;
 let recentlyViewed: ListPreview[];
 
-const LIST_DATA = ref<ListFetchResponse>({data: {levels: []}});
+const LIST_DATA = ref<ListFetchResponse>({ data: { levels: [] } });
 const LIST_CREATOR = ref<string>("");
+const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash: string} | false>()
 const LIST_COL = ref<number[]>([0, 0, 0]);
 
 const nonexistentList = ref<boolean>(false)
 function main() {
-  
+
   let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
   if (props.randomList) listURL = "random";
 
   nonexistentList.value = false
-  
+
   axios
     .get(import.meta.env.VITE_API + "/getLists.php?" + listURL)
     .then((res: AxiosResponse) => {
@@ -56,10 +58,11 @@ function main() {
         nonexistentList.value = true
         return
       }
-  
+
       LIST_DATA.value = res.data[0];
       LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
-  
+      LIST_CREATORDATA.value = res.data[1]?.[0]
+
       // Use new levelList structure (put levels into 'levels' array)
       if (!LIST_DATA.value?.data.levels) {
         LIST_DATA.value!.data.levels = [];
@@ -69,16 +72,16 @@ function main() {
             LIST_DATA.value?.data.levels.push(LIST_DATA.value.data[level]);
           });
       }
-  
+
       if (localStorage != undefined) {
         favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
         recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
-  
+
         addIntoRecentlyViewed =
           recentlyViewed.filter((list: ListPreview) => list.id == (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
-          .length == 0; // Has not been viewed yet
+            .length == 0; // Has not been viewed yet
       }
-  
+
       if (addIntoRecentlyViewed) {
         let isListPrivate = Boolean(LIST_DATA.value?.hidden != "0");
         recentlyViewed.push({
@@ -91,25 +94,24 @@ function main() {
         if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
         localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
       }
-  
+
       document.title = `${LIST_DATA.value?.name} | GD Seznamy`;
-  
+
       // Set list colors
       let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;
       LIST_COL.value =
         typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
       if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
         modifyListBG(LIST_COL.value);
-  
+
       // Set list background image
       let listBG = LIST_DATA.value?.data?.titleImg!;
       (
         document.body as HTMLBodyElement
-      ).style.backgroundImage = `url('${
-        typeof listBG == "string" ? listBG : listBG[0] ?? ""
-      }')`;
+      ).style.backgroundImage = `url('${typeof listBG == "string" ? listBG : listBG[0] ?? ""
+        }')`;
       positionListBackground()
-  
+
       // Check pinned status
       if (localStorage) {
         JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
@@ -117,9 +119,9 @@ function main() {
         });
       }
     });
-  
-  }
-  
+
+}
+
 const positionListBackground = () => ["left", "center", "right"][LIST_DATA.value.data.titleImg?.[3]];
 
 const tryJumping = (ind: number, forceJump = false) => {
@@ -179,6 +181,7 @@ const getURL = () => `${window.location.host}/${!PRIVATE_LIST ? LIST_DATA.value?
 const sharePopupOpen = ref<boolean>(false);
 const jumpToPopupOpen = ref<boolean>(false);
 const commentsShowing = ref<boolean>(false)
+const mobileExtrasOpen = ref<boolean>(false)
 
 const listActions = (action: string) => {
   switch (action) {
@@ -197,6 +200,9 @@ const listActions = (action: string) => {
     case "editList":
       router.push(`/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}/edit`)
       break;
+    case "mobileExtras":
+      mobileExtrasOpen.value = true
+      break;
   }
 };
 
@@ -209,47 +215,31 @@ const listActions = (action: string) => {
       backgroundPositionY: (LIST_DATA?.data?.titleImg?.[1] ?? 0) + '%',
     }"
   > -->
-    <div
-      v-if="LIST_DATA?.data.titleImg?.[4]"
-      :style="{
-        backgroundImage: `linear-gradient(180deg, ${chroma(
-          chroma.hsl(
-            LIST_COL[0],
-            0.36,
-            LIST_COL[1] < 1 ? LIST_COL[1] : LIST_COL[1] * 0.015625
-          )
-        ).hex()}, transparent)`,
-      }"
-      class="absolute w-full h-full -z-20"
-    ></div>
+  <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
+    backgroundImage: `linear-gradient(180deg, ${chroma(
+      chroma.hsl(
+        LIST_COL[0],
+        0.36,
+        LIST_COL[1] < 1 ? LIST_COL[1] : LIST_COL[1] * 0.015625
+      )
+    ).hex()}, transparent)`,
+  }" class="absolute w-full h-full -z-20"></div>
   <!-- </div> -->
 
-  <SharePopup
-    v-show="sharePopupOpen"
-    @close-popup="sharePopupOpen = false"
-    :share-text="getURL()"
-  />
-  <PickerPopup
-    @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)"
-    v-show="jumpToPopupOpen"
-    picker-data-type="level"
-    :picker-data="LIST_DATA.data.levels"
-    @close-popup="jumpToPopupOpen = false"
-    browser-name="Skočit na"
-  />
+  <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
+  <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen"
+    picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"
+    browser-name="Skočit na" />
+
+  <!-- Mobile options popup -->
+  <MobileExtras v-if="mobileExtrasOpen" @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
 
   <section class="mt-12 text-white">
     <header>
       <div class=""></div>
-      <ListDescription
-        @do-list-action="listActions"
-        v-bind="LIST_DATA"
-        :creator="LIST_CREATOR"
-        :id="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-        :list-pinned="listPinned"
-        class="mb-8"
-        v-if="LIST_DATA.name != undefined && !nonexistentList"
-      />
+      <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :creator-data="LIST_CREATORDATA!"
+        :id="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-pinned="listPinned" class="mb-8"
+        v-if="LIST_DATA.name != undefined && !nonexistentList" />
     </header>
     <main class="flex flex-col gap-4">
 
@@ -259,30 +249,25 @@ const listActions = (action: string) => {
         <h2 class="mt-2 text-2xl font-bold opacity-60">Tento seznam neexistuje!</h2>
         <div class="flex gap-3 mt-5 max-sm:flex-col">
           <RouterLink to="/random">
-            <button class="p-2 rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8" alt="">Jít na náhodný seznam</button>
+            <button class="p-2 rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8"
+                alt="">Jít na náhodný seznam</button>
           </RouterLink>
           <RouterLink to="/">
-            <button class="p-2 text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg" class="inline mr-3 w-8" alt="">Jít domů</button>
+            <button class="p-2 text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
+                class="inline mr-3 w-8" alt="">Jít domů</button>
           </RouterLink>
         </div>
       </section>
 
       <!-- List -->
-      <LevelCard
-        v-for="(level, index) in LIST_DATA?.data.levels"
-        v-bind="level"
-        :favorited="favoritedIDs?.includes(level.levelID!)"
-        :level-index="index"
-        :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-        :list-name="LIST_DATA?.name!"
-        :translucent-card="LIST_DATA?.data.translucent!"
-        class="levelCard"
-        :disable-stars="false"
-        v-show="!commentsShowing"
-        @vnode-mounted="tryJumping(index)"
-      />
+      <LevelCard v-for="(level, index) in LIST_DATA?.data.levels" v-bind="level"
+        :favorited="favoritedIDs?.includes(level.levelID!)" :level-index="index"
+        :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-name="LIST_DATA?.name!"
+        :translucent-card="LIST_DATA?.data.translucent!" class="levelCard" :disable-stars="false"
+        v-show="!commentsShowing" @vnode-mounted="tryJumping(index)" />
 
-      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"/>
+      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :comm-amount="LIST_DATA.commAmount"
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" />
     </main>
   </section>
 </template>

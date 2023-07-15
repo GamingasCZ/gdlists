@@ -59,7 +59,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <Navbar :is-logged-in="loggedIn" />
-  <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
+  <main class="min-h-screen">
+    <Navbar :is-logged-in="loggedIn" />
+    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
+  </main>
   <Footer />
 </template>

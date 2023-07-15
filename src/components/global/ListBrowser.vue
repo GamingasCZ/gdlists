@@ -176,6 +176,13 @@ function refreshBrowser() {
     });
 }
 
+const doRefresh = () => {
+  PAGE.value = 0
+  LISTS.value = []
+  loadFailed.value = false
+  refreshBrowser()
+}
+
 const removeFavoriteLevel = (levelID: string) => {
   let levelIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
   let position = levelIDs.indexOf(levelID);
@@ -297,7 +304,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
         </form>
 
         <!-- Refresh Button -->
-        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="refreshBrowser()">
+        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()" v-if="refreshButton && LISTS.length > 0 && !loadFailed">
           <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">Obnovit</label>
         </button>
 
@@ -360,6 +367,31 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
         >
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">Nepodařilo se načíst obsah!</p>
+          <button
+            class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
+            @click="refreshBrowser()"
+          >
+            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />Načíst
+            znova
+          </button>
+        </div>
+
+        <!-- No lists/comments BG -->
+        <div
+          v-if="LISTS.length == 0 && !searchNoResults"
+          class="flex flex-col gap-3 justify-center items-center"
+        >
+          
+          <div class="flex flex-col gap-6 items-center" v-if="onlineType != 'comments'">
+            <img src="@/images/listEmpty.svg" alt="" class="w-48 opacity-25" />
+            <p class="text-xl opacity-90">Nejsou tu žádné seznamy!</p>
+          </div>
+
+          <div class="flex flex-col gap-6 items-center" v-else>
+            <img src="@/images/noComments.svg" alt="" class="w-48 opacity-25" />
+            <p class="text-xl opacity-90">Nejsou tu žádné komentáře!</p>
+          </div>
+
           <button
             class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             @click="refreshBrowser()"

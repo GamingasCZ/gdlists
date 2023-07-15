@@ -20,7 +20,7 @@ if ($mysqli -> connect_errno) die("0");
 
 // Get ID of hidden list
 if (preg_match('/[A-z]/', $_GET["listid"])) {
-    if (strlen($_GET["listid"]) != 10) die("3");
+    if (strlen($_GET["listid"]) != 10 && !in_array($_GET["listid"], ["y2019", "y2021"])) die("3");
     $hiddenID = $mysqli->query(sprintf("SELECT `id` FROM `lists` WHERE `hidden`= '%s'", $_GET["listid"])) or die($mysqli->error);
     $fuckupID = $hiddenID->fetch_all(MYSQLI_ASSOC)[0]["id"];
 }

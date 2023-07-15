@@ -30,6 +30,8 @@ onMounted(() => {
   levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
 })
 
+const isOnline = ref(window.navigator.onLine)
+
 var isNowHidden: boolean
 
 const listExists = ref<boolean>(true)
@@ -394,7 +396,7 @@ function removeList() {
     </main>
     <ListSettings />
 
-    <section class="flex gap-3">
+    <section class="flex gap-3" :class="{'disabled': !isOnline}">
       <button
         type="submit"
         class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"

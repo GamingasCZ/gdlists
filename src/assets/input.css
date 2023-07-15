@@ -32,7 +32,7 @@
 }
 
 body {
-  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins]
+  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins] flex flex-col justify-between
 }
 
 .button {

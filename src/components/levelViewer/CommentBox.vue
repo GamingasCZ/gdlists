@@ -130,6 +130,5 @@ function sendComment() {
                 <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="sendComment"><img src="@/images/send.svg" class="inline" alt=""></button>
             </div>
         </footer>
-        <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-1 mx-auto mt-6 mb-6 max-sm:hidden">
     </section>
 </template>

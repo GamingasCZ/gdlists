@@ -38,7 +38,7 @@ const search = (e: Event) => {
           @click="emit('closePopup')"
         />
       </div>
-      <div class="flex flex-col mt-2">
+      <div class="flex flex-col mt-2 h-[36.5rem]">
         <input
           type="text"
           placeholder="Hledat v nápovědě..."
