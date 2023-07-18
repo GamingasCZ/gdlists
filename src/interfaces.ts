@@ -35,6 +35,11 @@ export interface CommentFetchResponse {
   uid: string
 }
 
+export interface LikeFetchResponse {
+  result: 'deleted' | 'added'
+  ratings: [0|1, 0|1, number]
+}
+
 export interface ListUpdateFetch {
   creator: ""
   name: string

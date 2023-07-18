@@ -36,8 +36,9 @@ switch ($method) {
         
     case 'POST': // No rate => rate
         $accountCheck = checkAccount()["id"];
-        $fuckupData = intval($_POST["id"]);
-        $rating = $_POST["action"] == "1" ? 1 : 0;
+        $DATA = json_decode(file_get_contents("php://input"), true);
+        $fuckupData = intval($DATA["id"]);
+        $rating = $DATA["action"] == 1 ? 1 : 0;
 
         // TODO: check for private lists!!
 

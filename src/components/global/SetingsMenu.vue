@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import LoginButton from "./LoginButton.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
@@ -14,6 +14,8 @@ function logout() {
   localStorage.removeItem("account_info");
   window.location.reload();
 }
+
+const screenWidth = ref(window.innerWidth)
 </script>
 
 <template>
@@ -56,13 +58,14 @@ function logout() {
     </section>
 
     <section
+      v-if="screenWidth > 900"
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
       Domovská stránka
       <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.homepageColumns">
         <option :value="1">1 sloupec</option>
-        <option :value="2">2 sloupce</option>
-        <option :value="3">3 sloupce</option>
+        <option :value="2" v-if="screenWidth > 900">2 sloupce</option>
+        <option :value="3" v-if="screenWidth > 1500">3 sloupce</option>
       </select>
     </section>
   </div>

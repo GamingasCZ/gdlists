@@ -123,7 +123,7 @@ try {
           </div>
 
           <!-- Level name -->
-          <h2 class="ml-2 text-3xl font-black">
+          <h2 class="ml-2 text-3xl font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
             {{ levelName || "Bezejmenný" }}
           </h2>
         </header>

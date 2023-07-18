@@ -51,6 +51,7 @@ const listScroll = () =>
 
 const loadFailed = ref<boolean>(false);
 const searchNoResults = ref<boolean>(false);
+const loading = ref<boolean>(false)
 
 const LISTS_ON_PAGE = 8;
 const PAGE = ref<number>(
@@ -106,14 +107,15 @@ function refreshBrowser() {
       hasSearch.slice(
         LISTS_ON_PAGE * PAGE.value!,
         LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
-      ).forEach((x: ListPreview) => LISTS.value!.push(x))
+        ).forEach((x: ListPreview) => LISTS.value!.push(x))
       infiniteListsLoading = false
     }
     maxPages.value = Math.ceil(hasSearch.length / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
     return;
   }
-
+  
+  loading.value = true
   let fetchURI: string
   let fetchQuery: Object
   if (props?.onlineType != 'comments') {
@@ -166,10 +168,12 @@ function refreshBrowser() {
         infiniteListsLoading = false
       }
 
+      loading.value = false
       USERS.value = res.data[1];
       loadFailed.value = false;
     })
     .catch(e => {
+      loading.value = false
       LISTS.value = [];
       loadFailed.value = true;
       maxPages.value = 0;
@@ -349,11 +353,11 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           </button>
         </div>
       </header>
-      <main class="flex flex-col gap-3 items-center" :class="{'mt-6': !headerEmpty()}">
+      <main class="flex flex-col gap-3 items-center mt-6">
 
         <!-- No results BG -->
         <div
-          v-if="searchNoResults && LISTS.length == 0"
+          v-if="searchNoResults && LISTS.length == 0 && !loading"
           class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
@@ -362,7 +366,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
 
         <!-- Loading error BG -->
         <div
-          v-if="loadFailed"
+          v-if="loadFailed && !loading"
           class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
@@ -376,9 +380,15 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           </button>
         </div>
 
+        <!-- Loading -->
+        <div v-if="loading" class="flex flex-col gap-4 items-center">
+          <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
+          <p class="text-xl text-opacity-40">Načítání...</p>
+        </div>
+
         <!-- No lists/comments BG -->
         <div
-          v-if="LISTS.length == 0 && !searchNoResults"
+          v-if="LISTS.length == 0 && !searchNoResults && !loading"
           class="flex flex-col gap-3 justify-center items-center"
         >
           
@@ -412,7 +422,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           :is-pinned="false"
           @remove-level="removeFavoriteLevel"
           :key="Math.random()"
-        ></component>
+        />
       </main>
     </main>
   </section>

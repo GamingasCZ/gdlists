@@ -3,7 +3,7 @@ import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
-import { onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { SETTINGS } from "@/siteSettings";
 
 document.title = "GD Seznamy";
@@ -17,6 +17,8 @@ const firstTimeUser = ref<boolean>(false);
 
 const returnfromLoginPFP = ref<string>("");
 const returnfromLoginName = ref<string>("");
+
+const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.value.homepageColumns) : '1fr')
 
 watch(props, () => {
   let loginCookie = cookier("logindata").get();
@@ -119,7 +121,7 @@ watch(props, () => {
     </div>
   </section>
 
-  <main id="homepageSections" class="grid" :style="{gridTemplateColumns: '1fr '.repeat(SETTINGS.homepageColumns)}">
+  <main id="homepageSections" class="grid" :style="{gridTemplateColumns: columns}">
     <ListSection
       :header-name="$t('homepage.newest')"
       :extra-text="$t('homepage.more')"
