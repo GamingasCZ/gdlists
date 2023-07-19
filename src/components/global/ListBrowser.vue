@@ -66,6 +66,7 @@ const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
+  LISTS.value = []
   PAGE.value = setPage;
   window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
@@ -295,7 +296,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           action=""
           class="flex gap-2 items-center"
           @submit.prevent="doSearch"
-          v-if="!hideSearch"
+          v-if="(!hideSearch && maxPages > 1) || SEARCH_QUERY.length > 0"
         >
           <input
             v-model="SEARCH_QUERY"
@@ -371,7 +372,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
 
         <!-- Loading error BG -->
         <div
-          v-if="loadFailed && !loading"
+          v-else-if="loadFailed && !loading"
           class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
@@ -386,14 +387,14 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
         </div>
 
         <!-- Loading -->
-        <div v-if="loading" class="flex flex-col gap-4 items-center">
+        <div v-else-if="loading" class="flex flex-col gap-4 items-center">
           <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
           <p class="text-xl text-opacity-40">Načítání...</p>
         </div>
 
         <!-- No lists/comments BG -->
         <div
-          v-if="LISTS.length == 0 && !searchNoResults && !loading"
+          v-else-if="LISTS.length == 0 && !searchNoResults && !loading"
           class="flex flex-col gap-3 justify-center items-center"
         >
           

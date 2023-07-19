@@ -94,25 +94,35 @@ export const modifyListBG = (newColors: number[] | string) => {
   );
 };
 
-export function checkList(listName: string) {
-  let error = (errorText: string, errorPos?: number) => { return {valid: false, error: errorText, listPos: errorPos ?? -1} }
+export function checkList(listName: string): {valid: boolean, error?: string, listPos?: number, stamp?: number} {
+  let error = (errorText: string, errorPos?: number) => { return {valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random()} }
+
+  if (!isOnline.value) return error("Nejsi připojený k internetu!")
 
   if (listName.length <= 3) return error("Jméno seznamu je moc krátké!")
 
   if (levelList.value.levels.length == 0) return error("Snažíš se poslat prázdný seznam lmao :D.")
   
-  let i = 1
+  let i = 0
+  let listError: object | undefined
   levelList.value.levels.forEach(level => {
-    if (level.levelName.length == 0) return error(`Level na ${i}. místě nemá jméno!`, i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) return error(`Level na ${i}. místě nemá tvůrce!`, i)
-    if (level.levelID?.match(/^\d+$/)) return error(`Level na ${i}. místě má neplatné ID levelu!`, i)
+    if (level.levelName.length == 0) listError = error(`Level na ${i+1}. místě nemá jméno!`, i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) listError = error(`Level na ${i+1}. místě nemá tvůrce!`, i)
+    if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(`Level na ${i+1}. místě má neplatné ID levelu!`, i)
     i++
   })
+  if (listError != undefined) return listError
 
   let listSize = JSON.stringify(levelList.value).length
-  if (listSize > 25000) return(`Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o ${(listSize/25000).toFixed(2)}% nad limitem.`)
+  if (listSize > 25000) return error(`Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o ${(listSize/25000).toFixed(2)}% nad limitem.`)
+
+  return {valid: true}
 }
 
 export function creatorToCollab(currentName: string): CollabData {
   return [[currentName, 0, "Host"], [], []]
 }
+
+export const isOnline = ref(true)
+window.addEventListener("offline", () => isOnline.value = false)
+window.addEventListener("online", () => isOnline.value = true)

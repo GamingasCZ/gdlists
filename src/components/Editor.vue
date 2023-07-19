@@ -9,8 +9,9 @@ import DescriptionEditor from "./global/TextEditor.vue";
 import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
 import CollabEditor from "./editor/CollabEditor.vue"
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeColor } from "../Editor";
-import { ref, onMounted, nextTick, watch } from "vue";
+import ErrorPopup from "./editor/errorPopup.vue";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeColor, checkList, isOnline } from "../Editor";
+import { ref, onMounted } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
@@ -29,8 +30,6 @@ const props = defineProps<{
 onMounted(() => {
   levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
 })
-
-const isOnline = ref(window.navigator.onLine)
 
 var isNowHidden: boolean
 
@@ -70,31 +69,52 @@ if (props.editing) {
   }).catch(() => listExists.value = false)
 }
 
+
+
 const nice = () => {
   console.log(levelList.value);
 };
-const currentlyOpenedCard = ref<number>(0);
-const tagPopupOpen = ref<boolean>(false);
-const BGpickerPopupOpen = ref<boolean>(false);
-const bgColorPickerOpen = ref<boolean>(false);
-const descriptionEditorOpen = ref<boolean>(false);
-const favoriteLevelPickerOpen = ref<boolean>(false);
-const removeListPopupOpen = ref<boolean>(false);
-const collabEditorOpen = ref<boolean>(false);
-const previewingList = ref<boolean>(false);
+const tagPopupOpen = ref(false);
+const BGpickerPopupOpen = ref(false);
+const bgColorPickerOpen = ref(false);
+const descriptionEditorOpen = ref(false);
+const favoriteLevelPickerOpen = ref(false);
+const removeListPopupOpen = ref(false);
+const collabEditorOpen = ref(false);
+
+const currentlyOpenedCard = ref(0);
+const previewingList = ref(false);
+
+const listName = ref('')
+const errorMessage = ref('')
+const errorStamp = ref(-1)
+const errorDblclickHelp = ref(false)
+const formShaking = ref(false)
 
 const startAddLevel = () => {
   addLevel(null);
   currentlyOpenedCard.value = levelList.value.levels.length - 1;
 };
 
-const updatingPositions = ref<number>(-1);
+const previewList = (bypassCheck: boolean) => {
+  let check = checkList(listName.value)
+  errorDblclickHelp.value = true
+  if (!check.valid && !bypassCheck) {
+    errorMessage.value = check.error!
+    errorStamp.value = check.stamp!
+    formShaking.value = true
+    setTimeout(() => formShaking.value = false, 333);
+  }
+  else
+    previewingList.value = true
+}
+
+const updatingPositions = ref(-1);
 const updateOpenedCard = (newPos: number) => {
   currentlyOpenedCard.value = newPos;
   if (newPos == -1) updatingPositions.value = currentlyOpenedCard.value;
 };
 
-let oldOpenedPos = 0;
 const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
   if (pos == -1) {
     // Reset
@@ -103,7 +123,6 @@ const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
     return;
   }
   updatingPositions.value = currentlyOpenedCard.value;
-  oldOpenedPos = currentlyOpenedCard.value;
   currentlyOpenedCard.value = -1;
 };
 
@@ -121,6 +140,16 @@ const addFromFavorites = (level: FavoritedLevel) => {
 };
 
 function uploadList() {
+  errorDblclickHelp.value = false
+  let check = checkList(listName.value)
+  if (!check.valid) {
+    errorMessage.value = check.error!
+    errorStamp.value = check.stamp!
+    formShaking.value = true
+    setTimeout(() => formShaking.value = false, 333);
+  }
+
+
   axios.post(import.meta.env.VITE_API+"/sendList.php", {
     listData: JSON.stringify(levelList.value),
     lName: (document.getElementById("levelName") as HTMLInputElement).value,
@@ -219,6 +248,8 @@ function removeList() {
     mess="Pro vytvoření seznamu se prosím přihlaš!"
   />
 
+  <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp"/>
+
   <!-- List Preview -->
   <Transition name="fadeSlide">
     <section v-show="previewingList" class="mt-4">
@@ -228,7 +259,7 @@ function removeList() {
         </button>
         <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
       </div>
-      <div class="flex flex-col gap-3 mt-20">
+      <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
         <LevelCard
           v-for="level in levelList.levels"
           v-bind="level"
@@ -266,6 +297,7 @@ function removeList() {
     action="/editor"
     @submit.prevent
     class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
+    :class="{'motion-reduce:animate-none animate-[shake_0.2s_infinite]': formShaking}"
     v-show="!previewingList"
     v-if="isLoggedIn && listExists && listBelongsToYou"
   >
@@ -278,6 +310,7 @@ function removeList() {
         autocomplete="off"
         type="text"
         id="levelName"
+        v-model="listName"
         placeholder="Jméno seznamu"
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
       />
@@ -344,7 +377,7 @@ function removeList() {
     >
       <span class="text-2xl font-black">Levely</span>
       <div class="box-border flex gap-3 mt-2" v-if="updatingPositions == -1">
-        <button type="button" @click="previewingList = true">
+        <button type="button" @click="previewList(false)" @dblclick="previewList(true)">
           <img
             class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
             src="../images/preview.svg"
@@ -402,6 +435,7 @@ function removeList() {
         class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
         @click="uploadList"
         v-if="!editing"
+        :disabled="!isOnline"
       >
         <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
       </button>
@@ -410,6 +444,7 @@ function removeList() {
         class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
         @click="updateList"
         v-if="editing"
+        :disabled="!isOnline"
       >
         <img src="../images/upload.svg" class="w-6" alt="" />Aktualizovat
       </button>
@@ -418,6 +453,7 @@ function removeList() {
         class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black bg-red-400 rounded-md button"
         @click="removeListPopupOpen = true"
         v-if="editing"
+        :disabled="!isOnline"
       >
         <img src="../images/del.svg" class="w-6" alt="" />Smazat
       </button>

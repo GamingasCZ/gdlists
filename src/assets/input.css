@@ -140,3 +140,11 @@ dialog {
 .slide-leave-to {
   margin-top: -1rem;
 }
+
+@keyframes shake {
+  0% { transform: translate(-5px, 0px); }
+  25% { transform: translate(-5px, 5px); }
+  50% { transform: translate(0px, -5px); }
+  75% { transform: translate(0px, 5px); }
+  100% { transform: translate(5px, 0px); }
+}
