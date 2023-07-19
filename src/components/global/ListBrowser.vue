@@ -10,6 +10,7 @@ import { SETTINGS } from "@/siteSettings";
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
+  (e: "refreshedBrowser", objectAmount: number): void;
 }>();
 
 const props = defineProps({
@@ -150,12 +151,14 @@ function refreshBrowser() {
         loadFailed.value = true;
         LISTS.value = [];
         maxPages.value = 0;
+        emit("refreshedBrowser", 0)
         return;
       }
       if (res.data == 3) {
         searchNoResults.value = true;
         LISTS.value = [];
         maxPages.value = 0;
+        emit("refreshedBrowser", 0)
         return;
       }
 
@@ -168,11 +171,13 @@ function refreshBrowser() {
         infiniteListsLoading = false
       }
 
+      emit("refreshedBrowser", LISTS.value.length)
       loading.value = false
       USERS.value = res.data[1];
       loadFailed.value = false;
     })
     .catch(e => {
+      emit("refreshedBrowser", 0)
       loading.value = false
       LISTS.value = [];
       loadFailed.value = true;
@@ -406,7 +411,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
             class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             @click="refreshBrowser()"
           >
-            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />Načíst
+            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" id="listRefreshButton" />Načíst
             znova
           </button>
         </div>

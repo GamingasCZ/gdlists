@@ -59,7 +59,7 @@ else if (Math.floor(datePassed/2419200) <= 4) time.value = `před 1 měsícem`
 else time.value = `před ${Math.floor(datePassed/2419200)} měsíci`
 
 const parsedComment = ref<string>("")
-parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5" src="' + new URL(`../../images/emoji/$1.webp`, import.meta.url).href + '" alt="">')
+parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5 pointer-events-none" src="' + new URL(`../../images/emoji/$1.webp`, import.meta.url).href + '" alt="">')
 
 </script>
 

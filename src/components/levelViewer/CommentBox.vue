@@ -11,6 +11,9 @@ const props = defineProps<{
     listID: string
 }>()
 
+const MIN_COMMENT_LEN = 10
+const MAX_COMMENT_LEN = 300
+
 const loggedIn = ref<boolean>(true)
 
 const pfp = ref<string>("")
@@ -41,30 +44,28 @@ watch(listColor, () => {
 const dropdownOpen = ref<number>(-1)
 const openDropdown = (ind: number) => dropdownOpen.value = dropdownOpen.value == ind ? -1 : ind
 
-var COMMENT_BOX
+const COMMENT_BOX = ref()
 onMounted(() => {
     if (document.getElementById("commentBox") == null) return
 
-    COMMENT_BOX = new Editor(document.getElementById("commentBox"), {
+    COMMENT_BOX.value = new Editor(document.getElementById("commentBox"), {
         emoji: {
             render(emoji) {
                 const img = document.createElement('img')
                 img.classList.add('inline-block', 'w-4',)
                 img.src = getEmoji(emoji.id)
                 img.draggable = false
-                // const img = document.createElement('kbd')
-                // img.classList.add('inline-block', 'w-4', 'h-4', 'bg-cover')
-                // img.style.backgroundImage = `url(${getEmoji(emoji.id)})`
-                // img.draggable = true
                 return img
             },
         },
         submit: {
             will: e => e.key === 'Enter' && e.ctrlKey,
-            done: console.log,
+            done: sendComment,
         },
     })
 })
+
+const commentLength = ref(0)
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
@@ -80,13 +81,32 @@ placeholder.value = placeholders[Math.floor(Math.random() * placeholders.length)
 const chatboxEmpty = () => {
     if (!document.getElementById("commentBox")?.textContent) placeholderActive.value = true
 }
-function sendComment() {
-    let comment: Array<string | {id: string}> = COMMENT_BOX.submit()
+
+function parseComment(comment: Array<string | {id: string}> ): string {
     let parsedComment = ""
     comment.forEach((commentBit: string | {id: string}) => {
+        console.log(commentBit)
         if (typeof commentBit == "string") parsedComment += commentBit
-        else if (typeof comment == "object") parsedComment += `&${commentBit.id.padStart(2, '0')}`
+        else if (typeof comment == "object") {
+            if (commentBit.id == undefined) return // bug when selecting all text and removing it
+            parsedComment += `&${commentBit.id.padStart(2, '0')}`
+        }
     });
+    return parsedComment
+}
+const lengthPie = ref()
+watch(commentLength, () => lengthPie.value = `conic-gradient(${parsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
+const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.value.getValues()).length
+
+
+function sendComment(com = "") {
+    if (parseComment(COMMENT_BOX.value.getValues()).length < MIN_COMMENT_LEN) return
+
+    let comment: Array<string | {id: string}>
+    if (com == "") comment = COMMENT_BOX.value.submit()
+    else comment = com
+    let parsedComment = parseComment(comment)
+
 
     // why tf did i have to stringify the post data? it wouldn't show up in the backend otherwise fuck!!!!
     axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify({
@@ -106,7 +126,7 @@ function sendComment() {
     </section>
 
     <section v-else class="relative z-10 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
-        <pre @focus="placeholderActive = false" @blur="chatboxEmpty" contenteditable="true" id="commentBox" class="overflow-y-auto font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-20" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
+        <pre @focus="placeholderActive = false" @blur="chatboxEmpty" @paste="modCommentLength()" @input="modCommentLength()" contenteditable="true" id="commentBox" class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-20" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
         
         <!-- Color Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-md" v-show="dropdownOpen == 0">
@@ -115,7 +135,7 @@ function sendComment() {
 
         <!-- Emoji Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
-            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${getEmoji(index)})`}" @click="COMMENT_BOX.insertEmoji({ id: index })" @drag=""></button>
+            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${getEmoji(index)})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
         </div>
 
         <footer class="flex justify-between mt-1">
@@ -127,7 +147,7 @@ function sendComment() {
             <div class="flex gap-2">
                 <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
                 <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="sendComment"><img src="@/images/send.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor, backgroundImage: lengthPie}" class="box-border p-1 w-8 rounded-full transition-opacity duration-75 disabled:opacity-50" :disabled="commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN" @click="sendComment()"><img src="@/images/send.svg" class="inline" alt=""></button>
             </div>
         </footer>
     </section>
