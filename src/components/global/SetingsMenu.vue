@@ -68,5 +68,16 @@ const screenWidth = ref(window.innerWidth)
         <option :value="3" v-if="screenWidth > 1500">3 sloupce</option>
       </select>
     </section>
+    <section
+      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
+    >
+      Autosave v editoru
+      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.autosave">
+        <option :value="0">Vypnutý</option>
+        <option :value="30">Každých 30s</option>
+        <option :value="60">Každých 60s</option>
+        <option :value="180">Každé 3min</option>
+      </select>
+    </section>
   </div>
 </template>

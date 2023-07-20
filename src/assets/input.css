@@ -25,10 +25,10 @@
 }
 
 :root {
-  --siteBackground: #08110b;
-  --primaryColor: #045124;
-  --secondaryColor: #142019;
-  --brightGreen: #71d471;
+  --siteBackground: rgba(8, 17, 11, 1);
+  --primaryColor: rgba(4, 81, 36, 1);
+  --secondaryColor: rgba(20, 32, 25, 1);
+  --brightGreen: rgba(113, 212, 113, 1)
 }
 
 body {

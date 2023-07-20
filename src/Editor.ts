@@ -1,6 +1,7 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, LevelTag, CollabData } from "./interfaces";
+import type { LevelList, Level, LevelTag, CollabData, LevelBackup } from "./interfaces";
+import { SETTINGS } from "./siteSettings";
 
 export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
@@ -126,3 +127,16 @@ export function creatorToCollab(currentName: string): CollabData {
 export const isOnline = ref(true)
 window.addEventListener("offline", () => isOnline.value = false)
 window.addEventListener("online", () => isOnline.value = true)
+
+export function saveBackup(listName: string, hidden: boolean) {
+  if (localStorage && SETTINGS.value.autosave) {
+    let backup: LevelBackup = {listName: listName, levelData: JSON.stringify(levelList.value), listHidden: hidden, listDate: Date.now()}
+
+    localStorage.setItem("listBackup", JSON.stringify(backup))
+  }
+  return Math.random()
+}
+
+export const removeBackup = () => {
+  localStorage.removeItem("listBackup")
+}

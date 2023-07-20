@@ -3,7 +3,8 @@ import { ref, watch } from "vue";
 export const SETTINGS = ref({
   scrolling: 0,
   language: 0,
-  homepageColumns: 1
+  homepageColumns: 1,
+  autosave: 60
 });
 
 watch(SETTINGS, () => {

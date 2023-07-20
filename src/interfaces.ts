@@ -46,7 +46,7 @@ export interface ListUpdateFetch {
   data: LevelList
   id: number
   timestamp: string
-  hidden: string
+  hidden: '0'|'1'
   uid: string
   rate_ratio: number
   views: number
@@ -92,6 +92,13 @@ interface HumanSocialLink {
 export interface ListCreatorInfo {
   username: string;
   discord_id: string;
+}
+
+export interface LevelBackup {
+  listName: string
+  levelData: LevelList
+  listHidden: '0'|'1'
+  listDate: number
 }
 
 export interface LevelList {

@@ -151,7 +151,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           <img class="w-10 aspect-square" src="../../images/star.webp" alt="" />
           <input
             autocomplete="off"
-            class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
+            class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
             type="text"
             name="levelID"
             @input="changeProp"
@@ -159,7 +159,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             placeholder="ID levelu"
           />
           <img
-            class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
+            class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }"
@@ -178,7 +178,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           <input
             autocomplete="off"
             style="appearance: textfield"
-            class="w-12 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
+            class="w-12 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
             type="number"
             :value="index! + 1"
             @click="mobileMoveLevel()"
@@ -219,7 +219,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="sm:hidden"
           >
             <img
-              class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
+              class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
               src="../../images/searchOpaque.svg"
               alt=""
               :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
@@ -227,7 +227,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           </button>
           <input
             autocomplete="off"
-            class="h-10 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
+            class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
             type="text"
             name="levelName"
             :value="data?.levelName"
@@ -248,7 +248,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             @click="searchLevel(false)"
           >
             <img
-              class="p-1 w-10 bg-black bg-opacity-30 rounded-full transition-opacity duration-100 button aspect-square"
+              class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
               src="../../images/searchOpaque.svg"
               alt=""
               :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
@@ -264,7 +264,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         <div class="flex gap-2 max-sm:flex-row-reverse">
           <input
             autocomplete="off"
-            class="h-10 max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
+            class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
             type="text"
             name="creator"
             :value="data?.creator"
@@ -272,7 +272,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             placeholder="Tvůrce"
           />
           <img
-            class="p-1 w-10 bg-black bg-opacity-30 rounded-full button aspect-square"
+            class="p-1 w-10 bg-black bg-opacity-30 rounded-md button aspect-square"
             src="../../images/bytost.webp"
             alt=""
             @click="emit('openCollabTools', index!)"
@@ -289,7 +289,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           />
           <input
             autocomplete="off"
-            class="max-w-[20vw] rounded-full bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
+            class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
             type="text"
             name="video"
             @input="changeProp"

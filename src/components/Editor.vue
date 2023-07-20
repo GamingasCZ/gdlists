@@ -10,14 +10,18 @@ import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
 import CollabEditor from "./editor/CollabEditor.vue"
 import ErrorPopup from "./editor/errorPopup.vue";
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, makeColor, checkList, isOnline } from "../Editor";
-import { ref, onMounted } from "vue";
-import type { FavoritedLevel, Level, ListUpdateFetch, LevelList } from "@/interfaces";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline } from "../Editor";
+import { ref, onMounted, watch } from "vue";
+import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
 import axios, { type AxiosResponse } from "axios";
 import cookier from "cookier"
 import router from "@/router";
+import { saveBackup } from "../Editor";
+import Notification from "./global/Notification.vue";
+import { SETTINGS } from "@/siteSettings";
+import { onBeforeRouteLeave } from "vue-router";
 
 document.title = "Editor | GD Seznamy";
 
@@ -27,11 +31,47 @@ const props = defineProps<{
   listID: string | number
 }>();
 
+
+const doBackup = () => {
+  if (levelList.value.levels.length == 0) return // Do not save without any levels
+  if (router.currentRoute.value.name != "editor") return // Only when leaving editor
+  notifStamp.value = saveBackup(listName.value, !!listHiddenSelected())
+}
+
+const backupData = ref({backupName: "", backupDate: "0", backupData: "", choseHidden: "0"})
+let autosaveInterval
 onMounted(() => {
   levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
+
+  if (localStorage) {
+    let backup = localStorage.getItem("listBackup")
+    if (backup) {
+      let backupParsed: LevelBackup = JSON.parse(backup)
+      backupData.value.backupName = backupParsed.listName
+      backupData.value.backupDate = new Date(backupParsed.listDate).toLocaleDateString()
+      backupData.value.backupData = <any>backupParsed.levelData
+      backupData.value.choseHidden = backupParsed.listHidden
+    }
+  }
+
+  if (SETTINGS.value.autosave) {
+    // Save when leaving the site
+    window.addEventListener("beforeunload", doBackup)
+    onBeforeRouteLeave(doBackup)
+
+    autosaveInterval = setInterval(() => {
+      if (!SETTINGS.value.autosave) { // If setting changes, do not autosave
+        clearInterval(autosaveInterval)
+        return
+      }
+    }, AUTOSAVE_TIMEOUT)
+
+    doBackup()
+}
 })
 
 var isNowHidden: boolean
+const AUTOSAVE_TIMEOUT = SETTINGS.value.autosave*1000
 
 const listExists = ref<boolean>(true)
 const listBelongsToYou = ref<boolean>(true)
@@ -46,12 +86,17 @@ if (props.editing) {
       return
     }
 
-    let list: LevelList = listData.data;
-    (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
-    (document.getElementById("levelName") as HTMLInputElement).disabled = true;
+    loadList(listData.data, listData.name, listData.hidden)
+  }).catch(() => listExists.value = false)
+}
+
+function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
+    let list: LevelList = listData;
+    // (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
+    listName.value = lName;
     levelList.value.description = list.description;
 
-    isNowHidden = listData.hidden != '0';
+    isNowHidden = hidden != '0';
     (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden
 
     // Old list have levels scattered in levelList
@@ -66,10 +111,7 @@ if (props.editing) {
     
     // Color is most likely #020202, the default color
     if (!isNaN(levelList.value.pageBGcolor[0])) modifyListBG(levelList.value.pageBGcolor)
-  }).catch(() => listExists.value = false)
 }
-
-
 
 const nice = () => {
   console.log(levelList.value);
@@ -90,6 +132,13 @@ const errorMessage = ref('')
 const errorStamp = ref(-1)
 const errorDblclickHelp = ref(false)
 const formShaking = ref(false)
+const notifStamp = ref(Math.random())
+
+const loadBackup = () => {
+  loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, backupData.value.choseHidden)
+  removeBackup()
+  saveBackup(listName.value, !!listHiddenSelected())
+}
 
 const startAddLevel = () => {
   addLevel(null);
@@ -139,6 +188,8 @@ const addFromFavorites = (level: FavoritedLevel) => {
   addLevel(addedLevel);
 };
 
+const listHiddenSelected = () => (document.querySelector("input[name='private']") as HTMLInputElement).checked ? 1 : 0
+
 function uploadList() {
   errorDblclickHelp.value = false
   let check = checkList(listName.value)
@@ -154,7 +205,7 @@ function uploadList() {
     listData: JSON.stringify(levelList.value),
     lName: (document.getElementById("levelName") as HTMLInputElement).value,
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
-    hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked | 0
+    hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
 
   })
@@ -166,7 +217,7 @@ function updateList() {
     id: props.listID,
     isNowHidden: isNowHidden ? "true" : "false",
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
-    hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked | 0
+    hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     router.push(`/${res.data[0]}`)
   })
@@ -310,6 +361,7 @@ function removeList() {
         autocomplete="off"
         type="text"
         id="levelName"
+        :disabled="editing"
         v-model="listName"
         placeholder="Jméno seznamu"
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
@@ -322,12 +374,12 @@ function removeList() {
         type="text"
         id="description"
         placeholder="Popis seznamu"
-        class="h-16 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
+        class="h-8 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg focus:h-16"
         v-model="levelList.description"
       ></textarea>
       <button type="button">
         <img
-          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-md button"
           src="../images/fullscreen.svg"
           alt=""
           @click="descriptionEditorOpen = true"
@@ -344,7 +396,7 @@ function removeList() {
       />
       <button type="button">
         <img
-          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-full button"
+          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-md button"
           src="../images/gear.svg"
           alt=""
           @click="BGpickerPopupOpen = true"
@@ -357,7 +409,7 @@ function removeList() {
       <span>Barva pozadí:</span>
       <button
         type="button"
-        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus-visible:outline button"
+        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
@@ -379,21 +431,21 @@ function removeList() {
       <div class="box-border flex gap-3 mt-2" v-if="updatingPositions == -1">
         <button type="button" @click="previewList(false)" @dblclick="previewList(true)">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
             src="../images/preview.svg"
             alt=""
           />
         </button>
         <button type="button" @click="favoriteLevelPickerOpen = true">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
             src="../images/addfromFaves.svg"
             alt=""
           />
         </button>
         <button type="button" @click="startAddLevel()">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-full button"
+            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
             src="../images/addLevel.svg"
             alt=""
           />
@@ -401,13 +453,36 @@ function removeList() {
       </div>
     </header>
 
+    <Notification title="Seznam uložen!" icon="save" :stamp="notifStamp"/>
+
     <main
       class="flex min-h-[6rem] w-full flex-col gap-1.5 bg-[url(../images/fade.webp)] bg-repeat-x px-2 py-2"
     >
+      <section class="flex justify-between items-center px-3 py-1 m-1 bg-white bg-opacity-10 rounded-md" v-if="backupData.backupDate != '0'">
+        <div class="flex items-center">
+          <img src="@/images/browseMobHeader.svg" class="inline mr-3 w-10" alt="">
+          <div class="inline-flex flex-col leading-snug">
+            <h3 class="opacity-50">Máš tu rozpracovaný seznam!</h3>
+            <div>
+              <i>{{ backupData.backupName || 'Bezejmenný seznam'}}</i> - <b>{{backupData.backupDate }}</b>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 w-max max-sm:gap-1 max-sm:flex-col">
+          <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button" @click="loadBackup(); backupData.backupDate = '0'">
+            <img src="@/images/edit.svg" class="box-border inline p-0.5 w-6">
+            <label class="max-sm:hidden">Obnovit</label>
+          </button>
+          <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button" @click="removeBackup(); backupData.backupDate = '0'">
+          <img src="@/images/trash.svg" class="box-border inline p-0.5 w-6">
+            <label class="max-sm:hidden">Smazat</label>
+          </button>
+        </div>
+      </section>
       <h2 v-if="!levelList.levels.length" class="mt-4">
         Kliknutím na
         <img
-          class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-full"
+          class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-md"
           src="../images/addLevel.svg"
         />
         přidáš level!
