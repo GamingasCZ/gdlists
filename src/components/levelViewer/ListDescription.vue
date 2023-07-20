@@ -80,7 +80,7 @@ function sendRating(action: 1 | 0) {
     <section class="flex gap-2">
       <!-- Likes and dislikes -->
       <div class="box-border flex flex-col items-center max-sm:hidden">
-        <button class="button rounded-lg bg-[#21cc5b] p-1 !transition-colors" :style="{boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : ''}" :class="{'bg-[#051c0c]': rating?.[2] == 0, 'bg-[#14805c]': rating?.[2] == 1}" @click="sendRating(1)">
+        <button class="button rounded-lg bg-[#21cc5b] p-1 !transition-colors" :style="{boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : ''}" :class="{'!bg-[#051c0c]': rating?.[2] == 0, '!bg-[#14805c]': rating?.[2] == 1}" @click="sendRating(1)">
           <img class="w-5" src="@/images/like.svg" alt="" :class="{'brightness-[6]': rating?.[2] == 1}" />
         </button>
         <span class="my-0.5 text-lg font-bold"
@@ -89,7 +89,7 @@ function sendRating(action: 1 | 0) {
             v-if="rate == undefined"
             class="w-4 h-3 bg-white bg-opacity-50 rounded-full border-none"
         /></span>
-        <button class="button rounded-lg bg-[#cc2121] p-1 !transition-colors" @click="sendRating(0)" :style="{'background': rating?.[2] == 0 ? 'radial-gradient(rgb(72, 0, 24), rgb(179, 7, 7))' : '', boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : ''}" :class="{'bg-[#1c0505]': rating?.[2] == 1, 'bg-[#730909]': rating?.[2] == 0}">
+        <button class="button rounded-lg bg-[#cc2121] p-1 !transition-colors" @click="sendRating(0)" :style="{'background': rating?.[2] == 0 ? 'radial-gradient(rgb(72, 0, 24), rgb(179, 7, 7))' : '', boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : ''}" :class="{'!bg-[#1c0505]': rating?.[2] == 1, '!bg-[#730909]': rating?.[2] == 0}">
           <img class="w-5" src="@/images/dislike.svg" alt="" :class="{'brightness-[6]': rating?.[2] == 0}"/>
         </button>
       </div>
@@ -149,7 +149,7 @@ function sendRating(action: 1 | 0) {
       <div class="flex">
         <!-- Mobile likes and dislikes -->
         <div class="box-border flex gap-1.5 items-center sm:hidden">
-          <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors" @click="sendRating(1)" :style="{boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : ''}" :class="{'bg-[#051c0c]': rating?.[2] == 0, 'bg-[#14805c]': rating?.[2] == 1}">
+          <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors" @click="sendRating(1)" :style="{boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : ''}" :class="{'!bg-[#051c0c]': rating?.[2] == 0, '!bg-[#14805c]': rating?.[2] == 1}">
             <img class="w-6" src="@/images/like.svg" alt="" :class="{'brightness-[6]': rating?.[2] == 1}" />
           </button>
           <span class="text-center min-w-[2rem] text-lg font-bold"
@@ -158,7 +158,7 @@ function sendRating(action: 1 | 0) {
               v-if="rate == undefined"
               class="w-4 h-1 bg-white bg-opacity-50 rounded-full border-none"
           /></span>
-          <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors" @click="sendRating(0)" :style="{'background': rating?.[2] == 0 ? 'radial-gradient(rgb(72, 0, 24), rgb(179, 7, 7))' : '', boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : ''}" :class="{'bg-[#1c0505]': rating?.[2] == 1, 'bg-[#730909]': rating?.[2] == 0}">
+          <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors" @click="sendRating(0)" :style="{'background': rating?.[2] == 0 ? 'radial-gradient(rgb(72, 0, 24), rgb(179, 7, 7))' : '', boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : ''}" :class="{'!bg-[#1c0505]': rating?.[2] == 1, '!bg-[#730909]': rating?.[2] == 0}">
             <img class="w-6" src="@/images/dislike.svg" alt="" :class="{'brightness-[6]': rating?.[2] == 0}"/>
           </button>
         </div>

@@ -88,7 +88,7 @@ try {
         <header class="flex items-center">
           <!-- Level difficulty -->
           <div
-            class="relative m-1 mr-0.5 ml-0"
+            class="relative m-2 mr-1 ml-0"
             v-if="difficulty"
             :class="{ '!mx-2': difficulty[1] > 0 }"
           >
