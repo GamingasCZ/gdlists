@@ -54,53 +54,51 @@ const setDragboxPos = (e: MouseEvent) => {
         class="absolute z-[-1] h-full w-full bg-cover bg-no-repeat opacity-40 blur-md"
       ></div>
       <div class="relative mb-1 h-max">
-        <h2 class="text-center text-xl font-bold">Nastavení obrázku</h2>
+        <h2 class="text-xl font-bold text-center">{{ $t('other.imageSettings') }}</h2>
         <img
           src="@/images/close.svg"
           alt=""
-          class="button absolute top-0 right-0 w-6"
+          class="absolute top-0 right-0 w-6 button"
           @click="emit('closePopup')"
         />
       </div>
 
       <div
         v-if="levelList.titleImg[0] == ''"
-        class="mt-2 flex items-center gap-4 rounded-md bg-blue-600 bg-opacity-30 p-3"
+        class="flex gap-4 items-center p-3 mt-2 bg-blue-600 bg-opacity-30 rounded-md"
       >
         <img src="@/images/info.svg" alt="" class="w-8" />
-        <span
-          >Zadej <i>URL obrázku nebo animace</i> a zde pak budeš moct nastavit
-          jeho vlastnosti!</span
+        <span v-html="$t('other.imageHelp')"
+          ></span
         >
       </div>
       <div
         v-else-if="loadedImage == 'loading'"
-        class="mt-2 flex flex-col items-center justify-center rounded-md py-6"
+        class="flex flex-col justify-center items-center py-6 mt-2 rounded-md"
       >
         <img
           src="@/images/loading.webp"
-          class="w-10 animate-spin opacity-50"
+          class="w-10 opacity-50 animate-spin"
           alt=""
         />
-        <span class="opacity-50">Načítání obrázku...</span>
+        <span class="opacity-50">{{ $t('other.loadingImage') }}</span>
       </div>
       <div
         v-else-if="!loadedImage"
-        class="mt-2 flex items-center gap-4 rounded-md bg-red-600 bg-opacity-30 p-3"
+        class="flex gap-4 items-center p-3 mt-2 bg-red-600 bg-opacity-30 rounded-md"
       >
         <img src="@/images/close.svg" alt="" class="w-8" />
-        <span
-          >Nepodařilo se načíst obrázek! URL obrázku velkou většinu času končí
-          příponou <i>.jpg/.png/.webp/.gif!</i></span
+        <span v-html="$t('other.imageLoadFailed')"
+          ></span
         >
       </div>
 
       <main v-else class="flex gap-6 max-sm:flex-col max-sm:items-center">
-        <section class="relative h-max w-max">
+        <section class="relative w-max h-max">
           <img
             :src="levelList.titleImg[0]"
             alt=""
-            class="pointer-events-none w-52"
+            class="w-52 pointer-events-none"
             id="dragboxImage"
           />
           <div
@@ -118,7 +116,7 @@ const setDragboxPos = (e: MouseEvent) => {
         </section>
         <section class="flex flex-col gap-3">
           <div>
-            <h3>Zakrytí</h3>
+            <h3>{{ $t('other.coverage') }}</h3>
             <input
               type="range"
               name=""
@@ -134,11 +132,11 @@ const setDragboxPos = (e: MouseEvent) => {
             />
           </div>
           <div>
-            <h2>Zarovnání</h2>
+            <h2>{{ $t('other.alignment') }}</h2>
             <div class="flex gap-2">
               <button
                 @click="levelList.titleImg[3] = 0"
-                class="button rounded-md bg-black bg-opacity-40 p-1"
+                class="p-1 bg-black bg-opacity-40 rounded-md button"
               >
                 <img
                   class="w-6"
@@ -149,7 +147,7 @@ const setDragboxPos = (e: MouseEvent) => {
               </button>
               <button
                 @click="levelList.titleImg[3] = 1"
-                class="button rounded-md bg-black bg-opacity-40 p-1"
+                class="p-1 bg-black bg-opacity-40 rounded-md button"
               >
                 <img
                   class="w-6"
@@ -160,7 +158,7 @@ const setDragboxPos = (e: MouseEvent) => {
               </button>
               <button
                 @click="levelList.titleImg[3] = 2"
-                class="button rounded-md bg-black bg-opacity-40 p-1"
+                class="p-1 bg-black bg-opacity-40 rounded-md button"
               >
                 <img
                   class="w-6"
@@ -178,7 +176,7 @@ const setDragboxPos = (e: MouseEvent) => {
               name=""
               id=""
               v-model="levelList.titleImg[4]"
-            /><span>Přechod</span>
+            /><span>{{ $t('other.gradient') }}</span>
           </div>
         </section>
       </main>

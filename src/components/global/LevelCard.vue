@@ -78,7 +78,7 @@ try {
   >
     <!-- ID copy popup -->
     <article v-if="copyingID" class="absolute top-1/2 left-1/2 z-10 px-4 py-2 w-max text-2xl text-center bg-black bg-opacity-80 rounded-lg -translate-x-1/2 -translate-y-1/2">
-      <h2 class="font-black">ID zkopírováno!</h2>
+      <h2 class="font-black">{{ $t('level.idCopied') }}</h2>
       <hr class="rounded-full border-2 opacity-80">
       <h3>{{ levelID }}</h3>
     </article>
@@ -93,14 +93,14 @@ try {
             :class="{ '!mx-2': difficulty[1] > 0 }"
           >
             <img
-              class="z-10 w-10"
-              :src="`/public/faces/${difficulty[0]}.webp`"
+            class="relative z-10 w-10"
+            :src="`/public/faces/${difficulty[0]}.webp`"
               :class="{ 'scale-[1.3]': difficulty[0] > 5 }"
               alt=""
             />
             <img
               v-if="difficulty[1] == 2"
-              class="absolute top-0 -z-10 w-full scale-[1.4]"
+              class="absolute top-0 z-0 w-full scale-[1.4]"
               :class="{
                 '!-top-0.5 !scale-[1.7]': difficulty[0] > 5,
                 '!-top-0.5 !scale-[1.48]': difficulty[0] == 10,
@@ -124,7 +124,7 @@ try {
 
           <!-- Level name -->
           <h2 class="ml-2 text-3xl font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
-            {{ levelName || "Bezejmenný" }}
+            {{ levelName || $t('other.unnamesd') }}
           </h2>
         </header>
       </div>
@@ -158,7 +158,7 @@ try {
     </button>
 
     <!-- Level creator -->
-    <h3 v-if="typeof creator == 'string'">{{ creator || "Bezejmenný" }}</h3>
+    <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
     <CollabPreview v-if="typeof creator == 'object'" :collab="creator" />
 
     <!-- Level Tags -->

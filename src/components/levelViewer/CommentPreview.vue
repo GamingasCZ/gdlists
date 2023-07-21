@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import chroma from 'chroma-js'
 import { ref } from 'vue'
-
+import { useI18n } from 'vue-i18n'
 
 interface CommentFetchResponse {
   username: string
@@ -45,18 +45,18 @@ const time = ref<string>("")
 const datePassed = Math.floor(Date.now()/1000 - parseInt(props.timestamp))
 const dateString = ref<string>(`${new Date(parseInt(props.timestamp)*1000).toLocaleDateString()} ${new Date(parseInt(props.timestamp)*1000).toLocaleTimeString()}`)
 
-if (datePassed < 5) time.value = "před pár sekundami"
-else if (datePassed <= 60) time.value = `před ${datePassed} sekundami`
-else if (Math.floor(datePassed/60) == 1) time.value = `před 1 minutou`
-else if (Math.floor(datePassed/60) <= 60) time.value = `před ${Math.floor(datePassed/60)} minutami`
-else if (Math.floor(datePassed/3600) == 1) time.value = `před 1 hodinou`
-else if (Math.floor(datePassed/3600) <= 24) time.value = `před ${Math.floor(datePassed/3600)} hodinami`
-else if (Math.floor(datePassed/86400) == 1) time.value = `před 1 dnem`
-else if (Math.floor(datePassed/86400) <= 7) time.value = `před ${Math.floor(datePassed/86400)} dny`
-else if (Math.floor(datePassed/604800) == 1) time.value = `před 1 týdnem`
-else if (Math.floor(datePassed/604800) <= 4) time.value = `před ${Math.floor(datePassed/604800)} týdny`
-else if (Math.floor(datePassed/2419200) <= 4) time.value = `před 1 měsícem`
-else time.value = `před ${Math.floor(datePassed/2419200)} měsíci`
+if (datePassed < 5) time.value = useI18n().t('date.fewSecsAgo')
+else if (datePassed <= 60) time.value = useI18n().t('date.secs', datePassed)
+else if (Math.floor(datePassed/60) == 1) time.value = useI18n().t('date.mins', [Math.floor(datePassed/60)])
+else if (Math.floor(datePassed/60) <= 60) time.value = useI18n().t('date.mins', [Math.floor(datePassed/60)])
+else if (Math.floor(datePassed/3600) == 1) time.value = useI18n().t('date.hours', [Math.floor(datePassed/3600)])
+else if (Math.floor(datePassed/3600) <= 24) time.value = useI18n().t('date.hours', [Math.floor(datePassed/3600)])
+else if (Math.floor(datePassed/86400) == 1) time.value = useI18n().t('date.days', [Math.floor(datePassed/86400)])
+else if (Math.floor(datePassed/86400) <= 7) time.value = useI18n().t('date.days', [Math.floor(datePassed/86400)])
+else if (Math.floor(datePassed/604800) == 1) time.value = useI18n().t('date.weeks', [Math.floor(datePassed/604800)])
+else if (Math.floor(datePassed/604800) <= 4) time.value = useI18n().t('date.weeks', [Math.floor(datePassed/604800)])
+else if (Math.floor(datePassed/2419200) <= 4) time.value = useI18n().t('date.months', [Math.floor(datePassed/2419200)])
+else time.value = useI18n().t('date.months', [Math.floor(datePassed/2419200)])
 
 const parsedComment = ref<string>("")
 parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5 pointer-events-none" src="' + new URL(`../../images/emoji/$1.webp`, import.meta.url).href + '" alt="">')

@@ -64,7 +64,7 @@ const moveTagPos = (from: number, to: number) => {
         "
         type="text"
         :value="tagName || $t('editor.tags[' + tagID + ']')"
-        placeholder="Text štítku"
+        :placeholder="$t('editor.tagText')"
         class="px-1 w-28 text-sm text-center bg-black bg-opacity-20 rounded-full"
       />
       <input
@@ -76,7 +76,7 @@ const moveTagPos = (from: number, to: number) => {
           ).value
         "
         :value="tagLink"
-        placeholder="Odkaz štítku"
+        :placeholder="$t('editor.tagLink')"
         class="px-1 w-28 text-sm text-center bg-black bg-opacity-20 rounded-full"
       />
     </div>

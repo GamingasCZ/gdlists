@@ -105,7 +105,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       v-show="!opened"
       @click="updatingPositions != -1 ? 0 : emit('updateOpenedCard', index!)"
     >
-      #{{ index! + 1 }} - {{ data?.levelName || "Bezejmenný" }}
+      #{{ index! + 1 }} - {{ data?.levelName || $t('other.unnamesd') }}
       <div
         v-show="updatingPositions != -1"
         class="absolute right-0 top-2"
@@ -156,7 +156,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             name="levelID"
             @input="changeProp"
             :value="data?.levelID"
-            placeholder="ID levelu"
+            :placeholder="$t('level.levelID')"
           />
           <img
             class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
@@ -232,7 +232,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             name="levelName"
             :value="data?.levelName"
             @input="changeProp"
-            placeholder="Jméno levelu"
+            :placeholder="$t('level.levelName')"
           />
         </div>
 
@@ -269,7 +269,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             name="creator"
             :value="data?.creator"
             @input="changeProp"
-            placeholder="Tvůrce"
+            :placeholder="$t('level.creator')"
           />
           <img
             class="p-1 w-10 bg-black bg-opacity-30 rounded-md button aspect-square"
@@ -294,7 +294,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             name="video"
             @input="changeProp"
             :value="data?.video"
-            placeholder="Video"
+            :placeholder="$t('level.video')"
           />
         </div>
 

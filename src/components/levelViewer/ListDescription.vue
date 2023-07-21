@@ -110,7 +110,7 @@ function sendRating(action: 1 | 0) {
             />
             <img src="@/images/view.svg" alt="" class="w-4 sm:hidden">
             <span>
-              <span>{{ views }}</span><span class="max-sm:hidden"> zhlédnutí</span>
+              <span>{{ views }} </span><span class="max-sm:hidden">{{ $t('level.views') }}</span>
             </span>
             <hr
               class="w-1 h-4 bg-white bg-opacity-60 rounded-full border-none"
@@ -127,7 +127,7 @@ function sendRating(action: 1 | 0) {
             'text-opacity-40': ['', undefined].includes(data?.description),
             'before:opacity-0': !tallDescription || toggleDescription,
           }"
-          v-html="parseText(data?.description || 'Seznam nemá popisek.')"
+          v-html="parseText(data?.description || $t('level.noDescription'))"
         ></pre>
         <button
           v-if="tallDescription"
@@ -170,7 +170,7 @@ function sendRating(action: 1 | 0) {
           <button class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
             <img src="@/images/comment.svg" class="inline w-6 sm:mr-2" /><label
               class="max-sm:hidden"
-              >Komentáře</label
+              >{{ $t('level.comments') }}</label
             >
             <label
               class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-sm:absolute max-sm:bottom-1 max-sm:right-1"
@@ -184,30 +184,30 @@ function sendRating(action: 1 | 0) {
         <!-- Share popup -->
         <button
           @click="emit('doListAction', 'sharePopup')"
-          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
+          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
         >
           <img
             class="inline w-4 max-sm:w-6 sm:mr-2"
             src="@/images/share.svg"
             alt=""
-          /><label class="max-sm:hidden">Sdílet</label>
+          /><label class="max-sm:hidden">{{ $t('other.share') }}</label>
         </button>
 
         <!-- Jump to popup -->
         <button
           @click="emit('doListAction', 'jumpPopup')"
-          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
+          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
         >
           <img
             class="inline w-4 max-sm:w-6 sm:mr-2"
             src="@/images/jumpto.svg"
             alt=""
-          /><label class="max-sm:hidden">Skočit na</label>
+          /><label class="max-sm:hidden">{{ $t('listViewer.jumpTo') }}</label>
         </button>
 
         <!-- Pin list -->
         <button
-          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
+          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
           @click="emit('doListAction', 'pinList')"
         >
           <img
@@ -222,12 +222,12 @@ function sendRating(action: 1 | 0) {
             alt=""
             v-else
           />
-          <label class="max-sm:hidden">{{ listPinned ? 'Odepnout' : 'Připnout' }}</label>
+          <label class="max-sm:hidden">{{ listPinned ? $t('level.unpin') : $t('level.pin') }}</label>
         </button>
 
         <!-- Edit list -->
         <button
-          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
+          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
           @click="emit('doListAction', 'editList')"
           v-if="userUID == uid"
         >
@@ -235,7 +235,7 @@ function sendRating(action: 1 | 0) {
             class="inline w-4 max-sm:w-6 sm:mr-2"
             src="@/images/edit.svg"
             alt=""
-          /><label class="max-sm:hidden">Upravit</label>
+          /><label class="max-sm:hidden">{{ $t('level.edit') }}</label>
         </button>
       </div>
 
@@ -243,13 +243,13 @@ function sendRating(action: 1 | 0) {
       <div class="sm:hidden">
         <button
           @click="emit('doListAction', 'mobileExtras')"
-          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle max-sm:!p-2"
+          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
         >
           <img
             class="inline w-4 max-sm:w-6 sm:mr-2"
             src="@/images/more.svg"
             alt=""
-          /><label class="max-sm:hidden">Sdílet</label>
+          /><label class="max-sm:hidden">{{ $t('other.share') }}</label>
         </button>
       </div>
 

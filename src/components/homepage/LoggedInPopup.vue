@@ -19,21 +19,21 @@ const props = defineProps<{
     >
       <img
         :src="pfplink"
-        class="w-28 -translate-y-14 rounded-full border-8 border-solid border-lof-300"
+        class="w-28 rounded-full border-8 border-solid -translate-y-14 border-lof-300"
         alt=""
       />
       <div
-        class="mx-2 flex -translate-y-7 flex-col items-center justify-center gap-2 text-center"
+        class="flex flex-col gap-2 justify-center items-center mx-2 text-center -translate-y-7"
       >
         <h1 class="text-lg text-yellow-200">
-          Vítej v GD Seznamech, <b>{{ username }}!</b>
+          {{ $t('other.welcomeToGDL') }} <b>{{ username }}!</b>
         </h1>
-        <p>Teď můžeš vytvářet seznamy, likovat a komentovat!</p>
+        <p>{{ $t('other.greatFeatures') }}</p>
         <button
-          class="rounded-md bg-lof-400 px-3 py-2 align-bottom text-2xl font-black text-black"
+          class="px-3 py-2 text-2xl font-black text-black align-bottom rounded-md bg-lof-400"
           @click="emit('closePopup')"
         >
-          <img src="@/images/check.svg" alt="" class="mr-3 inline w-8" />Ok!
+          <img src="@/images/check.svg" alt="" class="inline mr-3 w-8" />{{ $t('other.ok') }}
         </button>
       </div>
     </section>

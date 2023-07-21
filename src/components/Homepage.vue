@@ -59,17 +59,17 @@ watch(props, () => {
     v-if="!firstTimeUser"
     class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16"
   >
-    Vítej zpět, <b>{{ returnfromLoginName }}</b
+    {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b
     >!
   </div>
 
   <header
-    class="flex h-[256px] items-end justify-center bg-[url(../images/introGrad2.webp)] bg-center"
+    class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center"
   >
     <form
       action="./browse"
       method="get"
-      class="flex gap-2 items-center text-white translate-y-1/2"
+      class="flex gap-2 items-center text-white"
     >
       <input
         type="text"
@@ -85,27 +85,27 @@ watch(props, () => {
         />
       </button>
     </form>
+    <div class="flex gap-2 justify-center pt-2 w-max text-base text-white">
+      <RouterLink to="/editor">
+        <button
+          class="flex gap-4 items-center px-2 py-3 w-max rounded-md button bg-lof-300"
+        >
+          <img src="../images/plus.svg" alt="" class="w-6" />{{
+            $t("homepage.createList")
+          }}
+        </button>
+      </RouterLink>
+      <RouterLink to="/random">
+        <button
+          class="flex gap-4 items-center px-2 py-3 w-max rounded-md button bg-lof-300 sm:mr-14"
+        >
+          <img src="../images/dice.svg" alt="" class="w-6" />{{
+            $t("homepage.tryLuck")
+          }}
+        </button>
+      </RouterLink>
+    </div>
   </header>
-  <div class="flex gap-2 justify-center pt-8 text-base text-white">
-    <RouterLink to="/editor">
-      <button
-        class="flex gap-4 items-center px-2 py-3 rounded-md button bg-lof-300"
-      >
-        <img src="../images/plus.svg" alt="" class="w-6" />{{
-          $t("homepage.createList")
-        }}
-      </button>
-    </RouterLink>
-    <RouterLink to="/random">
-      <button
-        class="flex gap-4 items-center px-2 py-3 rounded-md button bg-lof-300 sm:mr-14"
-      >
-        <img src="../images/dice.svg" alt="" class="w-6" />{{
-          $t("homepage.tryLuck")
-        }}
-      </button>
-    </RouterLink>
-  </div>
 
   <section class="flex justify-center">
     <div

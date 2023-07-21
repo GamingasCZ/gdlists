@@ -16,10 +16,11 @@ switch (props.icon) {
 }
 
 const shown = ref(false)
-watch(props, () => {
+watch(props, () => { // todo rozbitý když měníš jazyk
     shown.value = true
     setTimeout(() => shown.value = false, 1500);
 })
+
 </script>
 
 <template>

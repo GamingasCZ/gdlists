@@ -10,6 +10,7 @@ import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
 import CollabEditor from "./editor/CollabEditor.vue"
 import ErrorPopup from "./editor/errorPopup.vue";
+import EditorBackup from "./editor/EditorBackup.vue";
 import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline } from "../Editor";
 import { ref, onMounted, watch } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
@@ -22,9 +23,9 @@ import { saveBackup } from "../Editor";
 import Notification from "./global/Notification.vue";
 import { SETTINGS } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
+import { useI18n } from "vue-i18n";
 
-document.title = "Editor | GD Seznamy";
-
+document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
 const props = defineProps<{
   isLoggedIn: boolean;
   editing: boolean
@@ -198,8 +199,8 @@ function uploadList() {
     errorStamp.value = check.stamp!
     formShaking.value = true
     setTimeout(() => formShaking.value = false, 333);
+    return
   }
-
 
   axios.post(import.meta.env.VITE_API+"/sendList.php", {
     listData: JSON.stringify(levelList.value),
@@ -207,11 +208,22 @@ function uploadList() {
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-
+    removeBackup()
+    router.replace(`/${res.data[0]}`)
   })
 }
 
 function updateList() {
+  errorDblclickHelp.value = false
+  let check = checkList(listName.value)
+  if (!check.valid) {
+    errorMessage.value = check.error!
+    errorStamp.value = check.stamp!
+    formShaking.value = true
+    setTimeout(() => formShaking.value = false, 333);
+    return
+  }
+
   axios.post(import.meta.env.VITE_API+"/updateList.php", {
     listData: JSON.stringify(levelList.value),
     id: props.listID,
@@ -219,16 +231,18 @@ function updateList() {
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    router.push(`/${res.data[0]}`)
+    removeBackup()
+    router.replace(`/${res.data[0]}`)
   })
 }
 
 function removeList() {
   axios.post(import.meta.env.VITE_API+"/removeList.php", {
     id: props.listID,
-    hidden: (document.querySelector("input[name='private']") as HTMLInputElement).checked ? "1" : "0"
+    hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data == 3) {
+      removeBackup()
       router.replace('/browse')
     }
   })
@@ -266,7 +280,7 @@ function removeList() {
   <Transition name="fade">
     <DescriptionEditor
       v-show="descriptionEditorOpen"
-      editor-title="Editor popisku"
+      :editor-title="$t('editor.descriptionEditor')"
       @close-popup="descriptionEditorOpen = false"
     />
   </Transition>
@@ -282,7 +296,7 @@ function removeList() {
 
   <PickerPopup
     v-show="favoriteLevelPickerOpen"
-    browser-name="Uložené levely"
+    :browser-name="$t('other.savedLevels')"
     @close-popup="favoriteLevelPickerOpen = false"
     @select-option="addFromFavorites($event)"
     picker-data="@favorites"
@@ -292,11 +306,11 @@ function removeList() {
   <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>
 
   <h2 class="my-4 text-3xl text-center text-white" v-show="!previewingList">
-    {{ editing ? 'Upravování' : 'Editor' }}
+    {{ editing ? $t('editor.editing') : $t('editor.editor') }}
   </h2>
   <NotLoggedIn
     v-if="!isLoggedIn"
-    mess="Pro vytvoření seznamu se prosím přihlaš!"
+    :mess="$t('editor.loginToCreate')"
   />
 
   <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp"/>
@@ -308,7 +322,7 @@ function removeList() {
         <button @click="previewingList = false" class="absolute top-1 left-1 button">
           <img src="@/images/arrow-left.webp" class="w-10" alt="" />
         </button>
-        <h1 class="text-3xl text-center text-white">Náhled seznamu</h1>
+        <h1 class="text-3xl text-center text-white">{{ $t('editor.preview') }}</h1>
       </div>
       <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
         <LevelCard
@@ -327,7 +341,7 @@ function removeList() {
     v-if="!listExists"
   >
     <img src="@/images/listError.svg" class="mb-4 w-48" alt="">
-    <p>Tento seznam neexistuje!</p>
+    <p>{{ $t('editor.nonexistentList') }}</p>
   </section>
 
 
@@ -340,7 +354,7 @@ function removeList() {
       <img src="@/images/edit.svg" class="w-48" alt="">
       <img src="@/images/close.svg" class="absolute right-0 bottom-5 w-12" alt="">
     </div>
-    <p>Tento seznam ti nepatří!</p>
+    <p>{{ $t('editor.notBelongToYou') }}!</p>
   </section>
 
   <!-- Editor -->
@@ -363,7 +377,7 @@ function removeList() {
         id="levelName"
         :disabled="editing"
         v-model="listName"
-        placeholder="Jméno seznamu"
+        :placeholder="$t('editor.levelName')"
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
       />
       <div></div>
@@ -373,7 +387,7 @@ function removeList() {
         autocomplete="off"
         type="text"
         id="description"
-        placeholder="Popis seznamu"
+        :placeholder="$t('editor.listDescription')"
         class="h-8 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg focus:h-16"
         v-model="levelList.description"
       ></textarea>
@@ -390,7 +404,7 @@ function removeList() {
       <input
         autocomplete="off"
         type="text"
-        placeholder="Obrázek seznamu"
+        :placeholder="$t('editor.titleImage')"
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         v-model="levelList.titleImg[0]"
       />
@@ -406,7 +420,7 @@ function removeList() {
     </div>
 
     <div class="flex gap-2 items-center my-1">
-      <span>Barva pozadí:</span>
+      <span>{{$t('editor.bgColor')}}</span>
       <button
         type="button"
         class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
@@ -427,7 +441,7 @@ function removeList() {
       class="sticky -top-8 z-10 flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2"
       id="editorHeader"
     >
-      <span class="text-2xl font-black">Levely</span>
+      <span class="text-2xl font-black">{{ $t('editor.levels') }}</span>
       <div class="box-border flex gap-3 mt-2" v-if="updatingPositions == -1">
         <button type="button" @click="previewList(false)" @dblclick="previewList(true)">
           <img
@@ -453,39 +467,20 @@ function removeList() {
       </div>
     </header>
 
-    <Notification title="Seznam uložen!" icon="save" :stamp="notifStamp"/>
+    <Notification :title="$t('editor.levelSaved')" icon="save" :stamp="notifStamp"/>
 
     <main
       class="flex min-h-[6rem] w-full flex-col gap-1.5 bg-[url(../images/fade.webp)] bg-repeat-x px-2 py-2"
     >
-      <section class="flex justify-between items-center px-3 py-1 m-1 bg-white bg-opacity-10 rounded-md" v-if="backupData.backupDate != '0'">
-        <div class="flex items-center">
-          <img src="@/images/browseMobHeader.svg" class="inline mr-3 w-10" alt="">
-          <div class="inline-flex flex-col leading-snug">
-            <h3 class="opacity-50">Máš tu rozpracovaný seznam!</h3>
-            <div>
-              <i>{{ backupData.backupName || 'Bezejmenný seznam'}}</i> - <b>{{backupData.backupDate }}</b>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-3 w-max max-sm:gap-1 max-sm:flex-col">
-          <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button" @click="loadBackup(); backupData.backupDate = '0'">
-            <img src="@/images/edit.svg" class="box-border inline p-0.5 w-6">
-            <label class="max-sm:hidden">Obnovit</label>
-          </button>
-          <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button" @click="removeBackup(); backupData.backupDate = '0'">
-          <img src="@/images/trash.svg" class="box-border inline p-0.5 w-6">
-            <label class="max-sm:hidden">Smazat</label>
-          </button>
-        </div>
-      </section>
+      <EditorBackup :backup-data="backupData" @load-backup="loadBackup(); backupData.backupDate = '0'" @remove-backup="removeBackup(); backupData.backupDate = '0'"/>
+
       <h2 v-if="!levelList.levels.length" class="mt-4">
-        Kliknutím na
+        {{ $t('editor.clickAdd1') }}
         <img
           class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-md"
           src="../images/addLevel.svg"
         />
-        přidáš level!
+        {{ $t('editor.clickAdd2') }}
       </h2>
 
       <!-- Levels -->
@@ -512,7 +507,7 @@ function removeList() {
         v-if="!editing"
         :disabled="!isOnline"
       >
-        <img src="../images/upload.svg" class="w-6" alt="" />Nahrát
+        <img src="../images/upload.svg" class="w-6" alt="" />{{ $t('editor.upload') }}
       </button>
       <button
         type="submit"
@@ -521,7 +516,7 @@ function removeList() {
         v-if="editing"
         :disabled="!isOnline"
       >
-        <img src="../images/upload.svg" class="w-6" alt="" />Aktualizovat
+        <img src="../images/upload.svg" class="w-6" alt="" />{{ $t('editor.update') }}
       </button>
       <button
         type="submit"
@@ -530,7 +525,7 @@ function removeList() {
         v-if="editing"
         :disabled="!isOnline"
       >
-        <img src="../images/del.svg" class="w-6" alt="" />Smazat
+        <img src="../images/del.svg" class="w-6" alt="" />{{ $t('editor.remove') }}
       </button>
     </section>
   </form>

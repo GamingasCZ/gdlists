@@ -20,11 +20,11 @@ const emit = defineEmits<{
       class="absolute top-1/2 left-1/2 w-max max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
     >
       <div class="relative">
-        <h1 class="text-center text-xl font-bold">Štítky</h1>
+        <h1 class="text-xl font-bold text-center">{{ $t('editor.tagTitle') }}</h1>
         <img
           src="@/images/close.svg"
           alt=""
-          class="button absolute top-0 right-0 w-6"
+          class="absolute top-0 right-0 w-6 button"
           @click="emit('closePopup')"
         />
       </div>
@@ -35,7 +35,7 @@ const emit = defineEmits<{
           @click="emit('addTag', [tag - 1, '', ''])"
           v-for="tag in TAG_COUNT"
           type="button"
-          class="button flex items-center gap-2 rounded-full bg-black bg-opacity-20 p-1.5 text-sm"
+          class="flex gap-2 items-center p-1.5 text-sm bg-black bg-opacity-20 rounded-full button"
         >
           <img :src="'/src/images/badges/' + (tag - 1) + '.svg'" alt="" />{{
             $t(`editor.tags[${tag - 1}]`)

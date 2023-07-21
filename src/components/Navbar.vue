@@ -64,7 +64,7 @@ watch(props, () => {
       <img
         alt=""
         :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
-        :class="{'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, 'border-orange-600': !isOnline}"
+        :class="{'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline}"
         class="absolute animate-ping top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid !transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture"
         v-if="!isOnline"
@@ -72,7 +72,7 @@ watch(props, () => {
       <img
         alt=""
         :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
-        :class="{'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, 'border-orange-600': !isOnline}"
+        :class="{'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline}"
         class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid !transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture"
       />

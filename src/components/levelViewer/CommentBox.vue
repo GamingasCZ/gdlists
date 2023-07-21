@@ -106,7 +106,7 @@ function sendComment(com = "") {
     if (com == "") comment = COMMENT_BOX.value.submit()
     else comment = com
     let parsedComment = parseComment(comment)
-
+    commentLength.value = 0
 
     // why tf did i have to stringify the post data? it wouldn't show up in the backend otherwise fuck!!!!
     axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify({

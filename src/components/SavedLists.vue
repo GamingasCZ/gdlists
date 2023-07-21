@@ -4,6 +4,6 @@ import ListBrowser from "./global/ListBrowser.vue";
 
 <template>
   <section>
-    <ListBrowser :online-browser="false" browser-name="Uložené levely" />
+    <ListBrowser :online-browser="false" :browser-name="$t('other.savedLevels')" />
   </section>
 </template>

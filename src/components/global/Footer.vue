@@ -17,7 +17,7 @@ const helpMenuOpen = ref<boolean>(false);
         alt=""
       />
       <div class="ml-3">
-        <p class="text-xs font-thin leading-[8px] opacity-40">GD Lists by</p>
+        <p class="text-xs font-thin leading-[8px] opacity-40">{{ $t('other.gdListsBy') }}</p>
         <strong>GAMINGAS</strong>
         <p class="text-[0.6rem] leading-[8px] opacity-40">2021 - 2023</p>
       </div>
@@ -27,11 +27,11 @@ const helpMenuOpen = ref<boolean>(false);
         class="p-1 bg-black bg-opacity-40 rounded-md"
         @click="helpMenuOpen = true"
       >
-        Nápověda
+        {{ $t('other.help') }}
       </button>
       <a href="https://github.com/GamingasCZ/gdlists-vue-frontend/">
         <button class="p-1 bg-black bg-opacity-40 rounded-md">
-          Zdrojový kód
+          {{ $t('other.sourceCod') }}
         </button>
       </a>
       <!-- <a href="https://github.com/GamingasCZ/gdlists-vue-frontend/issues/new?title=Bug:%20">

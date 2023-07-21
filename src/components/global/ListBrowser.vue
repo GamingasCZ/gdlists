@@ -7,6 +7,7 @@ import { ref, onMounted, watch } from "vue";
 import FavoritePreview from "./FavoritePreview.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
+import { useI18n } from "vue-i18n";
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
@@ -26,7 +27,7 @@ const props = defineProps({
 
 // Page title
 if (props.browserName) {
-  document.title = `${props.browserName} | GD Seznamy`;
+  document.title = `${props.browserName} | ${useI18n().t('other.websiteName')}`;
 }
 
 // Infinite scrolling / Pages watch
@@ -60,15 +61,15 @@ const PAGE = ref<number>(
   );
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
-const USERS = ref<ListCreatorInfo[]>();
+const USERS = ref<ListCreatorInfo[]>([]);
 const LISTS = ref<ListPreview[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
-  LISTS.value = []
+  if (usingPagesScrolling.value) LISTS.value = [] // Do not clear when using infinite scrolling
   PAGE.value = setPage;
-  window.history.pushState("", "", `?p=${PAGE.value + 1}`);
+  // window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
   pagesArray.value = listScroll();
   refreshBrowser();
@@ -174,7 +175,7 @@ function refreshBrowser() {
 
       emit("refreshedBrowser", LISTS.value.length)
       loading.value = false
-      USERS.value = res.data[1];
+      USERS.value?.push(...res.data[1]);
       loadFailed.value = false;
     })
     .catch(e => {
@@ -198,19 +199,16 @@ const removeFavoriteLevel = (levelID: string) => {
   let position = levelIDs.indexOf(levelID);
   favoriteLevels.splice(position, 1);
   levelIDs.splice(position, 1);
-  if (filtered) {
-    let i = 0;
-    filtered.forEach((x) => {
-      if (x.levelID == levelID) filtered.splice(i, 1);
-      i++;
-    });
+  for (let i = 0; i < LISTS.value.length; i++) {
+    console.table({"id":LISTS.value[i].levelID, "removed": levelID})
+    if (LISTS.value[i].levelID == levelID) {
+      LISTS.value.splice(i, 1)
+      break
+    }
   }
-
+  
   localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
   localStorage.setItem("favoriteIDs", JSON.stringify(levelIDs));
-
-  document.querySelectorAll(".listPreviews").forEach(x => x.remove())
-  refreshBrowser();
 };
 
 let favoriteLevels: any;
@@ -250,8 +248,6 @@ function infiniteScroll() {
 }
 
 window.addEventListener("scroll", infiniteScroll)
-
-const headerEmpty = () => document.getElementById("browserHeader")?.childElementCount == 0
 </script>
 
 <template>
@@ -269,14 +265,14 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           :class="{ 'bg-greenGradient': onlineType == '' }"
           @click="emit('switchBrowser', '')"
         >
-          Nejnovější
+          {{ $t('homepage.newest') }}
         </button>
         <button
           class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
           :class="{ 'bg-greenGradient': onlineType == 'user' }"
           @click="emit('switchBrowser', 'user')"
         >
-          Moje
+          {{ $t('other.myLists') }}
         </button>
         <button
           class="button box-border rounded-full border-[0.1rem] border-solid border-green-800"
@@ -303,7 +299,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
             type="text"
             max="30"
             class="px-3 w-64 h-11 text-xl bg-white bg-opacity-10 rounded-full"
-            placeholder="Hledat..."
+            :placeholder="$t('other.search')+'...'"
           />
           <button
             type="submit"
@@ -315,7 +311,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
 
         <!-- Refresh Button -->
         <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()" v-if="refreshButton && LISTS.length > 0 && !loadFailed">
-          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">Obnovit</label>
+          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{ $t('other.refresh') }}</label>
         </button>
 
         <!-- Page Switcher -->
@@ -367,7 +363,7 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">Žádné výsledky!</p>
+          <p class="text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
         </div>
 
         <!-- Loading error BG -->
@@ -376,20 +372,19 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           class="flex flex-col gap-3 justify-center items-center"
         >
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">Nepodařilo se načíst obsah!</p>
+          <p class="text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
           <button
             class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             @click="refreshBrowser()"
           >
-            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />Načíst
-            znova
+            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />{{ $t('other.reload') }}
           </button>
         </div>
 
         <!-- Loading -->
-        <div v-else-if="loading" class="flex flex-col gap-4 items-center">
+        <div v-else-if="loading && usingPagesScrolling" class="flex flex-col gap-4 items-center">
           <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
-          <p class="text-xl text-opacity-40">Načítání...</p>
+          <p class="text-xl text-opacity-40">{{ $t('other.loading') }}...</p>
         </div>
 
         <!-- No lists/comments BG -->
@@ -400,20 +395,19 @@ const headerEmpty = () => document.getElementById("browserHeader")?.childElement
           
           <div class="flex flex-col gap-6 items-center" v-if="onlineType != 'comments'">
             <img src="@/images/listEmpty.svg" alt="" class="w-48 opacity-25" />
-            <p class="text-xl opacity-90">Nejsou tu žádné seznamy!</p>
+            <p class="text-xl opacity-90">{{ $t('other.noListsHere') }}</p>
           </div>
 
           <div class="flex flex-col gap-6 items-center" v-else>
             <img src="@/images/noComments.svg" alt="" class="w-48 opacity-25" />
-            <p class="text-xl opacity-90">Nejsou tu žádné komentáře!</p>
+            <p class="text-xl opacity-90">{{ $t('other.noCommentsHere') }}</p>
           </div>
 
           <button
             class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             @click="refreshBrowser()"
           >
-            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" id="listRefreshButton" />Načíst
-            znova
+            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" id="listRefreshButton" />{{ $t('other.reload') }}
           </button>
         </div>
 

@@ -31,10 +31,10 @@ const doDeleteAnim = () => {
                 <img src="@/images/szn1.webp" id="delBottom" class="w-48 transition-transform duration-100 ease-in-out" :class="{'-translate-y-[1.25rem]': !deleteHover}" alt="">
             </header>
             <main class="flex flex-col items-center">
-                <h1 class="text-2xl font-bold text-center">Opravdu chceš smazat tento seznam?</h1>
+                <h1 class="text-2xl font-bold text-center">{{ $t('editor.doDeleteList') }}</h1>
                 <div class="mt-3">
-                    <button class="px-4 py-2 mr-3 text-2xl font-black bg-red-500 bg-opacity-20 rounded-md button" @click="doDeleteAnim" @mouseover="deleteHover = true" @mouseout="deleteHover = false">Ano</button>
-                    <button class="px-4 py-2 text-2xl font-black bg-blue-500 bg-opacity-20 rounded-md button" @click="emit('closePopup')">Ne</button>
+                    <button class="px-4 py-2 mr-3 text-2xl font-black bg-red-500 bg-opacity-20 rounded-md button" @click="doDeleteAnim" @mouseover="deleteHover = true" @mouseout="deleteHover = false">{{ $t('other.yes') }}</button>
+                    <button class="px-4 py-2 text-2xl font-black bg-blue-500 bg-opacity-20 rounded-md button" @click="emit('closePopup')">{{ $t('other.no') }}</button>
                 </div>
             </main>
         </section>

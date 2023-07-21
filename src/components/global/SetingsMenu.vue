@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import LoginButton from "./LoginButton.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
+import { setLanguage } from "@/locales";
 
 defineProps<{
   isLoggedIn: boolean;
@@ -32,8 +33,7 @@ const screenWidth = ref(window.innerWidth)
         class="px-2 py-1 bg-white bg-opacity-10 rounded-full button"
         @click="logout"
       >
-        <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />Odhlásit
-        se
+        <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />{{ $t('settingsMenu.logout') }}
       </button>
     </section>
 
@@ -51,7 +51,7 @@ const screenWidth = ref(window.innerWidth)
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
       {{ $t("settingsMenu.language") }}
-      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.language">
+      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.language" @change="setLanguage(SETTINGS.language)">
         <option :value="0">{{ $t("settingsMenu.czech") }}</option>
         <option :value="1">{{ $t("settingsMenu.english") }}</option>
       </select>
@@ -61,22 +61,22 @@ const screenWidth = ref(window.innerWidth)
       v-if="screenWidth > 900"
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
-      Domovská stránka
+      {{ $t('settingsMenu.homepage') }}
       <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.homepageColumns">
-        <option :value="1">1 sloupec</option>
-        <option :value="2" v-if="screenWidth > 900">2 sloupce</option>
-        <option :value="3" v-if="screenWidth > 1500">3 sloupce</option>
+        <option :value="1">{{ $t('settingsMenu.columns', 1) }}</option>
+        <option :value="2" v-if="screenWidth > 900">{{ $t('settingsMenu.columns', 2) }}</option>
+        <option :value="3" v-if="screenWidth > 1500">{{ $t('settingsMenu.columns', 3) }}</option>
       </select>
     </section>
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
-      Autosave v editoru
+      {{ $t('settingsMenu.autosave') }}
       <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.autosave">
-        <option :value="0">Vypnutý</option>
-        <option :value="30">Každých 30s</option>
-        <option :value="60">Každých 60s</option>
-        <option :value="180">Každé 3min</option>
+        <option :value="0">{{ $t('settingsMenu.asOff') }}</option>
+        <option :value="30">{{ $t('settingsMenu.everySec', [30]) }}</option>
+        <option :value="60">{{ $t('settingsMenu.everySec', [60]) }}</option>
+        <option :value="180">{{ $t('settingsMenu.everyMin', [3]) }}</option>
       </select>
     </section>
   </div>

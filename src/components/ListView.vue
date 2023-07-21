@@ -17,6 +17,7 @@ import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
 import { loadRouteLocation } from "vue-router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
+import { i18n } from "@/locales";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -95,7 +96,7 @@ function main() {
         localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
       }
 
-      document.title = `${LIST_DATA.value?.name} | GD Seznamy`;
+      document.title = `${LIST_DATA.value?.name} | ${i18n.t('other.websiteName')}`;
 
       // Set list colors
       let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;
@@ -229,7 +230,7 @@ const listActions = (action: string) => {
   <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
   <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen"
     picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"
-    browser-name="Skočit na" />
+    :browser-name="$t('listViewer.jumpTo')" />
 
   <!-- Mobile options popup -->
   <MobileExtras v-if="mobileExtrasOpen" @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
@@ -246,15 +247,15 @@ const listActions = (action: string) => {
       <!-- Nonexistent list -->
       <section v-if="nonexistentList" class="flex flex-col items-center my-20 text-white">
         <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
-        <h2 class="mt-2 text-2xl font-bold opacity-60">Tento seznam neexistuje!</h2>
+        <h2 class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentList') }}</h2>
         <div class="flex gap-3 mt-5 max-sm:flex-col">
           <RouterLink to="/random">
-            <button class="p-2 rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8"
-                alt="">Jít na náhodný seznam</button>
+            <button class="p-2 w-full rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8"
+                alt="">{{ $t('listViewer.goToRandom') }}</button>
           </RouterLink>
           <RouterLink to="/">
-            <button class="p-2 text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
-                class="inline mr-3 w-8" alt="">Jít domů</button>
+            <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
+                class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
           </RouterLink>
         </div>
       </section>
@@ -262,12 +263,12 @@ const listActions = (action: string) => {
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels" v-bind="level"
         :favorited="favoritedIDs?.includes(level.levelID!)" :level-index="index"
-        :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-name="LIST_DATA?.name!"
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-name="LIST_DATA?.name!"
         :translucent-card="LIST_DATA?.data.translucent!" class="levelCard" :disable-stars="false"
         v-show="!commentsShowing" @vnode-mounted="tryJumping(index)" />
 
       <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :comm-amount="LIST_DATA.commAmount"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" />
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :showing="commentsShowing"/>
     </main>
   </section>
 </template>

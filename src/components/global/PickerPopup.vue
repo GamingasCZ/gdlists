@@ -69,7 +69,7 @@ onUpdated(() => {
           <form action="." @submit.prevent="highlightFirstElement">
             <input
               type="text"
-              placeholder="Hledat..."
+              :placeholder="$t('other.search')+'...'"
               class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-full"
               id="pickerInput"
               @input="
@@ -87,14 +87,14 @@ onUpdated(() => {
               class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
             >
               <img src="@/images/savedMobHeader.svg" class="w-36" />
-              <h2>Neuložil jsi zatím žádné levely!</h2>
+              <h2>{{ $t('other.noSavedLevels') }}</h2>
             </div>
             <div
               v-else-if="!filteredData.length"
               class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
             >
               <img src="@/images/searchOpaque.svg" class="w-36" />
-              <h2>Nebyly nalezeny žádné levely!</h2>
+              <h2>{{ $t('other.noLevelsFound') }}</h2>
             </div>
             <component
               v-for="level in filteredData"

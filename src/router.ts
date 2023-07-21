@@ -1,4 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { setLanguage } from "./locales";
+import { SETTINGS } from "./siteSettings";
+import { useI18n } from "vue-i18n";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -6,12 +9,12 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: () => import("../components/Homepage.vue"),
+      component: () => import("@/components/Homepage.vue"),
     },
     {
       path: "/editor",
       name: "editor",
-      component: () => import("../components/Editor.vue"),
+      component: () => import("@/components/Editor.vue"),
     },
     {
       path: "/browse",
@@ -19,7 +22,7 @@ const router = createRouter({
       props: (route) => ({
         query: route.query.q ?? "",
         onlineType: route.query.type ?? "",
-        browserName: "Komunitní seznamy"
+        browserName: useI18n().t('listViewer.communityLists')
       }),
       component: () => import("@/components/CommunityLists.vue"),
     },
@@ -49,7 +52,10 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach(() => {
+router.beforeEach(async () => {
+  setLanguage(SETTINGS.value.language)
+  window.scrollTo(0,0)
+  
   document.documentElement.style.setProperty("--siteBackground", "");
 
   if (
@@ -70,4 +76,4 @@ router.beforeEach(() => {
   }
 });
 
-export default router;
+export default router

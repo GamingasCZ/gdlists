@@ -6,6 +6,7 @@ import { onMounted, ref } from "vue";
 import cookier from "cookier";
 import { SETTINGS } from "./siteSettings";
 import router from "./router";
+import NoConnection from "./components/global/NoConnection.vue";
 
 if (localStorage) {
   localStorage.getItem("favoriteIDs") ??
@@ -61,6 +62,7 @@ onMounted(() => {
 <template>
   <main class="min-h-screen">
     <Navbar :is-logged-in="loggedIn" />
+    <NoConnection />
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
   </main>
   <Footer />

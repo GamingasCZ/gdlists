@@ -5,11 +5,11 @@ import { ref } from "vue";
 
 <template>
   <section class="w-80">
-    <h2 class="text-center text-xl font-bold">Nastavení</h2>
-    <div class="flex flex-col gap-2 rounded-md bg-white bg-opacity-5 px-2 py-2">
+    <h2 class="text-xl font-bold text-center">{{ $t('other.settings') }}</h2>
+    <div class="flex flex-col gap-2 px-2 py-2 bg-white bg-opacity-5 rounded-md">
       <div>
         <input type="checkbox" name="private" class="button" />
-        <label for="private">Soukromý seznam</label>
+        <label for="private">{{ $t('editor.privateList') }}</label>
       </div>
       <div>
         <input
@@ -19,19 +19,19 @@ import { ref } from "vue";
           id="nice"
           class="button"
         />
-        <label for="diffGuessing" id="diffGuess">Hádání obtížnstí</label>
+        <label for="diffGuessing" id="diffGuess">{{ $t('editor.levelGuessing') }}</label>
       </div>
       <Transition name="fade">
         <div
           v-show="levelList.diffGuesser[0]"
-          class="ml-8 box-border flex w-max items-center gap-2 rounded-md bg-black bg-opacity-25 px-3 py-2"
+          class="box-border flex gap-2 items-center px-3 py-2 ml-8 w-max bg-black bg-opacity-25 rounded-md"
         >
-          <span>Hádat: </span>
+          <span>{{ $t('editor.guess') }}: </span>
           <button @click="levelList.diffGuesser[1] = !levelList.diffGuesser[1]">
             <img
               src="/public/faces/4.webp"
               alt=""
-              class="button w-10 rounded-md bg-black bg-opacity-50 p-1"
+              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
               :class="{ disabled: !levelList.diffGuesser[1] }"
             />
           </button>
@@ -39,7 +39,7 @@ import { ref } from "vue";
             <img
               src="/public/faces/epic.webp"
               alt=""
-              class="button w-10 rounded-md bg-black bg-opacity-50 p-1"
+              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
               :class="{ disabled: !levelList.diffGuesser[2] }"
             />
           </button>
@@ -52,7 +52,7 @@ import { ref } from "vue";
           name="translucency"
           class="button"
         />
-        <label for="translucency">Průsvitné karty</label>
+        <label for="translucency">{{ $t('editor.translucentCards') }}</label>
       </div>
     </div>
   </section>

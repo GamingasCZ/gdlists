@@ -12,12 +12,12 @@ defineProps({
   <section class="box-border flex justify-between items-center">
     <div class="mr-2 flex min-h-[5rem] items-center gap-2 overflow-x-auto">
       <span v-show="!levelList.levels[cardIndex!].tags.length" class=""
-        >Klikni na
+        >{{ $t('editor.clickAdd3') }}
         <img
           src="@/images/plus.svg"
           class="inline p-1 mx-2 w-10 bg-black bg-opacity-40 rounded-md"
         />
-        k přidání štítků!</span
+        {{ $t('editor.clickAddTags') }}</span
       >
       <TagEditBox
         v-for="(tag, index) in levelList.levels[cardIndex!].tags"

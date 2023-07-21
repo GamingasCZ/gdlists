@@ -1,7 +1,8 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, LevelTag, CollabData, LevelBackup } from "./interfaces";
+import type { LevelList, Level, CollabData, LevelBackup } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
+import { i18n } from "./locales";
 
 export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
@@ -95,29 +96,29 @@ export const modifyListBG = (newColors: number[] | string) => {
   );
 };
 
-export function checkList(listName: string): {valid: boolean, error?: string, listPos?: number, stamp?: number} {
-  let error = (errorText: string, errorPos?: number) => { return {valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random()} }
+export function checkList(listName: string): { valid: boolean, error?: string, listPos?: number, stamp?: number } {
+  let error = (errorText: string, errorPos?: number) => { return { valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }
 
-  if (!isOnline.value) return error("Nejsi připojený k internetu!")
+  if (!isOnline.value) return error(i18n.global.t('other.disconnected'))
 
-  if (listName.length <= 3) return error("Jméno seznamu je moc krátké!")
+  if (listName.length <= 3) return error(i18n.global.t('editor.nameShort'))
 
-  if (levelList.value.levels.length == 0) return error("Snažíš se poslat prázdný seznam lmao :D.")
-  
+  if (levelList.value.levels.length == 0) return error(i18n.global.t('editor.emptyListSend'))
+
   let i = 0
   let listError: object | undefined
   levelList.value.levels.forEach(level => {
-    if (level.levelName.length == 0) listError = error(`Level na ${i+1}. místě nemá jméno!`, i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) listError = error(`Level na ${i+1}. místě nemá tvůrce!`, i)
-    if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(`Level na ${i+1}. místě má neplatné ID levelu!`, i)
+    if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
     i++
   })
-  if (listError != undefined) return listError
+  if (listError != undefined) return <any>listError
 
   let listSize = JSON.stringify(levelList.value).length
-  if (listSize > 25000) return error(`Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o ${(listSize/25000).toFixed(2)}% nad limitem.`)
+  if (listSize > 25000) return error(i18n.global.t('editor.overLimit', [(listSize / 25000).toFixed(2)]))
 
-  return {valid: true}
+  return { valid: true }
 }
 
 export function creatorToCollab(currentName: string): CollabData {
@@ -130,7 +131,7 @@ window.addEventListener("online", () => isOnline.value = true)
 
 export function saveBackup(listName: string, hidden: boolean) {
   if (localStorage && SETTINGS.value.autosave) {
-    let backup: LevelBackup = {listName: listName, levelData: JSON.stringify(levelList.value), listHidden: hidden, listDate: Date.now()}
+    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(levelList.value), listHidden: hidden, listDate: Date.now() }
 
     localStorage.setItem("listBackup", JSON.stringify(backup))
   }
