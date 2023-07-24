@@ -163,6 +163,9 @@ const startMove = (currIndex: number, toPosition: number) => {
     updateOpenedCard(moveLevel(updatingPositions.value, toPosition));
   else updateOpenedCard(moveLevel(currIndex, toPosition));
   enableMoveControls(-1, toPosition);
+
+  let offset = currIndex > toPosition ? -100 : -200
+  window.scrollTo(0, (document.querySelectorAll(".levelCard")[toPosition] as HTMLDivElement).offsetTop+offset)
 };
 
 const updatingPositions = ref(-1);
@@ -293,8 +296,7 @@ function removeList() {
 
   <Transition name="fade">
     <CollabEditor
-      v-show="collabEditorOpen"
-      v-if="levelList.levels.length > 0"
+      v-if="collabEditorOpen && levelList.levels.length > 0"
       :index="currentlyOpenedCard"
       @close-popup="collabEditorOpen = false"
     />
@@ -497,7 +499,7 @@ function removeList() {
         :updating-positions="updatingPositions"
         @do-move="startMove"
         @update-opened-card="updateOpenedCard"
-        @start-move="enableMoveControls"
+        @move-controls="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
         @open-collab-tools="collabEditorOpen = true"
         class="levelCard"

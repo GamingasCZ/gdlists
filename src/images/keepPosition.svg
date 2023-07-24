@@ -1,0 +1,6 @@
+<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+ <g fill="#fff" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="2.3" stroke-width="3">
+  <circle cx="16" cy="16" r="4.3792" style="paint-order:stroke markers fill"/>
+  <path d="m16 1.5c-7.9772 0-14.5 6.5228-14.5 14.5 0 7.9772 6.5228 14.5 14.5 14.5 7.9772 0 14.5-6.5228 14.5-14.5 0-7.9772-6.5228-14.5-14.5-14.5zm0 5.3082c5.1084 0 9.1918 4.0834 9.1918 9.1918s-4.0834 9.1918-9.1918 9.1918-9.1918-4.0834-9.1918-9.1918 4.0834-9.1918 9.1918-9.1918z" color="#000000" style="paint-order:stroke markers fill"/>
+ </g>
+</svg>
