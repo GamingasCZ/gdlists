@@ -8,6 +8,8 @@ import type { FavoritedLevel, Level } from "@/interfaces";
 const emit = defineEmits(["closePopup", "selectOption"]);
 const props = defineProps<{
   browserName: string;
+  outerErrorText: string
+  outerError: boolean
   pickerData: Level[] | FavoritedLevel[] | string;
   pickerDataType: "favoriteLevel" | "level";
 }>();
@@ -70,7 +72,7 @@ onUpdated(() => {
             <input
               type="text"
               :placeholder="$t('other.search')+'...'"
-              class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-full"
+              class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-md"
               id="pickerInput"
               @input="
                 filteredData = data.filter((x) =>
@@ -80,7 +82,7 @@ onUpdated(() => {
             />
           </form>
           <main
-            class="mt-2 flex flex-grow-[1] flex-col gap-1 overflow-y-auto rounded-lg bg-white bg-opacity-10 p-1"
+            class="mt-2 flex-grow-[1] overflow-y-auto overflow-x-clip rounded-lg bg-white bg-opacity-10 p-1"
           >
             <div
               v-if="!data.length"
@@ -89,6 +91,7 @@ onUpdated(() => {
               <img src="@/images/savedMobHeader.svg" class="w-36" />
               <h2>{{ $t('other.noSavedLevels') }}</h2>
             </div>
+
             <div
               v-else-if="!filteredData.length"
               class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
@@ -96,13 +99,24 @@ onUpdated(() => {
               <img src="@/images/searchOpaque.svg" class="w-36" />
               <h2>{{ $t('other.noLevelsFound') }}</h2>
             </div>
-            <component
-              v-for="level in filteredData"
-              @click="emit('selectOption', level)"
-              :is="[FavoriteBubble, LevelBubble][bubbleType]"
-              :data="level"
-              class="pickerBubble"
-            />
+
+            <div
+              v-else-if="outerError"
+              class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
+            >
+              <img src="@/images/close.svg" class="w-36" />
+              <h2>{{ outerErrorText }}</h2>
+            </div>
+            
+            <div v-if="!outerError" class="flex flex-col gap-1">
+              <component
+                v-for="level in filteredData"
+                @click="emit('selectOption', level)"
+                :is="[FavoriteBubble, LevelBubble][bubbleType]"
+                :data="level"
+                class="pickerBubble"
+              />
+            </div>
           </main>
         </section>
       </Transition>

@@ -26,7 +26,7 @@ watch(props, () => {
   <nav
     class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-md overflow-x-clip bg-greenGradient shadow-black"
   >
-    <RouterLink to="/"><Logo class="w-10 h-10 button" /></RouterLink>
+    <RouterLink to="/"><Logo class="w-10 h-10 button"/></RouterLink>
     <section
       class="flex gap-5 items-center text-xs font-bold text-white md:text-xl"
       :class="{'opacity-50 pointer-events-none': !isOnline}"

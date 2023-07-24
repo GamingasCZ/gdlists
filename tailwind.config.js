@@ -14,7 +14,8 @@ module.exports = {
       },
       backgroundImage: ({ theme }) => ({
           greenGradient: `linear-gradient(9deg, ${theme("colors.lof.200")}, ${theme("colors.lof.300")})`
-      })
+      }),
+      boxShadow: { drop: "black 0px 0px 8px" }
     },
   },
   plugins: [],

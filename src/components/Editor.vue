@@ -2,6 +2,7 @@
 import NotLoggedIn from "./global/NotLoggedInDialog.vue";
 import ListSettings from "./editor/ListSettings.vue";
 import EditorCard from "./editor/EditorCard.vue";
+import EditorCardHeader from "./editor/EditorCardHeader.vue";
 import ColorPicker from "./global/ColorPicker.vue";
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import BGImagePicker from "./global/BackgroundImagePicker.vue";
@@ -19,7 +20,7 @@ import LevelCard from "./global/LevelCard.vue";
 import axios, { type AxiosResponse } from "axios";
 import cookier from "cookier"
 import router from "@/router";
-import { saveBackup } from "../Editor";
+import { saveBackup, moveLevel } from "../Editor";
 import Notification from "./global/Notification.vue";
 import { SETTINGS } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
@@ -114,9 +115,6 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     if (!isNaN(levelList.value.pageBGcolor[0])) modifyListBG(levelList.value.pageBGcolor)
 }
 
-const nice = () => {
-  console.log(levelList.value);
-};
 const tagPopupOpen = ref(false);
 const BGpickerPopupOpen = ref(false);
 const bgColorPickerOpen = ref(false);
@@ -149,6 +147,7 @@ const startAddLevel = () => {
 const previewList = (bypassCheck: boolean) => {
   let check = checkList(listName.value)
   errorDblclickHelp.value = true
+  errorMessage.value = ""
   if (!check.valid && !bypassCheck) {
     errorMessage.value = check.error!
     errorStamp.value = check.stamp!
@@ -158,6 +157,13 @@ const previewList = (bypassCheck: boolean) => {
   else
     previewingList.value = true
 }
+
+const startMove = (currIndex: number, toPosition: number) => {
+  if (updatingPositions.value != -1)
+    updateOpenedCard(moveLevel(updatingPositions.value, toPosition));
+  else updateOpenedCard(moveLevel(currIndex, toPosition));
+  enableMoveControls(-1, toPosition);
+};
 
 const updatingPositions = ref(-1);
 const updateOpenedCard = (newPos: number) => {
@@ -183,7 +189,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
     color: chroma(level.levelColor).hsv(),
     levelID: level.levelID,
     video: null,
-    difficulty: [0, 0],
+    difficulty: level.levelDiff,
     tags: [],
   };
   addLevel(addedLevel);
@@ -297,6 +303,8 @@ function removeList() {
   <PickerPopup
     v-show="favoriteLevelPickerOpen"
     :browser-name="$t('other.savedLevels')"
+    :outer-error-text="$t('editor.maxLevels')"
+    :outer-error="levelList.levels.length >= 50"
     @close-popup="favoriteLevelPickerOpen = false"
     @select-option="addFromFavorites($event)"
     picker-data="@favorites"
@@ -313,27 +321,25 @@ function removeList() {
     :mess="$t('editor.loginToCreate')"
   />
 
-  <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp"/>
+  <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp" :previewing="previewingList"/>
 
   <!-- List Preview -->
-  <Transition name="fadeSlide">
-    <section v-show="previewingList" class="mt-4">
-      <div class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
-        <button @click="previewingList = false" class="absolute top-1 left-1 button">
-          <img src="@/images/arrow-left.webp" class="w-10" alt="" />
-        </button>
-        <h1 class="text-3xl text-center text-white">{{ $t('editor.preview') }}</h1>
-      </div>
-      <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
-        <LevelCard
-          v-for="level in levelList.levels"
-          v-bind="level"
-          :disable-stars="true"
-          :translucent-card="levelList.translucent"
-        />
-      </div>
-    </section>
-  </Transition>
+  <section v-show="previewingList" class="mt-4">
+    <div class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
+      <button @click="previewingList = false" class="absolute top-1 left-1 button">
+        <img src="@/images/arrow-left.webp" class="w-10" alt="" />
+      </button>
+      <h1 class="text-3xl text-center text-white">{{ $t('editor.preview') }}</h1>
+    </div>
+    <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
+      <LevelCard
+        v-for="level in levelList.levels"
+        v-bind="level"
+        :disable-stars="true"
+        :translucent-card="levelList.translucent"
+      />
+    </div>
+  </section>
 
   <!-- Edit error - List doesn't exist -->
   <section
@@ -361,7 +367,7 @@ function removeList() {
   <form
     action="/editor"
     @submit.prevent
-    class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-lg shadow-black"
+    class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-drop"
     :class="{'motion-reduce:animate-none animate-[shake_0.2s_infinite]': formShaking}"
     v-show="!previewingList"
     v-if="isLoggedIn && listExists && listBelongsToYou"
@@ -450,14 +456,14 @@ function removeList() {
             alt=""
           />
         </button>
-        <button type="button" @click="favoriteLevelPickerOpen = true">
+        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s]" @click="favoriteLevelPickerOpen = true">
           <img
             class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
             src="../images/addfromFaves.svg"
             alt=""
           />
         </button>
-        <button type="button" @click="startAddLevel()">
+        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s]" @click="startAddLevel()">
           <img
             class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
             src="../images/addLevel.svg"
@@ -472,7 +478,7 @@ function removeList() {
     <main
       class="flex min-h-[6rem] w-full flex-col gap-1.5 bg-[url(../images/fade.webp)] bg-repeat-x px-2 py-2"
     >
-      <EditorBackup :backup-data="backupData" @load-backup="loadBackup(); backupData.backupDate = '0'" @remove-backup="removeBackup(); backupData.backupDate = '0'"/>
+      <EditorBackup v-if="levelList.levels.length == 0" :backup-data="backupData" @load-backup="loadBackup(); backupData.backupDate = '0'" @remove-backup="removeBackup(); backupData.backupDate = '0'"/>
 
       <h2 v-if="!levelList.levels.length" class="mt-4">
         {{ $t('editor.clickAdd1') }}
@@ -484,17 +490,18 @@ function removeList() {
       </h2>
 
       <!-- Levels -->
-      <EditorCard
+      <component
         v-for="(level, index) in levelList.levels"
         :data="level"
         :index="index"
-        :opened="currentlyOpenedCard == index"
         :updating-positions="updatingPositions"
+        @do-move="startMove"
         @update-opened-card="updateOpenedCard"
         @start-move="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
         @open-collab-tools="collabEditorOpen = true"
         class="levelCard"
+        :is="currentlyOpenedCard == index ? EditorCard : EditorCardHeader"
       />
     </main>
     <ListSettings />
@@ -529,5 +536,4 @@ function removeList() {
       </button>
     </section>
   </form>
-  <button @click="nice" class="translate-y-20">dwdsasad</button>
 </template>

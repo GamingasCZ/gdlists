@@ -8,7 +8,7 @@ const helpMenuOpen = ref<boolean>(false);
 <template>
   <HelpMenu v-if="helpMenuOpen" @close-popup="helpMenuOpen = false" />
   <section
-    class="flex z-50 justify-center items-center mt-20 w-full h-24 text-white bg-lof-200"
+    class="flex z-50 justify-center items-center mt-20 w-full h-24 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
   >
     <div class="flex items-center">
       <img

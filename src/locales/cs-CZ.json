@@ -110,7 +110,8 @@
     "noNameAt": "Level na {0}. místě nemá jméno!",
     "overLimit": "Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o {0}% nad limitem.",
     "noCreatorAt": "Level na {0}. místě nemá tvůrce!",
-    "invalidID": "Level na {0}. místě má neplatné ID levelu!"
+    "invalidID": "Level na {0}. místě má neplatné ID levelu!",
+    "maxLevels": "Víc levelů už nemůžeš přidat!"
   },
   "other": {
     "lockQuotes": [
@@ -183,12 +184,12 @@
   },
   "date": {
     "fewSecsAgo": "před pár sekundami",
-    "secs": "{0} sekundou | {0} sekundami",
-    "mins": "{0} minutou | {0} minutami",
-    "hours": "{0} hodinou | {0} hodinami",
-    "days": "{0} dnem | {0} dny",
-    "weeks": "{0} týdnem | {0} týdny",
-    "months": "{0} měsícem | {0} měsíci"
+    "secs": "před {0} sekundou | před {0} sekundami",
+    "mins": "před {0} minutou | před {0} minutami",
+    "hours": "před {0} hodinou | před {0} hodinami",
+    "days": "před {0} dnem | před {0} dny",
+    "weeks": "před {0} týdnem | před {0} týdny",
+    "months": "před {0} měsícem | před {0} měsíci"
   },
   "help": {
     "Lists": "Seznamy",

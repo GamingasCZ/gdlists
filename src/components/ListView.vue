@@ -15,9 +15,8 @@ import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
-import { loadRouteLocation } from "vue-router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
-import { i18n } from "@/locales";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -27,6 +26,8 @@ const props = defineProps({
 onUnmounted(() => {
   document.body.style.backgroundImage = '';
 });
+
+let gdlists = useI18n().t('other.websiteName')
 
 watch(props, () => main())
 onMounted(() => main())
@@ -96,7 +97,7 @@ function main() {
         localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
       }
 
-      document.title = `${LIST_DATA.value?.name} | ${i18n.t('other.websiteName')}`;
+      document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
       // Set list colors
       let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;

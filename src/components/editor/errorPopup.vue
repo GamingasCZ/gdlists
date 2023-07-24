@@ -7,11 +7,22 @@ const props = defineProps<{
     errorText: string
     showDblclickInfo: boolean
     stamp: number
+    previewing: boolean
 }>()
 
 const hidden = ref(true)
 
 watch(props, () => {
+    if (!props.errorText) { // Empty error (=no error)
+        hidden.value = true
+        return
+    }
+    
+    if (props.previewing) { // Hide the popup when previewing list
+        hidden.value = true
+        return
+    }
+
     hidden.value = false
     setTimeout(() => hidden.value = true, 2000);
 })

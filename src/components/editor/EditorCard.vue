@@ -20,12 +20,13 @@ const emit = defineEmits<{
   (e: "startMove", pos: number, newInd: number): void;
   (e: "openTagPopup"): void;
   (e: "openCollabTools", levelIndex: number): void;
+  (e: "doMove", levelIndex: number, toIndex: number): void;
 }>();
 
 // Colors
 const darkCol = () => 
   chroma
-    .hsl(...props.data?.color!)
+    .hsl(...levelList.value.levels[props.index!].color!)
     .darken()
     .css();
 const changeCardColors = (newColors: [number, number]) =>
@@ -48,19 +49,17 @@ const getRateImage = () => {
   }
 };
 
-const changeProp = (e: Event) => {
-  let target: HTMLInputElement = e.currentTarget as HTMLInputElement;
-  levelList.value.levels[props.index as number][target.name] = target.value;
-};
+const diffFacePath = ref(new URL(`/public/faces/${levelList.value.levels[props.index!].difficulty[0]}.webp`, import.meta.url).href)
+const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0] : levelList.value.levels[props.index!].creator)
+const modifyCreator = (e: Event) => {
+  let newCreator = (e.target as HTMLInputElement).value
+  if (typeof levelList.value.levels[props.index!].creator == 'string')
+    levelList.value.levels[props.index!].creator = newCreator
+  else
+    levelList.value.levels[props.index!].creator[0][0] = newCreator
+}
 
 const openedPanel = ref<number>(0);
-const startMove = (toPosition: number) => {
-  if (props.updatingPositions != -1)
-    emit("updateOpenedCard", moveLevel(props.updatingPositions, toPosition));
-  else emit("updateOpenedCard", moveLevel(props.index!, toPosition));
-  emit("startMove", -1, toPosition);
-  openedPanel.value = 0;
-};
 
 const mobileMoveLevel = () => {
   emit("startMove", props.index!, 0);
@@ -69,7 +68,12 @@ const mobileMoveLevel = () => {
 function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   let levelID = levelList.value.levels[props.index!].levelID;
   let levelName = levelList.value.levels[props.index!].levelName;
-  let levelCreator = levelList.value.levels[props.index!].creator;
+  let levelCreator: string;
+  if (typeof levelList.value.levels[props.index!].creator == 'string')
+    levelCreator = levelList.value.levels[props.index!].creator
+  else
+    levelCreator = levelList.value.levels[props.index!].creator[0][0]
+
   let request: string = "";
   if (searchingByID) request = `id=${levelID}`; // Searching by ID
   else {
@@ -87,7 +91,12 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       let level: LevelSearchResponse = response.data;
       levelList.value.levels[props.index!].levelID = level.id;
       levelList.value.levels[props.index!].levelName = level.name;
-      levelList.value.levels[props.index!].creator = level.author;
+      
+      if (typeof levelList.value.levels[props.index!].creator == 'string')
+        levelList.value.levels[props.index!].creator = level.author
+      else
+        levelList.value.levels[props.index!].creator[0][0] = level.author
+
       levelList.value.levels[props.index!].difficulty = [
         level.difficulty,
         level.cp,
@@ -98,52 +107,10 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 
 <template>
   <section>
-    <!-- Closed card content -->
-    <header
-      :style="{ backgroundColor: chroma.hsl(...data?.color!).hex()}"
-      class="relative px-2 py-1 text-lg rounded-md"
-      v-show="!opened"
-      @click="updatingPositions != -1 ? 0 : emit('updateOpenedCard', index!)"
-    >
-      #{{ index! + 1 }} - {{ data?.levelName || $t('other.unnamesd') }}
-      <div
-        v-show="updatingPositions != -1"
-        class="absolute right-0 top-2"
-      >
-        <!-- Move Up -->
-        <button
-          v-show="index! < updatingPositions"
-          class="w-12 button"
-          @click="startMove(index!)"
-        >
-          <img src="@/images/showCommsU.svg" />
-        </button>
-
-        <!-- Move down -->
-        <button
-          v-show="index! > updatingPositions"
-          class="w-12 button"
-          @click="startMove(index!)"
-        >
-          <img src="@/images/showCommsD.svg" />
-        </button>
-
-        <!-- Cancel Move -->
-        <button
-          v-show="index! == updatingPositions"
-          class="mr-2.5 w-6 button"
-          @click="startMove(index!)"
-        >
-          <img src="@/images/close.svg" />
-        </button>
-      </div>
-    </header>
-
     <!-- Card content -->
     <main
-      v-show="opened"
-      :style="{ backgroundColor: chroma.hsl(...data?.color!).hex(), borderColor: darkCol() }"
-      class="flex flex-col gap-1.5 rounded-md border-[0.35rem] border-solid p-2"
+    :style="{ backgroundImage: `linear-gradient(30deg, ${chroma.hsl(...levelList.levels[index!].color!).hex()}, ${darkCol()})` }"
+    class="flex flex-col gap-1.5 p-2 rounded-md"
     >
       <div class="flex justify-between">
         <div class="box-border inline-flex gap-2">
@@ -154,8 +121,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
             type="text"
             name="levelID"
-            @input="changeProp"
-            :value="data?.levelID"
+            v-model="levelList.levels[index!].levelID"
             :placeholder="$t('level.levelID')"
           />
           <img
@@ -173,24 +139,24 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="w-10 button aspect-square"
             src="../../images/showCommsU.svg"
             alt=""
-            @click="startMove(props.index! - 1)"
+            @click="emit('doMove', props.index!, props.index! - 1); openedPanel = 0;"
           />
           <input
             autocomplete="off"
             style="appearance: textfield"
-            class="w-12 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
+            class="w-12 max-w-[20vw] font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
             type="number"
             :value="index! + 1"
             @click="mobileMoveLevel()"
             @change="
-              startMove(parseInt(($event.target as HTMLInputElement).value) - 1)
+              emit('doMove', props.index!, parseInt(($event.target as HTMLInputElement).value) - 1); openedPanel = 0;
             "
           />
           <img
             class="w-10 button aspect-square"
             src="../../images/showCommsD.svg"
             alt=""
-            @click="startMove(props.index! + 1)"
+            @click="emit('doMove', props.index!, props.index! + 1); openedPanel = 0;"
           />
         </div>
 
@@ -230,8 +196,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
             type="text"
             name="levelName"
-            :value="data?.levelName"
-            @input="changeProp"
+            maxlength="20"
+            v-model="levelList.levels[index!].levelName"
             :placeholder="$t('level.levelName')"
           />
         </div>
@@ -267,14 +233,15 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
             type="text"
             name="creator"
-            :value="data?.creator"
-            @input="changeProp"
+            :value="levelCreator"
+            @change="modifyCreator"
             :placeholder="$t('level.creator')"
           />
           <img
             class="p-1 w-10 bg-black bg-opacity-30 rounded-md button aspect-square"
             src="../../images/bytost.webp"
             alt=""
+            :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
             @click="emit('openCollabTools', index!)"
           />
         </div>
@@ -292,8 +259,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
             type="text"
             name="video"
-            @input="changeProp"
-            :value="data?.video"
+            v-model="levelList.levels[index!].video"
             :placeholder="$t('level.video')"
           />
         </div>
@@ -302,14 +268,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         <div class="flex gap-2 items-start max-sm:mt-3">
           <img
             class="w-10 button"
-            @click="deleteLevel(props.index!)"
-            src="../../images/delete.webp"
-            alt=""
-          />
-          <img
-            class="w-10 button"
             @click="openedPanel = openedPanel != 1 ? 1 : 0"
-            src="../../images/colorSelect.webp"
+            src="../../images/colorPicker.svg"
             alt=""
           />
           <div class="flex relative justify-center items-center button">
@@ -317,24 +277,30 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
               class="w-10"
               @click="openedPanel = openedPanel != 2 ? 2 : 0"
               alt=""
-              src="/public/faces/diffContainer.webp"
+              src="../../images/difficultyBG.svg"
             />
             <img
-              :src="`/src/images/faces/${levelList.levels[index!].difficulty[0]}.webp`"
+              :src="diffFacePath"
               alt=""
-              class="absolute z-20 w-6 pointer-events-none"
+              class="absolute z-20 w-7 pointer-events-none"
             />
             <img
               :src="getRateImage()"
               alt=""
-              class="absolute z-10 w-8 pointer-events-none"
+              class="absolute z-10 w-10 pointer-events-none"
               :style="{zIndex: levelList.levels[index!].difficulty[1]-1 ? 10 : 30 }"
             />
           </div>
           <img
             class="w-10 button"
             @click="openedPanel = openedPanel != 3 ? 3 : 0"
-            src="../../images/tags.webp"
+            src="../../images/tagPicker.svg"
+            alt=""
+          />
+          <img
+            class="ml-4 w-10 button"
+            @click="deleteLevel(props.index!)"
+            src="../../images/deleteLevel.svg"
             alt=""
           />
         </div>

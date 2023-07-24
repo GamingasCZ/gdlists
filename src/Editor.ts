@@ -24,7 +24,7 @@ export function makeColor(col?: [number, number, number] | string): [number, num
   else if (typeof col == 'string') return chroma(col).hsl()
   else {
     let randomColor = chroma.hsv(
-      Math.floor(Math.random() * 360), 1, Math.random() / 2
+      Math.floor(Math.random() * 360), 1, Math.random() / 3
     ).hsv()
     return randomColor
   }

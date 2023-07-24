@@ -4,7 +4,7 @@ import { ref } from "vue";
 </script>
 
 <template>
-  <section class="w-80">
+  <section class="w-80 max-w-[90vw]">
     <h2 class="text-xl font-bold text-center">{{ $t('other.settings') }}</h2>
     <div class="flex flex-col gap-2 px-2 py-2 bg-white bg-opacity-5 rounded-md">
       <div>

@@ -48,6 +48,7 @@ const doFavoriteLevel = () => {
       creator: isCollab ? props.creator[0][0] : (props.creator as string),
       levelColor: chroma(props.color!).hex(),
       levelID: props.levelID!,
+      levelDiff: props.difficulty,
       listID: props.listID,
       listName: props.listName,
       listPosition: props.levelIndex,
@@ -94,7 +95,7 @@ try {
           >
             <img
             class="relative z-10 w-10"
-            :src="`/public/faces/${difficulty[0]}.webp`"
+            :src="`/faces/${difficulty[0]}.webp`"
               :class="{ 'scale-[1.3]': difficulty[0] > 5 }"
               alt=""
             />
@@ -105,19 +106,19 @@ try {
                 '!-top-0.5 !scale-[1.7]': difficulty[0] > 5,
                 '!-top-0.5 !scale-[1.48]': difficulty[0] == 10,
               }"
-              :src="`/public/faces/featured.webp`"
+              :src="`/faces/featured.webp`"
               alt=""
             />
             <img
               v-else-if="difficulty[1] == 3"
               class="absolute -top-1 -z-10 w-full scale-[1.6]"
-              :src="`/public/faces/epic.webp`"
+              :src="`/faces/epic.webp`"
               alt=""
             />
             <img
               v-else-if="difficulty[1] == 1"
               class="absolute -right-0 -bottom-0 z-20 w-4 scale-150"
-              :src="`/public/faces/star.webp`"
+              :src="`/faces/star.webp`"
               alt=""
             />
           </div>

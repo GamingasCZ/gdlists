@@ -56,7 +56,12 @@ const pfp = ref("")
 if (!props.creatorData) {
   import(`../../images/oldPFP.png`).then(res => {pfp.value = res.default})
 }
-else pfp.value = `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
+else {
+  let img = new Image()
+  img.src = `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
+  img.addEventListener("load", () => pfp.value = img.src)
+  img.addEventListener("error", () => import("@/images/defaultPFP.webp").then(res => pfp.value = res.default))
+}
 
 let sendingRating = false
 function sendRating(action: 1 | 0) {

@@ -36,7 +36,11 @@ if (props.username != "") {
 
 props.userArray.forEach(user => {
   if (user.id == props.uid) {
-    pfp.value = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar_hash}.png`
+    let img = new Image()
+    img.src = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar_hash}.png`
+    img.addEventListener("load", () => pfp.value = img.src)
+    img.addEventListener("error", () => import("@/images/defaultPFP.webp").then(res => pfp.value = res.default))
+
     username.value = user.username
   }
 });

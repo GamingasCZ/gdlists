@@ -1,12 +1,12 @@
 {
   "date": {
-    "days": "{0} day | \n{0} days",
+    "days": "{0} day ago | \n{0} days ago",
     "fewSecsAgo": "a few seconds ago",
-    "hours": "{0} hour | \n{0} hours",
-    "mins": "{0} minute | \n{0} minutes",
-    "months": "{0} month | \n{0} months",
-    "secs": "{0} second | \n{0} seconds",
-    "weeks": "{0} week | \n{0} weeks"
+    "hours": "{0} hour ago | \n{0} hours ago",
+    "mins": "{0} minute ago | \n{0} minutes ago",
+    "months": "{0} month ago | \n{0} months ago",
+    "secs": "{0} second ago | \n{0} seconds ago",
+    "weeks": "{0} week ago | \n{0} weeks ago"
   },
   "editor": {
     "bgColor": "Background color:",
@@ -14,7 +14,7 @@
     "clickAdd2": "to add a level!",
     "clickAdd3": "Click ",
     "clickAddTags": "to add a tag!",
-    "descriptionEditor": "Tag editor",
+    "descriptionEditor": "Description Editor",
     "doDeleteList": "Are you sure you want to delete this list?",
     "editing": "Editing",
     "editor": "Editor",
@@ -38,6 +38,15 @@
     "tagTitle": "Tags",
     "tags": [
       "Slow",
+      "Fast",
+      "High Objects",
+      "2P",
+      "Hacked",
+      "Layout",
+      "Decorated",
+      "1.9",
+      "Crazy",
+      "Unrated",
       "Impossible",
       "Shitpost",
       "Minigame",
@@ -48,22 +57,13 @@
       "Glowy",
       "Remake",
       "Gimmicky",
-      "Fast",
       "Controversial",
       "Colorful",
       "Modern",
       "Bossfight",
       "Long",
       "Unreleased",
-      "Unrecognized",
-      "High Objects",
-      "2P",
-      "Hacked",
-      "Layout",
-      "Decorated",
-      "1.9",
-      "Crazy",
-      "Unrated"
+      "Unrecognized"
     ],
     "titleImage": "List Background",
     "translucentCards": "Translucent Cards",
@@ -76,7 +76,8 @@
     "invalidID": "The  {0}. level has an invalid level ID!",
     "noCreatorAt": "The {0}. level is missing its creator!",
     "noNameAt": "The {0}. level is missing a level name!",
-    "overLimit": "Your list is too big. \nYou'll have to remove some levels or collabs. \nYou are {0}% over the limit."
+    "overLimit": "Your list is too big. \nYou'll have to remove some levels or collabs. \nYou are {0}% over the limit.",
+    "maxLevels": "You cannot add more levels!"
   },
   "homepage": {
     "clear": "Clear",

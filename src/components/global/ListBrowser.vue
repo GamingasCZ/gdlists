@@ -8,6 +8,7 @@ import FavoritePreview from "./FavoritePreview.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
+import { isOnline } from "@/Editor";
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
@@ -310,7 +311,7 @@ window.addEventListener("scroll", infiniteScroll)
         </form>
 
         <!-- Refresh Button -->
-        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()" v-if="refreshButton && LISTS.length > 0 && !loadFailed">
+        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()" v-if="refreshButton && isOnline && LISTS.length > 0 && !loadFailed">
           <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{ $t('other.refresh') }}</label>
         </button>
 

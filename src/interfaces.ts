@@ -58,6 +58,7 @@ export interface FavoritedLevel {
   creator: string;
   levelID: string;
   levelColor: string;
+  levelDiff: [number, number]
   listID: string;
   listName: string;
   listPosition: number;

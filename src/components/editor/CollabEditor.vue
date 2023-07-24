@@ -14,6 +14,14 @@ const emit = defineEmits<{
 const colorLeft = ref<string>(chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.906, 0.167).hex())
 const colorRight = ref<string>(chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.231, 0.102).hex())
 
+const modifyCreator = (e: Event) => {
+  let newCreator = (e.target as HTMLInputElement).value
+  if (typeof levelList.value.levels[props.index!].creator == 'string')
+    levelList.value.levels[props.index!].creator = newCreator
+  else
+    levelList.value.levels[props.index!].creator[0][0] = newCreator
+}
+
 watch(props, () => {
     colorLeft.value = chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.906, 0.167).hex()
     colorRight.value = chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.231, 0.102).hex()
@@ -53,7 +61,7 @@ function addRole(preset: string = "") {
       <header class="flex gap-2 items-center mx-2 mt-2">
         <img src="@/images/bytost.webp" class="w-10" alt="">
         <input value="Host" type="text" class="px-3 -mr-1 w-24 h-10 text-right bg-black bg-opacity-40 rounded-full" placeholder="Role hosta">: 
-        <input type="text" class="px-3 h-10 bg-black bg-opacity-40 rounded-full max-sm:w-32" placeholder="Jméno hosta">
+        <input type="text" @change="modifyCreator" :value="typeof levelList.levels[index!].creator == 'object' ? levelList.levels[index!].creator[0][0] : levelList.levels[index!].creator" class="px-3 h-10 bg-black bg-opacity-40 rounded-full max-sm:w-32" placeholder="Jméno hosta">
         <button class="box-border p-1 bg-black bg-opacity-40 rounded-full button">
             <img src="@/images/searchOpaque.svg" class="w-8" alt="">
         </button>

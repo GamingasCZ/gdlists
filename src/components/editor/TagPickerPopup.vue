@@ -6,7 +6,10 @@ const emit = defineEmits<{
   (e: "closePopup"): void;
   (e: "addTag", tag: LevelTag): void;
 }>();
+const getTag = (ind: number) => new URL(`/public/badges/${ind}.svg`, import.meta.url).href
+
 </script>
+
 
 <template>
   <dialog
@@ -37,7 +40,7 @@ const emit = defineEmits<{
           type="button"
           class="flex gap-2 items-center p-1.5 text-sm bg-black bg-opacity-20 rounded-full button"
         >
-          <img :src="'/src/images/badges/' + (tag - 1) + '.svg'" alt="" />{{
+          <img :src="getTag(tag - 1)" alt="" />{{
             $t(`editor.tags[${tag - 1}]`)
           }}
         </button>

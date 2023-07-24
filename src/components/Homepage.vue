@@ -5,8 +5,9 @@ import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
 import { computed, ref, watch } from "vue";
 import { SETTINGS } from "@/siteSettings";
+import { useI18n } from "vue-i18n";
 
-document.title = "GD Seznamy";
+document.title = useI18n().t("other.websiteName");
 
 const props = defineProps({
   isLoggedIn: Boolean,
