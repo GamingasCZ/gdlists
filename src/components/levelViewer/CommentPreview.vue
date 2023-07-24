@@ -64,6 +64,7 @@ else time.value = useI18n().t('date.months', [Math.floor(datePassed/2419200)])
 
 const parsedComment = ref<string>("")
 parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5 pointer-events-none" src="' + new URL(`../../images/emoji/$1.webp`, import.meta.url).href + '" alt="">')
+parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
 
 </script>
 

@@ -59,7 +59,6 @@ onMounted(() => {
             },
         },
         submit: {
-            will: e => e.key === 'Enter' && e.ctrlKey,
             done: sendComment,
         },
     })
@@ -85,11 +84,10 @@ const chatboxEmpty = () => {
 function parseComment(comment: Array<string | {id: string}> ): string {
     let parsedComment = ""
     comment.forEach((commentBit: string | {id: string}) => {
-        console.log(commentBit)
         if (typeof commentBit == "string") parsedComment += commentBit
         else if (typeof comment == "object") {
-            if (commentBit.id == undefined) return // bug when selecting all text and removing it
-            parsedComment += `&${commentBit.id.padStart(2, '0')}`
+            if (commentBit.id == undefined) parsedComment += "\n" // bug when selecting all text and removing it
+            else parsedComment += `&${commentBit.id.padStart(2, '0')}`
         }
     });
     return parsedComment
@@ -107,6 +105,7 @@ function sendComment(com = "") {
     else comment = com
     let parsedComment = parseComment(comment)
     commentLength.value = 0
+    console.log(parsedComment)
 
     // why tf did i have to stringify the post data? it wouldn't show up in the backend otherwise fuck!!!!
     axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify({
