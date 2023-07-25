@@ -85,7 +85,7 @@ function sendRating(action: 1 | 0) {
 </script>
 
 <template>
-  <section class="mx-auto flex w-[80rem] max-w-[95vw] flex-col backdrop-blur-sm">
+  <section class="mx-auto flex w-[80rem] max-w-[95vw] flex-col">
     <section class="flex gap-2">
       <!-- Likes and dislikes -->
       <div class="box-border flex flex-col items-center max-sm:hidden">
@@ -116,7 +116,7 @@ function sendRating(action: 1 | 0) {
       </div>
 
       <!-- Description -->
-      <main class="relative grow">
+      <main class="relative backdrop-blur-sm grow">
         <header class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
           <img :src="pfp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid" alt="" />
           <h1 class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>

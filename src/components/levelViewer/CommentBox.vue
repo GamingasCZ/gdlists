@@ -7,6 +7,7 @@ import Editor from 'pure-editor'
 import axios, { type AxiosResponse } from 'axios'
 import cookier from 'cookier'
 import LoginButton from '../global/LoginButton.vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     listID: string
@@ -70,11 +71,10 @@ const commentLength = ref(0)
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
 let placeholders = [
-    "Tvůj seznam je...",
-    "Líbí se mi tvůj seznam, protože...",
-    "Máš jiný názor než já. Už nikdy nebudeš klidně spát, protože...",
-    "Tvůj seznam stojí za prd, protože...",
-    "Mrkni se i na můj seznam..."
+    useI18n().t("listViewer.commHelp1"),
+    useI18n().t("listViewer.commHelp2"),
+    useI18n().t("listViewer.commHelp3"),
+    useI18n().t("listViewer.commHelp4"),
 ]
 placeholder.value = placeholders[Math.floor(Math.random() * placeholders.length)]
 
@@ -124,8 +124,11 @@ function sendComment(com = "") {
     <section class="relative z-10 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
         <pre :tabindex="loggedIn ? 0 : -1" @focus="placeholderActive = false" :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}" @blur="chatboxEmpty" @paste="modCommentLength()" @input="modCommentLength()" contenteditable="true" id="commentBox" class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-24" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
         
+        <!-- placeholder text -->
+        <p class="absolute top-2 left-3 opacity-30" v-if="placeholderActive">{{ placeholder }}</p>
+
         <!-- Not logged in notification -->
-        <section class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
+        <section v-if="!loggedIn" class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
             <div class="flex gap-2 items-center">
                 <img src="@/images/info.svg" alt="" class="w-6">
                 <p>{{ $t('listViewer.commentLogin') }}</p>

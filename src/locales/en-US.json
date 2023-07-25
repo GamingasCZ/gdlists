@@ -122,7 +122,12 @@
     "nonexistentList": "This list does not exist!",
     "communityLists": "Community Lists",
     "commentLogin": "Please login to make comments!",
-    "likeNotLoggedIn": "Please login to rate lists!"
+    "likeNotLoggedIn": "Please login to rate lists!",
+    "commHelp1": "Your list is...",
+    "commHelp2": "I like your list, 'cause...",
+    "commHelp3": "Your opinion differs from mine, you will be...",
+    "commHelp4": "Your list is a trainwreck, because...",
+    "commHelp5": "Also check out my list..."
   },
   "navbar": {
     "editor": "Editor",

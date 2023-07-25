@@ -97,6 +97,7 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     // (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
     listName.value = lName;
     levelList.value.description = list.description;
+    levelList.value.titleImg[0] = list.titleImg[0];
 
     isNowHidden = hidden != '0';
     (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden

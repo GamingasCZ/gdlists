@@ -121,7 +121,7 @@ const setDragboxPos = (e: MouseEvent) => {
               type="range"
               name=""
               id=""
-              class="slider"
+              class="bg-transparent slider"
               v-model="levelList.titleImg[2]"
               @input="
                 dragBoxTopOffset = 0;

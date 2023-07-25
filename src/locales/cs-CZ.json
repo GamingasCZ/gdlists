@@ -170,7 +170,12 @@
     "goHome": "Jít domů",
     "communityLists": "Komunitní seznamy",
     "commentLogin": "Pro komentování se prosím přihlaš!",
-    "likeNotLoggedIn": "K hodnocení seznamů se prosím přihlaš!"
+    "likeNotLoggedIn": "K hodnocení seznamů se prosím přihlaš!",
+    "commHelp1": "Tvůj seznam je...",
+    "commHelp2": "Líbí se mi tvůj seznam, protože...",
+    "commHelp3": "Máš jiný názor než já. Už nikdy nebudeš klidně spát, protože...",
+    "commHelp4": "Tvůj seznam stojí za prd, protože...",
+    "commHelp5": "Mrkni se i na můj seznam..."
   },
   "level": {
     "levelID": "ID levelu",
