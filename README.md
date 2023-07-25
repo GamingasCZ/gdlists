@@ -1,21 +1,27 @@
 # Geometry Dash Level Lists
 
-Hi, I wanted to be really hip and cool, so I'm rewriting the frontend of GD Lists with *hyper-modern technologies*!!
+Welcome to the brand new, **rewritten from the ground up**, GD Lists, a website where you can make lists of Geometry Dash levels!
 
-## The hyper-modern stuff
-- Vue.js
-- Typescript
-- Tailwind
-- Vite
+Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and more scalable. Any contributions very welcome!
 
-# About
-GD Lists is a website where you can make and easily share your lists of **Geometry Dash** levels!
-- **Check it out [here](https://gamingas.wz.cz/lofttop10/)**
+**Check out the site here:** https://gamingas.wz.cz/gdlists
+## Features
+* An easy to use editor
+* Tons of customizations for spicing up lists
+* Likes and comments
+* Saving levels
+* Private lists
 
-## Also check out the original repo, if you feel like puking! (also contains the backend!!)
-#### [The lof-top10 repository](https://github.com/GamingasCZ/lof-top10)
+## Planned features
+* Reviews
+* Level Browser
+* Profiles
+* Improved comments
 
 # Screenshots
-- TBA
+![homepage](https://github.com/GamingasCZ/gdlists/assets/51487573/01e6d86e-9750-4fde-a066-af902afb1720)
+![editor](https://github.com/GamingasCZ/gdlists/assets/51487573/79c956fc-2a3a-4bc1-8c6d-2bbd8d18a648)
 
-# Todo - [issue #1](https://github.com/GamingasCZ/gdlists-vue-frontend/issues/1)
+
+## The original GD Lists
+* check out if you feel like puking - [The lof-top10 repository](https://github.com/GamingasCZ/lof-top10)
