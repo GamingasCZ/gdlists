@@ -17,6 +17,7 @@ import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
 import { useI18n } from "vue-i18n";
+import LikePopup from "./levelViewer/LikePopup.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -180,10 +181,11 @@ const toggleListPin = () => {
 }
 
 const getURL = () => `${window.location.host}/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`;
-const sharePopupOpen = ref<boolean>(false);
-const jumpToPopupOpen = ref<boolean>(false);
-const commentsShowing = ref<boolean>(false)
-const mobileExtrasOpen = ref<boolean>(false)
+const sharePopupOpen = ref(false);
+const jumpToPopupOpen = ref(false);
+const commentsShowing = ref(false)
+const mobileExtrasOpen = ref(false)
+const likeNotLoggedInOpen = ref(false)
 
 const listActions = (action: string) => {
   switch (action) {
@@ -204,6 +206,9 @@ const listActions = (action: string) => {
       break;
     case "mobileExtras":
       mobileExtrasOpen.value = true
+      break;
+    case "rateNotLoggedIn":
+      likeNotLoggedInOpen.value = true
       break;
   }
 };
@@ -228,6 +233,7 @@ const listActions = (action: string) => {
   }" class="absolute w-full h-full -z-20"></div>
   <!-- </div> -->
 
+  <Transition name="fade"><LikePopup v-if="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false" /></Transition>
   <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
   <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen"
     picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"

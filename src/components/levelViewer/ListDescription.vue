@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras"): void;
+  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras" | "rateNotLoggedIn"): void;
 }>();
 
 const hoveringRating = ref(false)
@@ -67,6 +67,11 @@ else {
 let sendingRating = false
 function sendRating(action: 1 | 0) {
   if (sendingRating) return
+
+  // Not logged in
+  if (userUID.value == "") {
+    return emit("doListAction", "rateNotLoggedIn")
+  }
 
   sendingRating = true
   axios.post(import.meta.env.VITE_API + "/rateAction.php", { id: props.id, action: action }).then(res => {

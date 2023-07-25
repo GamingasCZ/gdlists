@@ -121,7 +121,8 @@
     "jumpTo": "Jump to",
     "nonexistentList": "This list does not exist!",
     "communityLists": "Community Lists",
-    "commentLogin": "Please login to make comments!"
+    "commentLogin": "Please login to make comments!",
+    "likeNotLoggedIn": "Please login to rate lists!"
   },
   "navbar": {
     "editor": "Editor",
@@ -175,7 +176,8 @@
     "welcomeToGDL": "Welcome to GD Lists,",
     "yes": "Yes",
     "myLists": "My Lists",
-    "disconnected": "You're disconnected from the Internet!"
+    "disconnected": "You're disconnected from the Internet!",
+    "notNow": "Not Now"
   },
   "settingsMenu": {
     "asOff": "Off",

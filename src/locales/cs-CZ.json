@@ -160,7 +160,8 @@
     "ok": "Ok!",
     "options": "Možnosti",
     "myLists": "Moje",
-    "disconnected": "Nejsi připojený k internetu!"
+    "disconnected": "Nejsi připojený k internetu!",
+    "notNow": "Zatím ne"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -168,7 +169,8 @@
     "goToRandom": "Jít na náhodný seznam",
     "goHome": "Jít domů",
     "communityLists": "Komunitní seznamy",
-    "commentLogin": "Pro komentování se prosím přihlaš!"
+    "commentLogin": "Pro komentování se prosím přihlaš!",
+    "likeNotLoggedIn": "K hodnocení seznamů se prosím přihlaš!"
   },
   "level": {
     "levelID": "ID levelu",
