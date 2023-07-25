@@ -77,7 +77,12 @@
     "noCreatorAt": "The {0}. level is missing its creator!",
     "noNameAt": "The {0}. level is missing a level name!",
     "overLimit": "Your list is too big. \nYou'll have to remove some levels or collabs. \nYou are {0}% over the limit.",
-    "maxLevels": "You cannot add more levels!"
+    "maxLevels": "You cannot add more levels!",
+    "collabTools": "Collab Tools",
+    "collabToolsSoon": "Collab tools will be added back soon!",
+    "diffGuessSoon": "Difficulty guessing will be added back soon!",
+    "listBGhelp": "# Settings\n*Coverage - Changes the height of the background.\n*Alignment - If the screen's aspect ratio is narrower than the background, the background will be aligned.\n*Gradient - If a gradient with the list color should be placed over the background.\nThere's a green box in the image preview that you can drag and select the part of the background you want to show.\n\nList backgrounds work best with translucent cards!",
+    "levelSearchHelp": "# Searching by ID\n*The search icon next to the level ID will fetch level info of a level with the given ID\n# Searching by name/creator\nThe search icon between the level name and level author will fetch\n*The most liked level with the **given name**\n*The most recent level from the **given author**\n*If both fields are fille in, **the level from the given author**"
   },
   "homepage": {
     "clear": "Clear",
@@ -204,7 +209,7 @@
     "license": "License",
     "listEdits": "Editing and removing lists",
     "listEditsHelp": "You can edit a list on the list page by clicking 'Edit'. \nThe list can be deleted in the editor. \nTo edit the list, you must be logged in to the account that uploaded the list.",
-    "listGuessing": "Guessing difficulty",
+    "listGuessing": "Difficulty Guessing",
     "listGuessingHelp": "If you turn on difficulty guessing, the list will gradually unlock after you guess the difficulty and level rating. \nIn the list settings dropdown, the difficulty button indicates the difficulty. \nThe button with the flame indicates the level rating.",
     "listPinHelp": "If you come back to a list often, you can pin it and it will appear on the homepage. \nYou can have up to 5 pinned lists at once.",
     "listPinning": "Pinning lists",
@@ -212,6 +217,6 @@
     "privListsHelp": "Private lists are not displayed publicly and you can only access them with a special link. \nYou can edit them at any time and make them public.",
     "translucentHelp": "When turned on, level cards will be translucent in the list. \nTranslucent cards work best with some sort of list background.",
     "usedPackages": "Used packages",
-    "usingTheEditor": "Using the editor"
+    "usingTheEditor": "Level Searching"
   }
 }

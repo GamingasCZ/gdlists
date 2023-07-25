@@ -64,16 +64,20 @@ watch(props, () => {
           :placeholder="$t('homepage.searchLists')" />
 
         <div class="flex gap-2 pt-2 w-full text-base text-white">
-          <button class="flex gap-4 items-center px-2 py-3 min-w-max rounded-md grow button bg-lof-300">
-            <img src="../images/plus.svg" alt="" class="w-6" />{{
-              $t("homepage.createList")
-            }}
-          </button>
-          <button class="flex gap-4 items-center px-2 py-3 rounded-md button grow bg-lof-300">
-            <img src="../images/dice.svg" alt="" class="w-6" />{{
-              $t("homepage.tryLuck")
-            }}
-          </button>
+          <RouterLink to="/editor" class="min-w-max grow">
+            <button class="flex gap-4 items-center px-2 py-3 w-full rounded-md grow button bg-lof-300" type="button">
+              <img src="../images/plus.svg" alt="" class="w-6" />{{
+                $t("homepage.createList")
+              }}
+            </button>
+          </RouterLink>
+          <RouterLink to="/random" class="min-w-max grow">
+            <button class="flex gap-4 items-center px-2 py-3 w-full rounded-md button grow bg-lof-300" type="button">
+              <img src="../images/dice.svg" alt="" class="w-6" />{{
+                $t("homepage.tryLuck")
+              }}
+            </button>
+          </RouterLink>
         </div>
       </div>
       <button type="submit">

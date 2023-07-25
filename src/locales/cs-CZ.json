@@ -111,7 +111,12 @@
     "overLimit": "Tvůj seznam je moc velký. Bohužel musíš odstranit nějaké levely nebo collaby. Jsi o {0}% nad limitem.",
     "noCreatorAt": "Level na {0}. místě nemá tvůrce!",
     "invalidID": "Level na {0}. místě má neplatné ID levelu!",
-    "maxLevels": "Víc levelů už nemůžeš přidat!"
+    "maxLevels": "Víc levelů už nemůžeš přidat!",
+    "listBGhelp": "# Nastavení \n *Zakrytí - Jak velkou část obrazovky zabere pozadí. \n*Zarovnání - Pokud má obrazovka užší poměr stran než pozadí, pozadí se zarovná na zvolenou stranu. \n*Přechod - Zda by měl být přidán přes pozadí přechod s barvou seznamu. \nV náhledu obrázku je i zelený rámeček, za ten můžeš tahat a vybrat tak jaká část pozadí se zobrazí. \n\n Pozadí seznamu funguje nejlépe s průsvitnými kartami!",
+    "diffGuessSoon": "Hadání obtížností bude brzy přidáno zpět :).",
+    "collabToolsSoon": "Collab nástroje budou brzy přidány zpět :).",
+    "collabTools": "Collab nástroje",
+    "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**."
   },
   "other": {
     "lockQuotes": [
@@ -205,7 +210,7 @@
     "listPinHelp": "Pokud se k nějakému seznamu často vracíš, můžeš si ho připnou a zobrazí se na domovské stránce. Naráz můžeš mít připlých až 5 seznamů.",
     "listEdits": "Upravování a mazání seznamů",
     "listEditsHelp": "Upravit seznam můžeš na stránce se seznamem, kliknutím na 'Upravit'. V editoru lze seznam smazat. Pro upravování seznamu musíš být přihlášený do účtu, který nahrál seznam.",
-    "usingTheEditor": "Používání editoru",
+    "usingTheEditor": "Vyhledávání levelů",
     "privLists": "Soukromé seznamy",
     "privListsHelp": "Soukromé seznamy se nezobrazí veřejně a můžeš se k nim dostat jen speciálním odkazem. Můžeš je kdykoliv upravit a udělat je veřejné.",
     "listGuessing": "Hádání obtížností",

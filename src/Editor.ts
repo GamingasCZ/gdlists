@@ -3,13 +3,14 @@ import { ref } from "vue";
 import type { LevelList, Level, CollabData, LevelBackup } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
+import router from "./router";
 
 export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
 
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
-  pageBGcolor: [180, 0, 2],
+  pageBGcolor: [140, 0.37, 5],
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
@@ -67,7 +68,18 @@ export function testIfImageExists(url: string) {
   });
 }
 
-export const modifyListBG = (newColors: number[] | string) => {
+export const modifyListBG = (newColors: number[] | string, reset = false) => {
+  if (reset) {
+    levelList.value.pageBGcolor = DEFAULT_LEVELLIST.pageBGcolor
+    document.documentElement.style.setProperty("--siteBackground","")
+    document.documentElement.style.setProperty("--primaryColor","")
+    document.documentElement.style.setProperty("--secondaryColor","")
+    return
+  }
+  
+  // Default colors
+  if (newColors[1] == 0.37) return
+
   // Old lists - hex colors
   if (typeof newColors == 'string') newColors = chroma(newColors).hsl()
 
@@ -78,6 +90,7 @@ export const modifyListBG = (newColors: number[] | string) => {
   )
 
   levelList.value.pageBGcolor = [newColors[0], 0.36, newColors[2]]
+  
 
   document.documentElement.style.setProperty(
     "--siteBackground",
@@ -97,6 +110,20 @@ export const modifyListBG = (newColors: number[] | string) => {
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
 };
+
+export function resetList() {
+  if (router.currentRoute.value.name == "editor") router.push({path: "/editor", force: true})
+}
+
+export function fixHEX(hexColor: string) {
+  // If the code ends with a number, hex code is sometimes broken (completely random lmao)
+
+  if (hexColor.length == 7) return hexColor; // No need for fix
+
+  let fixed = hexColor.slice(0, -1) + "0" + hexColor.slice(-1);
+  if (fixed.length != 7) return "#000000";
+  else return fixed;
+}
 
 export function checkList(listName: string): { valid: boolean, error?: string, listPos?: number, stamp?: number } {
   let error = (errorText: string, errorPos?: number) => { return { valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }

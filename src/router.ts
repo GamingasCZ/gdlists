@@ -52,9 +52,10 @@ const router = createRouter({
   ],
 });
 
+router.afterEach(() => window.scrollTo(0,0))
+
 router.beforeEach(async () => {
   setLanguage(SETTINGS.value.language)
-  window.scrollTo(0,0)
   
   document.documentElement.style.setProperty("--siteBackground", "");
 

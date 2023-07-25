@@ -21,8 +21,6 @@ function getCreator() {
 
 const getTag = (ind: number) => new URL(`/public/badges/${ind}.svg`, import.meta.url).href
 
-const facePath = ref(`url(/faces/${props.data.difficulty[0]}.webp)`)
-
 </script>
 
 <template>
@@ -46,7 +44,7 @@ const facePath = ref(`url(/faces/${props.data.difficulty[0]}.webp)`)
             </div>
 
             <ul class="flex gap-1.5 mr-1.5">
-                <img :src="getTag(tag[0])" :title="tag[2].toString()" alt="" class="w-6" v-for="tag in data.tags.slice(0, 5)">
+                <img :src="getTag(tag[0])" :title="tag[2].toString()" alt="" class="w-6" v-for="tag in (data?.tags ?? []).slice(0, 5)">
             </ul>
         </section>
         

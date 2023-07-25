@@ -30,8 +30,7 @@ if (localStorage) {
 }
 
 function getEmoji(ind: number) {
-    const path = `../../images/emoji/${ind.toString().padStart(2, '0')}.webp`;
-    return new URL(path, import.meta.url).toString()
+    return new URL(`/public/emoji/${ind.toString().padStart(2, '0')}.webp`, import.meta.url).href
 }
 
 

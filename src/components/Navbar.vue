@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from "vue-router";
 import { nextTick, onMounted, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { isOnline } from "@/Editor";
+import { isOnline, resetList } from "@/Editor";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -34,6 +34,7 @@ watch(props, () => {
       <RouterLink
         to="/editor"
         class="flex flex-col gap-2 items-center py-1 rounded-full md:flex-row md:bg-black md:bg-opacity-50 md:px-4"
+        @mousedown="resetList"
         ><img src="../images/editorMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.editor")
         }}</RouterLink

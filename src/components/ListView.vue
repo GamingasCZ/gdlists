@@ -176,7 +176,7 @@ const toggleListPin = () => {
   }
 }
 
-const getURL = () => `${window.location.host}/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`;
+const getURL = () => `${window.location.host}/gdlists/s/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`;
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
 const commentsShowing = ref(false)

@@ -1,7 +1,7 @@
 import { ref, watch } from "vue";
 
 export const SETTINGS = ref({
-  scrolling: 0,
+  scrolling: 1,
   language: 0,
   homepageColumns: 1,
   autosave: 60

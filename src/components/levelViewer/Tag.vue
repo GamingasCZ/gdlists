@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import type { LevelTag } from "@/interfaces";
-defineProps<{
+import { ref } from "vue";
+const props = defineProps<{
   tag: LevelTag;
 }>();
+
+const tagPath = ref(new URL(`/public/badges/${props.tag[0]}.svg`, import.meta.url).href)
 
 </script>
 
 <template>
   <div class="p-1.5 text-xs bg-black bg-opacity-40 rounded-full sm:text-sm">
     <img
-      :src="'/badges/'+tag[0]+'.svg'"
+      :src="tagPath"
       class="inline mr-2 w-3 align-middle sm:w-6"
       alt=""
     />

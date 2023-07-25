@@ -23,15 +23,16 @@ const qa: question[] = [
   },
   {
     startSection: useI18n().t('editor.editor'),
+    question: useI18n().t('editor.titleImage'),
+    answer: useI18n().t('editor.listBGhelp')
+  },
+  {
     question: useI18n().t('help.usingTheEditor'),
-    answer: `# Záhlaví \n
-                   *Ikonka oka zapne náhled seznamu\n
-                   *Ikonka hvězdičky ti umožní přidávat levely, které jsi v seznamech přidal do oblíbených\n
-                   *Ikonka pluska přídá level. V seznamu můžeš mít max. 50 levelů. \n
-                   # Karta levelu
-                   *Lupa vedle pole s ID levelu najde level podle zadaného ID levelu
-                   *Lupa mezi polem se jménem levelu a tvůrcem najde buďto nejstahovanější level se **zadaným jménem**, nejnovější level od **zadaného tvůrce**, nebo pokud jsou vyplněna obě pole, *level od zadaného tvůrce*.
-                   `,
+    answer: useI18n().t('editor.levelSearchHelp'),
+  },
+  {
+    question: useI18n().t('editor.collabTools'),
+    answer: useI18n().t('editor.collabToolsSoon')
   },
   {
     question: useI18n().t('help.privLists'),
@@ -41,7 +42,7 @@ const qa: question[] = [
   {
     question: useI18n().t('help.listGuessing'),
     answer:
-      useI18n().t('help.listGuessingHelp'),
+      useI18n().t('editor.diffGuessSoon'),
   },
   {
     question: useI18n().t('editor.translucentCards'),
@@ -50,19 +51,19 @@ const qa: question[] = [
   },
   {
     question: useI18n().t('help.license'),
-    answer: "todo",
+    answer: "https://github.com/GamingasCZ/gdlists/blob/master/LICENSE",
   },
   {
     question: useI18n().t('help.usedPackages'),
     answer: `
-  vue \n
-  vue i18n \n
-  tailwind \n
-  axios\n
-  typescript\n
-  chroma-js\n
-  cookier\n
-  pure-editor\n
+  vue, \n
+  vue i18n, \n
+  tailwind, \n
+  axios, \n
+  typescript, \n
+  chroma-js, \n
+  cookier, \n
+  pure-editor \n
       `,
   },
 ];

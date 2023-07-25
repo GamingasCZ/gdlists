@@ -39,17 +39,27 @@ const changeCardColors = (newColors: [number, number, number]) =>
 // Difficulty Picker
 const changeRate = (newRating: number) =>
   (levelList.value.levels[props.index!].difficulty[1] = newRating);
-const changeFace = (newFace: number) =>
-  (levelList.value.levels[props.index!].difficulty[0] = newFace);
+const changeFace = (newFace: number) => {
+  levelList.value.levels[props.index!].difficulty[0] = newFace;
+  diffFacePath.value = new URL(`/public/faces/${newFace}.webp`, import.meta.url).href
+}
 const getRateImage = () => {
-  let rate = levelList.value.levels[props.index!].difficulty[1];
+  let rate = levelList.value.levels[props.index!].difficulty?.[1] ?? 0;
   if (rate == 0) return; // Unrated level
   else {
-    return `/public/faces/${["star", "featured", "epic"][rate - 1]}.webp`;
+    return new URL(`/public/faces/${["star", "featured", "epic"][rate - 1]}.webp`, import.meta.url).href;
   }
 };
 
-const diffFacePath = ref(new URL(`/public/faces/${levelList.value.levels[props.index!].difficulty[0]}.webp`, import.meta.url).href)
+const collabShaking = ref(false)
+const shakeCollab = () => {
+  collabShaking.value = true
+  setTimeout(() => {
+    collabShaking.value = false
+  }, 200);
+}
+
+const diffFacePath = ref(new URL(`/public/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`, import.meta.url).href)
 const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0] : levelList.value.levels[props.index!].creator)
 const modifyCreator = (e: Event) => {
   let newCreator = (e.currentTarget as HTMLInputElement).value
@@ -139,9 +149,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         />
         <input
           autocomplete="off" readonly
-          style="appearance: textfield"
           class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
-          type="number"
           :value="index! + 1"
           @mousedown="mobileMoveLevel()"
         />
@@ -233,8 +241,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           class="p-1 w-10 bg-black bg-opacity-30 rounded-md button aspect-square"
           src="../../images/bytost.webp"
           alt=""
-          :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
-          @click="emit('openCollabTools', index!)"
+          :class="{'animate-[shake_0.2s_infinite]': collabShaking, 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
+          @click="shakeCollab()"
         />
       </div>
     </div>
@@ -280,7 +288,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             :src="getRateImage()"
             alt=""
             class="absolute z-10 w-10 pointer-events-none"
-            :style="{zIndex: levelList.levels[index!].difficulty[1]-1 ? 10 : 30 }"
+            :class="{'w-5 left-2/4 top-2/4': levelList.levels[index!].difficulty?.[1] == 1}"
+            :style="{zIndex: (levelList.levels[index!].difficulty?.[1] ?? 0) -1 ? 10 : 30 }"
           />
         </div>
         <img

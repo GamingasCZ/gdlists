@@ -63,13 +63,13 @@ else if (Math.floor(datePassed/2419200) <= 4) time.value = useI18n().t('date.mon
 else time.value = useI18n().t('date.months', Math.floor(datePassed/2419200))
 
 const parsedComment = ref<string>("")
-parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5 pointer-events-none" src="' + new URL(`../../images/emoji/$1.webp`, import.meta.url).href + '" alt="">')
+parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5 pointer-events-none" src="' + new URL(`/public/emoji/$1.webp`, import.meta.url).href + '" alt="">')
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
 
 </script>
 
 <template>
-    <section class="mb-2">
+    <section class="mb-2 w-full break-words">
       <header class="flex gap-2 items-center">
         <img :src="pfp" class="w-11 rounded-full pointer-events-none" alt="">
         <div class="inline">

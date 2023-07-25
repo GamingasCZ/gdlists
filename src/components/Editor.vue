@@ -12,7 +12,8 @@ import RemoveListPopup from "./editor/RemoveListPopup.vue"
 import CollabEditor from "./editor/CollabEditor.vue"
 import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline } from "../Editor";
+import ListBackground from "./global/ListBackground.vue";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX } from "../Editor";
 import { ref, onMounted, watch } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
 import chroma from "chroma-js";
@@ -95,18 +96,33 @@ if (props.editing) {
 function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     let list: LevelList = listData;
     levelList.value.levels = []
-    // (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
     listName.value = lName;
-    levelList.value = list
-
-    isNowHidden = hidden != '0';
-    (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden
 
     // Old list have levels scattered in levelList
     if (list.levels == undefined) {
       list.levels = []
       Object.keys(list).filter(x => x.match(/^\d+$/)).forEach(level => list.levels.push(list[parseInt(level)]));
     }
+
+    // Check fucked up hex values
+    list.levels = list.levels.map(level => {
+      if (typeof level.color == "string") {
+        let newCols = chroma(fixHEX(level.color)).hsl()
+        level.color = newCols
+        return level
+      } else return level
+    })
+    
+    levelList.value = list
+
+    // Add missing values
+    Object.keys(DEFAULT_LEVELLIST).forEach(key => {
+      if (levelList.value[key] == undefined) levelList.value[key] = DEFAULT_LEVELLIST[key]
+    })
+
+
+    isNowHidden = hidden != '0';
+    (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden
 
     modifyListBG(list.pageBGcolor)
 }
@@ -195,6 +211,7 @@ const addFromFavorites = (level: FavoritedLevel) => {
 };
 
 const listHiddenSelected = () => (document.querySelector("input[name='private']") as HTMLInputElement).checked ? 1 : 0
+const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
 function uploadList() {
   errorDblclickHelp.value = false
@@ -322,7 +339,8 @@ function removeList() {
   <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp" :previewing="previewingList"/>
 
   <!-- List Preview -->
-  <section v-show="previewingList" class="mt-4">
+  <section v-if="previewingList" class="mt-4">
+    <ListBackground :image-data="levelList.titleImg" :list-color="levelList.pageBGcolor" />
     <div class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
       <button @click="previewingList = false" class="absolute top-1 left-1 button">
         <img src="@/images/arrow-left.webp" class="w-10" alt="" />
@@ -429,8 +447,12 @@ function removeList() {
         type="button"
         class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
         @click="bgColorPickerOpen = !bgColorPickerOpen"
+        :style="{background: getBGcolor()}"
       >
         <img src="../images/color.svg" alt="" class="w-5" />
+      </button>
+      <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click="modifyListBG([0,0,0], true)">
+        <img src="@/images/close.svg" class="w-4" alt="">
       </button>
     </div>
 
@@ -438,7 +460,7 @@ function removeList() {
       v-show="bgColorPickerOpen"
       class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
     >
-      <ColorPicker @colors-modified="modifyListBG" :hue="levelList.pageBGcolor[0]" :saturation="levelList.pageBGcolor[1]" :lightness="levelList.pageBGcolor[2]"/>
+      <ColorPicker @colors-modified="modifyListBG" :hue="levelList.pageBGcolor[0]" :saturation="0.36" :lightness="levelList.pageBGcolor[2]"/>
     </div>
 
     <header

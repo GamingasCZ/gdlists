@@ -69,6 +69,16 @@ try {
 } catch (e) {
   CARD_COL.value = chroma.random();
 }
+
+const difficultyFace = ref("")
+const difficultyGlow = ref("")
+if (props.difficulty) {
+  difficultyFace.value = new URL(`/public/faces/${props.difficulty[0]}.webp`, import.meta.url).href
+  if (props.difficulty[1]) { // Must be rated
+    difficultyGlow.value = new URL(`/public/faces/${["","star","featured","epic"][props.difficulty[1]]}.webp`, import.meta.url).href
+  }
+}
+
 </script>
 
 <template>
@@ -94,8 +104,8 @@ try {
             :class="{ '!mx-2': difficulty[1] > 0 }"
           >
             <img
-            class="relative z-10 w-10"
-            :src="`/faces/${difficulty[0]}.webp`"
+              class="relative z-10 w-10"
+              :src="difficultyFace"
               :class="{ 'scale-[1.3]': difficulty[0] > 5 }"
               alt=""
             />
@@ -106,19 +116,19 @@ try {
                 '!-top-0.5 !scale-[1.7]': difficulty[0] > 5,
                 '!-top-0.5 !scale-[1.48]': difficulty[0] == 10,
               }"
-              :src="`/faces/featured.webp`"
+              :src="difficultyGlow"
               alt=""
             />
             <img
               v-else-if="difficulty[1] == 3"
               class="absolute -top-1 -z-10 w-full scale-[1.6]"
-              :src="`/faces/epic.webp`"
+              :src="difficultyGlow"
               alt=""
             />
             <img
               v-else-if="difficulty[1] == 1"
               class="absolute -right-0 -bottom-0 z-20 w-4 scale-150"
-              :src="`/faces/star.webp`"
+              :src="difficultyGlow"
               alt=""
             />
           </div>
