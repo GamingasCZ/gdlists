@@ -9,7 +9,7 @@ export const EMOJI_COUNT = 18;
 
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
-  pageBGcolor: [0, 0, 0.2],
+  pageBGcolor: [180, 0, 2],
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
@@ -71,15 +71,17 @@ export const modifyListBG = (newColors: number[] | string) => {
   // Old lists - hex colors
   if (typeof newColors == 'string') newColors = chroma(newColors).hsl()
 
+  let listColor = chroma.hsl(
+    newColors[0],
+    0.36,
+    newColors[2] < 1 ? newColors[2] : newColors[2] / 64
+  )
+
+  levelList.value.pageBGcolor = [newColors[0], 0.36, newColors[2]]
+
   document.documentElement.style.setProperty(
     "--siteBackground",
-    chroma(
-      chroma.hsl(
-        newColors[0],
-        0.36,
-        newColors[1] < 1 ? newColors[1] : newColors[1] * 0.015625
-      )
-    ).hex()
+    listColor.hex()
   );
   document.documentElement.style.setProperty(
     "--primaryColor",

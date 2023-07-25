@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
+
+const props = defineProps<{
+  hue: number;
+  saturation: number;
+  lightness: number;
+}>()
 
 const emit = defineEmits(["colorsModified"]);
-const color = ref<[number, number]>([180, 16]);
-
-const giveValue = (
-  modifyingValue: "hueChange" | "valChange",
-  setValue: number
-) => {
-  color.value[modifyingValue == "valChange" ? 1 : 0] = setValue;
-
-  emit("colorsModified", color.value);
-};
+const colors = ref([props.hue, props.saturation, props.lightness]);
+watch(props, () => colors.value = [props.hue, props.saturation, props.lightness])
 </script>
 
 <template>
@@ -23,13 +21,9 @@ const giveValue = (
         class="w-full colorPickerSlider"
         min="0"
         max="360"
-        :value="color[0]"
-        @input="
-          giveValue(
-            'hueChange',
-            parseInt(($event.target as HTMLInputElement).value)
-          )
-        "
+        step="1"
+        v-model.number="colors[0]"
+        @input="emit('colorsModified', colors)"
       />
     </div>
 
@@ -40,13 +34,9 @@ const giveValue = (
         class="w-full colorPickerSlider"
         min="0"
         max="32"
-        :value="color[1]"
-        @input="
-          giveValue(
-            'valChange',
-            parseInt(($event.target as HTMLInputElement).value)
-          )
-        "
+        step="1"
+        v-model.number="colors[2]"
+        @input="emit('colorsModified', colors)"
       />
     </div>
   </section>

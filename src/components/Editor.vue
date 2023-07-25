@@ -94,10 +94,10 @@ if (props.editing) {
 
 function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     let list: LevelList = listData;
+    levelList.value.levels = []
     // (document.getElementById("levelName") as HTMLInputElement).value = listData.name;
     listName.value = lName;
-    levelList.value.description = list.description;
-    levelList.value.titleImg[0] = list.titleImg[0];
+    levelList.value = list
 
     isNowHidden = hidden != '0';
     (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden
@@ -108,12 +108,7 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
       Object.keys(list).filter(x => x.match(/^\d+$/)).forEach(level => list.levels.push(list[parseInt(level)]));
     }
 
-    list.levels.forEach(level => addLevel(level))
-
-    levelList.value.pageBGcolor = [NaN, 0, 2]
-    
-    // Color is most likely #020202, the default color
-    if (!isNaN(levelList.value.pageBGcolor[0])) modifyListBG(levelList.value.pageBGcolor)
+    modifyListBG(list.pageBGcolor)
 }
 
 const tagPopupOpen = ref(false);
@@ -443,7 +438,7 @@ function removeList() {
       v-show="bgColorPickerOpen"
       class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
     >
-      <ColorPicker @colors-modified="modifyListBG" />
+      <ColorPicker @colors-modified="modifyListBG" :hue="levelList.pageBGcolor[0]" :saturation="levelList.pageBGcolor[1]" :lightness="levelList.pageBGcolor[2]"/>
     </div>
 
     <header

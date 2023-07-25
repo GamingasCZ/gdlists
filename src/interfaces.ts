@@ -106,7 +106,7 @@ export interface LevelList {
   description: string;
   diffGuesser: [boolean, boolean, boolean]; // DG enabled, diffGuess, rateGuess
   pageBGcolor: string | [number, number, number]; // hex | hsv array
-  titleImg: [string, number, number, number, boolean]; // url, BG top offset [%], BG height, BG XAlign, gradient
+  titleImg: ListBackground; // url, BG top offset [%], BG height, BG XAlign, gradient
   translucent: boolean;
   levels: Array<Level>;
 }
@@ -119,6 +119,14 @@ export interface Level {
   difficulty: [number, number];
   color: [number, number, number];
   tags: LevelTag[];
+}
+
+export interface ListBackground {
+  0: string
+  1: number
+  2: number
+  3: number
+  4: boolean
 }
 
 export interface LevelTag {

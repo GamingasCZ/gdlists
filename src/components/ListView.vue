@@ -18,6 +18,7 @@ import router from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
 import { useI18n } from "vue-i18n";
 import LikePopup from "./levelViewer/LikePopup.vue";
+import ListBackground from "./global/ListBackground.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -101,19 +102,16 @@ function main() {
       document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
       // Set list colors
-      let listColors: number[] | string = LIST_DATA.value?.data.pageBGcolor!;
-      LIST_COL.value =
-        typeof listColors == "string" ? chroma(listColors).hsl() : listColors;
+      let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
+      if (typeof listColors == "object") listColors[2] /= 64
+      else { listColors = chroma(listColors).hsl() }
+      LIST_COL.value = listColors
+      
+      // Saturation 0
+      if (LIST_COL.value[0] == null) LIST_COL.value[0] = 0
+
       if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
         modifyListBG(LIST_COL.value);
-
-      // Set list background image
-      let listBG = LIST_DATA.value?.data?.titleImg!;
-      (
-        document.body as HTMLBodyElement
-      ).style.backgroundImage = `url('${typeof listBG == "string" ? listBG : listBG[0] ?? ""
-        }')`;
-      positionListBackground()
 
       // Check pinned status
       if (localStorage) {
@@ -124,8 +122,6 @@ function main() {
     });
 
 }
-
-const positionListBackground = () => ["left", "center", "right"][LIST_DATA.value.data.titleImg?.[3]];
 
 const tryJumping = (ind: number, forceJump = false) => {
   let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
@@ -223,15 +219,8 @@ const listActions = (action: string) => {
     }"
   > -->
   <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
-    backgroundImage: `linear-gradient(180deg, ${chroma(
-      chroma.hsl(
-        LIST_COL[0],
-        0.36,
-        LIST_COL[1] < 1 ? LIST_COL[1] : LIST_COL[1] * 0.015625
-      )
-    ).hex()}, transparent)`,
+    backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
-  <!-- </div> -->
 
   <Transition name="fade"><LikePopup v-if="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false" /></Transition>
   <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
@@ -266,6 +255,10 @@ const listActions = (action: string) => {
           </RouterLink>
         </div>
       </section>
+
+      <Teleport to="#app">
+        <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />
+      </Teleport>
 
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels" v-bind="level"

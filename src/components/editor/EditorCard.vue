@@ -29,11 +29,11 @@ const lightCol = () =>
     .hsl(...levelList.value.levels[props.index!].color!)
     .brighten(0.5)
     .css();
-const changeCardColors = (newColors: [number, number]) =>
+const changeCardColors = (newColors: [number, number, number]) =>
   (levelList.value.levels[props.index!].color = [
     newColors[0],
     0.5,
-    newColors[1] / 64,
+    newColors[2] / 64,
   ]);
 
 // Difficulty Picker
@@ -140,7 +140,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         <input
           autocomplete="off" readonly
           style="appearance: textfield"
-          class="w-12 mx-1 max-w-[20vw] cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
+          class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
           type="number"
           :value="index! + 1"
           @mousedown="mobileMoveLevel()"
@@ -299,15 +299,18 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
     </div>
 
     <!-- Extras panel -->
-    <div class="p-2 bg-black bg-opacity-30 rounded-md" v-show="openedPanel">
+    <div class="p-2 bg-black bg-opacity-20" v-show="openedPanel">
       <ColorPicker
         v-if="openedPanel == 1"
         @colors-modified="changeCardColors"
+        :hue="levelList.levels[index!].color[0]"
+        :saturation="levelList.levels[index!].color[1]"
+        :lightness="levelList.levels[index!].color[2] * 64"
       />
       <DifficultyPicker
         v-if="openedPanel == 2"
-        :selected-rate="levelList.levels[props.index!].difficulty[1]"
-        :selected-face="levelList.levels[props.index!].difficulty[0]"
+        :selected-rate="levelList.levels[index!].difficulty[1]"
+        :selected-face="levelList.levels[index!].difficulty[0]"
         @change-face="changeFace"
         @change-rate="changeRate"
       />
