@@ -6,6 +6,7 @@ import ColorPicker from '../global/ColorPicker.vue'
 import Editor from 'pure-editor'
 import axios, { type AxiosResponse } from 'axios'
 import cookier from 'cookier'
+import LoginButton from '../global/LoginButton.vue'
 
 const props = defineProps<{
     listID: string
@@ -120,13 +121,18 @@ function sendComment(com = "") {
 </script>
 
 <template>
-    <section v-if="!loggedIn">
-
-    </section>
-
-    <section v-else class="relative z-10 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
-        <pre @focus="placeholderActive = false" @blur="chatboxEmpty" @paste="modCommentLength()" @input="modCommentLength()" contenteditable="true" id="commentBox" class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-20" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
+    <section class="relative z-10 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
+        <pre :tabindex="loggedIn ? 0 : -1" @focus="placeholderActive = false" :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}" @blur="chatboxEmpty" @paste="modCommentLength()" @input="modCommentLength()" contenteditable="true" id="commentBox" class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-24" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
         
+        <!-- Not logged in notification -->
+        <section class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
+            <div class="flex gap-2 items-center">
+                <img src="@/images/info.svg" alt="" class="w-6">
+                <p>{{ $t('listViewer.commentLogin') }}</p>
+            </div>
+            <LoginButton />
+        </section>
+
         <!-- Color Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-md" v-show="dropdownOpen == 0">
             <ColorPicker @colors-modified="listColor = $event" />
@@ -144,9 +150,9 @@ function sendComment(com = "") {
             </div>
 
             <div class="flex gap-2">
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor, backgroundImage: lengthPie}" class="box-border p-1 w-8 rounded-full transition-opacity duration-75 disabled:opacity-50" :disabled="commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN" @click="sendComment()"><img src="@/images/send.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor, backgroundImage: lengthPie}" class="box-border p-1 w-8 rounded-full transition-opacity duration-75 disabled:opacity-50" :disabled="(commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN) || !loggedIn" @click="sendComment()"><img src="@/images/send.svg" class="inline" alt=""></button>
             </div>
         </footer>
     </section>

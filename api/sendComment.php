@@ -8,6 +8,7 @@ Return codes:
 4 - Invalid comment color
 5 - Invalid comment type
 6 - Comment sent!!
+7 - Not logged in!!
 */
 
 require("globals.php");
@@ -36,6 +37,7 @@ if ($mysqli->connect_errno) die("0");
 
 // TODO: check for cookie
 $discord_id = checkAccount()["id"];
+if (!$discord_id) die("7");
 
 $uid_query = $mysqli -> query(sprintf("SELECT `id` FROM `users` WHERE `discord_id` = '%s'", $discord_id));
 $user_id = $uid_query -> fetch_all(MYSQLI_ASSOC)[0]["id"];

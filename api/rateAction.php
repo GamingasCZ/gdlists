@@ -5,7 +5,7 @@ header('Content-type: application/json'); // Return as JSON
 Return codes:
 0 - Error connecting to database
 1 - Incorrect parameters
-
+2 - Not logged in
 */
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -36,6 +36,8 @@ switch ($method) {
         
     case 'POST': // No rate => rate
         $accountCheck = checkAccount()["id"];
+        if (!$accountCheck) die("3");
+
         $DATA = json_decode(file_get_contents("php://input"), true);
         $fuckupData = intval($DATA["id"]);
         $rating = $DATA["action"] == 1 ? 1 : 0;

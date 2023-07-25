@@ -167,7 +167,8 @@
     "nonexistentList": "Tento seznam neexistuje!",
     "goToRandom": "Jít na náhodný seznam",
     "goHome": "Jít domů",
-    "communityLists": "Komunitní seznamy"
+    "communityLists": "Komunitní seznamy",
+    "commentLogin": "Pro komentování se prosím přihlaš!"
   },
   "level": {
     "levelID": "ID levelu",

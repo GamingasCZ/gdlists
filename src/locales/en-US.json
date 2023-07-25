@@ -120,7 +120,8 @@
     "goToRandom": "Go to a random list",
     "jumpTo": "Jump to",
     "nonexistentList": "This list does not exist!",
-    "communityLists": "Community Lists"
+    "communityLists": "Community Lists",
+    "commentLogin": "Please login to make comments!"
   },
   "navbar": {
     "editor": "Editor",
