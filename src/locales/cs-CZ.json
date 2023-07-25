@@ -192,12 +192,12 @@
   },
   "date": {
     "fewSecsAgo": "před pár sekundami",
-    "secs": "před {0} sekundou | před {0} sekundami",
-    "mins": "před {0} minutou | před {0} minutami",
-    "hours": "před {0} hodinou | před {0} hodinami",
-    "days": "před {0} dnem | před {0} dny",
-    "weeks": "před {0} týdnem | před {0} týdny",
-    "months": "před {0} měsícem | před {0} měsíci"
+    "secs": "před {count} sekundou | před {count} sekundami",
+    "mins": "před {count} minutou | před {count} minutami",
+    "hours": "před {count} hodinou | před {count} hodinami",
+    "days": "před {count} dnem | před {count} dny",
+    "weeks": "před {count} týdnem | před {count} týdny",
+    "months": "před {count} měsícem | před {count} měsíci"
   },
   "help": {
     "Lists": "Seznamy",

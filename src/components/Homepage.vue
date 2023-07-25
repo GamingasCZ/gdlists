@@ -25,10 +25,10 @@ watch(props, () => {
   let loginCookie = cookier("logindata").get();
   if (props.isLoggedIn && loginCookie != null) {
     returnedFromLogin.value = true;
-  
+
     loginCookie = JSON.parse(loginCookie);
     returnfromLoginName.value = loginCookie[0];
-  
+
     // first-time user
     firstTimeUser.value = loginCookie[3];
     if (!firstTimeUser.value) {
@@ -39,9 +39,9 @@ watch(props, () => {
         setTimeout(() => loginToast?.remove(), 500);
       }, 2500);
     }
-  
+
     returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`;
-  
+
     cookier("logindata").remove();
   }
 })
@@ -49,70 +49,42 @@ watch(props, () => {
 </script>
 
 <template>
-  <LoggedInPopup
-    @close-popup="returnedFromLogin = false"
-    v-if="firstTimeUser && returnedFromLogin"
-    :username="returnfromLoginName"
-    :pfplink="returnfromLoginPFP"
-  />
-  <div
-    id="loginToast"
-    v-if="!firstTimeUser"
-    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16"
-  >
-    {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b
-    >!
+  <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="firstTimeUser && returnedFromLogin"
+    :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
+  <div id="loginToast" v-if="!firstTimeUser"
+    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
+    {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!
   </div>
 
-  <header
-    class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center"
-  >
-    <form
-      action="./browse"
-      method="get"
-      class="flex gap-2 items-center text-white"
-    >
-      <input
-        type="text"
-        name="q"
-        class="max-w-[70vw] w-80 rounded-md border-4 border-lof-300 bg-greenGradient py-2 px-1 outline-transparent placeholder:text-xl"
-        :placeholder="$t('homepage.searchLists')"
-      />
+  <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
+    <form action="./browse" method="get" class="flex gap-2 items-start text-white">
+      <div>
+        <input type="text" name="q"
+          class="max-w-[70vw] w-80 rounded-md border-4 border-lof-300 bg-greenGradient py-2 px-1 outline-transparent placeholder:text-xl"
+          :placeholder="$t('homepage.searchLists')" />
+
+        <div class="flex gap-2 pt-2 w-full text-base text-white">
+          <button class="flex gap-4 items-center px-2 py-3 min-w-max rounded-md grow button bg-lof-300">
+            <img src="../images/plus.svg" alt="" class="w-6" />{{
+              $t("homepage.createList")
+            }}
+          </button>
+          <button class="flex gap-4 items-center px-2 py-3 rounded-md button grow bg-lof-300">
+            <img src="../images/dice.svg" alt="" class="w-6" />{{
+              $t("homepage.tryLuck")
+            }}
+          </button>
+        </div>
+      </div>
       <button type="submit">
-        <img
-          src="../images/searchOpaque.svg"
-          alt=""
-          class="p-2 rounded-full button bg-greenGradient"
-        />
+        <img src="../images/searchOpaque.svg" alt="" class="p-2 rounded-full button bg-greenGradient" />
       </button>
     </form>
-    <div class="flex gap-2 justify-center pt-2 w-max text-base text-white">
-      <RouterLink to="/editor">
-        <button
-          class="flex gap-4 items-center px-2 py-3 w-max rounded-md button bg-lof-300"
-        >
-          <img src="../images/plus.svg" alt="" class="w-6" />{{
-            $t("homepage.createList")
-          }}
-        </button>
-      </RouterLink>
-      <RouterLink to="/random">
-        <button
-          class="flex gap-4 items-center px-2 py-3 w-max rounded-md button bg-lof-300 sm:mr-14"
-        >
-          <img src="../images/dice.svg" alt="" class="w-6" />{{
-            $t("homepage.tryLuck")
-          }}
-        </button>
-      </RouterLink>
-    </div>
   </header>
 
   <section class="flex justify-center">
-    <div
-      v-if="!isLoggedIn"
-      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient"
-    >
+    <div v-if="!isLoggedIn"
+      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
         <p class="max-sm:text-xs">{{ $t("homepage.welcomeToGDL") }}</p>
@@ -122,58 +94,25 @@ watch(props, () => {
     </div>
   </section>
 
-  <main id="homepageSections" class="grid" :style="{gridTemplateColumns: columns}">
-    <ListSection
-      :header-name="$t('homepage.newest')"
-      :extra-text="$t('homepage.more')"
-      extra-icon="more"
-      :empty-text="$t('homepage.listsUnavailable')"
-      extra-action="/browse"
-      content-type="/getLists.php?homepage=1"
-    />
-  
-    <ListSection
-      :header-name="$t('homepage.pinned')"
-      :empty-text="$t('homepage.noListsPinned')"
-      content-type="@pinnedLists"
-      :max-items="5"
-    />
-  
-    <ListSection
-      v-if="isLoggedIn"
-      :header-name="$t('homepage.uploaded')"
-      :extra-text="$t('homepage.more')"
-      extra-icon="more"
-      extra-action="/browse?type=user"
-      :empty-text="$t('homepage.noListsUploaded')"
-      content-type="/getLists.php?homeUser"
-    />
-  
-    <ListSection
-      :header-name="$t('homepage.visited')"
-      :extra-text="$t('homepage.clear')"
-      extra-icon="trash"
-      extra-action="@clear"
-      :empty-text="$t('homepage.noListsVisited')"
-      content-type="@recentlyViewed"
-    />
-  
-    <ListSection
-      :header-name="$t('homepage.savedMix')"
-      :extra-text="$t('homepage.more')"
-      extra-icon="more"
-      :empty-text="$t('homepage.noLevelsSaved')"
-      content-type="@favorites"
-      extra-action="/saved"
-      :randomize-content="true"
-      :list-type="1"
-    />
-  
-    <ListSection
-      :header-name="$t('homepage.official')"
-      :empty-text="$t('homepage.listsNonexistent')"
-      content-type="oldLists"
-    />
-  </main>
+  <main id="homepageSections" class="grid" :style="{ gridTemplateColumns: columns }">
+    <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
+      :empty-text="$t('homepage.listsUnavailable')" extra-action="/browse" content-type="/getLists.php?homepage=1" />
 
+    <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
+      content-type="@pinnedLists" :max-items="5" />
+
+    <ListSection v-if="isLoggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
+      extra-icon="more" extra-action="/browse?type=user" :empty-text="$t('homepage.noListsUploaded')"
+      content-type="/getLists.php?homeUser" />
+
+    <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash"
+      extra-action="@clear" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
+
+    <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more"
+      :empty-text="$t('homepage.noLevelsSaved')" content-type="@favorites" extra-action="/saved" :randomize-content="true"
+      :list-type="1" />
+
+    <ListSection :header-name="$t('homepage.official')" :empty-text="$t('homepage.listsNonexistent')"
+      content-type="oldLists" />
+  </main>
 </template>

@@ -1,12 +1,12 @@
 {
   "date": {
-    "days": "{0} day ago | \n{0} days ago",
+    "days": "{count} day ago | {count} days ago",
     "fewSecsAgo": "a few seconds ago",
-    "hours": "{0} hour ago | \n{0} hours ago",
-    "mins": "{0} minute ago | \n{0} minutes ago",
-    "months": "{0} month ago | \n{0} months ago",
-    "secs": "{0} second ago | \n{0} seconds ago",
-    "weeks": "{0} week ago | \n{0} weeks ago"
+    "hours": "{count} hour ago | {count} hours ago",
+    "mins": "{count} minute ago | {count} minutes ago",
+    "months": "{count} month ago | {count} months ago",
+    "secs": "{count} second ago | {count} seconds ago",
+    "weeks": "{count} week ago | {count} weeks ago"
   },
   "editor": {
     "bgColor": "Background color:",

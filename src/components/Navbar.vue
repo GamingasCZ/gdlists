@@ -24,7 +24,7 @@ watch(props, () => {
 
 <template>
   <nav
-    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-md overflow-x-clip bg-greenGradient shadow-black"
+    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-drop overflow-x-clip bg-greenGradient"
   >
     <RouterLink to="/"><Logo class="w-10 h-10 button"/></RouterLink>
     <section

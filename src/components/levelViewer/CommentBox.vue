@@ -35,12 +35,12 @@ function getEmoji(ind: number) {
 }
 
 
-const listColor = ref<number[]>([Math.floor(Math.random()*360), 8+Math.random()*24])
-const parsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).hex())
-const darkParsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).darken(4).hex())
+const listColor = ref<number[]>([Math.floor(Math.random()*360), 1, 8+Math.random()*24])
+const parsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex())
+const darkParsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex())
 watch(listColor, () => {
-    parsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).hex()
-    darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[1]/64).darken(4).hex()
+    parsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex()
+    darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex()
 }, {deep: true})
 
 const dropdownOpen = ref<number>(-1)
@@ -138,7 +138,7 @@ function sendComment(com = "") {
 
         <!-- Color Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-md" v-show="dropdownOpen == 0">
-            <ColorPicker @colors-modified="listColor = $event" />
+            <ColorPicker @colors-modified="listColor = $event" :hue="listColor[0]" :saturation="listColor[1]" :lightness="listColor[2]"/>
         </div>
 
         <!-- Emoji Picker -->
