@@ -118,7 +118,7 @@ function sendRating(action: 1 | 0) {
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
         <header class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
-          <img :src="pfp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid" alt="" />
+          <img :src="pfp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" alt="" />
           <h1 class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
 
           <!-- List information -->
