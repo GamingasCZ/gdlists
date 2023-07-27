@@ -34,7 +34,8 @@ let gdlists = useI18n().t('other.websiteName')
 watch(props, () => main())
 onMounted(() => main())
 
-const PRIVATE_LIST: boolean =
+// other way around bruh (private list=false, public=true)
+let PRIVATE_LIST: boolean =
   props.randomList ? false : props?.listID?.match(/^\d+$/g)?.length == 1;
 
 const favoritedIDs = ref<string[] | null>();
@@ -49,9 +50,11 @@ const LIST_COL = ref<number[]>([0, 0, 0]);
 
 const nonexistentList = ref<boolean>(false)
 function main() {
-
   let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
-  if (props.randomList) listURL = "random";
+  if (props.randomList) {
+    listURL = "random";
+    PRIVATE_LIST = true
+  }
 
   nonexistentList.value = false
 
@@ -87,7 +90,6 @@ function main() {
       }
 
       if (addIntoRecentlyViewed) {
-        let isListPrivate = Boolean(LIST_DATA.value?.hidden != "0");
         recentlyViewed.push({
           creator: LIST_CREATOR.value,
           id: (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),

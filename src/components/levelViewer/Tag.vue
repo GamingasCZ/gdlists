@@ -5,7 +5,11 @@ const props = defineProps<{
   tag: LevelTag;
 }>();
 
-const tagPath = ref(new URL(`/public/badges/${props.tag[0]}.svg`, import.meta.url).href)
+const tagPath = ref("")
+async function getTag() {
+  tagPath.value = await import(`../../images/badges/${props.tag[0]}.svg`).then(res => res.default)
+}
+getTag()
 
 </script>
 
@@ -21,10 +25,10 @@ const tagPath = ref(new URL(`/public/badges/${props.tag[0]}.svg`, import.meta.ur
       class="text-blue-300 underline"
       :href="tag[2]"
       v-if="tag[2]"
-      >{{ tag[1] == -1 ? $t(`editor.tags[${tag[0]}]`) : tag[1] }}</a
+      >{{ [-1, ''].includes(tag[1]) ? $t(`editor.tags[${tag[0]}]`) : tag[1] }}</a
     >
     <span v-else>{{
-      tag[1] == -1 ? $t(`editor.tags[${tag[0]}]`) : tag[1]
+      [-1, ''].includes(tag[1]) ? $t(`editor.tags[${tag[0]}]`) : tag[1]
     }}</span>
   </div>
 </template>

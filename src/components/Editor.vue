@@ -230,8 +230,15 @@ function uploadList() {
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    removeBackup()
-    router.replace(`/${res.data[0]}`)
+    if (res.data[0] != undefined) {
+      removeBackup()
+      router.replace(`/${res.data[0]}`)
+    }
+    else {
+      errorDblclickHelp.value = false
+      errorMessage.value = useI18n().t('other.uploadFail', [res.data])
+      errorStamp.value = Math.random()
+    }
   })
 }
 
@@ -253,8 +260,15 @@ function updateList() {
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    removeBackup()
-    router.replace(`/${res.data[0]}`)
+    if (res.data[0] != undefined) {
+      removeBackup()
+      router.replace(`/${res.data[0]}`)
+    }
+    else {
+      errorDblclickHelp.value = false
+      errorMessage.value = useI18n().t('other.updateFail', [res.data])
+      errorStamp.value = Math.random()
+    }
   })
 }
 
@@ -266,6 +280,11 @@ function removeList() {
     if (res.data == 3) {
       removeBackup()
       router.replace('/browse')
+    }
+    else {
+      errorDblclickHelp.value = false
+      errorMessage.value = useI18n().t('other.removeFail', [res.data])
+      errorStamp.value = Math.random()
     }
   })
 
@@ -341,11 +360,11 @@ function removeList() {
   <!-- List Preview -->
   <section v-if="previewingList" class="mt-4">
     <ListBackground :image-data="levelList.titleImg" :list-color="levelList.pageBGcolor" />
-    <div class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
-      <button @click="previewingList = false" class="absolute top-1 left-1 button">
-        <img src="@/images/arrow-left.webp" class="w-10" alt="" />
-      </button>
+    <div :class="{'!mt-16': !isOnline}" class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
       <h1 class="text-3xl text-center text-white">{{ $t('editor.preview') }}</h1>
+      <button @click="previewingList = false" class="box-border absolute left-1 top-1/2 p-1 w-10 -translate-y-1/2 button">
+        <img src="@/images/close.svg" class="w-full" alt="" />
+      </button>
     </div>
     <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
       <LevelCard
@@ -400,7 +419,7 @@ function removeList() {
         :disabled="editing"
         v-model="listName"
         :placeholder="$t('editor.levelName')"
-        class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
+        class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg disabled:bg-opacity-0 disabled:cursor-not-allowed"
       />
       <div></div>
 

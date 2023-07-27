@@ -3,6 +3,7 @@
 import type { Level } from '@/interfaces';
 import chroma from 'chroma-js';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     data: Level
@@ -14,12 +15,21 @@ const emit = defineEmits(['updateOpenedCard', 'doMove'])
 
 function getCreator() {
     if (typeof props.data.creator == "object") // Collab
-        return `${props.data.creator[0][0]} + ${props.data.creator[1].length} dalších`
+        return useI18n().t('editor.collabText', [props.data.creator[0][0], props.data.creator[1].length])
     else
         return props.data.creator
 }
 
-const getTag = (ind: number) => new URL(`/public/badges/${ind}.svg`, import.meta.url).href
+const tags = ref([])
+const getTags = async (ind: number) => {
+    tags.value = []
+    let tag = await import(`../../images/badges/${ind}.svg`).then(res => res.default)
+    tags.value.push(tag)
+}
+
+props.data.tags.slice(0,5).forEach(tag => {
+   getTags(tag[0]) 
+});
 
 </script>
 
@@ -44,7 +54,7 @@ const getTag = (ind: number) => new URL(`/public/badges/${ind}.svg`, import.meta
             </div>
 
             <ul class="flex gap-1.5 mr-1.5">
-                <img :src="getTag(tag[0])" :title="tag[2].toString()" alt="" class="w-6" v-for="tag in (data?.tags ?? []).slice(0, 5)">
+                <img :src="tags[index]" :title="tag[2].toString()" alt="" class="w-6" v-for="(tag, index) in (data?.tags ?? []).slice(0, 5)">
             </ul>
         </section>
         

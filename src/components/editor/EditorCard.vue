@@ -104,10 +104,12 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         levelList.value.levels[props.index!].creator[0][0] = level.author
       levelCreator.value = level.author
 
+      if (level.difficulty == -1) level.difficulty = 11 // Auto levels
       levelList.value.levels[props.index!].difficulty = [
         level.difficulty,
         level.cp,
       ];
+      diffFacePath.value = new URL(`/public/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`, import.meta.url).href
     });
 }
 </script>
@@ -239,7 +241,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         />
         <img
           class="p-1 w-10 bg-black bg-opacity-30 rounded-md button aspect-square"
-          src="../../images/bytost.webp"
+          src="../../images/collabMen.svg"
           alt=""
           :class="{'animate-[shake_0.2s_infinite]': collabShaking, 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
           @click="shakeCollab()"
@@ -251,7 +253,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       <div class="flex gap-2">
         <img
           class="w-10 aspect-square"
-          src="../../images/youtube.webp"
+          src="../../images/modYT.svg"
           alt=""
         />
         <input

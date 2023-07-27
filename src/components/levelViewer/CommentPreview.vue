@@ -63,7 +63,13 @@ else if (Math.floor(datePassed/2419200) <= 4) time.value = useI18n().t('date.mon
 else time.value = useI18n().t('date.months', Math.floor(datePassed/2419200))
 
 const parsedComment = ref<string>("")
-parsedComment.value = props.comment.replace(/&(\d{2})/g, '<img class="inline w-5 pointer-events-none" src="' + new URL(`/public/emoji/$1.webp`, import.meta.url).href + '" alt="">')
+let emojis = props.comment.match(/&(\d{2})/g)
+if (emojis != null) {
+  emojis.forEach(async emoji => {
+    let fetch = await import(`../../images/emoji/${emoji.slice(1)}.webp`).then(res => res.default)
+    parsedComment.value = props.comment.replaceAll(emoji, `<img class="inline w-5 pointer-events-none" src="${fetch}" alt="">`)
+  });
+} else parsedComment.value = props.comment
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
 
 </script>

@@ -4,6 +4,7 @@ import chroma, { type Color } from "chroma-js";
 import { onMounted, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
+import { fixHEX } from "@/Editor";
 
 const props = defineProps<{
   levelName: string;
@@ -46,7 +47,7 @@ const doFavoriteLevel = () => {
     faves.push({
       levelName: props.levelName,
       creator: isCollab ? props.creator[0][0] : (props.creator as string),
-      levelColor: chroma(props.color!).hex(),
+      levelColor: CARD_COL.value?.hex(),
       levelID: props.levelID!,
       levelDiff: props.difficulty,
       listID: props.listID,
@@ -65,7 +66,7 @@ const CARD_COL = ref<Color>();
 
 // Old lists may have broken colors!! (damn you, old Gamingas :D)
 try {
-  CARD_COL.value = typeof props.color == 'string' ? chroma(props.color) : chroma.hsl(...props.color);
+  CARD_COL.value = typeof props.color == 'string' ? chroma(fixHEX(props.color)) : chroma.hsl(...props.color);
 } catch (e) {
   CARD_COL.value = chroma.random();
 }
@@ -88,11 +89,13 @@ if (props.difficulty) {
     :class="{'backdrop-blur-md': translucentCard}"
   >
     <!-- ID copy popup -->
-    <article v-if="copyingID" class="absolute top-1/2 left-1/2 z-10 px-4 py-2 w-max text-2xl text-center bg-black bg-opacity-80 rounded-lg -translate-x-1/2 -translate-y-1/2">
-      <h2 class="font-black">{{ $t('level.idCopied') }}</h2>
-      <hr class="rounded-full border-2 opacity-80">
-      <h3>{{ levelID }}</h3>
-    </article>
+    <Transition name="fade">
+      <article v-if="copyingID" class="absolute top-1/2 left-1/2 z-10 px-4 py-2 w-max text-2xl text-center bg-black bg-opacity-80 rounded-lg -translate-x-1/2 -translate-y-1/2">
+        <h2 class="font-black">{{ $t('level.idCopied') }}</h2>
+        <hr class="rounded-full border-2 opacity-80">
+        <h3>{{ levelID }}</h3>
+      </article>
+    </Transition>
 
     <main class="flex justify-between items-center max-sm:flex-col">
       <div>

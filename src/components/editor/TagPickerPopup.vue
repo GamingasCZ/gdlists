@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { TAG_COUNT } from "../../Editor";
 import type { LevelTag } from "../../interfaces";
 
@@ -6,7 +7,14 @@ const emit = defineEmits<{
   (e: "closePopup"): void;
   (e: "addTag", tag: LevelTag): void;
 }>();
-const getTag = (ind: number) => new URL(`/public/badges/${ind}.svg`, import.meta.url).href
+
+const Tags = ref<string[]>([])
+async function loadTags() {
+    for (let i = 0; i < TAG_COUNT; i++) {
+        Tags.value.push(await import(`../../images/badges/${i}.svg`).then(res => res.default))
+    }
+}
+loadTags()
 
 </script>
 
@@ -36,11 +44,11 @@ const getTag = (ind: number) => new URL(`/public/badges/${ind}.svg`, import.meta
       >
         <button
           @click="emit('addTag', [tag - 1, '', ''])"
-          v-for="tag in TAG_COUNT"
+          v-for="(tag, index) in TAG_COUNT"
           type="button"
           class="flex gap-2 items-center p-1.5 text-sm bg-black bg-opacity-20 rounded-full button"
         >
-          <img :src="getTag(tag - 1)" alt="" />{{
+          <img :src="Tags[index]" alt="" />{{
             $t(`editor.tags[${tag - 1}]`)
           }}
         </button>

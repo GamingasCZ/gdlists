@@ -82,7 +82,8 @@
     "collabToolsSoon": "Collab tools will be added back soon!",
     "diffGuessSoon": "Difficulty guessing will be added back soon!",
     "listBGhelp": "# Settings\n*Coverage - Changes the height of the background.\n*Alignment - If the screen's aspect ratio is narrower than the background, the background will be aligned.\n*Gradient - If a gradient with the list color should be placed over the background.\nThere's a green box in the image preview that you can drag and select the part of the background you want to show.\n\nList backgrounds work best with translucent cards!",
-    "levelSearchHelp": "# Searching by ID\n*The search icon next to the level ID will fetch level info of a level with the given ID\n# Searching by name/creator\nThe search icon between the level name and level author will fetch\n*The most liked level with the **given name**\n*The most recent level from the **given author**\n*If both fields are fille in, **the level from the given author**"
+    "levelSearchHelp": "# Searching by ID\n*The search icon next to the level ID will fetch level info of a level with the given ID\n# Searching by name/creator\nThe search icon between the level name and level author will fetch\n*The most liked level with the **given name**\n*The most recent level from the **given author**\n*If both fields are fille in, **the level from the given author**",
+    "collabText": "{0} + {1} more"
   },
   "homepage": {
     "clear": "Clear",
@@ -187,7 +188,10 @@
     "yes": "Yes",
     "myLists": "My Lists",
     "disconnected": "You're disconnected from the Internet!",
-    "notNow": "Not Now"
+    "notNow": "Not Now",
+    "removeFail": "Failed to delete the list. Error code: {0}",
+    "updateFail": "Failed to update the list. Error code: {0]",
+    "uploadFail": "Failed to upload the list. Error code: {0}"
   },
   "settingsMenu": {
     "asOff": "Off",

@@ -24,7 +24,10 @@ const moveTagPos = (from: number, to: number) => {
   levelList.value.levels[props.cardIndex!].tags.splice(to, 0, currentTag);
 };
 
-const tagPath = ref(new URL(`/public/badges/${props.tagID}.svg`, import.meta.url).href)
+const tagPath = ref("")
+const getTag = async () => tagPath.value = await import(`../../images/badges/${props.tagID}.svg`).then(res => res.default)
+getTag()
+
 </script>
 
 <template>

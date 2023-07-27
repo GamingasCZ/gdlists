@@ -116,7 +116,8 @@
     "diffGuessSoon": "Hadání obtížností bude brzy přidáno zpět :).",
     "collabToolsSoon": "Collab nástroje budou brzy přidány zpět :).",
     "collabTools": "Collab nástroje",
-    "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**."
+    "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**.",
+    "collabText": "{0} + {1} dalších"
   },
   "other": {
     "lockQuotes": [
@@ -166,7 +167,10 @@
     "options": "Možnosti",
     "myLists": "Moje",
     "disconnected": "Nejsi připojený k internetu!",
-    "notNow": "Zatím ne"
+    "notNow": "Zatím ne",
+    "uploadFail": "Nepodařilo se nahrát seznam. Kód chyby: {0}",
+    "updateFail": "Nepodařilo se aktualizovat seznam. Kód chyby: {0}",
+    "removeFail": "Nepodařilo se smazat seznam. Kód chyby: {0}"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

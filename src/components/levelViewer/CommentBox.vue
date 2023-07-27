@@ -29,10 +29,13 @@ if (localStorage) {
     }
 }
 
-function getEmoji(ind: number) {
-    return new URL(`/public/emoji/${ind.toString().padStart(2, '0')}.webp`, import.meta.url).href
+let emojis = ref<string[]>([])
+async function loadEmojis() {
+    for (let i = 0; i < EMOJI_COUNT; i++) {
+        emojis.value.push(await import(`../../images/emoji/${(i+1).toString().padStart(2, '0')}.webp`).then(res => res.default))
+    }
 }
-
+loadEmojis()
 
 const listColor = ref<number[]>([Math.floor(Math.random()*360), 1, 8+Math.random()*24])
 const parsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex())
@@ -54,7 +57,7 @@ onMounted(() => {
             render(emoji) {
                 const img = document.createElement('img')
                 img.classList.add('inline-block', 'w-4',)
-                img.src = getEmoji(emoji.id)
+                img.src = emojis.value[emoji.id]
                 img.draggable = false
                 return img
             },
@@ -124,7 +127,7 @@ function sendComment(com = "") {
         <pre :tabindex="loggedIn ? 0 : -1" @focus="placeholderActive = false" :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}" @blur="chatboxEmpty" @paste="modCommentLength()" @input="modCommentLength()" contenteditable="true" id="commentBox" class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-24" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
         
         <!-- placeholder text -->
-        <p class="absolute top-2 left-3 opacity-30" v-if="placeholderActive">{{ placeholder }}</p>
+        <p class="absolute top-2 left-3 opacity-30" v-if="placeholderActive && commentLength == 0">{{ placeholder }}</p>
 
         <!-- Not logged in notification -->
         <section v-if="!loggedIn" class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
@@ -142,7 +145,7 @@ function sendComment(com = "") {
 
         <!-- Emoji Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
-            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${getEmoji(index)})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
+            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
         </div>
 
         <footer class="flex justify-between mt-1">
