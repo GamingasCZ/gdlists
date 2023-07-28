@@ -68,6 +68,7 @@ getTag()
           ).value
         "
         type="text"
+        maxlength="20"
         :value="tagName || $t('editor.tags[' + tagID + ']')"
         :placeholder="$t('editor.tagText')"
         class="px-1 w-28 text-sm text-center bg-black bg-opacity-20 rounded-full"
@@ -81,6 +82,7 @@ getTag()
           ).value
         "
         :value="tagLink"
+        maxlength="100"
         :placeholder="$t('editor.tagLink')"
         class="px-1 w-28 text-sm text-center bg-black bg-opacity-20 rounded-full"
       />

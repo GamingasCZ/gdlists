@@ -235,6 +235,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
           type="text"
           name="creator"
+          maxlength="15"
           :value="levelCreator"
           @change="modifyCreator"
           :placeholder="$t('level.creator')"
@@ -261,6 +262,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
           type="text"
           name="video"
+          maxlength="50"
           v-model="levelList.levels[index!].video"
           :placeholder="$t('level.video')"
         />

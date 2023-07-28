@@ -168,9 +168,9 @@
     "myLists": "Moje",
     "disconnected": "Nejsi připojený k internetu!",
     "notNow": "Zatím ne",
-    "uploadFail": "Nepodařilo se nahrát seznam. Kód chyby: {0}",
-    "updateFail": "Nepodařilo se aktualizovat seznam. Kód chyby: {0}",
-    "removeFail": "Nepodařilo se smazat seznam. Kód chyby: {0}"
+    "uploadFail": "Nepodařilo se nahrát seznam. Kód chyby: ",
+    "updateFail": "Nepodařilo se aktualizovat seznam. Kód chyby: ",
+    "removeFail": "Nepodařilo se smazat seznam. Kód chyby: "
   },
   "listViewer": {
     "jumpTo": "Skočit na",

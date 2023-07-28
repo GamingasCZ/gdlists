@@ -7,36 +7,35 @@ Return codes:
 2 - Invalid listName length
 3 - Invalid listCreator length
 4 - List too big
+5 - Invalid list data
+6 - Invalid list parameters
 */
 
 require("globals.php");
+require("checkList.php");
 header('Content-type: application/json'); // Return as JSON
 
-$mysqli = new mysqli($hostname, $username, $password, $database);
 $time = new DateTime();
 
-// Cannot connect to database
-if ($mysqli -> connect_errno) {
-  echo "0";
-  exit();
-}
 $DATA = json_decode(file_get_contents("php://input"), true);
 
 // Invalid listName length
 if (strlen($DATA["lName"]) < 3 || strlen($DATA["lName"]) > 40) {
-  echo "2";
-  exit();
+  die(json_encode([-1, 2]));
 }
 
 // Check list size
 $len = strlen($DATA["listData"]);
 if ($len > 25000 || $len < 150) {
-  echo "4";
-  exit();
+  die(json_encode([-1, 4]));
 }
 
 $user_id = checkAccount()["id"];
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
+
+// Check list
+$listCheck = checkList($DATA["listData"]);
+if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
 // Checking request
 error_reporting($debugMode ? -1 : 0);
@@ -46,6 +45,12 @@ $timestamp = $time -> getTimestamp();
 // Generate id if list private
 if ($DATA["hidden"]) { $hidden = privateIDGenerator($fuckupData[1], $fuckupData[0], $timestamp); }
 else { $hidden = "0"; }
+
+$mysqli = new mysqli($hostname, $username, $password, $database);
+// Cannot connect to database
+if ($mysqli -> connect_errno) {
+  die(json_encode([-1, 0]));
+}
 
 // Send to database
 $teplate = "INSERT INTO `lists`(`creator`,`name`,`data`,`timestamp`,`hidden`,`uid`,`diffGuesser`) VALUES ('',?,?,?,?,?,?)";

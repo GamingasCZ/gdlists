@@ -27,9 +27,11 @@ const getTags = async (ind: number) => {
     tags.value.push(tag)
 }
 
-props.data.tags.slice(0,5).forEach(tag => {
-   getTags(tag[0]) 
-});
+if (props.data.tags != undefined) {
+    props.data.tags.slice(0,5).forEach(tag => {
+       getTags(tag[0]) 
+    });
+}
 
 </script>
 

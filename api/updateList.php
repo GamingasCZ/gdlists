@@ -6,20 +6,27 @@ Return codes:
 2 - Invalid password
 [LIST_ID] - Success!!
 4 - No changes made to list
+5 - Invalid list data
+6 - Invalid list parameters
 */
 
 require("globals.php");
+require("checkList.php");
 header('Content-type: application/json'); // Return as JSON
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 
 if ($mysqli -> connect_errno) {
-  echo "0";
-  exit();
+    die(json_encode([-1, 0]));
 }
 
 // Checking request
 $DATA = json_decode(file_get_contents("php://input"), true);
+
+// Check list
+$listCheck = checkList($DATA["listData"]);
+if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
+
 $fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"]));
 
 // Password check
@@ -34,16 +41,16 @@ else {
 }
 
 // When no changes are made in the list
-$isBeingHidden = $DATA["hidden"] == 1 and $DATA["isNowHidden"] == "false" && $DATA["hidden"] == 0 and $DATA["isNowHidden"] == "true";
+$isBeingHidden = ($DATA["hidden"] == 1 && $DATA["isNowHidden"] == "false") || ($DATA["hidden"] == 0 && $DATA["isNowHidden"] == "true");
 if ($listData["data"] == $fuckupData[1] && !$isBeingHidden) {
-    die("4");
+    die(json_encode([-1, 4]));
 }
 
 // Check ownership (did i just say SHIP?? THAT'S A GD REFERENCE!!)
 $checkUser = checkListOwnership($mysqli, $listData["uid"]);
 if (!$checkUser) {
   $mysqli -> close();
-  die("2");
+  die(json_encode([-1, 2]));
 }
 
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;

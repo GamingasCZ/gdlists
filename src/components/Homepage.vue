@@ -60,7 +60,7 @@ watch(props, () => {
     <form action="./browse" method="get" class="flex gap-2 items-start text-white">
       <div>
         <input type="text" name="q"
-          class="max-w-[70vw] w-80 rounded-md border-4 border-lof-300 bg-greenGradient py-2 px-1 outline-transparent placeholder:text-xl"
+          class="px-1 py-2 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
           :placeholder="$t('homepage.searchLists')" />
 
         <div class="flex gap-2 pt-2 w-full text-base text-white">
@@ -80,7 +80,7 @@ watch(props, () => {
           </RouterLink>
         </div>
       </div>
-      <button type="submit">
+      <button type="submit" class="max-sm:hidden">
         <img src="../images/searchOpaque.svg" alt="" class="p-2 rounded-full button bg-greenGradient" />
       </button>
     </form>

@@ -213,6 +213,11 @@ const addFromFavorites = (level: FavoritedLevel) => {
 const listHiddenSelected = () => (document.querySelector("input[name='private']") as HTMLInputElement).checked ? 1 : 0
 const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
+const errors = [
+  useI18n().t('other.uploadFail'),
+  useI18n().t('other.updateFail'),
+  useI18n().t('other.removeFail')
+]
 function uploadList() {
   errorDblclickHelp.value = false
   let check = checkList(listName.value)
@@ -230,15 +235,19 @@ function uploadList() {
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    if (res.data[0] != undefined) {
+    if (res.data[0] != -1) {
       removeBackup()
       router.replace(`/${res.data[0]}`)
     }
     else {
       errorDblclickHelp.value = false
-      errorMessage.value = useI18n().t('other.uploadFail', [res.data])
+      errorMessage.value = errors[0]+res.data[1]
       errorStamp.value = Math.random()
     }
+  }).catch(res => {
+      errorDblclickHelp.value = false
+      errorMessage.value = errors[0]+"-1"
+      errorStamp.value = Math.random()
   })
 }
 
@@ -260,15 +269,19 @@ function updateList() {
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected()
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
-    if (res.data[0] != undefined) {
+    if (res.data[0] != -1) {
       removeBackup()
       router.replace(`/${res.data[0]}`)
     }
     else {
       errorDblclickHelp.value = false
-      errorMessage.value = useI18n().t('other.updateFail', [res.data])
+      errorMessage.value = errors[1]+res.data[1]
       errorStamp.value = Math.random()
     }
+  }).catch(res => {
+      errorDblclickHelp.value = false
+      errorMessage.value = errors[1]+"-1"
+      errorStamp.value = Math.random()
   })
 }
 
@@ -283,9 +296,13 @@ function removeList() {
     }
     else {
       errorDblclickHelp.value = false
-      errorMessage.value = useI18n().t('other.removeFail', [res.data])
+      errorMessage.value = errors[2]+res.data
       errorStamp.value = Math.random()
     }
+  }).catch(res => {
+      errorDblclickHelp.value = false
+      errorMessage.value = errors[2]+"-1"
+      errorStamp.value = Math.random()
   })
 
   let timeoutLength = Math.trunc(1/levelList.value.levels.length*1000)
@@ -305,7 +322,7 @@ function removeList() {
 <template>
   <Transition name="fade">
     <TagPickerPopup
-      v-show="tagPopupOpen"
+      v-if="tagPopupOpen"
       @close-popup="tagPopupOpen = false"
       @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
     ></TagPickerPopup>
@@ -320,7 +337,7 @@ function removeList() {
 
   <Transition name="fade">
     <DescriptionEditor
-      v-show="descriptionEditorOpen"
+      v-if="descriptionEditorOpen"
       :editor-title="$t('editor.descriptionEditor')"
       @close-popup="descriptionEditorOpen = false"
     />
@@ -335,7 +352,7 @@ function removeList() {
   </Transition>
 
   <PickerPopup
-    v-show="favoriteLevelPickerOpen"
+    v-if="favoriteLevelPickerOpen"
     :browser-name="$t('other.savedLevels')"
     :outer-error-text="$t('editor.maxLevels')"
     :outer-error="levelList.levels.length >= 50"
@@ -416,6 +433,7 @@ function removeList() {
         autocomplete="off"
         type="text"
         id="levelName"
+        maxlength="40"
         :disabled="editing"
         v-model="listName"
         :placeholder="$t('editor.levelName')"
@@ -428,6 +446,7 @@ function removeList() {
         autocomplete="off"
         type="text"
         id="description"
+        maxlength="3000"
         :placeholder="$t('editor.listDescription')"
         class="h-8 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg focus:h-16"
         v-model="levelList.description"
@@ -445,6 +464,7 @@ function removeList() {
       <input
         autocomplete="off"
         type="text"
+        maxlength="150"
         :placeholder="$t('editor.titleImage')"
         class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
         v-model="levelList.titleImg[0]"

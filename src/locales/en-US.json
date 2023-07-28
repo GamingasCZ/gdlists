@@ -189,9 +189,9 @@
     "myLists": "My Lists",
     "disconnected": "You're disconnected from the Internet!",
     "notNow": "Not Now",
-    "removeFail": "Failed to delete the list. Error code: {0}",
-    "updateFail": "Failed to update the list. Error code: {0]",
-    "uploadFail": "Failed to upload the list. Error code: {0}"
+    "removeFail": "Failed to delete the list. Error code: ",
+    "updateFail": "Failed to update the list. Error code: ",
+    "uploadFail": "Failed to upload the list. Error code: "
   },
   "settingsMenu": {
     "asOff": "Off",

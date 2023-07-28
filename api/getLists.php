@@ -135,7 +135,7 @@ if (count($_GET) == 1) {
             LIMIT %d 
             OFFSET %s", $selRange, $showHidden, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
 
-  $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) from `lists` WHERE `hidden` = '0' AND `name` LIKE '%%%s%%' AND `id`<=%d %s", $_GET["searchQuery"], $_GET["startID"], $addReq));
+  $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) from `lists` WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
   $maxpage = ceil($maxpageQuery->fetch_array()[0] / clamp(intval($_GET["fetchAmount"]), 2, 15));
   
   $result = $mysqli->query($query);

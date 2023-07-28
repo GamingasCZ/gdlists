@@ -88,7 +88,7 @@ function sendRating(action: 1 | 0) {
   <section class="mx-auto flex w-[80rem] max-w-[95vw] flex-col">
     <section class="flex gap-2">
       <!-- Likes and dislikes -->
-      <div class="box-border flex flex-col items-center max-sm:hidden">
+      <div class="box-border flex flex-col items-center min-w-max max-sm:hidden">
 
         <!-- Like button -->
         <button id="likeButton" class="button relative rounded-lg bg-[#21cc5b] p-1 !transition-colors"
@@ -142,7 +142,7 @@ function sendRating(action: 1 | 0) {
           </div>
         </header>
         <pre id="listDescription"
-          class="descriptionFade h-24 overflow-y-hidden whitespace-pre-wrap rounded-b-md bg-gray-800 bg-opacity-80 px-2 font-[poppins] leading-5 text-white transition-[height] duration-75 ease-in-out before:transition-opacity"
+          class="descriptionFade h-24 overflow-y-hidden break-words max-w-[95vw] whitespace-pre-wrap rounded-b-md bg-gray-800 bg-opacity-80 px-2 font-[poppins] leading-5 text-white transition-[height] duration-75 ease-in-out before:transition-opacity"
           :class="{
                 'text-opacity-40': ['', undefined].includes(data?.description),
                 'before:opacity-0': !tallDescription || toggleDescription,
