@@ -170,7 +170,8 @@
     "notNow": "Zatím ne",
     "uploadFail": "Nepodařilo se nahrát seznam. Kód chyby: ",
     "updateFail": "Nepodařilo se aktualizovat seznam. Kód chyby: ",
-    "removeFail": "Nepodařilo se smazat seznam. Kód chyby: "
+    "removeFail": "Nepodařilo se smazat seznam. Kód chyby: ",
+    "by": "od"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -184,7 +185,12 @@
     "commHelp2": "Líbí se mi tvůj seznam, protože...",
     "commHelp3": "Máš jiný názor než já. Už nikdy nebudeš klidně spát, protože...",
     "commHelp4": "Tvůj seznam stojí za prd, protože...",
-    "commHelp5": "Mrkni se i na můj seznam..."
+    "commHelp5": "Mrkni se i na můj seznam...",
+    "whatDiff": "Jakou má level obtížnost?",
+    "whatRate": "Jak je level ohodnocen?",
+    "playAgain": "Hrát znova",
+    "listFinished": "Dokončil jsi seznam!",
+    "scoreBetter": "Dokážeš to líp?"
   },
   "level": {
     "levelID": "ID levelu",
@@ -222,5 +228,6 @@
     "translucentHelp": "Po zapnutí budou v seznamu karty levelů průsvitné. Průsvitné karty nejlíp fungují s nějakým obrázkem seznamu.",
     "usedPackages": "Použité balíčky",
     "license": "Licence"
-  }
+  },
+  "levelViewer": {}
 }

@@ -1,14 +1,5 @@
 <script setup lang="ts">
 import { levelList } from "../../Editor";
-import { ref } from "vue";
-
-const collabShaking = ref(false)
-const shakeCollab = () => {
-  collabShaking.value = true
-  setTimeout(() => {
-    collabShaking.value = false
-  }, 200);
-}
 </script>
 
 <template>
@@ -19,10 +10,11 @@ const shakeCollab = () => {
         <input type="checkbox" name="private" class="button" />
         <label for="private">{{ $t('editor.privateList') }}</label>
       </div>
-      <div :class="{'animate-[shake_0.2s_infinite]': collabShaking}" @mousedown="shakeCollab">
+      <div>
         <input
             type="checkbox"
             class="button"
+            v-model="levelList.diffGuesser[0]"
           />
         <label for="diffGuessing" id="diffGuess">{{ $t('editor.levelGuessing') }}</label>
       </div>

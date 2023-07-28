@@ -81,7 +81,7 @@ const unpinList = () => {
 <template>
   <RouterLink
     :to="hidden != '0' ? hidden ?? id.toString() : id.toString()!"
-    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
@@ -121,6 +121,8 @@ const unpinList = () => {
     <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-full button">
       <img src="@/images/unpin.svg" alt="">
     </button>
+
+    <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
   </RouterLink>
 </template>
 3

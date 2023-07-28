@@ -133,7 +133,12 @@
     "commHelp2": "I like your list, 'cause...",
     "commHelp3": "Your opinion differs from mine, you will be...",
     "commHelp4": "Your list is a trainwreck, because...",
-    "commHelp5": "Also check out my list..."
+    "commHelp5": "Also check out my list...",
+    "listFinished": "You completed the list!",
+    "playAgain": "Play again",
+    "whatDiff": "What's the level's difficulty?",
+    "whatRate": "What's the level's rating?",
+    "scoreBetter": "Can you score better?"
   },
   "navbar": {
     "editor": "Editor",
@@ -191,7 +196,8 @@
     "notNow": "Not Now",
     "removeFail": "Failed to delete the list. Error code: ",
     "updateFail": "Failed to update the list. Error code: ",
-    "uploadFail": "Failed to upload the list. Error code: "
+    "uploadFail": "Failed to upload the list. Error code: ",
+    "by": "by"
   },
   "settingsMenu": {
     "asOff": "Off",

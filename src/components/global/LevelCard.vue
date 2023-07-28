@@ -5,6 +5,7 @@ import { onMounted, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import { fixHEX } from "@/Editor";
+import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
 
 const props = defineProps<{
   levelName: string;
@@ -20,6 +21,11 @@ const props = defineProps<{
   listName: string;
   disableStars: boolean;
   translucentCard: boolean;
+  guessingNow: boolean
+}>();
+
+const emit = defineEmits<{
+  (e: "nextGuess", res: number): void;
 }>();
 
 const isFavorited = ref<boolean>(props.favorited);
@@ -73,12 +79,16 @@ try {
 
 const difficultyFace = ref("")
 const difficultyGlow = ref("")
-if (props.difficulty) {
-  difficultyFace.value = new URL(`/public/faces/${props.difficulty[0]}.webp`, import.meta.url).href
-  if (props.difficulty[1]) { // Must be rated
-    difficultyGlow.value = new URL(`/public/faces/${["","star","featured","epic"][props.difficulty[1]]}.webp`, import.meta.url).href
+
+async function getDifficulty() {
+  if (props.difficulty) {
+    difficultyFace.value = await import(`../../images/faces/${props.difficulty[0]}.webp`).then(res => res.default)
+    if (props.difficulty[1]) { // Must be rated
+      difficultyGlow.value = await import(`../../images/faces/${["","star","featured","epic"][props.difficulty[1]]}.webp`).then(res => res.default)
+    }
   }
 }
+getDifficulty()
 
 </script>
 
@@ -103,7 +113,7 @@ if (props.difficulty) {
           <!-- Level difficulty -->
           <div
             class="relative m-2 mr-1 ml-0"
-            v-if="difficulty"
+            v-if="difficulty && !guessingNow"
             :class="{ '!mx-2': difficulty[1] > 0 }"
           >
             <img
@@ -144,7 +154,7 @@ if (props.difficulty) {
       </div>
 
       <!-- Card links -->
-      <div class="flex gap-1.5 max-sm:my-2 sm:mr-10">
+      <div class="flex gap-1.5 max-sm:my-2 sm:mr-10" v-if="!guessingNow">
         <button class="button" v-if="video">
           <a :href="`https://youtu.be/${video}`"
             ><img class="w-14 max-sm:w-10" src="@/images/modYT.svg" alt=""
@@ -159,6 +169,12 @@ if (props.difficulty) {
           <img class="w-14 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
+
+      <!-- Skip difficulty guess -->
+      <button v-else class="mr-10 max-sm:mr-0 button" @click="emit('nextGuess', 0)">
+          <img class="w-14 max-sm:w-10" src="@/images/skip.svg" alt="" />
+      </button>
+
     </main>
 
     <!-- Favorite star -->
@@ -179,5 +195,7 @@ if (props.difficulty) {
     <section class="flex flex-wrap gap-2 mt-2">
       <Tag v-for="tag in tags" :tag="tag" />
     </section>
+
+    <DifficultyGuesserContainer :difficulty="difficulty" v-if="guessingNow" @guessed="emit('nextGuess', $event)" />
   </section>
 </template>

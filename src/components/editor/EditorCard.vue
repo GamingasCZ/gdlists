@@ -39,9 +39,9 @@ const changeCardColors = (newColors: [number, number, number]) =>
 // Difficulty Picker
 const changeRate = (newRating: number) =>
   (levelList.value.levels[props.index!].difficulty[1] = newRating);
-const changeFace = (newFace: number) => {
+const changeFace = async (newFace: number) => {
   levelList.value.levels[props.index!].difficulty[0] = newFace;
-  diffFacePath.value = new URL(`/public/faces/${newFace}.webp`, import.meta.url).href
+  diffFacePath.value = await getDiffFace()
 }
 const getRateImage = () => {
   let rate = levelList.value.levels[props.index!].difficulty?.[1] ?? 0;
@@ -59,7 +59,11 @@ const shakeCollab = () => {
   }, 200);
 }
 
-const diffFacePath = ref(new URL(`/public/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`, import.meta.url).href)
+const diffFacePath = ref("")
+const getDiffFace = async () => await import(`../../images/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`).then(res => diffFacePath.value = res.default)
+getDiffFace()
+
+
 const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0] : levelList.value.levels[props.index!].creator)
 const modifyCreator = (e: Event) => {
   let newCreator = (e.currentTarget as HTMLInputElement).value
@@ -93,7 +97,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 
   axios
     .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
-    .then((response: AxiosResponse) => {
+    .then(async (response: AxiosResponse) => {
       let level: LevelSearchResponse = response.data;
       levelList.value.levels[props.index!].levelID = level.id;
       levelList.value.levels[props.index!].levelName = level.name;
@@ -109,7 +113,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         level.difficulty,
         level.cp,
       ];
-      diffFacePath.value = new URL(`/public/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`, import.meta.url).href
+      diffFacePath.value = await getDiffFace()
     });
 }
 </script>

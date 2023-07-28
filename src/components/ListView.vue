@@ -10,7 +10,7 @@ import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, getCurrentInstance } from "vue";
+import { ref, onMounted, watch, onUnmounted } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -19,6 +19,7 @@ import MobileExtras from "./levelViewer/MobileExtras.vue";
 import { useI18n } from "vue-i18n";
 import LikePopup from "./levelViewer/LikePopup.vue";
 import ListBackground from "./global/ListBackground.vue";
+import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -47,6 +48,7 @@ const LIST_DATA = ref<ListFetchResponse>({ data: { levels: [] } });
 const LIST_CREATOR = ref<string>("");
 const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash: string} | false>()
 const LIST_COL = ref<number[]>([0, 0, 0]);
+const LEVEL_COUNT = ref(0)
 
 const nonexistentList = ref<boolean>(false)
 function main() {
@@ -121,6 +123,10 @@ function main() {
           if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
         });
       }
+
+      // Set difficulty guessing
+      LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
+      if (LIST_DATA.value.data.diffGuesser?.[0]) cardGuessing.value = 0
     });
 
 }
@@ -147,6 +153,13 @@ const tryJumping = (ind: number, forceJump = false) => {
     ).style.animation = "flash 0.8s linear";
   }
 };
+
+const cardGuessing = ref(-1)
+const guesses = ref<number[]>([])
+const doNextGuess = (result: number) => {
+  cardGuessing.value += 1
+  guesses.value.push(result)
+}
 
 const listPinned = ref<boolean>(false)
 const toggleListPin = () => {
@@ -263,11 +276,30 @@ const listActions = (action: string) => {
       </Teleport>
 
       <!-- List -->
-      <LevelCard v-for="(level, index) in LIST_DATA?.data.levels" v-bind="level"
-        :favorited="favoritedIDs?.includes(level.levelID!)" :level-index="index"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-name="LIST_DATA?.name!"
-        :translucent-card="LIST_DATA?.data.translucent!" class="levelCard" :disable-stars="false"
-        v-show="!commentsShowing" @vnode-mounted="tryJumping(index)" />
+      <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+        class="levelCard"
+        v-show="!commentsShowing"
+        v-bind="level"
+        :favorited="favoritedIDs?.includes(level.levelID!)"
+        :level-index="index"
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+        :list-name="LIST_DATA?.name!"
+        :translucent-card="LIST_DATA?.data.translucent!" 
+        :disable-stars="false" 
+        :guessing-now="cardGuessing == index"
+        @vnode-mounted="tryJumping(index)"
+        @next-guess="doNextGuess($event)"
+      />
+
+      <GuessingFinished
+        v-if="LIST_DATA?.id != undefined && cardGuessing == LEVEL_COUNT"
+        :guesses="guesses"
+        :list-creator="LIST_CREATOR"
+        :list-name="LIST_DATA.name"
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden: LIST_DATA?.id.toString()"
+        :both-modes-enabled="LIST_DATA.data.diffGuesser[1] && LIST_DATA.data.diffGuesser[2]"
+        @replay-list="cardGuessing = 0"
+      />
 
       <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :comm-amount="LIST_DATA.commAmount"
         :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :showing="commentsShowing"/>

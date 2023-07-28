@@ -1,10 +1,25 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
 defineProps({
   selectedFace: Number,
   selectedRate: Number,
 });
 
 const emit = defineEmits(["changeRate", "changeFace"]);
+
+const faces = ref<string[]>([])
+const rates = ref<string[]>([])
+async function getDifficulties() {
+  for (let i = 0; i <= 11; i++) {
+    faces.value.push(await import(`../../images/faces/${i}.webp`).then(res => res.default))
+  }
+  
+  ['error', 'star', 'featured', 'epic'].forEach(async rating => {
+    rates.value.push(await import(`../../images/faces/${rating}.webp`).then(res => res.default))
+  });
+}
+getDifficulties()
 
 function getDiffImage(ind: string) {
   return new URL(`/public/faces/${ind}.webp`, import.meta.url).href;
@@ -17,14 +32,14 @@ function getDiffImage(ind: string) {
       class="box-border flex flex-grow-[1] items-center gap-3 overflow-x-auto"
     >
       <button
-        v-for="diff in 12"
-        :key="diff"
+        v-for="(diff, index) in faces"
+        :key="index"
         type="button"
         class="p-1 w-12 h-12 bg-opacity-40 rounded-md button aspect-square"
-        @click="emit('changeFace', diff - 1)"
-        :class="{ 'bg-black': diff - 1 == selectedFace }"
+        @click="emit('changeFace', index - 1)"
+        :class="{ 'bg-black': index - 1 == selectedFace }"
       >
-        <img :src="getDiffImage((diff - 1).toString())" />
+        <img :src="diff" />
       </button>
     </div>
     <div
@@ -33,12 +48,12 @@ function getDiffImage(ind: string) {
       <button
         type="button"
         class="p-1 w-10 bg-black bg-opacity-20 rounded-md aspect-square"
-        v-for="(rate, index) in ['error', 'star', 'featured', 'epic']"
+        v-for="(rate, index) in rates"
         @click="emit('changeRate', index)"
       >
         <img
           class="button"
-          :src="getDiffImage(rate)"
+          :src="rate"
           :class="{ disabled: index != selectedRate }"
         />
       </button>
