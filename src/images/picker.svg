@@ -1,22 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
-   version="1.1"
-   id="svg5"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs2" />
-  <g
-     id="layer1">
-    <path
-       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"
-       id="path1157"
-       d="m 932.1805,545.95738 c -7.26085,12.57616 -1444.90899,12.57615 -1452.16984,-10e-6 -7.26085,-12.57616 711.56323,-1257.61596 726.08492,-1257.61596 14.5217,0 733.34577,1245.03981 726.08492,1257.61597 z"
-       transform="matrix(0.08368122,0,0,0.20006481,87.75367,164.13197)" />
-  </g>
+<svg width="10.978" height="16" version="1.1" viewBox="0 0 10.978 16" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-2.5109)">
+  <path d="m8.0064 1.1683e-7c-2.9472 3.5465-6.4498 7.9648-5.2556 12.242 0.57915 2.0743 3.102 3.7579 5.2556 3.7579 2.1536 0 4.6765-1.6836 5.2556-3.7579 1.1942-4.2773-2.5817-8.6829-5.2556-12.242z" fill="#fff" style="paint-order:stroke markers fill"/>
+ </g>
 </svg>
