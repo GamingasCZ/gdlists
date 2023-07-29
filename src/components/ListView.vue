@@ -126,15 +126,15 @@ function main() {
 
       // Set difficulty guessing
       LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
-      if (LIST_DATA.value.data.diffGuesser?.[0]) cardGuessing.value = 0
+      if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
     });
 
 }
 
+let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
+  "goto"
+);
 const tryJumping = (ind: number, forceJump = false) => {
-  let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
-    "goto"
-  );
   if (forceJump) {
     isJumpingFromFaves = ind.toString();
     jumpToPopupOpen.value = false;
@@ -150,15 +150,19 @@ const tryJumping = (ind: number, forceJump = false) => {
     }
     (
       jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
-    ).style.animation = "flash 0.8s linear";
+    ).style.animation = "flash 0.8s linear forwards";
   }
 };
 
+const windowHeight = ref(window.innerHeight)
 const cardGuessing = ref(-1)
 const guesses = ref<number[]>([])
 const doNextGuess = (result: number) => {
   cardGuessing.value += 1
   guesses.value.push(result)
+
+  let guessingCardElement = document.querySelector(`.levelCard:nth-child(${cardGuessing.value})`) as HTMLDivElement
+  window.scrollTo({top: guessingCardElement.offsetTop-windowHeight.value/2+128, behavior: "smooth"})
 }
 
 const listPinned = ref<boolean>(false)
@@ -241,7 +245,7 @@ const listActions = (action: string) => {
   <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
   <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen"
     picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"
-    :browser-name="$t('listViewer.jumpTo')" />
+    :browser-name="$t('listViewer.jumpTo')" :outer-error="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" :outer-error-text="$t('listViewer.noGuessJumping')"/>
 
   <!-- Mobile options popup -->
   <MobileExtras v-if="mobileExtrasOpen" @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
@@ -278,6 +282,7 @@ const listActions = (action: string) => {
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
         class="levelCard"
+        :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
         v-show="!commentsShowing"
         v-bind="level"
         :favorited="favoritedIDs?.includes(level.levelID!)"
@@ -287,9 +292,13 @@ const listActions = (action: string) => {
         :translucent-card="LIST_DATA?.data.translucent!" 
         :disable-stars="false" 
         :guessing-now="cardGuessing == index"
+        :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
         @vnode-mounted="tryJumping(index)"
         @next-guess="doNextGuess($event)"
       />
+
+      <!-- Guessing bottom padding -->
+      <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != LEVEL_COUNT"></div>
 
       <GuessingFinished
         v-if="LIST_DATA?.id != undefined && cardGuessing == LEVEL_COUNT"
@@ -306,3 +315,21 @@ const listActions = (action: string) => {
     </main>
   </section>
 </template>
+
+<style scoped>
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.levelCard {
+  animation: slideIn 0.4s ease forwards;
+  opacity: 0;
+}
+</style>
