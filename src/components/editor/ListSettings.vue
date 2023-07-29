@@ -26,7 +26,7 @@ import { levelList } from "../../Editor";
           <span>{{ $t('editor.guess') }}: </span>
           <button @click="levelList.diffGuesser[1] = !levelList.diffGuesser[1]">
             <img
-              src="/public/faces/4.webp"
+              src="@/images/faces/4.webp"
               alt=""
               class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
               :class="{ disabled: !levelList.diffGuesser[1] }"
@@ -34,7 +34,7 @@ import { levelList } from "../../Editor";
           </button>
           <button @click="levelList.diffGuesser[2] = !levelList.diffGuesser[2]">
             <img
-              src="/public/faces/epic.webp"
+              src="@/images/faces/epic.webp"
               alt=""
               class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
               :class="{ disabled: !levelList.diffGuesser[2] }"

@@ -39,6 +39,11 @@ const shareResult = () => {
     navigator.clipboard.writeText(text)
 }
 
+const replayList = () => {
+    window.scrollTo({top: 0, behavior: 'smooth'})
+    emit('replayList')
+}
+
 </script>
 
 <template>
@@ -48,8 +53,8 @@ const shareResult = () => {
             <span class="absolute top-1/2 left-1/2 text-xl -translate-x-1/2 -translate-y-1/2">{{ percentage }}%</span>
         </div>
         <table class="grid grid-cols-2 gap-3">
-            <td><button class="px-2 py-1 w-full text-lg text-left bg-black bg-opacity-40 rounded-md button" @click="shareResult()"><img src="@/images/share.svg" alt="" class="inline mr-3 w-12">{{ $t('other.share') }}</button></td>
-            <td><button class="px-2 py-1 w-full text-lg text-left bg-black bg-opacity-40 rounded-md button" @click="emit('replayList')"><img src="@/images/replay.svg" alt="" class="inline mr-3 w-12">{{ $t('listViewer.playAgain') }}</button></td>
+            <td><button class="px-2 py-1 w-full text-lg text-xl text-left bg-black bg-opacity-40 rounded-md button" @click="shareResult()"><img src="@/images/share.svg" alt="" class="box-border inline p-1 mr-3 w-10">{{ $t('other.share') }}</button></td>
+            <td><button class="px-2 py-1 w-full text-lg text-xl text-left bg-black bg-opacity-40 rounded-md button" @click="replayList()"><img src="@/images/replay.svg" alt="" class="box-border inline p-1 mr-3 w-10">{{ $t('listViewer.playAgain') }}</button></td>
         </table>
     </section>
 </template>

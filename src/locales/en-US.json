@@ -138,7 +138,8 @@
     "playAgain": "Play again",
     "whatDiff": "What's the level's difficulty?",
     "whatRate": "What's the level's rating?",
-    "scoreBetter": "Can you score better?"
+    "scoreBetter": "Can you score better?",
+    "noGuessJumping": "You cannot jump on a guessing list!"
   },
   "navbar": {
     "editor": "Editor",

@@ -191,21 +191,21 @@ function sendRating(action: 1 | 0) {
       <div class="flex gap-2 max-sm:hidden">
         <!-- Share popup -->
         <button @click="emit('doListAction', 'sharePopup')"
-          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2">
+          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2">
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/share.svg" alt="" /><label class="max-sm:hidden">{{
             $t('other.share') }}</label>
         </button>
 
         <!-- Jump to popup -->
         <button @click="emit('doListAction', 'jumpPopup')"
-          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2">
+          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2">
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/jumpto.svg" alt="" /><label class="max-sm:hidden">{{
             $t('listViewer.jumpTo') }}</label>
         </button>
 
         <!-- Pin list -->
         <button
-          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
+          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
           @click="emit('doListAction', 'pinList')">
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/pin.svg" alt="" v-if="!listPinned" />
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/unpin.svg" alt="" v-else />
@@ -214,7 +214,7 @@ function sendRating(action: 1 | 0) {
 
         <!-- Edit list -->
         <button
-          class="button w-24 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
+          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
           @click="emit('doListAction', 'editList')" v-if="userUID == uid">
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/edit.svg" alt="" /><label class="max-sm:hidden">{{
             $t('level.edit') }}</label>

@@ -118,7 +118,7 @@ const unpinList = () => {
       <p class="text-xs">- {{ creator?.length ? creator : getUsername() }} -</p>
     </section>
 
-    <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-full button">
+    <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-md button">
       <img src="@/images/unpin.svg" alt="">
     </button>
 

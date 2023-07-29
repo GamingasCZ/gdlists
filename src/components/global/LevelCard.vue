@@ -21,7 +21,8 @@ const props = defineProps<{
   listName: string;
   disableStars: boolean;
   translucentCard: boolean;
-  guessingNow: boolean
+  guessingNow: boolean;
+  diffGuessArray: [boolean, boolean, boolean];
 }>();
 
 const emit = defineEmits<{
@@ -147,7 +148,7 @@ getDifficulty()
           </div>
 
           <!-- Level name -->
-          <h2 class="ml-2 text-3xl font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
+          <h2 :class="{'ml-2': !guessingNow}" class="text-3xl font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
             {{ levelName || $t('other.unnamesd') }}
           </h2>
         </header>
@@ -196,6 +197,6 @@ getDifficulty()
       <Tag v-for="tag in tags" :tag="tag" />
     </section>
 
-    <DifficultyGuesserContainer :difficulty="difficulty" v-if="guessingNow" @guessed="emit('nextGuess', $event)" />
+    <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="emit('nextGuess', $event)" />
   </section>
 </template>

@@ -20,10 +20,6 @@ async function getDifficulties() {
   });
 }
 getDifficulties()
-
-function getDiffImage(ind: string) {
-  return new URL(`/public/faces/${ind}.webp`, import.meta.url).href;
-}
 </script>
 
 <template>
@@ -36,8 +32,8 @@ function getDiffImage(ind: string) {
         :key="index"
         type="button"
         class="p-1 w-12 h-12 bg-opacity-40 rounded-md button aspect-square"
-        @click="emit('changeFace', index - 1)"
-        :class="{ 'bg-black': index - 1 == selectedFace }"
+        @click="emit('changeFace', index)"
+        :class="{ 'bg-black': index == selectedFace }"
       >
         <img :src="diff" />
       </button>

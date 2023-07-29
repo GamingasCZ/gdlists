@@ -190,7 +190,8 @@
     "whatRate": "Jak je level ohodnocen?",
     "playAgain": "Hrát znova",
     "listFinished": "Dokončil jsi seznam!",
-    "scoreBetter": "Dokážeš to líp?"
+    "scoreBetter": "Dokážeš to líp?",
+    "noGuessJumping": "Nemůžeš skákat na hádacím seznamu!"
   },
   "level": {
     "levelID": "ID levelu",

@@ -8,15 +8,13 @@ const props = defineProps<{
   data: Level;
 }>();
 
-const color = ref(typeof props.data.color == 'string' ? fixHEX(props.data.color) : props.data.color )
-
-if (props.data.color == "string") props.data.color = fixHEX(props.data.color)
+const color = ref(typeof props.data.color == 'string' ? fixHEX(props.data.color) : chroma.hsl(...props.data.color).hex() )
 
 const isCollab = ref<boolean>(typeof props.data.creator != "string");
 </script>
 <template>
   <button
-    :style="{ backgroundColor: chroma(color).hex() }"
+    :style="{ backgroundColor: color }"
     class="px-2 py-1 leading-4 text-left rounded-md button focus-visible:!outline"
   >
     <h3 class="font-bold">

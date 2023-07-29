@@ -37,19 +37,24 @@ const changeCardColors = (newColors: [number, number, number]) =>
   ]);
 
 // Difficulty Picker
-const changeRate = (newRating: number) =>
-  (levelList.value.levels[props.index!].difficulty[1] = newRating);
+const changeRate = async (newRating: number) => {
+  levelList.value.levels[props.index!].difficulty[1] = newRating;
+  rateImagePath.value = await getRateImage()
+}
 const changeFace = async (newFace: number) => {
   levelList.value.levels[props.index!].difficulty[0] = newFace;
   diffFacePath.value = await getDiffFace()
 }
-const getRateImage = () => {
+
+const rateImagePath = ref("")
+const getRateImage = async () => {
   let rate = levelList.value.levels[props.index!].difficulty?.[1] ?? 0;
-  if (rate == 0) return; // Unrated level
+  if (rate == 0) rateImagePath.value = ""; // Unrated level
   else {
-    return new URL(`/public/faces/${["star", "featured", "epic"][rate - 1]}.webp`, import.meta.url).href;
+    return await import(`../../images/faces/${["star", "featured", "epic"][rate - 1]}.webp`).then(res => rateImagePath.value = res.default);
   }
 };
+getRateImage()
 
 const collabShaking = ref(false)
 const shakeCollab = () => {
@@ -114,6 +119,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         level.cp,
       ];
       diffFacePath.value = await getDiffFace()
+      rateImagePath.value = await getRateImage()
     });
 }
 </script>
@@ -293,7 +299,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             class="absolute z-20 w-7 pointer-events-none"
           />
           <img
-            :src="getRateImage()"
+            :src="rateImagePath"
             alt=""
             class="absolute z-10 w-10 pointer-events-none"
             :class="{'w-5 left-2/4 top-2/4': levelList.levels[index!].difficulty?.[1] == 1}"
