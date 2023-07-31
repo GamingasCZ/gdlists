@@ -142,3 +142,7 @@ export interface LevelSearchResponse {
   difficulty: number;
   cp: number;
 }
+
+export interface viewedPopups {
+  diffGuesserHelp?: boolean
+}

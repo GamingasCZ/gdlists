@@ -198,7 +198,10 @@
     "removeFail": "Failed to delete the list. Error code: ",
     "updateFail": "Failed to update the list. Error code: ",
     "uploadFail": "Failed to upload the list. Error code: ",
-    "by": "by"
+    "by": "by",
+    "skip": "Skip",
+    "increasedIQ": "I get it!",
+    "next": "Next"
   },
   "settingsMenu": {
     "asOff": "Off",

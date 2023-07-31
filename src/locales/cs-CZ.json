@@ -171,7 +171,10 @@
     "uploadFail": "Nepodařilo se nahrát seznam. Kód chyby: ",
     "updateFail": "Nepodařilo se aktualizovat seznam. Kód chyby: ",
     "removeFail": "Nepodařilo se smazat seznam. Kód chyby: ",
-    "by": "od"
+    "by": "od",
+    "skip": "Přeskočit",
+    "increasedIQ": "Chápu!",
+    "next": "Další"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

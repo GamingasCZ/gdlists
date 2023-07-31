@@ -8,9 +8,10 @@ import type {
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
+// import LevelCardPC from "./global/LevelCardPC.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted } from "vue";
+import { ref, onMounted, watch, onUnmounted, computed } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -20,6 +21,8 @@ import { useI18n } from "vue-i18n";
 import LikePopup from "./levelViewer/LikePopup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
+import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
+import { viewedPopups } from "@/siteSettings";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -157,6 +160,7 @@ const tryJumping = (ind: number, forceJump = false) => {
 const windowHeight = ref(window.innerHeight)
 const cardGuessing = ref(-1)
 const guesses = ref<number[]>([])
+const guessHelpOpened = ref(localStorage && !viewedPopups.diffGuesserHelp)
 const doNextGuess = (result: number) => {
   cardGuessing.value += 1
   guesses.value.push(result)
@@ -250,6 +254,8 @@ const listActions = (action: string) => {
   <!-- Mobile options popup -->
   <MobileExtras v-if="mobileExtrasOpen" @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
 
+  <DiffGuesserHelpDialog v-if="guessHelpOpened" @close-popup="guessHelpOpened = false"/>
+
   <section class="mt-12 text-white">
     <header>
       <div class=""></div>
@@ -298,7 +304,7 @@ const listActions = (action: string) => {
       />
 
       <!-- Guessing bottom padding -->
-      <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != LEVEL_COUNT"></div>
+      <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>
 
       <GuessingFinished
         v-if="LIST_DATA?.id != undefined && cardGuessing == LEVEL_COUNT"
