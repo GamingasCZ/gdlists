@@ -175,7 +175,8 @@
     "by": "od",
     "skip": "Přeskočit",
     "increasedIQ": "Chápu!",
-    "next": "Další"
+    "next": "Další",
+    "close": "Zavřít"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -234,5 +235,10 @@
     "usedPackages": "Použité balíčky",
     "license": "Licence"
   },
-  "levelViewer": {}
+  "levelViewer": {},
+  "list": {
+    "uploadFinished": "Seznam byl {0}!",
+    "updated": "aktualizován",
+    "uploaded": "nahrán"
+  }
 }

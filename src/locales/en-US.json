@@ -202,7 +202,8 @@
     "by": "by",
     "skip": "Skip",
     "increasedIQ": "I get it!",
-    "next": "Next"
+    "next": "Next",
+    "close": "Close"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -233,5 +234,10 @@
     "translucentHelp": "When turned on, level cards will be translucent in the list. \nTranslucent cards work best with some sort of list background.",
     "usedPackages": "Used packages",
     "usingTheEditor": "Level Searching"
+  },
+  "list": {
+    "uploadFinished": "List {0}!",
+    "updated": "updated",
+    "uploaded": "uploaded"
   }
 }

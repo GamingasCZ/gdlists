@@ -39,20 +39,20 @@ const doShare = (ind: number) => window.open(links[ind], '_blank')
             <div class="absolute left-0 -top-24 w-full h-24 bg-gradient-to-t to-transparent from-lof-300"></div>
             <img class="absolute left-0 -top-44 z-10 w-96 cursor-default pointer-events-none ship" src="@/images/uploading.webp" alt="" :id="!closing ? 'float' : ''" :class="{'-translate-y-full' : closing}">
 
-            <h1 class="mt-32 mb-5 text-3xl font-extrabold text-center">Seznam byl {{ isUpdating ? 'aktualizován' : 'nahrán' }}!</h1>
+            <h1 class="mt-32 mb-5 text-3xl font-extrabold text-center">{{ $t('list.uploadFinished', [isUpdating ? $t('list.updated') : $t('list.uploaded')]) }}</h1>
 
-            <label>Sdílet</label>
+            <label>{{ $t('other.share') }}</label>
             <input type="text" class="p-1 text-lg bg-black bg-opacity-40 rounded-md outline-none" readonly @mouseover="$event.target?.select()" :value="sharelink">
             <div class="grid grid-cols-3 gap-1 mt-1">
-                <button v-if="!copied" @click="copyLink()" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/link.svg" alt="" class="inline mr-2 w-4">Odkaz</button>
+                <button v-if="!copied" @click="copyLink()" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/link.svg" alt="" class="inline mr-2 w-4">{{ $t('other.link') }}</button>
                 <button v-else class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/copy.svg" alt="" class="inline mr-2 w-4 animate-ping"></button>
                 <button @click="doShare(0)" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/twitterIcon.svg" alt="" class="inline mr-2 w-4">Twitter</button>
                 <button @click="doShare(1)" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/redditIcon.svg" alt="" class="inline mr-2 w-4">Reddit</button>
             </div>
 
             <div class="grid grid-cols-2 gap-2 mt-10">
-                <button @click="emit('doEdit')" class="p-1 px-2 text-lg text-left text-white rounded-md border-4 border-black border-opacity-40 border-solid button"><img src="@/images/edit.svg" class="inline mr-2 w-6" alt="">Upravit</button>
-                <button @click="closePopup()" class="p-2 text-lg text-left text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/close.svg" class="inline mr-2 w-6" alt="">Zavřít</button>
+                <button @click="emit('doEdit')" class="p-1 px-2 text-lg text-left text-white rounded-md border-4 border-black border-opacity-40 border-solid button"><img src="@/images/edit.svg" class="inline mr-2 w-6" alt="">{{ $t('level.edit') }}</button>
+                <button @click="closePopup()" class="p-2 text-lg text-left text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/close.svg" class="inline mr-2 w-6" alt="">{{ $t('other.close') }}</button>
             </div>
         </section>
     </dialog>
