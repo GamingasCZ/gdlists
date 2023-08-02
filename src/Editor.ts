@@ -8,6 +8,10 @@ import router from "./router";
 export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
 
+// For demon faces
+export const diffScaleOffsets = [1.085, 1.11, 1.15, 1.2, 1.25]
+export const diffTranslateOffsets = [0,0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
+
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
   pageBGcolor: [140, 0.37, 5],
@@ -110,6 +114,21 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
 };
+
+export const prettyDate = (datePassed: number) => {
+  if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
+  else if (datePassed <= 60) return i18n.global.t('date.secs', datePassed)
+  else if (Math.floor(datePassed/60) == 1) return i18n.global.t('date.mins', Math.floor(datePassed/60))
+  else if (Math.floor(datePassed/60) <= 60) return i18n.global.t('date.mins', Math.floor(datePassed/60))
+  else if (Math.floor(datePassed/3600) == 1) return i18n.global.t('date.hours', Math.floor(datePassed/3600))
+  else if (Math.floor(datePassed/3600) <= 24) return i18n.global.t('date.hours', Math.floor(datePassed/3600))
+  else if (Math.floor(datePassed/86400) == 1) return i18n.global.t('date.days', Math.floor(datePassed/86400))
+  else if (Math.floor(datePassed/86400) <= 7) return i18n.global.t('date.days', Math.floor(datePassed/86400))
+  else if (Math.floor(datePassed/604800) == 1) return i18n.global.t('date.weeks', Math.floor(datePassed/604800))
+  else if (Math.floor(datePassed/604800) <= 4) return i18n.global.t('date.weeks', Math.floor(datePassed/604800))
+  else if (Math.floor(datePassed/2419200) <= 4) return i18n.global.t('date.months', Math.floor(datePassed/2419200))
+  else return i18n.global.t('date.months', Math.floor(datePassed/2419200))
+}
 
 export function resetList() {
   if (router.currentRoute.value.name == "editor") router.push({path: "/editor", force: true})

@@ -237,6 +237,7 @@ function uploadList() {
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()
+      sessionStorage.setItem("uploadFinished", "1")
       router.replace(`/${res.data[0]}`)
     }
     else {
@@ -271,6 +272,7 @@ function updateList() {
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()
+      sessionStorage.setItem("uploadFinished", "2")
       router.replace(`/${res.data[0]}`)
     }
     else {

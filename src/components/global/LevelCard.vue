@@ -4,7 +4,7 @@ import chroma, { type Color } from "chroma-js";
 import { onMounted, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
-import { fixHEX } from "@/Editor";
+import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
 
 const props = defineProps<{
@@ -91,14 +91,57 @@ async function getDifficulty() {
 }
 getDifficulty()
 
+const guessResult = ref([-1,-1])
+const guessGradient = ref("")
+const guessOpacity = ref(0.5)
+function nextGuess(results: number) {
+  switch (results) {
+    case 0: guessResult.value = [0,0]; break;
+    case 1: guessResult.value = [1,1]; break;
+    case 2: guessResult.value = [1,0]; break;
+    case 3: guessResult.value = [0,1]; break;
+  }
+  let colDiff = guessResult.value[0] ? "#78d51c" : "#b92020"
+  let colRate = guessResult.value[1] ? "#78d51c" : "#b92020"
+  guessGradient.value = `linear-gradient(10deg, ${colDiff}, ${colRate})`
+  let repeats = 5
+  let flash = setInterval(() => {
+    guessOpacity.value = guessOpacity.value == 0.5 ? 0.8 : 0.5
+    if (repeats == 0) {
+      clearInterval(flash)
+      guessOpacity.value = 0
+      setTimeout(() => {
+        guessResult.value = [-1,-1]
+      }, 100);
+    }
+    repeats -= 1
+  }, 150)
+  emit('nextGuess', results)
+}
+
 </script>
 
 <template>
-  <section
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F]"
+  <section v-if="guessResult"
+    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F] overflow-clip"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
+    :id="guessResult[0] != -1 ? 'levelCard' : ''"
   >
+
+    <Transition name="fade">
+      <div v-if="guessResult[0] > -1" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[min(30vw,60rem)] justify-center items-center -z-10 opacity-40 mix-blend-luminosity">
+        <div v-show="diffGuessArray[1]" class="w-28">
+          <img v-if="guessResult[0] == 0" src="@/images/error.webp" class="w-28" alt="">
+          <img v-else src="@/images/check.webp" class="w-28" alt="">
+        </div>
+        <div v-show="diffGuessArray[2]" class="w-28">
+          <img v-if="guessResult[1] == 0" src="@/images/error.webp" class="w-28" alt="">
+          <img v-else src="@/images/check.webp" class="w-28" alt="">
+        </div>
+      </div>
+    </Transition>
+
     <!-- ID copy popup -->
     <Transition name="fade">
       <article v-if="copyingID" class="absolute top-1/2 left-1/2 z-10 px-4 py-2 w-max text-2xl text-center bg-black bg-opacity-80 rounded-lg -translate-x-1/2 -translate-y-1/2">
@@ -117,28 +160,36 @@ getDifficulty()
             v-if="difficulty && !guessingNow"
             :class="{ '!mx-2': difficulty[1] > 0 }"
           >
+
+            <!-- Difficulty face -->
             <img
               class="relative z-10 w-10"
               :src="difficultyFace"
-              :class="{ 'scale-[1.3]': difficulty[0] > 5 }"
-              alt=""
+              :class="{'translate-y-0.5': difficulty[1] == 3}"
+              :style="{scale: diffScaleOffsets[difficulty[0]-6], translate: diffTranslateOffsets[difficulty[0]-6]}"
+              alt=""  
             />
+
+
+            <!-- Featured glow -->
             <img
               v-if="difficulty[1] == 2"
-              class="absolute top-0 z-0 w-full scale-[1.4]"
+              class="absolute top-1/2 -translate-y-1/2  z-0 w-full scale-[1.4]"
               :class="{
-                '!-top-0.5 !scale-[1.7]': difficulty[0] > 5,
-                '!-top-0.5 !scale-[1.48]': difficulty[0] == 10,
               }"
               :src="difficultyGlow"
               alt=""
             />
+
+            <!-- Epic rate -->
             <img
               v-else-if="difficulty[1] == 3"
               class="absolute -top-1 -z-10 w-full scale-[1.6]"
               :src="difficultyGlow"
               alt=""
             />
+
+            <!-- Star rate -->
             <img
               v-else-if="difficulty[1] == 1"
               class="absolute -right-0 -bottom-0 z-20 w-4 scale-150"
@@ -197,6 +248,25 @@ getDifficulty()
       <Tag v-for="tag in tags" :tag="tag" />
     </section>
 
-    <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="emit('nextGuess', $event)" />
+    <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
   </section>
 </template>
+
+<style scoped>
+
+#levelCard::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  overflow: hidden;
+  mix-blend-mode: plus-lighter;
+  background: v-bind(guessGradient);
+  transition: opacity 150ms ease;
+  opacity: v-bind(guessOpacity);
+}
+
+</style>

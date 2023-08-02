@@ -80,10 +80,11 @@
     "maxLevels": "You cannot add more levels!",
     "collabTools": "Collab Tools",
     "collabToolsSoon": "Collab tools will be added back soon!",
-    "diffGuessSoon": "Difficulty guessing will be added back soon!",
     "listBGhelp": "# Settings\n*Coverage - Changes the height of the background.\n*Alignment - If the screen's aspect ratio is narrower than the background, the background will be aligned.\n*Gradient - If a gradient with the list color should be placed over the background.\nThere's a green box in the image preview that you can drag and select the part of the background you want to show.\n\nList backgrounds work best with translucent cards!",
     "levelSearchHelp": "# Searching by ID\n*The search icon next to the level ID will fetch level info of a level with the given ID\n# Searching by name/creator\nThe search icon between the level name and level author will fetch\n*The most liked level with the **given name**\n*The most recent level from the **given author**\n*If both fields are fille in, **the level from the given author**",
-    "collabText": "{0} + {1} more"
+    "collabText": "{0} + {1} more",
+    "videoSearch": "Video search",
+    "diffGuessHelp": "If Difficulty Guessing is turned on, the list will gradually unlock as you guess difficulties, ratings, or both.\n*In the List Browser, these lists have question marks in the background.\n*If coming from Saved Levels, guessing will not be triggered.\n*You can use the arrow keys to play."
   },
   "homepage": {
     "clear": "Clear",

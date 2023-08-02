@@ -146,3 +146,13 @@ export interface LevelSearchResponse {
 export interface viewedPopups {
   diffGuesserHelp?: boolean
 }
+
+export interface ytSearchDetails {
+  success: boolean;
+  videoCount: number;
+  titles: string[];
+  creators: string[];
+  thumbnails: string[];
+  links: string[];
+  publishTime: string[];
+}

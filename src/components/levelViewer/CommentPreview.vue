@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { prettyDate } from '@/Editor'
 import chroma from 'chroma-js'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -49,18 +50,7 @@ const time = ref<string>("")
 const datePassed = Math.floor(Date.now()/1000 - parseInt(props.timestamp))
 const dateString = ref<string>(`${new Date(parseInt(props.timestamp)*1000).toLocaleDateString()} ${new Date(parseInt(props.timestamp)*1000).toLocaleTimeString()}`)
 
-if (datePassed < 5) time.value = useI18n().t('date.fewSecsAgo')
-else if (datePassed <= 60) time.value = useI18n().t('date.secs', datePassed)
-else if (Math.floor(datePassed/60) == 1) time.value = useI18n().t('date.mins', Math.floor(datePassed/60))
-else if (Math.floor(datePassed/60) <= 60) time.value = useI18n().t('date.mins', Math.floor(datePassed/60))
-else if (Math.floor(datePassed/3600) == 1) time.value = useI18n().t('date.hours', Math.floor(datePassed/3600))
-else if (Math.floor(datePassed/3600) <= 24) time.value = useI18n().t('date.hours', Math.floor(datePassed/3600))
-else if (Math.floor(datePassed/86400) == 1) time.value = useI18n().t('date.days', Math.floor(datePassed/86400))
-else if (Math.floor(datePassed/86400) <= 7) time.value = useI18n().t('date.days', Math.floor(datePassed/86400))
-else if (Math.floor(datePassed/604800) == 1) time.value = useI18n().t('date.weeks', Math.floor(datePassed/604800))
-else if (Math.floor(datePassed/604800) <= 4) time.value = useI18n().t('date.weeks', Math.floor(datePassed/604800))
-else if (Math.floor(datePassed/2419200) <= 4) time.value = useI18n().t('date.months', Math.floor(datePassed/2419200))
-else time.value = useI18n().t('date.months', Math.floor(datePassed/2419200))
+time.value = prettyDate(datePassed)
 
 const parsedComment = ref<string>("")
 let emojis = props.comment.match(/&(\d{2})/g)

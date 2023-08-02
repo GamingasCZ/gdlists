@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue';
+import { diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 
 const props = defineProps<{
     difficulty: [number, number];
@@ -57,10 +58,15 @@ function selectFace(selection: number) {
 
 function checkResult() {
     let result: number
+    let bothEnabled = props.diffGuessArray[1] && props.diffGuessArray[2]
+
+    if (!props.diffGuessArray[1]) { // Difficulty guessing not enabled
+        selectedFace.value = props.difficulty[0]
+    }
 
     if (props.difficulty[0] == selectedFace.value && props.difficulty[1] == selectedRate.value) result = 1 // Both correct
-    else if (props.difficulty[0] == selectedFace.value) result = 2 // Only difficulty correct
-    else if (props.difficulty[1] == selectedRate.value) result = 3 // Only rating correct
+    else if (props.difficulty[0] == selectedFace.value && bothEnabled) result = 2 // Only difficulty correct
+    else if (props.difficulty[1] == selectedRate.value && bothEnabled) result = 3 // Only rating correct
     else result = 0 // dumbass
 
     emit('guessed', result)
@@ -103,8 +109,7 @@ function rateBack() {
             <button @click="selectedRate = index; checkResult()" @keydown.down="selectedRate = index; checkResult()" @keydown.right="moveFocus(1)" @keyup.up="rateBack()" @keydown.left="moveFocus(-1)"
                 class="relative button focus-visible:drop-shadow-lg shadow-black focus-visible:scale-125 guessFace"
                 v-for="(face, index) in ratings">
-
-                <img :src="difficultyFaces[selectedFace]" alt="" class="top-1/2 left-1/2 w-10" >
+                <img :src="difficultyFaces[selectedFace]" alt="" class="top-1/2 left-1/2 w-10" :style="{scale: diffScaleOffsets[selectedFace-6], translate: diffTranslateOffsets[selectedFace-6]}">
                 <img :src="face" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2" :class="ratingClasses[index]">
             </button>
         </section>

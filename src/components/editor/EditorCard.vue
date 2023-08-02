@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { levelList, moveLevel, deleteLevel } from "@/Editor";
+import { levelList, deleteLevel, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { ref, onUnmounted } from "vue";
-import type { Level, LevelSearchResponse } from "../../interfaces";
+import { onMounted, ref } from "vue";
+import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
+import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 
 const props = defineProps<{
   index?: number;
@@ -38,10 +39,17 @@ const changeCardColors = (newColors: [number, number, number]) =>
 
 // Difficulty Picker
 const changeRate = async (newRating: number) => {
-  levelList.value.levels[props.index!].difficulty[1] = newRating;
+  if (levelList.value.levels[props.index!].difficulty[0] != 0) { // N/A cannot be rated
+    levelList.value.levels[props.index!].difficulty[1] = newRating;
+  }
   rateImagePath.value = await getRateImage()
 }
 const changeFace = async (newFace: number) => {
+  if (newFace == 0) {
+    levelList.value.levels[props.index!].difficulty[1] = 0 // Unrate N/A levels
+    rateImagePath.value = await getRateImage()
+  }
+
   levelList.value.levels[props.index!].difficulty[0] = newFace;
   diffFacePath.value = await getDiffFace()
 }
@@ -77,6 +85,62 @@ const modifyCreator = (e: Event) => {
   else
     levelList.value.levels[props.index!].creator[0][0] = newCreator
   levelCreator.value = newCreator
+}
+
+const modifyVideo = (e: Event) => {
+  let videoInput = (e.target as HTMLInputElement)
+  let linkMatch: string;
+  // Link is a regular YT link
+  if (videoInput.value.match(/(watch\?v=)/g)) {
+      linkMatch = <any>videoInput.value.match(/(?<=\?v=).+/g);
+  }
+  // Link is most likely a shortened YT link
+  else {
+      linkMatch = <any>videoInput.value.match(/(?<=youtu.be\/).+/g);
+  }
+
+
+  videoInput.value = linkMatch
+  levelList.value.levels[props.index!].video = linkMatch
+}
+
+const ytPanelOpen = ref(false)
+const ytVideoData = ref<ytSearchDetails>({videoCount: 0})
+async function videoSearch() {
+  let data: ytSearchDetails = {
+    success: false,
+    videoCount: 0,
+    titles: [],
+    creators: [],
+    thumbnails: [],
+    links: [],
+    publishTime: []
+  }
+
+  await axios.get(`https://youtube.googleapis.com/youtube/v3/search`, {
+    params: {part: "snippet", "maxResults": 10, q: `Geometry Dash ${levelList.value.levels[props.index!].levelName}`, key: import.meta.env.VITE_YTAPIKEY}
+  }).then(res => {
+    data.success = true
+    data.videoCount = res.data.pageInfo.resultsPerPage
+    res.data.items.forEach(video => {
+      data.titles.push(video.snippet.title)
+      data.creators.push(video.snippet.channelTitle)
+      data.links.push(video.id.videoId)
+      data.thumbnails.push(video.snippet.thumbnails.default.url)
+      data.publishTime.push(video.snippet.publishTime)
+    })
+    ytPanelOpen.value = true
+  })
+
+  return data
+}
+
+const vidScrollBox = ref(0)
+const scroll = (by: number) => {
+  let ele = document.querySelector("#youtubeScroll") as HTMLDivElement
+  vidScrollBox.value = ele.scrollLeft + by
+  ele.scrollLeft += by
+  vidScrollBox.value = vidScrollBox.value >= (ele.scrollWidth-by) ? -1 : vidScrollBox.value
 }
 
 const openedPanel = ref<number>(0);
@@ -120,6 +184,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       ];
       diffFacePath.value = await getDiffFace()
       rateImagePath.value = await getRateImage()
+
+      ytVideoData.value = await videoSearch()
     });
 }
 </script>
@@ -133,7 +199,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
     <div class="flex justify-between p-2 pr-1 bg-black bg-opacity-20">
       <div class="box-border inline-flex gap-2">
         <!-- Level ID input -->
-        <img class="w-10 aspect-square" src="../../images/star.webp" alt="" />
+        <img class="w-10 aspect-square" src="../../images/levelID.svg" alt="" />
         <input
           autocomplete="off"
           class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
@@ -174,7 +240,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       </div>
 
       <!-- Mobile move button -->
-      <button type="button" @click="mobileMoveLevel()" class="sm:hidden" v-if="levelList.levels.length > 1">
+      <button type="button" @click="mobileMoveLevel()" class="mr-1 sm:hidden" v-if="levelList.levels.length > 1">
         <img
           class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button"
           src="../../images/move.svg"
@@ -184,10 +250,10 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
     </div>
     <div class="flex gap-2 items-center px-2 max-sm:flex-col">
       <!-- Level name input -->
-      <div class="flex gap-2">
+      <div class="flex gap-2 max-sm:w-full">
         <img
           class="w-10 aspect-square max-sm:hidden"
-          src="../../images/island.webp"
+          src="../../images/level.svg"
           alt=""
         />
         <button
@@ -197,7 +263,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           class="sm:hidden"
         >
           <img
-            class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            class="p-1 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
@@ -205,7 +271,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         </button>
         <input
           autocomplete="off"
-          class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
+          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
           type="text"
           name="levelName"
           maxlength="20"
@@ -239,10 +305,10 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       </div>
 
       <!-- Creator input -->
-      <div class="flex gap-2 max-sm:flex-row-reverse">
+      <div class="flex gap-2 max-sm:flex-row-reverse max-sm:w-full">
         <input
           autocomplete="off"
-          class="h-10 max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
+          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
           type="text"
           name="creator"
           maxlength="15"
@@ -251,7 +317,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           :placeholder="$t('level.creator')"
         />
         <img
-          class="p-1 w-10 bg-black bg-opacity-30 rounded-md button aspect-square"
+          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/collabMen.svg"
           alt=""
           :class="{'animate-[shake_0.2s_infinite]': collabShaking, 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
@@ -261,19 +327,20 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
     </div>
     <div class="flex justify-between items-center px-2 pb-2 max-sm:flex-col">
       <!-- Video input -->
-      <div class="flex gap-2">
+      <div class="flex gap-2 max-sm:w-full">
         <img
-          class="w-10 aspect-square"
-          src="../../images/modYT.svg"
+          class="min-w-[2.5rem] aspect-square"
+          src="../../images/video.svg"
           alt=""
         />
         <input
           autocomplete="off"
-          class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-full"
+          class="sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
           type="text"
           name="video"
           maxlength="50"
-          v-model="levelList.levels[index!].video"
+          @change="modifyVideo"
+          :value="levelList.levels[index!].video"
           :placeholder="$t('level.video')"
         />
       </div>
@@ -296,6 +363,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           <img
             :src="diffFacePath"
             alt=""
+            :class="{'translate-y-0.5': levelList.levels[index!].difficulty?.[1] == 3}"
+            :style="{scale: diffScaleOffsets[levelList.levels[index!].difficulty?.[0]-6], translate: diffTranslateOffsets[levelList.levels[index!].difficulty?.[0]-6]}"
             class="absolute z-20 w-7 pointer-events-none"
           />
           <img
@@ -321,8 +390,23 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       </div>
     </div>
 
+    <section class="relative bg-black bg-opacity-20" v-if="ytPanelOpen">
+      <header class="flex justify-between items-center px-3 py-2 bg-black bg-opacity-20">
+        <h3>{{ $t('editor.videoSearch') }}</h3>
+        <button class="button" @click="ytPanelOpen = false"><img src="@/images/close.svg" class="w-4" alt=""></button>
+      </header>
+
+      <button v-show="vidScrollBox > 5 || vidScrollBox == -1" @click="scroll(-600)" class="absolute left-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&lt;</button>
+      <main class="flex overflow-x-hidden relative gap-2 p-2 max-sm:flex-col scroll-smooth" id="youtubeScroll">
+        <YoutubeVideoPreview v-for="vid in ytVideoData?.videoCount" :index="vid" :video-data="ytVideoData" @pick-video="levelList.levels[index!].video = $event"/>
+      </main>
+      <button v-show="vidScrollBox != -1" @click="scroll(600)" class="absolute right-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&gt;</button>
+    
+    </section>
     <!-- Extras panel -->
     <div class="p-2 bg-black bg-opacity-20" v-show="openedPanel">
+      <!-- Youtube panel -->
+
       <ColorPicker
         v-if="openedPanel == 1"
         @colors-modified="changeCardColors"

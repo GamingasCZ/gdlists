@@ -15,7 +15,7 @@ defineProps({
         >{{ $t('editor.clickAdd3') }}
         <img
           src="@/images/plus.svg"
-          class="inline p-1 mx-2 w-10 bg-black bg-opacity-40 rounded-md"
+          class="box-border inline p-2 mx-2 w-10 bg-black bg-opacity-40 rounded-md"
         />
         {{ $t('editor.clickAddTags') }}</span
       >
@@ -32,7 +32,7 @@ defineProps({
       src="@/images/plus.svg"
       alt=""
       @click="emit('openPopup')"
-      class="p-1 w-10 bg-black bg-opacity-40 rounded-md button aspect-square"
+      class="box-border p-2 w-10 bg-black bg-opacity-40 rounded-md button aspect-square"
     />
   </section>
 </template>

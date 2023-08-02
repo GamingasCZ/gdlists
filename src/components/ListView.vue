@@ -23,6 +23,7 @@ import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
 import { viewedPopups } from "@/siteSettings";
+import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -205,6 +206,14 @@ const jumpToPopupOpen = ref(false);
 const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
 const likeNotLoggedInOpen = ref(false)
+const uploadedDialogShown = ref(0)
+if (sessionStorage) {
+  let uploadKey = sessionStorage.getItem("uploadFinished")
+  if (uploadKey != null) {
+    uploadedDialogShown.value = parseInt(uploadKey) // 1 - upload, 2 - update
+    sessionStorage.removeItem("uploadFinished")
+  }
+}
 
 const listActions = (action: string) => {
   switch (action) {
@@ -255,6 +264,15 @@ const listActions = (action: string) => {
   <MobileExtras v-if="mobileExtrasOpen" @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
 
   <DiffGuesserHelpDialog v-if="guessHelpOpened" @close-popup="guessHelpOpened = false"/>
+  <Transition name="fade">
+    <ListUploadedDialog
+      v-if="LIST_DATA.name != undefined && uploadedDialogShown"
+      :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+      :is-updating="uploadedDialogShown == 2"
+      @do-edit="listActions('editList')"
+      @close-popup="uploadedDialogShown = 0"
+    />
+  </Transition>
 
   <section class="mt-12 text-white">
     <header>

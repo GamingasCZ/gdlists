@@ -1,5 +1,17 @@
 <script setup lang="ts">
 import { levelList } from "../../Editor";
+
+const modifyDiffGuesser = (ind: number) => {
+  levelList.value.diffGuesser[ind] = !levelList.value.diffGuesser[ind]
+  levelList.value.diffGuesser[0] = levelList.value.diffGuesser[1] || levelList.value.diffGuesser[2] // Hide dropdown when both disabled
+  if (!levelList.value.diffGuesser[0]) {
+    setTimeout(() => {
+      levelList.value.diffGuesser[1] = true
+      levelList.value.diffGuesser[2] = true
+    }, 50)
+  }
+}
+
 </script>
 
 <template>
@@ -24,7 +36,7 @@ import { levelList } from "../../Editor";
           class="box-border flex gap-2 items-center px-3 py-2 ml-8 w-max bg-black bg-opacity-25 rounded-md"
         >
           <span>{{ $t('editor.guess') }}: </span>
-          <button @click="levelList.diffGuesser[1] = !levelList.diffGuesser[1]">
+          <button @click="modifyDiffGuesser(1)">
             <img
               src="@/images/faces/4.webp"
               alt=""
@@ -32,7 +44,7 @@ import { levelList } from "../../Editor";
               :class="{ disabled: !levelList.diffGuesser[1] }"
             />
           </button>
-          <button @click="levelList.diffGuesser[2] = !levelList.diffGuesser[2]">
+          <button @click="modifyDiffGuesser(2)">
             <img
               src="@/images/faces/epic.webp"
               alt=""

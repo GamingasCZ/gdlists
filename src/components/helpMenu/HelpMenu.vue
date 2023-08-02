@@ -42,7 +42,7 @@ const qa: question[] = [
   {
     question: useI18n().t('help.listGuessing'),
     answer:
-      useI18n().t('editor.diffGuessSoon'),
+      useI18n().t('editor.diffGuessHelp'),
   },
   {
     question: useI18n().t('editor.translucentCards'),
