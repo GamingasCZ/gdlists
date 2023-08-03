@@ -146,7 +146,7 @@ const formShaking = ref(false)
 const notifStamp = ref(Math.random())
 
 const loadBackup = () => {
-  loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, backupData.value.choseHidden)
+  loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, <any>backupData.value.choseHidden)
   removeBackup()
   saveBackup(listName.value, !!listHiddenSelected())
 }
@@ -378,7 +378,7 @@ function removeList() {
 
   <!-- List Preview -->
   <section v-if="previewingList" class="mt-4">
-    <ListBackground :image-data="levelList.titleImg" :list-color="levelList.pageBGcolor" />
+    <ListBackground :image-data="levelList.titleImg" :list-color="<any>levelList.pageBGcolor" />
     <div :class="{'!mt-16': !isOnline}" class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
       <h1 class="text-3xl text-center text-white">{{ $t('editor.preview') }}</h1>
       <button @click="previewingList = false" class="box-border absolute left-1 top-1/2 p-1 w-10 -translate-y-1/2 button">

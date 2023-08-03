@@ -140,7 +140,18 @@
     "whatDiff": "What's the level's difficulty?",
     "whatRate": "What's the level's rating?",
     "scoreBetter": "Can you score better?",
-    "noGuessJumping": "You cannot jump on a guessing list!"
+    "noGuessJumping": "You cannot jump on a guessing list!",
+    "diffGHelp1": "Welcome to list guessing!",
+    "diffGHelp2": "How was it...",
+    "diffGHelp3": "Use the keyboard to play!",
+    "diffGHelp4": "These are special lists where you guess <strong>level difficulties and ratings</strong>.",
+    "diffGHelp5": "List makers can <strong>turn off</strong> one of the guessing options.",
+    "diffGHelp7": "After you finish the list, you can view and share your score.",
+    "diffGHelp9": "Use the <strong>Left and Right</strong> keys to select difficulties or ratings.",
+    "diffGHelp10": "Use the <strong>Down</strong> key to confirm your choice.",
+    "diffGHelp11": "Use the <strong>Up</strong> key to go back.",
+    "diffGHelp6": "You can get up to <strong>two points</strong> for every guessed difficulty/rating.",
+    "diffGHelp8": "If you're unsure, you can skip guessing."
   },
   "navbar": {
     "editor": "Editor",

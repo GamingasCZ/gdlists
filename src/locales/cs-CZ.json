@@ -196,7 +196,18 @@
     "playAgain": "Hrát znova",
     "listFinished": "Dokončil jsi seznam!",
     "scoreBetter": "Dokážeš to líp?",
-    "noGuessJumping": "Nemůžeš skákat na hádacím seznamu!"
+    "noGuessJumping": "Nemůžeš skákat na hádacím seznamu!",
+    "diffGHelp1": "Vítej v hádacím seznamu!",
+    "diffGHelp2": "Jakpak jen to je...",
+    "diffGHelp3": "Můžeš hrát i klávesnicí!",
+    "diffGHelp4": "Toto jsou speciální seznamy, ve kterých hádáš <strong>obtížnosti a rating levelu</strong>.",
+    "diffGHelp5": "Tvůrci seznamů mohou <strong>vypnout</strong> jednu z možností hádání.",
+    "diffGHelp6": "Za každý správně uhodnutý level můžeš získat až <strong>dva body</strong>.",
+    "diffGHelp7": "Na konci se ti zobrazí tvé skóre a můžeš jej sdílet.",
+    "diffGHelp8": "Nevíš-li, můžeš přeskočit hádání.",
+    "diffGHelp9": "Šipkami <strong>doleva a doprava</strong> vybíráš obtížnosti nebo ratingy.",
+    "diffGHelp10": "Šipkou <strong>dolů</strong> potvrdíš svou volbu.",
+    "diffGHelp11": "Šipkou <strong>nahoru</strong> se vrátíš zpět."
   },
   "level": {
     "levelID": "ID levelu",

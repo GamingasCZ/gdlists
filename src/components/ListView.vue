@@ -129,6 +129,7 @@ function main() {
       }
 
       // Set difficulty guessing
+      guessHelpOpened.value = localStorage && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
       LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
       if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
     });
@@ -142,9 +143,11 @@ const tryJumping = (ind: number, forceJump = false) => {
   if (forceJump) {
     isJumpingFromFaves = ind.toString();
     jumpToPopupOpen.value = false;
+    cardGuessing.value = -1
   }
-
+  
   if (isJumpingFromFaves && parseInt(isJumpingFromFaves) == ind) {
+    cardGuessing.value = -1
     let jumpedToCard = document.querySelectorAll(".levelCard");
 
     if (parseInt(isJumpingFromFaves) > 1) {
@@ -161,7 +164,7 @@ const tryJumping = (ind: number, forceJump = false) => {
 const windowHeight = ref(window.innerHeight)
 const cardGuessing = ref(-1)
 const guesses = ref<number[]>([])
-const guessHelpOpened = ref(localStorage && !viewedPopups.diffGuesserHelp)
+const guessHelpOpened = ref(false)
 const doNextGuess = (result: number) => {
   cardGuessing.value += 1
   guesses.value.push(result)
@@ -244,12 +247,6 @@ const listActions = (action: string) => {
 </script>
 
 <template>
-  <!-- <div
-    :style="{
-      height: (LIST_DATA?.data?.titleImg?.[2] ?? 0) + '%',
-      backgroundPositionY: (LIST_DATA?.data?.titleImg?.[1] ?? 0) + '%',
-    }"
-  > -->
   <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
     backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
@@ -322,7 +319,7 @@ const listActions = (action: string) => {
       />
 
       <!-- Guessing bottom padding -->
-      <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>
+      <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != -1 && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>
 
       <GuessingFinished
         v-if="LIST_DATA?.id != undefined && cardGuessing == LEVEL_COUNT"

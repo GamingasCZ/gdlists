@@ -1,10 +1,8 @@
 <svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
- <g stroke-linecap="round" stroke-linejoin="round">
-  <g fill="none" stroke="#fff" stroke-width="2">
-   <path d="m4.3536 12.057c-4.2219-4.1049-1.0095-9.5306-1.0095-9.5306s1.1771 4.0742 5.333 5.1851c0 0-2.3746 1.2137-4.3235 4.3455z" style="paint-order:stroke markers fill"/>
-   <path d="m27.932 12.057c4.2219-4.1049 1.0095-9.5306 1.0095-9.5306s-1.1771 4.0742-5.333 5.1851c0 0 2.3746 1.2137 4.3235 4.3455z" style="paint-order:stroke markers fill"/>
-   <ellipse cx="16" cy="19.781" rx="10.164" ry="10.161" style="paint-order:stroke markers fill"/>
-  </g>
-  <text transform="matrix(.93303 .35188 -.35438 .93813 0 0)" x="16.842436" y="20.379494" fill="#ffffff" font-family="Comfortaa" font-size="18.962px" stroke="#ffffff" stroke-width=".1" xml:space="preserve"><tspan x="16.842436" y="20.379494" font-family="Comfortaa" font-weight="bold" stroke-width=".1">?</tspan></text>
+ <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+  <path d="m4.3536 12.057c-4.2219-4.1049-1.0095-9.5306-1.0095-9.5306s1.1771 4.0742 5.333 5.1851c0 0-2.3746 1.2137-4.3235 4.3455z" style="paint-order:stroke markers fill"/>
+  <path d="m27.932 12.057c4.2219-4.1049 1.0095-9.5306 1.0095-9.5306s-1.1771 4.0742-5.333 5.1851c0 0 2.3746 1.2137 4.3235 4.3455z" style="paint-order:stroke markers fill"/>
+  <ellipse cx="16" cy="19.781" rx="10.164" ry="10.161" style="paint-order:stroke markers fill"/>
  </g>
+ <text transform="matrix(.99687 .0057349 -.0063034 1.0031 0 0)" x="11.585221" y="26.327162" fill="#ffffff" font-family="Comfortaa" font-size="16.812px" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width=".1" xml:space="preserve"><tspan x="11.585221" y="26.327162" font-family="Comfortaa" font-weight="bold" stroke-width=".1">?</tspan></text>
 </svg>
