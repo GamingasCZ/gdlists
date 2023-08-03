@@ -60,8 +60,8 @@ let percentage = ref(Math.ceil(points.value/maxPoints.value*100))
 const resultMessagePick = ref([0,0])
 if (percentage.value <= 25) resultMessagePick.value = [0, Math.floor(Math.random() * 3)]
 else if (percentage.value <= 50) resultMessagePick.value = [1, Math.floor(Math.random() * 3)]
-else if (percentage.value == 69) resultMessagePick.value = [2, 0]
-else if (percentage.value <= 75) resultMessagePick.value = [3, Math.floor(Math.random() * 3)]
+else if (percentage.value == 69) resultMessagePick.value = [3, 0]
+else if (percentage.value <= 75) resultMessagePick.value = [2, Math.floor(Math.random() * 3)]
 else if (percentage.value <= 99) resultMessagePick.value = [4, Math.floor(Math.random() * 3)]
 else resultMessagePick.value = [5, Math.floor(Math.random() * 3)]
 

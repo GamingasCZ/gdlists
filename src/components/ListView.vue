@@ -322,7 +322,7 @@ const listActions = (action: string) => {
       <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != -1 && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>
 
       <GuessingFinished
-        v-if="LIST_DATA?.id != undefined && cardGuessing == LEVEL_COUNT"
+        v-if="LIST_DATA?.id != undefined && cardGuessing == LEVEL_COUNT && !commentsShowing"
         :guesses="guesses"
         :list-creator="LIST_CREATOR"
         :list-name="LIST_DATA.name"
