@@ -74,7 +74,8 @@ function checkResult() {
 
 let focusedFace = 0
 function moveFocus(by: number) {
-    focusedFace = Math.min(Math.max(focusedFace + by, 0), document.querySelectorAll(".guessFace").length-1)
+    let idk = guessingDifficulty.value ? 1 : 0
+    focusedFace = Math.min(Math.max(focusedFace + by, 0), document.querySelectorAll(".guessFace").length-idk)
 
     let selectElement = document.querySelector(`.guessFace:nth-child(${focusedFace+1})`) as HTMLButtonElement
     selectElement.focus()

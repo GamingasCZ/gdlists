@@ -328,7 +328,7 @@ const listActions = (action: string) => {
         :list-name="LIST_DATA.name"
         :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden: LIST_DATA?.id.toString()"
         :both-modes-enabled="LIST_DATA.data.diffGuesser[1] && LIST_DATA.data.diffGuesser[2]"
-        @replay-list="cardGuessing = 0"
+        @replay-list="guesses = []; cardGuessing = 0"
       />
 
       <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :comm-amount="LIST_DATA.commAmount"

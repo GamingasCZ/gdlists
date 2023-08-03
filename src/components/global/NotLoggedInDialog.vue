@@ -6,8 +6,13 @@ defineProps({
   mess: String,
 });
 
-let faces = ref(["04", "05", "07", "08", "15", "12", "10"]);
-let pick = Math.floor(Math.random() * faces.value.length);
+let faces = ["04", "05", "07", "08", "15", "12", "10"];
+let pick = Math.floor(Math.random() * faces.length);
+
+const emojiPath = ref("")
+const getEmoji = async () => await import(`../../images/emoji/${faces[pick]}.webp`).then(res => emojiPath.value = res.default)
+getEmoji()
+
 </script>
 
 <template>
@@ -17,7 +22,7 @@ let pick = Math.floor(Math.random() * faces.value.length);
     <div
       class="flex gap-2 items-center px-3 py-2 bg-black bg-opacity-50 rounded-lg"
     >
-      <img :src="`/src/images/emoji/${faces[pick]}.webp`" alt="" class="w-14" />
+      <img :src="emojiPath" alt="" class="w-14" />
       <span class="italic font-black"
         >„{{ $t(`other.lockQuotes[${pick}]`) }}”</span
       >

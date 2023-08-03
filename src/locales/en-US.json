@@ -151,7 +151,23 @@
     "diffGHelp10": "Use the <strong>Down</strong> key to confirm your choice.",
     "diffGHelp11": "Use the <strong>Up</strong> key to go back.",
     "diffGHelp6": "You can get up to <strong>two points</strong> for every guessed difficulty/rating.",
-    "diffGHelp8": "If you're unsure, you can skip guessing."
+    "diffGHelp8": "If you're unsure, you can skip guessing.",
+    "diffResult8": "You can fluke it now that you know the answers!",
+    "diffResult7": "Beat all levels and this becomes much easier!",
+    "diffResult6": "Maybe you'd be a better osu player...",
+    "diffResult5": "How come you don't know the difficulties of millions of levels!",
+    "diffResult4": "No worries, you'll do better next time!",
+    "diffResult3": "yo, it's me robtop, you're banned from my game!",
+    "diffResult15": "You don't touch grass much, do you?",
+    "diffResult14": "You're a GD god! That's a compliment, btw!",
+    "diffResult13": "Epic W! Your score is very based!",
+    "diffResult12": "As a criminal, I'd love to steal some of your skill!",
+    "diffResult2": "On the bright side, you still have time to run!",
+    "diffResult11": "nice work, have banana!",
+    "diffResult10": "YOU CANNOT BE SERIOUS!",
+    "diffResult1": "a monkey would fair better than you!",
+    "diffResult9": "Imperfect, you'll be grinding map packs as punishment.",
+    "diffResult16": "The thousands of hours of dashing are finally paying off!"
   },
   "navbar": {
     "editor": "Editor",
@@ -214,7 +230,8 @@
     "skip": "Skip",
     "increasedIQ": "I get it!",
     "next": "Next",
-    "close": "Close"
+    "close": "Close",
+    "copied": "Copied!"
   },
   "settingsMenu": {
     "asOff": "Off",

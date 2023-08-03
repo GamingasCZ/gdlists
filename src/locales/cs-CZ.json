@@ -176,7 +176,8 @@
     "skip": "Přeskočit",
     "increasedIQ": "Chápu!",
     "next": "Další",
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "copied": "Zkopírováno!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -207,7 +208,23 @@
     "diffGHelp8": "Nevíš-li, můžeš přeskočit hádání.",
     "diffGHelp9": "Šipkami <strong>doleva a doprava</strong> vybíráš obtížnosti nebo ratingy.",
     "diffGHelp10": "Šipkou <strong>dolů</strong> potvrdíš svou volbu.",
-    "diffGHelp11": "Šipkou <strong>nahoru</strong> se vrátíš zpět."
+    "diffGHelp11": "Šipkou <strong>nahoru</strong> se vrátíš zpět.",
+    "diffResult1": "Aji opica by to naklikala líp než ty!",
+    "diffResult2": "Ber to z té lepší stránky, ještě máš šanci utéct!",
+    "diffResult3": "Su to já, RobTopák, ode dneška jsi zabanován!",
+    "diffResult4": "Nevadí, příště to dopadne líp!",
+    "diffResult5": "Jak je možné že neznáš obtížnosti milionů levelů?",
+    "diffResult6": "Třeba by z tebe byl lepší osu hráč...",
+    "diffResult7": "Beatni všechny levely a bude to jednodušší!",
+    "diffResult8": "Teď když znáš odpovědi, musíš to flukenout!",
+    "diffResult9": "Neperfektní, za trest budeš hrát map packy!",
+    "diffResult10": "TO NEMYSLÍŠ VÁŽNĚ!",
+    "diffResult11": "Moc pěkné skóre, dostaneš banán!",
+    "diffResult12": "Jako kriminálník ti mám chuť stealnout část skillu!",
+    "diffResult13": "Vskutku epické W! Tvé skóre je velice based!",
+    "diffResult14": "Jsi Geodeš bůh! To je mimochodem kompliment!",
+    "diffResult15": "Ty se asi moc nedotýkáš trávníku!",
+    "diffResult16": "Přeci jen se ty tisíce hodin dashování k něčemu byly!"
   },
   "level": {
     "levelID": "ID levelu",
