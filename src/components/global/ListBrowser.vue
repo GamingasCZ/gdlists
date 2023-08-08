@@ -441,7 +441,7 @@ window.addEventListener("scroll", infiniteScroll)
             class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             @click="refreshBrowser()"
           >
-            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" id="listRefreshButton" />{{ $t('other.reload') }}
+            <img src="@/images/replay.svg" class="box-border p-1 w-10 text-2xl" alt="" id="listRefreshButton" />{{ $t('other.reload') }}
           </button>
         </div>
 

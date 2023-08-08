@@ -14,8 +14,17 @@ watch(SETTINGS, () => {
   }
 }, {deep: true})
 
+export const hasLocalStorage = () => {
+  try {
+    return localStorage != null
+  }
+  catch (e) {
+    return false
+  }
+}
+
 export var viewedPopups: viewedPopups;
-if (localStorage) {
+if (hasLocalStorage()) {
   let popupsViewed: viewedPopups | null = JSON.parse(localStorage.getItem("popupsViewed")!)
   if (popupsViewed == null) {
     localStorage.setItem("popupsViewed", "{}")

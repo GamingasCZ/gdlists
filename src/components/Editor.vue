@@ -23,7 +23,7 @@ import cookier from "cookier"
 import router from "@/router";
 import { saveBackup, moveLevel } from "../Editor";
 import Notification from "./global/Notification.vue";
-import { SETTINGS } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
 
@@ -370,9 +370,13 @@ function removeList() {
     {{ editing ? $t('editor.editing') : $t('editor.editor') }}
   </h2>
   <NotLoggedIn
-    v-if="!isLoggedIn"
+    v-if="!isLoggedIn && hasLocalStorage()"
     :mess="$t('editor.loginToCreate')"
   />
+  <div v-else-if="!hasLocalStorage()" class="flex flex-col gap-4 justify-center items-center mx-auto mt-5">
+    <img src="../images/disCookies.svg" class="w-48 opacity-20" alt="">
+    <h1 class="max-w-sm text-2xl text-center text-white opacity-20">Nemáš povolené cookies, můžeš jen procházet seznamy!</h1>
+  </div>
 
   <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp" :previewing="previewingList"/>
 

@@ -22,7 +22,7 @@ import LikePopup from "./levelViewer/LikePopup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
-import { viewedPopups } from "@/siteSettings";
+import { hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 
 const props = defineProps({
@@ -86,7 +86,7 @@ function main() {
           });
       }
 
-      if (localStorage != undefined) {
+      if (hasLocalStorage()) {
         favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
         recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
 
@@ -122,14 +122,14 @@ function main() {
         modifyListBG(LIST_COL.value);
 
       // Check pinned status
-      if (localStorage) {
+      if (hasLocalStorage()) {
         JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
           if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
         });
       }
 
       // Set difficulty guessing
-      guessHelpOpened.value = localStorage && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
+      guessHelpOpened.value = hasLocalStorage() && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
       LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
       if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
     });
@@ -210,7 +210,7 @@ const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
 const likeNotLoggedInOpen = ref(false)
 const uploadedDialogShown = ref(0)
-if (sessionStorage) {
+if (hasLocalStorage()) {
   let uploadKey = sessionStorage.getItem("uploadFinished")
   if (uploadKey != null) {
     uploadedDialogShown.value = parseInt(uploadKey) // 1 - upload, 2 - update

@@ -12,7 +12,7 @@ const emit = defineEmits(["closePopup"])
             <p class="text-lg text-center">{{ $t('listViewer.likeNotLoggedIn') }}</p>
             <section class="grid grid-cols-2 gap-3 mt-4">
                 <LoginButton />
-                <button @click="emit('closePopup')" class="px-2 py-1 text-sm leading-none text-left align-middle rounded-full border-4 border-black border-opacity-40 button">
+                <button @click="emit('closePopup')" class="px-2 py-1 text-sm leading-none text-left align-middle rounded-md border-4 border-black border-opacity-40 button">
                     <img src="@/images/close.svg" class="inline mr-2 w-5" alt="">
                     {{ $t('other.notNow') }}
                 </button>

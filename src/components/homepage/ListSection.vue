@@ -10,6 +10,7 @@ import FavoritePreview from "../global/FavoritePreview.vue";
 import ListPreviewElement from "../global/ListPreview.vue";
 import cookier from "cookier";
 import { oldLists } from "./officialLists";
+import { hasLocalStorage } from "@/siteSettings";
 
 const props = defineProps({
   headerName: { type: String, required: true },
@@ -37,13 +38,16 @@ if (props.contentType?.startsWith("/")) {
       users.value = response.data[1];
     });
 } else if (props.contentType?.startsWith("@")) {
-  let data: any[] = JSON.parse(
-    localStorage.getItem(props.contentType.slice(1))!
-  );
-  if (props?.randomizeContent)
-    data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
-
-  lists.value = data.slice(0, props.maxItems);
+  if (!hasLocalStorage()) lists.value = []
+  else {
+    let data: any[] = JSON.parse(
+      localStorage.getItem(props.contentType.slice(1))!
+    );
+    if (props?.randomizeContent)
+      data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
+  
+    lists.value = data.slice(0, props.maxItems);
+  }
 } else if (props.contentType == "oldLists") {
   lists.value = oldLists;
 } else {
@@ -76,18 +80,15 @@ const clearViewed = () => {
       <RouterLink
         v-if="extraText?.length! > 0 && extraAction?.startsWith('/')"
         :to="extraAction"
-      >
-        <button
-          class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
+        class="flex gap-2 px-2 py-0.5 rounded-md button bg-lof-300 selectOutline"
         >
-          <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
-        </button>
+        <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
       </RouterLink>
 
       <!-- Action button -->
       <button
         v-if="extraText?.length! > 0 && extraAction?.startsWith('@')"
-        class="flex gap-2 px-2 py-0.5 ml-2 rounded-full button bg-lof-300"
+        class="flex gap-2 px-2 py-0.5 rounded-md button bg-lof-300 selectOutline"
         @click="clearViewed()"
       >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}

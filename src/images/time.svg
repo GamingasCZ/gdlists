@@ -1,20 +1,16 @@
-<svg id="svg5" width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
- <defs id="defs2">
-  <mask id="mask-powermask-path-effect1681" maskUnits="userSpaceOnUse">
-   <path id="mask-powermask-path-effect1681_box" d="m1.7254 1.7254h28.549v28.549h-28.549z" fill="#fff"/>
-   <g id="g1679" style="">
-    <circle id="circle1673" cx="16" cy="16" r="7.6036" d="M 23.603575,16 A 7.6035748,7.6035748 0 0 1 16,23.603575 7.6035748,7.6035748 0 0 1 8.3964252,16 7.6035748,7.6035748 0 0 1 16,8.3964252 7.6035748,7.6035748 0 0 1 23.603575,16 Z"/>
-    <rect id="rect1675" x="12.272" width="7.5035" height="13.12" d="m 12.271758,0 h 7.503463 v 13.120099 h -7.503463 z"/>
-    <rect id="rect1677" transform="rotate(-90)" x="-19.752" y="16.281" width="7.5035" height="13.12" d="m -19.751732,16.281233 h 7.503463 v 13.120099 h -7.503463 z"/>
-   </g>
-  </mask>
- </defs>
- <g id="layer1" fill="#fff">
-  <path id="path392" d="m29.275 16a13.275 13.275 0 0 1-13.275 13.275 13.275 13.275 0 0 1-13.275-13.275 13.275 13.275 0 0 1 13.275-13.275 13.275 13.275 0 0 1 13.275 13.275z" mask="url(#mask-powermask-path-effect1681)"/>
-  <g stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
-   <circle id="path502" cx="16" cy="16" r="4.7369" stroke-width=".35837"/>
-   <path id="path619" d="m16 16v-13.908" stroke-width="3"/>
-   <path id="path619-3" d="m13.962 16h13.908" stroke-width="3"/>
+<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(1.0258 0 0 1.0258 -.41349 .25296)" fill="#fff" stroke-width=".97488">
+  <circle cx="16" cy="16" r="4.9757" fill="#fff" style="paint-order:stroke markers fill"/>
+  <path transform="translate(.063616 -.0082491)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill="#fff" style="paint-order:stroke markers fill"/>
+  <path transform="rotate(-51.429 15.96 15.938)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill-opacity="0" style="paint-order:stroke markers fill"/>
+  <g fill="#fff">
+   <path transform="rotate(257.14 15.965 15.979)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" style="paint-order:stroke markers fill"/>
+   <path transform="rotate(205.71 15.967 15.997)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" style="paint-order:stroke markers fill"/>
+   <path transform="rotate(154.29 15.969 16.011)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" style="paint-order:stroke markers fill"/>
   </g>
+  <path transform="rotate(102.86 15.971 16.029)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill-opacity="0" style="paint-order:stroke markers fill"/>
+  <path transform="rotate(51.429 15.977 16.07)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill="#fff" style="paint-order:stroke markers fill"/>
+  <path d="m16 16c-2.8303-3.4775-5.6605-6.955-8.4908-10.432" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="2.3" stroke-width="4.8744" style="paint-order:stroke markers fill"/>
+  <path d="m16.751 16c3.086 0.76489 6.166 1.5283 9.2489 2.2924" fill-opacity="0" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="2.3" stroke-width="4.8744" style="paint-order:stroke markers fill"/>
  </g>
 </svg>

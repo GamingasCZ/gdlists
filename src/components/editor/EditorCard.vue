@@ -64,14 +64,6 @@ const getRateImage = async () => {
 };
 getRateImage()
 
-const collabShaking = ref(false)
-const shakeCollab = () => {
-  collabShaking.value = true
-  setTimeout(() => {
-    collabShaking.value = false
-  }, 200);
-}
-
 const diffFacePath = ref("")
 const getDiffFace = async () => await import(`../../images/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`).then(res => diffFacePath.value = res.default)
 getDiffFace()
@@ -283,7 +275,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       <!-- Level search -->
       <div class="flex gap-2 items-center max-sm:hidden">
         <hr
-          class="w-8 h-1 bg-white transition-opacity duration-100"
+          class="w-8 h-1.5 bg-white rounded-full transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }"
         />
         <button
@@ -299,7 +291,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           />
         </button>
         <hr
-          class="w-8 h-1 bg-white transition-opacity duration-100"
+          class="w-8 h-1.5 bg-white rounded-full transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }"
         />
       </div>
@@ -320,8 +312,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/collabMen.svg"
           alt=""
-          :class="{'animate-[shake_0.2s_infinite]': collabShaking, 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
-          @click="shakeCollab()"
+          :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
+          @click="emit('openCollabTools', index!)"
         />
       </div>
     </div>

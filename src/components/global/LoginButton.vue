@@ -10,7 +10,7 @@ const goToDiscord = () =>
 
 <template>
   <button
-    class="flex gap-3 items-center p-2 text-sm text-white bg-black bg-opacity-50 rounded-full button"
+    class="flex gap-3 items-center p-2 text-sm text-white bg-black bg-opacity-50 rounded-md button"
     @click="goToDiscord"
   >
     <img src="../../images/discord.svg" alt="" class="w-6" />{{

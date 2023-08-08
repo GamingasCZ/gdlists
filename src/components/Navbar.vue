@@ -4,6 +4,9 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
+import { scale } from "chroma-js";
+import { useI18n } from "vue-i18n";
+import { hasLocalStorage } from "@/siteSettings";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -20,6 +23,27 @@ watch(props, () => {
     }
 })
 
+const scrollerWidth = ref(0)
+const scrollerXOff = ref(0)
+const scrollerInd = ref(0)
+const locale = useI18n().locale
+watch(locale, () => {
+  let firstLink = document.querySelector(".websiteLink") as HTMLLinkElement
+  scrollerWidth.value = firstLink.clientWidth
+})
+
+const modScrollerWidth = (e: Event) => {
+  let link = e.target as HTMLLinkElement
+  if (link.nodeName == "IMG")
+    link = (e.target as HTMLImageElement).parentElement as HTMLLinkElement
+    
+  scrollerInd.value = parseInt(link.dataset.ind!)
+  scrollerWidth.value = link.clientWidth
+  scrollerXOff.value = link.offsetLeft
+}
+
+const localStorg = ref(hasLocalStorage())
+
 </script>
 
 <template>
@@ -28,12 +52,17 @@ watch(props, () => {
   >
     <RouterLink to="/"><Logo class="w-10 h-10 button"/></RouterLink>
     <section
-      class="flex gap-5 items-center text-xs font-bold text-white md:text-xl"
+      class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{'opacity-50 pointer-events-none': !isOnline}"
     >
+      <hr class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform" :style="{transform: `scaleX(${scrollerWidth}) translateX(${scrollerXOff/scrollerWidth}px)`}">
       <RouterLink
         to="/editor"
-        class="flex flex-col gap-2 items-center py-1 rounded-full md:flex-row md:bg-black md:bg-opacity-50 md:px-4"
+        v-if="localStorg"
+        @click="modScrollerWidth"
+        data-ind="0"
+        class="flex flex-col gap-2 items-center transition-colors md:flex-row md:bg-opacity-20 md:bg-black md:px-4 websiteLink"
+        :class="{'md:!bg-opacity-40': scrollerInd == 0}"
         @mousedown="resetList"
         ><img src="../images/editorMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.editor")
@@ -41,27 +70,34 @@ watch(props, () => {
       >
       <RouterLink
         to="/browse"
-        class="flex flex-col gap-2 items-center py-1 rounded-full md:flex-row md:bg-black md:bg-opacity-50 md:px-4"
+        @click="modScrollerWidth"
+        data-ind="1"
+        class="flex flex-col gap-2 items-center transition-colors md:flex-row md:bg-opacity-20 md:bg-black md:px-4 websiteLink"
+        :class="{'md:!bg-opacity-40': scrollerInd == 1}"
         ><img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.lists")
         }}</RouterLink
       >
       <RouterLink
         to="/saved"
-        class="flex flex-col gap-2 items-center py-1 rounded-full md:flex-row md:bg-black md:bg-opacity-50 md:px-4"
+        v-if="localStorg"
+        @click="modScrollerWidth"
+        data-ind="2"
+        class="flex flex-col gap-2 items-center transition-colors md:flex-row md:bg-opacity-20 md:bg-black md:px-4 websiteLink"
+        :class="{'md:!bg-opacity-40': scrollerInd == 2}"
         ><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.saved")
         }}</RouterLink
       >
     </section>
     <img
-      v-if="!isLoggedIn"
+      v-if="!isLoggedIn && localStorg"
       @click="showSettings()"
       src="../images/user.svg"
       alt=""
       class="px-1 w-10 h-10 button"
     />
-    <div v-else @click="showSettings()" class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
+    <div v-else-if="localStorg" @click="showSettings()" class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
       <img
         alt=""
         :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
@@ -78,11 +114,14 @@ watch(props, () => {
         id="profilePicture"
       />
     </div>
+    <div v-else></div>
+
     <Transition name="fadeSlide">
       <SetingsMenu
         :username="loginInfo ? loginInfo[0] : ''"
         :is-logged-in="isLoggedIn"
         v-show="settingsShown"
+        v-if="localStorg"
         id="settingsMenu"
       />
     </Transition>

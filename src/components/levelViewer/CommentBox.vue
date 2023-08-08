@@ -148,16 +148,16 @@ function sendComment(com = "") {
             <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
         </div>
 
-        <footer class="flex justify-between mt-1">
+        <footer class="flex justify-between mt-2">
             <div>
                 <img :src="pfp" class="inline mr-2 w-8 rounded-full" alt="">
                 <label>{{ username }}</label>
             </div>
 
             <div class="flex gap-2">
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor, backgroundImage: lengthPie}" class="box-border p-1 w-8 rounded-full transition-opacity duration-75 disabled:opacity-50" :disabled="(commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN) || !loggedIn" @click="sendComment()"><img src="@/images/send.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-md disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-md disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor, backgroundImage: lengthPie}" class="box-border p-1 rounded-md transition-opacity duration-75 disabled:opacity-50" :disabled="(commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN) || !loggedIn" @click="sendComment()"><img src="@/images/send.svg" class="inline mr-2 w-7" alt="">{{ $t('other.send') }}</button>
             </div>
         </footer>
     </section>

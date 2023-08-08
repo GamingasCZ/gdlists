@@ -3,6 +3,7 @@ import type { LevelList, LikeFetchResponse } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { onMounted, ref, watch } from "vue";
 import parseText from "../global/parseEditorFormatting";
+import { hasLocalStorage } from "@/siteSettings";
 
 const props = defineProps<{
   name: string;
@@ -48,8 +49,10 @@ watch(toggleDescription, () => {
   else description.style.height = "";
 });
 
+const localStorg = hasLocalStorage()
+
 const userUID = ref<string>("")
-if (localStorage) {
+if (hasLocalStorage()) {
   userUID.value = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? ""
 }
 
@@ -91,7 +94,7 @@ function sendRating(action: 1 | 0) {
       <div class="box-border flex flex-col items-center min-w-max max-sm:hidden">
 
         <!-- Like button -->
-        <button id="likeButton" class="button relative rounded-lg bg-[#21cc5b] p-1 !transition-colors"
+        <button id="likeButton" class="button relative rounded-lg bg-[#21cc5b] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
         :style="{ boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
         :class="{ '!bg-[#051c0c]': rating?.[2] == 0, '!bg-[#14805c]': rating?.[2] == 1 }" @click="sendRating(1)">
 
@@ -105,7 +108,7 @@ function sendRating(action: 1 | 0) {
         </span>
 
         <!-- Dislike button -->
-        <button id="dislikeButton" class="button relative rounded-lg bg-[#cc2121] p-1 !transition-colors"
+        <button id="dislikeButton" class="button relative rounded-lg bg-[#cc2121] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
           @click="sendRating(0)"
           :style="{ boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
           :class="{ '!bg-[#1c0505]': rating?.[2] == 1, '!bg-[#730909]': rating?.[2] == 0 }">
@@ -159,7 +162,7 @@ function sendRating(action: 1 | 0) {
       <div class="flex">
         <!-- Mobile likes and dislikes -->
         <div class="box-border flex gap-1.5 items-center sm:hidden">
-          <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors" @click="sendRating(1)"
+          <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg" @click="sendRating(1)"
             :style="{ boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
             :class="{ '!bg-[#051c0c]': rating?.[2] == 0, '!bg-[#14805c]': rating?.[2] == 1 }">
             <img class="w-6" src="@/images/like.svg" alt="" :class="{ 'brightness-[6]': rating?.[2] == 1 }" />
@@ -167,7 +170,7 @@ function sendRating(action: 1 | 0) {
           <span class="text-center min-w-[2rem] text-lg font-bold">{{ rate }}
             <hr v-if="rate == undefined" class="w-4 h-1 bg-white bg-opacity-50 rounded-full border-none" />
           </span>
-          <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors" @click="sendRating(0)"
+          <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg" @click="sendRating(0)"
             :style="{ boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
             :class="{ '!bg-[#1c0505]': rating?.[2] == 1, '!bg-[#730909]': rating?.[2] == 0 }">
             <img class="w-6" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': rating?.[2] == 0 }" />
@@ -206,7 +209,8 @@ function sendRating(action: 1 | 0) {
         <!-- Pin list -->
         <button
           class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-sm:!p-2"
-          @click="emit('doListAction', 'pinList')">
+          @click="emit('doListAction', 'pinList')"
+          v-if="localStorg">
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/pin.svg" alt="" v-if="!listPinned" />
           <img class="inline w-4 max-sm:w-6 sm:mr-2" src="@/images/unpin.svg" alt="" v-else />
           <label class="max-sm:hidden">{{ listPinned ? $t('level.unpin') : $t('level.pin') }}</label>

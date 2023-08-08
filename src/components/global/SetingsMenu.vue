@@ -30,7 +30,7 @@ const screenWidth = ref(window.innerWidth)
     >
       <h1 class="font-bold">{{ username }}</h1>
       <button
-        class="px-2 py-1 bg-white bg-opacity-10 rounded-full button"
+        class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
         @click="logout"
       >
         <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />{{ $t('settingsMenu.logout') }}

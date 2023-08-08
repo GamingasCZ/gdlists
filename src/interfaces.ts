@@ -67,20 +67,20 @@ export interface FavoritedLevel {
 
 export interface CollabData {
   0: [string, number, string]; // 'Host' name, Host verified, Host title
-  1: CollabRoles[];
+  1: string[];
   2: CollabHumans[];
 }
 
-interface CollabRoles {
+export interface CollabRoles {
   name: string;
   id: number;
 }
 
-interface CollabHumans {
+export interface CollabHumans {
   name: string;
   role: number;
   color: string;
-  part: [string, string];
+  part: [number, number];
   socials: HumanSocialLink[];
   verified: number | number[];
 }
