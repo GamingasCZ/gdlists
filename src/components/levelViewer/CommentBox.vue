@@ -57,7 +57,7 @@ onMounted(() => {
             render(emoji) {
                 const img = document.createElement('img')
                 img.classList.add('inline-block', 'w-4',)
-                img.src = emojis.value[emoji.id]
+                img.src = emojis.value[emoji.id-1]
                 img.draggable = false
                 return img
             },
@@ -108,7 +108,6 @@ function sendComment(com = "") {
     else comment = com
     let parsedComment = parseComment(comment)
     commentLength.value = 0
-    console.log(parsedComment)
 
     // why tf did i have to stringify the post data? it wouldn't show up in the backend otherwise fuck!!!!
     axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify({
@@ -145,7 +144,7 @@ function sendComment(com = "") {
 
         <!-- Emoji Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
-            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
+            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index-1]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
         </div>
 
         <footer class="flex justify-between mt-1">
