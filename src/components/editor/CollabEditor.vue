@@ -54,8 +54,8 @@ function addMember(params?: CollabHumans) {
     socials: params?.socials ?? [],
     color: params?.color ?? makeColor(),
     part: params?.part ?? [0, 0],
-    role: params?.role ?? levelList.value.levels[props.index].creator[1][0],
-    verified: params?.verified ?? false
+    role: params?.role ?? 0,
+    verified: params?.verified ?? 0
   })
 }
 
@@ -147,7 +147,7 @@ onMounted(() => {
               v-bind="member"
               :pos="pos"
               :level-index="index"
-              :role-color="roleColors[0]"
+              :role-color="roleColors[member.role]"
               @change-role="pickingRole = $event"
             />
         </section>
@@ -163,7 +163,7 @@ onMounted(() => {
     >
 
       <!-- Role header -->
-      <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between items-center">
+      <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
         <img
           src="@/images/hideSidebar.svg"
           alt=""
@@ -181,7 +181,7 @@ onMounted(() => {
         <div v-else></div>
       </header>
       <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
-        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in levelList.levels[index].creator?.[1]" class="flex p-1 text-white rounded-md transition-colors items-middle shadow-drop h-max" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
+        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in levelList.levels[index].creator?.[1]" class="flex p-1 h-9 text-white rounded-md transition-colors items-middle shadow-drop h-max" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
           <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" placeholder="Jméno role" class="px-1 mr-2 bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
           <div class="flex gap-1" v-if="pickingRole == -1">
             <button class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm button" @click="levelList.levels[index].creator?.[1].splice(pos, 1)"><img src="@/images/trash.svg" alt=""></button>
