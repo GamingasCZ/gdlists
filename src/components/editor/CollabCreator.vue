@@ -28,7 +28,7 @@ const colorPickerOpen = ref(false)
 </script>
 
 <template>
-    <section class="flex flex-col gap-2 items-center pl-2 overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20">
+    <section class="flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20">
         <main class="flex gap-2 items-center w-full">
             <div class="flex w-full">
                 <div class="flex gap-2 items-center">

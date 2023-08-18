@@ -116,7 +116,7 @@ onMounted(() => {
       </header>
 
       <main>
-        <header class="flex justify-between items-center bg-[url(@/images/headerBG.webp)] bg-center p-2 mt-3">
+        <header class="flex relative justify-between items-center bg-[url(@/images/headerBG.webp)] bg-center p-2 mt-3">
             <h2 class="text-2xl font-black max-sm:hidden">Členové</h2>
             <div class="sm:hidden"></div>
             <div class="flex items-center">
@@ -127,9 +127,16 @@ onMounted(() => {
                     <img src="@/images/addLevel.svg" alt="">
                 </button>
             </div>
+            
+            <!-- Socials input box -->
+            <section class="absolute flex items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <button class="rounded-md bg-cyan-400 button"><img class="w-10" src="@/images/twitterIcon.svg"></button>
+                <input type="text" class="bg-black rounded-md bg-opacity-40">
+            </section>
+            
         </header>
 
-        <section class="bg-[url(@/images/fade.webp)] flex flex-col bg-repeat-x p-1 h-[30rem] overflow-y-auto gap-1">
+        <section class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 h-[30rem] overflow-y-auto gap-1">
             
             <!-- No roles help -->
             <div v-if="noMembers" class="flex flex-col gap-3 items-center my-auto">
