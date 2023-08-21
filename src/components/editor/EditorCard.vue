@@ -194,14 +194,14 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
         <img class="w-10 aspect-square" src="../../images/levelID.svg" alt="" />
         <input
           autocomplete="off"
-          class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
+          class="max-w-[20vw] box-border rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
           type="text"
           name="levelID"
           v-model="levelList.levels[index!].levelID"
           :placeholder="$t('level.levelID')"
         />
         <img
-          class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+          class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
           src="../../images/searchOpaque.svg"
           alt=""
           :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }"
@@ -252,10 +252,10 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
           type="button"
           @click="searchLevel(false)"
-          class="sm:hidden"
+          class="box-border sm:hidden"
         >
           <img
-            class="p-1 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            class="p-2 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
@@ -275,23 +275,24 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       <!-- Level search -->
       <div class="flex gap-2 items-center max-sm:hidden">
         <hr
-          class="w-8 h-1.5 bg-white rounded-full transition-opacity duration-100"
+          class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }"
         />
         <button
           :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
           type="button"
+          class="box-border"
           @click="searchLevel(false)"
         >
           <img
-            class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
           />
         </button>
         <hr
-          class="w-8 h-1.5 bg-white rounded-full transition-opacity duration-100"
+          class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }"
         />
       </div>

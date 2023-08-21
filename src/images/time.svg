@@ -1,16 +1,112 @@
-<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
- <g transform="matrix(1.0258 0 0 1.0258 -.41349 .25296)" fill="#fff" stroke-width=".97488">
-  <circle cx="16" cy="16" r="4.9757" fill="#fff" style="paint-order:stroke markers fill"/>
-  <path transform="translate(.063616 -.0082491)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill="#fff" style="paint-order:stroke markers fill"/>
-  <path transform="rotate(-51.429 15.96 15.938)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill-opacity="0" style="paint-order:stroke markers fill"/>
-  <g fill="#fff">
-   <path transform="rotate(257.14 15.965 15.979)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" style="paint-order:stroke markers fill"/>
-   <path transform="rotate(205.71 15.967 15.997)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" style="paint-order:stroke markers fill"/>
-   <path transform="rotate(154.29 15.969 16.011)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" style="paint-order:stroke markers fill"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   viewBox="0 0 32 32"
+   id="svg9"
+   sodipodi:docname="time.svg"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs9" />
+  <sodipodi:namedview
+     id="namedview9"
+     pagecolor="#000000"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="3.8338446"
+     inkscape:cx="53.210295"
+     inkscape:cy="32.082678"
+     inkscape:window-width="1560"
+     inkscape:window-height="876"
+     inkscape:window-x="40"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g9" />
+  <g
+     transform="matrix(1.0258 0 0 1.0258 -.41349 .25296)"
+     fill="#fff"
+     stroke-width=".97488"
+     id="g9">
+    <path
+       transform="translate(.063616 -.0082491)"
+       d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+       fill="#fff"
+       style="paint-order:stroke markers fill"
+       id="path1" />
+    <path
+       transform="rotate(-51.429 15.96 15.938)"
+       d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+       fill-opacity="0"
+       style="paint-order:stroke markers fill"
+       id="path2" />
+    <g
+       fill="#fff"
+       id="g5">
+      <path
+         transform="rotate(257.14 15.965 15.979)"
+         d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+         style="paint-order:stroke markers fill"
+         id="path3" />
+      <path
+         transform="rotate(205.71 15.967 15.997)"
+         d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+         style="paint-order:stroke markers fill"
+         id="path4" />
+      <path
+         transform="rotate(154.29 15.969 16.011)"
+         d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+         style="paint-order:stroke markers fill"
+         id="path5" />
+    </g>
+    <path
+       transform="rotate(102.86 15.971 16.029)"
+       d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+       fill-opacity="0"
+       style="paint-order:stroke markers fill"
+       id="path6" />
+    <path
+       transform="rotate(51.429 15.977 16.07)"
+       d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z"
+       fill="#fff"
+       style="paint-order:stroke markers fill"
+       id="path7" />
+    <path
+       d="M 16.000673,15.350985 4.8171131,5.1013816"
+       fill="#ffffff"
+       stroke="#ffffff"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       stroke-miterlimit="2.3"
+       stroke-width="4.8744"
+       style="paint-order:stroke markers fill"
+       id="path8"
+       sodipodi:nodetypes="cc" />
+    <path
+       d="M 16.000673,15.350985 25.9999,18.2924"
+       fill-opacity="0"
+       stroke="#ffffff"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       stroke-miterlimit="2.3"
+       stroke-width="4.8744"
+       style="paint-order:stroke markers fill"
+       id="path9"
+       sodipodi:nodetypes="cc" />
+    <circle
+       cx="16.000673"
+       cy="15.350985"
+       r="5.3212733"
+       fill="#ffffff"
+       style="paint-order:stroke markers fill"
+       id="circle1" />
   </g>
-  <path transform="rotate(102.86 15.971 16.029)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill-opacity="0" style="paint-order:stroke markers fill"/>
-  <path transform="rotate(51.429 15.977 16.07)" d="m18.799 2.8654c0.0083 1.584-1.269 2.8748-2.8529 2.8831-1.584 0.00834-2.8748-1.269-2.8831-2.8529-0.0083-1.584 1.269-2.8748 2.8529-2.8831s2.8748 1.269 2.8831 2.8529z" fill="#fff" style="paint-order:stroke markers fill"/>
-  <path d="m16 16c-2.8303-3.4775-5.6605-6.955-8.4908-10.432" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="2.3" stroke-width="4.8744" style="paint-order:stroke markers fill"/>
-  <path d="m16.751 16c3.086 0.76489 6.166 1.5283 9.2489 2.2924" fill-opacity="0" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="2.3" stroke-width="4.8744" style="paint-order:stroke markers fill"/>
- </g>
 </svg>

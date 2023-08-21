@@ -1,0 +1,13 @@
+<svg enable-background="new 0 0 2400 2800" version="1.1" viewBox="0 0 2400 2800" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+</style>
+<title>Asset 3</title>
+<g transform="matrix(.83953 0 0 .83953 192.56 224.66)" stroke-width="1.1911">
+	<g stroke-width="1.1911">
+		<path class="st0" d="m500 0-500 500v1800h600v500l500-500h400l900-900v-1400zm1700 1300-400 400h-400l-350 350v-350h-450v-1500h1600z"/>
+		<rect class="st0" x="1700" y="550" width="200" height="600"/>
+		<rect class="st0" x="1150" y="550" width="200" height="600"/>
+	</g>
+</g>
+</svg>

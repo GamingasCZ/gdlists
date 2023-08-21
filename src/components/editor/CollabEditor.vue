@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { levelList, creatorToCollab, makeColor } from '@/Editor';
 import chroma from 'chroma-js';
-import { computed, onMounted, ref, watch } from 'vue';
-import type { CollabHumans } from '@/interfaces'
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import type { CollabData, CollabHumans } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import { hasLocalStorage } from '@/siteSettings';
+import { socialMedia, socialMediaImages } from './socialSites';
 
 const props = defineProps({
     index: {type: Number, required: true}
@@ -13,6 +14,8 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: "closePopup"): void;
 }>();
+
+var collab = levelList.value.levels[props.index!].creator
 
 const colorLeft = ref(chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.906, 0.167).hex())
 const colorRight = ref(chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.231, 0.102).hex())
@@ -60,9 +63,30 @@ function addMember(params?: CollabHumans) {
 }
 
 const noMembers = computed(() => 
-  levelList.value.levels[props.index!].creator?.[2] == undefined || levelList.value.levels[props.index!].creator?.[2].length == 0)
+  levelList.value.levels[props.index!].creator?.[2] == undefined || !levelList.value.levels[props.index!].creator?.[2].length)
+const noRoles = computed(() => 
+  levelList.value.levels[props.index!].creator?.[1] == undefined || !levelList.value.levels[props.index!].creator?.[1].length)
 const localStrg = hasLocalStorage()
 const pickingRole = ref(-1)
+const clipboardContent: undefined | CollabData = ref(undefined)
+
+const socialPicker = reactive({
+  open: false,
+  creatorIndex: 0,
+  socialIndex: 0
+})
+const socialPickerURL = ref("")
+
+function addSocial(editing: boolean, creatorIndex: number, editPos?: number) {
+  socialPicker.open = true
+  socialPicker.creatorIndex = creatorIndex
+  socialPickerURL.value = ""
+}
+function confirmSocial() {
+  levelList.value.levels[props.index].creator[2][socialPicker.creatorIndex].socials.push([socialPicker.socialIndex, socialPickerURL.value])
+  socialPicker.open = false
+  socialPickerURL.value = ""
+}
 
 onMounted(() => {
   if (!noMembers && typeof levelList.value.levels[props.index].creator[1][0] == 'object') {
@@ -111,7 +135,7 @@ onMounted(() => {
         </div>
         <button v-if="!noMembers" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
           <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
-          Přidat role
+          Upravit role
         </button>
       </header>
 
@@ -120,29 +144,52 @@ onMounted(() => {
             <h2 class="text-2xl font-black max-sm:hidden">Členové</h2>
             <div class="sm:hidden"></div>
             <div class="flex items-center">
-                <button class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button">
+                <button class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button" :class="{'disabled': clipboardContent == undefined}">
                     <img src="@/images/paste.svg" alt="">
                 </button>
-                <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button" @click="addMember()">
+                <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                  @click="addMember()"
+                  :class="{'disabled': noRoles}"
+                  >
                     <img src="@/images/addLevel.svg" alt="">
                 </button>
             </div>
             
             <!-- Socials input box -->
-            <section class="absolute flex items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <button class="rounded-md bg-cyan-400 button"><img class="w-10" src="@/images/twitterIcon.svg"></button>
-                <input type="text" class="bg-black rounded-md bg-opacity-40">
-            </section>
+            <form
+              class="flex absolute top-0 left-0 gap-1 justify-center items-center w-full h-full bg-black bg-opacity-30 backdrop-brightness-50"
+              v-if="socialPicker.open"
+              @submit.prevent="confirmSocial"  
+            >
+              <section class="flex flex-col gap-1">
+                <div class="relative">
+                  <img :src="socialMediaImages[socialMedia[socialPicker.socialIndex].icon]" class="absolute left-3 top-1/2 w-4 opacity-40 -translate-y-1/2" alt="">
+                  <input maxlength="100" v-model="socialPickerURL" type="text" id="socInputBox" class="box-border pl-10 w-80 bg-black bg-opacity-40 rounded-md" :placeholder="socialMedia[socialPicker.socialIndex].name">
+                </div>
+                
+                <!-- Link buttons -->
+                <div class="flex gap-2">
+                  <button type="button" class="flex justify-center items-center w-10 h-5 rounded-sm button" :style="{backgroundColor: website.color}" v-for="(website, index) in socialMedia" @click="socialPicker.socialIndex = index">
+                    <img class="w-4" :src="socialMediaImages[website.icon]">
+                  </button>
+                </div>
+              </section>
+
+              <button type="submit" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/color.svg" class="w-6" alt=""></button>
+              <button type="button" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/close.svg" class="w-6" alt="" @click="socialPicker.open = false"></button>
+
+            </form>
             
         </header>
 
-        <section class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 h-[30rem] overflow-y-auto gap-1">
+        <section class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 h-[30rem] gap-1">
             
             <!-- No roles help -->
             <div v-if="noMembers" class="flex flex-col gap-3 items-center my-auto">
-              <img src="../../images/collabDudes.svg" class="w-[20rem] opacity-10" alt="">
-              <h1 class="text-2xl opacity-60">K přidání členů, přidej nějaké role.</h1>
-              <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
+              <img src="../../images/collabDudes.svg" class="w-[20rem] opacity-20" alt="">
+              <h1 v-if="noRoles" class="text-2xl opacity-60">K přidání členů, přidej nějaké role.</h1>
+              <h1 v-else class="text-2xl opacity-60">Zatím jsi nepřidal žádné členy.</h1>
+              <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen" v-if="noRoles">
                 <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
                 Přidat role
               </button>
@@ -156,6 +203,7 @@ onMounted(() => {
               :level-index="index"
               :role-color="roleColors[member.role]"
               @change-role="pickingRole = $event"
+              @add-social="addSocial"
             />
         </section>
 
@@ -187,7 +235,25 @@ onMounted(() => {
         />
         <div v-else></div>
       </header>
-      <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
+      <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex justify-center items-center flex-col gap-2 p-2 overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
+        
+        <!-- Presets and role help -->
+        <article class="flex flex-col gap-2 justify-center items-center w-full" v-if="noRoles">
+          <div class="opacity-40">
+            <img src="@/images/plus.svg" alt="">
+            <p></p>
+          </div>
+          <hr>
+          <button
+            v-for="preset in ['Dekorace', 'Layout', 'Optimalizace']"
+            @click="addRole(preset)"
+            class="w-3/5 text-xl text-white text-opacity-40 bg-black bg-opacity-40 rounded-md button"
+          >
+            {{ preset }}
+          </button>
+        </article>
+
+        <!-- Role bubble -->
         <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in levelList.levels[index].creator?.[1]" class="flex p-1 h-9 text-white rounded-md transition-colors items-middle shadow-drop h-max" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
           <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" placeholder="Jméno role" class="px-1 mr-2 bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
           <div class="flex gap-1" v-if="pickingRole == -1">
@@ -216,3 +282,18 @@ onMounted(() => {
     </aside>
   </dialog>
 </template>
+
+<style>
+
+#socInputBox::after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  background-image: url(@/images/socials/link.svg);
+  background-size: cover;
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+}
+
+</style>
