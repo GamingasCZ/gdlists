@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { levelList, creatorToCollab, makeColor } from '@/Editor';
 import chroma from 'chroma-js';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, onUpdated, reactive, ref, watch } from 'vue';
 import type { CollabData, CollabHumans } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import { hasLocalStorage } from '@/siteSettings';
-import { socialMedia, socialMediaImages } from './socialSites';
+import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
+import axios from 'axios';
 
 const props = defineProps({
     index: {type: Number, required: true}
@@ -15,87 +16,286 @@ const emit = defineEmits<{
   (e: "closePopup"): void;
 }>();
 
-var collab = levelList.value.levels[props.index!].creator
+var collab = ref(levelList.value.levels[props.index!].creator)
+var levelColor = levelList.value.levels?.[props.index]?.color
 
-const colorLeft = ref(chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.906, 0.167).hex())
-const colorRight = ref(chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.231, 0.102).hex())
-const colorSex = ref(chroma.hsl(90+levelList.value.levels?.[props.index]?.color?.[0] % 360, 0.9, 0.25).hex())
-const colorSex2 = ref(chroma.hsl(270+levelList.value.levels?.[props.index]?.color?.[0] % 360, 0.6, 0.1).hex())
+const hyperfunnyNames = [
+  "Editor collabu",
+  "Editor megacollabu",
+  "Editor gigacollabu",
+  "ježíšku na křížku",
+  "Správa planety"
+]
+const editorName = ref(hyperfunnyNames[0])
+const makeFunyEditorName = () => {
+  if (typeof collab.value == "string") return
 
-const roleSidebarOpen = ref(false)
-
-const modifyCreator = (e: Event) => {
-  let newCreator = (e.target as HTMLInputElement).value
-  if (typeof levelList.value.levels[props.index!].creator == 'string')
-    levelList.value.levels[props.index!].creator = newCreator
-  else
-    levelList.value.levels[props.index!].creator[0][0] = newCreator
+  if (collab.value[2].length < 10) editorName.value = hyperfunnyNames[0]
+  else if (collab.value[2].length < 25) editorName.value = hyperfunnyNames[1]
+  else if (collab.value[2].length < 50) editorName.value = hyperfunnyNames[2]
+  else if (collab.value[2].length < 75) editorName.value = hyperfunnyNames[3]
+  else if (collab.value[2].length >= 100) editorName.value = hyperfunnyNames[4]
 }
 
+const colorLeft = ref(chroma.hsl(levelColor?.[0], 0.906, 0.167).hex())
+const colorRight = ref(chroma.hsl(levelColor?.[0], 0.231, 0.102).hex())
+const colorSex = ref(chroma.hsl(90+levelColor?.[0] % 360, 0.9, 0.25).hex())
+const colorSex2 = ref(chroma.hsl(270+levelColor?.[0] % 360, 0.6, 0.1).hex())
+
+const makeRoleColors = () => {
+  if (typeof collab.value == "string") return
+
+  roleColors.value = chroma.scale([colorSex.value, colorSex2.value]).mode('oklch').colors(Math.max(2, collab.value[1].length))
+}
+
+const MAX_LASTUSED = 15
+const lastUsedRoles = ref<string[]>()
+const pinnedLastUsedRoles = ref<string[]>()
+if (hasLocalStorage()) {
+  lastUsedRoles.value = JSON.parse(localStorage.getItem("lastUsedRoles")!) ?? []
+  pinnedLastUsedRoles.value = JSON.parse(localStorage.getItem("pinnedLastUsedRoles")!) ?? []
+}
+const allLastUsedRoles = ref([...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []])
+
 watch(props, () => {
-    colorLeft.value = chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.906, 0.167).hex()
-    colorRight.value = chroma.hsl(levelList.value.levels?.[props.index]?.color?.[0], 0.231, 0.102).hex()
+    colorLeft.value = chroma.hsl(levelColor?.[0], 0.906, 0.167).hex()
+    colorRight.value = chroma.hsl(levelColor?.[0], 0.231, 0.102).hex()
 })
 
-const roleColors = ref<string[]>([])
-function addRole(preset: string = "") {
-  let creator = levelList.value.levels[props.index].creator
-  if (typeof creator == 'string') levelList.value.levels[props.index].creator = creatorToCollab(creator)
+/*
+=======
+Roles
+=======
+*/
 
-  levelList.value.levels[props.index].creator?.[1].push(preset)
-  roleColors.value = chroma.scale([colorSex.value, colorSex2.value]).mode('oklch').colors(levelList.value.levels[props.index].creator[1].length)
+const roleColors = ref<string[]>([])
+const roleSidebarOpen = ref(false)
+
+function addRole(preset: string = "") {
+  if (typeof collab.value == 'string') {
+    collab.value = creatorToCollab(collab.value)
+    levelList.value.levels[props.index!].creator = collab.value
+  }
+
+  collab.value?.[1].push(preset)
+  makeRoleColors()
 }
 
 function pickRole(creatorPos: number, rolePos: number) {
-  levelList.value.levels[props.index].creator[2][creatorPos].role = rolePos
+  if (typeof collab.value == "string") return
+
+  collab.value[2][creatorPos].role = rolePos
   pickingRole.value = -1
 }
 
+function pinRole(roleName: string) {
+  if (pinnedLastUsedRoles.value?.includes(roleName)) { // Remove pinned
+    pinnedLastUsedRoles.value?.splice(pinnedLastUsedRoles.value.indexOf(roleName), 1)
+    lastUsedRoles.value?.push(roleName)
+  }
+  else { // Add pinned
+    pinnedLastUsedRoles.value?.push(roleName)
+    lastUsedRoles.value?.splice(lastUsedRoles.value.indexOf(roleName), 1)
+  }
+
+  allLastUsedRoles.value = [...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []]
+}
+
+function removeLastUsedRole(roleName: string) {
+  if (pinnedLastUsedRoles.value?.includes(roleName))
+    pinnedLastUsedRoles.value.splice(pinnedLastUsedRoles.value.indexOf(roleName), 1)
+  else
+    lastUsedRoles.value?.splice(lastUsedRoles.value.indexOf(roleName), 1)
+
+  allLastUsedRoles.value = [...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []]
+}
+
+/*
+=======
+Members
+=======
+*/
+
+const modifyCreator = (e: Event) => {
+  let newCreator = (e.target as HTMLInputElement).value
+  if (typeof collab.value == 'string')
+    collab.value = newCreator
+  else
+    collab.value[0][0] = newCreator
+}
+
 function addMember(params?: CollabHumans) {
-  (levelList.value.levels[props.index].creator[2] as CollabHumans[]).push({
+  pickingRole.value = -1;
+  (collab.value[2] as CollabHumans[]).push({
     name: params?.name ?? "",
     socials: params?.socials ?? [],
-    color: params?.color ?? makeColor(),
+    color: makeColor(params?.color),
     part: params?.part ?? [0, 0],
     role: params?.role ?? 0,
     verified: params?.verified ?? 0
   })
+  makeFunyEditorName()
+}
+
+function removeMember(position: number) {
+  pickingRole.value = -1
+  collab.value[2].splice(position, 1)
+  socialPicker.open = false
+  makeFunyEditorName()
+}
+
+function copyMember(position: number) {
+  if (typeof collab.value == "string") return
+
+  clipboardContent.value = [
+    collab.value[2][position].role, // Role index
+    collab.value[1][collab.value[2][position].role], // Role name
+
+    collab.value[2][position] // human data >:)
+  ]
+}
+
+function pasteMember() {
+  if (!clipboardContent.value) return
+
+  if (typeof collab == 'string') collab.value = creatorToCollab(collab.value) // turn into collab
+
+  // Add role if missing
+  let newRoleIndex = clipboardContent.value[0]
+  if (collab.value[1]?.[clipboardContent.value[0]] != clipboardContent.value[1]) {
+    addRole(clipboardContent.value[1])
+    newRoleIndex = collab.value[1].length - 1
+  }
+
+  if (typeof collab.value == "string") return
+
+  addMember(clipboardContent.value[2])
+  collab.value[2][collab.value[2].length-1].role = newRoleIndex
 }
 
 const noMembers = computed(() => 
-  levelList.value.levels[props.index!].creator?.[2] == undefined || !levelList.value.levels[props.index!].creator?.[2].length)
+  collab.value?.[2] == undefined || !collab.value?.[2].length)
 const noRoles = computed(() => 
-  levelList.value.levels[props.index!].creator?.[1] == undefined || !levelList.value.levels[props.index!].creator?.[1].length)
+  collab.value?.[1] == undefined || !collab.value?.[1].length)
+const oneRoleAndHasMembers = computed(() =>
+  collab.value?.[1].length == 1 && collab.value?.[2].length > 0
+) 
+
 const localStrg = hasLocalStorage()
 const pickingRole = ref(-1)
-const clipboardContent: undefined | CollabData = ref(undefined)
+const clipboardContent = ref<[number, string, CollabHumans]>()
+
+/*
+=======
+Social media
+=======
+*/
 
 const socialPicker = reactive({
   open: false,
+  editing: -1,
+  dropdownOpen: false,
   creatorIndex: 0,
-  socialIndex: 0
+  socialIndex: 0,
+  usedSocials: <number[]>[]
 })
 const socialPickerURL = ref("")
 
+const openSocialDropdown = () => {
+  if (typeof collab.value == "string") return
+
+  socialPicker.dropdownOpen = true
+  document.body.addEventListener("click", () => socialPicker.dropdownOpen = false, {once: true, capture: true},)
+}
+const modifyPickerURL = (e: Event) => {
+  if ([3, 4].includes(socialPicker.socialIndex)) // do not shorten discord and custom link
+    socialPickerURL.value = (e.target as HTMLInputElement).value
+  else
+    socialPickerURL.value = checkAndRemoveDomain((e.target as HTMLInputElement).value)
+}
+
 function addSocial(editing: boolean, creatorIndex: number, editPos?: number) {
+  if (typeof collab.value == "string") return
+  if (collab.value[2].length >= 100) return
+
   socialPicker.open = true
   socialPicker.creatorIndex = creatorIndex
   socialPickerURL.value = ""
+  socialPicker.editing = -1
+
+  let usedSocials: number[] = []
+  collab.value[2][socialPicker.creatorIndex].socials.forEach(web => usedSocials.push(web[0]))
+  socialPicker.usedSocials = usedSocials
+  
+  if (editing) {
+    socialPicker.socialIndex = collab.value[2][creatorIndex].socials[editPos!][0]
+    socialPickerURL.value = checkAndRemoveDomain(collab.value[2][creatorIndex].socials[editPos!][1])
+    socialPicker.editing = editPos!
+  }
+  else {
+    socialPicker.socialIndex = 0
+
+    // Pick next unused social media site
+    for (let i = 0; i < socialMedia.length; i++) {
+      if (!usedSocials.includes(i)) {
+        socialPicker.socialIndex = i
+        break
+      }
+    }
+  }
+  socialPicker.dropdownOpen = false;
+  setTimeout(() => {
+    (document.querySelector("#socInputBox") as HTMLInputElement).focus()
+  }, 50);
 }
 function confirmSocial() {
-  levelList.value.levels[props.index].creator[2][socialPicker.creatorIndex].socials.push([socialPicker.socialIndex, socialPickerURL.value])
+  if (typeof collab.value == "string") return
+
+  if (socialPicker.editing > -1)
+    collab.value[2][socialPicker.creatorIndex].socials[socialPicker.editing] = [socialPicker.socialIndex, socialPickerURL.value]
+  else
+    collab.value[2][socialPicker.creatorIndex].socials.push([socialPicker.socialIndex, socialPickerURL.value])
+    
+  socialPicker.editing = -1
   socialPicker.open = false
   socialPickerURL.value = ""
+  socialPicker.dropdownOpen = false
+}
+const removeSocial = (creatorIndex: number, socialIndex: number) => {
+  (collab.value as CollabData)[2][creatorIndex].socials.splice(socialIndex, 1);
+  socialPicker.open = false;
 }
 
 onMounted(() => {
-  if (!noMembers && typeof levelList.value.levels[props.index].creator[1][0] == 'object') {
+
+  makeRoleColors()
+
+  // Convert old role format to the new one
+  if (!noMembers && typeof collab.value[1][0] == 'object') {
+    if (typeof collab.value != "string") return
+
     let i = 0;
-    levelList.value.levels[props.index].creator[1].foreach((roleObj: object) => {
-      levelList.value.levels[props.index].creator[1][i] = roleObj.name
+    collab.value[1].forEach(roleObj => {
+      (collab.value as CollabData)[1][i] = roleObj.name
       i += 1
     })
   }
+})
+
+onUnmounted(() => {
+  if (typeof collab.value == "string") return
+  if (!hasLocalStorage()) return
+
+  // Save used roles
+  lastUsedRoles.value?.push(...collab.value[1])
+  let preSaveRoles = lastUsedRoles.value
+  preSaveRoles?.push(...pinnedLastUsedRoles.value!)
+
+  console.log(preSaveRoles)
+  lastUsedRoles.value = [...new Set(preSaveRoles?.splice(-MAX_LASTUSED))]
+
+  localStorage.setItem("lastUsedRoles", JSON.stringify(lastUsedRoles.value))
+  localStorage.setItem("pinnedLastUsedRoles", JSON.stringify(pinnedLastUsedRoles.value))
 })
 
 </script>
@@ -115,7 +315,7 @@ onMounted(() => {
     >
       <div class="flex relative justify-between items-center py-1 mx-2 -translate-y-0.5">
         <div></div>
-        <h1 class="text-xl font-bold text-center">Editor collabu</h1>
+        <h1 class="text-xl font-bold text-center">{{ editorName }}</h1>
         <img
           src="@/images/close.svg"
           alt=""
@@ -128,12 +328,12 @@ onMounted(() => {
         <div class="flex gap-2">
           <img src="@/images/unknownCube.svg" class="w-10" alt="">
           <input value="Host" type="text" class="px-3 -mr-1 w-24 h-10 text-right bg-black bg-opacity-40 rounded-md" placeholder="Role hosta">: 
-          <input type="text" @change="modifyCreator" :value="typeof levelList.levels[index!].creator == 'object' ? levelList.levels[index!].creator[0][0] : levelList.levels[index!].creator" class="px-3 h-10 bg-black bg-opacity-40 rounded-md max-sm:w-32" placeholder="Jméno hosta">
+          <input type="text" @change="modifyCreator" :value="typeof collab == 'object' ? collab[0][0] : collab" class="px-3 h-10 bg-black bg-opacity-40 rounded-md max-sm:w-32" placeholder="Jméno hosta">
           <button class="box-border bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/searchOpaque.svg" class="p-2 w-10" alt="">
           </button>
         </div>
-        <button v-if="!noMembers" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
+        <button v-if="!roleSidebarOpen" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
           <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
           Upravit role
         </button>
@@ -141,44 +341,63 @@ onMounted(() => {
 
       <main>
         <header class="flex relative justify-between items-center bg-[url(@/images/headerBG.webp)] bg-center p-2 mt-3">
-            <h2 class="text-2xl font-black max-sm:hidden">Členové</h2>
+            <h2 class="text-2xl font-black">Členové</h2>
             <div class="sm:hidden"></div>
             <div class="flex items-center">
-                <button class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button" :class="{'disabled': clipboardContent == undefined}">
+                <button
+                  class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                  :class="{'disabled': clipboardContent == undefined || collab[2].length >= 100}"
+                  :disabled="clipboardContent == undefined || collab[2].length >= 100"
+                  @click="pasteMember"
+                >
                     <img src="@/images/paste.svg" alt="">
                 </button>
                 <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
                   @click="addMember()"
-                  :class="{'disabled': noRoles}"
-                  >
+                  :disabled="noRoles || collab[2].length >= 100"
+                  :class="{'disabled': noRoles || collab[2].length >= 100}"
+                >
                     <img src="@/images/addLevel.svg" alt="">
                 </button>
             </div>
             
             <!-- Socials input box -->
-            <form
-              class="flex absolute top-0 left-0 gap-1 justify-center items-center w-full h-full bg-black bg-opacity-30 backdrop-brightness-50"
-              v-if="socialPicker.open"
-              @submit.prevent="confirmSocial"  
-            >
-              <section class="flex flex-col gap-1">
-                <div class="relative">
-                  <img :src="socialMediaImages[socialMedia[socialPicker.socialIndex].icon]" class="absolute left-3 top-1/2 w-4 opacity-40 -translate-y-1/2" alt="">
-                  <input maxlength="100" v-model="socialPickerURL" type="text" id="socInputBox" class="box-border pl-10 w-80 bg-black bg-opacity-40 rounded-md" :placeholder="socialMedia[socialPicker.socialIndex].name">
-                </div>
-                
-                <!-- Link buttons -->
-                <div class="flex gap-2">
-                  <button type="button" class="flex justify-center items-center w-10 h-5 rounded-sm button" :style="{backgroundColor: website.color}" v-for="(website, index) in socialMedia" @click="socialPicker.socialIndex = index">
-                    <img class="w-4" :src="socialMediaImages[website.icon]">
-                  </button>
-                </div>
-              </section>
-
-              <button type="submit" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/color.svg" class="w-6" alt=""></button>
-              <button type="button" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/close.svg" class="w-6" alt="" @click="socialPicker.open = false"></button>
-
-            </form>
+            <Transition name="fade">
+              <form
+                class="flex absolute bottom-0 left-1/2 -translate-x-1/2 gap-1 justify-center items-center w-[99%] h-[90%] bg-white bg-opacity-10 rounded-md backdrop-blur-sm shadow-drop"
+                v-if="socialPicker.open"
+                @submit.prevent="confirmSocial"  
+              >
+                  <div class="box-border flex relative items-center p-1 w-[30rem] max-w-[70vw] bg-black bg-opacity-40 rounded-md">
+                    <button type="button" @click="openSocialDropdown" class="pr-1 align-middle bg-white bg-opacity-10 rounded-md button">
+                      <img :src="socialMediaImages[socialMedia[socialPicker.socialIndex].icon]" class="absolute left-2 top-1/2 mx-auto w-4 opacity-40 -translate-y-1/2" alt="">
+                      <label for="socInputBox" class="ml-7 text-xs opacity-40 pointer-events-none">{{ socialMedia[socialPicker.socialIndex].baseUrl }}</label>
+                    </button>
+                    <input maxlength="100" :value="socialPickerURL" @change="modifyPickerURL" @paste="modifyPickerURL" type="text" id="socInputBox" class="box-border px-1 ml-1 w-full bg-transparent rounded-sm outline-none focus-visible:bg-opacity-5 focus-visible:bg-white" :placeholder="socialMedia[socialPicker.socialIndex].name">
+                    
+                    <!-- Link buttons -->
+                    <div class="flex absolute -left-2 -bottom-11 gap-2 p-2 rounded-md bg-[#020202]" v-if="socialPicker.dropdownOpen">
+                      <img src="@/images/popupArr.svg" class="absolute -top-4 left-5 w-4 pointer-events-none" alt="">
+                      <button
+                        type="button"
+                        class="flex justify-center items-center w-10 h-5 rounded-sm button" 
+                        :style="{backgroundColor: website.color}"
+                        v-for="website in socialMedia.filter(web => !socialPicker.usedSocials.includes(web.index))"
+                        @click="socialPicker.socialIndex = website.index"
+                      >
+                        <img class="w-4 pointer-events-none" :src="socialMediaImages[website.icon]">
+                      </button>
+                    </div>
+                    
+                  </div>
+                  
+  
+                <button type="submit" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/checkThick.svg" class="w-6" alt=""></button>
+                <button v-if="socialPicker.editing == -1" type="button" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/close.svg" class="w-6" alt="" @click="socialPicker.open = false"></button>
+                <button v-else type="button" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/trash.svg" class="w-6" alt="" @click="removeSocial(socialPicker.creatorIndex, socialPicker.socialIndex)"></button>
+  
+              </form>
+            </Transition>
             
         </header>
 
@@ -187,8 +406,8 @@ onMounted(() => {
             <!-- No roles help -->
             <div v-if="noMembers" class="flex flex-col gap-3 items-center my-auto">
               <img src="../../images/collabDudes.svg" class="w-[20rem] opacity-20" alt="">
-              <h1 v-if="noRoles" class="text-2xl opacity-60">K přidání členů, přidej nějaké role.</h1>
-              <h1 v-else class="text-2xl opacity-60">Zatím jsi nepřidal žádné členy.</h1>
+              <h1 v-if="noRoles" class="text-2xl opacity-60 max-sm:text-lg">K přidání členů, přidej nějaké role.</h1>
+              <h1 v-else class="text-2xl opacity-60 max-sm:text-lg">Zatím jsi nepřidal žádné členy.</h1>
               <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen" v-if="noRoles">
                 <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
                 Přidat role
@@ -197,13 +416,16 @@ onMounted(() => {
 
             <!-- Collab humans -->
             <CollabCreator
-              v-for="(member, pos) in levelList.levels[index].creator?.[2]"
+              v-for="(member, pos) in (collab as CollabData)[2]"
               v-bind="member"
               :pos="pos"
               :level-index="index"
               :role-color="roleColors[member.role]"
               @change-role="pickingRole = $event"
+              @remove-member="removeMember"
+              @copy-member="copyMember"
               @add-social="addSocial"
+              @remove-social="removeSocial(pos, $event)"
             />
         </section>
 
@@ -219,33 +441,30 @@ onMounted(() => {
 
       <!-- Role header -->
       <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
-        <img
-          src="@/images/hideSidebar.svg"
-          alt=""
-          class="w-6 button"
-          @click="roleSidebarOpen = false"
-        />
+        <button @click="roleSidebarOpen = false" class="button">
+          <img
+            src="@/images/hideSidebar.svg"
+            alt=""
+            class="w-6"
+          />
+        </button>
         <h1 class="text-xl font-black text-center">Role</h1>
-        <img
-          src="@/images/addLevel.svg"
-          alt=""
-          class="box-border p-1 w-8 bg-black bg-opacity-40 rounded-md button"
-          @click="addRole()"
-          v-if="pickingRole == -1"
-        />
-        <div v-else></div>
+        <button class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="pickingRole > -1" @click="addRole()">
+          <img
+            src="@/images/addLevel.svg"
+            alt=""
+            class="box-border p-1 w-8"
+          />
+        </button>
       </header>
-      <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex justify-center items-center flex-col gap-2 p-2 overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
+      <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
         
         <!-- Presets and role help -->
-        <article class="flex flex-col gap-2 justify-center items-center w-full" v-if="noRoles">
-          <div class="opacity-40">
-            <img src="@/images/plus.svg" alt="">
-            <p></p>
-          </div>
-          <hr>
+        <article class="flex flex-col gap-2 justify-center items-center my-auto w-full" v-if="noRoles">
+          <p class="text-3xl opacity-40">Návrhy</p>
+          <hr class="mb-3 w-9/12 h-0.5 bg-white border-none opacity-10">
           <button
-            v-for="preset in ['Dekorace', 'Layout', 'Optimalizace']"
+            v-for="preset in ['Layout', 'Dekorace', 'Testování', 'Optimalizace']"
             @click="addRole(preset)"
             class="w-3/5 text-xl text-white text-opacity-40 bg-black bg-opacity-40 rounded-md button"
           >
@@ -254,10 +473,10 @@ onMounted(() => {
         </article>
 
         <!-- Role bubble -->
-        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in levelList.levels[index].creator?.[1]" class="flex p-1 h-9 text-white rounded-md transition-colors items-middle shadow-drop h-max" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
+        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]" class="flex p-1 h-9 text-white rounded-md transition-colors items-middle shadow-drop" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
           <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" placeholder="Jméno role" class="px-1 mr-2 bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
-          <div class="flex gap-1" v-if="pickingRole == -1">
-            <button class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm button" @click="levelList.levels[index].creator?.[1].splice(pos, 1)"><img src="@/images/trash.svg" alt=""></button>
+          <div class="flex gap-1">
+            <button :disabled="pickingRole > -1 || oneRoleAndHasMembers" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button" @click="(collab as CollabData)[1].splice(pos, 1); makeRoleColors()"><img src="@/images/trash.svg" alt=""></button>
           </div>
         </button>
       </main>
@@ -269,31 +488,22 @@ onMounted(() => {
         </header>
   
         <!-- Recently used content -->
-        <main class="h-52 bg-[url(@/images/fade.webp)] bg-repeat-x overflow-y-auto">
+        <main class="h-52 overflow-x-clip bg-[url(@/images/fade.webp)] bg-repeat-x overflow-y-auto flex flex-col gap-2 py-2">
   
           <!-- History empty help -->
-          <article class="flex flex-col gap-4 justify-center items-center h-full opacity-20">
+          <article class="flex flex-col gap-4 justify-center items-center h-full opacity-20" v-if="!allLastUsedRoles.length">
             <img src="@/images/time.svg" class="w-28" alt="">
             <h2 class="w-52 text-lg leading-tight text-center">Tady se objeví tvé naposledy vytvořené role!</h2>
           </article>
+
+          <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md bg-slate-900 shadow-drop" v-for="role in allLastUsedRoles">
+            <span class="w-full">{{ role }}</span>
+            <button class="bg-black bg-opacity-40 rounded-sm button"><img src="@/images/pin.svg" alt="" class="box-border p-1 w-7" :class="{'opacity-30': !pinnedLastUsedRoles?.includes(role)}" @click="pinRole(role)"></button>
+            <button class="bg-black bg-opacity-40 rounded-sm button"><img src="@/images/trash.svg" alt="" class="box-border p-1 w-7" @click="removeLastUsedRole(role)"></button>
+          </button>
   
         </main>
       </section>
     </aside>
   </dialog>
 </template>
-
-<style>
-
-#socInputBox::after {
-  content: "";
-  width: 1rem;
-  height: 1rem;
-  background-image: url(@/images/socials/link.svg);
-  background-size: cover;
-  position: absolute;
-  top: 50%;
-  left: 1rem;
-}
-
-</style>
