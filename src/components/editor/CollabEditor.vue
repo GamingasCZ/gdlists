@@ -9,11 +9,13 @@ import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSi
 import axios from 'axios';
 
 const props = defineProps({
-    index: {type: Number, required: true}
+    index: {type: Number, required: true},
+    clipboard: {type: Object}
 })
 
 const emit = defineEmits<{
   (e: "closePopup"): void;
+  (e: "sendClipboard", memberClipboard: [number, string, CollabHumans]): void;
 }>();
 
 var collab = ref(levelList.value.levels[props.index!].creator)
@@ -153,6 +155,7 @@ function copyMember(position: number) {
 
     collab.value[2][position] // human data >:)
   ]
+  emit('sendClipboard', clipboardContent.value)
 }
 
 function pasteMember() {
@@ -183,7 +186,7 @@ const oneRoleAndHasMembers = computed(() =>
 
 const localStrg = hasLocalStorage()
 const pickingRole = ref(-1)
-const clipboardContent = ref<[number, string, CollabHumans]>()
+const clipboardContent = ref<[number, string, CollabHumans]>(props.clipboard)
 
 /*
 =======
@@ -346,16 +349,16 @@ onUnmounted(() => {
             <div class="flex items-center">
                 <button
                   class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
-                  :class="{'disabled': clipboardContent == undefined || collab[2].length >= 100}"
-                  :disabled="clipboardContent == undefined || collab[2].length >= 100"
+                  :class="{'disabled': typeof collab != 'string' && (clipboardContent == undefined || collab[2].length >= 100)}"
+                  :disabled="typeof collab != 'string' && (clipboardContent == undefined || collab[2].length >= 100)"
                   @click="pasteMember"
                 >
                     <img src="@/images/paste.svg" alt="">
                 </button>
                 <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
                   @click="addMember()"
-                  :disabled="noRoles || collab[2].length >= 100"
-                  :class="{'disabled': noRoles || collab[2].length >= 100}"
+                  :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
+                  :class="{'disabled': typeof collab != 'string' && (noRoles || collab[2].length >= 100)}"
                 >
                     <img src="@/images/addLevel.svg" alt="">
                 </button>

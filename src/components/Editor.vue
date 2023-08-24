@@ -144,6 +144,7 @@ const errorStamp = ref(-1)
 const errorDblclickHelp = ref(false)
 const formShaking = ref(false)
 const notifStamp = ref(Math.random())
+const collabClipboard = ref()
 
 const loadBackup = () => {
   loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, <any>backupData.value.choseHidden)
@@ -350,6 +351,8 @@ function removeList() {
     <CollabEditor
       v-if="collabEditorOpen && levelList.levels.length > 0"
       :index="currentlyOpenedCard"
+      :clipboard="collabClipboard"
+      @send-clipboard="collabClipboard = $event"
       @close-popup="collabEditorOpen = false"
     />
   </Transition>
