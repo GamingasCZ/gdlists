@@ -434,9 +434,11 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   }
 }
 
-section {
-  animation: appear 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
-  transform-origin: top;
+@media (prefers-reduced-motion: no-preference) {
+  section {
+    animation: appear 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
+    transform-origin: top;
+  }
 }
 
 </style>

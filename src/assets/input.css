@@ -35,9 +35,12 @@ body {
   @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins] flex flex-col justify-between
 }
 
-.button {
-  @apply transition-transform scale-100 outline-none cursor-pointer duration-[50ms] ease-linear hover:scale-105 active:scale-110 
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    @apply transition-transform scale-100 outline-none duration-[50ms] ease-linear hover:scale-105 active:scale-110 
+  }
 }
+.button { @apply cursor-pointer}
 
 .selectOutline:focus-visible {
   @apply outline outline-1 outline-white

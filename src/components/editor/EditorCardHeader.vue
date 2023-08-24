@@ -81,6 +81,9 @@ if (props.data.tags != undefined) {
 </template>
 
 <style>
-.cardHeader { transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(0); }
-.cardHeader[data-moving="0"]:hover { transform: translateX(0.5rem); }
+@media (prefers-reduced-motion: no-preference) {
+    .cardHeader { transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(0); }
+    .cardHeader[data-moving="0"]:hover { transform: translateX(0.5rem); }
+}
+
 </style>

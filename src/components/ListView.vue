@@ -349,8 +349,10 @@ const listActions = (action: string) => {
   }
 }
 
-.levelCard {
-  animation: slideIn 0.4s ease forwards;
-  opacity: 0;
+@media (prefers-reduced-motion: no-preference) {
+  .levelCard {
+    animation: slideIn 0.4s ease forwards;
+    opacity: 0;
+  }
 }
 </style>

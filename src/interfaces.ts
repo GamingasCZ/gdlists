@@ -79,7 +79,7 @@ export interface CollabRoles {
 export interface CollabHumans {
   name: string;
   role: number;
-  color: string;
+  color: [number, number, number] | string;
   part: [number, number];
   socials: HumanSocialLink[];
   verified: number | number[];
