@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
+import { RouterLink } from "vue-router";
 import { nextTick, onMounted, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
-import { scale } from "chroma-js";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
 
@@ -26,10 +25,26 @@ watch(props, () => {
 const scrollerWidth = ref(0)
 const scrollerXOff = ref(0)
 const scrollerInd = ref(0)
+
+// Modify line size on content resize (lang change)
 const locale = useI18n().locale
 watch(locale, () => {
-  let firstLink = document.querySelector(".websiteLink") as HTMLLinkElement
-  scrollerWidth.value = firstLink.clientWidth
+  nextTick(() => {
+    let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
+    scrollerXOff.value = selectedLink.offsetLeft 
+    scrollerWidth.value = selectedLink.clientWidth 
+  })
+})
+
+onMounted(() => {
+  // Modify line size on content resize (lang change, mobile view)
+  let ro = new ResizeObserver(() => {
+    let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
+    scrollerXOff.value = selectedLink.offsetLeft 
+    scrollerWidth.value = selectedLink.clientWidth 
+  });
+
+  ro.observe(document.querySelectorAll(".websiteLink")[scrollerInd.value]);
 })
 
 const modScrollerWidth = (e: Event) => {
@@ -52,7 +67,7 @@ const localStorg = ref(hasLocalStorage())
   >
     <RouterLink to="/"><Logo class="w-10 h-10 button"/></RouterLink>
     <section
-      class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
+      class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem] max-md:gap-2 "
       :class="{'opacity-50 pointer-events-none': !isOnline}"
     >
       <hr class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform" :style="{transform: `scaleX(${scrollerWidth}) translateX(${scrollerXOff/scrollerWidth}px)`}">
@@ -61,7 +76,7 @@ const localStorg = ref(hasLocalStorage())
         v-if="localStorg"
         @click="modScrollerWidth"
         data-ind="0"
-        class="flex flex-col gap-2 items-center transition-colors md:flex-row md:bg-opacity-20 md:bg-black md:px-4 websiteLink"
+        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors md:flex-row md:px-4 websiteLink"
         :class="{'md:!bg-opacity-40': scrollerInd == 0}"
         @mousedown="resetList"
         ><img src="../images/editorMobHeader.svg" alt="" class="w-6" />{{
@@ -72,7 +87,7 @@ const localStorg = ref(hasLocalStorage())
         to="/browse"
         @click="modScrollerWidth"
         data-ind="1"
-        class="flex flex-col gap-2 items-center transition-colors md:flex-row md:bg-opacity-20 md:bg-black md:px-4 websiteLink"
+        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors md:flex-row md:px-4 websiteLink"
         :class="{'md:!bg-opacity-40': scrollerInd == 1}"
         ><img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.lists")
@@ -83,7 +98,7 @@ const localStorg = ref(hasLocalStorage())
         v-if="localStorg"
         @click="modScrollerWidth"
         data-ind="2"
-        class="flex flex-col gap-2 items-center transition-colors md:flex-row md:bg-opacity-20 md:bg-black md:px-4 websiteLink"
+        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors md:flex-row md:px-4 websiteLink"
         :class="{'md:!bg-opacity-40': scrollerInd == 2}"
         ><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.saved")
