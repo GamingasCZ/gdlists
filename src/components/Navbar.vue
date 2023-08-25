@@ -57,6 +57,10 @@ const modScrollerWidth = (e: Event) => {
   scrollerXOff.value = link.offsetLeft
 }
 
+const scrollerHome = () => {
+  scrollerInd.value = -1
+}
+
 const localStorg = ref(hasLocalStorage())
 
 </script>
@@ -65,19 +69,23 @@ const localStorg = ref(hasLocalStorage())
   <nav
     class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-drop overflow-x-clip bg-greenGradient"
   >
-    <RouterLink to="/"><Logo class="w-10 h-10 button"/></RouterLink>
+    <!-- Home link -->
+    <RouterLink to="/" @click="scrollerHome" class="relative">
+      <Logo class="w-10 h-10 button"/>
+    </RouterLink>
+    
     <section
       class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem] max-md:gap-2 "
       :class="{'opacity-50 pointer-events-none': !isOnline}"
     >
-      <hr class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform" :style="{transform: `scaleX(${scrollerWidth}) translateX(${scrollerXOff/scrollerWidth}px)`}">
-      <RouterLink
+    <hr class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform" :style="{transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff/scrollerWidth}px)`}">
+    <RouterLink
         to="/editor"
         v-if="localStorg"
         @click="modScrollerWidth"
         data-ind="0"
-        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors md:flex-row md:px-4 websiteLink"
-        :class="{'md:!bg-opacity-40': scrollerInd == 0}"
+        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors hover:bg-opacity-40 md:flex-row md:px-4 websiteLink"
+        :class="{'md:!bg-opacity-60': scrollerInd == 0}"
         @mousedown="resetList"
         ><img src="../images/editorMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.editor")
@@ -87,8 +95,8 @@ const localStorg = ref(hasLocalStorage())
         to="/browse"
         @click="modScrollerWidth"
         data-ind="1"
-        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors md:flex-row md:px-4 websiteLink"
-        :class="{'md:!bg-opacity-40': scrollerInd == 1}"
+        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors hover:bg-opacity-40 md:flex-row md:px-4 websiteLink"
+        :class="{'md:!bg-opacity-60': scrollerInd == 1}"
         ><img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.lists")
         }}</RouterLink
@@ -98,8 +106,8 @@ const localStorg = ref(hasLocalStorage())
         v-if="localStorg"
         @click="modScrollerWidth"
         data-ind="2"
-        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors md:flex-row md:px-4 websiteLink"
-        :class="{'md:!bg-opacity-40': scrollerInd == 2}"
+        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors hover:bg-opacity-40 md:flex-row md:px-4 websiteLink"
+        :class="{'md:!bg-opacity-60': scrollerInd == 2}"
         ><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.saved")
         }}</RouterLink
