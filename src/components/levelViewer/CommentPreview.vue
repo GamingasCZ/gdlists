@@ -30,7 +30,7 @@ const pfp = ref("")
 const username = ref("")
 
 // Endgame list special comment
-if (props.uid == -2) {
+if (props.uid == '-2') {
   import("@/images/among.webp").then(res => pfp.value = res.default)
   username.value = props.username
 }
@@ -70,7 +70,8 @@ parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
 </script>
 
 <template>
-    <section class="mb-2 w-full break-words">
+    <section class="relative mb-2 w-full break-words">
+      <div v-if="uid == '-2'" class="bg-[url(@/images/flames.webp)] absolute z-10 opacity-40 mix-blend-hard-light bottom-0 left-0 w-full h-full bg-repeat-x bg-contain"></div>
       <header class="flex gap-2 items-center">
         <img :src="pfp" class="w-11 rounded-full pointer-events-none" alt="">
         <div class="inline">
