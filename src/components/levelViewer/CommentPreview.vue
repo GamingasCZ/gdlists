@@ -26,11 +26,16 @@ interface CommentUser {
 
 const props = defineProps<CommentFetchResponse>()
 
-const pfp = ref<string>("")
-const username = ref<string>("")
+const pfp = ref("")
+const username = ref("")
 
+// Endgame list special comment
+if (props.uid == -2) {
+  import("@/images/among.webp").then(res => pfp.value = res.default)
+  username.value = props.username
+}
 // Old users
-if (props.username != "") {
+else if (props.username != "") {
   import("@/images/oldPFP.png").then(res => pfp.value = res.default)
   username.value = props.username
 }
