@@ -92,6 +92,29 @@ switch (array_keys($_GET)[0]) {
         }
         break;
     }
+    case "userDataFetch": {
+        $accountIDReq = post("https://www.boomlings.com/database/getGJUsers20.php", ["secret"=>"Wmfd2893gb7","str"=>$_GET["username"]], []);
+        if ($accountIDReq == "-1") die("-1");
+
+        $accountIDData = explode(":", $accountIDReq);
+        $userReq = post("https://www.boomlings.com/database/getGJUserInfo20.php", ["secret"=>"Wmfd2893gb7","targetAccountID"=>$accountIDData[21]], []);
+        $userData = explode(":", $userReq);
+        for ($i=0; $i < sizeof($userData); $i++) { 
+            array_splice($userData, $i, 1);
+        }
+
+        $returnData["username"] = $userData[0];
+        $returnData["iconID"] = intval($userData[14])-1;
+        $returnData["color1"] = intval($userData[4]);
+        $returnData["color2"] = intval($userData[5]);
+        $returnData["glow"] = $userData[20] == 1;
+        $returnData["youtube"] = $userData[13];
+        $returnData["twitter"] = $userData[26];
+        $returnData["twitch"] = $userData[27];
+        $returnData["stars"] = intval($userData[6]);
+        $returnData["demons"] = intval($userData[8]);
+        $returnData["cp"] = intval($userData[9]);
+    }
 }
 
 
