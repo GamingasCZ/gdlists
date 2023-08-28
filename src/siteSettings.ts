@@ -1,5 +1,5 @@
 import { ref, watch } from "vue";
-import type { viewedPopups, viewedPopups } from "./interfaces";
+import type { viewedPopup } from "./interfaces";
 
 export const SETTINGS = ref({
   scrolling: 1,
@@ -23,9 +23,9 @@ export const hasLocalStorage = () => {
   }
 }
 
-export var viewedPopups: viewedPopups;
+export var viewedPopups: viewedPopup;
 if (hasLocalStorage()) {
-  let popupsViewed: viewedPopups | null = JSON.parse(localStorage.getItem("popupsViewed")!)
+  let popupsViewed: viewedPopup | null = JSON.parse(localStorage.getItem("popupsViewed")!)
   if (popupsViewed == null) {
     localStorage.setItem("popupsViewed", "{}")
     viewedPopups = {}

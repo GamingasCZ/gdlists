@@ -143,8 +143,9 @@ export interface LevelSearchResponse {
   cp: number;
 }
 
-export interface viewedPopups {
+export interface viewedPopup {
   diffGuesserHelp?: boolean
+  oldListsRedirectHelp?: boolean
 }
 
 export interface ytSearchDetails {
