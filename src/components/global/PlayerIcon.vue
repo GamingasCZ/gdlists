@@ -8,34 +8,39 @@ const props = defineProps<{
     icon: number
     col1: string
     col2: string
+    glow: boolean
+    quality: number
 }>()
-
-const quality = 5
 
 const canvas = ref<HTMLCanvasElement>()
 let visibleCtx: CanvasRenderingContext2D;
 let suffixes = ["glow_001","2_001", "001","extra_001"]
 let images: object = {}
 const iconIndex = props.icon.toString().padStart(2,"0")
-const offscreenCanvases: OffscreenCanvas = new OffscreenCanvas(128/quality,128/quality)
+const offscreenCanvases: OffscreenCanvas = new OffscreenCanvas(128/props.quality,128/props.quality)
 
 function placeImage(image:HTMLImageElement | null) {
     if (image == null) return
     let imageIndex = parseInt(image.dataset.index!)
     let ctx = offscreenCanvases.getContext('2d')
     if (ctx == undefined) return
-
+    if (!props.glow && suffixes[imageIndex] == 'glow_001') {
+        const imageData = ctx.getImageData(0, 0, offscreenCanvases.width, offscreenCanvases.height);
+        ctx.putImageData(imageData, 0,0)
+        return offscreenCanvases.transferToImageBitmap()
+    }
+    
     let iconPath = `player_${iconIndex}_${suffixes[imageIndex]}.png`
     ctx.drawImage(
         image,
         
         // Place in the middle and apply offset
-        (128/quality-offsets[iconPath].spriteSize[0]/quality)/2+offsets[iconPath].spriteOffset[0]/quality,
-        (128/quality-offsets[iconPath].spriteSize[1]/quality)/2-offsets[iconPath].spriteOffset[1]/quality,
+        (128/props.quality-offsets[iconPath].spriteSize[0]/props.quality)/2+offsets[iconPath].spriteOffset[0]/props.quality,
+        (128/props.quality-offsets[iconPath].spriteSize[1]/props.quality)/2-offsets[iconPath].spriteOffset[1]/props.quality,
         
         // Apply scaling
-        offsets[iconPath].spriteSize[0]/quality,
-        offsets[iconPath].spriteSize[1]/quality,
+        offsets[iconPath].spriteSize[0]/props.quality,
+        offsets[iconPath].spriteSize[1]/props.quality,
     );
 
     const imageData = ctx.getImageData(0, 0, offscreenCanvases.width, offscreenCanvases.height);
@@ -84,10 +89,10 @@ let imagesLoaded = 0
 function drawOnVisibleCanvas() {
     imagesLoaded += 1
     if (imagesLoaded == 4)
-        ['2_001','glow_001', '001', 'extra_001'].forEach(suffix => visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0))
+        suffixes.forEach(suffix => visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0))
 }
 </script>
 
 <template>
-    <canvas :width="128/quality" :height="128/quality" ref="canvas"></canvas>
+    <canvas :width="128/props.quality" :height="128/props.quality" ref="canvas"></canvas>
 </template>

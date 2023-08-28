@@ -6,7 +6,6 @@ import type { CollabData, CollabHumans } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import { hasLocalStorage } from '@/siteSettings';
 import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
-import axios from 'axios';
 
 const props = defineProps({
     index: {type: Number, required: true},

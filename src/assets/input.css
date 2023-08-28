@@ -41,6 +41,9 @@ body {
   }
 }
 .button { @apply cursor-pointer}
+.shake {
+  animation: shake 0.2s infinite;
+}
 
 .selectOutline:focus-visible {
   @apply outline outline-1 outline-white

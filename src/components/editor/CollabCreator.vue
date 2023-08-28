@@ -5,7 +5,10 @@ import chroma from 'chroma-js';
 import { ref } from 'vue';
 import { socialMediaImages } from './socialSites';
 import { socialMedia } from './socialSites';
-import type { CollabData } from '@/interfaces';
+import type { CollabData, userDataFetchResponse } from '@/interfaces';
+import axios from 'axios';
+import PlayerIcon from '../global/PlayerIcon.vue';
+import colors from "../../../public/icons/colors.json"
 
 const emit = defineEmits<{
     (e: 'changeRole', creatorPos: number): void,
@@ -15,7 +18,7 @@ const emit = defineEmits<{
     (e: 'removeSocial', position: number): void,
 }>()
 
-defineProps<{
+const props = defineProps<{
     name: string;
     role: number;
     color: [number, number, number];
@@ -32,13 +35,48 @@ defineProps<{
 
 const colorPickerOpen = ref(false)
 
+const searchingCreator = ref(false)
+const noResults = ref(false)
+function getCreator() {
+    if (typeof levelList.value.levels[props.levelIndex].creator == 'string') return
+
+    searchingCreator.value = true
+    let searchUsername = levelList.value.levels[props.levelIndex].creator[2][props.pos].name
+    axios.get(
+        import.meta.env.VITE_API+"/rubLevelData.php",
+        {params: {userDataFetch: '', username: searchUsername}}
+    ).then(res => {
+        let userData: userDataFetchResponse = res.data
+        // User not found
+        if (res.data == -1) {
+            noResults.value = true
+            setTimeout(() => noResults.value = false, 500);
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].name = ""
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].verified = 0
+        }
+        else {
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].name = userData.username
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].color = chroma.rgb(...Object.values(colors[userData.color1])).hsl()
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].socials = userData.socials
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].verified = [
+                userData.iconID,
+                userData.color1,
+                userData.color2,
+                userData.glow
+            ]
+        }
+        setTimeout(() => searchingCreator.value = false, 5000)
+    }).catch(() => setTimeout(() => searchingCreator.value = false, 5000))
+}
+
 </script>
 
 <template>
     <section class="flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20">
         <main class="flex gap-2 justify-between items-center w-full">
-            <div class="flex gap-1 items-center">
-                <img src="@/images/unknownCube.svg" class="w-10" alt="">
+            <div class="flex gap-1 items-center" :class="{'shake': noResults}">
+                <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="verified == 0">
+                <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="4"/>
                 <div class="flex flex-col gap-1">
                     <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[levelIndex].creator as CollabData)[2][pos].name" placeholder="Jméno člena">
                     <section class="flex gap-1">
@@ -55,7 +93,7 @@ const colorPickerOpen = ref(false)
                         </button>
                     </section>
                 </div>
-                <button class="bg-black bg-opacity-40 rounded-md">
+                <button class="bg-black bg-opacity-40 rounded-md transition-opacity button disabled:opacity-50" :disabled="searchingCreator" @click="getCreator">
                     <img src="@/images/searchOpaque.svg" class="box-border p-1 w-8" alt="">
                 </button>
             </div>

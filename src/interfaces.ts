@@ -82,7 +82,7 @@ export interface CollabHumans {
   color: [number, number, number] | string;
   part: [number, number];
   socials: HumanSocialLink[];
-  verified: number | number[];
+  verified: 0 | number[];
 }
 
 interface HumanSocialLink {
@@ -140,6 +140,18 @@ export interface LevelSearchResponse {
   name: string;
   author: string;
   difficulty: number;
+  cp: number;
+}
+
+export interface userDataFetchResponse {
+  username: string;
+  iconID: number;
+  color1: number;
+  color2: number;
+  glow: boolean;
+  socials: [number, string][]
+  stars: number;
+  demons: number;
   cp: number;
 }
 
