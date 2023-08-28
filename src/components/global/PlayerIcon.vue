@@ -10,7 +10,7 @@ const props = defineProps<{
     col2: string
 }>()
 
-const quality = 2
+const quality = 5
 
 const canvas = ref<HTMLCanvasElement>()
 let visibleCtx: CanvasRenderingContext2D;
@@ -30,8 +30,8 @@ function placeImage(image:HTMLImageElement | null) {
         image,
         
         // Place in the middle and apply offset
-        (128/quality-offsets[iconPath].spriteSize[0]/quality)/quality+offsets[iconPath].spriteOffset[0]/quality,
-        (128/quality-offsets[iconPath].spriteSize[1]/quality)/quality-offsets[iconPath].spriteOffset[1]/quality,
+        (128/quality-offsets[iconPath].spriteSize[0]/quality)/2+offsets[iconPath].spriteOffset[0]/quality,
+        (128/quality-offsets[iconPath].spriteSize[1]/quality)/2-offsets[iconPath].spriteOffset[1]/quality,
         
         // Apply scaling
         offsets[iconPath].spriteSize[0]/quality,
@@ -83,12 +83,8 @@ onMounted(() => {
 let imagesLoaded = 0
 function drawOnVisibleCanvas() {
     imagesLoaded += 1
-    if (imagesLoaded == 4) {
-        visibleCtx.drawImage(placeImage(images['2_001'])!, 0, 0)
-        visibleCtx.drawImage(placeImage(images['glow_001'])!, 0, 0)
-        visibleCtx.drawImage(placeImage(images['001'])!, 0, 0)
-        visibleCtx.drawImage(placeImage(images['extra_001'])!, 0, 0)
-    }
+    if (imagesLoaded == 4)
+        ['2_001','glow_001', '001', 'extra_001'].forEach(suffix => visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0))
 }
 </script>
 
