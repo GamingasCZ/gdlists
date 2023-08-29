@@ -8,7 +8,7 @@ import { socialMedia } from './socialSites';
 import type { CollabData, userDataFetchResponse } from '@/interfaces';
 import axios from 'axios';
 import PlayerIcon from '../global/PlayerIcon.vue';
-import colors from "../../../public/icons/colors.json"
+import colors from "../../images/icons/colors.json"
 
 const emit = defineEmits<{
     (e: 'changeRole', creatorPos: number): void,
@@ -31,6 +31,7 @@ const props = defineProps<{
     pos: number;
     levelIndex: number;
     roleColor: string;
+    host: boolean;
 }>()
 
 const colorPickerOpen = ref(false)
@@ -76,7 +77,7 @@ function getCreator() {
         <main class="flex gap-2 justify-between items-center w-full">
             <div class="flex gap-1 items-center" :class="{'shake': noResults}">
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="verified == 0">
-                <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="4"/>
+                <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
                     <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[levelIndex].creator as CollabData)[2][pos].name" placeholder="Jméno člena">
                     <section class="flex gap-1">

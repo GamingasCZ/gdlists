@@ -79,5 +79,17 @@ const screenWidth = ref(window.innerWidth)
         <option :value="180">{{ $t('settingsMenu.everyMin', [3]) }}</option>
       </select>
     </section>
+    <section
+      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
+    >
+      Kvalita ikonek
+      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.iconQuality">
+        <option :value="-2">Negenerovat</option>
+        <option :value="-1">Bez barev</option>
+        <option :value="6">Nízká</option>
+        <option :value="4">Výchozí</option>
+        <option :value="2">Vysoká</option>
+      </select>
+    </section>
   </div>
 </template>

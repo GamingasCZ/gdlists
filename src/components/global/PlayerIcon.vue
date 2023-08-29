@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import chroma from 'chroma-js';
 import { onMounted, ref } from 'vue';
-import offsets from "../../../public/icons/offsets.json";
-import colors from "../../../public/icons/colors.json";
+import offsets from "../../images/icons/offsets.json";
+import colors from "../../images/icons/colors.json";
+import { SETTINGS } from "@/siteSettings";
 
 const props = defineProps<{
     icon: number
@@ -12,12 +13,13 @@ const props = defineProps<{
     quality: number
 }>()
 
+let quality = SETTINGS.value.iconQuality < 0 ? 4 : props.quality*SETTINGS.value.iconQuality
 const canvas = ref<HTMLCanvasElement>()
 let visibleCtx: CanvasRenderingContext2D;
 let suffixes = ["glow_001","2_001", "001","extra_001"]
 let images: object = {}
 const iconIndex = props.icon.toString().padStart(2,"0")
-const offscreenCanvases: OffscreenCanvas = new OffscreenCanvas(128/props.quality,128/props.quality)
+const offscreenCanvases: OffscreenCanvas = new OffscreenCanvas(128/quality,128/quality)
 
 function placeImage(image:HTMLImageElement | null) {
     if (image == null) return
@@ -35,18 +37,18 @@ function placeImage(image:HTMLImageElement | null) {
         image,
         
         // Place in the middle and apply offset
-        (128/props.quality-offsets[iconPath].spriteSize[0]/props.quality)/2+offsets[iconPath].spriteOffset[0]/props.quality,
-        (128/props.quality-offsets[iconPath].spriteSize[1]/props.quality)/2-offsets[iconPath].spriteOffset[1]/props.quality,
+        (128/quality-offsets[iconPath].spriteSize[0]/quality)/2+offsets[iconPath].spriteOffset[0]/quality,
+        (128/quality-offsets[iconPath].spriteSize[1]/quality)/2-offsets[iconPath].spriteOffset[1]/quality,
         
         // Apply scaling
-        offsets[iconPath].spriteSize[0]/props.quality,
-        offsets[iconPath].spriteSize[1]/props.quality,
+        offsets[iconPath].spriteSize[0]/quality,
+        offsets[iconPath].spriteSize[1]/quality,
     );
 
     const imageData = ctx.getImageData(0, 0, offscreenCanvases.width, offscreenCanvases.height);
     const data = imageData.data;
 
-    if (imageIndex != 3) { // Extras are always white
+    if (imageIndex != 3 && SETTINGS.value.iconQuality > 0) { // Extras are always white
         let newCol;
         // Recoloring icon parts
         for (let j = 0; j < data.length; j += 4) {
@@ -69,19 +71,20 @@ onMounted(() => {
 
     let i = 0
     suffixes.forEach(suffix => {
-        let image = new Image()
-        image.src = new URL(`/public/icons/player_${iconIndex}_${suffix}.webp`, import.meta.url).href;
-        image.dataset.index = (i).toString()
-        i += 1
-
-        image.onload = () => {
-            images[suffix] = image
-            drawOnVisibleCanvas()
-        }
-        image.onerror = () => {
+        import(`../../images/icons/player_${iconIndex}_${suffix}.webp`).then(res => {
+            let image = new Image()
+            image.src = res.default;
+            image.dataset.index = (i).toString()
+            i += 1
+            
+            image.onload = () => {
+                images[suffix] = image
+                drawOnVisibleCanvas()
+            }
+        }).catch(() => {
             images[suffix] = null
             drawOnVisibleCanvas()
-        }
+        })
     })
 })
 
@@ -94,5 +97,6 @@ function drawOnVisibleCanvas() {
 </script>
 
 <template>
-    <canvas :width="128/props.quality" :height="128/props.quality" ref="canvas"></canvas>
+    <canvas :width="128/quality" :height="128/quality" ref="canvas" v-if="SETTINGS.iconQuality != -2"></canvas>
+    <div class="min-w-[8px] min-h-[8px] rounded-md" :style="{backgroundColor: `rgb(${Object.values(colors[col1]).join(', ')})`}" v-else></div>
 </template>

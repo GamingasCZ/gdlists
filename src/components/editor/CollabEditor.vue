@@ -186,6 +186,7 @@ const oneRoleAndHasMembers = computed(() =>
 const localStrg = hasLocalStorage()
 const pickingRole = ref(-1)
 const clipboardContent = ref<[number, string, CollabHumans]>(props.clipboard)
+const sortDropdownOpen = ref(false)
 
 /*
 =======
@@ -290,11 +291,9 @@ onUnmounted(() => {
 
   // Save used roles
   lastUsedRoles.value?.push(...collab.value[1])
-  let preSaveRoles = lastUsedRoles.value
-  preSaveRoles?.push(...pinnedLastUsedRoles.value!)
+  lastUsedRoles.value = lastUsedRoles.value?.filter(lastUsedRole => !pinnedLastUsedRoles.value?.includes(lastUsedRole))
 
-  console.log(preSaveRoles)
-  lastUsedRoles.value = [...new Set(preSaveRoles?.splice(-MAX_LASTUSED))]
+  lastUsedRoles.value = [...new Set(lastUsedRoles.value?.splice(-MAX_LASTUSED))]
 
   localStorage.setItem("lastUsedRoles", JSON.stringify(lastUsedRoles.value))
   localStorage.setItem("pinnedLastUsedRoles", JSON.stringify(pinnedLastUsedRoles.value))
@@ -327,14 +326,30 @@ onUnmounted(() => {
       </div>
 
       <header class="flex gap-2 justify-between items-center mx-2 mt-2">
-        <div class="flex gap-2">
-          <img src="@/images/unknownCube.svg" class="w-10" alt="">
-          <input value="Host" type="text" class="px-3 -mr-1 w-24 h-10 text-right bg-black bg-opacity-40 rounded-md" placeholder="Role hosta">: 
-          <input type="text" @change="modifyCreator" :value="typeof collab == 'object' ? collab[0][0] : collab" class="px-3 h-10 bg-black bg-opacity-40 rounded-md max-sm:w-32" placeholder="Jméno hosta">
+        
+        <!-- Host input box -->
+        <div class="flex gap-2 items-center">
+          <img src="@/images/unknownCube.svg" class="w-11" alt="">
+          <input value="Host" type="text" class="px-3 -mr-1 w-24 h-11 text-right bg-black bg-opacity-40 rounded-md" placeholder="Role hosta">: 
+          <div class="flex flex-col gap-1">
+              <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[index].creator as CollabData)[2][0].name" placeholder="Jméno člena">
+              <section class="flex gap-1" v-if="(typeof collab != 'string')">
+                  <button
+                      class="w-8 rounded-sm button" :style="{backgroundColor: socialMedia[site[0]].color}"
+                      v-for="(site, index) in collab?.[2]?.[0]?.socials"
+                  >
+                      <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="box-border p-0.5 mx-auto h-4" alt="">
+                  </button>
+                  <button class="w-8 bg-gray-600 rounded-sm button" v-if="'pp'.length < 5">
+                      <img src="../../images/plus.svg" class="box-border p-0.5 mx-auto h-4" alt="">
+                  </button>
+              </section>
+          </div>
           <button class="box-border bg-black bg-opacity-40 rounded-md button">
-              <img src="@/images/searchOpaque.svg" class="p-2 w-10" alt="">
+              <img src="@/images/searchOpaque.svg" class="box-border p-1 w-8" alt="">
           </button>
         </div>
+
         <button v-if="!roleSidebarOpen" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
           <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
           Upravit role
@@ -353,6 +368,27 @@ onUnmounted(() => {
                   @click="pasteMember"
                 >
                     <img src="@/images/paste.svg" alt="">
+                </button>
+                <button
+                  class="box-border relative z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                  :class="{'disabled': (typeof collab == 'string')}"
+                  :disabled="(typeof collab == 'string')"
+                  @click="sortDropdownOpen = !sortDropdownOpen"
+                >
+                    <img src="@/images/sort.svg" alt="">
+                    <Transition name="fade">
+                      <div v-if="sortDropdownOpen" class="flex absolute -bottom-40 -left-1/2 flex-col gap-1 p-1 w-40 text-center bg-black bg-opacity-90 rounded-md backdrop-blur-sm -translate-x-11">
+                        <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 opacity-90 -translate-x-1.5" alt="">
+                        <h2 class="font-bold">Seřadit podle</h2>
+                        <button v-for="sort in ['Začátku části', 'Jména', 'Role']" class="block p-1 w-full text-white bg-white bg-opacity-10 rounded-md button">{{ sort }}</button>
+                      </div>
+                    </Transition>
+                </button>
+                <button
+                  class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                  @click="pasteMember"
+                >
+                    <img src="@/images/addfromFaves.svg" alt="">
                 </button>
                 <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
                   @click="addMember()"
@@ -423,6 +459,7 @@ onUnmounted(() => {
               :pos="pos"
               :level-index="index"
               :role-color="roleColors[member.role]"
+              :host="false"
               @change-role="pickingRole = $event"
               @remove-member="removeMember"
               @copy-member="copyMember"
@@ -498,8 +535,8 @@ onUnmounted(() => {
             <h2 class="w-52 text-lg leading-tight text-center">Tady se objeví tvé naposledy vytvořené role!</h2>
           </article>
 
-          <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md bg-slate-900 shadow-drop" v-for="role in allLastUsedRoles">
-            <span class="w-full">{{ role }}</span>
+          <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md shadow-drop" :style="{backgroundColor: colorLeft}" v-for="role in allLastUsedRoles">
+            <span class="ml-1 w-full">{{ role }}</span>
             <button class="bg-black bg-opacity-40 rounded-sm button"><img src="@/images/pin.svg" alt="" class="box-border p-1 w-7" :class="{'opacity-30': !pinnedLastUsedRoles?.includes(role)}" @click="pinRole(role)"></button>
             <button class="bg-black bg-opacity-40 rounded-sm button"><img src="@/images/trash.svg" alt="" class="box-border p-1 w-7" @click="removeLastUsedRole(role)"></button>
           </button>
