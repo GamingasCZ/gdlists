@@ -12,7 +12,25 @@ const props = defineProps<{
 }>();
 
 const settingsShown = ref(false);
-const showSettings = () => (settingsShown.value = !settingsShown.value);
+const showSettings = (e: MouseEvent) => {
+  console.log(e.target)
+  if (e.target.id == "settingsOpener") return
+  settingsShown.value = true
+  document.body.addEventListener("click", closeSettings, {capture: true})
+};
+const closeSettings = (m: MouseEvent) => {
+    if (m.x == 0) return // Clicking on settings menu content fricks up mouse pos
+    let settingsMenu = document.querySelector("#settingsMenu") as HTMLDivElement
+    let left = settingsMenu.offsetLeft!
+    let top = settingsMenu.offsetTop!
+    let width = settingsMenu.offsetWidth!
+    let height = settingsMenu.offsetHeight!
+    if (m.x < left || m.x > left+width || m.y < top || m.y > top+height) {
+      settingsShown.value = false
+      settingsMenu.removeEventListener("click", closeSettings, {capture: true})
+    }
+  }
+
 
 const loginInfo = ref<string[]>([]);
 
@@ -115,12 +133,12 @@ const localStorg = ref(hasLocalStorage())
     </section>
     <img
       v-if="!isLoggedIn && localStorg"
-      @click="showSettings()"
+      @click="showSettings"
       src="../images/user.svg"
       alt=""
       class="px-1 w-10 h-10 button"
     />
-    <div v-else-if="localStorg" @click="showSettings()" class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
+    <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
       <img
         alt=""
         :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
