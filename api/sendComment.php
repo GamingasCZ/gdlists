@@ -18,6 +18,9 @@ $DATA = json_decode(file_get_contents("php://input"), true);
 
 $fuckupData = sanitizeInput(array($DATA["comment"], $DATA["comType"], $DATA["listID"], $DATA["comColor"]));
 
+// no more comments on endgame list >:)
+if ($DATA["listID"] == 121) die("3");
+
 // Checking comment and user string length
 if (strlen($DATA["comment"]) > 300 || strlen($DATA["comment"]) < 10) die("2");
 

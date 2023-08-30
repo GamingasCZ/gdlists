@@ -13,7 +13,6 @@ const props = defineProps<{
 
 const settingsShown = ref(false);
 const showSettings = (e: MouseEvent) => {
-  console.log(e.target)
   if (e.target.id == "settingsOpener") return
   settingsShown.value = true
   document.body.addEventListener("click", closeSettings, {capture: true})

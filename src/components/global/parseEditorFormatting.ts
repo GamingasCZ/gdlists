@@ -9,11 +9,11 @@ export default function parseText(textToParse: string): string {
   });
   textToParse = textToParse.replace(
     /#(.*?)\n/g,
-    `<h1 class="text-xl">$1</h1>\n`
+    `<h1 class="mt-3 text-xl">$1</h1>`
   );
   textToParse = textToParse.replace(
     /\*(.*?)(\n|$)/g,
-    `<li class="mx-4">$1</li>\n`
+    `<li class="mx-4">$1</li>`
   );
 
   let urlRegex =
