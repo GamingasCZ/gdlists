@@ -58,6 +58,7 @@ function addFormatting(type: number) {
     default:
       break;
   }
+  levelList.value.description = textbox.value
 }
 </script>
 
