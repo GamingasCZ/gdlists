@@ -269,5 +269,33 @@
     "uploadFinished": "Seznam byl {0}!",
     "updated": "aktualizován",
     "uploaded": "nahrán"
+  },
+  "collabTools": {
+    "hostRole": "Role hosta",
+    "hostName": "Jméno hosta",
+    "modifyRoles": "Upravit role",
+    "members": "Členové",
+    "addRoleToAddMember": "K přidání členů, přidej nějaké role.",
+    "addSomeMembers": "Zatím jsi nepřidal žádné členy.",
+    "addRoles": "Přidat role",
+    "roles": "Role",
+    "examples": "Návrhy",
+    "recentlyUsed": "Naposledy použité",
+    "recentRolesHere": "Tady se objeví tvé naposledy vytvořené role!",
+    "optimization": "Optimalizace",
+    "testing": "Testování",
+    "deco": "Dekorace",
+    "layout": "Layout",
+    "sortPart": "Začátku části",
+    "sortName": "Jména",
+    "sortRole": "Role",
+    "memberName": "Jméno člena",
+    "unnamedRole": "Bezejmenná",
+    "sortBy": "Seřadit podle",
+    "funny1": "Editor collabu",
+    "funny2": "Editor megacollabu",
+    "funny3": "Editor gigacollabu",
+    "funny4": "ježíšku na křížku",
+    "funny5": "Správa planety"
   }
 }

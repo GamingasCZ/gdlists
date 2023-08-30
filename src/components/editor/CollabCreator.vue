@@ -74,12 +74,12 @@ function getCreator() {
 
 <template>
     <section class="flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20">
-        <main class="flex gap-2 justify-between items-center w-full">
+        <main class="flex gap-2 justify-between items-center my-auto w-full">
             <div class="flex gap-1 items-center" :class="{'shake': noResults}">
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="verified == 0">
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
-                    <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[levelIndex].creator as CollabData)[2][pos].name" placeholder="Jméno člena">
+                    <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[levelIndex].creator as CollabData)[2][pos].name" :placeholder="$t('collabTools.memberName')">
                     <section class="flex gap-1">
                         <button
                             class="w-8 rounded-sm button" :style="{backgroundColor: socialMedia[site[0]].color}"
@@ -99,21 +99,23 @@ function getCreator() {
                 </button>
             </div>
 
-            <section class="flex flex-col items-center">
+            <section class="flex flex-col items-center" v-if="!host">
                 <div>
                     <input class="p-1 w-12 text-xl bg-black bg-opacity-40 rounded-md" type="text" v-model="part[0]">%
                     <img src="@/images/arrow.svg" class="inline px-2 w-16 opacity-40" alt="">
                     <input class="p-1 w-12 text-xl bg-black bg-opacity-40 rounded-md" type="text" v-model="part[1]">%
                 </div>
             </section>
+            <h1 v-else>Host collabu</h1>
+            
             <section class="flex flex-col items-center">
                 <button class="relative p-1 w-40 rounded-md button shadow-drop" :style="{backgroundColor: roleColor}" @click="emit('changeRole', pos)">
-                    {{ levelList.levels[levelIndex].creator[1][role] || 'Bezejmenná' }}
+                    {{ levelList.levels[levelIndex].creator[1][role] || $t('collabTools.unnamedRole') }}
                     <img src="@/images/edit.svg" class="box-border inline absolute right-1 top-1/2 p-0.5 ml-auto w-4 bg-black bg-opacity-40 rounded-sm -translate-y-1/2" alt="">
                 </button>
             </section>
     
-            <div class="flex gap-2 items-center">
+            <div class="flex gap-2 items-center" v-if="!host">
                 <button class="flex justify-center items-center w-10 h-10 rounded-md border-4 border-white border-solid button"
                     :style="{backgroundColor: chroma.hsl(...color).hex()}"
                     @click="colorPickerOpen = !colorPickerOpen">

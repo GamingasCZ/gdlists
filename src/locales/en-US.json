@@ -268,5 +268,33 @@
     "uploadFinished": "List {0}!",
     "updated": "updated",
     "uploaded": "uploaded"
+  },
+  "collabTools": {
+    "addRoleToAddMember": "Add roles to add members.",
+    "addRoles": "Add roles",
+    "deco": "Decoration",
+    "examples": "Examples",
+    "addSomeMembers": "You haven't added any members yet.",
+    "hostName": "Host name",
+    "hostRole": "Host role",
+    "layout": "Layout",
+    "memberName": "Member name",
+    "members": "Members",
+    "optimization": "Optimization",
+    "modifyRoles": "Edit roles",
+    "recentRolesHere": "Here will be your last used roles!",
+    "recentlyUsed": "Recently used",
+    "roles": "Roles",
+    "testing": "Testing",
+    "unnamedRole": "Unnamed",
+    "sortRole": "Role",
+    "sortPart": "Part start",
+    "sortName": "Name",
+    "sortBy": "Sort by",
+    "funny1": "Collab editor",
+    "funny2": "Megacollab editor",
+    "funny3": "Gigacollab editor",
+    "funny4": "oh god",
+    "funny5": "Earth management"
   }
 }

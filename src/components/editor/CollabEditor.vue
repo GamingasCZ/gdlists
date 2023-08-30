@@ -6,6 +6,7 @@ import type { CollabData, CollabHumans } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import { hasLocalStorage } from '@/siteSettings';
 import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     index: {type: Number, required: true},
@@ -21,11 +22,11 @@ var collab = ref(levelList.value.levels[props.index!].creator)
 var levelColor = levelList.value.levels?.[props.index]?.color
 
 const hyperfunnyNames = [
-  "Editor collabu",
-  "Editor megacollabu",
-  "Editor gigacollabu",
-  "ježíšku na křížku",
-  "Správa planety"
+  useI18n().t('collabTools.funny1'),
+  useI18n().t('collabTools.funny2'),
+  useI18n().t('collabTools.funny3'),
+  useI18n().t('collabTools.funny4'),
+  useI18n().t('collabTools.funny5')
 ]
 const editorName = ref(hyperfunnyNames[0])
 const makeFunyEditorName = () => {
@@ -123,6 +124,27 @@ const modifyCreator = (e: Event) => {
     collab.value = newCreator
   else
     collab.value[0][0] = newCreator
+}
+
+const openSortDropdown = () => {
+  sortDropdownOpen.value = true
+  document.body.addEventListener("click", () => sortDropdownOpen.value = false, {once: true, capture: true},)
+}
+
+function sortCollab(type: 0 | 1 | 2) {
+  if (typeof collab.value == 'string') return
+  console.log(type)
+  switch (type) {
+    case 0: // By part
+      collab.value[2] = collab.value[2].sort((a,b) => a.part[0] - b.part[0])
+      break;
+    case 1: // By name
+      collab.value[2] = collab.value[2].sort((a,b) => a.name.localeCompare(b.name))
+      break;
+    case 2: // By role
+      collab.value[2] = collab.value[2].sort((a,b) => a.role - b.role)
+      break;
+  }
 }
 
 function addMember(params?: CollabHumans) {
@@ -315,7 +337,10 @@ onUnmounted(() => {
       class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg py-2 text-white shadow-lg shadow-black h-[40rem]"
     >
       <div class="flex relative justify-between items-center py-1 mx-2 -translate-y-0.5">
-        <div></div>
+        <button class="p-0.5 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
+          <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-6">
+          {{ $t('collabTools.modifyRoles') }}
+        </button>
         <h1 class="text-xl font-bold text-center">{{ editorName }}</h1>
         <img
           src="@/images/close.svg"
@@ -325,40 +350,8 @@ onUnmounted(() => {
         />
       </div>
 
-      <header class="flex gap-2 justify-between items-center mx-2 mt-2">
-        
-        <!-- Host input box -->
-        <div class="flex gap-2 items-center">
-          <img src="@/images/unknownCube.svg" class="w-11" alt="">
-          <input value="Host" type="text" class="px-3 -mr-1 w-24 h-11 text-right bg-black bg-opacity-40 rounded-md" placeholder="Role hosta">: 
-          <div class="flex flex-col gap-1">
-              <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[index].creator as CollabData)[2][0].name" placeholder="Jméno člena">
-              <section class="flex gap-1" v-if="(typeof collab != 'string')">
-                  <button
-                      class="w-8 rounded-sm button" :style="{backgroundColor: socialMedia[site[0]].color}"
-                      v-for="(site, index) in collab?.[2]?.[0]?.socials"
-                  >
-                      <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="box-border p-0.5 mx-auto h-4" alt="">
-                  </button>
-                  <button class="w-8 bg-gray-600 rounded-sm button" v-if="'pp'.length < 5">
-                      <img src="../../images/plus.svg" class="box-border p-0.5 mx-auto h-4" alt="">
-                  </button>
-              </section>
-          </div>
-          <button class="box-border bg-black bg-opacity-40 rounded-md button">
-              <img src="@/images/searchOpaque.svg" class="box-border p-1 w-8" alt="">
-          </button>
-        </div>
-
-        <button v-if="!roleSidebarOpen" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
-          <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
-          Upravit role
-        </button>
-      </header>
-
-      <main>
-        <header class="flex relative justify-between items-center bg-[url(@/images/headerBG.webp)] bg-center p-2 mt-3">
-            <h2 class="text-2xl font-black">Členové</h2>
+        <header class="flex relative justify-between items-center bg-[url(@/images/headerBG.webp)] bg-center p-2">
+            <h2 class="text-2xl font-black">{{ $t('collabTools.members') }}</h2>
             <div class="sm:hidden"></div>
             <div class="flex items-center">
                 <button
@@ -369,21 +362,23 @@ onUnmounted(() => {
                 >
                     <img src="@/images/paste.svg" alt="">
                 </button>
-                <button
-                  class="box-border relative z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
-                  :class="{'disabled': (typeof collab == 'string')}"
-                  :disabled="(typeof collab == 'string')"
-                  @click="sortDropdownOpen = !sortDropdownOpen"
-                >
-                    <img src="@/images/sort.svg" alt="">
-                    <Transition name="fade">
-                      <div v-if="sortDropdownOpen" class="flex absolute -bottom-40 -left-1/2 flex-col gap-1 p-1 w-40 text-center bg-black bg-opacity-90 rounded-md backdrop-blur-sm -translate-x-11">
-                        <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 opacity-90 -translate-x-1.5" alt="">
-                        <h2 class="font-bold">Seřadit podle</h2>
-                        <button v-for="sort in ['Začátku části', 'Jména', 'Role']" class="block p-1 w-full text-white bg-white bg-opacity-10 rounded-md button">{{ sort }}</button>
-                      </div>
-                    </Transition>
-                </button>
+                <div class="relative">
+                  <button
+                    class="box-border z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                    :class="{'disabled': (typeof collab == 'string')}"
+                    :disabled="(typeof collab == 'string')"
+                    @click="openSortDropdown()"
+                  >
+                      <img src="@/images/sort.svg" alt="">
+                    </button>
+                  <Transition name="fade">
+                    <div v-if="sortDropdownOpen" class="flex absolute -bottom-40 -left-1/2 z-10 flex-col gap-1 p-1 w-40 text-center bg-black bg-opacity-90 rounded-md backdrop-blur-sm -translate-x-10">
+                      <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 opacity-90 -translate-x-1.5" alt="">
+                      <h2 class="font-bold">{{ $t('collabTools.sortBy') }}</h2>
+                      <button v-for="(sort, index) in [$t('collabTools.sortPart'), $t('collabTools.sortName'), $t('collabTools.sortRole')]" @click="sortCollab(index)" class="block p-1 w-full text-white bg-white bg-opacity-10 rounded-md button">{{ sort }}</button>
+                    </div>
+                  </Transition>
+                </div>
                 <button
                   class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
                   @click="pasteMember"
@@ -439,36 +434,36 @@ onUnmounted(() => {
             
         </header>
 
-        <section class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 h-[30rem] gap-1">
+        <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 h-[33.7rem] max-h-[77vh] gap-1">
             
             <!-- No roles help -->
             <div v-if="noMembers" class="flex flex-col gap-3 items-center my-auto">
               <img src="../../images/collabDudes.svg" class="w-[20rem] opacity-20" alt="">
-              <h1 v-if="noRoles" class="text-2xl opacity-60 max-sm:text-lg">K přidání členů, přidej nějaké role.</h1>
-              <h1 v-else class="text-2xl opacity-60 max-sm:text-lg">Zatím jsi nepřidal žádné členy.</h1>
+              <h1 v-if="noRoles" class="text-2xl opacity-60 max-sm:text-lg">{{ $t('collabTools.addRoleToAddMember') }}</h1>
+              <h1 v-else class="text-2xl opacity-60 max-sm:text-lg">{{ $t('collabTools.addSomeMembers') }}</h1>
               <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen" v-if="noRoles">
                 <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
-                Přidat role
+                {{ $t('collabTools.addRoles') }}
               </button>
             </div>
 
             <!-- Collab humans -->
             <CollabCreator
               v-for="(member, pos) in (collab as CollabData)[2]"
+              :key="pos"
               v-bind="member"
               :pos="pos"
               :level-index="index"
               :role-color="roleColors[member.role]"
-              :host="false"
+              :host="pos == 0"
               @change-role="pickingRole = $event"
               @remove-member="removeMember"
               @copy-member="copyMember"
               @add-social="addSocial"
               @remove-social="removeSocial(pos, $event)"
             />
-        </section>
+        </main>
 
-      </main>
     </section>
 
     <aside
@@ -487,7 +482,7 @@ onUnmounted(() => {
             class="w-6"
           />
         </button>
-        <h1 class="text-xl font-black text-center">Role</h1>
+        <h1 class="text-xl font-black text-center">{{ $t('collabTools.roles') }}</h1>
         <button class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="pickingRole > -1" @click="addRole()">
           <img
             src="@/images/addLevel.svg"
@@ -500,10 +495,10 @@ onUnmounted(() => {
         
         <!-- Presets and role help -->
         <article class="flex flex-col gap-2 justify-center items-center my-auto w-full" v-if="noRoles">
-          <p class="text-3xl opacity-40">Návrhy</p>
+          <p class="text-3xl opacity-40">{{ $t('collabTools.examples') }}</p>
           <hr class="mb-3 w-9/12 h-0.5 bg-white border-none opacity-10">
           <button
-            v-for="preset in ['Layout', 'Dekorace', 'Testování', 'Optimalizace']"
+            v-for="preset in [$t('collabTools.layout'), $t('collabTools.deco'), $t('collabTools.testing'), $t('collabTools.optimization')]"
             @click="addRole(preset)"
             class="w-3/5 text-xl text-white text-opacity-40 bg-black bg-opacity-40 rounded-md button"
           >
@@ -523,7 +518,7 @@ onUnmounted(() => {
       <section v-if="localStrg && pickingRole == -1">
         <!-- Recently used header -->
         <header class="flex justify-between items-center bg-[url(@/images/headerBG.webp)] bg-top p-1 mt-3">
-          <h2 class="w-full text-xl font-black text-center max-sm:hidden">Naposledy použité</h2>
+          <h2 class="w-full text-xl font-black text-center max-sm:hidden">{{ $t('collabTools.recentlyUsed') }}</h2>
         </header>
   
         <!-- Recently used content -->
@@ -532,7 +527,7 @@ onUnmounted(() => {
           <!-- History empty help -->
           <article class="flex flex-col gap-4 justify-center items-center h-full opacity-20" v-if="!allLastUsedRoles.length">
             <img src="@/images/time.svg" class="w-28" alt="">
-            <h2 class="w-52 text-lg leading-tight text-center">Tady se objeví tvé naposledy vytvořené role!</h2>
+            <h2 class="w-52 text-lg leading-tight text-center">{{ $t('collabTools.recentRolesHere') }}</h2>
           </article>
 
           <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md shadow-drop" :style="{backgroundColor: colorLeft}" v-for="role in allLastUsedRoles">
