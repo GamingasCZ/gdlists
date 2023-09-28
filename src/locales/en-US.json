@@ -285,7 +285,7 @@
     "recentRolesHere": "Here will be your last used roles!",
     "recentlyUsed": "Recently used",
     "roles": "Roles",
-    "testing": "Testing",
+    "testing": "Playtesting",
     "unnamedRole": "Unnamed",
     "sortRole": "Role",
     "sortPart": "Part start",
@@ -295,6 +295,8 @@
     "funny2": "Megacollab editor",
     "funny3": "Gigacollab editor",
     "funny4": "oh god",
-    "funny5": "Earth management"
+    "funny5": "Earth management",
+    "noEditOldCollab": "Sorry, collabs from old lists cannot be edited!",
+    "verifier": "Verifier"
   }
 }

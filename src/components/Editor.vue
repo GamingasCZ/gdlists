@@ -320,6 +320,13 @@ function removeList() {
   
 }
 
+function throwError(messsage: string, dblClickHelp: boolean) {
+  errorDblclickHelp.value = dblClickHelp
+  errorMessage.value = messsage
+  errorStamp.value = Math.random()
+  formShaking.value = true
+  setTimeout(() => formShaking.value = false, 333);
+}
 
 </script>
 
@@ -569,6 +576,7 @@ function removeList() {
         @move-controls="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
         @open-collab-tools="collabEditorOpen = true"
+        @throw-error="throwError($event, false)"
         class="levelCard"
         :is="currentlyOpenedCard == index ? EditorCard : EditorCardHeader"
       />

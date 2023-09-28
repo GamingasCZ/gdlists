@@ -2,12 +2,13 @@
 import { levelList, deleteLevel, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
 import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   index?: number;
@@ -22,6 +23,7 @@ const emit = defineEmits<{
   (e: "openTagPopup"): void;
   (e: "openCollabTools", levelIndex: number): void;
   (e: "doMove", levelIndex: number, toIndex: number): void;
+  (e: "throwError", errorText: string): void;
 }>();
 
 // Colors
@@ -180,6 +182,14 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       ytVideoData.value = await videoSearch()
     });
 }
+
+const isOldCollab = computed(() => typeof levelList.value.levels[props.index!].creator == 'object' && !levelList.value.levels[props.index!].creator[3])
+const openCollabTools = () => {
+  if (isOldCollab.value)
+    emit('throwError', useI18n().t('collabTools.noEditOldCollab'))
+  else
+    emit('openCollabTools', props.index!)
+}
 </script>
 
 <template>
@@ -313,8 +323,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/collabMen.svg"
           alt=""
-          :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
-          @click="emit('openCollabTools', index!)"
+          :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab}"
+          @click="openCollabTools()"
         />
       </div>
     </div>

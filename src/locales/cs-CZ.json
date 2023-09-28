@@ -283,7 +283,7 @@
     "recentlyUsed": "Naposledy použité",
     "recentRolesHere": "Tady se objeví tvé naposledy vytvořené role!",
     "optimization": "Optimalizace",
-    "testing": "Testování",
+    "testing": "Playtestování",
     "deco": "Dekorace",
     "layout": "Layout",
     "sortPart": "Začátku části",
@@ -296,6 +296,8 @@
     "funny2": "Editor megacollabu",
     "funny3": "Editor gigacollabu",
     "funny4": "ježíšku na křížku",
-    "funny5": "Správa planety"
+    "funny5": "Správa planety",
+    "noEditOldCollab": "Collaby ze starých seznamů bohužel nemohou být upraveny!",
+    "verifier": "Verifier"
   }
 }

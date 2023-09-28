@@ -170,7 +170,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
 }
 
 export function creatorToCollab(currentName: string): CollabData {
-  return [[currentName, 0, "Host"], [], []]
+  return [[{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}], [], [], true]
 }
 
 export const isOnline = ref(true)

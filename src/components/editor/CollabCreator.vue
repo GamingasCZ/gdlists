@@ -1,8 +1,8 @@
-<script setup lang="ts">
 import { levelList } from '@/Editor';
+<script setup lang="ts">
 import ColorPicker from '../global/ColorPicker.vue';
 import chroma from 'chroma-js';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { socialMediaImages } from './socialSites';
 import { socialMedia } from './socialSites';
 import type { CollabData, userDataFetchResponse } from '@/interfaces';
@@ -40,7 +40,7 @@ const searchingCreator = ref(false)
 const noResults = ref(false)
 function getCreator() {
     if (typeof levelList.value.levels[props.levelIndex].creator == 'string') return
-
+    
     searchingCreator.value = true
     let searchUsername = levelList.value.levels[props.levelIndex].creator[2][props.pos].name
     axios.get(
@@ -57,6 +57,8 @@ function getCreator() {
         }
         else {
             levelList.value.levels[props.levelIndex].creator[2][props.pos].name = userData.username
+            creatorName.value = userData.username
+            
             levelList.value.levels[props.levelIndex].creator[2][props.pos].color = chroma.rgb(...Object.values(colors[userData.color1])).hsl()
             levelList.value.levels[props.levelIndex].creator[2][props.pos].socials = userData.socials
             levelList.value.levels[props.levelIndex].creator[2][props.pos].verified = [
@@ -70,26 +72,42 @@ function getCreator() {
     }).catch(() => setTimeout(() => searchingCreator.value = false, 5000))
 }
 
+const creatorName = ref(props.name)
+const writeName = (e: Event) => {
+    let val = (e.target as HTMLInputElement).value
+    if (props.host) {
+        if (typeof levelList.value.levels[props.levelIndex].creator == 'string') {
+            levelList.value.levels[props.levelIndex].creator = val
+        }
+        else {
+            levelList.value.levels[props.levelIndex].creator[0][0].name = val
+        }
+    }
+    else
+        levelList.value.levels[props.levelIndex].creator[2][props.pos].name = val
+    creatorName.value = val
+}
+
 </script>
 
 <template>
-    <section class="flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20">
+    <section class="flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20" :class="{'!bg-opacity-0': host}">
         <main class="flex gap-2 justify-between items-center my-auto w-full">
             <div class="flex gap-1 items-center" :class="{'shake': noResults}">
-                <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="verified == 0">
+                <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="!verified">
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
-                    <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" v-model="(levelList.levels[levelIndex].creator as CollabData)[2][pos].name" :placeholder="$t('collabTools.memberName')">
+                    <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" @input="writeName" :value="creatorName ?? ''" :placeholder="$t('collabTools.memberName')">
                     <section class="flex gap-1">
                         <button
                             class="w-8 rounded-sm button" :style="{backgroundColor: socialMedia[site[0]].color}"
-                            v-for="(site, index) in socials"
+                            v-for="(site, index) in (socials ?? [])"
                             @click="emit('addSocial', true, pos, index)"
                             @auxclick="emit('removeSocial', index)"
                         >
                             <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="box-border p-0.5 mx-auto h-4" alt="">
                         </button>
-                        <button class="w-8 bg-gray-600 rounded-sm button" @click="emit('addSocial', false, pos)" v-if="socials.length < 5">
+                        <button class="w-8 bg-gray-600 rounded-sm button" @click="emit('addSocial', false, pos)" v-if="(socials ?? []).length < 5">
                             <img src="../../images/plus.svg" class="box-border p-0.5 mx-auto h-4" alt="">
                         </button>
                     </section>
@@ -101,16 +119,15 @@ function getCreator() {
 
             <section class="flex flex-col items-center" v-if="!host">
                 <div>
-                    <input class="p-1 w-12 text-xl bg-black bg-opacity-40 rounded-md" type="text" v-model="part[0]">%
+                    <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md" type="text" v-model="part[0]">
                     <img src="@/images/arrow.svg" class="inline px-2 w-16 opacity-40" alt="">
-                    <input class="p-1 w-12 text-xl bg-black bg-opacity-40 rounded-md" type="text" v-model="part[1]">%
+                    <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md" type="text" v-model="part[1]">
                 </div>
             </section>
-            <h1 v-else>Host collabu</h1>
             
             <section class="flex flex-col items-center">
-                <button class="relative p-1 w-40 rounded-md button shadow-drop" :style="{backgroundColor: roleColor}" @click="emit('changeRole', pos)">
-                    {{ levelList.levels[levelIndex].creator[1][role] || $t('collabTools.unnamedRole') }}
+                <button class="relative p-1 w-40 rounded-md button shadow-drop" :style="{backgroundColor: roleColor ?? '#000'}" @click="emit('changeRole', pos)">
+                    {{ levelList.levels[levelIndex].creator?.[1]?.[role] || $t('collabTools.unnamedRole') }}
                     <img src="@/images/edit.svg" class="box-border inline absolute right-1 top-1/2 p-0.5 ml-auto w-4 bg-black bg-opacity-40 rounded-sm -translate-y-1/2" alt="">
                 </button>
             </section>
@@ -128,7 +145,7 @@ function getCreator() {
             </div>
         </main>
         <Transition name="fade">
-            <ColorPicker v-if="colorPickerOpen" :hue="color[0]" :lightness="color[2]" :saturation="color[1]" @colors-modified="(levelList.levels[levelIndex].creator as CollabData)[2][pos].color = $event" />
+            <ColorPicker v-if="colorPickerOpen && !host" :hue="color[0]" :lightness="color[2]" :saturation="color[1]" @colors-modified="(levelList.levels[levelIndex].creator as CollabData)[2][pos].color = $event" />
         </Transition>
     </section>
 </template>

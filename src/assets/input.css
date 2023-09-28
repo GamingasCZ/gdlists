@@ -101,8 +101,11 @@ dialog {
 .slider::-moz-range-thumb:active {
   @apply scale-[1.4]
 }
+.slider::-webkit-scrollbar {
+  @apply border-none scale-125 transition-transform duration-200 bg-[#4d6c4f] shadow-lg shadow-black
+}
 .slider {
-  @apply bg-none
+  @apply bg-none 
 }
 
 @keyframes flash {
