@@ -25,14 +25,16 @@
 }
 
 :root {
-  --siteBackground: #08110b;
-  --primaryColor: #045124;
-  --secondaryColor: #142019;
+  --siteBackground: #150c1a;
+  --primaryColor: #8e4b04;
+  --secondaryColor: #400827;
   --brightGreen: #71d471;
 }
 
 body {
-  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins] flex flex-col justify-between
+  background: url(@/images/webs2.webp) repeat ;
+  background-size: 15rem;
+  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed font-[poppins] flex flex-col justify-between
 }
 
 @media (prefers-reduced-motion: no-preference) {

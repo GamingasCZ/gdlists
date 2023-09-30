@@ -33,9 +33,9 @@ watch(props, () => {
     firstTimeUser.value = loginCookie[3];
     if (!firstTimeUser.value) {
       let loginToast = document.getElementById("loginToast");
-      loginToast?.classList.remove("-translate-y-16");
+      loginToast?.classList.remove("-translate-y-32");
       setTimeout(() => {
-        loginToast?.classList.add("-translate-y-16");
+        loginToast?.classList.add("-translate-y-32");
         setTimeout(() => loginToast?.remove(), 500);
       }, 2500);
     }
@@ -54,11 +54,11 @@ const localStorg = ref(hasLocalStorage())
   <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="firstTimeUser && returnedFromLogin"
     :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
   <div id="loginToast" v-if="!firstTimeUser && localStorg"
-    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
+    class="absolute top-12 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-32">
     {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!
   </div>
 
-  <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
+  <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/graf3.webp)] bg-center">
     <form action="./browse" method="get" class="flex gap-2 items-start text-white">
       <div>
         <input type="text" name="q"

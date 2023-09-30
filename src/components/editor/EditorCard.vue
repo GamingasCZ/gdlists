@@ -2,13 +2,12 @@
 import { levelList, deleteLevel, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
 import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
-import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   index?: number;
@@ -23,7 +22,6 @@ const emit = defineEmits<{
   (e: "openTagPopup"): void;
   (e: "openCollabTools", levelIndex: number): void;
   (e: "doMove", levelIndex: number, toIndex: number): void;
-  (e: "throwError", errorText: string): void;
 }>();
 
 // Colors
@@ -65,6 +63,14 @@ const getRateImage = async () => {
   }
 };
 getRateImage()
+
+const collabShaking = ref(false)
+const shakeCollab = () => {
+  collabShaking.value = true
+  setTimeout(() => {
+    collabShaking.value = false
+  }, 200);
+}
 
 const diffFacePath = ref("")
 const getDiffFace = async () => await import(`../../images/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`).then(res => diffFacePath.value = res.default)
@@ -182,14 +188,6 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       ytVideoData.value = await videoSearch()
     });
 }
-
-const isOldCollab = computed(() => typeof levelList.value.levels[props.index!].creator == 'object' && !levelList.value.levels[props.index!].creator[3])
-const openCollabTools = () => {
-  if (isOldCollab.value)
-    emit('throwError', useI18n().t('collabTools.noEditOldCollab'))
-  else
-    emit('openCollabTools', props.index!)
-}
 </script>
 
 <template>
@@ -204,14 +202,14 @@ const openCollabTools = () => {
         <img class="w-10 aspect-square" src="../../images/levelID.svg" alt="" />
         <input
           autocomplete="off"
-          class="max-w-[20vw] box-border rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
+          class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
           type="text"
           name="levelID"
           v-model="levelList.levels[index!].levelID"
           :placeholder="$t('level.levelID')"
         />
         <img
-          class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+          class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
           src="../../images/searchOpaque.svg"
           alt=""
           :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }"
@@ -262,10 +260,10 @@ const openCollabTools = () => {
           :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
           type="button"
           @click="searchLevel(false)"
-          class="box-border sm:hidden"
+          class="sm:hidden"
         >
           <img
-            class="p-2 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            class="p-1 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
@@ -285,24 +283,23 @@ const openCollabTools = () => {
       <!-- Level search -->
       <div class="flex gap-2 items-center max-sm:hidden">
         <hr
-          class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
+          class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }"
         />
         <button
           :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
           type="button"
-          class="box-border"
           @click="searchLevel(false)"
         >
           <img
-            class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg"
             alt=""
             :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
           />
         </button>
         <hr
-          class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
+          class="w-8 h-1 bg-white transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }"
         />
       </div>
@@ -323,8 +320,8 @@ const openCollabTools = () => {
           class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/collabMen.svg"
           alt=""
-          :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab}"
-          @click="openCollabTools()"
+          :class="{'animate-[shake_0.2s_infinite]': collabShaking, 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
+          @click="shakeCollab()"
         />
       </div>
     </div>
@@ -444,11 +441,9 @@ const openCollabTools = () => {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  section {
-    animation: appear 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
-    transform-origin: top;
-  }
+section {
+  animation: appear 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
+  transform-origin: top;
 }
 
 </style>

@@ -9,7 +9,6 @@ import BGImagePicker from "./global/BackgroundImagePicker.vue";
 import DescriptionEditor from "./global/TextEditor.vue";
 import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
-import CollabEditor from "./editor/CollabEditor.vue"
 import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
@@ -23,7 +22,7 @@ import cookier from "cookier"
 import router from "@/router";
 import { saveBackup, moveLevel } from "../Editor";
 import Notification from "./global/Notification.vue";
-import { SETTINGS, hasLocalStorage } from "@/siteSettings";
+import { SETTINGS } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
 
@@ -144,7 +143,6 @@ const errorStamp = ref(-1)
 const errorDblclickHelp = ref(false)
 const formShaking = ref(false)
 const notifStamp = ref(Math.random())
-const collabClipboard = ref()
 
 const loadBackup = () => {
   loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, <any>backupData.value.choseHidden)
@@ -320,14 +318,6 @@ function removeList() {
   
 }
 
-function throwError(messsage: string, dblClickHelp: boolean) {
-  errorDblclickHelp.value = dblClickHelp
-  errorMessage.value = messsage
-  errorStamp.value = Math.random()
-  formShaking.value = true
-  setTimeout(() => formShaking.value = false, 333);
-}
-
 </script>
 
 <template>
@@ -358,8 +348,6 @@ function throwError(messsage: string, dblClickHelp: boolean) {
     <CollabEditor
       v-if="collabEditorOpen && levelList.levels.length > 0"
       :index="currentlyOpenedCard"
-      :clipboard="collabClipboard"
-      @send-clipboard="collabClipboard = $event"
       @close-popup="collabEditorOpen = false"
     />
   </Transition>
@@ -381,13 +369,9 @@ function throwError(messsage: string, dblClickHelp: boolean) {
     {{ editing ? $t('editor.editing') : $t('editor.editor') }}
   </h2>
   <NotLoggedIn
-    v-if="!isLoggedIn && hasLocalStorage()"
+    v-if="!isLoggedIn"
     :mess="$t('editor.loginToCreate')"
   />
-  <div v-else-if="!hasLocalStorage()" class="flex flex-col gap-4 justify-center items-center mx-auto mt-5">
-    <img src="../images/disCookies.svg" class="w-48 opacity-20" alt="">
-    <h1 class="max-w-sm text-2xl text-center text-white opacity-20">Nemáš povolené cookies, můžeš jen procházet seznamy!</h1>
-  </div>
 
   <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp" :previewing="previewingList"/>
 
@@ -576,7 +560,6 @@ function throwError(messsage: string, dblClickHelp: boolean) {
         @move-controls="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
         @open-collab-tools="collabEditorOpen = true"
-        @throw-error="throwError($event, false)"
         class="levelCard"
         :is="currentlyOpenedCard == index ? EditorCard : EditorCardHeader"
       />
