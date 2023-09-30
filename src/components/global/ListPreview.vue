@@ -21,17 +21,7 @@ const props = defineProps<{
 }>();
 
 const makeColor = () =>
-  chroma(
-    Math.floor(
-      16777215 *
-        Math.sin(
-          props.name
-            ?.split("")
-            .map((p: string) => p.charCodeAt(0))
-            .reduce((x, y) => x + y)! % Math.PI
-        )
-    )
-  );
+  chroma.hsl(30, 1, 0.2).mix(chroma.hsl(50, 0.2, 0.8), Math.random(), "hsl");
 
 const listColor = ref<Color>(makeColor());
 
