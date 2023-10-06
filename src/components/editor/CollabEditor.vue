@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { levelList, creatorToCollab, makeColor } from '@/Editor';
 import chroma from 'chroma-js';
-import { computed, onMounted, onUnmounted, onUpdated, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, watch } from 'vue';
 import type { CollabData, CollabHumans, SavedCollab } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import { hasLocalStorage } from '@/siteSettings';
@@ -73,20 +73,28 @@ Roles
 const roleColors = ref<string[]>([])
 const roleSidebarOpen = ref(false)
 
+function createCollab() {
+  addRole("Host")
+  roleSidebarOpen.value = true
+}
+
 function addRole(preset: string = "") {
   if (typeof collab.value == 'string') {
     collab.value = creatorToCollab(collab.value)
     levelList.value.levels[props.index!].creator = collab.value
   }
-  collab.value?.[1].push(preset)
-  makeRoleColors()
+  if (!collab.value[1].includes(preset)) {
+    collab.value?.[1].push(preset)
+    makeRoleColors()
+  }
 }
 
 function pickRole(creatorPos: number, rolePos: number) {
   if (typeof collab.value == "string") return
 
-  collab.value[2][creatorPos].role = rolePos
+  collab.value[creatorPos == 999 ? 0 : 2][creatorPos == 999 ? 0 : creatorPos].role = rolePos
   pickingRole.value = -1
+  nextTick(() => (document.querySelectorAll(`.roleSwitcher`)[creatorPos == 999 ? 0 : creatorPos+1] as HTMLButtonElement).focus())
 }
 
 function pinRole(roleName: string) {
@@ -109,6 +117,23 @@ function removeLastUsedRole(roleName: string) {
     lastUsedRoles.value?.splice(lastUsedRoles.value.indexOf(roleName), 1)
 
   allLastUsedRoles.value = [...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []]
+}
+
+function changeRole(levelIndex: number) {
+  pickingRole.value = levelIndex;
+  nextTick(() => (document.querySelector(".roleBubble") as HTMLButtonElement).focus())
+}
+
+function openSidebar(which:number) {
+  if (pickingRole.value > -1) return
+  if (which == 0) {
+    roleSidebarOpen.value = !roleSidebarOpen.value
+    savedSidebarOpen.value = false
+  }
+  else {
+    savedSidebarOpen.value = !savedSidebarOpen.value
+    roleSidebarOpen.value = false
+  }
 }
 
 /*
@@ -148,6 +173,7 @@ function addMember(params?: CollabHumans) {
     verified: params?.verified ?? 0
   })
   makeFunyEditorName()
+  nextTick(() => document.querySelector(".collabMember:last-child input").focus())
 }
 
 function removeMember(position: number) {
@@ -187,18 +213,17 @@ function pasteMember() {
   collab.value[2][collab.value[2].length-1].role = newRoleIndex
 }
 
-const noMembers = computed(() => 
-  collab.value?.[2] == undefined || !collab.value?.[2].length)
+const noMembers = computed(() =>
+  typeof collab.value == 'string' || (collab.value?.[2] == undefined || !collab.value?.[2].length)
+)
 const noRoles = computed(() => 
-  collab.value?.[1] == undefined || !collab.value?.[1].length)
-const oneRoleAndHasMembers = computed(() =>
-  collab.value?.[1].length == 1 && collab.value?.[2].length > 0
-) 
+  typeof collab.value == 'string' || (collab.value?.[1] == undefined || !collab.value?.[1].length))
 
 const localStrg = hasLocalStorage()
 const pickingRole = ref(-1)
 const clipboardContent = ref<[number, string, CollabHumans]>(props.clipboard)
 const sortDropdownOpen = ref(false)
+const presetDropdownOpen = ref(false)
 
 /*
 =======
@@ -221,6 +246,12 @@ const openSocialDropdown = () => {
 
   socialPicker.dropdownOpen = true
   document.body.addEventListener("click", () => socialPicker.dropdownOpen = false, {once: true, capture: true},)
+}
+const openPresetsDropdown = () => {
+  if (typeof collab.value == "string") return
+
+  presetDropdownOpen.value = true
+  document.body.addEventListener("click", () => presetDropdownOpen.value = false, {once: true, capture: true},)
 }
 const modifyPickerURL = (e: Event) => {
   if ([3, 4].includes(socialPicker.socialIndex)) // do not shorten discord and custom link
@@ -304,17 +335,69 @@ Saved collabs
 
 const savedSidebarOpen = ref(false)
 const savedCollabs = ref<SavedCollab[]>()
-const savedCollabIDs = ref<number[]>([])
 if (localStrg) {
   savedCollabs.value = JSON.parse(localStorage.getItem("savedCollabs")!) ?? []
-  Object.keys(savedCollabs.value!).forEach(collab => savedCollabIDs.value.push(parseInt(collab)))
 }
 
-onMounted(() => makeRoleColors() )
+function saveAllCollabs() {
+  if (!localStrg) return
+  localStorage.setItem("savedCollabs", JSON.stringify(savedCollabs.value))
+  let ids = []
+  savedCollabs.value?.forEach(collab => ids.push(collab.levelID))
+  localStorage.setItem("savedCollabIDs", JSON.stringify(ids))
+}
 
-onUnmounted(() => {
+function saveCollab() {
+  if (!localStrg) return
   if (typeof collab.value == "string") return
-  if (!hasLocalStorage()) return
+
+  let saveData: SavedCollab = {
+    collabName: levelList.value.levels[props.index].levelName || "Bezejmenný collab",
+    collabHost: collab.value[0][0].name,
+    levelID: parseInt(levelList.value.levels[props.index].levelID || "-1"),
+    collabID: collab.value[3],
+    data: collab.value,
+    memberCount: collab.value[2].length,
+    timestamp: Date.now()
+  }
+  savedCollabs.value?.push(saveData)
+  saveAllCollabs()
+}
+
+function modifySaveName(e:SubmitEvent, ind: number) {
+  (e.target as HTMLInputElement).blur()
+  savedCollabs.value![ind].collabName = e.target!.elements[0].value
+  savedNameEdit.previousName = savedCollabs.value![ind].collabName
+  saveAllCollabs()
+}
+
+function removeCollab(ind: number) {
+  savedCollabs.value?.splice(ind, 1)
+  saveAllCollabs()
+}
+
+function loadCollab(saveData: CollabData) {
+  levelList.value.levels[props.index].creator = saveData
+  collab.value = saveData
+  makeRoleColors()
+}
+
+const savedNameEdit = reactive({
+  editing: false,
+  editingIndex: -1,
+  previousName: ""
+})
+
+onMounted(() => {
+  let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
+  hasSavedCollab.value = saveIDs.indexOf(parseInt(levelList.value.levels[props.index].levelID))
+  makeRoleColors()
+})
+
+const hasSavedCollab = ref(-2)
+onUnmounted(() => {
+  if (!localStrg) return
+  if (typeof collab.value == "string") return
 
   // Save used roles
   lastUsedRoles.value?.push(...collab.value[1])
@@ -339,7 +422,8 @@ onUnmounted(() => {
     <section
       @click.stop=""
       :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
-      class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg py-2 text-white shadow-lg shadow-black h-[40rem]"
+      class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[40rem]"
+      :class="{'max-lg:hidden': roleSidebarOpen || savedSidebarOpen}"
     >
       <div class="flex relative justify-between items-center py-1 mx-2 -translate-y-0.5">
         <div></div>
@@ -352,41 +436,30 @@ onUnmounted(() => {
         />
       </div>
 
-      <section class="flex items-center mr-2">
+      <section class="flex items-center mr-2" v-if="(typeof collab != 'string')">
         <CollabCreator
-            class="mr-28 grow"
-            v-bind="collab[0]"
-            :pos="-1"
+            class="grow"
+            v-bind="collab[0][0]"
+            :pos="999"
             :level-index="index"
-            :role-color="[0,0,0]"
+            :role-color="roleColors?.[collab[0][0].role]"
             :host="true"
-            v-if="collab[0]"
+            v-if="(typeof collab != 'string')"
             @change-role="pickingRole = $event"
             @remove-member="removeMember"
             @copy-member="copyMember"
             @add-social="addSocial"
             @remove-social="removeSocial(0, $event)"
         />
-        <div v-else class="flex ml-1 grow">
-          <img
-            class="p-1 min-w-[2.5rem] button aspect-square"
-            src="../../images/collabMen.svg"
-            alt=""
-          />
-          <input
-            autocomplete="off"
-            class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-            type="text"
-            name="creator"
-            maxlength="15"
-            v-model="levelList.levels[index].creator"
-            :placeholder="$t('level.creator')"
-          />
-        </div>
+        <div v-else class="flex ml-1 grow"></div>
 
-        <button class="p-1.5 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen">
-          <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-6">
+        <button v-if="(typeof collab != 'string')" class="p-1.5 mr-2 bg-black bg-opacity-40 rounded-md button" @click="openSidebar(0)">
+          <img src="../../images/editorMobHeader.svg" alt="" class="box-border inline p-0.5 mr-2 w-6">
           {{ $t('collabTools.modifyRoles') }}
+        </button>
+        <button v-if="(typeof collab != 'string')" class="p-1.5 bg-black bg-opacity-40 rounded-md button" @click="openSidebar(1)">
+          <img src="../../images/savedMobHeader.svg" alt="" class="box-border inline p-0.5 mr-2 w-6">
+          {{ $t('navbar.saved') }}
         </button>
       </section>
 
@@ -396,8 +469,8 @@ onUnmounted(() => {
             <div class="flex items-center">
                 <button
                   class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
-                  :class="{'disabled': typeof collab != 'string' && (clipboardContent == undefined || collab[2].length >= 100)}"
-                  :disabled="typeof collab != 'string' && (clipboardContent == undefined || collab[2].length >= 100)"
+                  :class="{'disabled': clipboardContent == undefined || collab[2].length >= 100}"
+                  :disabled="clipboardContent == undefined || collab[2].length >= 100"
                   @click="pasteMember"
                 >
                     <img src="@/images/paste.svg" alt="">
@@ -405,8 +478,7 @@ onUnmounted(() => {
                 <div class="relative">
                   <button
                     class="box-border z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
-                    :class="{'disabled': (typeof collab == 'string')}"
-                    :disabled="(typeof collab == 'string')"
+                    v-if="(typeof collab != 'string')"
                     @click="openSortDropdown()"
                   >
                       <img src="@/images/sort.svg" alt="">
@@ -419,13 +491,7 @@ onUnmounted(() => {
                     </div>
                   </Transition>
                 </div>
-                <button
-                  class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
-                  @click="savedSidebarOpen = !savedSidebarOpen"
-                >
-                    <img src="@/images/addfromFaves.svg" alt="">
-                </button>
-                <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button" v-if="(typeof collab != 'string')"
                   @click="addMember()"
                   :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
                   :class="{'disabled': typeof collab != 'string' && (noRoles || collab[2].length >= 100)}"
@@ -444,7 +510,7 @@ onUnmounted(() => {
                   <div class="box-border flex relative items-center p-1 w-[30rem] max-w-[70vw] bg-black bg-opacity-40 rounded-md">
                     <button type="button" @click="openSocialDropdown" class="pr-1 align-middle bg-white bg-opacity-10 rounded-md button">
                       <img :src="socialMediaImages[socialMedia[socialPicker.socialIndex].icon]" class="absolute left-2 top-1/2 mx-auto w-4 opacity-40 -translate-y-1/2" alt="">
-                      <label for="socInputBox" class="ml-7 text-xs opacity-40 pointer-events-none">{{ socialMedia[socialPicker.socialIndex].baseUrl }}</label>
+                      <label for="socInputBox" class="ml-7 text-xs opacity-40 pointer-events-none max-sm:hidden">{{ socialMedia[socialPicker.socialIndex].baseUrl }}</label>
                     </button>
                     <input maxlength="100" :value="socialPickerURL" @change="modifyPickerURL" @paste="modifyPickerURL" type="text" id="socInputBox" class="box-border px-1 ml-1 w-full bg-transparent rounded-sm outline-none focus-visible:bg-opacity-5 focus-visible:bg-white" :placeholder="socialMedia[socialPicker.socialIndex].name">
                     
@@ -474,34 +540,56 @@ onUnmounted(() => {
             
         </header>
 
-        <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 h-[33.7rem] max-h-[77vh] gap-1">
+        <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col bg-repeat-x p-1 gap-1">
             
             <!-- No roles help -->
             <div v-if="noMembers" class="flex flex-col gap-3 items-center my-auto">
               <img src="../../images/collabDudes.svg" class="w-[20rem] opacity-20" alt="">
               <h1 v-if="noRoles" class="text-2xl opacity-60 max-sm:text-lg">{{ $t('collabTools.addRoleToAddMember') }}</h1>
-              <h1 v-else class="text-2xl opacity-60 max-sm:text-lg">{{ $t('collabTools.addSomeMembers') }}</h1>
-              <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="roleSidebarOpen = !roleSidebarOpen" v-if="noRoles">
-                <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
-                {{ $t('collabTools.addRoles') }}
-              </button>
+              <h1 v-else class="text-2xl opacity-60 max-sm:text-lg">
+                {{ $t('collabTools.addSomeMembers') }}
+                <h3 class="flex gap-2 justify-center items-center text-sm">Přidej členy stisknutím <img class="p-0.5 w-6 bg-black bg-opacity-40" src="@/images/addLevel.svg"></h3>
+              </h1>
+              <div class="flex gap-2">
+                <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="createCollab" v-if="noRoles">
+                  <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
+                  {{ $t('collabTools.addRoles') }}
+                </button>
+                <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="savedSidebarOpen = !savedSidebarOpen" v-if="noRoles">
+                  <img src="../../images/savedMobHeader.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
+                  {{ $t('navbar.saved') }}
+                </button>
+              </div>
+
+              <!-- Load existing saved -->
+              <div v-if="hasSavedCollab > -1">
+                <hr class="w-96 h-1 bg-white rounded-full border-none opacity-80">
+                <h1 class="mt-2 text-xl text-center opacity-60">K tomuto levelu máš uložený collab!</h1>
+                <button class="flex items-center p-1 mx-auto mt-2 bg-black bg-opacity-40 rounded-md button" @click="loadCollab(savedCollabs[hasSavedCollab].data)">
+                  <img src="@/images/checkThick.svg" class="mr-4 w-8" alt="">
+                  <span class="mr-1">Použít</span>
+                  <strong><i>{{ savedCollabs[hasSavedCollab].collabName }}</i></strong>
+                </button>
+              </div>
             </div>
 
             <!-- Collab humans -->
-            <CollabCreator
-              v-for="(member, pos) in (collab as CollabData)[2]"
-              :key="pos"
-              v-bind="member"
-              :pos="pos"
-              :level-index="index"
-              :role-color="roleColors[member.role]"
-              :host="false"
-              @change-role="pickingRole = $event"
-              @remove-member="removeMember"
-              @copy-member="copyMember"
-              @add-social="addSocial"
-              @remove-social="removeSocial(pos, $event)"
-            />
+            <div v-if="(typeof collab != 'string')">
+              <CollabCreator
+                v-for="(member, pos) in (collab as CollabData)[2]"
+                :key="member.name"
+                v-bind="member"
+                :pos="pos"
+                :level-index="index"
+                :role-color="roleColors[member.role]"
+                :host="false"
+                @change-role="changeRole"
+                @remove-member="removeMember"
+                @copy-member="copyMember"
+                @add-social="addSocial"
+                @remove-social="removeSocial(pos, $event)"
+              />
+            </div>
         </main>
 
     </section>
@@ -510,7 +598,8 @@ onUnmounted(() => {
       @click.stop=""
       :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
       class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
-      v-if="roleSidebarOpen || pickingRole > -1"
+      v-show="roleSidebarOpen || pickingRole > -1"
+      v-if="(typeof collab != 'string')"
     >
 
       <!-- Role header -->
@@ -523,34 +612,45 @@ onUnmounted(() => {
           />
         </button>
         <h1 class="text-xl font-black text-center">{{ $t('collabTools.roles') }}</h1>
-        <button class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="pickingRole > -1" @click="addRole()">
-          <img
-            src="@/images/addLevel.svg"
-            alt=""
-            class="box-border p-1 w-8"
-          />
-        </button>
+        <div class="flex gap-1">
+          <button class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="pickingRole > -1" @click="addRole()">
+            <img
+              src="@/images/addLevel.svg"
+              alt=""
+              class="box-border p-1 w-8"
+            />
+          </button>
+          <button class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="pickingRole > -1" @click="openPresetsDropdown()">
+            <img
+              src="@/images/moveDown.svg"
+              alt=""
+              class="box-border p-2 w-8"
+            />
+          </button>
+        </div>
       </header>
-      <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
+      <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 relative overflow-y-auto overflow-x-clip" :class="{'h-[21rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1}">
         
         <!-- Presets and role help -->
-        <article class="flex flex-col gap-2 justify-center items-center my-auto w-full" v-if="noRoles">
-          <p class="text-3xl opacity-40">{{ $t('collabTools.examples') }}</p>
-          <hr class="mb-3 w-9/12 h-0.5 bg-white border-none opacity-10">
-          <button
-            v-for="preset in [$t('collabTools.verifier'), $t('collabTools.layout'), $t('collabTools.deco'), $t('collabTools.testing'), $t('collabTools.optimization')]"
-            @click="addRole(preset)"
-            class="w-3/5 text-xl text-white text-opacity-40 bg-black bg-opacity-40 rounded-md button"
-          >
-            {{ preset }}
-          </button>
-        </article>
+        <Transition name="fade">
+          <article v-if="presetDropdownOpen" class="flex absolute right-2 top-6 z-40 flex-col gap-1 justify-center items-center p-1 w-40 bg-black bg-opacity-90 rounded-md backdrop-blur-sm">
+            <img src="@/images/popupArr.svg" class="absolute right-1.5 -top-5 w-5 opacity-90" alt="">
+            <p class="text-lg font-bold">{{ $t('collabTools.examples') }}</p>
+            <button
+              v-for="preset in [$t('collabTools.verifier'), $t('collabTools.layout'), $t('collabTools.deco'), $t('collabTools.testing'), $t('collabTools.optimization')].filter(x => !collab[1].includes(x))"
+              @click="addRole(preset)"
+              class="w-full text-white bg-white bg-opacity-10 rounded-md button"
+            >
+              {{ preset }}
+            </button>
+          </article>
+        </Transition>
 
         <!-- Role bubble -->
-        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]" class="flex p-1 h-9 text-white rounded-md transition-colors items-middle shadow-drop" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
+        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]" class="flex p-1 h-9 text-white rounded-md transition-colors roleBubble items-middle shadow-drop focus-visible:!outline focus-visible:!outline-current" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
           <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" placeholder="Jméno role" class="px-1 mr-2 bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
           <div class="flex gap-1">
-            <button :disabled="pickingRole > -1 || oneRoleAndHasMembers" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button" @click="(collab as CollabData)[1].splice(pos, 1); makeRoleColors()"><img src="@/images/trash.svg" alt=""></button>
+            <button :disabled="pickingRole > -1 || collab[1].length == 1" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button" @click="(collab as CollabData)[1].splice(pos, 1); makeRoleColors()"><img src="@/images/trash.svg" alt=""></button>
           </div>
         </button>
       </main>
@@ -578,8 +678,8 @@ onUnmounted(() => {
             v-for="role in allLastUsedRoles
           ">
             <span class="ml-1 w-full">{{ role }}</span>
-            <button class="bg-black bg-opacity-40 rounded-sm button"><img src="@/images/pin.svg" alt="" class="box-border p-1 w-7" :class="{'opacity-30': !pinnedLastUsedRoles?.includes(role)}" @click="pinRole(role)"></button>
-            <button class="bg-black bg-opacity-40 rounded-sm button"><img src="@/images/trash.svg" alt="" class="box-border p-1 w-7" @click="removeLastUsedRole(role)"></button>
+            <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="pinRole(role)"><img src="@/images/pin.svg" alt="" class="box-border p-1 w-7" :class="{'opacity-30': !pinnedLastUsedRoles?.includes(role)}"></button>
+            <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="removeLastUsedRole(role)"><img src="@/images/trash.svg" alt="" class="box-border p-1 w-7"></button>
           </button>
   
         </main>
@@ -589,7 +689,7 @@ onUnmounted(() => {
       @click.stop=""
       :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
       class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
-      v-if="savedSidebarOpen || pickingRole > -1"
+      v-show="savedSidebarOpen"
     >
 
       <!-- Saved collabs header -->
@@ -605,18 +705,47 @@ onUnmounted(() => {
         <div></div>
       </header>
       <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[37rem]">
-        <button class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="(typeof collab == 'string') || savedCollabIDs.includes(levelList.levels[index!].levelID!)">
+        <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="(typeof collab == 'string')" @click="saveCollab()">
           <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
           Uložit collab
         </button>
 
-        <article class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
+        <article v-if="!savedCollabs?.length" class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
           <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
           Tady se objeví collaby, které vytvoříš, nebo uložíš v seznamech!
         </article>
 
-        <section v-for="(save, index) in savedCollabs">
-          {{ JSON.parse(save).collabName }}
+        <section
+          v-for="(save, index) in savedCollabs"
+          class="p-1 rounded-md bg-greenGradient"
+        >
+          <form
+            class="flex gap-1 items-center cursor-text group"
+            action="/"
+            @submit.prevent="modifySaveName($event, index)"
+          >
+            <input
+              autocomplete="off" maxlength="25" type="text" placeholder="Jméno collabu"
+              @blur="savedNameEdit.editing = false; save.collabName = savedNameEdit.previousName"
+              @focus="savedNameEdit.editingIndex = index; savedNameEdit.previousName = save.collabName; savedNameEdit.editing = true"
+              @keyup.capture.enter="modifySaveName($event, index)"
+              :value="save.collabName"
+              class="text-xl font-bold leading-none bg-black bg-opacity-0 rounded-md outline-none focus-within:pl-1 focus-within:py-1 focus-within:bg-opacity-40">
+            <button type="submit" v-if="savedNameEdit.editing && savedNameEdit.editingIndex == index" class="box-border p-1 h-8 bg-black bg-opacity-40 rounded-md aspect-square button">
+              <img src="@/images/checkThick.svg" alt="">
+            </button>
+            <img src="@/images/edit.svg" v-else class="w-3 opacity-0 transition-opacity group-hover:opacity-100" alt="">
+          </form>
+          <h3 class="mb-2 text-sm opacity-60">{{ save.collabHost }} + {{ save.memberCount }} členů</h3>
+
+          <footer class="grid grid-cols-2 gap-1">
+            <button @click="loadCollab(save.data)" class="flex gap-2 items-center px-2 py-1 bg-black bg-opacity-40 rounded-md button">
+              <img class="w-6" alt="" src="@/images/checkThick.svg">Použít
+            </button>
+            <button @click="removeCollab(index)" class="flex gap-2 items-center px-2 py-1 bg-black bg-opacity-40 rounded-md button">
+              <img class="w-6" alt="" src="@/images/trash.svg">Smazat
+            </button>
+          </footer>
         </section>
       </main>
     </aside>

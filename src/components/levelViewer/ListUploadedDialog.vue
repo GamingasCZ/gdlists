@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { removeBackup} from '../../Editor'
 
 const props = defineProps<{
     listID: string
@@ -29,6 +30,10 @@ const links = [
   `https://www.reddit.com/submit?url=${encodeURIComponent(text)}`,
 ];
 const doShare = (ind: number) => window.open(links[ind], '_blank')
+
+onMounted(() => {
+    removeBackup()
+})
 
 </script>
 

@@ -68,15 +68,18 @@ export interface FavoritedLevel {
 export interface SavedCollab {
   data: CollabData;
   collabName: string;
+  collabHost: string;
   memberCount: number;
+  collabID: number;
   timestamp: number;
+  levelID: number;
 }
 
 export interface CollabData {
   0: CollabHumans
   1: string[];
   2: CollabHumans[];
-  3: boolean;
+  3: number;
 }
 
 export interface CollabRoles {

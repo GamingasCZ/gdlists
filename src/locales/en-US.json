@@ -270,8 +270,8 @@
     "uploaded": "uploaded"
   },
   "collabTools": {
-    "addRoleToAddMember": "Add roles to add members.",
-    "addRoles": "Add roles",
+    "addRoleToAddMember": "You haven't created a collab yet.",
+    "addRoles": "Create collab",
     "deco": "Decoration",
     "examples": "Examples",
     "addSomeMembers": "You haven't added any members yet.",
@@ -281,7 +281,7 @@
     "memberName": "Member name",
     "members": "Members",
     "optimization": "Optimization",
-    "modifyRoles": "Edit roles",
+    "modifyRoles": "Roles",
     "recentRolesHere": "Here will be your last used roles!",
     "recentlyUsed": "Recently used",
     "roles": "Roles",

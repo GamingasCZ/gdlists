@@ -219,6 +219,7 @@ const errors = [
   useI18n().t('other.updateFail'),
   useI18n().t('other.removeFail')
 ]
+
 function uploadList() {
   errorDblclickHelp.value = false
   let check = checkList(listName.value)

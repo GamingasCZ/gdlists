@@ -9,6 +9,7 @@ import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
 import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 import { useI18n } from "vue-i18n";
+import { hasLocalStorage } from "@/siteSettings";
 
 const props = defineProps<{
   index?: number;
@@ -71,7 +72,7 @@ const getDiffFace = async () => await import(`../../images/faces/${levelList.val
 getDiffFace()
 
 
-const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0] : levelList.value.levels[props.index!].creator)
+const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0].name : levelList.value.levels[props.index!].creator)
 const modifyCreator = (e: Event) => {
   let newCreator = (e.currentTarget as HTMLInputElement).value
   if (typeof levelList.value.levels[props.index!].creator == 'string')
@@ -143,6 +144,7 @@ const mobileMoveLevel = () => {
   emit("moveControls", props.index!, props.index!);
 };
 
+const collabFlash = ref(false)
 function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   let levelID = levelList.value.levels[props.index!].levelID;
   let levelName = levelList.value.levels[props.index!].levelName;
@@ -168,8 +170,16 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       if (typeof levelList.value.levels[props.index!].creator == 'string')
         levelList.value.levels[props.index!].creator = level.author
       else
-        levelList.value.levels[props.index!].creator[0][0] = level.author
+        levelList.value.levels[props.index!].creator[0][0].name = level.author
       levelCreator.value = level.author
+
+      if (hasLocalStorage()) {
+        let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
+        collabFlash.value = saveIDs.indexOf(parseInt(levelList.value.levels[props.index].levelID)) > -1
+        setTimeout(() => {
+          collabFlash.value = false
+        }, 5000);
+      }
 
       if (level.difficulty == -1) level.difficulty = 11 // Auto levels
       levelList.value.levels[props.index!].difficulty = [
@@ -319,13 +329,19 @@ const openCollabTools = () => {
           @change="modifyCreator"
           :placeholder="$t('level.creator')"
         />
-        <img
-          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
-          src="../../images/collabMen.svg"
-          alt=""
-          :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab}"
-          @click="openCollabTools()"
-        />
+        <button class="relative w-10 h-10 bg-black bg-opacity-30 rounded-md button" @click="openCollabTools()" :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash}">
+          <img
+            class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square"
+            src="../../images/collabMen.svg"
+            alt=""
+            v-if="collabFlash"
+          />
+          <img
+            class="absolute top-0 left-0 p-1 w-10 aspect-square"
+            src="../../images/collabMen.svg"
+            alt=""
+          />
+        </button>
       </div>
     </div>
     <div class="flex justify-between items-center px-2 pb-2 max-sm:flex-col">

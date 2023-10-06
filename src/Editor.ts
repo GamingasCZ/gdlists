@@ -157,7 +157,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
   let listError: object | undefined
   levelList.value.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name.length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
     if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
     i++
   })
@@ -170,7 +170,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
 }
 
 export function creatorToCollab(currentName: string): CollabData {
-  return [[{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}], [], [], true]
+  return [[{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}], [], [], Math.floor(Math.random() * 1000000)]
 }
 
 export const isOnline = ref(true)

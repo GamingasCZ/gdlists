@@ -15,7 +15,7 @@ const emit = defineEmits(['updateOpenedCard', 'doMove'])
 
 function getCreator() {
     if (typeof props.data.creator == "object") // Collab
-        return useI18n().t('editor.collabText', [props.data.creator[0][0], props.data.creator[1].length])
+        return useI18n().t('editor.collabText', [props.data.creator[0][0].name, props.data.creator[2].length])
     else
         return props.data.creator
 }

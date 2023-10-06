@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import chroma from 'chroma-js';
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import offsets from "../../images/icons/offsets.json";
 import colors from "../../images/icons/colors.json";
 import { SETTINGS } from "@/siteSettings";
@@ -91,8 +91,9 @@ onMounted(() => {
 let imagesLoaded = 0
 function drawOnVisibleCanvas() {
     imagesLoaded += 1
-    if (imagesLoaded == 4)
-        suffixes.forEach(suffix => visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0))
+    if (imagesLoaded == 4) {
+        nextTick(() => suffixes.forEach(suffix => visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0)))
+    }
 }
 </script>
 
