@@ -32,6 +32,7 @@ if ($len > 25000 || $len < 150) {
 
 $user_id = checkAccount()["id"];
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
+$disableComments = $DATA["disComments"] == 1 ? 1 : 0;
 
 // Check list
 $listCheck = checkList($DATA["listData"]);
@@ -53,9 +54,9 @@ if ($mysqli -> connect_errno) {
 }
 
 // Send to database
-$teplate = "INSERT INTO `lists`(`creator`,`name`,`data`,`timestamp`,`hidden`,`uid`,`diffGuesser`) VALUES ('',?,?,?,?,?,?)";
-$values = array($fuckupData[0], $fuckupData[1], $timestamp, $hidden, $user_id, $diffGuess);
-doRequest($mysqli, $teplate, $values, "ssssss");
+$teplate = "INSERT INTO `lists`(`creator`,`name`,`data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`) VALUES ('',?,?,?,?,?,?,?)";
+$values = array($fuckupData[0], $fuckupData[1], $timestamp, $hidden, $user_id, $diffGuess, $disableComments);
+doRequest($mysqli, $teplate, $values, "ssssssi");
 
 if ($DATA["hidden"]) {
     // Hidden lists

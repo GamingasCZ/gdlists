@@ -91,9 +91,9 @@ const search = (e: Event) => {
         <h1 class="text-xl font-bold text-center">{{ $t('other.help') }}</h1>
         <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
       </div>
-      <div class="flex flex-col mt-2 h-[36.5rem]">
+      <div class="grid grid-rows-[repeat(2,max-content)] mt-2">
         <input type="text" :placeholder="$t('other.searchInHelp')"
-          class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-full" @input="search" />
+          class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-md" @input="search" />
         <div class="flex overflow-y-auto flex-col gap-2 p-2 mt-2 bg-white bg-opacity-10 rounded-md grow">
           <HelpBubble v-for="(question, index) in qa" v-bind="question" :filter-show="filteredQuestions[0] == -1 || filteredQuestions.includes(index)
             " />

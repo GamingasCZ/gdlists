@@ -41,6 +41,7 @@ body {
   }
 }
 .button { @apply cursor-pointer}
+.button * {@apply pointer-events-none}
 .shake {
   animation: shake 0.2s infinite;
 }

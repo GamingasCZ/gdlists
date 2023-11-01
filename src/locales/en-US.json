@@ -167,7 +167,8 @@
     "diffResult10": "YOU CANNOT BE SERIOUS!",
     "diffResult1": "a monkey would fair better than you!",
     "diffResult9": "Imperfect, you'll be grinding map packs as punishment.",
-    "diffResult16": "The thousands of hours of dashing are finally paying off!"
+    "diffResult16": "The thousands of hours of dashing are finally paying off!",
+    "commDisableHelp": "Comments are disabled on this list!"
   },
   "navbar": {
     "editor": "Editor",
@@ -232,7 +233,8 @@
     "next": "Next",
     "close": "Close",
     "copied": "Copied!",
-    "send": "Send"
+    "send": "Send",
+    "disableComments": "Disable Comments"
   },
   "settingsMenu": {
     "asOff": "Off",

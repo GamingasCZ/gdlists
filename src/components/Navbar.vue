@@ -6,6 +6,7 @@ import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
+import router from "@/router";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -49,7 +50,8 @@ watch(locale, () => {
   nextTick(() => {
     let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
     scrollerXOff.value = selectedLink.offsetLeft 
-    scrollerWidth.value = selectedLink.clientWidth 
+    scrollerWidth.value = selectedLink.clientWidth
+    if (router.currentRoute.value.name == "home") scrollerHome()
   })
 })
 
@@ -62,6 +64,7 @@ onMounted(() => {
   });
 
   ro.observe(document.querySelectorAll(".websiteLink")[scrollerInd.value]);
+  if (router.currentRoute.value.name == "home") scrollerHome()
 })
 
 const modScrollerWidth = (e: Event) => {
@@ -87,22 +90,22 @@ const localStorg = ref(hasLocalStorage())
     class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-drop overflow-x-clip bg-greenGradient"
   >
     <!-- Home link -->
-    <RouterLink to="/" @click="scrollerHome" class="relative">
+    <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
       <Logo class="w-10 h-10 button"/>
     </RouterLink>
     
     <section
-      class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem] max-md:gap-2 "
+      class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{'opacity-50 pointer-events-none': !isOnline}"
     >
-    <hr class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform" :style="{transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff/scrollerWidth}px)`}">
+    <hr v-if="scrollerInd != 0" class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform" :style="{transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff/scrollerWidth}px)`}">
     <RouterLink
         to="/editor"
         v-if="localStorg"
         @click="modScrollerWidth"
-        data-ind="0"
-        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors hover:bg-opacity-40 md:flex-row md:px-4 websiteLink"
-        :class="{'md:!bg-opacity-60': scrollerInd == 0}"
+        data-ind="1"
+        class="flex flex-col gap-2 items-center px-4 pt-1 bg-black bg-opacity-20 transition-colors max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'md:!bg-opacity-60': scrollerInd == 1}"
         @mousedown="resetList"
         ><img src="../images/editorMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.editor")
@@ -111,9 +114,9 @@ const localStorg = ref(hasLocalStorage())
       <RouterLink
         to="/browse"
         @click="modScrollerWidth"
-        data-ind="1"
-        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors hover:bg-opacity-40 md:flex-row md:px-4 websiteLink"
-        :class="{'md:!bg-opacity-60': scrollerInd == 1}"
+        data-ind="2"
+        class="flex flex-col gap-2 items-center px-4 pt-1 bg-black bg-opacity-20 transition-colors max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'md:!bg-opacity-60': scrollerInd == 2}"
         ><img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.lists")
         }}</RouterLink
@@ -122,9 +125,9 @@ const localStorg = ref(hasLocalStorage())
         to="/saved"
         v-if="localStorg"
         @click="modScrollerWidth"
-        data-ind="2"
-        class="flex flex-col gap-2 items-center bg-black bg-opacity-20 transition-colors hover:bg-opacity-40 md:flex-row md:px-4 websiteLink"
-        :class="{'md:!bg-opacity-60': scrollerInd == 2}"
+        data-ind="3"
+        class="flex flex-col gap-2 items-center px-4 pt-1 bg-black bg-opacity-20 transition-colors max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'md:!bg-opacity-60': scrollerInd == 3}"
         ><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.saved")
         }}</RouterLink

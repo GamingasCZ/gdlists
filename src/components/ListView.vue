@@ -331,8 +331,14 @@ const listActions = (action: string) => {
         @replay-list="guesses = []; cardGuessing = 0"
       />
 
-      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :comm-amount="LIST_DATA.commAmount"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :showing="commentsShowing"/>
+      <CommentSection
+        v-show="commentsShowing"
+        v-if="LIST_DATA?.id != undefined"
+        :comm-amount="LIST_DATA.commAmount"
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+        :showing="commentsShowing"
+        :comments-disabled="LIST_DATA.data.disComments"  
+      />
     </main>
   </section>
 </template>

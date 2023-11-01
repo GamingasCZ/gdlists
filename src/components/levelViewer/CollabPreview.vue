@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import type { CollabData } from "../../interfaces";
 import PlayerIcon from "../global/PlayerIcon.vue";
+import { socialMedia, socialMediaImages } from "../editor/socialSites";
 
 const props = defineProps<{
   collab: CollabData;
@@ -30,14 +31,42 @@ const collabIcon = () => {
   else return props.collab[0][0].verified
 }
 
+const hostHasSocials = ref((props.collab?.[0]?.[0]?.socials ?? []).length)
+const hostSocialsShown = ref(false)
+const socialsDialog = ref<HTMLDivElement>()
+
+const showHostSocials = (e: MouseEvent) => {
+  if (!hostHasSocials.value) return
+  hostSocialsShown.value = !hostSocialsShown.value
+  document.body.addEventListener("click", closeHostSocials, {capture: true})
+  window.addEventListener("scroll", closeHostSocials, {"once": true})
+};
+const closeHostSocials = (m: Event) => {
+  if (socialsDialog.value == undefined) return
+  hostSocialsShown.value = false
+  socialsDialog.value.removeEventListener("click", closeHostSocials, {capture: true})
+}
+
 </script>
 
 <template>
   <section>
     <h2 class="mb-3 text-xl font-black text-center align-middle">
-      {{ collabRole }}:
+      <span>{{ collabRole }}:</span>
       <PlayerIcon v-if="collabIcon()" :icon="collabIcon()[0]" :col1="collabIcon()[1].toString()" :col2="collabIcon()[2].toString()" :glow="collabIcon()[3]" class="inline mx-3 w-10 h-10" :quality="1"/>
-      {{ collabHost }}
+      <span class="inline-flex relative justify-center">
+        <span @click="showHostSocials" class="opener" :class="{'py-1 px-2 bg-black rounded-md cursor-pointer hover:bg-opacity-70 transition-colors bg-opacity-40': hostHasSocials}">{{ collabHost }}</span>
+        <Transition name="fade">
+          <section v-if="hostSocialsShown" ref="socialsDialog" class="grid absolute top-14 z-30 grid-cols-1 gap-1 p-1 w-max bg-black bg-opacity-90 rounded-md backdrop-blur-md">
+            <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 -translate-x-1/2" alt="">
+            <h2 class="font-extrabold text-center">Odkazy</h2>
+            <button v-for="social in collab[0][0].socials" class="flex gap-1 px-2 text-sm font-normal rounded-sm button" :style="{backgroundColor: socialMedia[social[0]].color}">
+              <img :src="socialMediaImages[socialMedia[social[0]].icon]" class="w-4" alt="">
+              <label >{{ social[1] }}</label>
+            </button>
+          </section>
+        </Transition>
+      </span>
     </h2>
     <div
       class="flex relative flex-wrap gap-3 gap-y-5 justify-center p-2 max-h-28 overflow-clip bg-black bg-opacity-40 rounded-lg transition-colors cursor-pointer hover:bg-opacity-60"

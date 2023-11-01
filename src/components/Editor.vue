@@ -235,7 +235,8 @@ function uploadList() {
     listData: JSON.stringify(levelList.value),
     lName: (document.getElementById("levelName") as HTMLInputElement).value,
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
-    hidden: listHiddenSelected()
+    hidden: listHiddenSelected(),
+    disComments: (levelList.value.disComments as any) | 0
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()
@@ -270,7 +271,8 @@ function updateList() {
     id: props.listID,
     isNowHidden: isNowHidden ? "true" : "false",
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
-    hidden: listHiddenSelected()
+    hidden: listHiddenSelected(),
+    disComments: (levelList.value.disComments as any) | 0
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()
@@ -329,6 +331,12 @@ function throwError(messsage: string, dblClickHelp: boolean) {
   setTimeout(() => formShaking.value = false, 333);
 }
 
+const closeCollabTools = () => {
+  collabEditorOpen.value = false
+  if (typeof levelList.value.levels[currentlyOpenedCard.value].creator == "string") return
+  (document.querySelector("input[name=creator]") as HTMLInputElement).value = levelList.value.levels[currentlyOpenedCard.value].creator[0][0].name
+}
+
 </script>
 
 <template>
@@ -361,7 +369,7 @@ function throwError(messsage: string, dblClickHelp: boolean) {
       :index="currentlyOpenedCard"
       :clipboard="collabClipboard"
       @send-clipboard="collabClipboard = $event"
-      @close-popup="collabEditorOpen = false"
+      @close-popup="closeCollabTools()"
     />
   </Transition>
 

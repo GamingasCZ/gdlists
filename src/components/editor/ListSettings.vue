@@ -63,6 +63,15 @@ const modifyDiffGuesser = (ind: number) => {
         />
         <label for="translucency">{{ $t('editor.translucentCards') }}</label>
       </div>
+      <div>
+        <input
+          v-model="levelList.disComments"
+          type="checkbox"
+          name="translucency"
+          class="button"
+        />
+        <label for="translucency">{{ $t('other.disableComments') }}</label>
+      </div>
     </div>
   </section>
 </template>

@@ -119,6 +119,7 @@ export interface LevelList {
   pageBGcolor: string | [number, number, number]; // hex | hsv array
   titleImg: ListBackground; // url, BG top offset [%], BG height, BG XAlign, gradient
   translucent: boolean;
+  disComments: boolean;
   levels: Array<Level>;
 }
 

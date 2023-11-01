@@ -62,6 +62,7 @@ function getCreator() {
             creatorName.value = userData.username
             
             user.color = chroma.rgb(...Object.values(colors[userData.color1])).hsl()
+            user.color[2] *= 64
             user.socials = userData.socials
             user.verified = [
                 userData.iconID,
@@ -107,10 +108,10 @@ const modifyPart = (e: Event, which: number) => {
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="!verified">
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
-                    <input type="text" maxlength="15" class="px-1 w-44 bg-black bg-opacity-40 rounded-sm" @keyup.capture.enter="getCreator" @change="writeName" :value="creatorName ?? ''" :placeholder="$t('collabTools.memberName')">
-                    <section class="flex gap-1">
+                    <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] bg-black bg-opacity-40 rounded-sm" :value="name" @input="emit('changeName', pos)" :placeholder="$t('collabTools.memberName')">
+                    <section class="grid grid-cols-5 gap-1">
                         <button
-                            class="w-8 rounded-sm button focus-visible:-translate-y-1" :style="{backgroundColor: socialMedia[site[0]].color}"
+                            class="rounded-sm button focus-visible:-translate-y-1" :style="{backgroundColor: socialMedia[site[0]].color}"
                             type="button"
                             v-for="(site, index) in (socials ?? [])"
                             @click="emit('addSocial', true, pos, index)"
@@ -118,7 +119,7 @@ const modifyPart = (e: Event, which: number) => {
                         >
                             <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="box-border p-0.5 mx-auto h-4" alt="">
                         </button>
-                        <button class="w-8 bg-gray-600 rounded-sm button focus-visible:-translate-y-1" type="button" @click="emit('addSocial', false, pos)" v-if="(socials ?? []).length < 5">
+                        <button class="bg-gray-600 rounded-sm button focus-visible:-translate-y-1" type="button" @click="emit('addSocial', false, pos)" v-if="(socials ?? []).length < 5">
                             <img src="../../images/plus.svg" class="box-border p-0.5 mx-auto h-4" alt="">
                         </button>
                     </section>
@@ -130,16 +131,15 @@ const modifyPart = (e: Event, which: number) => {
 
             <section class="flex flex-col items-center" v-if="!host">
                 <div class="relative">
-                    <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md" inputmode="numeric" type="number" style="appearance: textfield" min="0" max="100" @change="modifyPart($event, 0)" :value="part[0]">
-                    <span class="absolute bottom-1.5 opacity-30 pointer-events-none">%</span>
-                    <img src="@/images/arrow.svg" class="inline mr-2 mb-1 ml-7 h-6 opacity-60 button" alt="">
-                    <!-- <img src="@/images/arrow2.svg" class="inline px-2 w-16 opacity-60 button" alt=""> -->
-                    <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md" inputmode="numeric" type="number" style="appearance: textfield" min="0" max="100" @change="modifyPart($event, 1)" :value="part[1]">
-                    <span class="absolute bottom-1.5 opacity-30 pointer-events-none">%</span>
+                    <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md max-sm:text-xs" inputmode="numeric" type="number" style="appearance: textfield" min="0" max="100" @change="modifyPart($event, 0)" :value="part[0]">
+                    <span class="absolute bottom-1.5 ml-1 opacity-30 pointer-events-none max-sm:text-xs">%</span>
+                    <img src="@/images/arrow.svg" class="inline mr-2 mb-1 ml-7 h-6 opacity-60 button max-sm:h-3 max-sm:rotate-90" alt="">
+                    <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md max-sm:text-xs" inputmode="numeric" type="number" style="appearance: textfield" min="0" max="100" @change="modifyPart($event, 1)" :value="part[1]">
+                    <span class="absolute bottom-1.5 ml-1 opacity-30 pointer-events-none max-sm:text-xs">%</span>
                 </div>
             </section>
             
-            <section class="flex flex-col items-center" :class="{'ml-4': host}">
+            <section class="flex flex-col items-center max-sm:hidden" :class="{'ml-4': host}">
                 <button class="relative p-1 w-40 rounded-md button shadow-drop roleSwitcher focus-visible:!outline focus-visible:!outline-current" :style="{backgroundColor: roleColor ?? '#000'}" @click="emit('changeRole', pos)">
                     {{ levelList.levels[levelIndex].creator?.[1]?.[role] ?? $t('collabTools.unnamedRole') }}
                     <img src="@/images/edit.svg" class="box-border inline absolute right-1 top-1/2 p-0.5 ml-auto w-4 bg-black bg-opacity-40 rounded-sm -translate-y-1/2" alt="">
@@ -147,14 +147,15 @@ const modifyPart = (e: Event, which: number) => {
             </section>
     
             <div class="flex gap-2 items-center" v-if="!host">
-                <button class="flex justify-center items-center w-10 h-10 rounded-md border-4 border-white border-solid button focus-visible:!outline focus-visible:!outline-current"
-                    
+                <button class="flex justify-center items-center w-10 h-10 rounded-md border-4 border-white border-solid button max-sm:hidden focus-visible:!outline focus-visible:!outline-current"
+                    :style="{backgroundColor: chroma.hsl(color[0], color[1], color[2]/64).hex()}"
+                    :class="{'!border-black': color[2] >= 32}"
                     @click="colorPickerOpen = !colorPickerOpen">
-                    <img src="@/images/color.svg" class="w-6" alt="">
+                    <img src="@/images/color.svg" class="w-6" alt="" :class="{'invert': color[2] >= 32}">
                 </button>
-                <div class="flex flex-col">
-                    <button class="w-7 bg-yellow-800"><img class="box-border p-1" src="@/images/copy.svg" alt="" @click="emit('copyMember', pos)"></button>
-                    <button class="w-7 bg-red-800"><img class="box-border p-1" src="@/images/trash.svg" alt="" @click="emit('removeMember', pos)"></button>
+                <div class="flex flex-col max-sm:hidden">
+                    <button class="w-7 bg-yellow-600"><img class="box-border p-1" src="@/images/copy.svg" alt="" @click="emit('copyMember', pos)"></button>
+                    <button class="w-7 bg-red-600"><img class="box-border p-1" src="@/images/trash.svg" alt="" @click="emit('removeMember', pos)"></button>
                 </div>
             </div>
         </main>

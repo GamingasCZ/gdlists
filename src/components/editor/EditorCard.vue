@@ -78,7 +78,7 @@ const modifyCreator = (e: Event) => {
   if (typeof levelList.value.levels[props.index!].creator == 'string')
     levelList.value.levels[props.index!].creator = newCreator
   else
-    levelList.value.levels[props.index!].creator[0][0] = newCreator
+    levelList.value.levels[props.index!].creator[0][0].name = newCreator
   levelCreator.value = newCreator
 }
 
@@ -200,6 +200,14 @@ const openCollabTools = () => {
   else
     emit('openCollabTools', props.index!)
 }
+
+const creatorFilledIn = computed(() => {
+  if (typeof levelList.value.levels[props.index!].creator == "string")
+    return levelList.value.levels[props.index!].creator
+  else {
+    return levelList.value.levels[props.index!].creator[0]?.[0]?.name
+  }
+})
 </script>
 
 <template>
@@ -313,7 +321,7 @@ const openCollabTools = () => {
         </button>
         <hr
           class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
-          :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }"
+          :style="{ opacity: creatorFilledIn ? 1 : 0.5 }"
         />
       </div>
 
@@ -329,7 +337,7 @@ const openCollabTools = () => {
           @change="modifyCreator"
           :placeholder="$t('level.creator')"
         />
-        <button class="relative w-10 h-10 bg-black bg-opacity-30 rounded-md button" @click="openCollabTools()" :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash}">
+        <button class="relative w-10 h-10 bg-black bg-opacity-30 rounded-md focus-within:!outline-current button" @click="openCollabTools()" :class="{'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash}">
           <img
             class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square"
             src="../../images/collabMen.svg"

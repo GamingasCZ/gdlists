@@ -18,6 +18,7 @@ export const DEFAULT_LEVELLIST: LevelList = {
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
+  disComments: false,
   levels: [],
 }
 
