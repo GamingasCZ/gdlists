@@ -51,20 +51,15 @@ body {
 }
 
 input[type="checkbox"] {
-  @apply appearance-none border-white border-opacity-50 border-solid border-[0.15rem] bg-white bg-opacity-20 rounded relative align-middle w-6 h-6 mr-2 focus-visible:outline
+  @apply appearance-none border-white border-opacity-50 border-solid border-[0.15rem] bg-white bg-opacity-20 rounded relative align-middle w-6 h-6 mr-2;
+}
+
+input[type="checkbox"]:focus-within:after {
+  @apply content-[''] absolute bg-white bg-opacity-30 w-3/5 h-3/5 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
 
 input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  background: white;
-  width: 60%;
-  height: 60%;
-  border-radius: inherit;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  transition: width 0.2s;
+  @apply content-[''] absolute bg-white w-3/5 h-3/5 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
 
 .disabled {

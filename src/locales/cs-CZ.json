@@ -118,7 +118,8 @@
     "collabTools": "Collab nástroje",
     "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**.",
     "collabText": "{0} + {1} dalších",
-    "videoSearch": "Hledání videí"
+    "videoSearch": "Hledání videí",
+    "collabNoPhones": "Collab editor není dostupný na telefonech!"
   },
   "other": {
     "lockQuotes": [
@@ -179,7 +180,8 @@
     "close": "Zavřít",
     "copied": "Zkopírováno!",
     "send": "Odeslat",
-    "disableComments": "Zakázat komentáře"
+    "disableComments": "Zakázat komentáře",
+    "save": "Uložit"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

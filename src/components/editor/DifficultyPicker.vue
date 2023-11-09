@@ -25,7 +25,7 @@ getDifficulties()
 <template>
   <section class="flex justify-between">
     <div
-      class="box-border flex flex-grow-[1] items-center gap-3 overflow-x-auto"
+      class="box-border flex flex-grow-[1] mx-1 items-center gap-3 overflow-x-auto"
     >
       <button
         v-for="(diff, index) in faces"
@@ -39,11 +39,11 @@ getDifficulties()
       </button>
     </div>
     <div
-      class="box-border grid grid-cols-2 gap-1 p-2 min-w-max bg-black bg-opacity-20 rounded-md"
+      class="box-border grid grid-cols-2 gap-1 min-w-max rounded-md"
     >
       <button
         type="button"
-        class="p-1 w-10 bg-black bg-opacity-20 rounded-md aspect-square"
+        class="p-1 w-10 bg-black bg-opacity-40 rounded-md aspect-square"
         v-for="(rate, index) in rates"
         @click="emit('changeRate', index)"
       >

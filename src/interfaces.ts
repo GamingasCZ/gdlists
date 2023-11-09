@@ -72,7 +72,7 @@ export interface SavedCollab {
   memberCount: number;
   collabID: number;
   timestamp: number;
-  levelID: number;
+  levelID: number | "-1";
 }
 
 export interface CollabData {

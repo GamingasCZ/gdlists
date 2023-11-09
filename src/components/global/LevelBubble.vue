@@ -26,7 +26,7 @@ const isCollab = ref<boolean>(typeof props.data.creator != "string");
       />{{ data.levelName }}
     </h3>
     <h5 class="text-xs font-normal opacity-70">
-      {{ !isCollab ? data.creator : data.creator[0][0] }}
+      {{ !isCollab ? data.creator : (data.creator[0][0]?.name ?? data.creator[0][0]) }}
     </h5>
   </button>
 </template>

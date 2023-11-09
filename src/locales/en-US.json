@@ -84,7 +84,8 @@
     "levelSearchHelp": "# Searching by ID\n*The search icon next to the level ID will fetch level info of a level with the given ID\n# Searching by name/creator\nThe search icon between the level name and level author will fetch\n*The most liked level with the **given name**\n*The most recent level from the **given author**\n*If both fields are fille in, **the level from the given author**",
     "collabText": "{0} + {1} more",
     "videoSearch": "Video search",
-    "diffGuessHelp": "If Difficulty Guessing is turned on, the list will gradually unlock as you guess difficulties, ratings, or both.\n*In the List Browser, these lists have question marks in the background.\n*If coming from Saved Levels, guessing will not be triggered.\n*You can use the arrow keys to play."
+    "diffGuessHelp": "If Difficulty Guessing is turned on, the list will gradually unlock as you guess difficulties, ratings, or both.\n*In the List Browser, these lists have question marks in the background.\n*If coming from Saved Levels, guessing will not be triggered.\n*You can use the arrow keys to play.",
+    "collabNoPhones": "The Collab editor is not available on mobile devices!"
   },
   "homepage": {
     "clear": "Clear",
@@ -234,7 +235,8 @@
     "close": "Close",
     "copied": "Copied!",
     "send": "Send",
-    "disableComments": "Disable Comments"
+    "disableComments": "Disable Comments",
+    "save": "Save"
   },
   "settingsMenu": {
     "asOff": "Off",

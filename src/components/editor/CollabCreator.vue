@@ -42,36 +42,38 @@ function getCreator() {
     if (typeof levelList.value.levels[props.levelIndex].creator == 'string') return
     if (searchingCreator.value) return
     
-    let user = props.host ? levelList.value.levels[props.levelIndex].creator[0][0] : levelList.value.levels[props.levelIndex].creator[2][props.pos]
-    searchingCreator.value = true
-    let searchUsername = user.name
-    axios.get(
-        import.meta.env.VITE_API+"/rubLevelData.php",
-        {params: {userDataFetch: '', username: searchUsername}}
-    ).then(res => {
-        let userData: userDataFetchResponse = res.data
-        // User not found
-        if (res.data == -1) {
-            noResults.value = true
-            setTimeout(() => noResults.value = false, 500);
-            user.name = ""
-            user.verified = 0
-        }
-        else {
-            user.name = userData.username
-            creatorName.value = userData.username
-            
-            user.color = chroma.rgb(...Object.values(colors[userData.color1])).hsl()
-            user.color[2] *= 64
-            user.socials = userData.socials
-            user.verified = [
-                userData.iconID,
-                userData.color1,
-                userData.color2,
-                userData.glow
-            ]
-        }
-        setTimeout(() => searchingCreator.value = false, 5000)
+    nextTick(() => {
+        let user = props.host ? levelList.value.levels[props.levelIndex].creator[0][0] : levelList.value.levels[props.levelIndex].creator[2][props.pos]
+        searchingCreator.value = true
+        let searchUsername = user.name
+        axios.get(
+            import.meta.env.VITE_API+"/rubLevelData.php",
+            {params: {userDataFetch: '', username: searchUsername}}
+        ).then(res => {
+            let userData: userDataFetchResponse = res.data
+            // User not found
+            if (res.data == -1) {
+                noResults.value = true
+                setTimeout(() => noResults.value = false, 500);
+                user.name = ""
+                user.verified = 0
+            }
+            else {
+                user.name = userData.username
+                creatorName.value = userData.username
+                
+                user.color = chroma.rgb(...Object.values(colors[userData.color1])).hsl()
+                user.color[2] *= 64
+                user.socials = userData.socials
+                user.verified = [
+                    userData.iconID,
+                    userData.color1,
+                    userData.color2,
+                    userData.glow
+                ]
+            }
+            setTimeout(() => searchingCreator.value = false, 5000)
+    })
     }).catch(() => setTimeout(() => searchingCreator.value = false, 5000))
 }
 
@@ -104,11 +106,11 @@ const modifyPart = (e: Event, which: number) => {
 <template>
     <section class="collabMember flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20" :class="{'!bg-opacity-0': host}">
         <main class="flex gap-2 items-center my-auto w-full" :class="{'justify-between': !host}">
-            <form class="flex gap-1 items-center" :class="{'shake': noResults}" @submit.prevent="getCreator">
+            <div class="flex gap-1 items-center" :class="{'shake': noResults}">
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="!verified">
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
-                    <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] bg-black bg-opacity-40 rounded-sm" :value="name" @input="emit('changeName', pos)" :placeholder="$t('collabTools.memberName')">
+                    <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] bg-black bg-opacity-40 rounded-sm" :value="name" @change="writeName" @keypress.enter="getCreator" :placeholder="$t('collabTools.memberName')">
                     <section class="grid grid-cols-5 gap-1">
                         <button
                             class="rounded-sm button focus-visible:-translate-y-1" :style="{backgroundColor: socialMedia[site[0]].color}"
@@ -124,10 +126,10 @@ const modifyPart = (e: Event, which: number) => {
                         </button>
                     </section>
                 </div>
-                <button class="bg-black bg-opacity-40 rounded-md transition-opacity button disabled:opacity-50 focus:outline focus:outline-current" type="submit" :disabled="searchingCreator">
+                <button class="bg-black bg-opacity-40 rounded-md transition-opacity button disabled:opacity-50 focus:outline focus:outline-current" @click="getCreator" :disabled="searchingCreator">
                     <img src="@/images/searchOpaque.svg" class="box-border p-1 w-8" alt="">
                 </button>
-            </form>
+            </div>
 
             <section class="flex flex-col items-center" v-if="!host">
                 <div class="relative">

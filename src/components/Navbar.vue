@@ -104,7 +104,7 @@ const localStorg = ref(hasLocalStorage())
         v-if="localStorg"
         @click="modScrollerWidth"
         data-ind="1"
-        class="flex flex-col gap-2 items-center px-4 pt-1 bg-black bg-opacity-20 transition-colors max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{'md:!bg-opacity-60': scrollerInd == 1}"
         @mousedown="resetList"
         ><img src="../images/editorMobHeader.svg" alt="" class="w-6" />{{
@@ -115,7 +115,7 @@ const localStorg = ref(hasLocalStorage())
         to="/browse"
         @click="modScrollerWidth"
         data-ind="2"
-        class="flex flex-col gap-2 items-center px-4 pt-1 bg-black bg-opacity-20 transition-colors max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{'md:!bg-opacity-60': scrollerInd == 2}"
         ><img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.lists")
@@ -126,7 +126,7 @@ const localStorg = ref(hasLocalStorage())
         v-if="localStorg"
         @click="modScrollerWidth"
         data-ind="3"
-        class="flex flex-col gap-2 items-center px-4 pt-1 bg-black bg-opacity-20 transition-colors max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{'md:!bg-opacity-60': scrollerInd == 3}"
         ><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
           $t("navbar.saved")

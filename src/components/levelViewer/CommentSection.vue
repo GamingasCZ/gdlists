@@ -29,7 +29,7 @@ watch(props, () => { // only refresh comments once
             <span>{{ $t('listViewer.commDisableHelp') }}</span>
         </div>
 
-        <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0}">
-        <ListBrowser v-if="showingOnce && !noNoCommsIfDisabledComments" :online-browser="true" :hide-search="true" online-type="comments" :comment-i-d="listID" :refreshButton="true" @refreshed-browser="amount = $event"/>
+        <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">
+        <ListBrowser v-if="showingOnce && !noNoCommsIfDisabledComments" :online-browser="true" :hide-search="true" online-type="comments" :comment-i-d="listID" :refreshButton="!commentsDisabled" @refreshed-browser="amount = $event"/>
     </main>
 </template>

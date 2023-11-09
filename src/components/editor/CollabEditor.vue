@@ -339,7 +339,6 @@ Saved collabs
 */
 
 const currentlyUsedSaved = ref(-1)
-const savedWithSameIDCollapsed = ref(true)
 const savedSidebarOpen = ref(false)
 const savedCollabs = ref<SavedCollab[]>()
 if (localStrg) {
@@ -358,8 +357,13 @@ function saveCollab() {
   if (!localStrg) return
   if (typeof collab.value == "string") return
 
+  let updating = currentlyUsedSaved.value != -1
+
   let saveData: SavedCollab = {
-    collabName: levelList.value.levels[props.index].levelName || "Bezejmenný collab",
+    collabName:
+      updating ? 
+        savedCollabs.value![currentlyUsedSaved.value].collabName :
+        levelList.value.levels[props.index].levelName || "Bezejmenný collab",
     collabHost: collab.value[0][0].name,
     levelID: parseInt(levelList.value.levels[props.index].levelID || "-1"),
     collabID: collab.value[3],
@@ -367,19 +371,13 @@ function saveCollab() {
     memberCount: collab.value[2].length,
     timestamp: Date.now()
   }
-  currentlyUsedSaved.value = savedCollabs.value?.length! - 1
 
-  if (currentlyUsedSaved.value == -1)
+  if (!updating) {
+    currentlyUsedSaved.value = savedCollabs.value?.length!
     savedCollabs.value?.push(saveData)
+  }
   else
-    savedCollabs.value[currentlyUsedSaved.value] = saveData
-  saveAllCollabs()
-}
-
-function modifySaveName(e:SubmitEvent, ind: number) {
-  (e.target as HTMLInputElement).blur()
-  savedCollabs.value![ind].collabName = e.target!.elements[0].value
-  savedNameEdit.previousName = savedCollabs.value![ind].collabName
+    savedCollabs.value![currentlyUsedSaved.value] = saveData
   saveAllCollabs()
 }
 
@@ -388,9 +386,11 @@ function removeCollab(ind: number) {
   saveAllCollabs()
 }
 
-function loadCollab(saveData: CollabData, collabIndex: number) {
-  levelList.value.levels[props.index].creator = saveData
-  collab.value = saveData
+function loadCollab(saveData: SavedCollab, collabIndex: number) {
+  levelList.value.levels[props.index].creator = saveData.data
+  if (saveData.levelID != "-1")
+    levelList.value.levels[props.index].levelID = saveData.levelID.toString()
+  collab.value = saveData.data
   currentlyUsedSaved.value = collabIndex
   makeRoleColors()
 }
@@ -730,42 +730,45 @@ onUnmounted(() => {
         </article>
 
         <!-- Currently editing -->
-        <div v-if="currentlyUsedSaved != -1">
+        <div v-if="currentlyUsedSaved != -1" class="mb-4">
           <header class="flex gap-3 items-center mt-3 mb-1 opacity-80">
             <hr class="w-4 h-1 bg-white border-none">
             <h2 class="text-xl">Upravované</h2>
             <hr class="h-1 bg-white border-none grow">
           </header>
-          <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" @change-name="modifySaveName" @load-collab="loadCollab" @remove-collab="removeCollab" />
+          <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
         </div>
 
         <!-- Same ID -->
-        <div v-if="currentlyUsedSaved != -1">
+        <!-- <div v-if="currentlyUsedSaved != -1">
           <header class="flex gap-3 items-center mb-1 opacity-80">
             <button @click="savedWithSameIDCollapsed = !savedWithSameIDCollapsed"><img src="@/images/showComms.svg" class="p-0.5 w-4 bg-white bg-opacity-20 rounded-full aspect-square" :class="{'rotate-90': !savedWithSameIDCollapsed}"></button>
             <h2 class="text-xl">Se stejným ID</h2>
             <hr class="h-1 bg-white border-none grow">
           </header>
-          <div v-if="!savedWithSameIDCollapsed">
+          <div v-if="!savedWithSameIDCollapsed" class="flex flex-col gap-2">
             <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" @change-name="modifySaveName" @load-collab="loadCollab" @remove-collab="removeCollab" />
           </div>
-        </div>
+        </div> -->
         
-        <!-- Same ID -->
+        <!-- All collabs -->
         <div>
           <header class="flex gap-3 items-center mt-3 mb-1 opacity-80">
             <hr class="w-4 h-1 bg-white border-none">
             <h2 class="text-xl">Všechny collaby</h2>
             <hr class="h-1 bg-white border-none grow">
           </header>
-          <SavedCollabVue
-            v-for="(save, index) in savedCollabs"
-            :save="save"
-            :collIndex="index"
-            @change-name="modifySaveName"
-            @load-collab="loadCollab"
-            @remove-collab="removeCollab"
-          />
+          <div class="flex flex-col gap-2">
+            <SavedCollabVue
+              v-for="(save, index) in savedCollabs"
+              :save="save"
+              :collIndex="index"
+              :in-use="currentlyUsedSaved == index"
+              @do-save="saveAllCollabs"
+              @load-collab="loadCollab"
+              @remove-collab="removeCollab"
+            />
+          </div>
         </div>
       </main>
     </aside>
