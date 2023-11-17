@@ -21,7 +21,7 @@ const humColor = (col: string | [number, number, number]) => {
         <h2 class="ml-6 text-xl font-bold">{{ roleName }}</h2>
         <div class="flex gap-2 items-center mt-1 w-full">
             <span class="text-xs">0%</span>
-            <div class="flex h-6 bg-black bg-opacity-40 rounded-md grow">
+            <div class="flex h-6 overflow-clip bg-black bg-opacity-40 rounded-md grow">
                 <div class="h-full" :style="{width: `${human.part[1] - human.part[0]}%`, background: humColor(human.color)}" v-for="human in humans"></div>
             </div>
             <span class="text-xs">100%</span>

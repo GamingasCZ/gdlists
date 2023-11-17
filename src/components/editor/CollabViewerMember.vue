@@ -20,6 +20,22 @@ const getEmoji = async () => {
 }
 getEmoji()
 
+const openLink = (ind: number, path: string) => {
+    switch (ind) {
+        case 4:
+            if (path.startsWith("/"))
+                window.open(`https://discord.com${path}`, '_blank')
+            else
+                alert("Copied to clipboard")
+            break;
+        case 5: // Custom site
+            window.open(path, '_blank'); break;
+    
+        default:
+            window.open("https://" +  socialMedia[ind].baseUrl + path, '_blank');
+    }
+}
+
 </script>
 
 <template>
@@ -38,7 +54,7 @@ getEmoji()
         <h5 class="w-max text-xs leading-none opacity-40">{{ roleName }}</h5>
         <h2 class="w-max text-lg font-extrabold leading-none">{{ name }}</h2>
         <footer class="flex gap-1 mt-1">
-            <button class="p-0.5 w-7 h-5 rounded-sm button" :style="{background: socialMedia[site[0]].color}" v-for="site in socials" :title="socialMedia[site[0]].name">
+            <button @click="openLink(site[0], site[1])" class="p-0.5 w-7 h-5 rounded-sm button" :style="{background: socialMedia[site[0]].color}" v-for="site in socials" :title="socialMedia[site[0]].name">
                 <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="mx-auto h-full" alt="">
             </button>
         </footer>
