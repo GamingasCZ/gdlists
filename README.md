@@ -17,6 +17,10 @@ Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and mo
 * Level Browser
 * Profiles
 * Improved comments
+* Level Requests lists
+* User and text cards
+* Multiple moderators
+* Private server support
 
 # Screenshots
 ![homepage](https://github.com/GamingasCZ/gdlists/assets/51487573/01e6d86e-9750-4fde-a066-af902afb1720)
