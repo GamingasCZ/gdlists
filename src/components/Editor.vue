@@ -337,6 +337,7 @@ const closeCollabTools = () => {
   if (typeof levelList.value.levels[currentlyOpenedCard.value].creator == "string") return
   (document.querySelector("input[name=creator]") as HTMLInputElement).value = levelList.value.levels[currentlyOpenedCard.value].creator[0][0].name
 }
+const collabDetails = ref([])
 
 </script>
 
@@ -373,8 +374,6 @@ const closeCollabTools = () => {
       @close-popup="closeCollabTools()"
     />
   </Transition>
-
-  <CollabViewer :level-color="[180, 1, 1]" level-name="Return 420" :translucent="true" :collab-data="[[{'name':'EidamGD','role':0,'color':[null,0,1,1],'part':[0,0],'socials':[],'verified':[6,12,17,true]}],['Host','Playtestování','Layout + Deco'],[{'name':'Domca26','socials':[[0,'/UCX2xrXOARRcCCD5CGEADR3w']],'color':[null,0,0.35294117647058826,1],'part':[0,0],'role':0,'verified':[79,18,3,true]},{'name':'Swift','socials':[[2,'/megqnl']],'color':[300,1,0.5,1],'part':[null,null],'role':2,'verified':[77,7,12,false]},{'name':'solace','socials':[],'color':[269.4117647058824,1,0.5,1],'part':['100',0],'role':2,'verified':[27,6,11,false]},{'name':'TwistedUp','socials':[[0,'/UCbRUbrJxrCPRCIjkGMxBMNQ'],[1,'/TwistedUpGD'],[2,'/twistedupgd']],'color':[90.58823529411765,1,0.5,1],'part':[15,30],'role':2,'verified':[30,0,41,true]},{'name':'TheNoWeeker','socials':[[0,'/UCrEZFQk0CVHkS_EjnO4PVKA']],'color':[280,1,0.29411764705882354,1],'part':[29,15],'role':2,'verified':[129,35,15,true]},{'name':'OliXor','socials':[[0,'/UCCEpTJBcHxA8Bjcr_XsvtnA'],[1,'/llyxr_']],'color':[180,1,0.24509803921568626,1],'part':[0,0],'role':2,'verified':[36,21,40,false]},{'name':'DragonMonst','socials':[],'color':[0,1,0.5,1],'part':[0,0],'role':2,'verified':[127,9,15,true]},{'name':'JirkaCZ25','socials':[[0,'/UCSNsB0apTXExFebuW31ftPACZ25Ji'],[1,'/cz25jirka'],[2,'/jirka_cz25']],'color':[null,0,0,1],'part':[0,0],'role':2,'verified':[106,15,9,false]},{'name':'wBellox','socials':[[0,'/UCnUd-0luUTskiq2hT0zKUJw']],'color':[60,1,0.5,1],'part':[0,0],'role':0,'verified':[255,11,3,false]},{'name':'Qog','socials':[[0,'/UCI9H9gPFA1dG1PdlF0cpDYw'],[1,'/qoemgh']],'color':[200,1,0.29411764705882354,1],'part':[0,0],'role':0,'verified':[95,34,14,true]},{'name':'KebabHD','socials':[],'color':[334.2857142857143,1,0.3431372549019608,1],'part':[0,0],'role':0,'verified':[78,25,11,true]},{'name':'Coin','socials':[],'color':[90.58823529411765,1,0.5,1],'part':[0,0],'role':0,'verified':[1,0,3,false]},{'name':'OnlyTrying','socials':[[0,'/UCnE7H_6aQQIccOCbxtxxqYA'],[1,'/OnlyTryingTT'],[2,'/OnlyTryingYT']],'color':[90.58823529411765,1,0.5,1],'part':[0,0],'role':0,'verified':[1,0,3,false]},{'name':'gooseunderscore','socials':[[0,'/UCOWLGM1v5TcrQPv0Idm60Lw'],[1,'/a_br0n'],[2,'/goose_underscore']],'color':[null,0,1,1],'part':[0,0],'role':0,'verified':[3,12,12,false]},{'name':'TrollerCZ','socials':[[0,'/UCBVhQxXQ_wSkGPiliT_NbXQ'],[1,'/TrollerCZ27']],'color':[90.58823529411765,1,0.5,1],'part':[0,0],'role':0,'verified':[128,0,38,true]},{'name':'Jalongames','socials':[[0,'/UCJ-p0Y7ITGjItQcRX2ZEjLQ'],[1,'/jalongames']],'color':[null,0,1,1],'part':[0,0],'role':0,'verified':[31,12,12,false]},{'name':'BrutalSword107','socials':[[0,'/UCf4cxefCvTMEKs38xuYqFVA'],[1,'/brutalsword107'],[2,'/brutalsword107']],'color':[210.58823529411765,1,0.5,1],'part':[0,0],'role':0,'verified':[59,4,16,true]},{'name':'','socials':[],'color':[81,1,0.01866457074199142],'part':[0,5],'role':0,'verified':0}],19605]"/>
 
   <PickerPopup
     v-if="favoriteLevelPickerOpen"
@@ -418,8 +417,11 @@ const closeCollabTools = () => {
         v-bind="level"
         :disable-stars="true"
         :translucent-card="levelList.translucent"
+        @open-collab="collabDetails = $event"
       />
     </div>
+    {{ collabDetails }}
+    <CollabViewer :level-color="[180, 1, 1]" level-name="Return 420" :translucent="true" :collab-data="collabDetails"/>
   </section>
 
   <!-- Edit error - List doesn't exist -->
