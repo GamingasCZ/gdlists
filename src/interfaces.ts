@@ -119,6 +119,7 @@ export interface Level {
   difficulty: [number, number];
   color: [number, number, number];
   tags: LevelTag[];
+  platf: boolean;
 }
 
 export interface ListBackground {

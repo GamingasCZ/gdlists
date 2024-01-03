@@ -59,7 +59,7 @@ const getRateImage = async () => {
   let rate = levelList.value.levels[props.index!].difficulty?.[1] ?? 0;
   if (rate == 0) rateImagePath.value = ""; // Unrated level
   else {
-    return await import(`../../images/faces/${["star", "featured", "epic"][rate - 1]}.webp`).then(res => rateImagePath.value = res.default);
+    return await import(`../../images/faces/${["star", "featured", "epic", "legendary", "mythic"][rate - 1]}.webp`).then(res => rateImagePath.value = res.default);
   }
 };
 getRateImage()
@@ -188,6 +188,12 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       ytVideoData.value = await videoSearch()
     });
 }
+
+const isPlatformer = ref(levelList.value.levels[props.index!].platf)
+const switchPlatformer = () => {
+  isPlatformer.value = !isPlatformer.value
+  levelList.value.levels[props.index!].platf = isPlatformer.value
+}
 </script>
 
 <template>
@@ -252,9 +258,18 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       <!-- Level name input -->
       <div class="flex gap-2 max-sm:w-full">
         <img
-          class="w-10 aspect-square max-sm:hidden"
+          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/level.svg"
           alt=""
+          v-if="!isPlatformer"
+          @click="switchPlatformer"
+        />
+        <img
+          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
+          src="../../images/levelPlat.svg"
+          alt=""
+          v-else
+          @click="switchPlatformer"
         />
         <button
           :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
@@ -276,7 +291,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           name="levelName"
           maxlength="20"
           v-model="levelList.levels[index!].levelName"
-          :placeholder="$t('level.levelName')"
+          :placeholder="isPlatformer ? $t('level.levelNamePlat') : $t('level.levelName')"
         />
       </div>
 
@@ -363,7 +378,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           <img
             :src="diffFacePath"
             alt=""
-            :class="{'translate-y-0.5': levelList.levels[index!].difficulty?.[1] == 3}"
+            :class="{'translate-y-0.5': levelList.levels[index!].difficulty?.[1] >= 3}"
             :style="{scale: diffScaleOffsets[levelList.levels[index!].difficulty?.[0]-6], translate: diffTranslateOffsets[levelList.levels[index!].difficulty?.[0]-6]}"
             class="absolute z-20 w-7 pointer-events-none"
           />

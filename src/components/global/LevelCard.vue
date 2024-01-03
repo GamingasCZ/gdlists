@@ -15,6 +15,7 @@ const props = defineProps<{
   difficulty: [number, number];
   color: [number, number, number] | string;
   tags: LevelTag[];
+  platf: boolean;
   favorited: boolean | undefined;
   levelIndex: number;
   listID: string;
@@ -85,7 +86,7 @@ async function getDifficulty() {
   if (props.difficulty) {
     difficultyFace.value = await import(`../../images/faces/${props.difficulty[0]}.webp`).then(res => res.default)
     if (props.difficulty[1]) { // Must be rated
-      difficultyGlow.value = await import(`../../images/faces/${["","star","featured","epic"][props.difficulty[1]]}.webp`).then(res => res.default)
+      difficultyGlow.value = await import(`../../images/faces/${["","star","featured","epic","legendary","mythic"][props.difficulty[1]]}.webp`).then(res => res.default)
     }
   }
 }
@@ -165,33 +166,50 @@ function nextGuess(results: number) {
             <img
               class="relative z-10 w-10"
               :src="difficultyFace"
-              :class="{'translate-y-0.5': difficulty[1] == 3}"
+              :class="{'translate-y-0.5': difficulty[1] >= 3}"
               :style="{scale: diffScaleOffsets[difficulty[0]-6], translate: diffTranslateOffsets[difficulty[0]-6]}"
               alt=""  
             />
 
 
+            <!-- Mythic glow -->
+            <img
+              v-if="difficulty[1] == 5"
+              class="absolute top-1/2 -translate-y-1/2 -translate-x-0.5 z-0 w-full scale-[1.8]"
+              :class="{
+              }"
+              :src="difficultyGlow"
+              alt=""
+            />
+            <!-- Legendary glow -->
+            <img
+              v-if="difficulty[1] == 4"
+              class="absolute top-1/2 -translate-y-1/2  z-0 w-full scale-[1.6]"
+              :class="{
+              }"
+              :src="difficultyGlow"
+              alt=""
+            />
+            
             <!-- Featured glow -->
             <img
               v-if="difficulty[1] == 2"
               class="absolute top-1/2 -translate-y-1/2  z-0 w-full scale-[1.4]"
-              :class="{
-              }"
               :src="difficultyGlow"
               alt=""
             />
 
             <!-- Epic rate -->
             <img
-              v-else-if="difficulty[1] == 3"
-              class="absolute -top-1 -z-10 w-full scale-[1.6]"
+              v-if="difficulty[1] == 3"
+              class="absolute -top-1 z-0 w-full scale-[1.6]"
               :src="difficultyGlow"
               alt=""
             />
 
             <!-- Star rate -->
             <img
-              v-else-if="difficulty[1] == 1"
+              v-if="difficulty[1] == 1"
               class="absolute -right-0 -bottom-0 z-20 w-4 scale-150"
               :src="difficultyGlow"
               alt=""
@@ -199,7 +217,8 @@ function nextGuess(results: number) {
           </div>
 
           <!-- Level name -->
-          <h2 :class="{'ml-2': !guessingNow}" class="text-3xl font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
+          <h2 :class="{'ml-2': !guessingNow}" class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
+            <h4 class="absolute -top-4 text-sm" v-if="platf">Platformer</h4>
             {{ levelName || $t('other.unnamesd') }}
           </h2>
         </header>
