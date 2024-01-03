@@ -19,7 +19,7 @@ const helpMenuOpen = ref<boolean>(false);
       <div class="ml-3">
         <p class="text-xs font-thin leading-[8px] opacity-40">{{ $t('other.gdListsBy') }}</p>
         <strong>GAMINGAS</strong>
-        <p class="text-[0.6rem] leading-[8px] opacity-40">2021 - 2023</p>
+        <p class="text-[0.6rem] leading-[8px] opacity-40">2021 - 2024 </p>
       </div>
     </div>
     <div class="flex gap-1.5 ml-20 text-xs max-sm:flex-col sm:gap-4 sm:text-sm">
