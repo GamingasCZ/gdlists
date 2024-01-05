@@ -466,11 +466,11 @@ onUnmounted(() => {
         />
         <div v-else class="flex ml-1 grow"></div>
 
-        <button v-if="(typeof collab != 'string')" class="p-1.5 mr-2 bg-black bg-opacity-40 rounded-md button" @click="openSidebar(0)" :class="{'!bg-opacity-80': roleSidebarOpen}">
+        <button v-if="(typeof collab != 'string')" class="p-1.5 mr-2 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current" @click="openSidebar(0)" :class="{'!bg-opacity-80': roleSidebarOpen}">
           <img src="../../images/editorMobHeader.svg" alt="" class="box-border inline p-0.5 w-6">
           <span class="ml-2 max-sm:hidden">{{ $t('collabTools.modifyRoles') }}</span>
         </button>
-        <button v-if="(typeof collab != 'string')" class="p-1.5 bg-black bg-opacity-40 rounded-md button" @click="openSidebar(1)" :class="{'!bg-opacity-80': savedSidebarOpen}">
+        <button v-if="(typeof collab != 'string')" class="p-1.5 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current" @click="openSidebar(1)" :class="{'!bg-opacity-80': savedSidebarOpen}">
           <img src="../../images/savedMobHeader.svg" alt="" class="box-border inline p-0.5 w-6">
           <span class="ml-2 max-sm:hidden">{{ $t('navbar.saved') }}</span>
         </button>
@@ -490,7 +490,7 @@ onUnmounted(() => {
                 </button>
                 <div class="relative">
                   <button
-                    class="box-border z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
+                    class="box-border z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current"
                     v-if="(typeof collab != 'string')"
                     @click="openSortDropdown()"
                   >
@@ -500,12 +500,13 @@ onUnmounted(() => {
                     <div v-if="sortDropdownOpen" class="flex absolute -bottom-40 -left-1/2 z-10 flex-col gap-1 p-1 w-40 text-center bg-black bg-opacity-90 rounded-md backdrop-blur-sm -translate-x-10">
                       <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 opacity-90 -translate-x-1.5" alt="">
                       <h2 class="font-bold">{{ $t('collabTools.sortBy') }}</h2>
-                      <button v-for="(sort, index) in [$t('collabTools.sortPart'), $t('collabTools.sortName'), $t('collabTools.sortRole')]" @click="sortCollab(index)" class="block p-1 w-full text-white bg-white bg-opacity-10 rounded-md button">{{ sort }}</button>
+                      <button v-for="(sort, index) in [$t('collabTools.sortPart'), $t('collabTools.sortName'), $t('collabTools.sortRole')]" @click="sortCollab(index)" class="block p-1 w-full text-white bg-white bg-opacity-10 rounded-md button focus-visible:!outline focus-visible:!outline-current">{{ sort }}</button>
                     </div>
                   </Transition>
                 </div>
-                <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button" v-if="(typeof collab != 'string')"
+                <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current" v-if="(typeof collab != 'string')"
                   @click="addMember()"
+                  id="addCollabMember"
                   :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
                   :class="{'disabled': typeof collab != 'string' && (noRoles || collab[2].length >= 100)}"
                 >
