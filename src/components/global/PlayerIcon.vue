@@ -9,7 +9,7 @@ const props = defineProps<{
     icon: number
     col1: string
     col2: string
-    glow: boolean
+    glow: string
     quality: number
 }>()
 
@@ -53,7 +53,7 @@ function placeImage(image:HTMLImageElement | null) {
         // Recoloring icon parts
         for (let j = 0; j < data.length; j += 4) {
             if (j % 4 == 0) // Optimization
-                newCol = chroma.blend(chroma.rgb(data[j], data[j+1], data[j+2]), imageIndex == 2 ? colors[props.col1] : colors[props.col2], 'multiply').rgb()
+                newCol = chroma.blend(chroma.rgb(data[j], data[j+1], data[j+2]), colors[[props.glow, props.col1, props.col2][imageIndex]], 'multiply').rgb()
             data[j] = newCol[0];
             data[j + 1] = newCol[1]
             data[j + 2] = newCol[2]
@@ -71,9 +71,8 @@ onMounted(() => {
 
     let i = 0
     suffixes.forEach(suffix => {
-        import(`../../images/icons/player_${iconIndex}_${suffix}.webp`).then(res => {
             let image = new Image()
-            image.src = res.default;
+            image.src = import.meta.env.BASE_URL + `/icons/player_${iconIndex}_${suffix}.webp`
             image.dataset.index = (i).toString()
             i += 1
             
@@ -81,10 +80,10 @@ onMounted(() => {
                 images[suffix] = image
                 drawOnVisibleCanvas()
             }
-        }).catch(() => {
-            images[suffix] = null
-            drawOnVisibleCanvas()
-        })
+            image.onerror = () => {
+                images[suffix] = null
+                drawOnVisibleCanvas()
+            }
     })
 })
 

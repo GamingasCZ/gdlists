@@ -112,11 +112,11 @@ function main() {
       // Set list colors
       let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
       if (typeof listColors == "object") listColors[2] /= 64
-      else { listColors = chroma(listColors).hsl() }
+      else if (listColors) { listColors = chroma(listColors).hsl() }
       LIST_COL.value = listColors
       
       // Saturation 0
-      if (LIST_COL.value[0] == null) LIST_COL.value[0] = 0
+      if (LIST_COL?.value?.[0]) LIST_COL.value[0] = 0
 
       if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
         modifyListBG(LIST_COL.value);

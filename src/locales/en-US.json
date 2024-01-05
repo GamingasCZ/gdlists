@@ -236,7 +236,9 @@
     "copied": "Copied!",
     "send": "Send",
     "disableComments": "Disable Comments",
-    "save": "Save"
+    "save": "Save",
+    "use": "Use",
+    "delete": "Delete"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -301,6 +303,23 @@
     "funny4": "oh god",
     "funny5": "Earth management",
     "noEditOldCollab": "Sorry, collabs from old lists cannot be edited!",
-    "verifier": "Verifier"
+    "verifier": "Verifier",
+    "collabExists": "You have a collab saved for this level!",
+    "addMember": "Add a member by clicking",
+    "addRole": "Add role",
+    "allCollabs": "All collabs",
+    "memberCount": "{count} members",
+    "saveCollab": "Save Collab",
+    "savedHelp": "Here are the collabs you create, or save in lists.",
+    "roleName": "Role name",
+    "beingEdited": "In use",
+    "noHost": "No host",
+    "twitch": "Twitch channel",
+    "twitter": "Twitter account",
+    "yt": "YouTube channel",
+    "dis": "Discord username/server",
+    "collabName": "Collab name",
+    "customLink": "Custom link",
+    "unnamedCollab": "Unnamed Collab"
   }
 }

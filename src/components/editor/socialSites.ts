@@ -1,11 +1,12 @@
+import { i18n } from "@/locales"
 import { ref } from "vue"
 
 export const socialMedia = [
-    {'name': "YouTube kanál", 'icon': "youtube", 'baseUrl': "youtube.com", 'color': "#FF0000", 'index': 0},
-    {'name': "Twitter účet", 'icon': "twitter", 'baseUrl': "twitter.com", 'color': "#1DA1F2", 'index': 1},
-    {'name': "Twitch kanál", 'icon': "twitch", 'baseUrl': "twitch.tv", 'color': "#9146ff", 'index': 2},
-    {'name': "Discord jméno/server", 'icon': "discord", 'baseUrl': "Discord", 'color': "#5865F2", 'index': 3},
-    {'name': "Vlastní odkaz", 'icon': "link", 'baseUrl': "Custom", 'color': "#2C2F33", 'index': 4}
+    {'name': i18n.global.t('collabTools.yt'), 'icon': "youtube", 'baseUrl': "youtube.com", 'color': "#FF0000", 'index': 0},
+    {'name': i18n.global.t('collabTools.twitter'), 'icon': "twitter", 'baseUrl': "twitter.com", 'color': "#1DA1F2", 'index': 1},
+    {'name': i18n.global.t('collabTools.twitch'), 'icon': "twitch", 'baseUrl': "twitch.tv", 'color': "#9146ff", 'index': 2},
+    {'name': i18n.global.t('collabTools.dis'), 'icon': "discord", 'baseUrl': "Discord", 'color': "#5865F2", 'index': 3},
+    {'name': i18n.global.t('collabTools.customLink'), 'icon': "link", 'baseUrl': "Custom", 'color': "#2C2F33", 'index': 4}
   ]
   
 export const socialMediaImages = ref({})

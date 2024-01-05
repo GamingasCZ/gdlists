@@ -181,7 +181,9 @@
     "copied": "Zkopírováno!",
     "send": "Odeslat",
     "disableComments": "Zakázat komentáře",
-    "save": "Uložit"
+    "save": "Uložit",
+    "use": "Použít",
+    "delete": "Smazat"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -302,6 +304,23 @@
     "funny4": "ježíšku na křížku",
     "funny5": "Správa planety",
     "noEditOldCollab": "Collaby ze starých seznamů bohužel nemohou být upraveny!",
-    "verifier": "Verifier"
+    "verifier": "Verifier",
+    "memberCount": "{count} členů",
+    "collabExists": "K tomuto levelu máš uložený collab!",
+    "addMember": "Přidej členy stisknutím",
+    "addRole": "Přidat roli",
+    "roleName": "Jméno role",
+    "saveCollab": "Uložit collab",
+    "savedHelp": "Tady se objeví collaby, které vytvoříš, nebo uložíš v seznamech!",
+    "allCollabs": "Všechny collaby",
+    "beingEdited": "Upravované",
+    "noHost": "Bez hosta",
+    "collabName": "Jméno collabu",
+    "yt": "YouTube kanál",
+    "twitter": "Twitter účet",
+    "twitch": "Twitch kanál",
+    "dis": "Discord jméno/server",
+    "customLink": "Vlastní odkaz",
+    "unnamedCollab": "Bezejmenný collab"
   }
 }

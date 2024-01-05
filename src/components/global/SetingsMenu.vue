@@ -35,12 +35,12 @@ const screenWidth = ref(window.innerWidth)
       >
         <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />{{ $t('settingsMenu.logout') }}
       </button>
-      <button
+      <!-- <button
         class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
         @click="logout"
       >
         <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />Zařízení
-      </button>
+      </button> -->
     </section>
 
     <section
@@ -85,7 +85,7 @@ const screenWidth = ref(window.innerWidth)
         <option :value="180">{{ $t('settingsMenu.everyMin', [3]) }}</option>
       </select>
     </section>
-    <!-- <section
+    <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
       Kvalita ikonek
@@ -96,6 +96,6 @@ const screenWidth = ref(window.innerWidth)
         <option :value="4">Výchozí</option>
         <option :value="2">Vysoká</option>
       </select>
-    </section> -->
+    </section>
   </div>
 </template>

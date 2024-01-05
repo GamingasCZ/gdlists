@@ -27,6 +27,7 @@ import Notification from "./global/Notification.vue";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
+import PlayerIcon from "./global/PlayerIcon.vue";
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
 const props = defineProps<{
@@ -536,6 +537,7 @@ const collabDetails = ref([])
       id="editorHeader"
     >
       <span class="text-2xl font-black">{{ $t('editor.levels') }}</span>
+      <PlayerIcon :col1="1" :col2="2" :icon="1" :glow="3" :quality="1" />
       <div class="box-border flex gap-3 mt-2" v-if="updatingPositions == -1">
         <button type="button" @click="previewList(false)" @dblclick="previewList(true)">
           <img

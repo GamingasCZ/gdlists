@@ -104,22 +104,22 @@ switch (array_keys($_GET)[0]) {
         }
 
         $returnData["username"] = $userData[0];
-        $returnData["iconID"] = intval($userData[14]);
+        $returnData["iconID"] = intval($userData[16]);
         $returnData["color1"] = intval($userData[4]);
         $returnData["color2"] = intval($userData[5]);
-        $returnData["glow"] = $userData[20] == 1;
+        $returnData["glow"] = $userData[6];
         $returnData["socials"] = [];
         $socialIndexes = [0, 1, 2];
 
         $i = 0;
-        foreach ([$userData[13], $userData[26], $userData[27]] as $site) {
+        foreach ([$userData[15], $userData[30], $userData[31]] as $site) {
             if ($site != "") array_push($returnData["socials"], [$socialIndexes[$i], "/" . $site]);
             $i += 1;
         }
         
-        $returnData["stars"] = intval($userData[6]);
-        $returnData["demons"] = intval($userData[8]);
-        $returnData["cp"] = intval($userData[9]);
+        $returnData["stars"] = intval($userData[7]);
+        $returnData["demons"] = intval($userData[10]);
+        $returnData["cp"] = intval($userData[11]);
     }
 }
 

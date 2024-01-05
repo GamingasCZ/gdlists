@@ -143,7 +143,7 @@ const modifyPart = (e: Event, which: number) => {
             
             <section class="flex flex-col items-center max-sm:hidden" :class="{'ml-4': host}">
                 <button class="relative p-1 w-40 rounded-md button shadow-drop roleSwitcher focus-visible:!outline focus-visible:!outline-current" :style="{backgroundColor: roleColor ?? '#000'}" @click="emit('changeRole', pos)">
-                    {{ levelList.levels[levelIndex].creator?.[1]?.[role] ?? $t('collabTools.unnamedRole') }}
+                    {{ levelList.levels[levelIndex].creator?.[1]?.[role] || $t('collabTools.unnamedRole') }}
                     <img src="@/images/edit.svg" class="box-border inline absolute right-1 top-1/2 p-0.5 ml-auto w-4 bg-black bg-opacity-40 rounded-sm -translate-y-1/2" alt="">
                 </button>
             </section>
@@ -156,8 +156,8 @@ const modifyPart = (e: Event, which: number) => {
                     <img src="@/images/color.svg" class="w-6" alt="" :class="{'invert': color[2] >= 32}">
                 </button>
                 <div class="flex flex-col max-sm:hidden">
-                    <button class="w-7 bg-yellow-600"><img class="box-border p-1" src="@/images/copy.svg" alt="" @click="emit('copyMember', pos)"></button>
-                    <button class="w-7 bg-red-600"><img class="box-border p-1" src="@/images/trash.svg" alt="" @click="emit('removeMember', pos)"></button>
+                    <button class="w-7 bg-yellow-600"><img class="box-border p-1 button" src="@/images/copy.svg" alt="" @click="emit('copyMember', pos)"></button>
+                    <button class="w-7 bg-red-600"><img class="box-border p-1 button" src="@/images/trash.svg" alt="" @click="emit('removeMember', pos)"></button>
                 </div>
             </div>
         </main>

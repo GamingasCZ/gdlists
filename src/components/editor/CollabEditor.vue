@@ -8,6 +8,7 @@ import SavedCollabVue from './SavedCollab.vue';
 import { hasLocalStorage } from '@/siteSettings';
 import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
 import { useI18n } from 'vue-i18n';
+import { i18n } from '@/locales';
 
 const props = defineProps({
     index: {type: Number, required: true},
@@ -363,7 +364,7 @@ function saveCollab() {
     collabName:
       updating ? 
         savedCollabs.value![currentlyUsedSaved.value].collabName :
-        levelList.value.levels[props.index].levelName || "Bezejmenný collab",
+        levelList.value.levels[props.index].levelName || i18n.global.t('collabTools.unnamedCollab'),
     collabHost: collab.value[0][0].name,
     levelID: parseInt(levelList.value.levels[props.index].levelID || "-1"),
     collabID: collab.value[3],
@@ -481,8 +482,8 @@ onUnmounted(() => {
             <div class="flex items-center">
                 <button
                   class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
-                  :class="{'disabled': clipboardContent == undefined || collab[2].length >= 100}"
-                  :disabled="clipboardContent == undefined || collab[2].length >= 100"
+                  :class="{'disabled': !clipboardContent || !collab?.[2] || collab[2].length >= 100}"
+                  :disabled="!clipboardContent || !collab?.[2] || collab[2].length >= 100"
                   @click="pasteMember"
                 >
                     <img src="@/images/paste.svg" alt="">
@@ -560,7 +561,7 @@ onUnmounted(() => {
               <h1 v-if="noRoles" class="text-2xl opacity-60 max-sm:text-lg">{{ $t('collabTools.addRoleToAddMember') }}</h1>
               <h1 v-else class="text-2xl opacity-60 max-sm:text-lg">
                 {{ $t('collabTools.addSomeMembers') }}
-                <h3 class="flex gap-2 justify-center items-center text-sm">Přidej členy stisknutím <img class="p-0.5 w-6 bg-black bg-opacity-40" src="@/images/addLevel.svg"></h3>
+                <h3 class="flex gap-2 justify-center items-center text-sm">{{ $t('collabTools.addMember') }} <img class="p-0.5 w-6 bg-black bg-opacity-40" src="@/images/addLevel.svg"></h3>
               </h1>
               <div class="flex gap-2">
                 <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="createCollab" v-if="noRoles" autofocus="true">
@@ -576,11 +577,11 @@ onUnmounted(() => {
               <!-- Load existing saved -->
               <div v-if="hasSavedCollab > -1">
                 <hr class="w-96 h-1 bg-white rounded-full border-none opacity-80">
-                <h1 class="mt-2 text-xl text-center opacity-60">K tomuto levelu máš uložený collab!</h1>
-                <button class="flex items-center p-1 mx-auto mt-2 bg-black bg-opacity-40 rounded-md button" @click="loadCollab(savedCollabs[hasSavedCollab].data)">
+                <h1 class="mt-2 text-xl text-center opacity-60">{{ $t('collabTools.collabExists') }}</h1>
+                <button class="flex items-center p-1 mx-auto mt-2 bg-black bg-opacity-40 rounded-md button" @click="loadCollab(savedCollabs?.[hasSavedCollab]!, hasSavedCollab)">
                   <img src="@/images/checkThick.svg" class="mr-4 w-8" alt="">
-                  <span class="mr-1">Použít</span>
-                  <strong><i>{{ savedCollabs[hasSavedCollab].collabName }}</i></strong>
+                  <span class="mr-1">{{ $t('other.use') }}</span>
+                  <strong><i>{{ savedCollabs?.[hasSavedCollab].collabName }}</i></strong>
                 </button>
               </div>
             </div>
@@ -653,7 +654,7 @@ onUnmounted(() => {
 
         <!-- Role bubble -->
         <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]" class="flex p-1 h-9 text-white rounded-md transition-colors roleBubble items-middle shadow-drop focus-visible:!outline focus-visible:!outline-current" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
-          <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" placeholder="Jméno role" class="px-1 mr-2 h-full bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
+          <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" :placeholder="$t('collabTools.roleName')" class="px-1 mr-2 h-full bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
           <div class="flex gap-1">
             <button :disabled="pickingRole > -1 || collab[1].length == 1" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button" @click="(collab as CollabData)[1].splice(pos, 1); makeRoleColors()"><img src="@/images/trash.svg" alt=""></button>
           </div>
@@ -665,7 +666,7 @@ onUnmounted(() => {
             src="@/images/plus.svg"
             alt=""
             class="box-border p-1 w-8"
-          /> Přidat roli
+          />{{ $t('collabTools.addRole') }}
         </button>
       </main>
 
@@ -721,19 +722,19 @@ onUnmounted(() => {
       <main class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[37rem]">
         <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="(typeof collab == 'string')" @click="saveCollab()">
           <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
-          Uložit collab
+          {{ $t('collabTools.saveCollab') }}
         </button>
 
         <article v-if="!savedCollabs?.length" class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
           <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
-          Tady se objeví collaby, které vytvoříš, nebo uložíš v seznamech!
+          {{ $t('collabTools.savedHelp') }}
         </article>
 
         <!-- Currently editing -->
         <div v-if="currentlyUsedSaved != -1" class="mb-4">
           <header class="flex gap-3 items-center mt-3 mb-1 opacity-80">
             <hr class="w-4 h-1 bg-white border-none">
-            <h2 class="text-xl">Upravované</h2>
+            <h2 class="text-xl">{{ $t('collabTools.beingEdited') }}</h2>
             <hr class="h-1 bg-white border-none grow">
           </header>
           <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
@@ -753,9 +754,9 @@ onUnmounted(() => {
         
         <!-- All collabs -->
         <div>
-          <header class="flex gap-3 items-center mt-3 mb-1 opacity-80">
+          <header class="flex gap-3 items-center mt-3 mb-1 opacity-80" v-if="savedCollabs?.length">
             <hr class="w-4 h-1 bg-white border-none">
-            <h2 class="text-xl">Všechny collaby</h2>
+            <h2 class="text-xl">{{ $t('collabTools.allCollabs') }}</h2>
             <hr class="h-1 bg-white border-none grow">
           </header>
           <div class="flex flex-col gap-2">
