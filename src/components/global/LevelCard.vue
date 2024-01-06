@@ -27,7 +27,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "nextGuess", res: number): void;
-  (e: "openCollab", name: string, creator: CollabData, color: any, translucent: boolean): void;
+  (e: "openCollab", index: number, col: [number, number, number]): void;
 }>();
 
 const isFavorited = ref<boolean>(props.favorited);
@@ -242,7 +242,7 @@ function nextGuess(results: number) {
 
     <!-- Level creator -->
     <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
-    <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @click="emit('openCollab', levelName, creator, color, translucentCard)" />
+    <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @click="emit('openCollab', levelIndex, CARD_COL?.rgb()!)" />
 
     <!-- Level Tags -->
     <section class="flex flex-wrap gap-2 mt-2">

@@ -96,6 +96,15 @@ export interface CollabHumans {
   verified: 0 | number[];
 }
 
+export interface CollabViewerRow {
+  icon: number[];
+  roleName: string;
+  name: string;
+  socials: [number, string][];
+  part: [number, number];
+  hovering: number;
+}
+
 interface HumanSocialLink {
   0: number; // Site ID
   1: string; // Site Link

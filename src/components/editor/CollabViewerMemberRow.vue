@@ -3,15 +3,10 @@ import { EMOJI_COUNT } from '@/Editor';
 import PlayerIcon from '../global/PlayerIcon.vue';
 import { socialMedia, socialMediaImages } from './socialSites';
 import { ref } from 'vue';
+import type { CollabViewerRow } from '@/interfaces';
 
 
-const props = defineProps<{
-    icon: number[]
-    roleName: string
-    name: string
-    socials: [number, string][]
-    part: [number, number]
-}>()
+const props = defineProps<CollabViewerRow>()
 
 const emoji = ref("")
 const getEmoji = async () => {

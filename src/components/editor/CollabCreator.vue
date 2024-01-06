@@ -76,15 +76,17 @@ function getCreator(e: SubmitEvent) {
 }
 
 const writeName = (e: Event) => {
-    let val = (e.target as HTMLInputElement).value
-    if (props.host) {
-        if (typeof levelList.value.levels[props.levelIndex].creator == 'string') 
-            levelList.value.levels[props.levelIndex].creator = val
+    setTimeout(() => {
+        let val = (e.target as HTMLInputElement).value
+        if (props.host) {
+            if (typeof levelList.value.levels[props.levelIndex].creator == 'string') 
+                levelList.value.levels[props.levelIndex].creator = val
+            else
+                levelList.value.levels[props.levelIndex].creator[0][0].name = val
+        }
         else
-            levelList.value.levels[props.levelIndex].creator[0][0].name = val
-    }
-    else
-        levelList.value.levels[props.levelIndex].creator[2][props.pos].name = val
+            levelList.value.levels[props.levelIndex].creator[2][props.pos].name = val
+    }, 50);
 }
 const modifyPart = (e: Event, which: number) => {
     props.part[which] = Math.min(Math.max(0, parseInt((e.target as HTMLInputElement).value)), 100)
@@ -106,7 +108,7 @@ const modifyPart = (e: Event, which: number) => {
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="!verified">
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
-                    <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] bg-black bg-opacity-40 rounded-sm" :value="name" :placeholder="$t('collabTools.memberName')">
+                    <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] bg-black bg-opacity-40 rounded-sm" :value="name" @change="writeName" :placeholder="$t('collabTools.memberName')">
                     <section class="grid grid-cols-5 gap-1">
                         <button
                             class="rounded-sm button focus-visible:-translate-y-1" :style="{backgroundColor: socialMedia[site[0]].color}"
@@ -130,10 +132,9 @@ const modifyPart = (e: Event, which: number) => {
             <section class="flex flex-col items-center" v-if="!host">
                 <div class="relative">
                     <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md max-sm:text-xs" inputmode="numeric" type="number" style="appearance: textfield" min="0" max="100" @change="modifyPart($event, 0)" :value="part[0]">
-                    <span class="absolute bottom-1.5 ml-1 opacity-30 pointer-events-none max-sm:text-xs">%</span>
-                    <img src="@/images/arrow.svg" class="inline mr-2 mb-1 ml-7 h-6 opacity-60 button max-sm:h-3 max-sm:rotate-90" alt="">
+                    <img src="@/images/arrow.svg" class="inline mx-2 mb-1 h-3 opacity-60 button max-sm:h-3 max-sm:rotate-90" alt="">
                     <input class="p-1 w-12 text-xl text-center bg-black bg-opacity-40 rounded-md max-sm:text-xs" inputmode="numeric" type="number" style="appearance: textfield" min="0" max="100" @change="modifyPart($event, 1)" :value="part[1]">
-                    <span class="absolute bottom-1.5 ml-1 opacity-30 pointer-events-none max-sm:text-xs">%</span>
+                    <span class="absolute bottom-1.5 ml-1 opacity-60 pointer-events-none max-sm:text-xs">%</span>
                 </div>
             </section>
             

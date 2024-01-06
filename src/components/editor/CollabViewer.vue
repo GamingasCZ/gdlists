@@ -52,7 +52,7 @@ const gridView = ref(true)
       </div>
       <!-- Graphs --> 
       <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]">
-        <CollabViewerGraph :role-name="role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" v-for="role in collabData[1]" />
+        <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" v-for="role in collabData[1]" />
       </div>
 
       <!-- Member header -->
@@ -66,7 +66,7 @@ const gridView = ref(true)
       </header>
       
       <!-- Members -->
-      <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap p-1 gap-1 overflow-y-auto h-auto">
+      <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-auto justify-start content-start">
           <component :is="gridView ? CollabViewerMember : CollabViewerMemberRow" v-for="member in collabData[2]" :name="member.name" :part="member.part" :socials="member.socials" :icon="member.verified" :role-name="collabData[1][member.role]"/>
       </div>
     </section>

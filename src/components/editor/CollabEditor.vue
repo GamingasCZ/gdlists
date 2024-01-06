@@ -451,7 +451,7 @@ onUnmounted(() => {
 
       <section class="flex items-center mr-2" v-if="(typeof collab != 'string')">
         <CollabCreator
-            class="grow"
+            class="ml-1 grow"
             v-bind="collab[0][0]"
             :pos="999"
             :level-index="index"

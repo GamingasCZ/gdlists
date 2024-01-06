@@ -24,6 +24,7 @@ import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
 import { hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
+import CollabViewer from "./editor/CollabViewer.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -244,6 +245,21 @@ const listActions = (action: string) => {
   }
 };
 
+const collabData = ref({
+  levelName: "",
+  levelColor: [0,0,0],
+  collabData: null
+})
+const openCollabTools = (ind: number, col: [number, number, number]) => {
+  if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
+
+  console.log(col)
+  collabData.value.levelName = LIST_DATA.value?.data.levels[ind].levelName
+  collabData.value.levelColor = col
+  collabData.value.collabData = LIST_DATA.value?.data.levels[ind].creator
+}
+
+
 </script>
 
 <template>
@@ -300,6 +316,8 @@ const listActions = (action: string) => {
         <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />
       </Teleport>
 
+      <CollabViewer v-if="collabData.collabData != null" v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
+
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
         class="levelCard"
@@ -314,8 +332,9 @@ const listActions = (action: string) => {
         :disable-stars="false" 
         :guessing-now="cardGuessing == index"
         :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-        @vnode-mounted="tryJumping(index)"
+        @vue:mounted="tryJumping(index)"
         @next-guess="doNextGuess($event)"
+        @open-collab="openCollabTools"
       />
 
       <!-- Guessing bottom padding -->
