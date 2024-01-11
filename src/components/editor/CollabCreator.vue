@@ -39,6 +39,7 @@ const colorPickerOpen = ref(false)
 const searchingCreator = ref(false)
 const noResults = ref(false)
 function getCreator(e: SubmitEvent) {
+    console.log("sex")
     if (typeof levelList.value.levels[props.levelIndex].creator == 'string') return
     if (searchingCreator.value) return
     
@@ -60,8 +61,7 @@ function getCreator(e: SubmitEvent) {
         else {
             user.name = userData.username
             
-            user.color = chroma.rgb(...Object.values(colors[userData.color1])).hsl()
-            user.color[2] *= 64
+            user.color = chroma.rgb(...Object.values(colors[userData.color1])).hex()
             user.socials = userData.socials
             user.verified = [
                 userData.iconID,
@@ -104,7 +104,7 @@ const modifyPart = (e: Event, which: number) => {
 <template>
     <section class="collabMember flex flex-col gap-2 items-center pl-2 min-h-[3.5rem] overflow-clip bg-black rounded-md odd:bg-opacity-40 even:bg-opacity-20" :class="{'!bg-opacity-0': host}">
         <main class="flex gap-2 items-center my-auto w-full" :class="{'justify-between': !host}">
-            <form @submit.prevent="getCreator" class="flex gap-1 items-center" :class="{'shake': noResults}">
+            <form @submit.native.prevent="getCreator" class="flex gap-1 items-center" :class="{'shake': noResults}">
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="!verified">
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
@@ -147,8 +147,7 @@ const modifyPart = (e: Event, which: number) => {
     
             <div class="flex gap-2 items-center" v-if="!host">
                 <button class="flex justify-center items-center w-10 h-10 rounded-md border-4 border-white border-solid button max-sm:hidden focus-visible:!outline focus-visible:!outline-current"
-                    :style="{backgroundColor: chroma.hsl(color[0], color[1], color[2]/64).hex()}"
-                    :class="{'!border-black': color[2] >= 32}"
+                    :style="{backgroundColor: color}"
                     @click="colorPickerOpen = !colorPickerOpen">
                     <img src="@/images/color.svg" class="w-6" alt="" :class="{'invert': color[2] >= 32}">
                 </button>
@@ -159,7 +158,7 @@ const modifyPart = (e: Event, which: number) => {
             </div>
         </main>
         <Transition name="fade">
-            <ColorPicker v-if="colorPickerOpen && !host" :hue="color[0]" :lightness="color[2]" :saturation="color[1]" @colors-modified="(levelList.levels[levelIndex].creator as CollabData)[2][pos].color = $event" />
+            <ColorPicker v-if="colorPickerOpen && !host" :hex="color" @colors-modified="(levelList.levels[levelIndex].creator as CollabData)[2][pos].color = $event" />
         </Transition>
     </section>
 </template>

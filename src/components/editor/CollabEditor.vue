@@ -92,9 +92,11 @@ function addRole(preset: string = "") {
   }
 }
 
+var lastPickedRole = -1
 function pickRole(creatorPos: number, rolePos: number) {
   if (typeof collab.value == "string") return
 
+  lastPickedRole = rolePos
   collab.value[creatorPos == 999 ? 0 : 2][creatorPos == 999 ? 0 : creatorPos].role = rolePos
   pickingRole.value = -1
   nextTick(() => (document.querySelectorAll(`.roleSwitcher`)[creatorPos == 999 ? 0 : creatorPos+1] as HTMLButtonElement).focus())
@@ -173,9 +175,9 @@ function addMember(params?: CollabHumans) {
   collab.value[2].push({
     name: params?.name ?? "",
     socials: params?.socials ?? [],
-    color: makeColor(params?.color),
+    color: makeColor(params?.color, true),
     part: params?.part ?? [lastMemberPart[1], Math.min(100, lastMemberPart[1]+5)],
-    role: params?.role ?? 0,
+    role: params?.role ?? (lastPickedRole == -1 ? 0 : lastPickedRole),
     verified: params?.verified ?? 0
   })
   makeFunyEditorName()

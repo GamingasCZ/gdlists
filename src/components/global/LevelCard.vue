@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CollabData, FavoritedLevel, Level, LevelTag } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
-import { onMounted, ref } from "vue";
+import { onErrorCaptured, onMounted, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
@@ -26,6 +26,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: "error"): void;
   (e: "nextGuess", res: number): void;
   (e: "openCollab", index: number, col: [number, number, number]): void;
 }>();
@@ -120,11 +121,15 @@ function nextGuess(results: number) {
   emit('nextGuess', results)
 }
 
+onErrorCaptured(() => {
+  emit("error")
+})
+
 </script>
 
 <template>
   <section v-if="guessResult"
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F] overflow-clip"
+    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
@@ -242,7 +247,7 @@ function nextGuess(results: number) {
 
     <!-- Level creator -->
     <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
-    <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @click="emit('openCollab', levelIndex, CARD_COL?.rgb()!)" />
+    <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
 
     <!-- Level Tags -->
     <section class="flex flex-wrap gap-2 mt-2">

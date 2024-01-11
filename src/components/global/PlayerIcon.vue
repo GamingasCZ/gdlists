@@ -16,7 +16,7 @@ const props = defineProps<{
 let quality = SETTINGS.value.iconQuality < 0 ? 4 : props.quality*SETTINGS.value.iconQuality
 const canvas = ref<HTMLCanvasElement>()
 let visibleCtx: CanvasRenderingContext2D;
-let suffixes = ["glow_001","2_001", "001","extra_001"]
+let suffixes = ["_glow","_2", "","_extra"]
 let images: object = {}
 const iconIndex = props.icon.toString().padStart(2,"0")
 const offscreenCanvases: OffscreenCanvas = new OffscreenCanvas(128/quality,128/quality)
@@ -26,23 +26,22 @@ function placeImage(image:HTMLImageElement | null) {
     let imageIndex = parseInt(image.dataset.index!)
     let ctx = offscreenCanvases.getContext('2d')
     if (ctx == undefined) return
-    if (!props.glow && suffixes[imageIndex] == 'glow_001') {
-        const imageData = ctx.getImageData(0, 0, offscreenCanvases.width, offscreenCanvases.height);
-        ctx.putImageData(imageData, 0,0)
+    if (!props.glow && suffixes[imageIndex] == '_glow') {
         return offscreenCanvases.transferToImageBitmap()
     }
     
-    let iconPath = `player_${iconIndex}_${suffixes[imageIndex]}.png`
+    let iconPath = `${iconIndex}${suffixes[imageIndex]}`
+    let iconOffset = offsets[iconPath][0] == 0 ? [0,0] : offsets[iconPath][0]
     ctx.drawImage(
         image,
         
         // Place in the middle and apply offset
-        (128/quality-offsets[iconPath].spriteSize[0]/quality)/2+offsets[iconPath].spriteOffset[0]/quality,
-        (128/quality-offsets[iconPath].spriteSize[1]/quality)/2-offsets[iconPath].spriteOffset[1]/quality,
+        (128/quality-offsets[iconPath][1][0]/quality)/2+iconOffset[0]/quality,
+        (128/quality-offsets[iconPath][1][1]/quality)/2-iconOffset[1]/quality,
         
         // Apply scaling
-        offsets[iconPath].spriteSize[0]/quality,
-        offsets[iconPath].spriteSize[1]/quality,
+        offsets[iconPath][1][0]/quality,
+        offsets[iconPath][1][1]/quality,
     );
 
     const imageData = ctx.getImageData(0, 0, offscreenCanvases.width, offscreenCanvases.height);
@@ -70,17 +69,20 @@ onMounted(() => {
     if (visibleCtx == undefined) return
 
     let i = 0
-    suffixes.forEach(suffix => {
-            let image = new Image()
-            image.src = import.meta.env.BASE_URL + `/icons/player_${iconIndex}_${suffix}.webp`
-            image.dataset.index = (i).toString()
-            i += 1
-            
-            image.onload = () => {
-                images[suffix] = image
-                drawOnVisibleCanvas()
+    suffixes.forEach(async suffix => {
+            if (offsets[`${iconIndex}${suffix}`]) {// Don't do shit if image doesn't exist
+                let image = new Image()
+                image.src = import.meta.env.BASE_URL + `/icons/player_${iconIndex}${suffix}_001.webp`
+
+                image.dataset.index = (i).toString()
+                i += 1
+                
+                image.addEventListener("load", () => {
+                    images[suffix] = image
+                    drawOnVisibleCanvas()
+                })
             }
-            image.onerror = () => {
+            else {
                 images[suffix] = null
                 drawOnVisibleCanvas()
             }
@@ -91,12 +93,14 @@ let imagesLoaded = 0
 function drawOnVisibleCanvas() {
     imagesLoaded += 1
     if (imagesLoaded == 4) {
-        nextTick(() => suffixes.forEach(suffix => visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0)))
+        nextTick(() => suffixes.forEach(suffix => {
+            if (images[suffix]) visibleCtx.drawImage(placeImage(images[suffix])!, 0, 0)
+        }))
     }
 }
 </script>
 
 <template>
     <canvas :width="128/quality" :height="128/quality" ref="canvas" v-if="SETTINGS.iconQuality != -2"></canvas>
-    <div class="min-w-[8px] min-h-[8px] rounded-md" :style="{backgroundColor: `rgb(${Object.values(colors[col1]).join(', ')})`}" v-else></div>
+    <div class="min-w-[8px] min-h-[8px] rounded-md" :style="{backgroundColor: `rgb(${colors[col1].join(', ')})`}" v-else></div>
 </template>

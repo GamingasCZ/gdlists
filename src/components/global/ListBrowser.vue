@@ -11,7 +11,7 @@ import { useI18n } from "vue-i18n";
 import { isOnline } from "@/Editor";
 
 const emit = defineEmits<{
-  (e: "switchBrowser", browser: "" | "user" | "hidden"): void;
+  (e: "switchBrowser", browser: "" | "user" | "hidden" | "collabs"): void;
   (e: "refreshedBrowser", objectAmount: number): void;
 }>();
 
@@ -107,7 +107,7 @@ function doSearch() {
 }
 
 function refreshBrowser() {
-  if (!props.onlineBrowser) {
+  if (!props.onlineBrowser && props.onlineType == "") {
     let hasSearch = [favoriteLevels, filtered][filtered != undefined | 0]
     if (usingPagesScrolling.value) {
       LISTS.value = hasSearch.slice(
@@ -126,6 +126,7 @@ function refreshBrowser() {
     pagesArray.value = listScroll();
     return;
   }
+  else if (props.onlineType == "collabs") return
   
   loading.value = true
   let fetchURI: string
@@ -228,9 +229,8 @@ if (!props.onlineBrowser)
   favoriteLevels = JSON.parse(localStorage.getItem("favorites")!);
 
 onMounted(() => {
-  if (props.onlineBrowser) refreshBrowser();
-  else {
-    // Hardcoded for now, maybe change later
+  if (!props.onlineBrowser && props.onlineType == '') { // saved level not collabs TODO: add collabs
+  // Hardcoded for now, maybe change later
     LISTS.value = favoriteLevels.slice(
       LISTS_ON_PAGE * PAGE.value!,
       LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
@@ -238,13 +238,15 @@ onMounted(() => {
     maxPages.value = Math.ceil(favoriteLevels.length! / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
   }
+  else if (props.onlineType == "collabs") LISTS.value = []
+  refreshBrowser();
 });
 
 // Changing browser types with browser buttons
 watch(props, (newBrowser) => {
   LISTS.value = []
   PAGE.value = 0
-  filtered = []
+  filtered = undefined
   refreshBrowser();
 });
 
@@ -292,6 +294,25 @@ window.addEventListener("scroll", infiniteScroll)
           @click="emit('switchBrowser', 'hidden')"
         >
           <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
+        </button>
+      </header>
+      <header
+        class="flex gap-3 justify-center mb-3"
+        v-if="!onlineBrowser"
+      >
+        <button
+          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{ 'bg-greenGradient': onlineType == '' }"
+          @click="emit('switchBrowser', '')"
+        >
+          {{ $t('editor.levels') }}
+        </button>
+        <button
+          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{ 'bg-greenGradient': onlineType == 'collabs' }"
+          @click="emit('switchBrowser', 'collabs')"
+        >
+          {{ $t('collabTools.collabs') }}
         </button>
       </header>
       <header
@@ -377,7 +398,7 @@ window.addEventListener("scroll", infiniteScroll)
       <main class="flex flex-col gap-3 items-center mt-6">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div
-          v-if="!onlineBrowser && LISTS.length == 0 && filtered == undefined"
+          v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center"
           >
           <img src="@/images/savedMobHeader.svg" alt="" class="w-48 opacity-25" />
@@ -387,6 +408,26 @@ window.addEventListener("scroll", infiniteScroll)
               class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
             >
               <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
+            </button>
+          </RouterLink>
+        </div>
+
+        <!-- No saved collabs -->
+        <div
+          v-else-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == 'collabs'"
+          class="flex flex-col gap-3 justify-center items-center"
+          >
+          <img src="@/images/collabDudes.svg" alt="" class="w-72 opacity-25" />
+          <div class="text-center">
+            <p class="text-2xl text-yellow-200 opacity-90">{{ $t('other.comingSoon') }}</p>
+            <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
+            <p class="text-sm opacity-70">{{ $t('collabTools.noSavedSub') }}</p>
+          </div>
+          <RouterLink to="/editor">
+            <button
+              class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
+            >
+              <img src="@/images/editorMobHeader.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('collabTools.startBuilding') }}
             </button>
           </RouterLink>
         </div>

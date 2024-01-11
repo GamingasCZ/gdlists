@@ -8,6 +8,10 @@ const props = defineProps<{
   collab: CollabData;
 }>();
 
+const emit = defineEmits<{
+  (e: "openCollab"): void
+}>()
+
 const showGDIcons = ref<boolean>(false);
 const preview = ref<HTMLDivElement>()
 const scrollable = ref(false)
@@ -23,11 +27,11 @@ const collabHost = computed(() => {
   else return props.collab[0][0].name
 })
 const collabRole = computed(() => {
-  if (isOldCollab) return props.collab[0][2]  ?? "Host"
+  if (isOldCollab) return props.collab[0][2] ?? "Host"
   else return props.collab[1][props.collab[0][0].role]
 })
 const collabIcon = () => {
-  if (isOldCollab) return props.collab[0][1]
+  if (isOldCollab) return typeof props.collab[0][1] == "object" ? props.collab[0][1] : false
   else return props.collab[0][0].verified
 }
 
@@ -51,19 +55,20 @@ const closeHostSocials = (m: Event) => {
 
 <template>
   <section>
-    <h2 class="mb-3 text-xl font-black text-center align-middle">
-      <span>{{ collabRole }}:</span>
-      <PlayerIcon v-if="collabIcon()" :icon="collabIcon()[0]" :col1="collabIcon()[1].toString()" :col2="collabIcon()[2].toString()" :glow="collabIcon()[3]" class="inline mx-3 w-10 h-10" :quality="1"/>
+    <h2 class="z-10 mb-3 text-xl font-black text-center align-middle">
+      <span>{{ collabRole }}: </span>
+      <PlayerIcon v-if="collabIcon()" :icon="collabIcon()[0]" :col1="collabIcon()[1].toString()" :col2="collabIcon()[2].toString()" :glow="collabIcon()[3] | 0" class="inline mx-3 w-10 h-10" :quality="1"/>
       <span class="inline-flex relative justify-center">
         <span @click="showHostSocials" class="opener" :class="{'py-1 px-2 bg-black rounded-md cursor-pointer hover:bg-opacity-70 transition-colors bg-opacity-40': hostHasSocials}">{{ collabHost }}</span>
         <Transition name="fade">
-          <section v-if="hostSocialsShown" ref="socialsDialog" class="grid absolute top-14 z-30 grid-cols-1 gap-1 p-1 w-max bg-black bg-opacity-90 rounded-md backdrop-blur-md">
+          <section v-if="hostSocialsShown" ref="socialsDialog" class="absolute top-14 z-10 grid-cols-1 gap-1 p-1 w-max bg-black bg-opacity-90 rounded-md backdrop-blur-md">
             <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 -translate-x-1/2" alt="">
-            <h2 class="font-extrabold text-center">Odkazy</h2>
-            <button v-for="social in collab[0][0].socials" class="flex gap-1 px-2 text-sm font-normal rounded-sm button" :style="{backgroundColor: socialMedia[social[0]].color}">
-              <img :src="socialMediaImages[socialMedia[social[0]].icon]" class="w-4" alt="">
-              <label >{{ social[1] }}</label>
-            </button>
+            <h2 class="font-extrabold text-center">{{ $t('other.links') }}</h2>
+            <div class="flex gap-1 w-full">
+              <a :href="'https://'+socialMedia[social[0]].baseUrl+social[1]" target="_blank" v-for="social in collab[0][0].socials" class="p-1 w-max text-sm font-normal rounded-sm h-max button" :style="{backgroundColor: socialMedia[social[0]].color}">
+                <img :src="socialMediaImages[socialMedia[social[0]].icon]" class="w-6 h-6" alt="">
+              </a>
+            </div>
           </section>
         </Transition>
       </span>
@@ -73,6 +78,7 @@ const closeHostSocials = (m: Event) => {
       @mouseover="showGDIcons = true"
       :class="{'!max-h-max': showAll, 'pb-8': showAll}"
       ref="preview"
+      @click="emit('openCollab')"
     >
       <div v-for="person in collab[2]">
         <PlayerIcon

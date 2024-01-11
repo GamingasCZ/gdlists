@@ -97,12 +97,9 @@ export interface CollabHumans {
 }
 
 export interface CollabViewerRow {
-  icon: number[];
   roleName: string;
-  name: string;
-  socials: [number, string][];
-  part: [number, number];
-  hovering: number;
+  human: CollabHumans;
+  roleCount: number;
 }
 
 interface HumanSocialLink {

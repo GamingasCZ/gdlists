@@ -17,7 +17,13 @@
     "columns": "{count} sloupec | {count} sloupce",
     "everySec": "Každých {0}s",
     "everyMin": "Každé {0}m",
-    "logout": "Odhlásit se"
+    "logout": "Odhlásit se",
+    "iconQuality": "Kvalita ikonek",
+    "noGenerate": "Negenerovat",
+    "noColor": "Bez barev",
+    "qLow": "Nízká",
+    "qMed": "Výchozí",
+    "qHigh": "Vysoká"
   },
   "homepage": {
     "searchLists": "Hledat seznamy...",
@@ -131,7 +137,7 @@
       "Chybí tomu přihlašování bossfight :/",
       "aaaaaaaaaaaaaaaaaaaa"
     ],
-    "savedLevels": "Uložené levely",
+    "savedLevels": "Uložené",
     "websiteName": "GD Seznamy",
     "unnamesd": "Bezejmenný",
     "settings": "Nastavení",
@@ -183,7 +189,9 @@
     "disableComments": "Zakázat komentáře",
     "save": "Uložit",
     "use": "Použít",
-    "delete": "Smazat"
+    "delete": "Smazat",
+    "comingSoon": "Brzy dostupné :D",
+    "links": "Odkazy"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -231,7 +239,8 @@
     "diffResult14": "Jsi Geodeš bůh! To je mimochodem kompliment!",
     "diffResult15": "Ty se asi moc nedotýkáš trávníku!",
     "diffResult16": "Přeci jen se ty tisíce hodin dashování k něčemu byly!",
-    "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!"
+    "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!",
+    "failLoad": "Seznam se nepodařilo načíst!"
   },
   "level": {
     "levelID": "ID levelu",
@@ -321,6 +330,11 @@
     "twitch": "Twitch kanál",
     "dis": "Discord jméno/server",
     "customLink": "Vlastní odkaz",
-    "unnamedCollab": "Bezejmenný collab"
+    "unnamedCollab": "Bezejmenný collab",
+    "collabs": "Collaby",
+    "startBuilding": "Začít stavět",
+    "noSaved": "Neuložil jsi zatím žádné collaby!",
+    "noSavedSub": "Můžeš je uložit při vytváření nebo v seznamech.",
+    "removeSaved": "Odebrat"
   }
 }

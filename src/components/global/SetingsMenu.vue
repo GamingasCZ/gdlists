@@ -88,13 +88,13 @@ const screenWidth = ref(window.innerWidth)
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
-      Kvalita ikonek
+      {{ $t('settingsMenu.iconQuality') }}
       <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.iconQuality">
-        <option :value="-2">Negenerovat</option>
-        <option :value="-1">Bez barev</option>
-        <option :value="6">Nízká</option>
-        <option :value="4">Výchozí</option>
-        <option :value="2">Vysoká</option>
+        <option :value="-2">{{ $t('settingsMenu.noGenerate') }}</option>
+        <option :value="-1">{{ $t('settingsMenu.noColor') }}</option>
+        <option :value="6">{{ $t('settingsMenu.qLow') }}</option>
+        <option :value="4">{{ $t('settingsMenu.qMed') }}</option>
+        <option :value="2">{{ $t('settingsMenu.qHigh') }}</option>
       </select>
     </section>
   </div>

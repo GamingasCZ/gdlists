@@ -24,15 +24,15 @@ export const DEFAULT_LEVELLIST: LevelList = {
 
 export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
 
-export function makeColor(col?: [number, number, number] | string): [number, number, number] {
+export function makeColor(col?: [number, number, number] | string, hex = false): [number, number, number] | string {
   // Random color
   if (typeof col == 'object' && col.length) return col
   else if (typeof col == 'string') return chroma(col).hsl()
   else {
     let randomColor = chroma.hsv(
       Math.floor(Math.random() * 360), 1, Math.random() / 3
-    ).hsv()
-    return randomColor
+    )
+    return hex ? randomColor.hex() : randomColor.hsl()
   }
 }
 

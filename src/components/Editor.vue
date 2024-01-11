@@ -339,6 +339,24 @@ const closeCollabTools = () => {
 }
 const collabDetails = ref([])
 
+const collabData = ref({
+  levelName: "",
+  levelColor: [0,0,0],
+  collabData: null,
+  index: 0,
+  levelID: 0
+})
+const openCollabTools = (ind: number, col: [number, number, number]) => {
+  if (typeof levelList.value?.levels?.[ind]?.creator == "string") return
+
+  collabData.value.levelName = levelList.value?.levels?.[ind].levelName
+  collabData.value.levelColor = col
+  collabData.value.index = ind
+  collabData.value.levelID = levelList.value?.levels?.[ind].levelID
+  collabData.value.collabData = levelList.value?.levels?.[ind].creator
+
+}
+
 </script>
 
 <template>
@@ -413,15 +431,15 @@ const collabDetails = ref([])
     </div>
     <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
       <LevelCard
-        v-for="level in levelList.levels"
+        v-for="(level, ind) in levelList.levels"
         v-bind="level"
         :disable-stars="true"
         :translucent-card="levelList.translucent"
-        @open-collab="collabDetails = $event"
+        @open-collab="openCollabTools(ind, level.color)"
       />
     </div>
     {{ collabDetails }}
-    <CollabViewer :level-color="[180, 1, 1]" level-name="Return 420" :translucent="true" :collab-data="collabDetails"/>
+    <CollabViewer :editor="true" v-if="collabData.collabData != null" v-bind="collabData" :translucent="levelList?.translucent!" @close-popup="collabData.collabData = null" />
   </section>
 
   <!-- Edit error - List doesn't exist -->

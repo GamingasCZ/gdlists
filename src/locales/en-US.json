@@ -169,7 +169,8 @@
     "diffResult1": "a monkey would fair better than you!",
     "diffResult9": "Imperfect, you'll be grinding map packs as punishment.",
     "diffResult16": "The thousands of hours of dashing are finally paying off!",
-    "commDisableHelp": "Comments are disabled on this list!"
+    "commDisableHelp": "Comments are disabled on this list!",
+    "failLoad": "The list failed to load!"
   },
   "navbar": {
     "editor": "Editor",
@@ -211,7 +212,7 @@
     "preview": "Preview",
     "refresh": "Refresh",
     "reload": "Reload",
-    "savedLevels": "Saved Levels",
+    "savedLevels": "Saved",
     "search": "Search",
     "searchInHelp": "Search in help...",
     "settings": "Settings",
@@ -238,7 +239,9 @@
     "disableComments": "Disable Comments",
     "save": "Save",
     "use": "Use",
-    "delete": "Delete"
+    "delete": "Delete",
+    "comingSoon": "Coming Soon! :D",
+    "links": "Links"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -253,7 +256,13 @@
     "language": "Language",
     "logout": "Log Out",
     "pages": "Paged",
-    "scrolling": "Scrolling"
+    "scrolling": "Scrolling",
+    "iconQuality": "Icon Quailty",
+    "noColor": "No Colors",
+    "noGenerate": "Disabled",
+    "qHigh": "High",
+    "qLow": "Low",
+    "qMed": "Default"
   },
   "help": {
     "Lists": "Lists",
@@ -320,6 +329,11 @@
     "dis": "Discord username/server",
     "collabName": "Collab name",
     "customLink": "Custom link",
-    "unnamedCollab": "Unnamed Collab"
+    "unnamedCollab": "Unnamed Collab",
+    "collabs": "Collabs",
+    "noSaved": "You haven't saved any collabs yet!",
+    "noSavedSub": "You can save them in the collab editor or in lists.",
+    "startBuilding": "Start building",
+    "removeSaved": "Remove"
   }
 }

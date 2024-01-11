@@ -2,8 +2,8 @@
 import { EMOJI_COUNT } from '@/Editor';
 import PlayerIcon from '../global/PlayerIcon.vue';
 import { socialMedia, socialMediaImages } from './socialSites';
-import { ref } from 'vue';
-import type { CollabViewerRow } from '@/interfaces';
+import { computed, inject, ref, watch } from 'vue';
+import type { CollabHumans, CollabViewerRow } from "@/interfaces";
 
 interface extras {
     index: number;
@@ -11,10 +11,12 @@ interface extras {
 
 const props = defineProps<CollabViewerRow & extras>()
 
+const hovering = inject<CollabHumans | null>("collabHovering")
+const allHumans = inject<CollabHumans[] | null>("collabHumanoids")
 const emoji = ref("")
 const getEmoji = async () => {
-    if (!props.icon?.[1]) // Human not verified (didn't use the search button in the editor)
-        emoji.value =  await import(`../../images/emoji/${Math.ceil(Math.random() * EMOJI_COUNT).toString().padStart(2,"0")}.webp`).then(res => res.default)
+    if (!props.human.verified?.[1]) // Human not verified (didn't use the search button in the editor)
+        emoji.value =  await import(`../../images/emoji/${Math.floor(Math.random() * EMOJI_COUNT+1).toString().padStart(2,"0")}.webp`).then(res => res.default)
 }
 getEmoji()
 
@@ -23,8 +25,6 @@ const openLink = (ind: number, path: string) => {
         case 4:
             if (path.startsWith("/"))
                 window.open(`https://discord.com${path}`, '_blank')
-            else
-                alert("Copied to clipboard")
             break;
         case 5: // Custom site
             window.open(path, '_blank'); break;
@@ -34,25 +34,35 @@ const openLink = (ind: number, path: string) => {
     }
 }
 
+let dcIndex = props.human.socials.findIndex(x => x[0] == 3)
+const isDiscordServer = computed(() => {
+    if (dcIndex != -1) return props.human.socials[dcIndex][1].includes("discord.com")
+    else return false
+})
+
 </script>
 
 <template>
-<section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] grow">
+<section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] max-w-[12rem] grow transition-opacity" :class="{'opacity-50': hovering != null && hovering != human}" @mouseenter="hovering = human" @mouseleave="hovering = null">
     <div class="flex gap-3 justify-center items-center">
         <PlayerIcon
-            v-if="icon?.[1]"
-            :icon="icon[0]" :col1="icon[1].toString()" :col2="icon[2].toString()" :glow="icon[3]" :quality="1"
+            v-if="human.verified?.[1]"
+            :icon="human.verified[0]" :col1="human.verified[1].toString()" :col2="human.verified[2].toString()" :glow="human.verified[3] | 0" :quality="1"
             class="w-10 h-10"
         />
         <img v-else :src="emoji" alt="" class="w-10 h-10">
-        <div class="text-sm leading-tight text-center" v-if="part[0] >= 0">{{ part[0] }}%<br>{{ part[1] }}%</div>
+        <div class="text-sm leading-tight text-center" v-if="human.part[0] >= 0">{{ human.part[0] }}-{{ human.part[1] }}%</div>
     </div>
     
     <div class="m-1 mt-3 text-center">
         <h5 class="w-max text-xs leading-none opacity-40">{{ roleName }}</h5>
-        <h2 class="w-max text-lg font-extrabold leading-none">{{ name }}</h2>
+        <h2 class="w-max text-lg font-extrabold leading-none">{{ human.name }}</h2>
+        <span class="flex gap-1 items-center w-max" v-if="!isDiscordServer && dcIndex != -1">
+                <img class="w-4" src="@/images/discord.svg" alt="">
+                {{ human.socials[dcIndex][1] }}
+        </span>
         <footer class="flex gap-1 mt-1">
-            <button @click="openLink(site[0], site[1])" class="p-0.5 w-7 h-5 rounded-sm button" :style="{background: socialMedia[site[0]].color}" v-for="site in socials" :title="socialMedia[site[0]].name">
+            <button @click="openLink(site[0], site[1])" class="p-0.5 w-full max-w-[4rem] h-5 rounded-sm button" :style="{background: socialMedia[site[0]].color}" v-for="site in human.socials" :title="socialMedia[site[0]].name">
                 <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="mx-auto h-full" alt="">
             </button>
         </footer>
