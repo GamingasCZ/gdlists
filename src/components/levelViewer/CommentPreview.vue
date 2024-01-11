@@ -57,12 +57,12 @@ const dateString = ref<string>(`${new Date(parseInt(props.timestamp)*1000).toLoc
 
 time.value = prettyDate(datePassed)
 
-const parsedComment = ref<string>("")
+const parsedComment = ref<string>(props.comment)
 let emojis = props.comment.match(/&(\d{2})/g)
 if (emojis != null) {
   emojis.forEach(async emoji => {
     let fetch = await import(`../../images/emoji/${emoji.slice(1)}.webp`).then(res => res.default)
-    parsedComment.value = props.comment.replaceAll(emoji, `<img class="inline w-5 pointer-events-none" src="${fetch}" alt="">`)
+    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline w-5 pointer-events-none" src="${fetch}" alt="">`)
   });
 } else parsedComment.value = props.comment
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")

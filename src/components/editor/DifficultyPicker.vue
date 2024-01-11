@@ -15,15 +15,17 @@ async function getDifficulties() {
     faces.value.push(await import(`../../images/faces/${i}.webp`).then(res => res.default))
   }
   
-  ['error', 'star', 'featured', 'epic'].forEach(async rating => {
-    rates.value.push(await import(`../../images/faces/${rating}.webp`).then(res => res.default))
-  });
+  let ratings = ['error', 'star', 'featured', 'epic', 'legendary', 'mythic']
+  for (const rating in ratings) {
+    rates.value.push(await import(`../../images/faces/${ratings[rating]}.webp`).then(res => res.default))
+  }
+  console.log(rates.value)
 }
 getDifficulties()
 </script>
 
 <template>
-  <section class="flex justify-between">
+  <section class="flex justify-between max-sm:flex-col">
     <div
       class="box-border flex flex-grow-[1] mx-1 items-center gap-3 overflow-x-auto"
     >
@@ -39,7 +41,7 @@ getDifficulties()
       </button>
     </div>
     <div
-      class="box-border grid grid-cols-2 gap-1 min-w-max rounded-md"
+      class="box-border grid-cols-3 gap-1 justify-between p-2 min-w-max bg-black bg-opacity-20 rounded-md max-sm:flex sm:grid"
     >
       <button
         type="button"

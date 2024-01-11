@@ -62,7 +62,7 @@ const getRateImage = async () => {
   let rate = levelList.value.levels[props.index!].difficulty?.[1] ?? 0;
   if (rate == 0) rateImagePath.value = ""; // Unrated level
   else {
-    return await import(`../../images/faces/${["star", "featured", "epic"][rate - 1]}.webp`).then(res => rateImagePath.value = res.default);
+    return await import(`../../images/faces/${["star", "featured", "epic", "legendary", "mythic"][rate - 1]}.webp`).then(res => rateImagePath.value = res.default);
   }
 };
 getRateImage()
@@ -229,6 +229,36 @@ const creatorFilledIn = computed(() => {
 const searchAvailableCreator = computed(() => (levelList.value.levels[props.index!].levelName != '' || levelList.value.levels[props.index!].creator != '') && !searching.value)
 const searchAvailableID = computed(() => levelList.value.levels[props.index!].levelID && !searching.value)
 
+axios
+  .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
+  .then(async (response: AxiosResponse) => {
+    let level: LevelSearchResponse = response.data;
+    levelList.value.levels[props.index!].levelID = level.id;
+    levelList.value.levels[props.index!].levelName = level.name;
+
+    if (typeof levelList.value.levels[props.index!].creator == 'string')
+      levelList.value.levels[props.index!].creator = level.author
+    else
+      levelList.value.levels[props.index!].creator[0][0] = level.author
+    levelCreator.value = level.author
+
+    if (level.difficulty == -1) level.difficulty = 11 // Auto levels
+    levelList.value.levels[props.index!].difficulty = [
+      level.difficulty,
+      level.cp,
+    ];
+    diffFacePath.value = await getDiffFace()
+    rateImagePath.value = await getRateImage()
+
+    ytVideoData.value = await videoSearch()
+  });
+}
+
+const isPlatformer = ref(levelList.value.levels[props.index!].platf)
+const switchPlatformer = () => {
+  isPlatformer.value = !isPlatformer.value
+  levelList.value.levels[props.index!].platf = isPlatformer.value
+}
 </script>
 
 <template>
@@ -271,9 +301,26 @@ const searchAvailableID = computed(() => levelList.value.levels[props.index!].le
     <div class="flex gap-2 items-center px-2 max-sm:flex-col">
       <!-- Level name input -->
       <div class="flex gap-2 max-sm:w-full">
-        <img class="w-10 aspect-square max-sm:hidden" src="../../images/level.svg" alt="" />
-        <button :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
-          type="button" @click="searchLevel(false)" class="box-border sm:hidden">
+        <img
+          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
+          src="../../images/level.svg"
+          alt=""
+          v-if="!isPlatformer"
+          @click="switchPlatformer"
+        />
+        <img
+          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
+          src="../../images/levelPlat.svg"
+          alt=""
+          v-else
+          @click="switchPlatformer"
+        />
+        <button
+          :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
+          type="button"
+          @click="searchLevel(false)"
+          class="sm:hidden"
+        >
           <img
             class="p-2 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
             src="../../images/searchOpaque.svg" alt=""
@@ -281,8 +328,12 @@ const searchAvailableID = computed(() => levelList.value.levels[props.index!].le
         </button>
         <input autocomplete="off"
           class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text" name="levelName" maxlength="20" v-model="levelList.levels[index!].levelName"
-          :placeholder="$t('level.levelName')" @keyup.enter="searchLevel(false)" />
+          type="text"
+          name="levelName"
+          maxlength="20"
+          v-model="levelList.levels[index!].levelName"
+          :placeholder="isPlatformer ? $t('level.levelNamePlat') : $t('level.levelName')"
+        />
       </div>
 
       <!-- Level search -->
@@ -329,16 +380,33 @@ const searchAvailableID = computed(() => levelList.value.levels[props.index!].le
 
       <!-- Extras buttons -->
       <div class="flex gap-2 items-start max-sm:mt-3">
-        <img class="w-10 button" @click="openedPanel = openedPanel != 1 ? 1 : 0" src="../../images/colorPicker.svg"
-          alt="" />
-        <div class="flex relative justify-center items-center button" @click="openedPanel = openedPanel != 2 ? 2 : 0">
-          <img class="w-10" alt="" src="../../images/difficultyBG.svg" />
-          <img :src="diffFacePath" alt="" :class="{ 'translate-y-0.5': levelList.levels[index!].difficulty?.[1] == 3 }"
-            :style="{ scale: diffScaleOffsets[levelList.levels[index!].difficulty?.[0] - 6], translate: diffTranslateOffsets[levelList.levels[index!].difficulty?.[0] - 6] }"
-            class="absolute z-20 w-7 pointer-events-none" />
-          <img :src="rateImagePath" alt="" class="absolute z-10 w-10 pointer-events-none"
-            :class="{ 'w-5 left-2/4 top-2/4': levelList.levels[index!].difficulty?.[1] == 1 }"
-            :style="{ zIndex: (levelList.levels[index!].difficulty?.[1] ?? 0) - 1 ? 10 : 30 }" />
+        <img
+          class="w-10 button"
+          @click="openedPanel = openedPanel != 1 ? 1 : 0"
+          src="../../images/colorPicker.svg"
+          alt=""
+        />
+        <div class="flex relative justify-center items-center button">
+          <img
+            class="w-10"
+            @click="openedPanel = openedPanel != 2 ? 2 : 0"
+            alt=""
+            src="../../images/difficultyBG.svg"
+          />
+          <img
+            :src="diffFacePath"
+            alt=""
+            :class="{'translate-y-0.5': levelList.levels[index!].difficulty?.[1] >= 3}"
+            :style="{scale: diffScaleOffsets[levelList.levels[index!].difficulty?.[0]-6], translate: diffTranslateOffsets[levelList.levels[index!].difficulty?.[0]-6]}"
+            class="absolute z-20 w-7 pointer-events-none"
+          />
+          <img
+            :src="rateImagePath"
+            alt=""
+            class="absolute z-10 w-10 pointer-events-none"
+            :class="{'w-5 left-2/4 top-2/4': levelList.levels[index!].difficulty?.[1] == 1}"
+            :style="{zIndex: (levelList.levels[index!].difficulty?.[1] ?? 0) -1 ? 10 : 30 }"
+          />
         </div>
         <img class="w-10 button" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
           alt="" />

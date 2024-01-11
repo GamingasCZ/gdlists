@@ -45,6 +45,7 @@ export function addLevel(values: Level | null) {
     video: values?.video ?? "",
     difficulty: values?.difficulty ?? [0, 0],
     tags: values?.tags ?? [],
+    platf: values?.platf ?? false,
   };
 
   levelList.value.levels.push(levelInfo);

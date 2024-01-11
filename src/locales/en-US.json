@@ -116,12 +116,13 @@
     "edit": "Edit",
     "idCopied": "ID copied!",
     "levelID": "Level ID",
-    "levelName": "Level Name",
+    "levelName": "Normal Level Name",
     "noDescription": "No description provided",
     "pin": "Pin",
     "unpin": "Unpin",
     "video": "Video",
-    "views": " views"
+    "views": " views",
+    "levelNamePlat": "Platformer Level Name"
   },
   "listViewer": {
     "goHome": "Go home",

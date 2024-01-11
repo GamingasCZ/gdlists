@@ -244,7 +244,7 @@
   },
   "level": {
     "levelID": "ID levelu",
-    "levelName": "Jméno levelu",
+    "levelName": "Jméno normálního levelu",
     "creator": "Tvůrce",
     "video": "Video",
     "idCopied": "ID zkopírováno!",
@@ -253,7 +253,8 @@
     "comments": "Komentáře",
     "edit": "Upravit",
     "unpin": "Odepnout",
-    "pin": "Připnout"
+    "pin": "Připnout",
+    "levelNamePlat": "Jméno platformer levelu"
   },
   "date": {
     "fewSecsAgo": "před pár sekundami",
