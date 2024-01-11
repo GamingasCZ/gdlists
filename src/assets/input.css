@@ -57,6 +57,9 @@ input[type="checkbox"] {
 input[type="checkbox"]:focus-within:after {
   @apply content-[''] absolute bg-white bg-opacity-30 w-3/5 h-3/5 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
+input[type="checkbox"]:hover:after {
+  @apply content-[''] absolute bg-white bg-opacity-30 w-3/5 h-3/5 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}
 
 input[type="checkbox"]:checked::after {
   @apply content-[''] absolute bg-white w-3/5 h-3/5 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
