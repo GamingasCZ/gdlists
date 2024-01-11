@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { makeColor, EMOJI_COUNT } from '@/Editor'
+import { makeColor, EMOJI_COUNT, isOnline } from '@/Editor'
 import chroma from 'chroma-js'
 import ColorPicker from '../global/ColorPicker.vue'
 import Editor from 'pure-editor'
@@ -43,6 +43,7 @@ const darkParsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.
 watch(listColor, () => {
     parsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex()
     darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex()
+    lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`
 }, {deep: true})
 
 const dropdownOpen = ref<number>(-1)
@@ -96,13 +97,14 @@ function parseComment(comment: Array<string | {id: string}> ): string {
     return parsedComment
 }
 const lengthPie = ref()
-watch(commentLength, () => lengthPie.value = `conic-gradient(${parsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
+watch(commentLength, () => lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
 const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.value.getValues()).length
 
-
+const commentError = ref(false)
 function sendComment(com = "") {
     if (parseComment(COMMENT_BOX.value.getValues()).length < MIN_COMMENT_LEN) return
 
+    let oldComment = document.getElementById("commentBox")?.innerHTML
     let comment: Array<string | {id: string}>
     if (com == "") comment = COMMENT_BOX.value.submit()
     else comment = com
@@ -116,14 +118,41 @@ function sendComment(com = "") {
         listID: props.listID,
         comColor: parsedColor.value,
     }), {headers: {Authorization: cookier("access_token").get()}}).then((res: AxiosResponse) => {
-        (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
+        if (res.data == 6)
+            (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
+        else {
+            document.getElementById("commentBox").innerHTML = oldComment
+            modCommentLength()
+            commentError.value = true
+            setTimeout(() => {
+                commentError.value = false
+            }, 5000);
+        }
+    }).catch(() => {
+        document.getElementById("commentBox").innerHTML = oldComment
+        modCommentLength()
+        commentError.value = true
+        setTimeout(() => {
+            commentError.value = false
+        }, 5000);
     })
 }
 </script>
 
 <template>
-    <section class="relative z-10 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
-        <pre :tabindex="loggedIn ? 0 : -1" @focus="placeholderActive = false" :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}" @blur="chatboxEmpty" @paste="modCommentLength()" @input="modCommentLength()" contenteditable="true" id="commentBox" class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-24" :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
+    <section class="relative z-20 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
+        <pre
+            @focus="placeholderActive = false"
+            @blur="chatboxEmpty"
+            @paste="modCommentLength()"
+            @input="modCommentLength()"
+            :tabindex="loggedIn ? 0 : -1"
+            :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}"
+            contenteditable="true"
+            id="commentBox"
+            class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-24"
+            :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}">
+        </pre>
         
         <!-- placeholder text -->
         <p class="absolute top-2 left-3 opacity-30" v-if="placeholderActive && commentLength == 0">{{ placeholder }}</p>
@@ -147,16 +176,32 @@ function sendComment(com = "") {
             <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index-1]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
         </div>
 
-        <footer class="flex justify-between mt-1">
+        <!-- Comment send error -->
+        <Transition name="fade">
+            <div v-if="commentError" class="flex gap-2 items-center p-1 my-2 rounded-md max-sm:text-sm" :style="{backgroundColor: parsedColor}">
+                <img src="@/images/info.svg" alt="" class="w-4">
+                <p>Nepodařilo se odeslat komentář, zkus to později!</p>
+            </div>
+        </Transition>
+        <footer class="flex justify-between mt-2">
             <div>
                 <img :src="pfp" class="inline mr-2 w-8 rounded-full" alt="">
                 <label>{{ username }}</label>
             </div>
 
             <div class="flex gap-2">
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 w-8 rounded-full disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="inline" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor, backgroundImage: lengthPie}" class="box-border p-1 w-8 rounded-full transition-opacity duration-75 disabled:opacity-50" :disabled="(commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN) || !loggedIn" @click="sendComment()"><img src="@/images/send.svg" class="inline" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 rounded-md aspect-square disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="w-6" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 rounded-md aspect-square disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="w-6" alt=""></button>
+                <button 
+                    :style="{backgroundColor: darkParsedColor}"
+                    class="box-border flex relative gap-2 items-center px-1 w-max rounded-md transition-opacity duration-75 disabled:opacity-50"
+                    :disabled="(commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN) || !loggedIn || !isOnline || commentError"
+                    @click="sendComment()"
+                >
+                    <div :style="{backgroundImage: lengthPie}" class="absolute bottom-0 left-0 w-full h-1 rounded-b-sm" v-show="commentLength > 1"></div>
+                    <img src="@/images/send.svg" class="w-7" alt="">
+                    <p>{{ $t('other.send') }}</p>
+                </button>
             </div>
         </footer>
     </section>

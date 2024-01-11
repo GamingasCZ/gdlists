@@ -9,6 +9,7 @@ Return codes:
 5 - Invalid comment type
 6 - Comment sent!!
 7 - Not logged in!!
+8 - Comments disabled
 */
 
 require("globals.php");
@@ -49,6 +50,10 @@ if (preg_match('/[A-z]/', $fuckupData[2])) {
   $hiddenID = $mysqli->query(sprintf("SELECT `id` FROM `lists` WHERE `hidden`= '%s'", $fuckupData[2])) or die($mysqli->error);
   $fuckupData[2] = $hiddenID->fetch_all(MYSQLI_ASSOC)[0]["id"];
 }
+
+// Disabled comments
+$list = doRequest($mysqli, "SELECT `commDisabled` FROM `lists` WHERE `id` = ?", [$fuckupData[2]], "i");
+if ($list["commDisabled"] == 1) die("8");
 
 $template = "INSERT INTO `comments` (`username`,`comment`,`comType`,`bgcolor`,`listID`,`verified`,`timestamp`,`uid`) VALUES ('',?, ?, ?, ?, ?, ?, ?)";
 $values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], "1", $time->getTimestamp(), $user_id);

@@ -10,6 +10,7 @@ import DescriptionEditor from "./global/TextEditor.vue";
 import PickerPopup from "./global/PickerPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue"
 import CollabEditor from "./editor/CollabEditor.vue"
+import CollabViewer from "./editor/CollabViewer.vue"
 import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
@@ -23,7 +24,7 @@ import cookier from "cookier"
 import router from "@/router";
 import { saveBackup, moveLevel } from "../Editor";
 import Notification from "./global/Notification.vue";
-import { SETTINGS } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
 
@@ -144,6 +145,7 @@ const errorStamp = ref(-1)
 const errorDblclickHelp = ref(false)
 const formShaking = ref(false)
 const notifStamp = ref(Math.random())
+const collabClipboard = ref()
 
 const loadBackup = () => {
   loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, <any>backupData.value.choseHidden)
@@ -218,6 +220,7 @@ const errors = [
   useI18n().t('other.updateFail'),
   useI18n().t('other.removeFail')
 ]
+
 function uploadList() {
   errorDblclickHelp.value = false
   let check = checkList(listName.value)
@@ -233,7 +236,8 @@ function uploadList() {
     listData: JSON.stringify(levelList.value),
     lName: (document.getElementById("levelName") as HTMLInputElement).value,
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
-    hidden: listHiddenSelected()
+    hidden: listHiddenSelected(),
+    disComments: (levelList.value.disComments as any) | 0
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()
@@ -268,7 +272,8 @@ function updateList() {
     id: props.listID,
     isNowHidden: isNowHidden ? "true" : "false",
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
-    hidden: listHiddenSelected()
+    hidden: listHiddenSelected(),
+    disComments: (levelList.value.disComments as any) | 0
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()
@@ -319,6 +324,39 @@ function removeList() {
   
 }
 
+function throwError(messsage: string, dblClickHelp: boolean) {
+  errorDblclickHelp.value = dblClickHelp
+  errorMessage.value = messsage
+  errorStamp.value = Math.random()
+  formShaking.value = true
+  setTimeout(() => formShaking.value = false, 333);
+}
+
+const closeCollabTools = () => {
+  collabEditorOpen.value = false
+  if (typeof levelList.value.levels[currentlyOpenedCard.value].creator == "string") return
+  (document.querySelector("input[name=creator]") as HTMLInputElement).value = levelList.value.levels[currentlyOpenedCard.value].creator[0][0].name
+}
+const collabDetails = ref([])
+
+const collabData = ref({
+  levelName: "",
+  levelColor: [0,0,0],
+  collabData: null,
+  index: 0,
+  levelID: 0
+})
+const openCollabTools = (ind: number, col: [number, number, number]) => {
+  if (typeof levelList.value?.levels?.[ind]?.creator == "string") return
+
+  collabData.value.levelName = levelList.value?.levels?.[ind].levelName
+  collabData.value.levelColor = col
+  collabData.value.index = ind
+  collabData.value.levelID = levelList.value?.levels?.[ind].levelID
+  collabData.value.collabData = levelList.value?.levels?.[ind].creator
+
+}
+
 </script>
 
 <template>
@@ -349,7 +387,9 @@ function removeList() {
     <CollabEditor
       v-if="collabEditorOpen && levelList.levels.length > 0"
       :index="currentlyOpenedCard"
-      @close-popup="collabEditorOpen = false"
+      :clipboard="collabClipboard"
+      @send-clipboard="collabClipboard = $event"
+      @close-popup="closeCollabTools()"
     />
   </Transition>
 
@@ -370,9 +410,13 @@ function removeList() {
     {{ editing ? $t('editor.editing') : $t('editor.editor') }}
   </h2>
   <NotLoggedIn
-    v-if="!isLoggedIn"
+    v-if="!isLoggedIn && hasLocalStorage()"
     :mess="$t('editor.loginToCreate')"
   />
+  <div v-else-if="!hasLocalStorage()" class="flex flex-col gap-4 justify-center items-center mx-auto mt-5">
+    <img src="../images/disCookies.svg" class="w-48 opacity-20" alt="">
+    <h1 class="max-w-sm text-2xl text-center text-white opacity-20">Nemáš povolené cookies, můžeš jen procházet seznamy!</h1>
+  </div>
 
   <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp" :previewing="previewingList"/>
 
@@ -387,12 +431,15 @@ function removeList() {
     </div>
     <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
       <LevelCard
-        v-for="level in levelList.levels"
+        v-for="(level, ind) in levelList.levels"
         v-bind="level"
         :disable-stars="true"
         :translucent-card="levelList.translucent"
+        @open-collab="openCollabTools(ind, level.color)"
       />
     </div>
+    {{ collabDetails }}
+    <CollabViewer :editor="true" v-if="collabData.collabData != null" v-bind="collabData" :translucent="levelList?.translucent!" @close-popup="collabData.collabData = null" />
   </section>
 
   <!-- Edit error - List doesn't exist -->
@@ -418,9 +465,7 @@ function removeList() {
   </section>
 
   <!-- Editor -->
-  <form
-    action="/editor"
-    @submit.prevent
+  <main
     class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-drop"
     :class="{'motion-reduce:animate-none animate-[shake_0.2s_infinite]': formShaking}"
     v-show="!previewingList"
@@ -529,6 +574,7 @@ function removeList() {
             class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
             src="../images/addLevel.svg"
             alt=""
+            id="addLevelButton"
           />
         </button>
       </div>
@@ -561,6 +607,7 @@ function removeList() {
         @move-controls="enableMoveControls"
         @open-tag-popup="tagPopupOpen = true"
         @open-collab-tools="collabEditorOpen = true"
+        @throw-error="throwError($event, false)"
         class="levelCard"
         :is="currentlyOpenedCard == index ? EditorCard : EditorCardHeader"
       />
@@ -569,8 +616,7 @@ function removeList() {
 
     <section class="flex gap-3" :class="{'disabled': !isOnline}">
       <button
-        type="submit"
-        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
+        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400 focus-within:outline-white"
         @click="uploadList"
         v-if="!editing"
         :disabled="!isOnline"
@@ -578,8 +624,7 @@ function removeList() {
         <img src="../images/upload.svg" class="w-6" alt="" />{{ $t('editor.upload') }}
       </button>
       <button
-        type="submit"
-        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400"
+        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black rounded-md button bg-lof-400 focus-within:outline-white"
         @click="updateList"
         v-if="editing"
         :disabled="!isOnline"
@@ -587,8 +632,7 @@ function removeList() {
         <img src="../images/upload.svg" class="w-6" alt="" />{{ $t('editor.update') }}
       </button>
       <button
-        type="submit"
-        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black bg-red-400 rounded-md button"
+        class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black bg-red-400 rounded-md button focus-within:outline-white"
         @click="removeListPopupOpen = true"
         v-if="editing"
         :disabled="!isOnline"
@@ -596,5 +640,5 @@ function removeList() {
         <img src="../images/del.svg" class="w-6" alt="" />{{ $t('editor.remove') }}
       </button>
     </section>
-  </form>
+  </main>
 </template>

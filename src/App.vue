@@ -4,11 +4,10 @@ import Footer from "./components/global/Footer.vue";
 import Navbar from "./components/Navbar.vue";
 import { onMounted, ref } from "vue";
 import cookier from "cookier";
-import { SETTINGS } from "./siteSettings";
-import router from "./router";
+import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 
-if (localStorage) {
+if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
     localStorage.setItem("favoriteIDs", "[]");
   localStorage.getItem("favorites") ?? localStorage.setItem("favorites", "[]");
@@ -36,6 +35,7 @@ if (localStorage) {
 
 const loggedIn = ref<boolean>(false);
 onMounted(() => {
+  if (!hasLocalStorage()) return
   axios
     .get(import.meta.env.VITE_API + "/accounts.php?check", {
       headers: { Authorization: cookier("access_token").get() },
@@ -57,13 +57,25 @@ onMounted(() => {
     })
     .catch(() => localStorage.removeItem("account_info"));
 });
+
+const tabbarOpen = ref(false)
+document.body.addEventListener("keyup", e => {
+  if (e.altKey && e.key == "Control") tabbarOpen.value = false
+})
+document.body.addEventListener("keydown", e => {
+  if (e.altKey && e.key == "Control") tabbarOpen.value = true
+})
 </script>
 
 <template>
   <main class="min-h-screen">
     <Navbar :is-logged-in="loggedIn" />
     <NoConnection />
-    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
+    <section v-if="tabbarOpen" class="absolute left-2 top-14 bg-greenGradient">
+      sas
+    </section>
+    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]"/>
+    
   </main>
   <Footer />
 </template>

@@ -65,24 +65,41 @@ export interface FavoritedLevel {
   timeAdded: number;
 }
 
-export interface CollabData {
-  0: [string, number, string]; // 'Host' name, Host verified, Host title
-  1: CollabRoles[];
-  2: CollabHumans[];
+export interface SavedCollab {
+  data: CollabData;
+  collabName: string;
+  collabHost: string;
+  memberCount: number;
+  collabID: number;
+  timestamp: number;
+  levelID: number | "-1";
 }
 
-interface CollabRoles {
+export interface CollabData {
+  0: CollabHumans
+  1: string[];
+  2: CollabHumans[];
+  3: number;
+}
+
+export interface CollabRoles {
   name: string;
   id: number;
 }
 
-interface CollabHumans {
+export interface CollabHumans {
   name: string;
   role: number;
-  color: string;
-  part: [string, string];
+  color: [number, number, number] | string;
+  part: [number, number];
   socials: HumanSocialLink[];
-  verified: number | number[];
+  verified: 0 | number[];
+}
+
+export interface CollabViewerRow {
+  roleName: string;
+  human: CollabHumans;
+  roleCount: number;
 }
 
 interface HumanSocialLink {
@@ -108,6 +125,7 @@ export interface LevelList {
   pageBGcolor: string | [number, number, number]; // hex | hsv array
   titleImg: ListBackground; // url, BG top offset [%], BG height, BG XAlign, gradient
   translucent: boolean;
+  disComments: boolean;
   levels: Array<Level>;
 }
 
@@ -144,8 +162,21 @@ export interface LevelSearchResponse {
   cp: number;
 }
 
-export interface viewedPopups {
+export interface userDataFetchResponse {
+  username: string;
+  iconID: number;
+  color1: number;
+  color2: number;
+  glow: boolean;
+  socials: [number, string][]
+  stars: number;
+  demons: number;
+  cp: number;
+}
+
+export interface viewedPopup {
   diffGuesserHelp?: boolean
+  oldListsRedirectHelp?: boolean
 }
 
 export interface ytSearchDetails {

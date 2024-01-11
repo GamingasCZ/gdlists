@@ -1,0 +1,10 @@
+<svg width="73.556mm" height="30.279mm" version="1.1" viewBox="0 0 73.556 30.279" xmlns="http://www.w3.org/2000/svg">
+ <g stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="2.3">
+  <g transform="translate(-72.688 -116.81)" fill="none" stroke="#fff" stroke-width="1.8521">
+   <path d="m109.14 131.95h36.181l-18.881-14.214" stroke-width="1.852" style="paint-order:stroke markers fill"/>
+   <path d="m145.32 131.95-18.881 14.214" style="paint-order:stroke markers fill"/>
+  </g>
+  <path d="m30.97 15.126h-30.178" fill="none" stroke="#fff" stroke-width="1.852" style="paint-order:stroke markers fill"/>
+  <path d="m21.074 29.281 19.793-28.311" fill="#f00" stroke="#f00" stroke-width="1.852" style="paint-order:stroke markers fill"/>
+ </g>
+</svg>

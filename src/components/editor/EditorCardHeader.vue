@@ -15,7 +15,7 @@ const emit = defineEmits(['updateOpenedCard', 'doMove'])
 
 function getCreator() {
     if (typeof props.data.creator == "object") // Collab
-        return useI18n().t('editor.collabText', [props.data.creator[0][0], props.data.creator[1].length])
+        return useI18n().t('editor.collabText', [props.data.creator[0][0].name, props.data.creator[2].length])
     else
         return props.data.creator
 }
@@ -81,6 +81,9 @@ if (props.data.tags != undefined) {
 </template>
 
 <style>
-.cardHeader { transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(0); }
-.cardHeader[data-moving="0"]:hover { transform: translateX(0.5rem); }
+@media (prefers-reduced-motion: no-preference) {
+    .cardHeader { transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(0); }
+    .cardHeader[data-moving="0"]:hover { transform: translateX(0.5rem); }
+}
+
 </style>

@@ -60,7 +60,7 @@ const getGradient = () =>
     2
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
-const uploadDate = reactive(new Date(props.timestamp!));
+const uploadDate = ref(new Date(parseInt(props.timestamp!)*1000));
 
 const unpinList = () => {
   let pinned: ListPreview[] = JSON.parse(localStorage.getItem('pinnedLists')!)

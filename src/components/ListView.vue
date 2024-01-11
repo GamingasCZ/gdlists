@@ -5,13 +5,14 @@ import type {
   FavoritedLevel,
   ListPreview,
   Level,
+SavedCollab,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 // import LevelCardPC from "./global/LevelCardPC.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, computed } from "vue";
+import { ref, onMounted, watch, onUnmounted, computed, provide } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -22,8 +23,9 @@ import LikePopup from "./levelViewer/LikePopup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
-import { viewedPopups } from "@/siteSettings";
+import { hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
+import CollabViewer from "./editor/CollabViewer.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -53,6 +55,7 @@ const LIST_CREATOR = ref<string>("");
 const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash: string} | false>()
 const LIST_COL = ref<number[]>([0, 0, 0]);
 const LEVEL_COUNT = ref(0)
+const listErrorLoading = ref(false)
 
 const nonexistentList = ref<boolean>(false)
 function main() {
@@ -67,73 +70,76 @@ function main() {
   axios
     .get(import.meta.env.VITE_API + "/getLists.php?" + listURL)
     .then((res: AxiosResponse) => {
-      if (res.data == 2) {
-        nonexistentList.value = true
-        return
-      }
+      try {
+        if (res.data == 2) {
+          nonexistentList.value = true
+          return
+        }
 
-      LIST_DATA.value = res.data[0];
-      LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
-      LIST_CREATORDATA.value = res.data[1]?.[0]
+        LIST_DATA.value = res.data[0];
+        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
+        LIST_CREATORDATA.value = res.data[1]?.[0]
 
-      // Use new levelList structure (put levels into 'levels' array)
-      if (!LIST_DATA.value?.data.levels) {
-        LIST_DATA.value!.data.levels = [];
-        Object.keys(LIST_DATA.value?.data!)
-          .filter((x: string) => x.match(/\d+/g))
-          .forEach((level: string) => {
-            LIST_DATA.value?.data.levels.push(LIST_DATA.value.data[level]);
+        // Use new levelList structure (put levels into 'levels' array)
+        if (!LIST_DATA.value?.data.levels) {
+          LIST_DATA.value!.data.levels = [];
+          Object.keys(LIST_DATA.value?.data!)
+            .filter((x: string) => x.match(/\d+/g))
+            .forEach((level: string) => {
+              LIST_DATA.value?.data.levels.push(LIST_DATA.value.data[level]);
+            });
+        }
+
+        if (hasLocalStorage()) {
+          favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
+          recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
+
+          addIntoRecentlyViewed =
+            recentlyViewed.filter((list: ListPreview) => list.id == (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
+              .length == 0; // Has not been viewed yet
+        }
+
+        if (addIntoRecentlyViewed) {
+          recentlyViewed.push({
+            creator: LIST_CREATOR.value,
+            id: (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
+            name: LIST_DATA.value?.name!,
+            uploadDate: Date.now(),
+            hidden: "0",
           });
+          if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
+          localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+        }
+
+        document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
+
+        // Set list colors
+        let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
+        if (typeof listColors == "object") listColors[2] /= 64
+        else if (listColors) { listColors = chroma(listColors).hsl() }
+        LIST_COL.value = listColors
+        
+        // Saturation 0
+        if (LIST_COL?.value?.[0]) LIST_COL.value[0] = 0
+
+        if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
+          modifyListBG(LIST_COL.value);
+
+        // Check pinned status
+        if (hasLocalStorage()) {
+          JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
+            if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
+          });
+        }
+
+        // Set difficulty guessing
+        guessHelpOpened.value = hasLocalStorage() && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
+        LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
+        if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
+      } catch (e) {
+        listErrorLoading.value = true
       }
-
-      if (localStorage != undefined) {
-        favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
-        recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
-
-        addIntoRecentlyViewed =
-          recentlyViewed.filter((list: ListPreview) => list.id == (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
-            .length == 0; // Has not been viewed yet
-      }
-
-      if (addIntoRecentlyViewed) {
-        recentlyViewed.push({
-          creator: LIST_CREATOR.value,
-          id: (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
-          name: LIST_DATA.value?.name!,
-          uploadDate: Date.now(),
-          hidden: "0",
-        });
-        if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
-        localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
-      }
-
-      document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
-
-      // Set list colors
-      let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
-      if (typeof listColors == "object") listColors[2] /= 64
-      else { listColors = chroma(listColors).hsl() }
-      LIST_COL.value = listColors
-      
-      // Saturation 0
-      if (LIST_COL.value[0] == null) LIST_COL.value[0] = 0
-
-      if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
-        modifyListBG(LIST_COL.value);
-
-      // Check pinned status
-      if (localStorage) {
-        JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
-          if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
-        });
-      }
-
-      // Set difficulty guessing
-      guessHelpOpened.value = localStorage && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
-      LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
-      if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
-    });
-
+    })
 }
 
 let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
@@ -210,7 +216,7 @@ const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
 const likeNotLoggedInOpen = ref(false)
 const uploadedDialogShown = ref(0)
-if (sessionStorage) {
+if (hasLocalStorage()) {
   let uploadKey = sessionStorage.getItem("uploadFinished")
   if (uploadKey != null) {
     uploadedDialogShown.value = parseInt(uploadKey) // 1 - upload, 2 - update
@@ -243,6 +249,54 @@ const listActions = (action: string) => {
       break;
   }
 };
+
+const collabData = ref({
+  levelName: "",
+  levelColor: [0,0,0],
+  collabData: null,
+  index: 0,
+  levelID: 0
+})
+const openCollabTools = (ind: number, col: [number, number, number]) => {
+  if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
+
+  collabData.value.levelName = LIST_DATA.value?.data.levels[ind].levelName
+  collabData.value.levelColor = col
+  collabData.value.index = ind
+  collabData.value.levelID = LIST_DATA.value?.data.levels[ind].levelID
+  collabData.value.collabData = LIST_DATA.value?.data.levels[ind].creator
+
+}
+const saveCollab = (ind: number) => {
+  if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
+  if (!hasLocalStorage()) return
+
+  let currSavedIDs: string[] = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? []
+  let currSaved: SavedCollab[] = JSON.parse(localStorage.getItem("savedCollabs")!) ?? []
+  if (currSavedIDs.includes(LIST_DATA.value?.data.levels[ind].levelID!)) { // Smazat collab
+    let remInd = currSavedIDs.indexOf(LIST_DATA.value?.data.levels[ind].levelID!)
+    currSavedIDs.splice(remInd, 1)
+    currSaved.splice(remInd, 1)
+  }
+  else { // Nesmazat collab, naopak přidat hihi :D
+    let collab: SavedCollab = {
+      collabHost: LIST_DATA.value?.data.levels[ind].creator[0].name,
+      levelID: LIST_DATA.value?.data.levels[ind].levelID,
+      collabID: Math.floor(Math.random() * 1000000),
+      collabName: LIST_DATA.value?.data.levels[ind].levelName,
+      data: LIST_DATA.value?.data.levels[ind].creator,
+      memberCount: LIST_DATA.value?.data.levels[ind].creator[2].length,
+      timestamp: Date.now()
+    }
+    currSaved.push(collab)
+    currSavedIDs.push(collab.levelID as string)
+  }
+
+  localStorage.setItem("savedCollabs", JSON.stringify(currSaved))
+  localStorage.setItem("savedCollabIDs", JSON.stringify(currSavedIDs))
+}
+
+provide("saveCollab", saveCollab)
 
 </script>
 
@@ -296,9 +350,22 @@ const listActions = (action: string) => {
         </div>
       </section>
 
+      <section v-if="listErrorLoading" class="flex flex-col items-center my-20 text-white">
+        <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
+        <h2 class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.failLoad') }}</h2>
+        <div class="flex gap-3 mt-5 max-sm:flex-col">
+          <RouterLink to="/">
+            <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
+                class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
+          </RouterLink>
+        </div>
+      </section>
+
       <Teleport to="#app">
         <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />
       </Teleport>
+
+      <CollabViewer v-if="collabData.collabData != null" v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
 
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
@@ -314,8 +381,10 @@ const listActions = (action: string) => {
         :disable-stars="false" 
         :guessing-now="cardGuessing == index"
         :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-        @vnode-mounted="tryJumping(index)"
+        @vue:mounted="tryJumping(index)"
         @next-guess="doNextGuess($event)"
+        @open-collab="openCollabTools"
+        @error="listErrorLoading = true"
       />
 
       <!-- Guessing bottom padding -->
@@ -331,8 +400,14 @@ const listActions = (action: string) => {
         @replay-list="guesses = []; cardGuessing = 0"
       />
 
-      <CommentSection v-show="commentsShowing" v-if="LIST_DATA?.id != undefined" :comm-amount="LIST_DATA.commAmount"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :showing="commentsShowing"/>
+      <CommentSection
+        v-show="commentsShowing"
+        v-if="LIST_DATA?.id != undefined"
+        :comm-amount="LIST_DATA.commAmount"
+        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+        :showing="commentsShowing"
+        :comments-disabled="LIST_DATA.data.disComments"  
+      />
     </main>
   </section>
 </template>
@@ -349,8 +424,10 @@ const listActions = (action: string) => {
   }
 }
 
-.levelCard {
-  animation: slideIn 0.4s ease forwards;
-  opacity: 0;
+@media (prefers-reduced-motion: no-preference) {
+  .levelCard {
+    animation: slideIn 0.4s ease forwards;
+    opacity: 0;
+  }
 }
 </style>

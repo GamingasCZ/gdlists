@@ -17,7 +17,13 @@
     "columns": "{count} sloupec | {count} sloupce",
     "everySec": "Každých {0}s",
     "everyMin": "Každé {0}m",
-    "logout": "Odhlásit se"
+    "logout": "Odhlásit se",
+    "iconQuality": "Kvalita ikonek",
+    "noGenerate": "Negenerovat",
+    "noColor": "Bez barev",
+    "qLow": "Nízká",
+    "qMed": "Výchozí",
+    "qHigh": "Vysoká"
   },
   "homepage": {
     "searchLists": "Hledat seznamy...",
@@ -114,11 +120,12 @@
     "maxLevels": "Víc levelů už nemůžeš přidat!",
     "listBGhelp": "# Nastavení \n *Zakrytí - Jak velkou část obrazovky zabere pozadí. \n*Zarovnání - Pokud má obrazovka užší poměr stran než pozadí, pozadí se zarovná na zvolenou stranu. \n*Přechod - Zda by měl být přidán přes pozadí přechod s barvou seznamu. \nV náhledu obrázku je i zelený rámeček, za ten můžeš tahat a vybrat tak jaká část pozadí se zobrazí. \n\n Pozadí seznamu funguje nejlépe s průsvitnými kartami!",
     "diffGuessHelp": "Pokud je hádání obtížnostú zapnuté, seznam se bude postupně odemykat po tom, co hádáš obtížnosti, rating, či oboje.\n*V prohlížeči seznamů takový seznam poznáš podle otazníků v pozadí.\n*Hádání se vyruší, pokud přecházíš z uložených levelů.\n*Můžeš hrát i šipkami na klávesnicí.",
-    "collabToolsSoon": "Collab nástroje budou brzy přidány zpět :).",
+    "collabToolsSoon": "Collab nástroje ti umožňují vizuálně zobrazit části collabu. Pokud to nedofailíš, v seznamu se objeví graf s délkami částí, a co člen v collabu dělal, jeho GD ikonka a sociální sítě.<br>\nCollaby se vytvářejí v editoru. Dostaneš se k ním pomocí ikonky vedle pole pro zadání tvůrce levelu.<br>\nNový collab vytvoříš tlačítkem \"Vytvořit collab\". Po vytvoření se otevře se panel, kde se nastavují role. Předchystané role jsou v šipečce vpravo nahoře.<br>\nPro přidání člena klikni na zelené plus. Po přidání bude automaticky zaměřeno pole s jménem. Po napsání jména člena můžeš zmáčknout Enter nebo kliknout na lupu. Tím se automaticky vyplní ikonka a sociální sítě z GD profilu. Po vyhledání bude zaměřeno tlačítko na přidání člena. Můžeš tedy rovnou zmáčknout Enter a přidá se další člen. Zbytek vygómeš sám, megamysle :D",
     "collabTools": "Collab nástroje",
     "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**.",
     "collabText": "{0} + {1} dalších",
-    "videoSearch": "Hledání videí"
+    "videoSearch": "Hledání videí",
+    "collabNoPhones": "Collab editor není dostupný na telefonech!"
   },
   "other": {
     "lockQuotes": [
@@ -130,7 +137,7 @@
       "Chybí tomu přihlašování bossfight :/",
       "aaaaaaaaaaaaaaaaaaaa"
     ],
-    "savedLevels": "Uložené levely",
+    "savedLevels": "Uložené",
     "websiteName": "GD Seznamy",
     "unnamesd": "Bezejmenný",
     "settings": "Nastavení",
@@ -177,7 +184,14 @@
     "increasedIQ": "Chápu!",
     "next": "Další",
     "close": "Zavřít",
-    "copied": "Zkopírováno!"
+    "copied": "Zkopírováno!",
+    "send": "Odeslat",
+    "disableComments": "Zakázat komentáře",
+    "save": "Uložit",
+    "use": "Použít",
+    "delete": "Smazat",
+    "comingSoon": "Brzy dostupné :D",
+    "links": "Odkazy"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -224,7 +238,9 @@
     "diffResult13": "Vskutku epické W! Tvé skóre je velice based!",
     "diffResult14": "Jsi Geodeš bůh! To je mimochodem kompliment!",
     "diffResult15": "Ty se asi moc nedotýkáš trávníku!",
-    "diffResult16": "Přeci jen se ty tisíce hodin dashování k něčemu byly!"
+    "diffResult16": "Přeci jen se ty tisíce hodin dashování k něčemu byly!",
+    "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!",
+    "failLoad": "Seznam se nepodařilo načíst!"
   },
   "level": {
     "levelID": "ID levelu",
@@ -269,5 +285,57 @@
     "uploadFinished": "Seznam byl {0}!",
     "updated": "aktualizován",
     "uploaded": "nahrán"
+  },
+  "collabTools": {
+    "hostRole": "Role hosta",
+    "hostName": "Jméno hosta",
+    "modifyRoles": "Role",
+    "members": "Členové",
+    "addRoleToAddMember": "Založ nový collab, nebo vyber z uložených.",
+    "addSomeMembers": "Zatím jsi nepřidal žádné členy.",
+    "addRoles": "Vytvořit collab",
+    "roles": "Role",
+    "examples": "Návrhy",
+    "recentlyUsed": "Naposledy použité",
+    "recentRolesHere": "Tady se objeví tvé naposledy vytvořené role!",
+    "optimization": "Optimalizace",
+    "testing": "Playtestování",
+    "deco": "Dekorace",
+    "layout": "Layout",
+    "sortPart": "Začátku části",
+    "sortName": "Jména",
+    "sortRole": "Role",
+    "memberName": "Jméno člena",
+    "unnamedRole": "Bezejmenná",
+    "sortBy": "Seřadit podle",
+    "funny1": "Editor collabu",
+    "funny2": "Editor megacollabu",
+    "funny3": "Editor gigacollabu",
+    "funny4": "ježíšku na křížku",
+    "funny5": "Správa planety",
+    "noEditOldCollab": "Collaby ze starých seznamů bohužel nemohou být upraveny!",
+    "verifier": "Verifier",
+    "memberCount": "{count} členů",
+    "collabExists": "K tomuto levelu máš uložený collab!",
+    "addMember": "Přidej členy stisknutím",
+    "addRole": "Přidat roli",
+    "roleName": "Jméno role",
+    "saveCollab": "Uložit collab",
+    "savedHelp": "Tady se objeví collaby, které vytvoříš, nebo uložíš v seznamech!",
+    "allCollabs": "Všechny collaby",
+    "beingEdited": "Upravované",
+    "noHost": "Bez hosta",
+    "collabName": "Jméno collabu",
+    "yt": "YouTube kanál",
+    "twitter": "Twitter účet",
+    "twitch": "Twitch kanál",
+    "dis": "Discord jméno/server",
+    "customLink": "Vlastní odkaz",
+    "unnamedCollab": "Bezejmenný collab",
+    "collabs": "Collaby",
+    "startBuilding": "Začít stavět",
+    "noSaved": "Neuložil jsi zatím žádné collaby!",
+    "noSavedSub": "Můžeš je uložit při vytváření nebo v seznamech.",
+    "removeSaved": "Odebrat"
   }
 }

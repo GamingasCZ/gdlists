@@ -4,7 +4,7 @@ import LoginButton from "./global/LoginButton.vue";
 import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
 import { computed, ref, watch } from "vue";
-import { SETTINGS } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 
 document.title = useI18n().t("other.websiteName");
@@ -46,12 +46,14 @@ watch(props, () => {
   }
 })
 
+const localStorg = ref(hasLocalStorage())
+
 </script>
 
 <template>
   <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="firstTimeUser && returnedFromLogin"
     :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
-  <div id="loginToast" v-if="!firstTimeUser"
+  <div id="loginToast" v-if="!firstTimeUser && localStorg"
     class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
     {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!
   </div>
@@ -64,30 +66,26 @@ watch(props, () => {
           :placeholder="$t('homepage.searchLists')" />
 
         <div class="flex gap-2 pt-2 w-full text-base text-white">
-          <RouterLink to="/editor" class="min-w-max grow">
-            <button class="flex gap-4 items-center px-2 py-3 w-full rounded-md grow button bg-lof-300" type="button">
-              <img src="../images/plus.svg" alt="" class="w-6" />{{
-                $t("homepage.createList")
-              }}
-            </button>
+          <RouterLink to="/editor" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md grow button bg-lof-300 selectOutline">
+            <img src="../images/plus.svg" alt="" class="w-6" />{{
+              $t("homepage.createList")
+            }}
           </RouterLink>
-          <RouterLink to="/random" class="min-w-max grow">
-            <button class="flex gap-4 items-center px-2 py-3 w-full rounded-md button grow bg-lof-300" type="button">
-              <img src="../images/dice.svg" alt="" class="w-6" />{{
-                $t("homepage.tryLuck")
-              }}
-            </button>
+          <RouterLink to="/random" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md button grow bg-lof-300 selectOutline">
+            <img src="../images/dice.svg" alt="" class="w-6" />{{
+              $t("homepage.tryLuck")
+            }}
           </RouterLink>
         </div>
       </div>
-      <button type="submit" class="max-sm:hidden">
-        <img src="../images/searchOpaque.svg" alt="" class="p-2 rounded-full button bg-greenGradient" />
+      <button type="submit" class="box-border p-3 w-12 rounded-full max-sm:hidden button bg-greenGradient">
+        <img src="../images/searchOpaque.svg" alt="" />
       </button>
     </form>
   </header>
 
   <section class="flex justify-center">
-    <div v-if="!isLoggedIn"
+    <div v-if="!isLoggedIn && localStorg"
       class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
@@ -95,6 +93,14 @@ watch(props, () => {
         <p class="max-md:hidden">{{ $t("homepage.connectDiscord") }}</p>
       </div>
       <LoginButton class="ml-auto" />
+    </div>
+    <div v-if="!localStorg"
+      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
+      <img src="../images/disCookies.svg" alt="" class="w-6" />
+      <div>
+        <p class="max-sm:text-xs">Nemáš povolené cookies!</p>
+        <p class="max-md:hidden">Nepůjde se přihlásit, můžeš jen procházet seznamy.</p>
+      </div>
     </div>
   </section>
 

@@ -30,11 +30,17 @@ const screenWidth = ref(window.innerWidth)
     >
       <h1 class="font-bold">{{ username }}</h1>
       <button
-        class="px-2 py-1 bg-white bg-opacity-10 rounded-full button"
+        class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
         @click="logout"
       >
         <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />{{ $t('settingsMenu.logout') }}
       </button>
+      <!-- <button
+        class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
+        @click="logout"
+      >
+        <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />Zařízení
+      </button> -->
     </section>
 
     <section
@@ -77,6 +83,18 @@ const screenWidth = ref(window.innerWidth)
         <option :value="30">{{ $t('settingsMenu.everySec', [30]) }}</option>
         <option :value="60">{{ $t('settingsMenu.everySec', [60]) }}</option>
         <option :value="180">{{ $t('settingsMenu.everyMin', [3]) }}</option>
+      </select>
+    </section>
+    <section
+      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
+    >
+      {{ $t('settingsMenu.iconQuality') }}
+      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.iconQuality">
+        <option :value="-2">{{ $t('settingsMenu.noGenerate') }}</option>
+        <option :value="-1">{{ $t('settingsMenu.noColor') }}</option>
+        <option :value="6">{{ $t('settingsMenu.qLow') }}</option>
+        <option :value="4">{{ $t('settingsMenu.qMed') }}</option>
+        <option :value="2">{{ $t('settingsMenu.qHigh') }}</option>
       </select>
     </section>
   </div>

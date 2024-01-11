@@ -18,20 +18,21 @@ export const DEFAULT_LEVELLIST: LevelList = {
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
+  disComments: false,
   levels: [],
 }
 
 export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
 
-export function makeColor(col?: [number, number, number] | string): [number, number, number] {
+export function makeColor(col?: [number, number, number] | string, hex = false): [number, number, number] | string {
   // Random color
   if (typeof col == 'object' && col.length) return col
   else if (typeof col == 'string') return chroma(col).hsl()
   else {
     let randomColor = chroma.hsv(
       Math.floor(Math.random() * 360), 1, Math.random() / 3
-    ).hsv()
-    return randomColor
+    )
+    return hex ? randomColor.hex() : randomColor.hsl()
   }
 }
 
@@ -158,7 +159,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
   let listError: object | undefined
   levelList.value.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name.length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
     if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
     i++
   })
@@ -171,7 +172,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
 }
 
 export function creatorToCollab(currentName: string): CollabData {
-  return [[currentName, 0, "Host"], [], []]
+  return [[{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}], [], [], Math.floor(Math.random() * 1000000)]
 }
 
 export const isOnline = ref(true)

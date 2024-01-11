@@ -92,6 +92,35 @@ switch (array_keys($_GET)[0]) {
         }
         break;
     }
+    case "userDataFetch": {
+        $accountIDReq = post("https://www.boomlings.com/database/getGJUsers20.php", ["secret"=>"Wmfd2893gb7","str"=>$_GET["username"]], []);
+        if ($accountIDReq == "-1") die("-1");
+
+        $accountIDData = explode(":", $accountIDReq);
+        $userReq = post("https://www.boomlings.com/database/getGJUserInfo20.php", ["secret"=>"Wmfd2893gb7","targetAccountID"=>$accountIDData[21]], []);
+        $userData = explode(":", $userReq);
+        for ($i=0; $i < sizeof($userData); $i++) { 
+            array_splice($userData, $i, 1);
+        }
+
+        $returnData["username"] = $userData[0];
+        $returnData["iconID"] = intval($userData[16]);
+        $returnData["color1"] = intval($userData[4]);
+        $returnData["color2"] = intval($userData[5]);
+        $returnData["glow"] = $userData[6];
+        $returnData["socials"] = [];
+        $socialIndexes = [0, 1, 2];
+
+        $i = 0;
+        foreach ([$userData[15], $userData[30], $userData[31]] as $site) {
+            if ($site != "") array_push($returnData["socials"], [$socialIndexes[$i], "/" . $site]);
+            $i += 1;
+        }
+        
+        $returnData["stars"] = intval($userData[7]);
+        $returnData["demons"] = intval($userData[10]);
+        $returnData["cp"] = intval($userData[11]);
+    }
 }
 
 

@@ -2,12 +2,14 @@
 import { levelList, deleteLevel, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
 import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
+import { useI18n } from "vue-i18n";
+import { hasLocalStorage } from "@/siteSettings";
 
 const props = defineProps<{
   index?: number;
@@ -22,20 +24,21 @@ const emit = defineEmits<{
   (e: "openTagPopup"): void;
   (e: "openCollabTools", levelIndex: number): void;
   (e: "doMove", levelIndex: number, toIndex: number): void;
+  (e: "throwError", errorText: string): void;
 }>();
 
 // Colors
-const lightCol = () => 
+const lightCol = () =>
   chroma
     .hsl(...levelList.value.levels[props.index!].color!)
     .brighten(0.5)
     .css();
 const changeCardColors = (newColors: [number, number, number]) =>
-  (levelList.value.levels[props.index!].color = [
-    newColors[0],
-    0.5,
-    newColors[2] / 64,
-  ]);
+(levelList.value.levels[props.index!].color = [
+  newColors[0],
+  0.5,
+  newColors[2] / 64,
+]);
 
 // Difficulty Picker
 const changeRate = async (newRating: number) => {
@@ -64,26 +67,18 @@ const getRateImage = async () => {
 };
 getRateImage()
 
-const collabShaking = ref(false)
-const shakeCollab = () => {
-  collabShaking.value = true
-  setTimeout(() => {
-    collabShaking.value = false
-  }, 200);
-}
-
 const diffFacePath = ref("")
 const getDiffFace = async () => await import(`../../images/faces/${levelList.value.levels[props.index!].difficulty?.[0] ?? 0}.webp`).then(res => diffFacePath.value = res.default)
 getDiffFace()
 
 
-const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0] : levelList.value.levels[props.index!].creator)
-const modifyCreator = (e: Event) => {
-  let newCreator = (e.currentTarget as HTMLInputElement).value
+const levelCreator = ref(typeof levelList.value.levels[props.index!].creator == 'object' ? levelList.value.levels[props.index!].creator[0][0].name : levelList.value.levels[props.index!].creator)
+const modifyCreator = (e: Event | string) => {
+  let newCreator = typeof e == 'string' ? e : (e.currentTarget as HTMLInputElement).value
   if (typeof levelList.value.levels[props.index!].creator == 'string')
     levelList.value.levels[props.index!].creator = newCreator
   else
-    levelList.value.levels[props.index!].creator[0][0] = newCreator
+    levelList.value.levels[props.index!].creator[0][0].name = newCreator
   levelCreator.value = newCreator
 }
 
@@ -92,11 +87,11 @@ const modifyVideo = (e: Event) => {
   let linkMatch: string;
   // Link is a regular YT link
   if (videoInput.value.match(/(watch\?v=)/g)) {
-      linkMatch = <any>videoInput.value.match(/(?<=\?v=).+/g);
+    linkMatch = <any>videoInput.value.match(/(?<=\?v=).+/g);
   }
   // Link is most likely a shortened YT link
   else {
-      linkMatch = <any>videoInput.value.match(/(?<=youtu.be\/).+/g);
+    linkMatch = <any>videoInput.value.match(/(?<=youtu.be\/).+/g);
   }
 
 
@@ -105,7 +100,7 @@ const modifyVideo = (e: Event) => {
 }
 
 const ytPanelOpen = ref(false)
-const ytVideoData = ref<ytSearchDetails>({videoCount: 0})
+const ytVideoData = ref<ytSearchDetails>({ videoCount: 0 })
 async function videoSearch() {
   let data: ytSearchDetails = {
     success: false,
@@ -118,7 +113,7 @@ async function videoSearch() {
   }
 
   await axios.get(`https://youtube.googleapis.com/youtube/v3/search`, {
-    params: {part: "snippet", "maxResults": 10, q: `Geometry Dash ${levelList.value.levels[props.index!].levelName}`, key: import.meta.env.VITE_YTAPIKEY}
+    params: { part: "snippet", "maxResults": 10, q: `Geometry Dash ${levelList.value.levels[props.index!].levelName}`, key: import.meta.env.VITE_YTAPIKEY }
   }).then(res => {
     data.success = true
     data.videoCount = res.data.pageInfo.resultsPerPage
@@ -140,7 +135,7 @@ const scroll = (by: number) => {
   let ele = document.querySelector("#youtubeScroll") as HTMLDivElement
   vidScrollBox.value = ele.scrollLeft + by
   ele.scrollLeft += by
-  vidScrollBox.value = vidScrollBox.value >= (ele.scrollWidth-by) ? -1 : vidScrollBox.value
+  vidScrollBox.value = vidScrollBox.value >= (ele.scrollWidth - by) ? -1 : vidScrollBox.value
 }
 
 const openedPanel = ref<number>(0);
@@ -149,44 +144,114 @@ const mobileMoveLevel = () => {
   emit("moveControls", props.index!, props.index!);
 };
 
+const collabFlash = ref(false)
+const searching = ref(false)
 function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
+  if (searchingByID && !searchAvailableID.value) return
+  if (!searchingByID && !searchAvailableCreator.value) return
+  if (searching.value) return
+
   let levelID = levelList.value.levels[props.index!].levelID;
   let levelName = levelList.value.levels[props.index!].levelName;
+  let searchingFromUser = levelName && levelCreator.value
 
   let request: string = "";
   if (searchingByID) request = `id=${levelID}`; // Searching by ID
+  else if (!levelName && levelCreator.value) request = `levelMaker=${levelCreator.value}`
   else {
-    if (levelName && levelCreator.value) {
+    if (searchingFromUser) {
       // Find level by specific creator
-      for (let i = 0; i < 5; i++) {
         request = `userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
+      } else request = `levelName=${levelName}`; // Find level
       }
-    } else request = `levelName=${levelName}`; // Find level
+      searching.value = true
+      axios
+        .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
+        .then(async (response: AxiosResponse) => {
+          let level: LevelSearchResponse = response.data;
+
+          // Couldn't find level
+          if (typeof response.data != "object") {
+            searching.value = false; return;
+          }
+
+          // Try next page
+          if (searchingFromUser && userSearchPage < 5) {
+            searchLevel(searchingByID, userSearchPage + 1 )
+          }
+          
+          levelList.value.levels[props.index!].levelID = level.id;
+          levelList.value.levels[props.index!].levelName = level.name;
+    
+          modifyCreator(level.author)
+    
+          if (hasLocalStorage()) {
+            let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
+            collabFlash.value = saveIDs.indexOf(parseInt(levelList.value.levels[props.index].levelID)) > -1
+            setTimeout(() => {
+              collabFlash.value = false
+            }, 5000);
+          }
+    
+          if (level.difficulty == -1) level.difficulty = 11 // Auto levels
+          levelList.value.levels[props.index!].difficulty = [
+            level.difficulty,
+            level.cp,
+          ];
+          diffFacePath.value = await getDiffFace()
+          rateImagePath.value = await getRateImage()
+    
+          ytVideoData.value = await videoSearch()
+          searching.value = false;
+          (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
+        }).catch(() => searching.value = false);
+    }
+
+
+const isOldCollab = computed(() => typeof levelList.value.levels[props.index!].creator == 'object' && !levelList.value.levels[props.index!].creator[3])
+const openCollabTools = () => {
+  if (isOldCollab.value)
+    emit('throwError', useI18n().t('collabTools.noEditOldCollab'))
+  else if (/iPhone|Android/i.test(navigator.userAgent))
+    emit('throwError', useI18n().t('editor.collabNoPhones'))
+  else
+    emit('openCollabTools', props.index!)
+}
+
+const creatorFilledIn = computed(() => {
+  if (typeof levelList.value.levels[props.index!].creator == "string")
+    return levelList.value.levels[props.index!].creator
+  else {
+    return levelList.value.levels[props.index!].creator[0]?.[0]?.name
   }
+})
 
-  axios
-    .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
-    .then(async (response: AxiosResponse) => {
-      let level: LevelSearchResponse = response.data;
-      levelList.value.levels[props.index!].levelID = level.id;
-      levelList.value.levels[props.index!].levelName = level.name;
-      
-      if (typeof levelList.value.levels[props.index!].creator == 'string')
-        levelList.value.levels[props.index!].creator = level.author
-      else
-        levelList.value.levels[props.index!].creator[0][0] = level.author
-      levelCreator.value = level.author
+const searchAvailableCreator = computed(() => (levelList.value.levels[props.index!].levelName != '' || levelList.value.levels[props.index!].creator != '') && !searching.value)
+const searchAvailableID = computed(() => levelList.value.levels[props.index!].levelID && !searching.value)
 
-      if (level.difficulty == -1) level.difficulty = 11 // Auto levels
-      levelList.value.levels[props.index!].difficulty = [
-        level.difficulty,
-        level.cp,
-      ];
-      diffFacePath.value = await getDiffFace()
-      rateImagePath.value = await getRateImage()
+axios
+  .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
+  .then(async (response: AxiosResponse) => {
+    let level: LevelSearchResponse = response.data;
+    levelList.value.levels[props.index!].levelID = level.id;
+    levelList.value.levels[props.index!].levelName = level.name;
 
-      ytVideoData.value = await videoSearch()
-    });
+    if (typeof levelList.value.levels[props.index!].creator == 'string')
+      levelList.value.levels[props.index!].creator = level.author
+    else
+      levelList.value.levels[props.index!].creator[0][0] = level.author
+    levelCreator.value = level.author
+
+    if (level.difficulty == -1) level.difficulty = 11 // Auto levels
+    levelList.value.levels[props.index!].difficulty = [
+      level.difficulty,
+      level.cp,
+    ];
+    diffFacePath.value = await getDiffFace()
+    rateImagePath.value = await getRateImage()
+
+    ytVideoData.value = await videoSearch()
+  });
 }
 
 const isPlatformer = ref(levelList.value.levels[props.index!].platf)
@@ -199,59 +264,38 @@ const switchPlatformer = () => {
 <template>
   <!-- Card content -->
   <section
-  :style="{ backgroundImage: `linear-gradient(-90deg, ${lightCol()}, ${chroma.hsl(...levelList.levels[index!].color!).hex()})` }"
-  class="flex flex-col gap-1.5 overflow-clip rounded-md"
-  >
+    :style="{ backgroundImage: `linear-gradient(-90deg, ${lightCol()}, ${chroma.hsl(...levelList.levels[index!].color!).hex()})` }"
+    class="flex flex-col gap-1.5 overflow-clip rounded-md">
     <div class="flex justify-between p-2 pr-1 bg-black bg-opacity-20">
       <div class="box-border inline-flex gap-2">
         <!-- Level ID input -->
         <img class="w-10 aspect-square" src="../../images/levelID.svg" alt="" />
-        <input
-          autocomplete="off"
-          class="max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
-          type="text"
-          name="levelID"
-          v-model="levelList.levels[index!].levelID"
-          :placeholder="$t('level.levelID')"
-        />
-        <img
-          class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-          src="../../images/searchOpaque.svg"
-          alt=""
-          :style="{ opacity: levelList.levels[index!].levelID ? 1 : 0.5 }"
-          @click="searchLevel(true)"
-        />
+        <input autocomplete="off" @keyup.enter="searchLevel(true)"
+          class="max-w-[20vw] box-border rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
+          type="text" name="levelID" v-model="levelList.levels[index!].levelID" :placeholder="$t('level.levelID')" />
+        <button :disabled="!searchAvailableID" type="button" class="box-border relative"
+          :style="{ opacity: searchAvailableID ? 1 : 0.5 }" @click="searchLevel(true)">
+          <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
+          <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            src="../../images/searchOpaque.svg" alt="" />
+        </button>
       </div>
 
       <div class="flex max-sm:hidden">
         <!-- Level position -->
-        <img
-          class="box-border p-1.5 w-10 button aspect-square"
-          src="../../images/moveUp.svg"
-          alt=""
-          @click="emit('doMove', index!, index! - 1); openedPanel = 0;"
-        />
-        <input
-          autocomplete="off" readonly
+        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveUp.svg" alt=""
+          @click="emit('doMove', index!, index! - 1); openedPanel = 0;" />
+        <input autocomplete="off" readonly
           class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
-          :value="index! + 1"
-          @mousedown="mobileMoveLevel()"
-        />
-        <img
-          class="box-border p-1.5 w-10 button aspect-square"
-          src="../../images/moveDown.svg"
-          alt=""
-          @click="emit('doMove', index!, index! + 1); openedPanel = 0;"
-        />
+          :value="index! + 1" @mousedown="mobileMoveLevel()" />
+        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveDown.svg" alt=""
+          @click="emit('doMove', index!, index! + 1); openedPanel = 0;" />
       </div>
 
       <!-- Mobile move button -->
       <button type="button" @click="mobileMoveLevel()" class="mr-1 sm:hidden" v-if="levelList.levels.length > 1">
-        <img
-          class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button"
-          src="../../images/move.svg"
-          alt=""
-        />
+        <img class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button"
+          src="../../images/move.svg" alt="" />
       </button>
     </div>
     <div class="flex gap-2 items-center px-2 max-sm:flex-col">
@@ -278,14 +322,11 @@ const switchPlatformer = () => {
           class="sm:hidden"
         >
           <img
-            class="p-1 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg"
-            alt=""
-            :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
-          />
+            class="p-2 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            src="../../images/searchOpaque.svg" alt=""
+            :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }" />
         </button>
-        <input
-          autocomplete="off"
+        <input autocomplete="off"
           class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
           type="text"
           name="levelName"
@@ -297,67 +338,44 @@ const switchPlatformer = () => {
 
       <!-- Level search -->
       <div class="flex gap-2 items-center max-sm:hidden">
-        <hr
-          class="w-8 h-1 bg-white transition-opacity duration-100"
-          :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }"
-        />
-        <button
-          :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
-          type="button"
-          @click="searchLevel(false)"
+        <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
+          :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }" />
+        
+        <button :disabled="!searchAvailableCreator" type="button" class="box-border relative"
+          :style="{ opacity: searchAvailableCreator ? 1 : 0.5 }" @click="searchLevel(false)"
         >
-          <img
-            class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg"
-            alt=""
-            :style="{ opacity: (levelList.levels[index!].levelName || levelList.levels[index!].creator) ? 1 : 0.5 }"
-          />
+          <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
+          <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
+            src="../../images/searchOpaque.svg" alt="" />
         </button>
-        <hr
-          class="w-8 h-1 bg-white transition-opacity duration-100"
-          :style="{ opacity: levelList.levels[index!].creator ? 1 : 0.5 }"
-        />
+        
+        <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
+          :style="{ opacity: creatorFilledIn ? 1 : 0.5 }" />
       </div>
 
       <!-- Creator input -->
       <div class="flex gap-2 max-sm:flex-row-reverse max-sm:w-full">
-        <input
-          autocomplete="off"
+        <input autocomplete="off"
           class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text"
-          name="creator"
-          maxlength="15"
-          :value="levelCreator"
-          @change="modifyCreator"
-          :placeholder="$t('level.creator')"
-        />
-        <img
-          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
-          src="../../images/collabMen.svg"
-          alt=""
-          :class="{'animate-[shake_0.2s_infinite]': collabShaking, 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object'}"
-          @click="shakeCollab()"
-        />
+          type="text" name="creator" maxlength="15" :value="levelCreator" @change="modifyCreator"
+          :placeholder="$t('level.creator')" @keyup.enter="searchLevel(false)"/>
+        <button class="relative w-10 h-10 bg-black bg-opacity-30 rounded-md focus-within:!outline-current button"
+          @click="openCollabTools()"
+          :class="{ 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
+          <img class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square" src="../../images/collabMen.svg" alt=""
+            v-if="collabFlash" />
+          <img class="absolute top-0 left-0 p-1 w-10 aspect-square" src="../../images/collabMen.svg" alt="" />
+        </button>
       </div>
     </div>
     <div class="flex justify-between items-center px-2 pb-2 max-sm:flex-col">
       <!-- Video input -->
       <div class="flex gap-2 max-sm:w-full">
-        <img
-          class="min-w-[2.5rem] aspect-square"
-          src="../../images/video.svg"
-          alt=""
-        />
-        <input
-          autocomplete="off"
+        <img class="min-w-[2.5rem] aspect-square" src="../../images/video.svg" alt="" />
+        <input autocomplete="off"
           class="sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text"
-          name="video"
-          maxlength="50"
-          @change="modifyVideo"
-          :value="levelList.levels[index!].video"
-          :placeholder="$t('level.video')"
-        />
+          type="text" name="video" maxlength="50" @change="modifyVideo" :value="levelList.levels[index!].video"
+          :placeholder="$t('level.video')" />
       </div>
 
       <!-- Extras buttons -->
@@ -390,18 +408,9 @@ const switchPlatformer = () => {
             :style="{zIndex: (levelList.levels[index!].difficulty?.[1] ?? 0) -1 ? 10 : 30 }"
           />
         </div>
-        <img
-          class="w-10 button"
-          @click="openedPanel = openedPanel != 3 ? 3 : 0"
-          src="../../images/tagPicker.svg"
-          alt=""
-        />
-        <img
-          class="ml-4 w-10 button"
-          @click="deleteLevel(props.index!)"
-          src="../../images/deleteLevel.svg"
-          alt=""
-        />
+        <img class="w-10 button" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
+          alt="" />
+        <img class="ml-4 w-10 button" @click="deleteLevel(props.index!)" src="../../images/deleteLevel.svg" alt="" />
       </div>
     </div>
 
@@ -411,54 +420,44 @@ const switchPlatformer = () => {
         <button class="button" @click="ytPanelOpen = false"><img src="@/images/close.svg" class="w-4" alt=""></button>
       </header>
 
-      <button v-show="vidScrollBox > 5 || vidScrollBox == -1" @click="scroll(-600)" class="absolute left-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&lt;</button>
+      <button v-show="vidScrollBox > 5 || vidScrollBox == -1" @click="scroll(-600)"
+        class="absolute left-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&lt;</button>
       <main class="flex overflow-x-hidden relative gap-2 p-2 max-sm:flex-col scroll-smooth" id="youtubeScroll">
-        <YoutubeVideoPreview v-for="vid in ytVideoData?.videoCount" :index="vid" :video-data="ytVideoData" @pick-video="levelList.levels[index!].video = $event"/>
+        <YoutubeVideoPreview v-for="vid in ytVideoData?.videoCount" :index="vid" :video-data="ytVideoData"
+          @pick-video="levelList.levels[index!].video = $event" />
       </main>
-      <button v-show="vidScrollBox != -1" @click="scroll(600)" class="absolute right-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&gt;</button>
-    
+      <button v-show="vidScrollBox != -1" @click="scroll(600)"
+        class="absolute right-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&gt;</button>
+
     </section>
     <!-- Extras panel -->
     <div class="p-2 bg-black bg-opacity-20" v-show="openedPanel">
       <!-- Youtube panel -->
 
-      <ColorPicker
-        v-if="openedPanel == 1"
-        @colors-modified="changeCardColors"
-        :hue="levelList.levels[index!].color[0]"
-        :saturation="levelList.levels[index!].color[1]"
-        :lightness="levelList.levels[index!].color[2] * 64"
-      />
-      <DifficultyPicker
-        v-if="openedPanel == 2"
-        :selected-rate="levelList.levels[index!].difficulty[1]"
-        :selected-face="levelList.levels[index!].difficulty[0]"
-        @change-face="changeFace"
-        @change-rate="changeRate"
-      />
-      <LevelTags
-        :card-index="index"
-        v-if="openedPanel == 3"
-        @open-popup="emit('openTagPopup')"
-      />
+      <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" :hue="levelList.levels[index!].color[0]"
+        :saturation="levelList.levels[index!].color[1]" :lightness="levelList.levels[index!].color[2] * 64" />
+      <DifficultyPicker v-if="openedPanel == 2" :selected-rate="levelList.levels[index!].difficulty[1]"
+        :selected-face="levelList.levels[index!].difficulty[0]" @change-face="changeFace" @change-rate="changeRate" />
+      <LevelTags :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
     </div>
   </section>
 </template>
 
 <style scoped>
-
 @keyframes appear {
   0% {
     transform: translate(0.5rem) scaleY(0.95);
   }
+
   100% {
     transform: translate(0) scaleY(1);
   }
 }
 
-section {
-  animation: appear 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
-  transform-origin: top;
+@media (prefers-reduced-motion: no-preference) {
+  section {
+    animation: appear 0.1s cubic-bezier(0.215, 0.610, 0.355, 1);
+    transform-origin: top;
+  }
 }
-
 </style>

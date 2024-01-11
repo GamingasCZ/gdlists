@@ -3,5 +3,7 @@
         "src/locales"
     ],
     "i18n-ally.keystyle": "nested",
-    "i18n-ally.extract.autoDetect": true
+    "i18n-ally.extract.autoDetect": true,
+    "window.density.editorTabHeight": "compact",
+    "i18n-ally.sourceLanguage": "cs-CZ"
 }

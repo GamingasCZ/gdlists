@@ -1,29 +1,51 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import chroma from "chroma-js";
+import { onMounted, ref, watch } from "vue";
 
 const props = defineProps<{
-  hue: number;
-  saturation: number;
-  lightness: number;
+  hue?: number;
+  saturation?: number;
+  lightness?: number;
+  hex?: string;
 }>()
 
 const emit = defineEmits(["colorsModified"]);
-const colors = ref([props.hue, props.saturation, props.lightness]);
-watch(props, () => colors.value = [props.hue, props.saturation, props.lightness])
+const colors = ref([props.hue ?? 0, props.saturation ?? 1, props.lightness ?? 0]);
+const colorsHex = ref(props.hex ?? chroma.hsl(props.hue, props.saturation, props.lightness).hex())
+
+const modColors = (ind: number, val: number) => {
+  colors.value[ind] = val
+  colorsHex.value = chroma.hsl(colors.value[0], colors.value[1], colors.value[2]/64).hex()
+  emit('colorsModified', props.hex ? colorsHex.value : colors.value)
+}
+
+onMounted(() => {
+  if (!props.hex) {
+    colors.value = [props.hue, props.saturation, props.lightness]
+    colorsHex.value = chroma.hsl(props.hue, props.saturation, props.lightness).hex()
+  }
+  else {
+    colors.value = chroma(props.hex).hsl()
+    colors.value[2] *= 64
+    colorsHex.value = props.hex
+  }
+}
+)
 </script>
 
 <template>
   <section class="w-full">
     <div>
-      <img src="@/images/rgb.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
+      <p>{{ colorsHex }}</p>
+    <img src="@/images/rgb.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
       <input
         type="range"
         class="w-full colorPickerSlider"
         min="0"
         max="360"
         step="1"
-        v-model.number="colors[0]"
-        @input="emit('colorsModified', colors)"
+        :value="colors[0]"
+        @input="modColors(0, parseInt($event.target?.value))"
       />
     </div>
 
@@ -35,8 +57,8 @@ watch(props, () => colors.value = [props.hue, props.saturation, props.lightness]
         min="0"
         max="32"
         step="1"
-        v-model.number="colors[2]"
-        @input="emit('colorsModified', colors)"
+        :value="colors[2]"
+        @input="modColors(2, parseInt($event.target?.value))"
       />
     </div>
   </section>
