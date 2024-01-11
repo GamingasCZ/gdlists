@@ -229,31 +229,6 @@ const creatorFilledIn = computed(() => {
 const searchAvailableCreator = computed(() => (levelList.value.levels[props.index!].levelName != '' || levelList.value.levels[props.index!].creator != '') && !searching.value)
 const searchAvailableID = computed(() => levelList.value.levels[props.index!].levelID && !searching.value)
 
-axios
-  .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
-  .then(async (response: AxiosResponse) => {
-    let level: LevelSearchResponse = response.data;
-    levelList.value.levels[props.index!].levelID = level.id;
-    levelList.value.levels[props.index!].levelName = level.name;
-
-    if (typeof levelList.value.levels[props.index!].creator == 'string')
-      levelList.value.levels[props.index!].creator = level.author
-    else
-      levelList.value.levels[props.index!].creator[0][0] = level.author
-    levelCreator.value = level.author
-
-    if (level.difficulty == -1) level.difficulty = 11 // Auto levels
-    levelList.value.levels[props.index!].difficulty = [
-      level.difficulty,
-      level.cp,
-    ];
-    diffFacePath.value = await getDiffFace()
-    rateImagePath.value = await getRateImage()
-
-    ytVideoData.value = await videoSearch()
-  });
-}
-
 const isPlatformer = ref(levelList.value.levels[props.index!].platf)
 const switchPlatformer = () => {
   isPlatformer.value = !isPlatformer.value
@@ -386,10 +361,9 @@ const switchPlatformer = () => {
           src="../../images/colorPicker.svg"
           alt=""
         />
-        <div class="flex relative justify-center items-center button">
+        <div class="flex relative justify-center items-center button" @click="openedPanel = openedPanel != 2 ? 2 : 0">
           <img
             class="w-10"
-            @click="openedPanel = openedPanel != 2 ? 2 : 0"
             alt=""
             src="../../images/difficultyBG.svg"
           />

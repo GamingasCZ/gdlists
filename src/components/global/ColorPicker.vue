@@ -36,7 +36,6 @@ onMounted(() => {
 <template>
   <section class="w-full">
     <div>
-      <p>{{ colorsHex }}</p>
     <img src="@/images/rgb.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
       <input
         type="range"

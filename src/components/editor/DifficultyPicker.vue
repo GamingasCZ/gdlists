@@ -41,7 +41,7 @@ getDifficulties()
       </button>
     </div>
     <div
-      class="box-border grid-cols-3 gap-1 justify-between p-2 min-w-max bg-black bg-opacity-20 rounded-md max-sm:flex sm:grid"
+      class="box-border grid-cols-3 gap-1 justify-between rounded-md min-w-ma max-sm:flex sm:grid"
     >
       <button
         type="button"

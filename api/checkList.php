@@ -2,11 +2,11 @@
 
 function checkList($list) {
     // Keys
-    $LIST_KEYS = ["description", "pageBGcolor", "diffGuesser", "titleImg", "translucent", "levels"];
+    $LIST_KEYS = ["description", "pageBGcolor", "diffGuesser", "titleImg", "translucent", "levels", "platf"];
     $LEVEL_KEYS = ["levelName", "creator", "color", "levelID", "video", "difficulty", "tags"];
     
     // Min/Max lenght
-    $ID_LEN = [0, 9];
+    $ID_LEN = [0, 10];
     $NAME_LEN = [1, 21];
     $CREATOR_LEN = [1, 16];
     $VIDEO_LEN = [0, 51];
