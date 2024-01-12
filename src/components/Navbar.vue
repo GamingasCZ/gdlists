@@ -112,7 +112,7 @@ const localStorg = ref(hasLocalStorage())
         }}</RouterLink
       >
       <RouterLink
-        to="/browse"
+        to="/browse/lists"
         @click="modScrollerWidth"
         data-ind="2"
         class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"

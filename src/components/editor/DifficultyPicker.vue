@@ -19,7 +19,6 @@ async function getDifficulties() {
   for (const rating in ratings) {
     rates.value.push(await import(`../../images/faces/${ratings[rating]}.webp`).then(res => res.default))
   }
-  console.log(rates.value)
 }
 getDifficulties()
 </script>

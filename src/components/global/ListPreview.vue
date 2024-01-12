@@ -80,7 +80,7 @@ const unpinList = () => {
 
 <template>
   <RouterLink
-    :to="hidden != '0' ? hidden ?? id.toString() : id.toString()!"
+    :to="hidden != '0' ? hidden ?? `/${id.toString()}` : `/${id.toString()}`!"
     class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),

@@ -59,7 +59,7 @@ const localStorg = ref(hasLocalStorage())
   </div>
 
   <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
-    <form action="./browse" method="get" class="flex gap-2 items-start text-white">
+    <form action="./browse/lists" method="get" class="flex gap-2 items-start text-white">
       <div>
         <input type="text" name="q"
           class="px-1 py-2 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
@@ -106,13 +106,13 @@ const localStorg = ref(hasLocalStorage())
 
   <main id="homepageSections" class="grid" :style="{ gridTemplateColumns: columns }">
     <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
-      :empty-text="$t('homepage.listsUnavailable')" extra-action="/browse" content-type="/getLists.php?homepage=1" />
+      :empty-text="$t('homepage.listsUnavailable')" extra-action="/browse/lists" content-type="/getLists.php?homepage=1" />
 
     <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
       content-type="@pinnedLists" :max-items="5" />
 
     <ListSection v-if="isLoggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
-      extra-icon="more" extra-action="/browse?type=user" :empty-text="$t('homepage.noListsUploaded')"
+      extra-icon="more" extra-action="/browse/lists?type=user" :empty-text="$t('homepage.noListsUploaded')"
       content-type="/getLists.php?homeUser" />
 
     <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash"

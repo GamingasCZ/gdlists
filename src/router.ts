@@ -17,12 +17,12 @@ const router = createRouter({
       component: () => import("@/components/Editor.vue"),
     },
     {
-      path: "/browse",
+      path: "/browse/:type",
       name: "browser",
       props: (route) => ({
         query: route.query.q ?? "",
         onlineType: route.query.type ?? "",
-        browserName: useI18n().t('listViewer.communityLists')
+        browserType: route
       }),
       component: () => import("@/components/CommunityLists.vue"),
     },

@@ -384,6 +384,12 @@ const switchPlatformer = () => {
         </div>
         <img class="w-10 button" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
           alt="" />
+        <img
+          class="w-10 button"
+          @click="openedPanel = openedPanel != 1 ? 1 : 0"
+          src="../../images/reviewPicker.svg"
+          alt=""
+        />
         <img class="ml-4 w-10 button" @click="deleteLevel(props.index!)" src="../../images/deleteLevel.svg" alt="" />
       </div>
     </div>

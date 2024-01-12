@@ -14,6 +14,7 @@ import CollabViewer from "./editor/CollabViewer.vue"
 import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
+import LevelImportPopup from "./editor/LevelImportPopup.vue";
 import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX } from "../Editor";
 import { ref, onMounted, watch } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
@@ -28,6 +29,7 @@ import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
+import parseText from "./global/parseEditorFormatting";
 
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
@@ -136,7 +138,9 @@ const bgColorPickerOpen = ref(false);
 const descriptionEditorOpen = ref(false);
 const favoriteLevelPickerOpen = ref(false);
 const removeListPopupOpen = ref(false);
+const importDialogOpen = ref(false);
 const collabEditorOpen = ref(false);
+const descriptionFocused = ref(false);
 
 const currentlyOpenedCard = ref(0);
 const previewingList = ref(false);
@@ -405,11 +409,10 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     picker-data-type="favoriteLevel"
   />
 
+  <LevelImportPopup @close-popup="importDialogOpen = false" v-if="importDialogOpen" />
+
   <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>
 
-  <h2 class="my-4 text-3xl text-center text-white" v-show="!previewingList">
-    {{ editing ? $t('editor.editing') : $t('editor.editor') }}
-  </h2>
   <NotLoggedIn
     v-if="!isLoggedIn && hasLocalStorage()"
     :mess="$t('editor.loginToCreate')"
@@ -466,80 +469,92 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 
   <!-- Editor -->
   <main
-    class="mx-auto flex w-[70rem] max-w-[95vw] flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-drop"
+    class="mx-auto flex w-[70rem] max-w-[95vw] mt-6 flex-col items-center rounded-md bg-greenGradient pb-3 text-white shadow-drop"
     :class="{'motion-reduce:animate-none animate-[shake_0.2s_infinite]': formShaking}"
     v-show="!previewingList"
     v-if="isLoggedIn && listExists && listBelongsToYou"
   >
     <div
-      class="my-2 grid w-full grid-cols-[max-content_max-content] items-center justify-center gap-y-2 gap-x-3 sm:-mr-10"
+      class="grid grid-cols-2 grid-rows-3 grid-flow-col gap-x-3 place-items-center my-2 mr-3 w-full"
     >
     
       <!-- List name -->
-      <input
-        autocomplete="off"
-        type="text"
-        id="levelName"
-        maxlength="40"
-        :disabled="editing"
-        v-model="listName"
-        :placeholder="$t('editor.levelName')"
-        class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg disabled:bg-opacity-0 disabled:cursor-not-allowed"
-      />
-      <div></div>
-
-      <!-- List description -->
-      <textarea
-        autocomplete="off"
-        type="text"
-        id="description"
-        maxlength="3000"
-        :placeholder="$t('editor.listDescription')"
-        class="h-8 w-[77vw] max-w-[20em] resize-none rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg focus:h-16"
-        v-model="levelList.description"
-      ></textarea>
-      <button type="button">
-        <img
-          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-md button"
-          src="../images/fullscreen.svg"
-          alt=""
-          @click="descriptionEditorOpen = true"
+      <div class="flex gap-2">
+        <input
+          autocomplete="off"
+          type="text"
+          id="levelName"
+          maxlength="40"
+          :disabled="editing"
+          v-model="listName"
+          :placeholder="$t('editor.levelName')"
+          class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg disabled:bg-opacity-0 disabled:cursor-not-allowed"
         />
-      </button>
+        <div class="w-8"></div>
+      </div>
 
       <!-- List Background -->
-      <input
-        autocomplete="off"
-        type="text"
-        maxlength="150"
-        :placeholder="$t('editor.titleImage')"
-        class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
-        v-model="levelList.titleImg[0]"
-      />
-      <button type="button">
-        <img
-          class="p-1.5 w-8 bg-black bg-opacity-50 rounded-md button"
-          src="../images/gear.svg"
-          alt=""
-          @click="BGpickerPopupOpen = true"
+      <div class="flex gap-2">
+        <input
+          autocomplete="off"
+          type="text"
+          maxlength="150"
+          :placeholder="$t('editor.titleImage')"
+          class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
+          v-model="levelList.titleImg[0]"
         />
-      </button>
+        <button type="button">
+          <img
+            class="p-1.5 w-8 bg-black bg-opacity-50 rounded-md button"
+            src="../images/gear.svg"
+            alt=""
+            @click="BGpickerPopupOpen = true"
+          />
+        </button>
+      </div>
 
-    </div>
+      <div class="flex gap-2 items-center my-1 mr-6">
+        <span>{{$t('editor.bgColor')}}</span>
+        <button
+          type="button"
+          class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
+          @click="bgColorPickerOpen = !bgColorPickerOpen"
+          :style="{background: getBGcolor()}"
+        >
+          <img src="../images/color.svg" alt="" class="w-5" />
+        </button>
+        <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click="modifyListBG([0,0,0], true)">
+          <img src="@/images/close.svg" class="w-4" alt="">
+        </button>
+      </div>
 
-    <div class="flex gap-2 items-center my-1">
-      <span>{{$t('editor.bgColor')}}</span>
-      <button
-        type="button"
-        class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
-        @click="bgColorPickerOpen = !bgColorPickerOpen"
-        :style="{background: getBGcolor()}"
-      >
-        <img src="../images/color.svg" alt="" class="w-5" />
-      </button>
-      <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click="modifyListBG([0,0,0], true)">
-        <img src="@/images/close.svg" class="w-4" alt="">
-      </button>
+      <!-- List description -->
+      <div class="flex relative row-span-3 gap-2 items-start w-full h-full group" @click="descriptionFocused = true">
+        <textarea
+          autocomplete="off"
+          type="text"
+          id="description"
+          maxlength="3000"
+          vue:updated="$el.focus()"
+          :placeholder="$t('editor.listDescription')"
+          class="px-2 h-full bg-white bg-opacity-5 rounded-md resize-none grow placeholder:text-lg"
+          v-model="levelList.description"
+          @blur="descriptionFocused = false"
+          v-if="descriptionFocused"
+        ></textarea>
+        <div v-else
+        class="overflow-auto px-2 h-full bg-white bg-opacity-5 rounded-md grow"
+        v-html="parseText(levelList.description)"
+        ></div>
+        <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-black bg-opacity-50 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
+          <img
+            class="w-8"
+            src="../images/fullscreen.svg"
+            alt=""
+          />
+        </button>
+      </div>
+
     </div>
 
     <div
@@ -550,28 +565,35 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     </div>
 
     <header
-      class="sticky -top-8 z-10 flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2"
+      class="sticky -top-8 z-10 flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-3 py-2"
       id="editorHeader"
     >
       <span class="text-2xl font-black">{{ $t('editor.levels') }}</span>
-      <div class="box-border flex gap-3 mt-2" v-if="updatingPositions == -1">
+      <div class="box-border flex mt-2" v-if="updatingPositions == -1">
         <button type="button" @click="previewList(false)" @dblclick="previewList(true)">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
+            class="p-2 w-10 bg-black bg-opacity-40 rounded-md hover:bg-black hover:bg-opacity-60"
             src="../images/preview.svg"
+            alt=""
+          />
+        </button>
+        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s] ml-3" @click="importDialogOpen = true">
+          <img
+            class="p-2 w-10 bg-black bg-opacity-40 rounded-l-md hover:bg-black hover:bg-opacity-60"
+            src="../images/importLevels.svg"
             alt=""
           />
         </button>
         <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s]" @click="favoriteLevelPickerOpen = true">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
+            class="p-2 w-10 bg-black bg-opacity-40 hover:bg-black hover:bg-opacity-60"
             src="../images/addfromFaves.svg"
             alt=""
           />
         </button>
         <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s]" @click="startAddLevel()">
           <img
-            class="p-1.5 w-10 bg-black bg-opacity-50 rounded-md button"
+            class="p-2 w-10 bg-black bg-opacity-40 rounded-r-md hover:bg-black hover:bg-opacity-60"
             src="../images/addLevel.svg"
             alt=""
             id="addLevelButton"
