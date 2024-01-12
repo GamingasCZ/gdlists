@@ -84,19 +84,17 @@ const search = (e: Event) => {
 </script>
 
 <template>
-  <dialog open @click="emit('closePopup')" tabindex="0" @keyup.esc="emit('closePopup')">
-    <section @click.stop=""
-      class="absolute flex flex-col top-1/2 left-1/2 h-[40rem] max-h-[95svh] w-[40rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black">
-      <div class="relative mb-2">
-        <h1 class="text-xl font-bold text-center">{{ $t('other.help') }}</h1>
-        <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
-      </div>
-      <input type="text" :placeholder="$t('other.searchInHelp')"
-        class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-md" @input="search" />
-      <div class="flex overflow-y-auto flex-col gap-2 p-2 mt-2 bg-white bg-opacity-10 rounded-md grow">
-        <HelpBubble v-for="(question, index) in qa" v-bind="question" :filter-show="filteredQuestions[0] == -1 || filteredQuestions.includes(index)
-          " />
-      </div>
-    </section>
-  </dialog>
+  <section @click.stop=""
+    class="absolute flex flex-col top-1/2 left-1/2 h-[40rem] max-h-[95svh] w-[40rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black">
+    <div class="relative mb-2">
+      <h1 class="text-xl font-bold text-center">{{ $t('other.help') }}</h1>
+      <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
+    </div>
+    <input type="text" :placeholder="$t('other.searchInHelp')"
+      class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-md" @input="search" />
+    <div class="flex overflow-y-auto flex-col gap-2 p-2 mt-2 bg-white bg-opacity-10 rounded-md grow">
+      <HelpBubble v-for="(question, index) in qa" v-bind="question" :filter-show="filteredQuestions[0] == -1 || filteredQuestions.includes(index)
+        " />
+    </div>
+  </section>
 </template>

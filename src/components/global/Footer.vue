@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import HelpMenu from "../helpMenu/HelpMenu.vue";
+import Dialog from "./Dialog.vue";
 
 const helpMenuOpen = ref<boolean>(false);
 </script>
 
 <template>
-  <HelpMenu v-if="helpMenuOpen" @close-popup="helpMenuOpen = false" />
+  <Dialog :open="helpMenuOpen" @close-popup="helpMenuOpen = false">
+    <HelpMenu @close-popup="helpMenuOpen = false" />
+  </Dialog>
   <section
     class="flex z-50 justify-center items-center mt-20 w-full h-24 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
   >
