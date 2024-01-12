@@ -6,7 +6,8 @@ export const SETTINGS = ref({
   language: 0,
   homepageColumns: 1,
   autosave: 60,
-  iconQuality: 4
+  iconQuality: 4,
+  dialogClickClose: true
 });
 
 watch(SETTINGS, () => {

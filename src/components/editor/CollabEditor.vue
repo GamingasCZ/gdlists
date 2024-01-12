@@ -5,7 +5,7 @@ import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, w
 import type { CollabData, CollabHumans, SavedCollab } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import SavedCollabVue from './SavedCollab.vue';
-import { hasLocalStorage } from '@/siteSettings';
+import { SETTINGS, hasLocalStorage } from '@/siteSettings';
 import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
 import { useI18n } from 'vue-i18n';
 import { i18n } from '@/locales';
@@ -429,7 +429,7 @@ onUnmounted(() => {
 <template>
   <dialog
     open
-    @click="emit('closePopup')"
+    @click="SETTINGS.dialogClickClose ? emit('closePopup') : ''"
     tabindex="0"
     @keyup.esc="emit('closePopup')"
     class="flex gap-2 justify-center items-center"

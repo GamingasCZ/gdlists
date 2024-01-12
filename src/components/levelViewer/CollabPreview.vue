@@ -80,7 +80,7 @@ const closeHostSocials = (m: Event) => {
       ref="preview"
       @click="emit('openCollab')"
     >
-      <div v-for="person in collab[2]">
+      <div v-for="person in collab[2]" class="flex items-center">
         <PlayerIcon
           :icon="person.verified[0]" :col1="person.verified[1]" :col2="person.verified[2]" :glow="person.verified[3]" :quality="1"
           class="inline-block mr-2 w-8 h-8 align-middle"
@@ -88,7 +88,6 @@ const closeHostSocials = (m: Event) => {
         />
         <span
           class="transition-colors duration-200"
-          :style="{ color: showGDIcons ? person.color : 'white' }"
           >{{ person.name }}</span
         >
       </div>

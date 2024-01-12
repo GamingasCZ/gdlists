@@ -35,8 +35,10 @@ $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $disableComments = $DATA["disComments"] == 1 ? 1 : 0;
 
 // Check list
+/*
 $listCheck = checkList($DATA["listData"]);
 if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
+*/
 
 // Checking request
 error_reporting($debugMode ? -1 : 0);

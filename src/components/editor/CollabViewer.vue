@@ -71,7 +71,7 @@ props.collabData[2].forEach(h => roleCount[h.role] += 1)
       </div>
       <!-- Graphs --> 
       <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]">
-        <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="collabData[1]" v-for="role in collabData[1]" />
+        <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="role in collabData[1]" />
       </div>
 
       <!-- Member header -->

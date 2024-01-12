@@ -27,6 +27,8 @@ import Notification from "./global/Notification.vue";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
+import DialogVue from "./global/Dialog.vue";
+
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
 const props = defineProps<{
@@ -337,7 +339,6 @@ const closeCollabTools = () => {
   if (typeof levelList.value.levels[currentlyOpenedCard.value].creator == "string") return
   (document.querySelector("input[name=creator]") as HTMLInputElement).value = levelList.value.levels[currentlyOpenedCard.value].creator[0][0].name
 }
-const collabDetails = ref([])
 
 const collabData = ref({
   levelName: "",
@@ -438,7 +439,6 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
         @open-collab="openCollabTools(ind, level.color)"
       />
     </div>
-    {{ collabDetails }}
     <CollabViewer :editor="true" v-if="collabData.collabData != null" v-bind="collabData" :translucent="levelList?.translucent!" @close-popup="collabData.collabData = null" />
   </section>
 

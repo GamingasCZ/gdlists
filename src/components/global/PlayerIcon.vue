@@ -11,6 +11,7 @@ const props = defineProps<{
     col2: string
     glow: string
     quality: number
+    iconDisabled?: boolean
 }>()
 
 let quality = SETTINGS.value.iconQuality < 0 ? 4 : props.quality*SETTINGS.value.iconQuality
@@ -101,6 +102,6 @@ function drawOnVisibleCanvas() {
 </script>
 
 <template>
-    <canvas :width="128/quality" :height="128/quality" ref="canvas" v-if="SETTINGS.iconQuality != -2"></canvas>
+    <canvas v-if="SETTINGS.iconQuality != -2 && !iconDisabled" :width="128/quality" :height="128/quality" ref="canvas"></canvas>
     <div class="min-w-[8px] min-h-[8px] rounded-md" :style="{backgroundColor: `rgb(${colors[col1].join(', ')})`}" v-else></div>
 </template>

@@ -23,7 +23,8 @@
     "noColor": "Bez barev",
     "qLow": "Nízká",
     "qMed": "Výchozí",
-    "qHigh": "Vysoká"
+    "qHigh": "Vysoká",
+    "clickClose": "Zavírání dialogů kliknutím mimo"
   },
   "homepage": {
     "searchLists": "Hledat seznamy...",

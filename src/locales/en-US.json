@@ -263,7 +263,8 @@
     "noGenerate": "Disabled",
     "qHigh": "High",
     "qLow": "Low",
-    "qMed": "Default"
+    "qMed": "Default",
+    "clickClose": "Clicking outside a dialog closes it"
   },
   "help": {
     "Lists": "Lists",

@@ -97,5 +97,11 @@ const screenWidth = ref(window.innerWidth)
         <option :value="2">{{ $t('settingsMenu.qHigh') }}</option>
       </select>
     </section>
+    <section
+      class="flex flex-col gap-1 justify-center items-center py-2 w-36 text-center bg-black bg-opacity-50 rounded-md"
+    >
+      {{ $t('settingsMenu.clickClose') }}
+      <input type="checkbox" class="button" v-model="SETTINGS.dialogClickClose">
+    </section>
   </div>
 </template>

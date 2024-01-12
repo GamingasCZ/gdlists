@@ -17,6 +17,7 @@ const humColor = (col: string | [number, number, number]) => {
 }
 
 const hovering = inject<CollabHumans | null>("collabHovering")!
+
 let roles = props.humans.filter(h => h.role == props.allRoles.indexOf(props.roleName))
 
 </script>

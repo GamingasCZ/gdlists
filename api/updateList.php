@@ -24,8 +24,10 @@ if ($mysqli -> connect_errno) {
 $DATA = json_decode(file_get_contents("php://input"), true);
 
 // Check list
+/*
 $listCheck = checkList($DATA["listData"]);
 if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
+*/
 
 $fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"]));
 
