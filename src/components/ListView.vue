@@ -378,7 +378,9 @@ provide("saveCollab", saveCollab)
         <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />
       </Teleport>
 
-      <CollabViewer v-if="collabData.collabData != null" v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
+      <DialogVue :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
+        <CollabViewer v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
+      </DialogVue>
 
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
