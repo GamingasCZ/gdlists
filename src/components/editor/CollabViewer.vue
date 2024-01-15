@@ -47,7 +47,7 @@ props.collabData[2].forEach(h => roleCount[h.role] += 1)
     class=" w-[70rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-1 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[50rem]"
   >
     <div class="flex relative justify-between items-center mx-1.5 mt-0.5 mb-1 -translate-y-0.5">
-      <button v-if="!editor" class="flex gap-3 px-2 py-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-30" @click="collabSaved = !collabSaved; saveCollab(index)" :disabled="!hasLStorage">
+      <button v-if="!editor && levelID != -1 && collabData[3]" class="flex gap-3 px-2 py-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-30" @click="collabSaved = !collabSaved; saveCollab(index)" :disabled="!hasLStorage">
         <img v-if="!collabSaved" src="@/images/savedMobHeader.svg" class="w-6" alt="">
         <img v-else src="@/images/trash.svg" class="w-6" alt="">
         <span class="max-sm:hidden">{{ collabSaved ? $t('collabTools.removeSaved') : $t('other.save') }}</span>
@@ -64,7 +64,7 @@ props.collabData[2].forEach(h => roleCount[h.role] += 1)
     </div>
     <!-- Graphs --> 
     <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]">
-      <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="role in collabData[1]" />
+      <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="(role, ind) in collabData[1].filter(x => !collabData?.[4]?.[collabData[1].findIndex(x)])" />
     </div>
 
     <!-- Member header -->

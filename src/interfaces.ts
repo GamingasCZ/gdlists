@@ -73,19 +73,37 @@ export interface SavedCollab {
   collabID: number;
   timestamp: number;
   levelID: number | "-1";
+  listID?: number;
 }
 
+/**
+ * Collab object. While making a list, this object replaces the creator parameter in {Level}, when you make a new collab in the collab editor.
+ *
+ * @host Collab host
+ * @roles Array of {CollabRoles}
+ * @members Array of {CollabHumans}. These are all the members of the collab
+ * @signature Used to distinguish new collabs from old collabs. Old collabs lack this parameter.
+ * @hiddenRoles Array of role indicies that will be hidden 
+ */
 export interface CollabData {
-  0: CollabHumans
+  0: [CollabHumans]
   1: string[];
   2: CollabHumans[];
   3: number;
+  4: number[];
 }
 
+/**
+ * UNUSED! A role in a collab. All roles are stored within index 1 of {CollabData}.
+ * 
+ * @name Name of the role
+ * @id Identifier
+ */
 export interface CollabRoles {
   name: string;
   id: number;
 }
+
 
 export interface CollabHumans {
   name: string;

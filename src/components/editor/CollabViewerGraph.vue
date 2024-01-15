@@ -38,9 +38,21 @@ let roles = props.humans.filter(h => h.role == props.allRoles.indexOf(props.role
         <div class="flex gap-2 items-center mt-1 w-full">
             <span class="text-xs">0%</span>
             <div class="flex relative h-6 overflow-clip bg-black bg-opacity-40 rounded-md grow">
-                <div @mouseenter="hovering = human" @mouseleave="hovering = null" class="absolute h-full transition-opacity" :class="{'opacity-30': hovering != null && human != hovering}" :style="{width: `${human.part[1] - human.part[0]}%`, background: humColor(human.color), left: `${human.part[0]}%`}" v-for="(human, ind) in roles"></div>
+                <div
+                    @mouseenter="hovering = human"
+                    @mouseleave="hovering = null"
+                    class="absolute h-full transition-opacity"
+                    :class="{'opacity-20': hovering != null && human != hovering, 'selected': human == hovering}"
+                    :style="{width: `${human.part[1] - human.part[0]}%`, background: humColor(human.color), left: `${human.part[0]}%`, color: humColor(human.color)}"
+                    v-for="(human, ind) in roles"></div>
             </div>
             <span class="text-xs">100%</span>
         </div>
     </section>
 </template>
+
+<style scoped>
+    .selected {
+        box-shadow: 0 0 20px, 0 0 10px rgba(255, 255, 255, 0.444) inset;
+    }
+</style>

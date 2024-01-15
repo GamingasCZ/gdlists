@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { makeColorFromString, parseElapsed } from "@/Editor";
 import type { ListCreatorInfo, ListPreview } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
@@ -20,32 +21,10 @@ const props = defineProps<{
   userArray: ListCreatorInfo[];
 }>();
 
-const makeColor = () =>
-  chroma(
-    Math.floor(
-      16777215 *
-        Math.sin(
-          props.name
-            ?.split("")
-            .map((p: string) => p.charCodeAt(0))
-            .reduce((x, y) => x + y)! % Math.PI
-        )
-    )
-  );
 
-const listColor = ref<Color>(makeColor());
+const listColor = ref<Color>(makeColorFromString(props.name));
 
 const emit = defineEmits(['unpinList'])
-
-function parseElapsed(secs: number) {
-  if (secs < 60) return Math.round(secs) + "s"; //s - seconds
-  else if (secs < 3600) return Math.round(secs / 60) + "m"; //m - minutes
-  else if (secs < 86400) return Math.round(secs / 3600) + "h"; //h - hours
-  else if (secs < 604800) return Math.round(secs / 86400) + "d"; //d - days
-  else if (secs < 1892160000)
-    return Math.round(secs / 604800) + "w"; //w - weeks
-  else return Math.round(secs / 1892160000) + "y"; //y - years
-}
 
 function getUsername() {
   let listCreator: string = "";
@@ -76,12 +55,13 @@ const unpinList = () => {
   localStorage.setItem("pinnedLists", JSON.stringify(pinned))
   emit('unpinList', removedIndex)
 }
+
 </script>
 
 <template>
   <RouterLink
     :to="hidden != '0' ? hidden ?? id.toString() : id.toString()!"
-    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 relative rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),

@@ -85,7 +85,17 @@
     "collabText": "{0} + {1} more",
     "videoSearch": "Video search",
     "diffGuessHelp": "If Difficulty Guessing is turned on, the list will gradually unlock as you guess difficulties, ratings, or both.\n*In the List Browser, these lists have question marks in the background.\n*If coming from Saved Levels, guessing will not be triggered.\n*You can use the arrow keys to play.",
-    "collabNoPhones": "The Collab editor is not available on mobile devices!"
+    "collabNoPhones": "The Collab editor is not available on mobile devices!",
+    "levelColorTitle": "Level color",
+    "diffTitle": "Level difficulty",
+    "labelsTitle": "Level tags",
+    "removeTitle": "Remove level",
+    "openVideoTitle": "Open video in new tab",
+    "collabTitle": "Open collab tools",
+    "searchTitle": "Search for level",
+    "switchTypeTitle": "Switch level type",
+    "moveUpTitle": "Move level up",
+    "moveDownTitle": "Move level down"
   },
   "homepage": {
     "clear": "Clear",
@@ -242,7 +252,9 @@
     "use": "Use",
     "delete": "Delete",
     "comingSoon": "Coming Soon! :D",
-    "links": "Links"
+    "links": "Links",
+    "cancel": "Cancel",
+    "accept": "Save"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -336,6 +348,18 @@
     "noSaved": "You haven't saved any collabs yet!",
     "noSavedSub": "You can save them in the collab editor or in lists.",
     "startBuilding": "Start building",
-    "removeSaved": "Remove"
+    "removeSaved": "Remove",
+    "addSocialTitle": "Add social network",
+    "findTItle": "Find member by GD username",
+    "copyMemberTItle": "Copy member",
+    "removeMemberTitle": "Remove member",
+    "changeRoleTitle": "Change role",
+    "hideTitle": "Hide role graph",
+    "removeRoleTitle": "Remove role",
+    "presetsTitle": "Role presets",
+    "pickSocialTitle": "Pick social network",
+    "addMemberTitle": "Add a Member",
+    "sortTitle": "Sort members",
+    "pasteMemberTitle": "Paste member"
   }
 }

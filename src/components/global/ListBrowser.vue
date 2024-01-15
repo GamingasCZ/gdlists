@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import type { ListCreatorInfo, ListPreview } from "@/interfaces";
-import CommentPreview from "@/components/levelViewer/CommentPreview.vue";
-import ListPrevElement from "@/components/global/ListPreview.vue";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
-import FavoritePreview from "./FavoritePreview.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
@@ -23,7 +20,8 @@ const props = defineProps({
   isLoggedIn: Boolean,
   hideSearch: {type: Boolean, default: false},
   commentID: {type: String, default: 0},
-  refreshButton: {type: Boolean, default: false}
+  refreshButton: {type: Boolean, default: false},
+  component: {type: Object, required: true}
 });
 
 // Page title
@@ -107,22 +105,23 @@ function doSearch() {
 }
 
 function refreshBrowser() {
-  if (!props.onlineBrowser && props.onlineType == "") {
-    let hasSearch = [favoriteLevels, filtered][filtered != undefined | 0]
+  if (!props.onlineBrowser) {
+    let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][filtered != undefined | 0]
+    let ind = props.onlineType == "collabs" | 0
     if (usingPagesScrolling.value) {
-      LISTS.value = hasSearch.slice(
+      LISTS.value = hasSearch[ind].slice(
         LISTS_ON_PAGE * PAGE.value!,
         LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
       );
     }
     else {
-      hasSearch.slice(
+      hasSearch[ind].slice(
         LISTS_ON_PAGE * PAGE.value!,
         LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
         ).forEach((x: ListPreview) => LISTS.value!.push(x))
       infiniteListsLoading = false
     }
-    maxPages.value = Math.ceil(hasSearch.length / LISTS_ON_PAGE);
+    maxPages.value = Math.ceil(hasSearch[ind].length / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
     return;
   }
@@ -225,8 +224,11 @@ const removeFavoriteLevel = (levelID: string) => {
 };
 
 let favoriteLevels: any;
-if (!props.onlineBrowser)
+let favoriteCollabs: any;
+if (!props.onlineBrowser) {
   favoriteLevels = JSON.parse(localStorage.getItem("favorites")!);
+  favoriteCollabs = JSON.parse(localStorage.getItem("savedCollabs")!);
+}
 
 onMounted(() => {
   if (!props.onlineBrowser && props.onlineType == '') { // saved level not collabs TODO: add collabs
@@ -238,7 +240,14 @@ onMounted(() => {
     maxPages.value = Math.ceil(favoriteLevels.length! / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
   }
-  else if (props.onlineType == "collabs") LISTS.value = []
+  else if (props.onlineType == "collabs") {
+    LISTS.value = favoriteCollabs.slice(
+      LISTS_ON_PAGE * PAGE.value!,
+      LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
+    );
+    maxPages.value = Math.ceil(favoriteCollabs.length! / LISTS_ON_PAGE);
+    pagesArray.value = listScroll();
+  }
   refreshBrowser();
 });
 
@@ -488,10 +497,12 @@ window.addEventListener("scroll", infiniteScroll)
 
         <!-- Previews -->
         <component
-          :is="onlineType == 'comments' ? CommentPreview : (onlineBrowser ? ListPrevElement : FavoritePreview)"
+          :is="component"
           class="min-w-full listPreviews"
           v-for="(list, index) in LISTS"
           v-bind="list"
+          :in-use="false" :on-saves-page="true" :coll-index="index*PAGE"
+          :save="list"
           :user-array="USERS"
           :index="index"
           :is-pinned="false"

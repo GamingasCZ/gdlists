@@ -72,22 +72,29 @@ Roles
 =======
 */
 
-const rolePresets = ref([useI18n().t('collabTools.verifier'), useI18n().t('collabTools.layout'), useI18n().t('collabTools.deco'), useI18n().t('collabTools.testing'), useI18n().t('collabTools.optimization')])
+const rolePresets = ref([
+  [useI18n().t('collabTools.verifier'), 1],
+  [useI18n().t('collabTools.layout'), 0],
+  [useI18n().t('collabTools.deco'), 0],
+  [useI18n().t('collabTools.testing'), 1],
+  [useI18n().t('collabTools.optimization'), 1]
+])
 const roleColors = ref<string[]>([])
 const roleSidebarOpen = ref(false)
 
 function createCollab() {
-  addRole("Host")
+  addRole(["Host", 1])
   roleSidebarOpen.value = true
 }
 
-function addRole(preset: string = "") {
+function addRole(preset: [string, number] = ["", 0]) {
   if (typeof collab.value == 'string') {
     collab.value = creatorToCollab(collab.value)
     levelList.value.levels[props.index!].creator = collab.value
   }
-  if (!collab.value[1].includes(preset)) {
-    collab.value?.[1].push(preset)
+  if (!collab.value[1].includes(preset[0])) {
+    collab.value?.[1].push(preset[0])
+    collab.value?.[4].push(preset[1]) // Add to hidden roles
     makeRoleColors()
   }
 }
@@ -95,6 +102,7 @@ function addRole(preset: string = "") {
 var lastPickedRole = -1
 function pickRole(creatorPos: number, rolePos: number) {
   if (typeof collab.value == "string") return
+  
 
   lastPickedRole = rolePos
   collab.value[creatorPos == 999 ? 0 : 2][creatorPos == 999 ? 0 : creatorPos].role = rolePos
@@ -139,6 +147,11 @@ function openSidebar(which:number) {
     savedSidebarOpen.value = !savedSidebarOpen.value
     roleSidebarOpen.value = false
   }
+}
+
+const invisibleRole = (pos: number) => {
+  if (!collab.value?.[4]) collab.value.push([]);
+  collab.value[4][pos] = !collab.value[4][pos]
 }
 
 /*
@@ -479,6 +492,7 @@ onUnmounted(() => {
                 class="box-border p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button"
                 :class="{'disabled': !clipboardContent || !collab?.[2] || collab[2].length >= 100}"
                 :disabled="!clipboardContent || !collab?.[2] || collab[2].length >= 100"
+                :title="$t('collabTools.pasteMemberTitle')"
                 @click="pasteMember"
               >
                   <img src="@/images/paste.svg" alt="">
@@ -487,6 +501,7 @@ onUnmounted(() => {
                 <button
                   class="box-border z-10 p-1.5 mr-2 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current"
                   v-if="(typeof collab != 'string')"
+                  :title="$t('collabTools.sortTitle')"
                   @click="openSortDropdown()"
                 >
                     <img src="@/images/sort.svg" alt="">
@@ -499,7 +514,7 @@ onUnmounted(() => {
                   </div>
                 </Transition>
               </div>
-              <button class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current" v-if="(typeof collab != 'string')"
+              <button :title="$t('collabTools.addMemberTitle')" class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current" v-if="(typeof collab != 'string')"
                 @click="addMember()"
                 id="addCollabMember"
                 :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
@@ -517,7 +532,7 @@ onUnmounted(() => {
               @submit.prevent="confirmSocial"  
             >
                 <div class="box-border flex relative items-center p-1 w-[30rem] max-w-[70vw] bg-black bg-opacity-40 rounded-md">
-                  <button type="button" @click="openSocialDropdown" class="pr-1 align-middle bg-white bg-opacity-10 rounded-md button">
+                  <button :title="$t('collabTools.pickSocialTitle')" type="button" @click="openSocialDropdown" class="pr-1 align-middle bg-white bg-opacity-10 rounded-md button">
                     <img :src="socialMediaImages[socialMedia[socialPicker.socialIndex].icon]" class="absolute left-2 top-1/2 mx-auto w-4 opacity-40 -translate-y-1/2" alt="">
                     <label for="socInputBox" class="ml-7 text-xs opacity-40 pointer-events-none max-sm:hidden">{{ socialMedia[socialPicker.socialIndex].baseUrl }}</label>
                   </button>
@@ -530,6 +545,7 @@ onUnmounted(() => {
                       type="button"
                       class="flex justify-center items-center w-10 h-5 rounded-sm button" 
                       :style="{backgroundColor: website.color}"
+                      :title="website.name"
                       v-for="website in socialMedia.filter(web => !socialPicker.usedSocials.includes(web.index))"
                       @click="socialPicker.socialIndex = website.index"
                     >
@@ -540,9 +556,9 @@ onUnmounted(() => {
                 </div>
                 
 
-              <button type="submit" :disabled="socialPickerURL.length < 5" class="p-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-50"><img src="@/images/checkThick.svg" class="w-6" alt=""></button>
-              <button v-if="socialPicker.editing == -1" type="button" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="socialPicker.open = false"><img src="@/images/close.svg" class="w-6" alt=""></button>
-              <button v-else type="button" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="removeSocial(socialPicker.creatorIndex, socialPicker.socialIndex)"><img src="@/images/trash.svg" class="w-6" alt=""></button>
+              <button :title="$t('other.accept')" type="submit" :disabled="socialPickerURL.length < 5" class="p-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-50"><img src="@/images/checkThick.svg" class="w-6" alt=""></button>
+              <button :title="$t('other.cancel')" v-if="socialPicker.editing == -1" type="button" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="socialPicker.open = false"><img src="@/images/close.svg" class="w-6" alt=""></button>
+              <button :title="$t('editor.remove')" v-else type="button" class="p-1 bg-black bg-opacity-40 rounded-md button" @click="removeSocial(socialPicker.creatorIndex, socialPicker.socialIndex)"><img src="@/images/trash.svg" class="w-6" alt=""></button>
 
             </form>
           </Transition>
@@ -613,7 +629,7 @@ onUnmounted(() => {
 
     <!-- Role header -->
     <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
-      <button @click="roleSidebarOpen = false" class="button">
+      <button :title="$t('collabTools.hideSidebarTitle')" @click="roleSidebarOpen = false" class="button">
         <img
           src="@/images/hideSidebar.svg"
           alt=""
@@ -622,7 +638,7 @@ onUnmounted(() => {
       </button>
       <h1 class="text-xl font-black text-center">{{ $t('collabTools.roles') }}</h1>
       <div class="flex gap-1">
-        <button class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="rolePresets.filter(x => !collab[1].includes(x)).length == 0" @click="openPresetsDropdown()">
+        <button :title="$t('collabTools.presetsTitle')" class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40" :disabled="rolePresets.filter(x => !collab[1].includes(x)).length == 0" @click="openPresetsDropdown()">
           <img
             src="@/images/moveDown.svg"
             alt=""
@@ -639,11 +655,11 @@ onUnmounted(() => {
           <img src="@/images/popupArr.svg" class="absolute right-1.5 -top-5 w-5 opacity-90" alt="">
           <p class="text-lg font-bold">{{ $t('collabTools.examples') }}</p>
           <button
-            v-for="preset in rolePresets.filter(x => !collab[1].includes(x))"
+            v-for="preset in rolePresets.filter(x => !collab[1].includes(x[0]))"
             @click="addRole(preset)"
             class="w-full text-white bg-white bg-opacity-10 rounded-md button"
           >
-            {{ preset }}
+            {{ preset[0] }}
           </button>
         </article>
       </Transition>
@@ -652,7 +668,8 @@ onUnmounted(() => {
       <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]" class="flex p-1 h-9 text-white rounded-md transition-colors roleBubble items-middle shadow-drop focus-visible:!outline focus-visible:!outline-current" :style="{backgroundColor: roleColors[pos]}" :class="{'button': pickingRole > -1}">
         <input :disabled="pickingRole > -1" :class="{'pointer-events-none': pickingRole > -1}" type="text" v-model="levelList.levels[index].creator[1][pos]" :placeholder="$t('collabTools.roleName')" class="px-1 mr-2 h-full bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
         <div class="flex gap-1">
-          <button :disabled="pickingRole > -1 || collab[1].length == 1" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button" @click="(collab as CollabData)[1].splice(pos, 1); makeRoleColors()"><img src="@/images/trash.svg" alt=""></button>
+          <button :title="$t('collabTools.hideTitle')" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button" @click="invisibleRole(pos)"><img src="@/images/view.svg" :class="{'opacity-20': collab?.[4]?.[pos]}" alt=""></button>
+          <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1 || collab[1].length == 1" class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm group button" @click="(collab as CollabData)[1].splice(pos, 1); (collab as CollabData)[4].splice(pos, 1); makeRoleColors()"><img class="group-disabled:opacity-20" src="@/images/trash.svg" alt=""></button>
         </div>
       </button>
 
@@ -733,7 +750,7 @@ onUnmounted(() => {
           <h2 class="text-xl">{{ $t('collabTools.beingEdited') }}</h2>
           <hr class="h-1 bg-white border-none grow">
         </header>
-        <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
+        <SavedCollabVue :on-saves-page="false" :save="savedCollabs![currentlyUsedSaved]" :coll-index="currentlyUsedSaved" :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
       </div>
 
       <!-- Same ID -->
@@ -761,6 +778,7 @@ onUnmounted(() => {
             :save="save"
             :collIndex="index"
             :in-use="currentlyUsedSaved == index"
+            :on-saves-page="false"
             @do-save="saveAllCollabs"
             @load-collab="loadCollab"
             @remove-collab="removeCollab"

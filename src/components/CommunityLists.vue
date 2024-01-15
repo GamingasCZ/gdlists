@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
 import router from "@/router";
+import ListPreview from "./global/ListPreview.vue";
 
 const props = defineProps<{
   query: string
@@ -14,6 +15,7 @@ const browser = ref<"" | "user" | "hidden">(props.onlineType);
 <template>
   <ListBrowser
     online-browser
+    :component="ListPreview"
     :search="query"
     :online-type="browser"
     @switch-browser="browser = $event"

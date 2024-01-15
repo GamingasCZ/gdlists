@@ -6,6 +6,8 @@ import type {
   ListPreview,
   Level,
 SavedCollab,
+CollabHumans,
+CollabData,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -280,14 +282,17 @@ const saveCollab = (ind: number) => {
     currSaved.splice(remInd, 1)
   }
   else { // Nesmazat collab, naopak přidat hihi :D
+    let c: CollabData = LIST_DATA.value?.data.levels[ind].creator
     let collab: SavedCollab = {
-      collabHost: LIST_DATA.value?.data.levels[ind].creator[0].name,
+      collabHost: c[0].name,
       levelID: LIST_DATA.value?.data.levels[ind].levelID,
       collabID: Math.floor(Math.random() * 1000000),
       collabName: LIST_DATA.value?.data.levels[ind].levelName,
-      data: LIST_DATA.value?.data.levels[ind].creator,
-      memberCount: LIST_DATA.value?.data.levels[ind].creator[2].length,
-      timestamp: Date.now()
+      data: c,
+      memberCount: c[2].length,
+      timestamp: Date.now(),
+      collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
+      listID: PRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)
