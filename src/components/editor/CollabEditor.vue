@@ -443,7 +443,7 @@ onUnmounted(() => {
 
 <template>
   <section @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
-    class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[40rem]"
+    class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[max-content_max-content_max-content_1fr] text-white shadow-lg shadow-black h-[40rem]"
     :class="{ 'max-lg:hidden': roleSidebarOpen || savedSidebarOpen }">
     <div class="flex relative justify-between items-center py-1 mx-2 -translate-y-0.5">
       <div></div>
@@ -471,6 +471,7 @@ onUnmounted(() => {
         <span class="ml-2 max-sm:hidden">{{ $t('navbar.saved') }}</span>
       </button>
     </section>
+    <div v-else></div>
 
     <header class="flex relative justify-between items-center bg-[url(@/images/headerBG.webp)] bg-center p-2">
       <h2 class="text-2xl font-black">{{ $t('collabTools.members') }}</h2>
@@ -607,7 +608,7 @@ onUnmounted(() => {
   </section>
 
   <aside @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
-    class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
+    class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black max-sm:w-full"
     v-show="roleSidebarOpen || pickingRole > -1" v-if="(typeof collab != 'string')">
 
     <!-- Role header -->
@@ -699,7 +700,7 @@ onUnmounted(() => {
     </section>
   </aside>
   <aside @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
-    class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black" v-show="savedSidebarOpen">
+    class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black max-sm:w-full" v-show="savedSidebarOpen">
 
     <!-- Saved collabs header -->
     <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
