@@ -236,10 +236,10 @@ onErrorCaptured(() => {
 
       <!-- Card links -->
       <div class="flex gap-1.5 max-sm:my-2 sm:mr-10" v-if="!guessingNow">
-        <a class="button" :href="`https://youtu.be/${video}`"
+        <a class="button" v-if="video" :href="`https://youtu.be/${video}`"
           ><img class="w-14 max-sm:w-10" src="@/images/modYT.svg" alt=""
         /></a>
-        <a class="button" :href="`https://gdbrowser.com/${levelID}`" target="_blank"
+        <a class="button" v-if="levelID" :href="`https://gdbrowser.com/${levelID}`" target="_blank"
           ><img class="w-14 max-sm:w-10" src="@/images/modGDB.svg" alt=""
         /></a>
         <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID">
