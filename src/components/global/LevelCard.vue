@@ -51,12 +51,16 @@ const doFavoriteLevel = () => {
   } else {
     favesIDs.push(props.levelID!);
 
+    
     let isCollab = typeof props.creator == "object";
+    let levelCreator
+    if (isCollab) levelCreator = props.creator?.[3] ? props.creator[0][0].name : props.creator[0][0]
+    else levelCreator = props.creator
 
     // TODO: add proper list name (list name may not always be sex)
     faves.push({
       levelName: props.levelName,
-      creator: isCollab ? props.creator[0][0] : (props.creator as string),
+      creator: levelCreator,
       levelColor: CARD_COL.value?.hex(),
       levelID: props.levelID!,
       levelDiff: props.difficulty,
@@ -232,10 +236,10 @@ onErrorCaptured(() => {
 
       <!-- Card links -->
       <div class="flex gap-1.5 max-sm:my-2 sm:mr-10" v-if="!guessingNow">
-        <a class="button" :href="`https://youtu.be/${video}`"
+        <a class="button" v-if="video" :href="`https://youtu.be/${video}`"
           ><img class="w-14 max-sm:w-10" src="@/images/modYT.svg" alt=""
         /></a>
-        <a class="button" :href="`https://gdbrowser.com/${levelID}`" target="_blank"
+        <a class="button" v-if="levelID" :href="`https://gdbrowser.com/${levelID}`" target="_blank"
           ><img class="w-14 max-sm:w-10" src="@/images/modGDB.svg" alt=""
         /></a>
         <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID">

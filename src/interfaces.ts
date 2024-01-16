@@ -37,7 +37,7 @@ export interface CommentFetchResponse {
 
 export interface LikeFetchResponse {
   result: 'deleted' | 'added'
-  ratings: [0|1, 0|1, number]
+  ratings: [0 | 1, 0 | 1, number]
 }
 
 export interface ListUpdateFetch {
@@ -46,7 +46,7 @@ export interface ListUpdateFetch {
   data: LevelList
   id: number
   timestamp: string
-  hidden: '0'|'1'
+  hidden: '0' | '1'
   uid: string
   rate_ratio: number
   views: number
@@ -65,6 +65,18 @@ export interface FavoritedLevel {
   timeAdded: number;
 }
 
+/**
+ * Saved collab. This object gets saved into localStorage while in the collab editor and clicking "Save", or when in the Collab Viewer inside a list and clicking save. It's visually shown in Saved, or in the saves section in Collab tools.
+ *
+ * @param object The entire collab object.
+ * @param string Name of the level from {levelList}.
+ * @param string Name of the collab host, taken from {CollabData[0].name}.
+ * @param number Amount of members in a collab. It's the length of {CollabData[2]}.
+ * @param number Identificator. A random number to allow multiple collabs with the same level to be saved.
+ * @param timestamp Time when the collab was saved.
+ * @param string Level ID of the level where the collab was saved. Used for auto-fetching local collabs when searching for a level.
+ * @param array The URL of the list (only the list ID) and the position of the level inside the list.
+ */
 export interface SavedCollab {
   data: CollabData;
   collabName: string;
@@ -73,19 +85,37 @@ export interface SavedCollab {
   collabID: number;
   timestamp: number;
   levelID: number | "-1";
+  listID?: [string, number];
 }
 
+/**
+ * Collab object. While making a list, this object replaces the creator parameter in {Level}, when you make a new collab in the collab editor.
+ *
+ * @param array Collab host
+ * @param array Array of {CollabRoles}
+ * @param array Array of {CollabHumans}. These are all the members of the collab
+ * @param number Used to distinguish new collabs from old collabs. Old collabs lack this parameter.
+ * @param array Array of role indicies that will be hidden 
+ */
 export interface CollabData {
-  0: CollabHumans
+  0: [CollabHumans]
   1: string[];
   2: CollabHumans[];
   3: number;
+  4: boolean[];
 }
 
+/**
+ * UNUSED! A role in a collab. All roles are stored within index 1 of {CollabData}.
+ * 
+ * @param string Name of the role
+ * @param number Identifier
+ */
 export interface CollabRoles {
   name: string;
   id: number;
 }
+
 
 export interface CollabHumans {
   name: string;
@@ -115,7 +145,7 @@ export interface ListCreatorInfo {
 export interface LevelBackup {
   listName: string
   levelData: LevelList
-  listHidden: '0'|'1'
+  listHidden: '0' | '1'
   listDate: number
 }
 

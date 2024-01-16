@@ -7,6 +7,7 @@ import type { CollabHumans, CollabViewerRow } from "@/interfaces";
 
 interface extras {
     index: number;
+    hiddenRole: boolean;
 }
 
 const props = defineProps<CollabViewerRow & extras>()
@@ -43,7 +44,7 @@ const isDiscordServer = computed(() => {
 </script>
 
 <template>
-<section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] w-full transition-opacity" :class="{'opacity-50': hovering != null && hovering != human}" @mouseenter="hovering = human" @mouseleave="hovering = null">
+<section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] w-full transition-opacity" :class="{'opacity-50': hovering != null && hovering != human}" @mouseenter="hiddenRole || (hovering = human)" @mouseleave="hovering = null">
     <div class="grid grid-cols-[0.5fr_0.75fr_0.5fr_1fr] gap-2 items-center">
         <div class="flex gap-2 items-center">
             <PlayerIcon
@@ -53,7 +54,7 @@ const isDiscordServer = computed(() => {
         />
             <img v-else :src="emoji" alt="" class="w-10 h-10">
             <div>
-                <h5 class="w-max text-xs leading-none opacity-40">{{ roleName }}</h5>
+                <h5 class="w-max text-xs leading-none" :class="{'opacity-40': !hiddenRole, 'font-bold': hiddenRole}">{{ roleName }}</h5>
                 <h2 class="w-max text-lg font-extrabold leading-none">{{ human.name }}</h2>
             </div>
         </div>

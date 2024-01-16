@@ -7,6 +7,7 @@ import type { CollabHumans, CollabViewerRow } from "@/interfaces";
 
 interface extras {
     index: number;
+    hiddenRole: boolean;
 }
 
 const props = defineProps<CollabViewerRow & extras>()
@@ -43,23 +44,23 @@ const isDiscordServer = computed(() => {
 </script>
 
 <template>
-<section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] max-w-[12rem] grow transition-opacity" :class="{'opacity-50': hovering != null && hovering != human}" @mouseenter="hovering = human" @mouseleave="hovering = null">
-    <div class="flex gap-3 justify-center items-center">
+<section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] max-w-[12rem] grow transition-opacity" :class="{'opacity-50': hovering != null && hovering != human}" @mouseenter="hiddenRole || (hovering = human)" @mouseleave="hovering = null">
+    <div class="flex relative gap-3 justify-center items-center">
         <PlayerIcon
             v-if="human.verified?.[1]"
             :icon="human.verified[0]" :col1="human.verified[1].toString()" :col2="human.verified[2].toString()" :glow="human.verified[3] | 0" :quality="1"
-            class="w-10 h-10"
+            class="z-10 w-10 h-10"
         />
         <img v-else :src="emoji" alt="" class="w-10 h-10">
         <div class="text-sm leading-tight text-center" v-if="human.part[0] >= 0">{{ human.part[0] }}-{{ human.part[1] }}%</div>
     </div>
     
     <div class="m-1 mt-3 text-center">
-        <h5 class="w-max text-xs leading-none opacity-40">{{ roleName }}</h5>
+        <h5 class="w-max text-xs leading-none" :class="{'opacity-40': !hiddenRole, 'font-bold': hiddenRole}">{{ roleName }}</h5>
         <h2 class="w-max text-lg font-extrabold leading-none">{{ human.name }}</h2>
         <span class="flex gap-1 items-center w-max" v-if="!isDiscordServer && dcIndex != -1">
-                <img class="w-4" src="@/images/discord.svg" alt="">
-                {{ human.socials[dcIndex][1] }}
+            <img class="w-4" src="@/images/discord.svg" alt="">
+            {{ human.socials[dcIndex][1] }}
         </span>
         <footer class="flex gap-1 mt-1">
             <button @click="openLink(site[0], site[1])" class="p-0.5 w-full max-w-[4rem] h-5 rounded-sm button" :style="{background: socialMedia[site[0]].color}" v-for="site in human.socials" :title="socialMedia[site[0]].name">

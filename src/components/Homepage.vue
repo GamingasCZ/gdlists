@@ -6,6 +6,7 @@ import cookier from "cookier";
 import { computed, ref, watch } from "vue";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
+import DialogVue from "./global/Dialog.vue";
 
 document.title = useI18n().t("other.websiteName");
 
@@ -51,8 +52,11 @@ const localStorg = ref(hasLocalStorage())
 </script>
 
 <template>
-  <LoggedInPopup @close-popup="returnedFromLogin = false" v-if="firstTimeUser && returnedFromLogin"
+  <DialogVue :open="firstTimeUser && returnedFromLogin" @close-popup="returnedFromLogin = false">
+    <LoggedInPopup @close-popup="returnedFromLogin = false"
     :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
+  </DialogVue>
+  
   <div id="loginToast" v-if="!firstTimeUser && localStorg"
     class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
     {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!

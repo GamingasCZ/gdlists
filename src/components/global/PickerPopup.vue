@@ -47,79 +47,70 @@ onUpdated(() => {
 </script>
 
 <template>
-  <Transition name="fade">
-    <dialog
-      open
-      @click="emit('closePopup')"
-      tabindex="0"
-      @keyup.esc="emit('closePopup')"
+  <Transition name="slide">
+    <section
+      @click.stop=""
+      class="absolute top-1/2 left-1/2 flex h-[40rem] max-h-[95svh] w-[35rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
     >
-      <Transition name="slide">
-        <section
-          @click.stop=""
-          class="absolute top-1/2 left-1/2 flex h-[40rem] max-h-[95svh] w-[35rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
+      <div class="relative">
+        <h1 class="text-xl font-bold text-center">{{ browserName }}</h1>
+        <img
+          src="@/images/close.svg"
+          alt=""
+          class="absolute top-0 right-0 w-6 button"
+          @click="emit('closePopup')"
+        />
+      </div>
+      <form action="." @submit.prevent="highlightFirstElement">
+        <input
+          type="text"
+          :placeholder="$t('other.search')+'...'"
+          class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-md"
+          id="pickerInput"
+          @input="
+            filteredData = data.filter((x) =>
+              x.levelName.toLowerCase().includes(($event.target as HTMLInputElement).value.toLowerCase())
+            )
+          "
+        />
+      </form>
+      <main
+        class="mt-2 flex-grow-[1] overflow-y-auto overflow-x-clip rounded-lg bg-white bg-opacity-10 p-1"
+      >
+        <div
+          v-if="!data.length"
+          class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
         >
-          <div class="relative">
-            <h1 class="text-xl font-bold text-center">{{ browserName }}</h1>
-            <img
-              src="@/images/close.svg"
-              alt=""
-              class="absolute top-0 right-0 w-6 button"
-              @click="emit('closePopup')"
-            />
-          </div>
-          <form action="." @submit.prevent="highlightFirstElement">
-            <input
-              type="text"
-              :placeholder="$t('other.search')+'...'"
-              class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-md"
-              id="pickerInput"
-              @input="
-                filteredData = data.filter((x) =>
-                  x.levelName.toLowerCase().includes(($event.target as HTMLInputElement).value.toLowerCase())
-                )
-              "
-            />
-          </form>
-          <main
-            class="mt-2 flex-grow-[1] overflow-y-auto overflow-x-clip rounded-lg bg-white bg-opacity-10 p-1"
-          >
-            <div
-              v-if="!data.length"
-              class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
-            >
-              <img src="@/images/savedMobHeader.svg" class="w-36" />
-              <h2>{{ $t('other.noSavedLevels') }}</h2>
-            </div>
+          <img src="@/images/savedMobHeader.svg" class="w-36" />
+          <h2>{{ $t('other.noSavedLevels') }}</h2>
+        </div>
 
-            <div
-              v-else-if="!filteredData.length"
-              class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
-            >
-              <img src="@/images/searchOpaque.svg" class="w-36" />
-              <h2>{{ $t('other.noLevelsFound') }}</h2>
-            </div>
+        <div
+          v-else-if="!filteredData.length"
+          class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
+        >
+          <img src="@/images/searchOpaque.svg" class="w-36" />
+          <h2>{{ $t('other.noLevelsFound') }}</h2>
+        </div>
 
-            <div
-              v-else-if="outerError"
-              class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
-            >
-              <img src="@/images/close.svg" class="w-36" />
-              <h2>{{ outerErrorText }}</h2>
-            </div>
-            
-            <div v-if="!outerError" class="flex flex-col gap-1">
-              <component
-                v-for="level in filteredData"
-                @click="emit('selectOption', level)"
-                :is="[FavoriteBubble, LevelBubble][bubbleType]"
-                :data="level"
-                class="pickerBubble"
-              />
-            </div>
-          </main>
-        </section>
-      </Transition>
-    </dialog>
+        <div
+          v-else-if="outerError"
+          class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
+        >
+          <img src="@/images/close.svg" class="w-36" />
+          <h2>{{ outerErrorText }}</h2>
+        </div>
+        
+        <div v-if="!outerError" class="flex flex-col gap-1">
+          <component
+            v-for="level in filteredData"
+            @click="emit('selectOption', level)"
+            :is="[FavoriteBubble, LevelBubble][bubbleType]"
+            :data="level"
+            class="pickerBubble"
+          />
+        </div>
+      </main>
+    </section>
   </Transition>
 </template>

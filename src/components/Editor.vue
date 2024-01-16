@@ -365,49 +365,46 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 </script>
 
 <template>
-  <Transition name="fade">
+  <DialogVue :open="tagPopupOpen" @close-popup="tagPopupOpen = false">
     <TagPickerPopup
-      v-if="tagPopupOpen"
       @close-popup="tagPopupOpen = false"
       @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
     ></TagPickerPopup>
-  </Transition>
+  </DialogVue>
   
-  <Transition name="fade">
-    <BGImagePicker
-    v-if="BGpickerPopupOpen"
-    @close-popup="BGpickerPopupOpen = false"
-    />
-  </Transition>
+  <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false">
+    <BGImagePicker @close-popup="BGpickerPopupOpen = false"/>
+  </DialogVue>
 
-  <Transition name="fade">
+  <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false">
     <DescriptionEditor
-      v-if="descriptionEditorOpen"
       :editor-title="$t('editor.descriptionEditor')"
       @close-popup="descriptionEditorOpen = false"
     />
-  </Transition>
+  </DialogVue>
 
-  <Transition name="fade">
+  
+  <DialogVue :open="collabEditorOpen && levelList.levels.length > 0" @close-popup="closeCollabTools()">
     <CollabEditor
-      v-if="collabEditorOpen && levelList.levels.length > 0"
       :index="currentlyOpenedCard"
       :clipboard="collabClipboard"
       @send-clipboard="collabClipboard = $event"
       @close-popup="closeCollabTools()"
     />
-  </Transition>
+  </DialogVue>
 
-  <PickerPopup
-    v-if="favoriteLevelPickerOpen"
-    :browser-name="$t('other.savedLevels')"
-    :outer-error-text="$t('editor.maxLevels')"
-    :outer-error="levelList.levels.length >= 50"
-    @close-popup="favoriteLevelPickerOpen = false"
-    @select-option="addFromFavorites($event)"
-    picker-data="@favorites"
-    picker-data-type="favoriteLevel"
-  />
+  <DialogVue :open="favoriteLevelPickerOpen" @close-popup="favoriteLevelPickerOpen = false">
+    <PickerPopup
+      v-if="favoriteLevelPickerOpen"
+      :browser-name="$t('other.savedLevels')"
+      :outer-error-text="$t('editor.maxLevels')"
+      :outer-error="levelList.levels.length >= 50"
+      @close-popup="favoriteLevelPickerOpen = false"
+      @select-option="addFromFavorites($event)"
+      picker-data="@favorites"
+      picker-data-type="favoriteLevel"
+    />
+  </DialogVue>
 
   <LevelImportPopup @close-popup="importDialogOpen = false" v-if="importDialogOpen" />
 
@@ -442,7 +439,9 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
         @open-collab="openCollabTools(ind, level.color)"
       />
     </div>
-    <CollabViewer :editor="true" v-if="collabData.collabData != null" v-bind="collabData" :translucent="levelList?.translucent!" @close-popup="collabData.collabData = null" />
+    <DialogVue :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
+      <CollabViewer :editor="true" v-if="collabData.collabData != null" v-bind="collabData" :translucent="levelList?.translucent!" @close-popup="collabData.collabData = null" />
+    </DialogVue>
   </section>
 
   <!-- Edit error - List doesn't exist -->

@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview } from "@/interfaces";
-import CommentPreview from "@/components/levelViewer/CommentPreview.vue";
-import ListPrevElement from "@/components/global/ListPreview.vue";
+import type { ListCreatorInfo, ListPreview, SavedCollab } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
-import FavoritePreview from "./FavoritePreview.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
@@ -23,7 +20,8 @@ const props = defineProps({
   isLoggedIn: Boolean,
   hideSearch: { type: Boolean, default: false },
   commentID: { type: String, default: 0 },
-  refreshButton: { type: Boolean, default: false }
+  refreshButton: { type: Boolean, default: false },
+  component: { type: Object, required: true }
 });
 
 // Page title
@@ -86,9 +84,12 @@ function doSearch() {
   searchNoResults.value = false;
   LISTS.value = []
   if (!props.onlineBrowser) {
-    filtered = favoriteLevels.filter((x) =>
-      x.levelName.includes(SEARCH_QUERY.value)
-    );
+    if (props.onlineType == 'collabs') {
+      filtered = favoriteCollabs.filter((x: SavedCollab) => x.collabName.includes(SEARCH_QUERY.value));
+    }
+    else {  
+      filtered = favoriteLevels.filter(x => x.levelName.includes(SEARCH_QUERY.value));
+    }
 
     LISTS.value = filtered.slice(
       PAGE.value * LISTS_ON_PAGE,
@@ -107,22 +108,23 @@ function doSearch() {
 }
 
 function refreshBrowser() {
-  if (!props.onlineBrowser && props.onlineType == "") {
-    let hasSearch = [favoriteLevels, filtered][filtered != undefined | 0]
+  if (!props.onlineBrowser) {
+    let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][filtered != undefined | 0]
+    let ind = props.onlineType == "collabs" | 0
     if (usingPagesScrolling.value) {
-      LISTS.value = hasSearch.slice(
+      LISTS.value = hasSearch[ind].slice(
         LISTS_ON_PAGE * PAGE.value!,
         LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
       );
     }
     else {
-      hasSearch.slice(
+      hasSearch[ind].slice(
         LISTS_ON_PAGE * PAGE.value!,
         LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
       ).forEach((x: ListPreview) => LISTS.value!.push(x))
       infiniteListsLoading = false
     }
-    maxPages.value = Math.ceil(hasSearch.length / LISTS_ON_PAGE);
+    maxPages.value = Math.ceil(hasSearch[ind].length / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
     return;
   }
@@ -224,9 +226,25 @@ const removeFavoriteLevel = (levelID: string) => {
   refreshBrowser()
 };
 
+const removeCollab = (obj: SavedCollab) => {
+  let position = favoriteCollabs.findIndex((x: SavedCollab) => x.timestamp == obj.timestamp)
+  let savedCollabIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!)
+  favoriteCollabs.splice(position, 1);
+  savedCollabIDs.splice(position, 1);
+
+  localStorage.setItem("savedCollabs", JSON.stringify(favoriteCollabs));
+  localStorage.setItem("savedCollabIDs", JSON.stringify(savedCollabIDs));
+
+  refreshBrowser()
+};
+
+
 let favoriteLevels: any;
-if (!props.onlineBrowser)
+let favoriteCollabs: any;
+if (!props.onlineBrowser) {
   favoriteLevels = JSON.parse(localStorage.getItem("favorites")!);
+  favoriteCollabs = JSON.parse(localStorage.getItem("savedCollabs")!);
+}
 
 onMounted(() => {
   if (!props.onlineBrowser && props.onlineType == '') { // saved level not collabs TODO: add collabs
@@ -238,7 +256,14 @@ onMounted(() => {
     maxPages.value = Math.ceil(favoriteLevels.length! / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
   }
-  else if (props.onlineType == "collabs") LISTS.value = []
+  else if (props.onlineType == "collabs") {
+    LISTS.value = favoriteCollabs.slice(
+      LISTS_ON_PAGE * PAGE.value!,
+      LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
+    );
+    maxPages.value = Math.ceil(favoriteCollabs.length! / LISTS_ON_PAGE);
+    pagesArray.value = listScroll();
+  }
   refreshBrowser();
 });
 
@@ -310,6 +335,37 @@ window.addEventListener("scroll", infiniteScroll)
           <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{
             $t('other.refresh') }}</label>
         </button>
+
+        <!-- Page Switcher -->
+        <div class="flex gap-2 items-center" v-if="maxPages > 1 && usingPagesScrolling">
+          <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
+            <img src="@/images/showCommsL.svg" class="w-4" alt="" />
+          </button>
+          <button class="w-8 bg-white bg-opacity-5 rounded-md button" :class="{ 'bg-greenGradient': PAGE == 0 }"
+            @click="switchPage(0)">
+            1
+          </button>
+
+          <hr v-if="PAGE! > 3 && maxPages > 6" class="w-1 h-4 rounded-full border-none bg-greenGradient" />
+
+          <button class="w-8 bg-white bg-opacity-5 rounded-md button" :class="{ 'bg-greenGradient': index - 1 == PAGE }"
+            @click="switchPage(index - 1)" v-for="index in pagesArray">
+            {{ index }}
+          </button>
+
+          <hr v-if="PAGE! < maxPages - 4 && maxPages > 6" class="w-1 h-4 rounded-full border-none bg-greenGradient" />
+
+          <!-- Last page -->
+          <button v-if="maxPages > 6" class="w-8 bg-white bg-opacity-5 rounded-md button"
+            :class="{ 'bg-greenGradient': PAGE == maxPages - 1 }" @click="switchPage(maxPages - 1)">
+            {{ maxPages }}
+          </button>
+
+          <!-- Page +1 -->
+          <button class="ml-2 button" @click="switchPage(PAGE! + 1)">
+            <img src="@/images/showComms.svg" class="w-4" alt="" />
+          </button>
+        </div>
       </header>
       <main class="flex flex-col gap-3 items-center mt-4">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
@@ -329,8 +385,7 @@ window.addEventListener("scroll", infiniteScroll)
           class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/collabDudes.svg" alt="" class="w-72 opacity-25" />
           <div class="text-center">
-            <p class="text-2xl text-yellow-200 opacity-90">{{ $t('other.comingSoon') }}</p>
-            <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
+          <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
             <p class="text-sm opacity-70">{{ $t('collabTools.noSavedSub') }}</p>
           </div>
           <RouterLink to="/editor">
@@ -418,6 +473,9 @@ window.addEventListener("scroll", infiniteScroll)
             <img src="@/images/showComms.svg" class="w-4" alt="" />
           </button>
         </div>
+        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
+          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index"
+          :is-pinned="false" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
       </main>
     </main>
   </section>

@@ -23,10 +23,10 @@ const hovering = ref(false)
             <div class="w-52 max-sm:w-24 bg-center h-full bg-cover transition-[filter_0.2s_ease] aspect-video" :style="{backgroundImage: `url(${videoData.thumbnails[index-1]})`}" :class="{'sm:brightness-50': hovering}"></div>
             <Transition name="fade">
                 <div v-show="hovering" class="flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-sm:hidden">
-                    <a :href="`https://youtu.be/${videoData.links[index-1]}`" class="mr-2 button" target="_blank">
+                    <a :title="$t('editor.openVideoTitle')" :href="`https://youtu.be/${videoData.links[index-1]}`" class="mr-2 button" target="_blank">
                         <img src="@/images/modYT.svg" class="w-10" alt="">
                     </a>
-                    <button @click="emit('pickVideo', videoData.links[index-1])" class="button"><img src="@/images/modPick.svg" class="w-10" alt=""></button>
+                    <button :title="$t('editor.pickVideoTitle')" @click="emit('pickVideo', videoData.links[index-1])" class="button"><img src="@/images/modPick.svg" class="w-10" alt=""></button>
                 </div>            
             </Transition>
             <div class="absolute bottom-0 pr-2 w-full h-5 text-sm text-right text-white text-opacity-40 backdrop-blur-lg backdrop-brightness-50 max-sm:hidden">{{ prettyDate((Date.now() - new Date(videoData.publishTime[index-1])) / 1000) }}</div>

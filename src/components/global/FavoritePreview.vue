@@ -42,7 +42,7 @@ const uploadDate = reactive(new Date(props.timeAdded!));
 <template>
   <RouterLink
     :to="`${listID!}?goto=${listPosition}`"
-    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
@@ -67,7 +67,7 @@ const uploadDate = reactive(new Date(props.timeAdded!));
 
     <button
       v-if="!hideRemove"
-      class="box-border p-2 ml-auto w-10 bg-black bg-opacity-40 rounded-full button"
+      class="box-border p-2 ml-auto w-10 bg-black bg-opacity-40 rounded-md button"
       @click.stop.prevent="emit('removeLevel', levelID)"
     >
       <img src="@/images/trash.svg" class="w-7" alt="" />

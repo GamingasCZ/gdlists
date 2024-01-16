@@ -80,6 +80,7 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     document.documentElement.style.setProperty("--siteBackground","")
     document.documentElement.style.setProperty("--primaryColor","")
     document.documentElement.style.setProperty("--secondaryColor","")
+    document.documentElement.style.setProperty("--brightGreen","")
     return
   }
   
@@ -110,6 +111,10 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     "--secondaryColor",
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
+  document.documentElement.style.setProperty(
+    "--brightGreen",
+    chroma(chroma.hsl(newColors[0], 0.535, 0.637)).hex()
+  );
 
   (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute(
     "theme-color",
@@ -132,9 +137,32 @@ export const prettyDate = (datePassed: number) => {
   else return i18n.global.t('date.months', Math.floor(datePassed/2419200))
 }
 
+export function parseElapsed(secs: number) {
+  if (secs < 60) return Math.round(secs) + "s"; //s - seconds
+  else if (secs < 3600) return Math.round(secs / 60) + "m"; //m - minutes
+  else if (secs < 86400) return Math.round(secs / 3600) + "h"; //h - hours
+  else if (secs < 604800) return Math.round(secs / 86400) + "d"; //d - days
+  else if (secs < 1892160000)
+    return Math.round(secs / 604800) + "w"; //w - weeks
+  else return Math.round(secs / 1892160000) + "y"; //y - years
+}
+
 export function resetList() {
   if (router.currentRoute.value.name == "editor") router.push({path: "/editor", force: true})
 }
+
+export const makeColorFromString = (name: string) =>
+chroma(
+  Math.floor(
+    16777215 *
+      Math.sin(
+        name
+          ?.split("")
+          .map((p: string) => p.charCodeAt(0))
+          .reduce((x, y) => x + y)! % Math.PI
+      )
+  )
+);
 
 export function fixHEX(hexColor: string) {
   // If the code ends with a number, hex code is sometimes broken (completely random lmao)
@@ -172,7 +200,13 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
 }
 
 export function creatorToCollab(currentName: string): CollabData {
-  return [[{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}], [], [], Math.floor(Math.random() * 1000000)]
+  return [
+    [{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}],
+    [],
+    [],
+    Math.floor(Math.random() * 1000000),
+    []
+  ]
 }
 
 export const isOnline = ref(true)

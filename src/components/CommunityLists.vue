@@ -3,6 +3,7 @@ import { ref } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
 import router from "@/router";
 import { useRouter } from "vue-router";
+import ListPreview from "./global/ListPreview.vue";
 
 const props = defineProps<{
   query: string
@@ -28,6 +29,7 @@ const userLists = ref<"" | "user" | "hidden">(props.onlineType);
 
   <ListBrowser
     online-browser
+    :component="ListPreview"
     :search="query"
     :online-type="userLists"
     :is-logged-in="isLoggedIn"

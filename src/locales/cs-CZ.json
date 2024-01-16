@@ -126,7 +126,18 @@
     "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**.",
     "collabText": "{0} + {1} dalších",
     "videoSearch": "Hledání videí",
-    "collabNoPhones": "Collab editor není dostupný na telefonech!"
+    "collabNoPhones": "Collab editor není dostupný na telefonech!",
+    "levelColorTitle": "Barva levelu",
+    "diffTitle": "Obtížnost levelu",
+    "labelsTitle": "Štítky levelu",
+    "removeTitle": "Smazat level",
+    "pickVideoTitle": "Vybrat video",
+    "openVideoTitle": "Otevřít video na nové kartě",
+    "collabTitle": "Otevřít collab nástroje",
+    "searchTitle": "Hledat level",
+    "switchTypeTitle": "Přepnout typ levelu",
+    "moveUpTitle": "Přesunout level nahoru",
+    "moveDownTitle": "Přesunout level dolů"
   },
   "other": {
     "lockQuotes": [
@@ -191,8 +202,9 @@
     "save": "Uložit",
     "use": "Použít",
     "delete": "Smazat",
-    "comingSoon": "Brzy dostupné :D",
-    "links": "Odkazy"
+    "links": "Odkazy",
+    "cancel": "Zrušit",
+    "accept": "Potvrdit"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -337,6 +349,19 @@
     "startBuilding": "Začít stavět",
     "noSaved": "Neuložil jsi zatím žádné collaby!",
     "noSavedSub": "Můžeš je uložit při vytváření nebo v seznamech.",
-    "removeSaved": "Odebrat"
+    "removeSaved": "Odebrat",
+    "addSocialTitle": "Přidat sociální síť",
+    "findTItle": "Najít člena podle GD jména",
+    "changeRoleTitle": "Změnit roli",
+    "copyMemberTItle": "Kopírovat člena",
+    "removeMemberTitle": "Smazat člena",
+    "hideTitle": "Zneviditelnit graf role",
+    "removeRoleTitle": "Smazat roli",
+    "presetsTitle": "Návrhy roli",
+    "hideSidebarTitle": "Skrýt sidebar",
+    "pickSocialTitle": "Vybrat sociální síť",
+    "addMemberTitle": "Přidat člena",
+    "sortTitle": "Roztřídit členy",
+    "pasteMemberTitle": "Vložit člena"
   }
 }

@@ -248,7 +248,7 @@ const switchPlatformer = () => {
         <input autocomplete="off" @keyup.enter="searchLevel(true)"
           class="max-w-[20vw] box-border rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
           type="text" name="levelID" v-model="levelList.levels[index!].levelID" :placeholder="$t('level.levelID')" />
-        <button :disabled="!searchAvailableID" type="button" class="box-border relative"
+        <button :disabled="!searchAvailableID" type="button" class="box-border relative" :title="$t('editor.searchTitle')"
           :style="{ opacity: searchAvailableID ? 1 : 0.5 }" @click="searchLevel(true)">
           <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
           <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
@@ -258,12 +258,12 @@ const switchPlatformer = () => {
 
       <div class="flex max-sm:hidden">
         <!-- Level position -->
-        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveUp.svg" alt=""
+        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveUp.svg" alt="" :title="$t('editor.moveUpTitle')"
           @click="emit('doMove', index!, index! - 1); openedPanel = 0;" />
         <input autocomplete="off" readonly
           class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
           :value="index! + 1" @mousedown="mobileMoveLevel()" />
-        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveDown.svg" alt=""
+        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveDown.svg" alt="" :title="$t('editor.moveDownTitle')"
           @click="emit('doMove', index!, index! + 1); openedPanel = 0;" />
       </div>
 
@@ -280,6 +280,7 @@ const switchPlatformer = () => {
           class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/level.svg"
           alt=""
+          :title="$t('editor.switchTypeTitle')"
           v-if="!isPlatformer"
           @click="switchPlatformer"
         />
@@ -287,12 +288,14 @@ const switchPlatformer = () => {
           class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
           src="../../images/levelPlat.svg"
           alt=""
+          :title="$t('editor.switchTypeTitle')"
           v-else
           @click="switchPlatformer"
         />
         <button
           :disabled="!(levelList.levels[index!].levelName != '' || levelList.levels[index!].creator != '')"
           type="button"
+          :title="$t('editor.searchTitle')"
           @click="searchLevel(false)"
           class="sm:hidden"
         >
@@ -316,7 +319,7 @@ const switchPlatformer = () => {
         <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
           :style="{ opacity: levelList.levels[index!].levelName ? 1 : 0.5 }" />
         
-        <button :disabled="!searchAvailableCreator" type="button" class="box-border relative"
+        <button :disabled="!searchAvailableCreator" type="button" class="box-border relative" :title="$t('editor.searchTitle')"
           :style="{ opacity: searchAvailableCreator ? 1 : 0.5 }" @click="searchLevel(false)"
         >
           <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
@@ -334,12 +337,13 @@ const switchPlatformer = () => {
           class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
           type="text" name="creator" maxlength="15" :value="levelCreator" @change="modifyCreator"
           :placeholder="$t('level.creator')" @keyup.enter="searchLevel(false)"/>
-        <button class="relative w-10 h-10 bg-black bg-opacity-30 rounded-md focus-within:!outline-current button"
+        <button class="relative bg-black bg-opacity-30 rounded-md focus-within:!outline-current button"
           @click="openCollabTools()"
+          :title="$t('editor.collabTitle')"
           :class="{ 'hue-rotate-180': typeof levelList.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
           <img class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square" src="../../images/collabMen.svg" alt=""
             v-if="collabFlash" />
-          <img class="absolute top-0 left-0 p-1 w-10 aspect-square" src="../../images/collabMen.svg" alt="" />
+          <img class="p-1 w-12 sm:w-10 aspect-square" src="../../images/collabMen.svg" alt="" />
         </button>
       </div>
     </div>
@@ -358,10 +362,11 @@ const switchPlatformer = () => {
         <img
           class="w-10 button"
           @click="openedPanel = openedPanel != 1 ? 1 : 0"
+          :title="$t('editor.levelColorTitle')"
           src="../../images/colorPicker.svg"
           alt=""
         />
-        <div class="flex relative justify-center items-center button" @click="openedPanel = openedPanel != 2 ? 2 : 0">
+        <div class="flex relative justify-center items-center button" :title="$t('editor.diffTitle')" @click="openedPanel = openedPanel != 2 ? 2 : 0">
           <img
             class="w-10"
             alt=""
@@ -382,7 +387,7 @@ const switchPlatformer = () => {
             :style="{zIndex: (levelList.levels[index!].difficulty?.[1] ?? 0) -1 ? 10 : 30 }"
           />
         </div>
-        <img class="w-10 button" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
+        <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
           alt="" />
         <img
           class="w-10 button"
@@ -390,7 +395,7 @@ const switchPlatformer = () => {
           src="../../images/reviewPicker.svg"
           alt=""
         />
-        <img class="ml-4 w-10 button" @click="deleteLevel(props.index!)" src="../../images/deleteLevel.svg" alt="" />
+        <img class="ml-4 w-10 button" :title="$t('editor.removeTitle')" @click="deleteLevel(props.index!)" src="../../images/deleteLevel.svg" alt="" />
       </div>
     </div>
 

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import ListBrowser from '../global/ListBrowser.vue';
 import CommentBox from './CommentBox.vue';
+import CommentPreview from './CommentPreview.vue';
 
 const props = defineProps({
     listID: {type: String, required: true},
@@ -30,6 +31,6 @@ watch(props, () => { // only refresh comments once
         </div>
 
         <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">
-        <ListBrowser v-if="showingOnce && !noNoCommsIfDisabledComments" :online-browser="true" :hide-search="true" online-type="comments" :comment-i-d="listID" :refreshButton="!commentsDisabled" @refreshed-browser="amount = $event"/>
+        <ListBrowser v-if="showingOnce && !noNoCommsIfDisabledComments" :component="CommentPreview" :online-browser="true" :hide-search="true" online-type="comments" :comment-i-d="listID" :refreshButton="!commentsDisabled" @refreshed-browser="amount = $event"/>
     </main>
 </template>

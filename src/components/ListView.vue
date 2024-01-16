@@ -6,6 +6,8 @@ import type {
   ListPreview,
   Level,
 SavedCollab,
+CollabHumans,
+CollabData,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -26,6 +28,7 @@ import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
 import { hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
+import DialogVue from "./global/Dialog.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -120,7 +123,7 @@ function main() {
         LIST_COL.value = listColors
         
         // Saturation 0
-        if (LIST_COL?.value?.[0]) LIST_COL.value[0] = 0
+        if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
 
         if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
           modifyListBG(LIST_COL.value);
@@ -279,14 +282,17 @@ const saveCollab = (ind: number) => {
     currSaved.splice(remInd, 1)
   }
   else { // Nesmazat collab, naopak přidat hihi :D
+    let c: CollabData = LIST_DATA.value?.data.levels[ind].creator
     let collab: SavedCollab = {
-      collabHost: LIST_DATA.value?.data.levels[ind].creator[0].name,
+      collabHost: c[0].name,
       levelID: LIST_DATA.value?.data.levels[ind].levelID,
       collabID: Math.floor(Math.random() * 1000000),
       collabName: LIST_DATA.value?.data.levels[ind].levelName,
-      data: LIST_DATA.value?.data.levels[ind].creator,
-      memberCount: LIST_DATA.value?.data.levels[ind].creator[2].length,
-      timestamp: Date.now()
+      data: c,
+      memberCount: c[2].length,
+      timestamp: Date.now(),
+      collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
+      listID: [PRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)
@@ -305,25 +311,37 @@ provide("saveCollab", saveCollab)
     backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
 
-  <Transition name="fade"><LikePopup v-if="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false" /></Transition>
-  <SharePopup v-show="sharePopupOpen" @close-popup="sharePopupOpen = false" :share-text="getURL()" />
-  <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="jumpToPopupOpen"
-    picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"
-    :browser-name="$t('listViewer.jumpTo')" :outer-error="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" :outer-error-text="$t('listViewer.noGuessJumping')"/>
+  <DialogVue :open="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false">
+    <LikePopup @close-popup="likeNotLoggedInOpen = false" />
+  </DialogVue>
+  
+  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false">
+    <SharePopup @close-popup="sharePopupOpen = false" :share-text="getURL()" />
+  </DialogVue>
+  
+  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false">
+    <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)"
+      picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"
+      :browser-name="$t('listViewer.jumpTo')" :outer-error="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" :outer-error-text="$t('listViewer.noGuessJumping')"/>
+  </DialogVue>
 
   <!-- Mobile options popup -->
-  <MobileExtras v-if="mobileExtrasOpen" @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
+  <DialogVue :open="mobileExtrasOpen" @close-popup="mobileExtrasOpen = false">
+    <MobileExtras @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
+  </DialogVue>
 
-  <DiffGuesserHelpDialog v-if="guessHelpOpened" @close-popup="guessHelpOpened = false"/>
-  <Transition name="fade">
+  <DialogVue :open="guessHelpOpened" @close-popup="guessHelpOpened = false">
+    <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
+  </DialogVue>
+  
+  <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" @close-popup="uploadedDialogShown = 0">
     <ListUploadedDialog
-      v-if="LIST_DATA.name != undefined && uploadedDialogShown"
       :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
       :is-updating="uploadedDialogShown == 2"
       @do-edit="listActions('editList')"
       @close-popup="uploadedDialogShown = 0"
     />
-  </Transition>
+  </DialogVue>
 
   <section class="mt-12 text-white">
     <header>
@@ -365,7 +383,9 @@ provide("saveCollab", saveCollab)
         <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />
       </Teleport>
 
-      <CollabViewer v-if="collabData.collabData != null" v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
+      <DialogVue :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
+        <CollabViewer v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
+      </DialogVue>
 
       <!-- List -->
       <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
