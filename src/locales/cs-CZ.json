@@ -131,7 +131,7 @@
     "diffTitle": "Obtížnost levelu",
     "labelsTitle": "Štítky levelu",
     "removeTitle": "Smazat level",
-    "pickVideoTitle": "Pick video",
+    "pickVideoTitle": "Vybrat video",
     "openVideoTitle": "Otevřít video na nové kartě",
     "collabTitle": "Otevřít collab nástroje",
     "searchTitle": "Hledat level",
@@ -202,7 +202,6 @@
     "save": "Uložit",
     "use": "Použít",
     "delete": "Smazat",
-    "comingSoon": "Brzy dostupné :D",
     "links": "Odkazy",
     "cancel": "Zrušit",
     "accept": "Potvrdit"

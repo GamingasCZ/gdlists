@@ -95,7 +95,8 @@
     "searchTitle": "Search for level",
     "switchTypeTitle": "Switch level type",
     "moveUpTitle": "Move level up",
-    "moveDownTitle": "Move level down"
+    "moveDownTitle": "Move level down",
+    "pickVideoTitle": "Pick video"
   },
   "homepage": {
     "clear": "Clear",
@@ -251,7 +252,6 @@
     "save": "Save",
     "use": "Use",
     "delete": "Delete",
-    "comingSoon": "Coming Soon! :D",
     "links": "Links",
     "cancel": "Cancel",
     "accept": "Save"
@@ -360,6 +360,7 @@
     "pickSocialTitle": "Pick social network",
     "addMemberTitle": "Add a Member",
     "sortTitle": "Sort members",
-    "pasteMemberTitle": "Paste member"
+    "pasteMemberTitle": "Paste member",
+    "hideSidebarTitle": "Hide sidebar"
   }
 }

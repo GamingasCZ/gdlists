@@ -6,6 +6,7 @@ import CollabViewerMember from "./CollabViewerMember.vue";
 import { hasLocalStorage } from "@/siteSettings";
 import { inject, provide, ref } from "vue";
 import CollabViewerMemberRow from "./CollabViewerMemberRow.vue";
+import { computed } from "vue";
 
 const props = defineProps<{
     levelColor: [number, number, number]
@@ -37,6 +38,7 @@ if (hasLStorage) {
 
 var roleCount = Array(props.collabData[1].length).fill(0)
 props.collabData[2].forEach(h => roleCount[h.role] += 1)
+const visibleRoles = computed(() => props.collabData[1].filter((_, i) => !props.collabData?.[4]?.[i] ?? true))
 </script>
 
 <template>
@@ -63,8 +65,8 @@ props.collabData[2].forEach(h => roleCount[h.role] += 1)
       />
     </div>
     <!-- Graphs --> 
-    <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]">
-      <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="(role, ind) in collabData[1].filter(x => !collabData?.[4]?.[collabData[1].findIndex(x)])" />
+    <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]" v-if="visibleRoles.length">
+      <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="(role, ind) in visibleRoles" />
     </div>
 
     <!-- Member header -->
@@ -79,7 +81,7 @@ props.collabData[2].forEach(h => roleCount[h.role] += 1)
     
     <!-- Members -->
     <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-auto justify-start content-start">
-        <component :is="gridView ? CollabViewerMember : CollabViewerMemberRow" v-for="(member, ind) in collabData[2]" :index="ind" :role-count="roleCount" :human="member" :role-name="collabData[1][member.role]"/>
+        <component :is="gridView ? CollabViewerMember : CollabViewerMemberRow" v-for="(member, ind) in collabData[2].toSorted((a,b) => collabData?.[4]?.[a.role] < collabData?.[4]?.[b.role])" :hidden-role="collabData?.[4]?.[member.role]" :index="ind" :role-count="roleCount" :human="member" :role-name="collabData[1][member.role]"/>
     </div>
   </section>
 </template>

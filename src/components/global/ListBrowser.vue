@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview } from "@/interfaces";
+import type { ListCreatorInfo, ListPreview, SavedCollab } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
@@ -18,10 +18,10 @@ const props = defineProps({
   onlineBrowser: { type: Boolean, required: true },
   onlineType: { type: String, default: "", immediate: true },
   isLoggedIn: Boolean,
-  hideSearch: {type: Boolean, default: false},
-  commentID: {type: String, default: 0},
-  refreshButton: {type: Boolean, default: false},
-  component: {type: Object, required: true}
+  hideSearch: { type: Boolean, default: false },
+  commentID: { type: String, default: 0 },
+  refreshButton: { type: Boolean, default: false },
+  component: { type: Object, required: true }
 });
 
 // Page title
@@ -57,7 +57,7 @@ const loading = ref<boolean>(false)
 const LISTS_ON_PAGE = 8;
 const PAGE = ref<number>(
   usingPagesScrolling.value ? (parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1 : 0
-  );
+);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
 const USERS = ref<ListCreatorInfo[]>([]);
@@ -84,9 +84,12 @@ function doSearch() {
   searchNoResults.value = false;
   LISTS.value = []
   if (!props.onlineBrowser) {
-    filtered = favoriteLevels.filter((x) =>
-      x.levelName.includes(SEARCH_QUERY.value)
-    );
+    if (props.onlineType == 'collabs') {
+      filtered = favoriteCollabs.filter((x: SavedCollab) => x.collabName.includes(SEARCH_QUERY.value));
+    }
+    else {  
+      filtered = favoriteLevels.filter(x => x.levelName.includes(SEARCH_QUERY.value));
+    }
 
     LISTS.value = filtered.slice(
       PAGE.value * LISTS_ON_PAGE,
@@ -94,7 +97,7 @@ function doSearch() {
     );
 
     if (SEARCH_QUERY.value == "") filtered = undefined
-      
+
     searchNoResults.value = LISTS.value.length == 0
     maxPages.value = Math.ceil(filtered.length / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
@@ -118,7 +121,7 @@ function refreshBrowser() {
       hasSearch[ind].slice(
         LISTS_ON_PAGE * PAGE.value!,
         LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
-        ).forEach((x: ListPreview) => LISTS.value!.push(x))
+      ).forEach((x: ListPreview) => LISTS.value!.push(x))
       infiniteListsLoading = false
     }
     maxPages.value = Math.ceil(hasSearch[ind].length / LISTS_ON_PAGE);
@@ -126,7 +129,7 @@ function refreshBrowser() {
     return;
   }
   else if (props.onlineType == "collabs") return
-  
+
   loading.value = true
   let fetchURI: string
   let fetchQuery: Object
@@ -223,6 +226,19 @@ const removeFavoriteLevel = (levelID: string) => {
   refreshBrowser()
 };
 
+const removeCollab = (obj: SavedCollab) => {
+  let position = favoriteCollabs.findIndex((x: SavedCollab) => x.timestamp == obj.timestamp)
+  let savedCollabIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!)
+  favoriteCollabs.splice(position, 1);
+  savedCollabIDs.splice(position, 1);
+
+  localStorage.setItem("savedCollabs", JSON.stringify(favoriteCollabs));
+  localStorage.setItem("savedCollabIDs", JSON.stringify(savedCollabIDs));
+
+  refreshBrowser()
+};
+
+
 let favoriteLevels: any;
 let favoriteCollabs: any;
 if (!props.onlineBrowser) {
@@ -232,7 +248,7 @@ if (!props.onlineBrowser) {
 
 onMounted(() => {
   if (!props.onlineBrowser && props.onlineType == '') { // saved level not collabs TODO: add collabs
-  // Hardcoded for now, maybe change later
+    // Hardcoded for now, maybe change later
     LISTS.value = favoriteLevels.slice(
       LISTS_ON_PAGE * PAGE.value!,
       LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
@@ -263,7 +279,7 @@ let infiniteListsLoading = false
 function infiniteScroll() {
   if (!infiniteListsLoading && !usingPagesScrolling.value) {
     let page = document.documentElement
-    if (page.scrollTop+page.clientHeight+page.clientHeight/2 > page.scrollHeight) {
+    if (page.scrollTop + page.clientHeight + page.clientHeight / 2 > page.scrollHeight) {
       infiniteListsLoading = true
       switchPage(PAGE.value! + 1)
     }
@@ -278,82 +294,48 @@ window.addEventListener("scroll", infiniteScroll)
     <h2 class="text-3xl text-center">{{ browserName }}</h2>
 
     <main class="mt-3">
-      <header
-        class="flex gap-3 justify-center mb-3"
-        v-show="onlineBrowser"
-        v-if="isLoggedIn"
-      >
-        <button
-          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
-          :class="{ 'bg-greenGradient': onlineType == '' }"
-          @click="emit('switchBrowser', '')"
-        >
+      <header class="flex gap-3 justify-center mb-3" v-show="onlineBrowser" v-if="isLoggedIn">
+        <button class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{ 'bg-greenGradient': onlineType == '' }" @click="emit('switchBrowser', '')">
           {{ $t('homepage.newest') }}
         </button>
-        <button
-          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
-          :class="{ 'bg-greenGradient': onlineType == 'user' }"
-          @click="emit('switchBrowser', 'user')"
-        >
+        <button class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{ 'bg-greenGradient': onlineType == 'user' }" @click="emit('switchBrowser', 'user')">
           {{ $t('other.myLists') }}
         </button>
-        <button
-          class="button box-border rounded-full border-[0.1rem] border-solid border-green-800"
-          :class="{ 'bg-greenGradient': onlineType == 'hidden' }"
-          @click="emit('switchBrowser', 'hidden')"
-        >
+        <button class="button box-border rounded-full border-[0.1rem] border-solid border-green-800"
+          :class="{ 'bg-greenGradient': onlineType == 'hidden' }" @click="emit('switchBrowser', 'hidden')">
           <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
         </button>
       </header>
-      <header
-        class="flex gap-3 justify-center mb-3"
-        v-if="!onlineBrowser"
-      >
-        <button
-          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
-          :class="{ 'bg-greenGradient': onlineType == '' }"
-          @click="emit('switchBrowser', '')"
-        >
+      <header class="flex gap-3 justify-center mb-3" v-if="!onlineBrowser">
+        <button class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{ 'bg-greenGradient': onlineType == '' }" @click="emit('switchBrowser', '')">
           {{ $t('editor.levels') }}
         </button>
-        <button
-          class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
-          :class="{ 'bg-greenGradient': onlineType == 'collabs' }"
-          @click="emit('switchBrowser', 'collabs')"
-        >
+        <button class="button rounded-full border-[0.1rem] border-solid border-green-800 px-4 py-0.5"
+          :class="{ 'bg-greenGradient': onlineType == 'collabs' }" @click="emit('switchBrowser', 'collabs')">
           {{ $t('collabTools.collabs') }}
         </button>
       </header>
-      <header
-        class="flex gap-3 justify-between max-sm:flex-col max-sm:items-center"
-        id="browserHeader"
-      >
+      <header class="flex gap-3 justify-between max-sm:flex-col max-sm:items-center" id="browserHeader">
 
         <!-- Search box -->
-        <form
-          action=""
-          class="flex gap-2 items-center"
-          @submit.prevent="doSearch"
-          v-if="!hideSearch && (maxPages != 0 || lastSearch != '')"
-        >
-          <input
-            v-model="SEARCH_QUERY"
-            type="text"
-            max="30"
+        <form action="" class="flex gap-2 items-center" @submit.prevent="doSearch"
+          v-if="!hideSearch && (maxPages != 0 || lastSearch != '')">
+          <input v-model="SEARCH_QUERY" type="text" max="30"
             class="px-3 w-64 h-11 text-xl bg-white bg-opacity-10 rounded-full"
-            :placeholder="$t('other.search')+'...'"
-          />
-          <button
-            type="submit"
-            class="box-border rounded-full bg-greenGradient"
-          >
+            :placeholder="$t('other.search') + '...'" />
+          <button type="submit" class="box-border rounded-full bg-greenGradient">
             <img src="@/images/searchOpaque.svg" alt="" class="p-2 w-11" />
           </button>
         </form>
 
         <!-- Refresh Button -->
-        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()" v-if="refreshButton && isOnline && LISTS.length > 0 && !loadFailed">
-          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{ $t('other.refresh') }}</label>
+        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()"
+          v-if="refreshButton && isOnline && LISTS.length > 0 && !loadFailed">
+          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{
+            $t('other.refresh') }}</label>
         </button>
 
         <!-- Page Switcher -->
@@ -361,40 +343,23 @@ window.addEventListener("scroll", infiniteScroll)
           <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
             <img src="@/images/showCommsL.svg" class="w-4" alt="" />
           </button>
-          <button
-            class="w-8 bg-white bg-opacity-5 rounded-md button"
-            :class="{ 'bg-greenGradient': PAGE == 0 }"
-            @click="switchPage(0)"
-          >
+          <button class="w-8 bg-white bg-opacity-5 rounded-md button" :class="{ 'bg-greenGradient': PAGE == 0 }"
+            @click="switchPage(0)">
             1
           </button>
 
-          <hr
-            v-if="PAGE! > 3 && maxPages > 6"
-            class="w-1 h-4 rounded-full border-none bg-greenGradient"
-          />
+          <hr v-if="PAGE! > 3 && maxPages > 6" class="w-1 h-4 rounded-full border-none bg-greenGradient" />
 
-          <button
-            class="w-8 bg-white bg-opacity-5 rounded-md button"
-            :class="{ 'bg-greenGradient': index - 1 == PAGE }"
-            @click="switchPage(index - 1)"
-            v-for="index in pagesArray"
-          >
+          <button class="w-8 bg-white bg-opacity-5 rounded-md button" :class="{ 'bg-greenGradient': index - 1 == PAGE }"
+            @click="switchPage(index - 1)" v-for="index in pagesArray">
             {{ index }}
           </button>
 
-          <hr
-            v-if="PAGE! < maxPages - 4 && maxPages > 6"
-            class="w-1 h-4 rounded-full border-none bg-greenGradient"
-          />
+          <hr v-if="PAGE! < maxPages - 4 && maxPages > 6" class="w-1 h-4 rounded-full border-none bg-greenGradient" />
 
           <!-- Last page -->
-          <button
-            v-if="maxPages > 6"
-            class="w-8 bg-white bg-opacity-5 rounded-md button"
-            :class="{ 'bg-greenGradient': PAGE == maxPages - 1 }"
-            @click="switchPage(maxPages - 1)"
-          >
+          <button v-if="maxPages > 6" class="w-8 bg-white bg-opacity-5 rounded-md button"
+            :class="{ 'bg-greenGradient': PAGE == maxPages - 1 }" @click="switchPage(maxPages - 1)">
             {{ maxPages }}
           </button>
 
@@ -406,61 +371,45 @@ window.addEventListener("scroll", infiniteScroll)
       </header>
       <main class="flex flex-col gap-3 items-center mt-6">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
-        <div
-          v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
-          class="flex flex-col gap-3 justify-center items-center"
-          >
+        <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
+          class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/savedMobHeader.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">{{ $t('other.noSavedLevels') }}</p>
           <RouterLink to="/random">
-            <button
-              class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
-            >
+            <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
               <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
             </button>
           </RouterLink>
         </div>
 
         <!-- No saved collabs -->
-        <div
-          v-else-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == 'collabs'"
-          class="flex flex-col gap-3 justify-center items-center"
-          >
+        <div v-else-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == 'collabs'"
+          class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/collabDudes.svg" alt="" class="w-72 opacity-25" />
           <div class="text-center">
-            <p class="text-2xl text-yellow-200 opacity-90">{{ $t('other.comingSoon') }}</p>
-            <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
+          <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
             <p class="text-sm opacity-70">{{ $t('collabTools.noSavedSub') }}</p>
           </div>
           <RouterLink to="/editor">
-            <button
-              class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
-            >
-              <img src="@/images/editorMobHeader.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('collabTools.startBuilding') }}
+            <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
+              <img src="@/images/editorMobHeader.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{
+                $t('collabTools.startBuilding') }}
             </button>
           </RouterLink>
         </div>
-      
+
         <!-- No results BG -->
-        <div
-          v-else-if="searchNoResults && LISTS.length == 0 && !loading"
-          class="flex flex-col gap-3 justify-center items-center"
-        >
+        <div v-else-if="searchNoResults && LISTS.length == 0 && !loading"
+          class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
         </div>
 
         <!-- Loading error BG -->
-        <div
-          v-else-if="loadFailed && !loading"
-          class="flex flex-col gap-3 justify-center items-center"
-        >
+        <div v-else-if="loadFailed && !loading" class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
-          <button
-            class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
-            @click="refreshBrowser()"
-          >
+          <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
             <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />{{ $t('other.reload') }}
           </button>
         </div>
@@ -472,11 +421,9 @@ window.addEventListener("scroll", infiniteScroll)
         </div>
 
         <!-- No lists/comments BG -->
-        <div
-          v-else-if="LISTS.length == 0 && !searchNoResults && !loading"
-          class="flex flex-col gap-3 justify-center items-center"
-        >
-          
+        <div v-else-if="LISTS.length == 0 && !searchNoResults && !loading"
+          class="flex flex-col gap-3 justify-center items-center">
+
           <div class="flex flex-col gap-6 items-center" v-if="onlineType != 'comments'">
             <img src="@/images/listEmpty.svg" alt="" class="w-48 opacity-25" />
             <p class="text-xl opacity-90">{{ $t('other.noListsHere') }}</p>
@@ -487,28 +434,16 @@ window.addEventListener("scroll", infiniteScroll)
             <p class="text-xl opacity-90">{{ $t('other.noCommentsHere') }}</p>
           </div>
 
-          <button
-            class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient"
-            @click="refreshBrowser()"
-          >
-            <img src="@/images/replay.svg" class="box-border p-1 w-10 text-2xl" alt="" id="listRefreshButton" />{{ $t('other.reload') }}
+          <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
+            <img src="@/images/replay.svg" class="box-border p-1 w-10 text-2xl" alt="" id="listRefreshButton" />{{
+              $t('other.reload') }}
           </button>
         </div>
 
         <!-- Previews -->
-        <component
-          :is="component"
-          class="min-w-full listPreviews"
-          v-for="(list, index) in LISTS"
-          v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index*PAGE"
-          :save="list"
-          :user-array="USERS"
-          :index="index"
-          :is-pinned="false"
-          @remove-level="removeFavoriteLevel"
-          :key="Math.random()"
-        />
+        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
+          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index"
+          :is-pinned="false" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
       </main>
     </main>
   </section>

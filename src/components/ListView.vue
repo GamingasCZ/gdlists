@@ -123,7 +123,7 @@ function main() {
         LIST_COL.value = listColors
         
         // Saturation 0
-        if (LIST_COL?.value?.[0]) LIST_COL.value[0] = 0
+        if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
 
         if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
           modifyListBG(LIST_COL.value);
@@ -292,7 +292,7 @@ const saveCollab = (ind: number) => {
       memberCount: c[2].length,
       timestamp: Date.now(),
       collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
-      listID: PRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden
+      listID: [PRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)

@@ -51,12 +51,16 @@ const doFavoriteLevel = () => {
   } else {
     favesIDs.push(props.levelID!);
 
+    
     let isCollab = typeof props.creator == "object";
+    let levelCreator
+    if (isCollab) levelCreator = props.creator?.[3] ? props.creator[0][0].name : props.creator[0][0]
+    else levelCreator = props.creator
 
     // TODO: add proper list name (list name may not always be sex)
     faves.push({
       levelName: props.levelName,
-      creator: isCollab ? props.creator[0][0] : (props.creator as string),
+      creator: levelCreator,
       levelColor: CARD_COL.value?.hex(),
       levelID: props.levelID!,
       levelDiff: props.difficulty,
