@@ -6,6 +6,36 @@ $returnData = [];
 
 
 switch (array_keys($_GET)[0]) {
+    case "list": {
+        $levelDataReq = post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>25,"str"=>$_GET["id"]], []);
+        if ($levelDataReq == -1) { // No levels found
+            http_response_code(404);
+            die(-1);
+        }
+
+        $allLevels = [];
+        $fetchData = explode("#",$levelDataReq);
+        $levelData = explode("|", $fetchData[0]);
+        $userData = explode("|", $fetchData[1]);
+        foreach ($levelData as $level) {
+            $singleLevel = explode(":", $level);
+            $author;
+            foreach ($userData as $name) { // Player ID from levelData search in names
+                if (preg_match(sprintf("/^%s/", $singleLevel[7]), $name) == 1) $author = explode(":", $name)[1];
+            }
+
+            array_push($allLevels, [
+                "id" => $singleLevel[1],
+                "name" => $singleLevel[3],
+                "author" => $author,
+                "difficulty" => ((int) $singleLevel[21])*10 + $singleLevel[11]/10, // isDemon*10 + weird ass rubrub difficulty thingy/10
+                "cp" => ((int) $singleLevel[27] > 0) + ((int) $singleLevel[29] > 0) + ((int) $singleLevel[31] > 0)
+            ]);
+        }
+
+        $returnData = array_slice($allLevels, 0, 50);
+        break;
+    }
     case "id": {
         $levelDataReq = post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>0,"str"=>$_GET["id"]], []);
         if ($levelDataReq == -1) { // No levels found
