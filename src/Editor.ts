@@ -80,6 +80,7 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     document.documentElement.style.setProperty("--siteBackground","")
     document.documentElement.style.setProperty("--primaryColor","")
     document.documentElement.style.setProperty("--secondaryColor","")
+    document.documentElement.style.setProperty("--brightGreen","")
     return
   }
   
@@ -109,6 +110,10 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
   document.documentElement.style.setProperty(
     "--secondaryColor",
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
+  );
+  document.documentElement.style.setProperty(
+    "--brightGreen",
+    chroma(chroma.hsl(newColors[0], 0.535, 0.637)).hex()
   );
 
   (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute(

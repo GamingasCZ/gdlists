@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { setLanguage } from "./locales";
 import { SETTINGS } from "./siteSettings";
 import { useI18n } from "vue-i18n";
+import { nextTick, ref } from "vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,8 +55,16 @@ const router = createRouter({
 
 router.afterEach(() => window.scrollTo(0,0))
 
+
+export const loadingProgress = ref(0)
+let loadStart: number
 router.beforeEach(async () => {
-  setLanguage(SETTINGS.value.language)
+
+  // Start loading bar
+  loadingProgress.value = 0
+  loadStart = setTimeout(() => {
+    loadingProgress.value = 99
+  }, 5)
   
   document.documentElement.style.setProperty("--siteBackground", "");
 
@@ -69,6 +78,7 @@ router.beforeEach(async () => {
     setTimeout(() => {
       document.documentElement.style.setProperty("--primaryColor", "");
       document.documentElement.style.setProperty("--secondaryColor", "");
+      document.documentElement.style.setProperty("--brightGreen", "");
     }, 150);
 
     setTimeout(() => {
@@ -76,5 +86,11 @@ router.beforeEach(async () => {
     }, 300);
   }
 });
+
+// Finish loading bar
+router.beforeResolve(() => {
+  clearTimeout(loadStart)
+  loadingProgress.value = 100
+})
 
 export default router

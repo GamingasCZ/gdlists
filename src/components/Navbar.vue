@@ -6,7 +6,7 @@ import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
-import router from "@/router";
+import router, { loadingProgress } from "@/router";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -65,6 +65,7 @@ onMounted(() => {
 
   ro.observe(document.querySelectorAll(".websiteLink")[scrollerInd.value]);
   if (router.currentRoute.value.name == "home") scrollerHome()
+
 })
 
 const modScrollerWidth = (e: Event) => {
@@ -168,5 +169,14 @@ const localStorg = ref(hasLocalStorage())
         id="settingsMenu"
       />
     </Transition>
+
+    <!-- Loading bar -->
+    <div class="absolute left-0 -bottom-1 w-full h-1 opacity-100 transition-opacity bg-lof-200 -z-30" :class="{'!opacity-0': loadingProgress == 100}">
+      <div class="absolute h-full bg-lof-400 transition-[width] w-0 ease-out" :class="{'duration-0': loadingProgress == 0, 'duration-200': loadingProgress == 100, 'duration-[10s]': loadingProgress == 99}" :style="{width: `${loadingProgress}%`}"></div>
+    </div>
   </nav>
 </template>
+
+<style>
+
+</style>

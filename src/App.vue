@@ -6,6 +6,7 @@ import { onMounted, ref } from "vue";
 import cookier from "cookier";
 import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
+import { langIndex, setLanguage } from "./locales";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -31,6 +32,7 @@ if (hasLocalStorage()) {
     localStorage.setItem("settings", JSON.stringify(loadedSettings))
   }
   SETTINGS.value = loadedSettings
+  if (langIndex.value != SETTINGS.value.language) setLanguage(SETTINGS.value.language)
 }
 
 const loggedIn = ref<boolean>(false);
