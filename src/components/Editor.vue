@@ -406,7 +406,9 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     />
   </DialogVue>
 
-  <LevelImportPopup @close-popup="importDialogOpen = false" v-if="importDialogOpen" />
+  <DialogVue :open="importDialogOpen" @close-popup="importDialogOpen = false">
+    <LevelImportPopup @close-popup="importDialogOpen = false" @add-level="addLevel($event)" />
+  </DialogVue>
 
   <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>
 
@@ -564,7 +566,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     </div>
 
     <header
-      class="sticky -top-8 z-10 flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-3 py-2"
+      class="sticky -top-8 z-10 flex w-full flex-row items-center justify-between bg-[url(../images/headerBG.webp)] px-2 py-2"
       id="editorHeader"
     >
       <span class="text-2xl font-black">{{ $t('editor.levels') }}</span>

@@ -137,7 +137,15 @@
     "searchTitle": "Hledat level",
     "switchTypeTitle": "Přepnout typ levelu",
     "moveUpTitle": "Přesunout level nahoru",
-    "moveDownTitle": "Přesunout level dolů"
+    "moveDownTitle": "Přesunout level dolů",
+    "importLevels": "Import levelů",
+    "iglists": "Ze hry",
+    "iglHelp": "Pro import, zadej ID listu z Geometry Dashe.",
+    "idlist": "Ze seznamu ID",
+    "idlistHelp": "Vlož ID levelů. Mohou být odděleny čímkoliv, až na čísla.",
+    "tables": "Z tabulek",
+    "tablesHelp": "Importuj tabulku ve formátu .csv. CSV soubor lze exportovat ve všech tabulkových procesorech.",
+    "uploadFile": "Nahrát soubor"
   },
   "other": {
     "lockQuotes": [
@@ -204,7 +212,10 @@
     "delete": "Smazat",
     "links": "Odkazy",
     "cancel": "Zrušit",
-    "accept": "Potvrdit"
+    "accept": "Potvrdit",
+    "import": "Importovat",
+    "back": "Zpět",
+    "add": "Přidat"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

@@ -335,37 +335,6 @@ window.addEventListener("scroll", infiniteScroll)
           <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{
             $t('other.refresh') }}</label>
         </button>
-
-        <!-- Page Switcher -->
-        <div class="flex gap-2 items-center" v-if="maxPages > 1 && usingPagesScrolling">
-          <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
-            <img src="@/images/showCommsL.svg" class="w-4" alt="" />
-          </button>
-          <button class="w-8 bg-white bg-opacity-5 rounded-md button" :class="{ 'bg-greenGradient': PAGE == 0 }"
-            @click="switchPage(0)">
-            1
-          </button>
-
-          <hr v-if="PAGE! > 3 && maxPages > 6" class="w-1 h-4 rounded-full border-none bg-greenGradient" />
-
-          <button class="w-8 bg-white bg-opacity-5 rounded-md button" :class="{ 'bg-greenGradient': index - 1 == PAGE }"
-            @click="switchPage(index - 1)" v-for="index in pagesArray">
-            {{ index }}
-          </button>
-
-          <hr v-if="PAGE! < maxPages - 4 && maxPages > 6" class="w-1 h-4 rounded-full border-none bg-greenGradient" />
-
-          <!-- Last page -->
-          <button v-if="maxPages > 6" class="w-8 bg-white bg-opacity-5 rounded-md button"
-            :class="{ 'bg-greenGradient': PAGE == maxPages - 1 }" @click="switchPage(maxPages - 1)">
-            {{ maxPages }}
-          </button>
-
-          <!-- Page +1 -->
-          <button class="ml-2 button" @click="switchPage(PAGE! + 1)">
-            <img src="@/images/showComms.svg" class="w-4" alt="" />
-          </button>
-        </div>
       </header>
       <main class="flex flex-col gap-3 items-center mt-4">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
@@ -438,10 +407,9 @@ window.addEventListener("scroll", infiniteScroll)
           </button>
         </div>
 
-        <!-- Previews -->
-        <component :is="onlineType == 'comments' ? CommentPreview : (onlineBrowser ? ListPrevElement : FavoritePreview)"
-          class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list" :user-array="USERS" :index="index"
-          :is-pinned="false" @remove-level="removeFavoriteLevel" :key="Math.random()" />
+        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
+          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index"
+          :is-pinned="false" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         <!-- Page Switcher -->
         <div class="flex gap-2 items-center mt-2" v-if="maxPages > 1 && usingPagesScrolling">
@@ -473,9 +441,6 @@ window.addEventListener("scroll", infiniteScroll)
             <img src="@/images/showComms.svg" class="w-4" alt="" />
           </button>
         </div>
-        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index"
-          :is-pinned="false" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
       </main>
     </main>
   </section>

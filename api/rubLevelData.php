@@ -4,15 +4,16 @@ header('Access-Control-Allow-Origin: *');
 require("globals.php");
 $returnData = [];
 
-function parseLevelList($response) {
-    if ($levelDataReq == -1) { // No levels found
-        http_response_code(404);
-        die(-1);
-    }
+function parseLevelList($response, $morePages = false) {
+    // if ($response == -1) { // No levels found
+    //     http_response_code(404);
+    //     die(-1);
+    // }
     $allLevels = [];
     $fetchData = explode("#",$response);
     $levelData = explode("|", $fetchData[0]);
     $userData = explode("|", $fetchData[1]);
+    $pagesData = $fetchData[3];
     foreach ($levelData as $level) {
         $singleLevel = explode(":", $level);
         $author;
@@ -25,19 +26,41 @@ function parseLevelList($response) {
             "name" => $singleLevel[3],
             "author" => $author,
             "difficulty" => ((int) $singleLevel[21])*10 + $singleLevel[11]/10, // isDemon*10 + weird ass rubrub difficulty thingy/10
-            "cp" => ((int) $singleLevel[27] > 0) + ((int) $singleLevel[29] > 0) + ((int) $singleLevel[31] > 0)
+            "cp" => ((int) $singleLevel[27] > 0) + ((int) $singleLevel[29] > 0) + ((int) $singleLevel[31] > 0),
+            "platf" => $singleLevel[37] == 5
         ]);
     }
-    return array_slice($allLevels, 0, 50);
+
+    return $morePages ? [$allLevels, explode(":", $pagesData)] : array_slice($allLevels, 0, 50);
+}
+
+function parseLevel($levelString) {
+    global $returnData;
+    $returnData["id"] = $levelString[1];
+    $returnData["name"] = $levelString[3];
+    $returnData["difficulty"] = ((int) $levelString[21])*5 + $levelString[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
+    $returnData["cp"] = ((int) $levelString[27] > 0) + ((int) $levelString[29] > 0) + ((int) $levelString[31] > 0);
+    $returnData["platf"] = $levelString[37] == 5;
 }
 
 switch (array_keys($_GET)[0]) {
     case "list": {
-        $returnData = parseLevelList($levelDataReq = post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>25,"str"=>$_GET["id"]], []));
+        $returnData = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>25,"str"=>$_GET["id"]], []));
         break;
     }
     case "idList": {
-        $returnData = parseLevelList($levelDataReq = post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>10, "str"=>$_GET["list"]], []));
+        $returnData = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>10, "str"=>$_GET["list"]], []));
+        break;
+    }
+    case "userAll": {
+        $accountIDReq = post("https://www.boomlings.com/database/getGJUsers20.php", ["secret"=>"Wmfd2893gb7","str"=>$_GET["username"]], []);
+        if ($accountIDReq == "-1") die("-1");
+        $playerID = explode(":", $accountIDReq)[3];
+
+        list($returnData, $pages) = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5, "str"=>$playerID], []), true);
+        for ($i=0; $i < ceil($pages[0]/$pages[2]); $i++) { 
+            $returnData = array_merge($returnData, parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5,"page"=>($i), "str"=>$playerID], []), false));
+        }
         break;
     }
     case "id": {
@@ -49,11 +72,8 @@ switch (array_keys($_GET)[0]) {
 
         $levelData = explode(":", $levelDataReq);
         
-        $returnData["id"] = $levelData[1];
-        $returnData["name"] = $levelData[3];
         $returnData["author"] = $levelData[54];
-        $returnData["difficulty"] = ((int) $levelData[21])*10 + $levelData[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
-        $returnData["cp"] = ((int) $levelData[27] > 0) + ((int) $levelData[29] > 0) + ((int) $levelData[31] > 0);
+        parseLevel($levelData);
         break;
     }
     case "levelName": {
@@ -71,10 +91,7 @@ switch (array_keys($_GET)[0]) {
             if (preg_match(sprintf("/^%s/", $levelData[7]), $level) == 1) $returnData["author"] = explode(":", $level)[1];
         }
 
-        $returnData["id"] = $levelData[1];
-        $returnData["name"] = $levelData[3];
-        $returnData["difficulty"] = ((int) $levelData[21])*5 + $levelData[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
-        $returnData["cp"] = ((int) $levelData[27] > 0) + ((int) $levelData[29] > 0) + ((int) $levelData[31] > 0);
+        parseLevel($levelData);
         break;
     }
     case "levelMaker": {
@@ -95,10 +112,7 @@ switch (array_keys($_GET)[0]) {
             if (preg_match(sprintf("/^%s/", $levelData[7]), $level) == 1) $returnData["author"] = explode(":", $level)[1];
         }
 
-        $returnData["id"] = $levelData[1];
-        $returnData["name"] = $levelData[3];
-        $returnData["difficulty"] = ((int) $levelData[21])*5 + $levelData[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
-        $returnData["cp"] = ((int) $levelData[27] > 0) + ((int) $levelData[29] > 0) + ((int) $levelData[31] > 0);
+        parseLevel($levelData);
         break;
     }
     case "userSearch": {
@@ -118,10 +132,7 @@ switch (array_keys($_GET)[0]) {
                 $returnData["author"] = $_GET["userSearch"];
                 
                 $levelData = explode(":", $level);
-                $returnData["id"] = $levelData[1];
-                $returnData["name"] = $levelData[3];
-                $returnData["difficulty"] = ((int) $levelData[21])*5 + $levelData[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
-                $returnData["cp"] = ((int) $levelData[27] > 0) + ((int) $levelData[29] > 0) + ((int) $levelData[31] > 0);
+                parseLevel($levelData);
             }
         }
         break;

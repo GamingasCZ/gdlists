@@ -182,6 +182,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
           
           levelList.value.levels[props.index!].levelID = level.id;
           levelList.value.levels[props.index!].levelName = level.name;
+          levelList.value.levels[props.index!].platf = level.platf;
+          isPlatformer.value = level.platf
     
           modifyCreator(level.author)
     

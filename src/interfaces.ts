@@ -190,6 +190,7 @@ export interface LevelSearchResponse {
   author: string;
   difficulty: number;
   cp: number;
+  platf: boolean
 }
 
 export interface userDataFetchResponse {
