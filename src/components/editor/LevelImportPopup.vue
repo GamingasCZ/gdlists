@@ -72,14 +72,14 @@ const addLevels = () => {
       <div class="">
         <h2 class="text-xl font-bold text-center">{{ $t('editor.iglists') }}</h2>
         <form class="grid grid-cols-2 justify-items-center items-center h-full text-center" @submit.prevent="findIngame($event.target[0].value == 'on', $event.target[2].value)">
-          <div class="flex flex-col gap-4 justify-center items-start">
+          <fieldset class="flex flex-col gap-4 justify-center items-start">
             <div>
-              <input type="checkbox" id="impList"><label for="impList">List</label>
+              <input type="radio" name="ingame" id="impList"><label for="impList">List</label>
             </div>
             <div>
-              <input type="checkbox" id="impUser"><label for="impUser">Uživatel</label>
+              <input type="radio" name="ingame" id="impUser"><label for="impUser">Uživatel</label>
             </div>
-          </div>
+          </fieldset>
           <div class="flex flex-col gap-2 items-center">
             <input class="py-1 pl-3 max-w-[40vw] bg-white bg-opacity-20 rounded-md" maxlength="20" role="spinbutton"
               :placeholder="'ID listu'" type="text">
