@@ -65,7 +65,8 @@ function addFormatting(type: number) {
 <template>
   <section
     class="absolute top-1/2 left-1/2 flex h-[30rem] max-h-[95%] w-[60rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
-  >
+    @click.stop=""
+    >
     <div class="relative mb-1 h-max">
       <h2 class="text-xl font-bold text-center">{{ editorTitle }}</h2>
       <img
