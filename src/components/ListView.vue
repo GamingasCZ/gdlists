@@ -284,7 +284,6 @@ const saveCollab = (ind: number) => {
   else { // Nesmazat collab, naopak přidat hihi :D
     let c: CollabData = LIST_DATA.value?.data.levels[ind].creator
     let collab: SavedCollab = {
-      collabHost: c[0].name,
       levelID: LIST_DATA.value?.data.levels[ind].levelID,
       collabID: Math.floor(Math.random() * 1000000),
       collabName: LIST_DATA.value?.data.levels[ind].levelName,
