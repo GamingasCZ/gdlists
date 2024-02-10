@@ -46,16 +46,6 @@ const screenWidth = ref(window.innerWidth)
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
-      {{ $t("settingsMenu.scrolling") }}
-      <select name="paging" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.scrolling">
-        <option :value="0">{{ $t("settingsMenu.infinite") }}</option>
-        <option :value="1">{{ $t("settingsMenu.pages") }}</option>
-      </select>
-    </section>
-
-    <section
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
-    >
       {{ $t("settingsMenu.language") }}
       <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.language" @change="setLanguage(SETTINGS.language)">
         <option :value="0">{{ $t("settingsMenu.czech") }}</option>

@@ -63,11 +63,15 @@ const localStorg = ref(hasLocalStorage())
   </div>
 
   <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
-    <form action="./browse/lists" method="get" class="flex gap-2 items-start text-white">
-      <div>
+    <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
+      <div class="relative">
         <input type="text" name="q"
           class="px-1 py-2 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
           :placeholder="$t('homepage.searchLists')" />
+
+        <RouterLink to="/random" class="absolute top-3 right-3 z-10 min-w-max button selectOutline">
+          <img src="../images/dice.svg" alt="" class="w-6" />
+        </RouterLink>
 
         <div class="flex gap-2 pt-2 w-full text-base text-white">
           <RouterLink to="/editor" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md grow button bg-lof-300 selectOutline">
@@ -76,9 +80,7 @@ const localStorg = ref(hasLocalStorage())
             }}
           </RouterLink>
           <RouterLink to="/random" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md button grow bg-lof-300 selectOutline">
-            <img src="../images/dice.svg" alt="" class="w-6" />{{
-              $t("homepage.tryLuck")
-            }}
+            <img src="../images/dice.svg" alt="" class="w-6" />Napsat recenzi
           </RouterLink>
         </div>
       </div>

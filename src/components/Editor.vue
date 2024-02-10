@@ -610,14 +610,14 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     >
       <EditorBackup v-if="levelList.levels.length == 0" :backup-data="backupData" @load-backup="loadBackup(); backupData.backupDate = '0'" @remove-backup="removeBackup(); backupData.backupDate = '0'"/>
 
-      <h2 v-if="!levelList.levels.length" class="mt-4">
-        {{ $t('editor.clickAdd1') }}
-        <img
-          class="inline p-1 mx-2 w-10 bg-black bg-opacity-50 rounded-md"
-          src="../images/addLevel.svg"
-        />
-        {{ $t('editor.clickAdd2') }}
-      </h2>
+      <div v-if="!levelList.levels.length" class="mt-4">
+        <h2 class="text-xl text-center">Jak bys rád začal?</h2>
+        <div class="flex flex-col gap-2 items-center">
+          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60"><img src="../images/addLevel.svg" class="w-8" alt="">Přidat level</button>
+          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60"><img src="../images/addfromFaves.svg" class="w-8" alt="">Přidat z uložených</button>
+          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60"><img src="../images/importLevels.svg" class="w-8" alt="">Importovat z GD nebo tabulek</button>
+        </div>
+      </div>
 
       <!-- Levels -->
       <component
@@ -635,7 +635,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
         :is="currentlyOpenedCard == index ? EditorCard : EditorCardHeader"
       />
     </main>
-    <ListSettings />
+    <ListSettings class="hidden" />
 
     <section class="flex gap-3" :class="{'disabled': !isOnline}">
       <button

@@ -6,6 +6,7 @@ import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import { isOnline } from "@/Editor";
+import { onUnmounted } from "vue";
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden" | "collabs"): void;
@@ -17,6 +18,7 @@ const props = defineProps({
   search: String,
   onlineBrowser: { type: Boolean, required: true },
   onlineType: { type: String, default: "", immediate: true },
+  onlineSubtype: { type: String, default: "", immediate: true, },
   isLoggedIn: Boolean,
   hideSearch: { type: Boolean, default: false },
   commentID: { type: String, default: 0 },
@@ -28,15 +30,6 @@ const props = defineProps({
 if (props.browserName) {
   document.title = `${props.browserName} | ${useI18n().t('other.websiteName')}`;
 }
-
-// Infinite scrolling / Pages watch
-const usingPagesScrolling = ref<boolean>(Boolean(SETTINGS.value.scrolling))
-watch(SETTINGS.value, () => {
-  usingPagesScrolling.value = Boolean(SETTINGS.value.scrolling)
-  PAGE.value = 0
-  LISTS.value = []
-  refreshBrowser()
-})
 
 const scrollingStart = (i: number) => i + 2;
 const scrollingBetween = (i: number) => i + PAGE.value! - 1;
@@ -55,9 +48,7 @@ const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
 
 const LISTS_ON_PAGE = 8;
-const PAGE = ref<number>(
-  usingPagesScrolling.value ? (parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1 : 0
-);
+const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
 const USERS = ref<ListCreatorInfo[]>([]);
@@ -66,7 +57,7 @@ const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
-  if (usingPagesScrolling.value) LISTS.value = [] // Do not clear when using infinite scrolling
+  LISTS.value = [] // Do not clear when using infinite scrolling
   PAGE.value = setPage;
   // window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
@@ -111,19 +102,11 @@ function refreshBrowser() {
   if (!props.onlineBrowser) {
     let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][filtered != undefined | 0]
     let ind = props.onlineType == "collabs" | 0
-    if (usingPagesScrolling.value) {
-      LISTS.value = hasSearch[ind].slice(
-        LISTS_ON_PAGE * PAGE.value!,
-        LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
-      );
-    }
-    else {
-      hasSearch[ind].slice(
-        LISTS_ON_PAGE * PAGE.value!,
-        LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
-      ).forEach((x: ListPreview) => LISTS.value!.push(x))
-      infiniteListsLoading = false
-    }
+    LISTS.value = hasSearch[ind].slice(
+      LISTS_ON_PAGE * PAGE.value!,
+      LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
+    );
+    
     maxPages.value = Math.ceil(hasSearch[ind].length / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
     return;
@@ -141,7 +124,8 @@ function refreshBrowser() {
       page: PAGE.value,
       path: "/getLists.php",
       fetchAmount: LISTS_ON_PAGE,
-      sort: 0
+      sort: 0,
+      type: props.onlineSubtype
     }
     if (props?.onlineType) fetchQuery[props.onlineType] = 1
   }
@@ -181,11 +165,7 @@ function refreshBrowser() {
       maxPages.value = res.data[2].maxPage;
       pagesArray.value = listScroll();
 
-      if (usingPagesScrolling.value) LISTS.value = res.data[0];
-      else {
-        res.data[0].forEach((x: ListPreview) => LISTS.value!.push(x))
-        infiniteListsLoading = false
-      }
+      LISTS.value = res.data[0];
 
       emit("refreshedBrowser", LISTS.value.length)
       loading.value = false
@@ -264,11 +244,16 @@ onMounted(() => {
     maxPages.value = Math.ceil(favoriteCollabs.length! / LISTS_ON_PAGE);
     pagesArray.value = listScroll();
   }
+
+  let gotoPage = JSON.parse(sessionStorage.getItem("pageLast")!) ?? [0, 'unknown']
+  if (props.onlineType == gotoPage[1]) PAGE.value = gotoPage[0]
+
   refreshBrowser();
 });
 
 // Changing browser types with browser buttons
 watch(props, (newBrowser) => {
+  console.log("aaa")
   LISTS.value = []
   PAGE.value = 0
   filtered = undefined
@@ -285,6 +270,8 @@ function infiniteScroll() {
     }
   }
 }
+
+onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
 
 window.addEventListener("scroll", infiniteScroll)
 </script>
