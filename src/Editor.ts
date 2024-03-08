@@ -9,7 +9,7 @@ export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
 
 // For demon faces
-export const diffScaleOffsets = [1.085, 1.11, 1.15, 1.2, 1.25]
+export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
 export const diffTranslateOffsets = [0,0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
 export const DEFAULT_LEVELLIST: LevelList = {

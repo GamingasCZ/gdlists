@@ -25,10 +25,16 @@ import LikePopup from "./levelViewer/LikePopup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
-import { hasLocalStorage, viewedPopups } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
+import TagViewerPopup from "./levelViewer/TagViewerPopup.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
+import ViewModePicker from "./global/ViewModePicker.vue";
+import LevelCardTable from "./global/LevelCardTable.vue";
+import Notification from "./global/Notification.vue";
+import LevelCardCompact from "./global/LevelCardCompact.vue";
+
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -173,7 +179,6 @@ const tryJumping = (ind: number, forceJump = false) => {
 const windowHeight = ref(window.innerHeight)
 const cardGuessing = ref(-1)
 const guesses = ref<number[]>([])
-const guessHelpOpened = ref(false)
 const doNextGuess = (result: number) => {
   cardGuessing.value += 1
   guesses.value.push(result)
@@ -218,6 +223,8 @@ const jumpToPopupOpen = ref(false);
 const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
 const likeNotLoggedInOpen = ref(false)
+const guessHelpOpened = ref(false)
+const tagViewerOpened = ref(-1)
 const uploadedDialogShown = ref(0)
 if (hasLocalStorage()) {
   let uploadKey = sessionStorage.getItem("uploadFinished")
@@ -303,12 +310,21 @@ const saveCollab = (ind: number) => {
 
 provide("saveCollab", saveCollab)
 
+const copyStamp = ref(Date.now())
+const copyID = (id: string) => {
+  navigator.clipboard.writeText(id!);
+  copyStamp.value = Date.now()
+};
+provide("idCopyTimestamp", copyID)
+
 </script>
 
 <template>
   <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
     backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
+
+  <Notification :title="$t('level.idCopied')" content="" icon="check" :stamp="copyStamp" />
 
   <DialogVue :open="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false">
     <LikePopup @close-popup="likeNotLoggedInOpen = false" />
@@ -331,6 +347,10 @@ provide("saveCollab", saveCollab)
 
   <DialogVue :open="guessHelpOpened" @close-popup="guessHelpOpened = false">
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
+  </DialogVue>
+
+  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1">
+    <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
   </DialogVue>
   
   <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" @close-popup="uploadedDialogShown = 0">
@@ -386,25 +406,71 @@ provide("saveCollab", saveCollab)
         <CollabViewer v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
       </DialogVue>
 
+      <!-- List view picker -->
+      <ViewModePicker />
+
       <!-- List -->
-      <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
-        class="levelCard"
-        :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
-        v-show="!commentsShowing"
-        v-bind="level"
-        :favorited="favoritedIDs?.includes(level.levelID!)"
-        :level-index="index"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-        :list-name="LIST_DATA?.name!"
-        :translucent-card="LIST_DATA?.data.translucent!" 
-        :disable-stars="false" 
-        :guessing-now="cardGuessing == index"
-        :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-        @vue:mounted="tryJumping(index)"
-        @next-guess="doNextGuess($event)"
-        @open-collab="openCollabTools"
-        @error="listErrorLoading = true"
-      />
+      <div v-if="SETTINGS.levelViewMode == 0 || LIST_DATA.diffGuesser" class="flex flex-col gap-4" v-show="!commentsShowing">
+        <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+          class="levelCard"
+          :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
+          v-bind="level"
+          :favorited="favoritedIDs?.includes(level.levelID!)"
+          :level-index="index"
+          :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+          :list-name="LIST_DATA?.name!"
+          :translucent-card="LIST_DATA?.data.translucent!" 
+          :disable-stars="false" 
+          @vue:mounted="tryJumping(index)"
+          @next-guess="doNextGuess($event)"
+          @open-collab="openCollabTools"
+          @error="listErrorLoading = true"
+        />
+      </div>
+      <div v-else-if="SETTINGS.levelViewMode == 1" class="flex flex-col gap-4">
+        <LevelCardCompact v-for="(level, index) in LIST_DATA?.data.levels"
+          class="levelCard"
+          :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
+          v-bind="level"
+          :favorited="favoritedIDs?.includes(level.levelID!)"
+          :level-index="index"
+          :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+          :list-name="LIST_DATA?.name!"
+          :translucent-card="LIST_DATA?.data.translucent!" 
+          :disable-stars="false" 
+          :guessing-now="cardGuessing == index"
+          :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
+          @vue:mounted="tryJumping(index)"
+          @next-guess="doNextGuess($event)"
+          @open-tags="tagViewerOpened = $event"
+          @open-collab="openCollabTools"
+          @error="listErrorLoading = true"
+        />
+      </div>
+      <div v-else-if="SETTINGS.levelViewMode == 2" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
+        <table class="overflow-auto mx-auto w-full bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
+          <th></th>
+          <th>{{ $t('other.name') }}</th>
+          <th>{{ $t('level.creator') }}</th>
+          <th>ID</th>
+          <th>{{ $t('other.links') }}</th>
+          <th></th>
+          <LevelCardTable v-for="(level, index) in LIST_DATA?.data.levels"
+            class="levelCard"
+            v-bind="level"
+            :favorited="favoritedIDs?.includes(level.levelID!)"
+            :level-index="index"
+            :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+            :list-name="LIST_DATA?.name!"
+            :translucent-card="LIST_DATA?.data.translucent!" 
+            :disable-stars="false" 
+            @vue:mounted="tryJumping(index)"
+            @open-collab="openCollabTools"
+            @open-tags="tagViewerOpened = $event"
+            @error="listErrorLoading = true"
+          />
+        </table>
+      </div>
 
       <!-- Guessing bottom padding -->
       <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != -1 && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>

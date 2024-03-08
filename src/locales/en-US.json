@@ -182,7 +182,10 @@
     "diffResult9": "Imperfect, you'll be grinding map packs as punishment.",
     "diffResult16": "The thousands of hours of dashing are finally paying off!",
     "commDisableHelp": "Comments are disabled on this list!",
-    "failLoad": "The list failed to load!"
+    "failLoad": "The list failed to load!",
+    "pickView1": "Pick the look of lists!",
+    "pickView2": "You can change this anytime in the settings.",
+    "noTags": "Level has no tags"
   },
   "navbar": {
     "editor": "Editor",
@@ -254,7 +257,9 @@
     "delete": "Delete",
     "links": "Links",
     "cancel": "Cancel",
-    "accept": "Save"
+    "accept": "Save",
+    "name": "Name",
+    "info": "Info"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -265,18 +270,19 @@
     "everyMin": "Every {0}m",
     "everySec": "Every {0}s",
     "homepage": "Homepage",
-    "infinite": "Infinite",
     "language": "Language",
     "logout": "Log Out",
-    "pages": "Paged",
-    "scrolling": "Scrolling",
     "iconQuality": "Icon Quailty",
     "noColor": "No Colors",
     "noGenerate": "Disabled",
     "qHigh": "High",
     "qLow": "Low",
     "qMed": "Default",
-    "clickClose": "Clicking outside a dialog closes it"
+    "clickClose": "Clicking outside a dialog closes it",
+    "classic": "Classic",
+    "compact": "Compact",
+    "table": "Table",
+    "viewMode": "Level Styling"
   },
   "help": {
     "Lists": "Lists",

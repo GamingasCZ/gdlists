@@ -5,9 +5,6 @@
     "saved": "Uložené"
   },
   "settingsMenu": {
-    "scrolling": "Listování",
-    "infinite": "Nekonečné",
-    "pages": "Stránky",
     "czech": "Čeština",
     "language": "Jazyk",
     "english": "Angličtina",
@@ -24,7 +21,11 @@
     "qLow": "Nízká",
     "qMed": "Výchozí",
     "qHigh": "Vysoká",
-    "clickClose": "Zavírání dialogů kliknutím mimo"
+    "clickClose": "Zavírání dialogů kliknutím mimo",
+    "viewMode": "Zobrazení levelů",
+    "classic": "Klasické",
+    "compact": "Kompaktní",
+    "table": "Tabulka"
   },
   "homepage": {
     "searchLists": "Hledat seznamy...",
@@ -204,7 +205,9 @@
     "delete": "Smazat",
     "links": "Odkazy",
     "cancel": "Zrušit",
-    "accept": "Potvrdit"
+    "accept": "Potvrdit",
+    "name": "Jméno",
+    "info": "Informace"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -253,7 +256,10 @@
     "diffResult15": "Ty se asi moc nedotýkáš trávníku!",
     "diffResult16": "Přeci jen se ty tisíce hodin dashování k něčemu byly!",
     "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!",
-    "failLoad": "Seznam se nepodařilo načíst!"
+    "failLoad": "Seznam se nepodařilo načíst!",
+    "pickView1": "Vyber si vzhled seznamu!",
+    "pickView2": "Vzhled lze kdykoliv změnit v nastavení.",
+    "noTags": "Level nemá žádné štítky"
   },
   "level": {
     "levelID": "ID levelu",
