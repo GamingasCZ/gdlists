@@ -46,10 +46,11 @@ const screenWidth = ref(window.innerWidth)
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >
-      {{ $t("settingsMenu.scrolling") }}
-      <select name="paging" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.scrolling">
-        <option :value="0">{{ $t("settingsMenu.infinite") }}</option>
-        <option :value="1">{{ $t("settingsMenu.pages") }}</option>
+      {{ $t('settingsMenu.viewMode') }}
+      <select name="viewMode" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.levelViewMode">
+        <option :value="0">{{ $t('settingsMenu.classic') }}</option>
+        <option :value="1">{{ $t('settingsMenu.compact') }}</option>
+        <option :value="2">{{ $t('settingsMenu.table') }}</option>
       </select>
     </section>
 

@@ -12,6 +12,10 @@ const modifyDiffGuesser = (ind: number) => {
   }
 }
 
+const diff = import.meta.env.BASE_URL + `/faces/4.webp`
+const rate = import.meta.env.BASE_URL + `/faces/star.webp`
+
+
 </script>
 
 <template>
@@ -38,7 +42,7 @@ const modifyDiffGuesser = (ind: number) => {
           <span>{{ $t('editor.guess') }}: </span>
           <button @click="modifyDiffGuesser(1)">
             <img
-              src="@/images/faces/4.webp"
+              :src="diff"
               alt=""
               class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
               :class="{ disabled: !levelList.diffGuesser[1] }"
@@ -46,7 +50,7 @@ const modifyDiffGuesser = (ind: number) => {
           </button>
           <button @click="modifyDiffGuesser(2)">
             <img
-              src="@/images/faces/epic.webp"
+              :src="rate"
               alt=""
               class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
               :class="{ disabled: !levelList.diffGuesser[2] }"

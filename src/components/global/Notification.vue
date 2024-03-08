@@ -13,6 +13,9 @@ switch (props.icon) {
     case 'save':
         import(`@/images/save.svg`).then(res => getIcon.value = res.default)
         break;
+    case 'check':
+        import(`@/images/checkThick.svg`).then(res => getIcon.value = res.default)
+        break;
 }
 
 const shown = ref(false)
