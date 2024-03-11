@@ -13,9 +13,14 @@ const router = createRouter({
       component: () => import("@/components/Homepage.vue"),
     },
     {
-      path: "/editor",
+      path: "/make/list",
       name: "editor",
       component: () => import("@/components/Editor.vue"),
+    },
+    {
+      path: "/make/review",
+      name: "writer",
+      component: () => import("@/components/Writer.vue"),
     },
     {
       path: "/browse/:type",
@@ -39,10 +44,15 @@ const router = createRouter({
       component: () => import("@/components/ListView.vue"),
     },
     {
-      path: "/:id/edit",
+      path: "/edit/:type/:id",
       name: "editing",
       props: (route) => ({ listID: route.params.id, editing: true }),
-      component: () => import("@/components/Editor.vue"),
+      component: (route) => {
+        if (route.params.type == "review")
+          import("@/components/Editor.vue")
+        else
+          import("@/components/Editor.vue")
+      },
     },
     {
       path: "/random",

@@ -185,7 +185,7 @@
     "failLoad": "The list failed to load!"
   },
   "navbar": {
-    "editor": "Editor",
+    "editor": "Create",
     "lists": "Browse",
     "saved": "Saved"
   },

@@ -242,7 +242,7 @@ const listActions = (action: string) => {
       toggleListPin()
       break;
     case "editList":
-      router.push(`/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}/edit`)
+      router.push(`/edit/list/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
       break;
     case "mobileExtras":
       mobileExtrasOpen.value = true

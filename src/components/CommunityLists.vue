@@ -8,13 +8,13 @@ import ListPreview from "./global/ListPreview.vue";
 
 const props = defineProps<{
   query: string
-  onlineType: "" | "user" | "hidden"
+  onlineType: "" | "user" | "hidden" | "collabs"
   isLoggedIn: boolean
   browserType: any
 }>();
 
 const contentType = ref(useRouter().currentRoute.value.path.split("/")[2])
-const userLists = ref<"" | "user" | "hidden">(props.onlineType);
+const userLists = ref<"" | "user" | "hidden" | "collabs">(props.onlineType);
 </script>
 
 <template>
@@ -26,6 +26,14 @@ const userLists = ref<"" | "user" | "hidden">(props.onlineType);
     <RouterLink to="/browse/reviews" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': $route.params.type == 'reviews'}">
       <img src="../images/reviews.svg" alt="" class="w-5" />
       <span class="my-2">Recenze</span>
+    </RouterLink>
+    <RouterLink to="/browse/levels" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': $route.params.type == 'reviews'}">
+      <img src="../images/reviews.svg" alt="" class="w-5" />
+      <span class="my-2">Levely</span>
+    </RouterLink>
+    <RouterLink to="/browse/collabs" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': $route.params.type == 'reviews'}">
+      <img src="../images/reviews.svg" alt="" class="w-5" />
+      <span class="my-2">Collaby</span>
     </RouterLink>
   </nav>
 

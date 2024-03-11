@@ -1,6 +1,6 @@
 {
   "navbar": {
-    "editor": "Editor",
+    "editor": "Vytvářet",
     "lists": "Procházet",
     "saved": "Uložené"
   },
@@ -215,7 +215,8 @@
     "accept": "Potvrdit",
     "import": "Importovat",
     "back": "Zpět",
-    "add": "Přidat"
+    "add": "Přidat",
+    "information": "Informace"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
