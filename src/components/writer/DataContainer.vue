@@ -5,12 +5,14 @@ import ContainerSettings from './ContainerSettings.vue';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
+	(e: "moveContainer", by: number): void
 	(e: "hasFocus", elem: HTMLDivElement): void
 	(e: "lostFocus"): void
 }>()
 
 interface Extras {
 	currentSettings: any[]
+	type: string
 }
 
 const props = defineProps<Container & Extras>()
@@ -44,17 +46,24 @@ const closeSettings = (m: MouseEvent) => {
 </script>
 
 <template>
-	<div class="relative group focus-within:outline-inherit hover:outline-[0.1rem] transition-[outline_0.05s] min-h-8 outline-lof-400">
+	<div class="relative group focus-within:outline hover:outline transition-[outline_0.05s] min-h-8 outline-lof-400">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div ref="element" @focus="emit('hasFocus', element!)" @input="showPlaceholder = $el.innerText.length == 0" :contenteditable="canEditText" class="break-words outline-none" :class="childStyling || []">
 		</div>
 		<slot @open-settings="showSettings"></slot>
 
 		<div class="absolute flex flex-col top-[-3px] right-[-31px] box-border">
-			<button @click="showSettings" class="p-0.5 opacity-0 group-focus-within:!opacity-100 group-hover:opacity-100 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
+			<button @click="showSettings" @auxclick="emit('removeContainer')" class="p-0.5 opacity-0 group-focus-within:!opacity-100 group-hover:opacity-100 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
 		</div>
 
-		<ContainerSettings id="containerSettings" v-if="settingsShown" :settings="currentSettings" @remove="emit('removeContainer')" />
+		<ContainerSettings
+			v-if="settingsShown"
+			id="containerSettings"
+			:type="type"
+			:settings-arr="currentSettings"
+			@remove="emit('removeContainer')"
+			@move="emit('moveContainer', $event)"
+		/>
 	</div>
 </template>
 

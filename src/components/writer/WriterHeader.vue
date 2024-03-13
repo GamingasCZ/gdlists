@@ -9,7 +9,7 @@ const emit = defineEmits<{
 <template>
     <section class="flex justify-between items-center p-1 mb-2 h-10 text-white rounded-md bg-greenGradient">
         <div class="flex gap-1">
-            <button class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60">
+            <button class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60" @click="emit('openDialog', 'levels')">
                 <img src="@/images/browseMobHeader.svg" alt="" class="w-6">
                 <img src="@/images/warn.svg" alt="" class="absolute bottom-1 left-5 w-3">
                 <span class="max-sm:hidden">{{ $t('editor.levels') }}</span>
@@ -17,7 +17,7 @@ const emit = defineEmits<{
             <button class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60">
                 <img src="@/images/rating.svg" alt="" class="w-6">
                 <img src="@/images/warn.svg" alt="" class="absolute bottom-1 left-5 w-3">
-                <span class="max-sm:hidden">Hodnocení</span>
+                <span class="max-sm:hidden">{{ $t('reviews.rating') }}</span>
             </button>
             <button class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60" @click="emit('openDialog', 'settings')">
                 <img src="@/images/gear.svg" alt="" class="w-6">

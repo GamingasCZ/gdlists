@@ -84,6 +84,10 @@ const scrollerHome = () => {
 
 const localStorg = ref(hasLocalStorage())
 const editorDropdownOpen = ref(false)
+const openEditorDropdown = () => {
+  editorDropdownOpen.value = true
+  document.body.addEventListener("click", () => editorDropdownOpen.value = false, { once: true, capture: true },)
+}
 
 </script>
 
@@ -104,18 +108,18 @@ const editorDropdownOpen = ref(false)
         :style="{ transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff / scrollerWidth}px)` }">
 
       <!-- Editor -->
-      <button v-if="localStorg" @click="editorDropdownOpen = true" data-ind="1"
+      <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
         class="flex relative flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }" @mousedown="resetList"><img src="../images/editorMobHeader.svg"
+        :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }"><img src="../images/editorMobHeader.svg"
           alt="" class="w-6 group-active:rotate-[20deg] transition-transform" />{{ $t("navbar.editor") }}
         <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full bg-greenGradient" v-if="editorDropdownOpen">
-          <RouterLink to="/make/list" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @vue:mounted="$el.focus()">
+          <RouterLink to="/make/list" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @click="editorDropdownOpen = false">
             <img src="@/images/browseMobHeader.svg" class="w-10 scale-[0.6]" alt="">
-            <span>Seznam</span>
+            <span>{{ $t('other.list') }}</span>
           </RouterLink>
-          <RouterLink to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button">
+          <RouterLink to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @click="editorDropdownOpen = false">
             <img src="@/images/reviews.svg" class="w-10 scale-[0.6]" alt="">
-            <span>Recenzi</span>
+            <span>{{ $t('other.review') }}</span>
           </RouterLink>
         </div>
       </button>

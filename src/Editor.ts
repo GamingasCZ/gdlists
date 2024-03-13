@@ -225,3 +225,14 @@ export function saveBackup(listName: string, hidden: boolean) {
 export const removeBackup = () => {
   localStorage.removeItem("listBackup")
 }
+
+export const shortenYTLink = (link: string) => {
+  // Link is a regular YT link
+  if (link.match(/(watch\?v=)/g)) {
+    return <any>link.match(/(?<=\?v=).+/g);
+  }
+  // Link is most likely a shortened YT link
+  else {
+    return <any>link.match(/(?<=youtu.be\/).+/g);
+  }
+}

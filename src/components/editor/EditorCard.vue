@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { levelList, deleteLevel, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
+import { levelList, deleteLevel, diffScaleOffsets, diffTranslateOffsets, shortenYTLink } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, onMounted, ref } from "vue";
@@ -84,19 +84,9 @@ const modifyCreator = (e: Event | string) => {
 
 const modifyVideo = (e: Event) => {
   let videoInput = (e.target as HTMLInputElement)
-  let linkMatch: string;
-  // Link is a regular YT link
-  if (videoInput.value.match(/(watch\?v=)/g)) {
-    linkMatch = <any>videoInput.value.match(/(?<=\?v=).+/g);
-  }
-  // Link is most likely a shortened YT link
-  else {
-    linkMatch = <any>videoInput.value.match(/(?<=youtu.be\/).+/g);
-  }
 
-
-  videoInput.value = linkMatch
-  levelList.value.levels[props.index!].video = linkMatch
+  videoInput.value = shortenYTLink(videoInput.value)
+  levelList.value.levels[props.index!].video = videoInput.value
 }
 
 const ytPanelOpen = ref(false)

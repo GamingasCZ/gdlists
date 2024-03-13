@@ -96,7 +96,8 @@
     "switchTypeTitle": "Switch level type",
     "moveUpTitle": "Move level up",
     "moveDownTitle": "Move level down",
-    "pickVideoTitle": "Pick video"
+    "pickVideoTitle": "Pick video",
+    "uploadFile": "Upload File"
   },
   "homepage": {
     "clear": "Clear",
@@ -254,7 +255,13 @@
     "delete": "Delete",
     "links": "Links",
     "cancel": "Cancel",
-    "accept": "Save"
+    "accept": "Save",
+    "review": "Review",
+    "list": "List",
+    "information": "Details",
+    "import": "Import",
+    "back": "Back",
+    "add": "Add"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -362,5 +369,13 @@
     "sortTitle": "Sort members",
     "pasteMemberTitle": "Paste member",
     "hideSidebarTitle": "Hide sidebar"
+  },
+  "reviews": {
+    "reviewName": "Review Title",
+    "rating": "Rating",
+    "addTagline": "Add a tagline",
+    "addParagraph": "Add Paragraph",
+    "clickImgSet": "Click to set an image.",
+    "imgError": "Failed to load the image!"
   }
 }

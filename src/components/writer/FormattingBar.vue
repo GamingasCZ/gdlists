@@ -13,7 +13,8 @@ const actions = [
 		["cursive", "Kurzívou", ""],
 		["underline", "Podtrženě", ""],
 		["strike", "Přeškrtnutě", ""],
-		["color", "Barva písma", ""]
+		["color", "Barva písma", ""],
+		["link", "Odkaz", ""]
 	],
 	[
 		["heading1", "Nadpis 1"],
@@ -28,7 +29,9 @@ const actions = [
 	],
 	[
 		["list", "Seznam"],
+		["showList", "Odkazy na seznam"],
 		["showLevel", "Zobrazit level"],
+		["showCollab", "Zobrazit collab"],
 		["showImage", "Přidat obrázek"],
 		["addVideo", "Přidat video"],
 		["showRating", "Zobrazit hodnocení"],
@@ -39,7 +42,7 @@ const actions = [
 </script>
 
 <template>
-	<section class="flex overflow-auto sticky top-10 z-40 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
+	<section class="flex overflow-auto sticky top-10 z-10 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
 		<div v-for="(action, index) in actions" class="flex gap-1 items-center">
 			<hr v-show="index > 0" class="inline-flex mx-2 mt-2 w-0.5 bg-white border-none opacity-10 aspect-square">
 			<button
@@ -48,7 +51,7 @@ const actions = [
 				@click="index != 2 ? emit('addContainer', button[0]) : emit('setAlignment', button[2])"
 				class="p-1 w-8 rounded-md transition-colors duration-75 hover:bg-opacity-40 hover:bg-black"
 			>
-				<img :src="`${BASE_URL}/formatting/${button[0]}.svg`" class="w-6">
+				<img :src="`${BASE_URL}/formatting/${button[0]}.svg`" class="w-6 pointer-events-none">
 			</button>
 		</div>
 	</section>

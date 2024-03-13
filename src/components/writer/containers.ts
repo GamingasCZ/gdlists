@@ -1,5 +1,8 @@
 import DataContainer from "./DataContainer.vue"
 import ReviewImage from "./ReviewImage.vue"
+import ReviewLevel from "./ReviewLevel.vue"
+import ReviewVideo from "./ReviewVideo.vue"
+import ReviewList from "./ReviewList.vue"
 
 const containers: Containers = {
     default: {
@@ -31,9 +34,10 @@ const containers: Containers = {
         settings: []
     },
     list: {
+        placeholder: "Seznam",
         childStyling: "listChildren",
         nestable: true,
-        canEditText: false,
+        canEditText: true,
         additionalComponents: [],
         settings: []
     },
@@ -68,6 +72,75 @@ const containers: Containers = {
             },
         ]
     },
+    addVideo: {
+        nestable: true,
+        canEditText: false,
+        additionalComponents: [ReviewVideo],
+        settings: [
+            {
+                key: "url",
+                title: "YouTube odkaz",
+                type: 0,
+                default: ""
+            },
+            {
+                key: "description",
+                title: "Popis videa",
+                type: 0,
+                default: ""
+            }
+        ]
+    },
+    showLevel: {
+        nestable: false,
+        canEditText: false,
+        additionalComponents: [ReviewLevel],
+        settings: [
+            {
+                key: "pick",
+                title: "Vybrat level",
+                type: 1,
+                default: 0
+            },
+            {
+                key: "showCollab",
+                title: "Zobrazit collab",
+                type: 2,
+                default: false
+            },
+            {
+                key: "description",
+                title: "Popis levelu",
+                type: 0,
+                default: ""
+            }
+        ]
+    },
+    showList: {
+        nestable: false,
+        canEditText: false,
+        additionalComponents: [ReviewList],
+        settings: [
+            {
+                key: "level",
+                title: "",
+                type: -1,
+                default: false
+            },
+            {
+                key: "pick",
+                title: "Vybrat seznam",
+                type: 1,
+                default: 0
+            },
+            {
+                key: "description",
+                title: "Popis seznamu",
+                type: 0,
+                default: ""
+            }
+        ]
+    },
     twoColumns: {
         styling: "grid grid-cols-2",
         nestable: false,
@@ -86,6 +159,9 @@ export type Containers = {
     heading3: Container
     list: Container
     showImage: Container
+    showLevel: Container
+    showList: Container
+    addVideo: Container
     twoColumns: Container
 }
 

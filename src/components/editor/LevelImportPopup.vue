@@ -73,8 +73,8 @@ const inGameType = ref(0)
       <!-- In-game lists -->
       <div class="">
         <h2 class="text-xl font-bold text-center">{{ $t('editor.iglists') }}</h2>
-        <form class="flex justify-items-start items-center h-full text-center" @submit.prevent="findIngame($event.target[0].value == 'on', $event.target[2].value)">
-          <fieldset class="flex flex-col gap-4 justify-start items-start mr-10">
+        <form class="flex flex-col gap-3 items-center mt-3 h-full text-center" @submit.prevent="findIngame($event.target[0].value == 'on', $event.target[2].value)">
+          <fieldset class="flex gap-4 justify-start items-start">
             <div>
               <input type="radio" v-model="inGameType" :value="0" name="ingame" id="impList"><label for="impList">List</label>
             </div>
@@ -82,7 +82,7 @@ const inGameType = ref(0)
               <input type="radio" v-model="inGameType" :value="1" name="ingame" id="impUser"><label for="impUser">Uživatel</label>
             </div>
           </fieldset>
-          <div class="flex flex-col gap-2 items-start">
+          <div class="flex gap-2 items-start">
             <input class="py-1 pl-3 max-w-[40vw] bg-white bg-opacity-20 rounded-md" maxlength="20" role="spinbutton"
               :placeholder="['ID listu', 'Jméno hráče'][inGameType]" type="text">
             <button type="submit" class="px-3 py-1 font-black text-black rounded-md bg-lof-400 button">{{ $t('other.import') }}</button>

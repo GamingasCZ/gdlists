@@ -22,9 +22,9 @@ loadTags()
 <template>
   <section
     @click.stop=""
-    class="absolute top-1/2 left-1/2 w-max max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
+    class="absolute top-1/2 left-1/2 w-max max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient text-white shadow-lg shadow-black"
   >
-    <div class="relative">
+    <div class="relative m-2">
       <h1 class="text-xl font-bold text-center">{{ $t('editor.tagTitle') }}</h1>
       <img
         src="@/images/close.svg"
@@ -34,7 +34,7 @@ loadTags()
       />
     </div>
     <div
-      class="grid max-h-[85vh] grid-cols-2 gap-1 overflow-y-auto overflow-x-hidden rounded-lg bg-black bg-opacity-20 p-2 sm:grid-cols-3"
+      class="grid max-h-[85vh] grid-cols-2 gap-1 overflow-y-auto p-2 overflow-x-hidden bg-black bg-opacity-20 bg-[url(@/images/fade.webp)] bg-repeat-x sm:grid-cols-3"
     >
       <button
         @click="emit('addTag', [tag - 1, '', ''])"
