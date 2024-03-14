@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import type { ContainerSettings, Containers } from './containers';
+import { inject, ref, watch } from 'vue';
+import type { ContainerSettings } from './containers';
 
 const emit = defineEmits<{
     (e: "remove"): void
     (e: "move", by: number): void
     (e: "pressedButton", key: string): void
+    (e: "hidSettings"): void
 }>()
 
 const containers = inject<Containers>("settingsTitles")
@@ -13,11 +14,42 @@ const containers = inject<Containers>("settingsTitles")
 const props = defineProps<{
     settingsArr: ContainerSettings[]
     type: string
+    shown: boolean
 }>()
+
+watch(props, () => {
+    if (props.shown) showSettings()
+})
+
+const containerSettings = ref<HTMLDivElement>()
+const settingsShown = ref(false)
+
+const showSettings = () => {
+	settingsShown.value = true
+	document.body.addEventListener("click", closeSettings, { capture: true })
+}
+
+const closeSettings = (m: MouseEvent) => {
+  if (m.x == 0) return // Clicking on settingsMenu menu content fricks up mouse pos
+
+  let elPos = containerSettings.value?.getBoundingClientRect()
+  let top = elPos?.y
+  let left = elPos?.x
+  let width = elPos?.width
+  let height = elPos?.height
+  console.log([top, left, width, height])
+  console.log()
+  if (m.x < left || m.x > left + width || m.y < top || m.y > top + height) {
+    settingsShown.value = false
+    document.body.removeEventListener("click", closeSettings, { capture: true })
+    emit('hidSettings')
+    }
+}
+
 </script>
 
 <template>
-    <div class="flex absolute -top-1 -right-1 flex-col gap-3 p-2 rounded-md rounded-tr-none bg-greenGradient">
+    <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 -right-1 z-10 flex-col gap-3 p-2 rounded-md rounded-tr-none bg-greenGradient">
         <div v-for="(setting, key, index) in settingsArr" class="flex flex-col">
             <div class="flex flex-col">
                 <div v-if="containers[type].settings[index].type == 0">
