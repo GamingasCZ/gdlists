@@ -3,6 +3,7 @@
 const emit = defineEmits<{
 	(e: "addContainer", key: string): string
 	(e: "setAlignment", align: string): string
+	(e: "setFormatting", format: string): string
 }>()
 
 const BASE_URL = import.meta.env.BASE_URL
@@ -39,6 +40,17 @@ const actions = [
 	]
 ]
 
+const doAction = (action: number, button: string) => {
+	switch (action) {
+		case 0:
+			emit('setFormatting', button[0]); break;
+		case 2:
+			emit('setAlignment', button[2]); break;
+		case 1 || 3:
+			emit('addContainer', button[0]); break;
+	}
+}
+
 </script>
 
 <template>
@@ -48,7 +60,7 @@ const actions = [
 			<button
 				v-for="button in action"
 				:title="button[1]"
-				@click="index != 2 ? emit('addContainer', button[0]) : emit('setAlignment', button[2])"
+				@click="doAction(index, button)"
 				class="p-1 w-8 rounded-md transition-colors duration-75 hover:bg-opacity-40 hover:bg-black"
 			>
 				<img :src="`${BASE_URL}/formatting/${button[0]}.svg`" class="w-6 pointer-events-none">

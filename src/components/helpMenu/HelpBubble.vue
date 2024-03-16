@@ -13,23 +13,23 @@ const answerOpen = ref<boolean>(false);
 </script>
 
 <template>
-  <div v-if="startSection" class="flex items-center gap-2 opacity-90">
-    <hr class="h-0.5 w-6 rounded-full border-none bg-white" />
+  <div v-if="startSection" class="flex gap-2 items-center opacity-90">
+    <hr class="w-6 h-0.5 bg-white rounded-full border-none" />
     <h2 class="text-xl">{{ startSection }}</h2>
-    <hr class="h-0.5 w-full rounded-full border-none bg-white" />
+    <hr class="w-full h-0.5 bg-white rounded-full border-none" />
   </div>
   <section
     v-show="filterShow"
-    class="rounded-sm bg-white bg-opacity-10 px-2 py-3 text-white"
+    class="px-2 py-3 text-white bg-black bg-opacity-40 rounded-md"
     @click="answerOpen = !answerOpen"
   >
     <div class="relative font-bold">
       <header>{{ question }}</header>
       <button
-        class="absolute top-0 right-0 transition-[scale] duration-75"
+        class="absolute top-1 right-1 transition-[scale] duration-75"
         :style="{ scale: answerOpen ? '1 -1' : '1 1' }"
       >
-        V
+        <img src="@/images/moveDown.svg" class="w-4" alt="">
       </button>
     </div>
     <Transition name="fade">

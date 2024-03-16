@@ -170,7 +170,7 @@
     "coverage": "Zakrytí",
     "alignment": "Zarovnání",
     "gradient": "Přechod",
-    "gdListsBy": "GD Lists by",
+    "gdListsBy": "GD Lists",
     "help": "Nápověda",
     "sourceCod": "Zdrojový kód",
     "search": "Hledat",
@@ -219,7 +219,8 @@
     "information": "Informace",
     "list": "Seznam",
     "review": "Recenzi",
-    "all": "Všechny"
+    "all": "Všechny",
+    "contact": "Kontakt"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

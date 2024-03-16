@@ -75,12 +75,12 @@ const localStorg = ref(hasLocalStorage())
 
         <div class="flex gap-2 pt-2 w-full text-base text-white">
           <RouterLink to="/make/list" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md grow button bg-lof-300 selectOutline">
-            <img src="../images/plus.svg" alt="" class="w-6" />{{
+            <img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
               $t("homepage.createList")
             }}
           </RouterLink>
           <RouterLink to="/make/review" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md button grow bg-lof-300 selectOutline">
-            <img src="../images/dice.svg" alt="" class="w-6" />Napsat recenzi
+            <img src="../images/reviews.svg" alt="" class="w-6" />Napsat recenzi
           </RouterLink>
         </div>
       </div>

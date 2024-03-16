@@ -33,12 +33,10 @@ const closeSettings = (m: MouseEvent) => {
   if (m.x == 0) return // Clicking on settingsMenu menu content fricks up mouse pos
 
   let elPos = containerSettings.value?.getBoundingClientRect()
-  let top = elPos?.y
-  let left = elPos?.x
-  let width = elPos?.width
-  let height = elPos?.height
-  console.log([top, left, width, height])
-  console.log()
+  let top = elPos?.y!
+  let left = elPos?.x!
+  let width = elPos?.width!
+  let height = elPos?.height!
   if (m.x < left || m.x > left + width || m.y < top || m.y > top + height) {
     settingsShown.value = false
     document.body.removeEventListener("click", closeSettings, { capture: true })

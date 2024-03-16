@@ -6,6 +6,7 @@ import ContainerSettings from './ContainerSettings.vue';
 const emit = defineEmits<{
 	(e: "removeContainer"): void
 	(e: "moveContainer", by: number): void
+	(e: "textModified", newText: string)
 	(e: "hasFocus", elem: HTMLDivElement): void
 	(e: "lostFocus"): void
 }>()
@@ -22,12 +23,26 @@ const showPlaceholder = ref(true)
 const element = ref<HTMLDivElement>()
 onMounted(() => element.value?.focus())
 
+const parseText = (e: Event) => {
+	emit('textModified', e.target.innerHTML)
+}
+const a = (e) => console.log(e)
+
 </script>
 
 <template>
 	<div class="relative group focus-within:outline hover:outline transition-[outline_0.05s] min-h-8 outline-lof-400">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
-		<div ref="element" @focus="emit('hasFocus', element!)" @input="showPlaceholder = $el.innerText.length == 0" :contenteditable="canEditText" class="break-words outline-none" :class="childStyling || []">
+		<div
+			ref="element"
+			@focus="emit('hasFocus', element!)"
+			@keyup="parseText"
+			@dragend="a"
+			@input="showPlaceholder = $el.innerText.length == 0"
+			:contenteditable="canEditText"
+			class="break-words outline-none"
+			:class="childStyling || []
+		">
 		</div>
 		<slot></slot>
 

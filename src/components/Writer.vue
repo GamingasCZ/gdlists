@@ -10,6 +10,7 @@ import CONTAINERS from "./writer/containers";
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
+import parseText from "./global/parseEditorFormatting";
 
 
 const reviewData = reactive<any[]>([])
@@ -40,16 +41,33 @@ const addContainer = (key: string) => {
     })
 }
 
-const moveContainer = (index: number, by: number) => {
-    let container = reviewData[index]
-    reviewData.splice(index - 2, 1)
-}
-
 const setAlignment = (index: number, alignment: string) => {
     if (index < 0) return
     reviewData[index].align = alignment
     selectedContainer.value[1]?.focus()
 }
+
+const setFormatting = (format: string) => {
+    let sel = window.getSelection()
+    let el = sel?.focusNode
+    let range = sel?.getRangeAt(0)
+    let signs = {
+        bold: "*",
+        underline: "_",
+        strike: "-",
+        cursive: "/",
+    }
+
+    let val = el?.nodeValue
+    reviewData[0].data = `${val?.slice(0, range?.startOffset)}${signs[format]}${signs[format]}${val?.slice(range?.startOffset, range?.endOffset)}${signs[format]}/${val?.slice(range?.endOffset)}`
+    
+    el.parentElement.innerHTML = reviewData[0].data.replace("**", "<b>").replace("*/", "</b>")
+}
+
+const moveContainer = (index: number, by: number) => {
+    reviewData.splice(index+by, 1, reviewData[index])
+}
+
 
 </script>
 
@@ -86,11 +104,18 @@ const setAlignment = (index: number, alignment: string) => {
                 <button class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
+                    <div>
+                        <input type="text" placeholder="Tagline">
+                    </div>
                 </button>
             </div>
 
             <!-- Formatting -->
-            <FormattingBar @add-container="addContainer" @set-alignment="setAlignment(selectedContainer[0], $event)" />
+            <FormattingBar
+                @set-formatting="setFormatting"
+                @add-container="addContainer"
+                @set-alignment="setAlignment(selectedContainer[0], $event)"
+            />
 
             <!-- Editor -->
             <section class="p-2 text-white rounded-md shadow-md bg-lof-200 shadow-black">
@@ -100,6 +125,7 @@ const setAlignment = (index: number, alignment: string) => {
                     @has-focus="selectedContainer = [index, $event]"
                     @remove-container="reviewData.splice(index, 1)"
                     @move-container="moveContainer(index, $event)"
+                    @text-modified="container.data = $event"
                     :type="container.type"
                     :current-settings="container.settings"
                     :class="[CONTAINERS[container.type].styling ?? '']"
