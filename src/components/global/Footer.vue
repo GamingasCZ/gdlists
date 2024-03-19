@@ -28,7 +28,7 @@ const contactMenuOpen = ref<boolean>(false);
         alt=""
       />
       <div class="ml-3">
-        <span class="mr-1 text-xs leading-tight align-middle opacity-40">(c)</span>
+        <span class="mr-1 text-xs leading-tight align-middle opacity-40">GD Lists by</span>
         <strong>GamingasCZ</strong>
         <p class="text-[0.6rem] opacity-40">2021 - 2024 </p>
       </div>

@@ -31,7 +31,7 @@ const emit = defineEmits(['closePopup'])
         <a href="https://github.com/GamingasCZ/gdlists/issues/new" target="_blank">
             <div class="flex gap-6 p-3 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60">
                 <img src="@/images/editorMobHeader.svg" class="mr-1 w-7" alt="">
-                <span>Nahlásit bug</span>
+                <span>{{ $t('other.reportBug') }}</span>
             </div>
         </a>
     </div>

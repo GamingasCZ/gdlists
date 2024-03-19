@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import ListPreview from '../global/ListPreview.vue';
 
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
+    (e: 'clearButton'): void
 }>()
 
-defineProps<{
+const props = defineProps<{
     settings: object
     index: number
+    buttonState: string
 }>()
+
+watch(props, () => {
+    switch (props.buttonState) {
+        case "pick": props.settings.level = false; break;
+    }
+    emit("clearButton")
+})
 
 const dialogs = inject("openedDialogs")
 
@@ -25,7 +34,7 @@ const BASE_URL = import.meta.env.BASE_URL
                 <h2>Vyber seznam, který chceš zobrazit</h2>
                 <button @click="dialogs.lists = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
                     <img src="@/images/browseMobHeader.svg" alt="" class="w-8">
-                    <span>{{ $t('reviews.pickList') }}</span>
+                    <span>{{ $t('reviews.pickList') }}{{ buttonState }}</span>
                 </button>
             </div>
         </button>

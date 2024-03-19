@@ -30,11 +30,11 @@ const switchTab = (newTab: number) => {
     tab.value = newTab
     state.value = 0
     query.value = ""
-    getLists()
+    getLists(0)
 }
 
 var typeTimeout = 0
-const getLists = () => {
+const getLists = (timeout = 250) => {
     if (typeTimeout > 0) clearTimeout(typeTimeout)
     if (query.value.length < 2 && tab.value == 0) return
     
@@ -55,12 +55,13 @@ const getLists = () => {
             lists.value = []
         })
         typeTimeout = 0
-    }, 250);
+    }, timeout);
 }
 
 const dialogs = inject("openedDialogs")
 const pickList = (listData: ListFetchResponse, creator: string) => {
     listData.creator = creator
+    listData.added = Date.now()
     props.data[dialogs.lists[1]].settings.level = listData
     emit('closePopup')
 }

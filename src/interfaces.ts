@@ -219,3 +219,28 @@ export interface ytSearchDetails {
   links: string[];
   publishTime: string[];
 }
+
+export interface ReviewList {
+  tagline: string
+  containers: object[] 
+  ratings: ReviewRating[]
+  settings: ReviewSettings
+}
+
+export interface ReviewRating {
+  name: number | string
+  value: number
+  color: [number, number, number]
+}
+
+export interface ReviewSettings {
+  style: 0 | 1 | 2
+}
+
+export interface ReviewContainer {
+  type: string
+  data: string
+  align: TEXT_ALIGNMENTS
+  settings: any[]
+}
+export type TEXT_ALIGNMENTS = "left" | "center" | "right" | "justify"

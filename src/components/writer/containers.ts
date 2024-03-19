@@ -97,7 +97,7 @@ const containers: Containers = {
         additionalComponents: [ReviewLevel],
         settings: [
             {
-                key: "pick",
+                key: "pickLevel",
                 title: "Vybrat level",
                 type: 1,
                 default: 0
@@ -106,7 +106,7 @@ const containers: Containers = {
                 key: "showCollab",
                 title: "Zobrazit collab",
                 type: 2,
-                default: false
+                default: true
             },
             {
                 key: "description",
@@ -145,7 +145,13 @@ const containers: Containers = {
         styling: "grid grid-cols-2",
         nestable: false,
         canEditText: false,
-        additionalComponents: [DataContainer],
+        dependentOnChildren: true,
+        additionalComponents: [DataContainer, DataContainer],
+        componentProps: {
+            nestable: false,
+            canEditText: true,
+            settings: []
+        },
         settings: []
     }
 }
@@ -169,7 +175,9 @@ export type Container = {
     placeholder?: string,
     styling?: string,
     childStyling?: string,
+    dependentOnChildren?: boolean
     additionalComponents?: any[],
+    componentProps?: Container,
     nestable: boolean,
     canEditText: boolean,
     settings: ContainerSettings[],

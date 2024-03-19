@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import { levelList } from '@/Editor';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import LevelCard from '../global/LevelCard.vue';
 import type { Level } from '@/interfaces';
 
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
+    (e: 'clearButton'): void
 }>()
 
-defineProps<{
+const props = defineProps<{
     settings: object
+    buttonState: string
 }>()
+
+watch(props, () => {
+    console.log(props)
+    switch (props.buttonState) {
+        case "pickLevel": levelData.value = null; break;
+    }
+    emit("clearButton")
+})
 
 const levelData = ref<Level | null>(null)
 const pickedIndex = ref(0)

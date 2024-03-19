@@ -303,6 +303,10 @@ window.addEventListener("scroll", infiniteScroll)
             :class="{ 'bg-lof-300': onlineType == 'collabs' }" @click="emit('switchBrowser', 'collabs')">
             {{ $t('collabTools.collabs') }}
           </button>
+          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+            :class="{ 'bg-lof-300': onlineType == 'reviews' }" @click="emit('switchBrowser', 'reviews')">
+            Recenze
+          </button>
         </header>
         <!-- Search box -->
         <form action="" class="flex items-center" @submit.prevent="doSearch"
@@ -399,7 +403,7 @@ window.addEventListener("scroll", infiniteScroll)
           :is-pinned="false" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         <!-- Page Switcher -->
-        <div class="flex gap-2 items-center mt-2" v-if="maxPages > 1 && usingPagesScrolling">
+        <div class="flex gap-2 items-center mt-2" v-if="maxPages > 1">
           <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
             <img src="@/images/showCommsL.svg" class="w-4" alt="" />
           </button>

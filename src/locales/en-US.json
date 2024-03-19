@@ -97,7 +97,8 @@
     "moveUpTitle": "Move level up",
     "moveDownTitle": "Move level down",
     "pickVideoTitle": "Pick video",
-    "uploadFile": "Upload File"
+    "uploadFile": "Upload File",
+    "idlist": "From List ID"
   },
   "homepage": {
     "clear": "Clear",
@@ -261,7 +262,10 @@
     "information": "Details",
     "import": "Import",
     "back": "Back",
-    "add": "Add"
+    "add": "Add",
+    "reportBug": "Report Bug",
+    "contact": "Contact",
+    "all": "All"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -376,6 +380,15 @@
     "addTagline": "Add a tagline",
     "addParagraph": "Add Paragraph",
     "clickImgSet": "Click to set an image.",
-    "imgError": "Failed to load the image!"
+    "imgError": "Failed to load the image!",
+    "p1": "Truly the level of all time!",
+    "p2": "Really feels like a Map Pack level!",
+    "p4": "RobTop was drunk again...",
+    "p3": "i love gd cologne... and this level!",
+    "p5": "A fuk map for the ages.",
+    "p6": "top players won't like this one!",
+    "addLevel": "Add Level",
+    "noLevelsYet": "You haven't added any levels yet!",
+    "pickList": "Pick List"
   }
 }

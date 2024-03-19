@@ -32,7 +32,7 @@ const actions = [
 		["list", "Seznam"],
 		["showList", "Odkazy na seznam"],
 		["showLevel", "Zobrazit level"],
-		["showCollab", "Zobrazit collab"],
+		["showCollab", "Přidat uživatele"],
 		["showImage", "Přidat obrázek"],
 		["addVideo", "Přidat video"],
 		["showRating", "Zobrazit hodnocení"],
@@ -46,7 +46,8 @@ const doAction = (action: number, button: string) => {
 			emit('setFormatting', button[0]); break;
 		case 2:
 			emit('setAlignment', button[2]); break;
-		case 1 || 3:
+		case 1:
+		case 3:
 			emit('addContainer', button[0]); break;
 	}
 }

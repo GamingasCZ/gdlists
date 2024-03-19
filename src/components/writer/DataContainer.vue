@@ -2,12 +2,14 @@
 import {onMounted, ref } from 'vue';
 import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
+import { reviewData } from '@/Reviews';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
 	(e: "moveContainer", by: number): void
 	(e: "textModified", newText: string)
 	(e: "hasFocus", elem: HTMLDivElement): void
+	(e: "settingsButton", key: string): void
 	(e: "lostFocus"): void
 }>()
 
@@ -21,25 +23,27 @@ const props = defineProps<Container & Extras>()
 const doShowSettings = ref(false)
 const showPlaceholder = ref(true)
 const element = ref<HTMLDivElement>()
+const ID = Date.now()
 onMounted(() => element.value?.focus())
 
 const parseText = (e: Event) => {
 	emit('textModified', e.target.innerHTML)
 }
-const a = (e) => console.log(e)
+
+onMounted(() => reviewData.containers[ID] = )
 
 </script>
 
 <template>
-	<div class="relative group focus-within:outline hover:outline transition-[outline_0.05s] min-h-8 outline-lof-400">
+	<div class="relative reviewContainer group focus-within:outline hover:outline transition-[outline_0.05s] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren}">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div
 			ref="element"
+			v-if="canEditText"
 			@focus="emit('hasFocus', element!)"
 			@keyup="parseText"
-			@dragend="a"
 			@input="showPlaceholder = $el.innerText.length == 0"
-			:contenteditable="canEditText"
+			:contenteditable="true"
 			class="break-words outline-none"
 			:class="childStyling || []
 		">
@@ -51,9 +55,11 @@ const a = (e) => console.log(e)
 		</div>
 
 		<ContainerSettings
+			v-if="!dependentOnChildren"
 			:type="type"
 			:settings-arr="currentSettings"
 			:shown="doShowSettings"
+			@pressed-button="emit('settingsButton', $event)"
 			@hid-settings="doShowSettings = false"
 			@remove="emit('removeContainer')"
 			@move="emit('moveContainer', $event)"
