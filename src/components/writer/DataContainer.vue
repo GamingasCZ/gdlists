@@ -30,12 +30,10 @@ const parseText = (e: Event) => {
 	emit('textModified', e.target.innerHTML)
 }
 
-onMounted(() => reviewData.containers[ID] = )
-
 </script>
 
 <template>
-	<div class="relative reviewContainer group focus-within:outline hover:outline transition-[outline_0.05s] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren}">
+	<div class="relative reviewContainer group focus-within:outline hover:outline outline-[2px] transition-[outline_0.05s] min-h-8 outline-gray-600" :class="{'!outline-none': dependentOnChildren}">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div
 			ref="element"

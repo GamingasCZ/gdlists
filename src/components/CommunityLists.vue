@@ -4,7 +4,9 @@ import ListBrowser from "./global/ListBrowser.vue";
 import router from "@/router";
 import { useRouter } from "vue-router";
 import ListPreview from "./global/ListPreview.vue";
+import { useI18n } from "vue-i18n";
 
+document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
 const props = defineProps<{
   query: string

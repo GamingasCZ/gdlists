@@ -28,7 +28,7 @@ const BASE_URL = import.meta.env.BASE_URL
 
 <template>
     <div class="mx-auto py-1 w-[30rem] max-w-full overflow-clip">
-        <button v-if="!settings.level" @click="emit('openSettings')" class="flex flex-col items-center p-2 w-full text-xl text-center rounded-md bg-lof-300">
+        <button v-if="!settings.level" @click="emit('openSettings')" class="flex flex-col items-center p-2 w-full text-xl text-center rounded-md bg-lof-200">
             <div>
                 <img :src="`${BASE_URL}/formatting/showList.svg`" class="p-2 mx-auto w-24 opacity-10" alt="">
                 <h2>Vyber seznam, který chceš zobrazit</h2>

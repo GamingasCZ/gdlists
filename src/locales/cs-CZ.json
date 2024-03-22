@@ -397,6 +397,13 @@
     "p3": "i love gd cologne... a tento level!",
     "p4": "RobTopák byl zas namol!",
     "p5": "Fuk mapa na věky věků.",
-    "p6": "top playerům se líbit nebude!"
+    "p6": "top playerům se líbit nebude!",
+    "reviewEditor": "Editor recenze",
+    "bgImage": "Obrázek pozadí",
+    "private": "Soukromá recenze",
+    "description": "Popisek recenze",
+    "points": "Body",
+    "stars": "Hvězdičky",
+    "none": "Žádné"
   }
 }

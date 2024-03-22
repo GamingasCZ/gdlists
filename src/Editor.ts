@@ -36,6 +36,8 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
   }
 }
 
+export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
+
 export function addLevel(values: Level | null) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
@@ -74,18 +76,17 @@ export function testIfImageExists(url: string) {
   });
 }
 
-export const modifyListBG = (newColors: number[] | string, reset = false) => {
+export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
   if (reset) {
-    levelList.value.pageBGcolor = DEFAULT_LEVELLIST.pageBGcolor
     document.documentElement.style.setProperty("--siteBackground","")
     document.documentElement.style.setProperty("--primaryColor","")
     document.documentElement.style.setProperty("--secondaryColor","")
     document.documentElement.style.setProperty("--brightGreen","")
-    return
+    return DEFAULT_LEVELLIST.pageBGcolor
   }
   
   // Default colors
-  if (newColors[1] == 0.37) return
+  // if (newColors[1] == 0.37) return
 
   // Old lists - hex colors
   if (typeof newColors == 'string') newColors = chroma(newColors).hsl()
@@ -95,9 +96,6 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     0.36,
     newColors[2] < 1 ? newColors[2] : newColors[2] / 64
   )
-
-  levelList.value.pageBGcolor = [newColors[0], 0.36, newColors[2]]
-  
 
   document.documentElement.style.setProperty(
     "--siteBackground",
@@ -120,6 +118,8 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     "theme-color",
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
+
+  return [newColors[0], 0.36, newColors[2]] as [number, number, number]
 };
 
 export const prettyDate = (datePassed: number) => {

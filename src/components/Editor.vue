@@ -15,7 +15,7 @@ import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import LevelImportPopup from "./editor/LevelImportPopup.vue";
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX } from "../Editor";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX, getBGcolor } from "../Editor";
 import { ref, onMounted, watch } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
 import chroma from "chroma-js";
@@ -129,7 +129,7 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     isNowHidden = hidden != '0';
     (document.querySelector("input[name='private']") as HTMLInputElement).checked = isNowHidden
 
-    modifyListBG(list.pageBGcolor)
+    levelList.value.pageBGcolor = modifyListBG(list.pageBGcolor)
 }
 
 const tagPopupOpen = ref(false);
@@ -219,7 +219,6 @@ const addFromFavorites = (level: FavoritedLevel) => {
 };
 
 const listHiddenSelected = () => (document.querySelector("input[name='private']") as HTMLInputElement).checked ? 1 : 0
-const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
 const errors = [
   useI18n().t('other.uploadFail'),
@@ -373,7 +372,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
   </DialogVue>
   
   <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false">
-    <BGImagePicker @close-popup="BGpickerPopupOpen = false"/>
+    <BGImagePicker :source="levelList" close-popup="BGpickerPopupOpen = false"/>
   </DialogVue>
 
   <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false">
@@ -524,7 +523,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
         >
           <img src="../images/color.svg" alt="" class="w-5" />
         </button>
-        <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click="modifyListBG([0,0,0], true)">
+        <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click="levelList.pageBGcolor = modifyListBG([0,0,0], true)">
           <img src="@/images/close.svg" class="w-4" alt="">
         </button>
       </div>
@@ -562,7 +561,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
       v-show="bgColorPickerOpen"
       class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
     >
-      <ColorPicker @colors-modified="modifyListBG" :hue="levelList.pageBGcolor[0]" :saturation="0.36" :lightness="levelList.pageBGcolor[2]"/>
+      <ColorPicker @colors-modified="levelList.pageBGcolor = modifyListBG($event, false, false)" :hue="levelList.pageBGcolor[0]" :saturation="0.36" :lightness="levelList.pageBGcolor[2]"/>
     </div>
 
     <header
@@ -635,7 +634,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
         :is="currentlyOpenedCard == index ? EditorCard : EditorCardHeader"
       />
     </main>
-    <ListSettings class="hidden" />
+    <ListSettings />
 
     <section class="flex gap-3" :class="{'disabled': !isOnline}">
       <button

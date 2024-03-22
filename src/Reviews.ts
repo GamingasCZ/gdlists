@@ -5,7 +5,11 @@ export const REVIEW_EXTRAS = {
     tagline: "",
     containers: [],
     ratings: [],
-    settings: []
+    settings: [],
+    rateTheme: 0,
+    private: false,
+    transparentPage: false,
+    disabledRatings: false,
 }
 
 export const reviewData = ref({...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS})

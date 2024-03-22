@@ -14,15 +14,19 @@ import { useI18n } from "vue-i18n";
 import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
 import { reviewData } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
+import ListBackground from "./global/ListBackground.vue";
+import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 
+document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
-const reviewData.containers = reactive<ReviewContainer[]>([])
 const openDialogs = reactive({
     "settings": false,
     "levels": false,
     "tags": false,
     "collabs": false,
-    "lists": [false, 0]
+    "lists": [false, 0],
+    "bgPicker": false,
+    "bgPreview": false
 })
 
 const collabClipboard = ref([])
@@ -68,6 +72,11 @@ const setFormatting = (format: string) => {
     el.parentElement.innerHTML = reviewData.containers[0].data.replace("**", "<b>").replace("*/", "</b>")
 }
 
+const startWriting = () => {
+    addContainer("heading1")
+    addContainer("default")
+}
+
 const moveContainer = (index: number, by: number) => {
     reviewData.containers.splice(index+by, 1, reviewData.containers[index])
 }
@@ -87,9 +96,10 @@ const buttonState = ref("")
 
 <template>
     <main class="p-2">
+        <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
-        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false">
-            <WriterSettings @close-popup="openDialogs.settings = false" />
+        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false" :title="seex">
+            <WriterSettings />
         </DialogVue>
 
         <DialogVue :open="openDialogs.levels" @close-popup="openDialogs.levels = false">
@@ -107,10 +117,13 @@ const buttonState = ref("")
         <DialogVue :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
             <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
         </DialogVue>
+        
+        <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false">
+            <BackgroundImagePicker :source="reviewData" @close-popup="openDialogs.bgPicker = false" />
+        </DialogVue>
 
-
+        
         <Header @open-dialog="openDialogs[$event] = true" />
-
         <section class="max-w-[90rem] mx-auto leadin">
             <!-- Hero -->
             <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
@@ -135,8 +148,8 @@ const buttonState = ref("")
             />
 
             <!-- Editor -->
-            <section class="p-2 text-white rounded-md shadow-md bg-lof-200 shadow-black">
-                <ReviewHelp v-if="!reviewData.containers.length" />
+            <section class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-300 shadow-black': !reviewData.transparentPage, 'outline-4 outline outline-lof-200': reviewData.transparentPage}">
+                <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" />
 
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
@@ -164,7 +177,7 @@ const buttonState = ref("")
                         />
                     </div>
                 </DataContainer>
-                <button @click="addContainer('default')" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed">
+                <button @click="addContainer('default')" v-show="reviewData.containers.length" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span>{{ $t('reviews.addParagraph') }}</span>
                 </button>

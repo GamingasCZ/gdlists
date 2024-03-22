@@ -2,10 +2,9 @@
 import { SETTINGS } from '@/siteSettings';
 import { ref, watch } from 'vue';
 
-
-
 const props = defineProps<{
-    open: boolean
+  open: boolean
+  title: string
 }>()
 
 const emit = defineEmits<{
@@ -29,15 +28,16 @@ watch(props, () => {
 
 <template>
   <Transition name="fade">
-    <dialog
-      ref="main"
-      @click="SETTINGS.dialogClickClose ? emit('closePopup') : ''"
-      tabindex="0"
-      @keyup.esc="emit('closePopup')"
-      class="flex gap-2 justify-center items-center"
-      v-if="open"
-    >
-      <slot />
+    <dialog ref="main" @click="SETTINGS.dialogClickClose ? emit('closePopup') : ''" tabindex="0"
+      @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center" v-if="open">
+      <section @click.stop=""
+        class="absolute top-1/2 left-1/2 flex max-h-[95vh] w-[35rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient text-white shadow-lg shadow-black">
+        <div class="relative m-2">
+          <h1 class="ml-1 text-xl font-bold text-center">{{ props.title }}</h1>
+          <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
+        </div>
+        <slot />
+      </section>
     </dialog>
   </Transition>
 </template>

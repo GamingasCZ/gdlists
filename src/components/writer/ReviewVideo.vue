@@ -38,7 +38,9 @@ const BASE_URL = import.meta.env.BASE_URL
                 :src="`https://www.youtube-nocookie.com/embed/${shortenYTLink(settings.url)}`"
                 title="YouTube video player" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen>
+                allowfullscreen
+                class="rounded-md"
+                >
             </iframe>
             <figcaption>{{ settings.description }}</figcaption>
         </figure>
