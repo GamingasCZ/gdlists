@@ -207,4 +207,69 @@ function clamp($current, $min, $max) {
     return max($min, min($max, $current));
 }
 
+function addLevelsToDatabase($mysqli, $levels, $listID, $userID) {
+    foreach ($levels as $l) {
+        $hash = substr(md5(json_encode($l)), 0, 8);
+        $isCollab = is_array($l["creator"]);
+        $creator;
+        if (!$isCollab) $creator = $l["creator"];
+        else {
+            if (isset($l["creator"][0][0]["name"]))
+                $creator = $l["creator"][0][0]["name"];
+            else
+                $creator = $l["creator"][0][0];
+        }
+
+        try {
+            doRequest($mysqli, "
+    INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, color, video, platformer, uploaderID, listID, hash)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ",
+        [
+            $l["levelName"],
+            $creator,
+            $isCollab ? sizeof($l["creator"][2]) : 0,
+            $l["levelID"],
+            isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
+            isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
+            json_encode($l["color"]),
+            $l["video"] ? $l["video"] : null,
+            isset($l["platf"]) ? $l["platf"] : false,
+            $userID,
+            $listID,
+            $hash
+        ], "ssiiiissiiis");
+        } catch (mysqli_sql_exception $err) {}
+        }
+    }
+
+function isnum($x) {return is_numeric($x);}
+
+function ass() {
+    global $hostname, $username, $password, $database;
+    $mysqli = new mysqli($hostname, $username, $password, $database);
+    
+    $result = $mysqli -> query("SELECT `data`,`id`,`uid` FROM lists");
+    $res = $result -> fetch_all();
+    for ($i=0; $i < sizeof($res); $i++) { 
+        $lev = base64_decode($res[$i][0], true);
+        if ($lev) {
+          $lev = json_decode(htmlspecialchars_decode(gzuncompress($decoded)), true);
+        } else {
+          $lev = json_decode(htmlspecialchars_decode($res[$i][0]), true);
+        }
+        if ($lev == null) continue;
+        $allLevels = [];
+        if (isset($lev["levels"])) {
+            $allLevels = $lev["levels"];
+        } else {
+            foreach (array_filter(array_keys($lev), "isnum") as $l) {
+                array_push($allLevels, $lev[$l]);
+            }
+        }
+
+        addLevelsToDatabase($mysqli, $allLevels, $res[$i][1], $res[$i][2]);
+    }
+}
+
 ?>

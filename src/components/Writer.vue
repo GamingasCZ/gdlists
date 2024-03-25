@@ -3,6 +3,7 @@ import { provide, reactive, ref } from "vue";
 import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
+import WriterRatings from "./writer/WriterRatings.vue";
 import LevelPopup from "./writer/LevelPopup.vue";
 import DataContainer from "./writer/DataContainer.vue"
 import FormattingBar from "./writer/FormattingBar.vue"
@@ -16,6 +17,7 @@ import { reviewData } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
+import { dialog } from "@/components/ui/sizes";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -26,6 +28,7 @@ const openDialogs = reactive({
     "collabs": false,
     "lists": [false, 0],
     "bgPicker": false,
+    "ratings": false,
     "bgPreview": false
 })
 
@@ -35,6 +38,7 @@ provide("openedDialogs", openDialogs)
 const selectedContainer = ref<[number, HTMLDivElement | null]>([-1, null])
 provide("settingsTitles", CONTAINERS)
 
+const selectedLevel = ref()
 
 const addContainer = (key: string) => {
     let settingObject = {}
@@ -98,16 +102,16 @@ const buttonState = ref("")
     <main class="p-2">
         <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
-        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false" :title="seex">
+        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false" :title="$t('other.settings')" :width="dialog.medium">
             <WriterSettings />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.levels" @close-popup="openDialogs.levels = false">
-            <LevelPopup @close-popup="openDialogs.levels = false" />
+        <DialogVue :open="openDialogs.levels" @close-popup="openDialogs.levels = false" :width="dialog.large">
+            <LevelPopup ref="selectedLevel" @close-popup="openDialogs.levels = false" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false">
-            <TagPickerPopup @close-popup="openDialogs.tags = false" />
+        <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium">
+            <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
         </DialogVue>
         
         <DialogVue :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false">
@@ -120,6 +124,10 @@ const buttonState = ref("")
         
         <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false">
             <BackgroundImagePicker :source="reviewData" @close-popup="openDialogs.bgPicker = false" />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.ratings" @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
+            <WriterRatings />
         </DialogVue>
 
         

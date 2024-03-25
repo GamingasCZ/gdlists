@@ -24,12 +24,12 @@ if ($mysqli -> connect_errno) {
 $DATA = json_decode(file_get_contents("php://input"), true);
 
 // Check list
-/*
-$listCheck = checkList($DATA["listData"]);
-if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
-*/
+// $listCheck = checkList($DATA["listData"]);
+// if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
 $fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"]));
+
+
 
 // Password check
 if (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "true") {
@@ -73,6 +73,14 @@ elseif ($DATA["hidden"] == 0 and $DATA["isNowHidden"] == "false") {
 else {
     doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden`='0', `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
     $retListID[0] = $listData["id"];
+}
+
+if ($DATA["hidden"] == 0) {
+    doRequest($mysqli, "DELETE FROM `levels` WHERE `listID`=?", [$DATA["id"]], "i");
+    $levels = json_decode($DATA["listData"], true);
+
+    // hope it's not an old list :D
+    addLevelsToDatabase($mysqli, $levels["levels"], $DATA["id"], $listData["uid"]);
 }
 
 echo json_encode($retListID);

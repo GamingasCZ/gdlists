@@ -14,7 +14,7 @@ export const diffTranslateOffsets = [0,0, "0 -0.05rem", "0 -0.05rem", "0 -0.09re
 
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
-  pageBGcolor: [140, 0.37, 5],
+  pageBGcolor: [140, 0.37, 3],
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
@@ -32,7 +32,7 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
     let randomColor = chroma.hsv(
       Math.floor(Math.random() * 360), 1, Math.random() / 3
     )
-    return hex ? randomColor.hex() : randomColor.hsl()
+    return hex ? randomColor.hex() : randomColor.hsl().slice(0, 3)
   }
 }
 

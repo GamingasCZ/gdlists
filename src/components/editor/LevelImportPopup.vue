@@ -60,15 +60,8 @@ const inGameType = ref(0)
 </script>
 
 <template>
-  <section @click.stop=""
-    class="absolute top-1/2 left-1/2 flex h-[40rem] max-h-[95svh] w-[35rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black">
-    <div class="relative">
-      <h1 class="text-xl font-bold text-center">{{ $t('editor.importLevels') }}</h1>
-      <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
-    </div>
-
     <!-- Main -->
-    <main v-if="page == 0" class="grid grid-rows-[max-content_1fr_max-content_1fr_max-content] mt-3 w-full h-full">
+    <main v-if="page == 0" class="grid gap-4 p-2 pt-0 grid-rows-[max-content_1fr_max-content_1fr_max-content] mt-3 w-full h-full">
 
       <!-- In-game lists -->
       <div class="">
@@ -128,5 +121,4 @@ const inGameType = ref(0)
         <button class="p-1 px-2 text-xl font-bold text-black rounded-md bg-lof-400" @click="addLevels">{{ $t('other.add') }}</button>
       </div>
     </main>
-  </section>
 </template>

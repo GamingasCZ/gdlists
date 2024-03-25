@@ -39,7 +39,12 @@ if ($listData === null) {
 
 $owner = checkListOwnership($mysqli, $listData["uid"]);
 if ($owner) {
-    $listData["data"] = json_decode(htmlspecialchars_decode($listData["data"]));
+    $decoded = base64_decode($listData["data"], true);
+    if ($decoded) {
+      $listData["data"] = json_decode(htmlspecialchars_decode(gzuncompress($decoded)));
+    } else {
+      $listData["data"] = json_decode(htmlspecialchars_decode($listData["data"]));
+    }
     echo json_encode($listData);
 }
 else die("2");

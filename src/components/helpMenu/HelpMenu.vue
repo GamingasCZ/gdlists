@@ -84,12 +84,6 @@ const search = (e: Event) => {
 </script>
 
 <template>
-  <section @click.stop=""
-    class="absolute flex flex-col top-1/2 left-1/2 h-[40rem] max-h-[95svh] w-[40rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient text-white shadow-lg shadow-black">
-    <div class="relative">
-      <h1 class="mt-2 text-xl font-bold text-center">{{ $t('other.help') }}</h1>
-      <img src="@/images/close.svg" alt="" class="absolute top-2 right-2 w-6 button" @click="emit('closePopup')" />
-    </div>
     <div class="p-2">
       <input type="text" :placeholder="$t('other.searchInHelp')"
         class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-md" @input="search" />
@@ -98,5 +92,4 @@ const search = (e: Event) => {
       <HelpBubble v-for="(question, index) in qa" v-bind="question" :filter-show="filteredQuestions[0] == -1 || filteredQuestions.includes(index)
         " />
     </div>
-  </section>
 </template>

@@ -37,7 +37,7 @@ const changeCardColors = (newColors: [number, number, number]) =>
 (levelList.value.levels[props.index!].color = [
   newColors[0],
   0.5,
-  newColors[2] / 64,
+  parseFloat((newColors[2] / 64).toFixed(2)),
 ]);
 
 // Difficulty Picker

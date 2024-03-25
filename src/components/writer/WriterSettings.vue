@@ -5,7 +5,6 @@ import { reviewData } from '@/Reviews';
 import { ref } from 'vue';
 import { inject } from 'vue';
 
-const emit = defineEmits(["closePopup"]);
 const bgColorPickerOpen = ref(false)
 const openDialogs = inject("openedDialogs")
 

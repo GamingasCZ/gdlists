@@ -29,6 +29,7 @@ import { hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
+import { dialog } from "./ui/sizes";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -315,18 +316,18 @@ provide("saveCollab", saveCollab)
     <LikePopup @close-popup="likeNotLoggedInOpen = false" />
   </DialogVue>
   
-  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false">
-    <SharePopup @close-popup="sharePopupOpen = false" :share-text="getURL()" />
+  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.small">
+    <SharePopup :share-text="getURL()" />
   </DialogVue>
   
-  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false">
+  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.jumpTo')">
     <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)"
-      picker-data-type="level" :picker-data="LIST_DATA.data.levels" @close-popup="jumpToPopupOpen = false"
+      picker-data-type="level" :picker-data="LIST_DATA.data.levels"
       :browser-name="$t('listViewer.jumpTo')" :outer-error="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" :outer-error-text="$t('listViewer.noGuessJumping')"/>
   </DialogVue>
 
   <!-- Mobile options popup -->
-  <DialogVue :open="mobileExtrasOpen" @close-popup="mobileExtrasOpen = false">
+  <DialogVue :open="mobileExtrasOpen" @close-popup="mobileExtrasOpen = false" :title="$t('other.options')">
     <MobileExtras @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
   </DialogVue>
 

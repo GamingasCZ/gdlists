@@ -29,8 +29,9 @@ const actions = [
 		["alignJustify", "Zarovnat do bloku", "justify"]
 	],
 	[
-		["list", "Seznam"],
-		["showList", "Odkazy na seznam"],
+		["divisor", "Přidat oddělovač"],
+		["list", "Přidat odrážky"],
+		["showList", "Odkaz na seznam"],
 		["showLevel", "Zobrazit level"],
 		["showCollab", "Přidat uživatele"],
 		["showImage", "Přidat obrázek"],
@@ -57,7 +58,7 @@ const doAction = (action: number, button: string) => {
 <template>
 	<section class="flex overflow-auto sticky top-10 z-10 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
 		<div v-for="(action, index) in actions" class="flex gap-1 items-center">
-			<hr v-show="index > 0" class="inline-flex mx-2 mt-2 w-0.5 bg-white border-none opacity-10 aspect-square">
+			<hr v-show="index > 0" class="inline-flex mx-2 w-0.5 h-6 bg-white border-none opacity-10 aspect-square">
 			<button
 				v-for="button in action"
 				:title="button[1]"

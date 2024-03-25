@@ -44,15 +44,16 @@ const router = createRouter({
       component: () => import("@/components/ListView.vue"),
     },
     {
-      path: "/edit/:type/:id",
+      path: "/edit/list/:id",
       name: "editing",
       props: (route) => ({ listID: route.params.id, editing: true }),
-      component: (route) => {
-        if (route.params.type == "review")
-          import("@/components/Editor.vue")
-        else
-          import("@/components/Editor.vue")
-      },
+      component: () => import("@/components/Editor.vue")
+    },
+    {
+      path: "/edit/review/:id",
+      name: "editingReview",
+      props: (route) => ({ reviewID: route.params.id, editing: true }),
+      component: () => import("@/components/Writer.vue")
     },
     {
       path: "/random",

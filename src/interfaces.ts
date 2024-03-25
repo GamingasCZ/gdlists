@@ -225,11 +225,15 @@ export interface ReviewList {
   containers: object[] 
   ratings: ReviewRating[]
   settings: ReviewSettings
+  rateTheme: number
+  private: boolean
+  transparentPage: boolean
+  disabledRatings: boolean
 }
 
 export interface ReviewRating {
   name: number | string
-  value: number
+  rating: number
   color: [number, number, number]
 }
 

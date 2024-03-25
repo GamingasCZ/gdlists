@@ -4,12 +4,6 @@ const emit = defineEmits(['closePopup'])
 </script>
 
 <template>
-  <section @click.stop=""
-    class="absolute flex flex-col top-1/2 left-1/2 max-h-[95svh] w-[20rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient text-white shadow-lg shadow-black">
-    <div class="relative">
-      <h1 class="mt-2 text-xl font-bold text-center">{{ $t('other.contact') }}</h1>
-      <img src="@/images/close.svg" alt="" class="absolute top-2 right-2 w-6 button" @click="emit('closePopup')" />
-    </div>
     <div class="flex flex-col gap-2 p-2">
         <div class="flex gap-3 items-center">
             <img src="@/images/ggprof.webp" class="w-12 rounded-full" alt="">
@@ -35,5 +29,4 @@ const emit = defineEmits(['closePopup'])
             </div>
         </a>
     </div>
-  </section>
 </template>

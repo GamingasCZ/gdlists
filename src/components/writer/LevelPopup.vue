@@ -25,6 +25,10 @@ const dialogs = inject("openedDialogs")
 
 const limit = computed(() => levelList.value.levels.length >= 10)
 
+defineExpose({
+    openedCard
+})
+
 </script>
 
 <template>

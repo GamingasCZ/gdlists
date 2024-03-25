@@ -30,6 +30,7 @@ import { onBeforeRouteLeave } from "vue-router";
 import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
 import parseText from "./global/parseEditorFormatting";
+import { dialog } from "./ui/sizes";
 
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
@@ -304,7 +305,7 @@ function removeList() {
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data == 3) {
       removeBackup()
-      router.replace('/browse')
+      router.replace('/browse/lists')
     }
     else {
       errorDblclickHelp.value = false
@@ -364,21 +365,19 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 </script>
 
 <template>
-  <DialogVue :open="tagPopupOpen" @close-popup="tagPopupOpen = false">
+  <DialogVue :open="tagPopupOpen" @close-popup="tagPopupOpen = false" :title="$t('editor.tagTitle')">
     <TagPickerPopup
-      @close-popup="tagPopupOpen = false"
       @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
     ></TagPickerPopup>
   </DialogVue>
   
-  <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false">
-    <BGImagePicker :source="levelList" close-popup="BGpickerPopupOpen = false"/>
+  <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false" :title="$t('other.imageSettings')">
+    <BGImagePicker :source="levelList" />
   </DialogVue>
 
-  <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false">
+  <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
     <DescriptionEditor
       :editor-title="$t('editor.descriptionEditor')"
-      @close-popup="descriptionEditorOpen = false"
     />
   </DialogVue>
 
@@ -392,21 +391,19 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     />
   </DialogVue>
 
-  <DialogVue :open="favoriteLevelPickerOpen" @close-popup="favoriteLevelPickerOpen = false">
+  <DialogVue :open="favoriteLevelPickerOpen" @close-popup="favoriteLevelPickerOpen = false" :title="$t('other.savedLevels')">
     <PickerPopup
       v-if="favoriteLevelPickerOpen"
-      :browser-name="$t('other.savedLevels')"
       :outer-error-text="$t('editor.maxLevels')"
       :outer-error="levelList.levels.length >= 50"
-      @close-popup="favoriteLevelPickerOpen = false"
       @select-option="addFromFavorites($event)"
       picker-data="@favorites"
       picker-data-type="favoriteLevel"
     />
   </DialogVue>
 
-  <DialogVue :open="importDialogOpen" @close-popup="importDialogOpen = false">
-    <LevelImportPopup @close-popup="importDialogOpen = false" @add-level="addLevel($event)" />
+  <DialogVue :open="importDialogOpen" @close-popup="importDialogOpen = false" :title="$t('editor.importLevels')">
+    <LevelImportPopup @add-level="addLevel($event)" />
   </DialogVue>
 
   <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>

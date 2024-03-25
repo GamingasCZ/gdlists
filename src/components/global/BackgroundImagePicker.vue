@@ -43,10 +43,6 @@ const setDragboxPos = (e: MouseEvent) => {
 </script>
 
 <template>
-  <section
-    @click.stop=""
-    class="absolute top-1/2 left-1/2 w-[30rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
-  >
     <div
       :style="{
         backgroundImage: loadedImage ? `url('${loadedImage}')` : '',
@@ -57,19 +53,10 @@ const setDragboxPos = (e: MouseEvent) => {
       }"
       class="absolute z-[-1] h-full w-full bg-cover bg-no-repeat opacity-40 blur-md"
     ></div>
-    <div class="relative mb-1 h-max">
-      <h2 class="text-xl font-bold text-center">{{ $t('other.imageSettings') }}</h2>
-      <img
-        src="@/images/close.svg"
-        alt=""
-        class="absolute top-0 right-0 w-6 button"
-        @click="emit('closePopup')"
-      />
-    </div>
 
     <div
       v-if="source.titleImg[0] == ''"
-      class="flex gap-4 items-center p-3 mt-2 bg-blue-600 bg-opacity-30 rounded-md"
+      class="flex gap-4 items-center p-3 m-2 bg-blue-600 bg-opacity-30 rounded-md"
     >
       <img src="@/images/info.svg" alt="" class="w-8" />
       <span v-html="$t('other.imageHelp')"
@@ -78,7 +65,7 @@ const setDragboxPos = (e: MouseEvent) => {
     </div>
     <div
       v-else-if="loadedImage == 'loading'"
-      class="flex flex-col justify-center items-center py-6 mt-2 rounded-md"
+      class="flex flex-col justify-center items-center py-6 m-2 rounded-md"
     >
       <img
         src="@/images/loading.webp"
@@ -89,7 +76,7 @@ const setDragboxPos = (e: MouseEvent) => {
     </div>
     <div
       v-else-if="!loadedImage"
-      class="flex gap-4 items-center p-3 mt-2 bg-red-600 bg-opacity-30 rounded-md"
+      class="flex gap-4 items-center p-3 m-2 bg-red-600 bg-opacity-30 rounded-md"
     >
       <img src="@/images/close.svg" alt="" class="w-8" />
       <span v-html="$t('other.imageLoadFailed')"
@@ -97,7 +84,7 @@ const setDragboxPos = (e: MouseEvent) => {
       >
     </div>
 
-    <main v-else class="flex gap-6 max-sm:flex-col max-sm:items-center">
+    <main v-else class="flex gap-6 m-2 max-sm:flex-col max-sm:items-center">
       <section class="relative w-max h-max">
         <img
           :src="source.titleImg[0]"
@@ -184,5 +171,4 @@ const setDragboxPos = (e: MouseEvent) => {
         </div>
       </section>
     </main>
-  </section>
 </template>

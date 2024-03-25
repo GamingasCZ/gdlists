@@ -3,6 +3,7 @@ import ReviewImage from "./ReviewImage.vue"
 import ReviewLevel from "./ReviewLevel.vue"
 import ReviewVideo from "./ReviewVideo.vue"
 import ReviewList from "./ReviewList.vue"
+import ReviewDivisor from "./ReviewDivisor.vue"
 
 const containers: Containers = {
     default: {
@@ -33,6 +34,27 @@ const containers: Containers = {
         canEditText: true,
         settings: []
     },
+    divisor: {
+        placeholder: "",
+        childStyling: "",
+        nestable: true,
+        canEditText: false,
+        additionalComponents: [ReviewDivisor],
+        settings: [
+            {
+                key: "visible",
+                title: "Viditelný",
+                type: [2],
+                default: true,
+            },
+            {
+                key: "size",
+                title: "Velikost",
+                type: [3, 12, 64],
+                default: 12
+            }
+        ]
+    },
     list: {
         placeholder: "Seznam",
         childStyling: "listChildren",
@@ -49,25 +71,25 @@ const containers: Containers = {
             {
                 key: "url",
                 title: "URL obrázku",
-                type: 0,
+                type: [0],
                 default: ""
             },
             {
                 key: "alt",
                 title: "Alternativní text",
-                type: 0,
+                type: [0],
                 default: ""
             },
             {
                 key: "description",
                 title: "Popis obrázku",
-                type: 0,
+                type: [0],
                 default: ""
             },
             {
                 key: "link",
                 title: "Odkaz",
-                type: 0,
+                type: [0],
                 default: ""
             },
         ]
@@ -80,13 +102,13 @@ const containers: Containers = {
             {
                 key: "url",
                 title: "YouTube odkaz",
-                type: 0,
+                type: [0],
                 default: ""
             },
             {
                 key: "description",
                 title: "Popis videa",
-                type: 0,
+                type: [0],
                 default: ""
             }
         ]
@@ -99,19 +121,19 @@ const containers: Containers = {
             {
                 key: "pickLevel",
                 title: "Vybrat level",
-                type: 1,
+                type: [1],
                 default: 0
             },
             {
                 key: "showCollab",
                 title: "Zobrazit collab",
-                type: 2,
+                type: [2],
                 default: true
             },
             {
                 key: "description",
                 title: "Popis levelu",
-                type: 0,
+                type: [0],
                 default: ""
             }
         ]
@@ -124,19 +146,19 @@ const containers: Containers = {
             {
                 key: "level",
                 title: "",
-                type: -1,
+                type: [-1],
                 default: false
             },
             {
                 key: "pick",
                 title: "Vybrat seznam",
-                type: 1,
+                type: [1],
                 default: 0
             },
             {
                 key: "description",
                 title: "Popis seznamu",
-                type: 0,
+                type: [0],
                 default: ""
             }
         ]
@@ -163,6 +185,7 @@ export type Containers = {
     heading1: Container
     heading2: Container
     heading3: Container
+    divisor: Container
     list: Container
     showImage: Container
     showLevel: Container
@@ -186,6 +209,6 @@ export type Container = {
 export type ContainerSettings = {
     key: string
     title: string
-    type: number
+    type: number[]
     default: any
 }

@@ -48,13 +48,13 @@ function checkList($list) {
     $i = 0;
     foreach ($LIST_KEYS as $key) {
         if (is_array($lens[$i])) { // Range
-            if (!validLenght($data[$LIST_KEYS[$i]], $lens[$i][0], $lens[$i][1])) return doError(2, $i, true);
+            if (!validLenght($data[$LIST_KEYS[$i]], $lens[$i][0], $lens[$i][1])) return doError(21, $i, true);
         }
         elseif ($lens[$i] === 0) continue; // Do not check
         else { // Exact lenght
-            if (!validLenght($data[$LIST_KEYS[$i]], $lens[$i], $lens[$i]+1)) return doError(2, $i, true);
+            if (!validLenght($data[$LIST_KEYS[$i]], $lens[$i], $lens[$i]+1)) return doError(22, $i, true);
         }
-        if (!validType($data[$LIST_KEYS[$i]], $LISTKEY_TYPE[$i], $types[$i])) return doError(2, $i, false);
+        if (!validType($data[$LIST_KEYS[$i]], $LISTKEY_TYPE[$i], $types[$i])) return doError("203".json_encode($data[$LIST_KEYS[$i]]), $i, false);
         $i += 1;
     }
 
@@ -65,13 +65,13 @@ function checkList($list) {
         $i = 0;
         foreach ($LEVEL_KEYS as $key) {
             if (is_array($lens[$i])) { // Range
-                if (!validLenght($level[$key], $lens[$i][0], $lens[$i][1])) return doError(3, $i, true);
+                if (!validLenght($level[$key], $lens[$i][0], $lens[$i][1])) return doError(31, $key, true);
             }
             elseif ($lens[$i] === 0) {$i += 1; continue;} // Do not check
             else { // Exact lenght
-                if (!validLenght($level[$key], $lens[$i], $lens[$i]+1)) return doError(3, $i, true);
+                if (!validLenght($level[$key], $lens[$i], $lens[$i]+1)) return doError(32, $key, true);
             }
-            if (!validType($level[$key], $LEVELKEY_TYPE[$i], $types[$i])) return doError(3, $i, false);
+            if (!validType($level[$key], $LEVELKEY_TYPE[$i], $types[$i])) return doError(33, $key, false);
             $i += 1;
         }
 
@@ -82,25 +82,25 @@ function checkList($list) {
         // else TODO collabs
 
         // Difficulties
-        if (!validLenght($level[$LEVEL_KEYS[5]][0], $DIFF_RANGE[0], $DIFF_RANGE[1])) return doError(5, 0, true);
-        if (!validLenght($level[$LEVEL_KEYS[5]][1], $RATE_RANGE[0], $RATE_RANGE[1])) return doError(5, 1, true);
+        if (!validLenght($level[$LEVEL_KEYS[5]][0], $DIFF_RANGE[0], $DIFF_RANGE[1])) return doError(51, 0, true);
+        if (!validLenght($level[$LEVEL_KEYS[5]][1], $RATE_RANGE[0], $RATE_RANGE[1])) return doError(52, 1, true);
 
         // Tags
         foreach ($level["tags"] as $tag) {
-            if (!validLenght($tag[0], $TAG_COUNT[0], $TAG_COUNT[1])) return doError(6, 0, true);
-            if (!validLenght((string) $tag[1], $TAGNAME_LEN[0], $TAGNAME_LEN[1])) doError(6, 1, true);
-            if (!validLenght($tag[2], $TAGLINK_LEN[0], $TAGLINK_LEN[1])) doError(6, 2, true);
+            if (!validLenght($tag[0], $TAG_COUNT[0], $TAG_COUNT[1])) return doError(61, 0, true);
+            if (!validLenght((string) $tag[1], $TAGNAME_LEN[0], $TAGNAME_LEN[1])) doError(62, 1, true);
+            if (!validLenght($tag[2], $TAGLINK_LEN[0], $TAGLINK_LEN[1])) doError(63, 2, true);
         }
     }
 
-    return 0;
+    return ["levels" => $data["levels"]];
 }
 
 // $seznamek = '{"description":"jak se vede\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nt\n","pageBGcolor":[210,1,0.36,0.0196078431372549],"diffGuesser":[false,true,true],"titleImg":["https://gamingas.wz.cz/gdlists/assets/value-13a863ee.webp",0,"10",1,true],"translucent":true,"levels":[{"levelName":"no tak deleeej","creator":"hhssh","color":[360,0.5,0.5],"levelID":"999999","video":"https://cdnssssssssssss","difficulty":[11,3],"tags":[[1, "", ""]]}]}';
 // echo checkList($seznamek);
 
 function doError($section, $index, $lengthCheck) {
-    return sprintf(">%si%s%s", $section, $index, is_null($lengthCheck) ? "N" : ["T","L"][intval($lengthCheck)]);
+    return sprintf("sec: %s, lev: %s %s", $section, $index, is_null($lengthCheck) ? "null" : ["typ","del"][intval($lengthCheck)]);
 }
 
 function validType($value, $type, $subCheck = []) {

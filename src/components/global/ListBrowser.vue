@@ -253,27 +253,14 @@ onMounted(() => {
 
 // Changing browser types with browser buttons
 watch(props, (newBrowser) => {
-  console.log("aaa")
   LISTS.value = []
   PAGE.value = 0
   filtered = undefined
   refreshBrowser();
 });
 
-let infiniteListsLoading = false
-function infiniteScroll() {
-  if (!infiniteListsLoading && !usingPagesScrolling.value) {
-    let page = document.documentElement
-    if (page.scrollTop + page.clientHeight + page.clientHeight / 2 > page.scrollHeight) {
-      infiniteListsLoading = true
-      switchPage(PAGE.value! + 1)
-    }
-  }
-}
-
 onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
 
-window.addEventListener("scroll", infiniteScroll)
 </script>
 
 <template>
@@ -373,7 +360,7 @@ window.addEventListener("scroll", infiniteScroll)
         </div>
 
         <!-- Loading -->
-        <div v-else-if="loading && usingPagesScrolling" class="flex flex-col gap-4 items-center">
+        <div v-else-if="loading" class="flex flex-col gap-4 items-center">
           <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
           <p class="text-xl text-opacity-40">{{ $t('other.loading') }}...</p>
         </div>

@@ -47,7 +47,12 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     
   } else {
     // Single list
-    $rows["data"] = json_decode(htmlspecialchars_decode($rows["data"]));
+    $decoded = base64_decode($rows["data"], true);
+    if ($decoded) {
+      $rows["data"] = json_decode(htmlspecialchars_decode(gzuncompress($decoded)));
+    } else {
+      $rows["data"] = json_decode(htmlspecialchars_decode($rows["data"]));
+    }
 
     if (isset($_COOKIE["lastViewed"]) && $_COOKIE["lastViewed"] != $rows["id"]) {
       doRequest($mysqli, "UPDATE lists SET views = views+1 WHERE id=?", [$rows["id"]], "i");

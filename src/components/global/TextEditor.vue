@@ -4,12 +4,6 @@ import { ref } from "vue";
 import parseText from "./parseEditorFormatting";
 import striptags from "striptags";
 
-defineProps({
-  editorTitle: String,
-});
-
-const emit = defineEmits(["closePopup"]);
-
 const isPreviewing = ref<boolean>(false);
 
 function addFormatting(type: number) {
@@ -63,19 +57,7 @@ function addFormatting(type: number) {
 </script>
 
 <template>
-  <section
-    class="absolute top-1/2 left-1/2 flex h-[30rem] max-h-[95%] w-[60rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
-  >
-    <div class="relative mb-1 h-max">
-      <h2 class="text-xl font-bold text-center">{{ editorTitle }}</h2>
-      <img
-        src="@/images/close.svg"
-        alt=""
-        class="absolute top-0 right-0 w-6 button"
-        @click="emit('closePopup')"
-      />
-    </div>
-    <main class="flex flex-grow-[1] flex-col gap-1.5">
+    <main class="flex flex-grow-[1] flex-col gap-1.5 m-2 mt-0 h-[30rem]">
       <div class="box-border flex gap-1.5 items-center">
         <button
           @click="addFormatting(0)"
@@ -169,5 +151,4 @@ function addFormatting(type: number) {
         "
       ></div>
     </main>
-  </section>
 </template>

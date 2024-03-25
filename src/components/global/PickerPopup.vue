@@ -2,12 +2,10 @@
 import { onUpdated, reactive, ref, watch } from "vue";
 import FavoriteBubble from "./FavoriteBubble.vue";
 import LevelBubble from "./LevelBubble.vue";
-import chroma from "chroma-js";
 import type { FavoritedLevel, Level } from "@/interfaces";
 
-const emit = defineEmits(["closePopup", "selectOption"]);
+const emit = defineEmits(["selectOption"]);
 const props = defineProps<{
-  browserName: string;
   outerErrorText: string
   outerError: boolean
   pickerData: Level[] | FavoritedLevel[] | string;
@@ -47,25 +45,11 @@ onUpdated(() => {
 </script>
 
 <template>
-  <Transition name="slide">
-    <section
-      @click.stop=""
-      class="absolute top-1/2 left-1/2 flex h-[40rem] max-h-[95svh] w-[35rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
-    >
-      <div class="relative">
-        <h1 class="text-xl font-bold text-center">{{ browserName }}</h1>
-        <img
-          src="@/images/close.svg"
-          alt=""
-          class="absolute top-0 right-0 w-6 button"
-          @click="emit('closePopup')"
-        />
-      </div>
-      <form action="." @submit.prevent="highlightFirstElement">
+      <form action="." class="flex w-full" @submit.prevent="highlightFirstElement">
         <input
           type="text"
           :placeholder="$t('other.search')+'...'"
-          class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-md"
+          class="px-2 py-1 mx-2 mt-1 bg-white bg-opacity-10 rounded-md grow"
           id="pickerInput"
           @input="
             filteredData = data.filter((x) =>
@@ -75,7 +59,7 @@ onUpdated(() => {
         />
       </form>
       <main
-        class="mt-2 flex-grow-[1] overflow-y-auto overflow-x-clip rounded-lg bg-white bg-opacity-10 p-1"
+        class="mt-2 flex-grow-[1] overflow-y-auto overflow-x-clip p-2 bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem]"
       >
         <div
           v-if="!data.length"
@@ -101,7 +85,7 @@ onUpdated(() => {
           <h2>{{ outerErrorText }}</h2>
         </div>
         
-        <div v-if="!outerError" class="flex flex-col gap-1">
+        <div v-if="!outerError" class="flex flex-col gap-2">
           <component
             v-for="level in filteredData"
             @click="emit('selectOption', level)"
@@ -111,6 +95,4 @@ onUpdated(() => {
           />
         </div>
       </main>
-    </section>
-  </Transition>
 </template>

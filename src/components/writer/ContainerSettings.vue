@@ -50,14 +50,18 @@ const closeSettings = (m: MouseEvent) => {
     <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 -right-1 z-10 flex-col gap-3 p-2 rounded-md rounded-tr-none bg-greenGradient">
         <div v-for="(setting, key, index) in settingsArr" class="flex flex-col">
             <div class="flex flex-col">
-                <div v-if="containers[type].settings[index].type == 0">
+                <div v-if="containers[type].settings[index].type[0] == 0">
                     <label :for="key">{{ containers[type].settings[index].title }}</label><br>
                     <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="text">
                 </div>
-                <button v-if="containers[type].settings[index].type == 1" @click="emit('pressedButton', key)" class="p-2 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
-                <div v-if="containers[type].settings[index].type == 2" class="flex justify-between">
+                <button v-if="containers[type].settings[index].type[0] == 1" @click="emit('pressedButton', key)" class="p-2 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
+                <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
-                    <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="checkbox">
+                    <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="checkbox">
+                </div>
+                <div v-if="containers[type].settings[index].type[0] == 3" class="flex justify-between">
+                    <label :for="key">{{ containers[type].settings[index].title }}</label>
+                    <input :name="key" :min="containers[type].settings[index].type[1]" :max="containers[type].settings[index].type[2]" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 mr-2 w-16 bg-white bg-opacity-10 rounded-md" type="number">
                 </div>
             </div>
 
