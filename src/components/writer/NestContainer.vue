@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { inject } from 'vue';
 import DataContainer from './DataContainer.vue';
+import { flexNames } from '@/Reviews';
 
 const props = defineProps<{
     settings: {components: any[]}
@@ -9,8 +10,12 @@ const props = defineProps<{
     subIndex: number
 }>()
 
-const selectedNestContainer = inject<number[]>("selectedNestContainer")!
+const emit = defineEmits<{
+    (e: "remove"): void
+    (e: "removeSubcontainer"): void
+}>()
 
+const selectedNestContainer = inject<number[]>("selectedNestContainer")!
 const selectedContainer = ref([-1, null])
 
 const moveContainer = (i: number, by: number) => {
@@ -20,17 +25,32 @@ const moveContainer = (i: number, by: number) => {
 }
 
 const buttonState = ref('')
-const CONTAINERS = inject("settingsTitles")
+const CONTAINERS = inject("settingsTitles")!
+
+const removeNestContainer = () => {
+    // Don't try to remove non-empty containers
+    if (props.settings.components[props.subIndex].length > 0) return
+
+    switch (props.settings.components.length) {
+        case 2: 
+            if (!props.settings.components[1].length && !props.settings.components[0].length) emit("remove")
+            break; // Leave columns
+        default:
+            props.settings.components.splice(props.subIndex, 1)
+            emit('removeSubcontainer')
+            break;
+    }
+}
 
 </script>
 
 <template>
-    <section @click="selectedNestContainer = [index, subIndex]" @focusout="selectedNestContainer = [-1, -1]" class="p-0.5 w-full border border-blue-400 border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
+    <section @click.stop="selectedNestContainer = [index, subIndex, selectedContainer[0]]" @dblclick="removeNestContainer" @focusout="selectedNestContainer = [-1, -1]" class="p-0.5 w-full border border-blue-400 border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
         <DataContainer
             v-for="(container, ind) in settings.components[subIndex]"
             v-bind="CONTAINERS[container.type]"
             @has-focus="selectedContainer = [ind, $event]"
-            @remove-container="settings.components[subIndex].splice(ind, 1)"
+            @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @text-modified="container.data = $event"
             @settings-button="buttonState = $event"
@@ -39,8 +59,9 @@ const CONTAINERS = inject("settingsTitles")
             :class="[CONTAINERS[container.type].styling ?? '']"
             :style="{textAlign: container.align}"
             :key="container.id"
+            :focused="selectedContainer[0] == ind"
         >
-            <div class="flex col-span-2 w-full">
+            <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component
                     v-for="elements in CONTAINERS[container.type].additionalComponents"
                     class="grow"

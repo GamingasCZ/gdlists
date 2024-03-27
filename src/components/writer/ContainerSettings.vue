@@ -47,7 +47,7 @@ const closeSettings = (m: MouseEvent) => {
 </script>
 
 <template>
-    <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 -right-1 z-10 flex-col gap-3 p-2 rounded-md rounded-tr-none bg-greenGradient">
+    <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 -right-1 z-10 flex-col gap-3 p-2 text-left rounded-md rounded-tr-none bg-greenGradient">
         <div v-for="(setting, key, index) in settingsArr" class="flex flex-col">
             <div class="flex flex-col">
                 <div v-if="containers[type].settings[index].type[0] == 0">

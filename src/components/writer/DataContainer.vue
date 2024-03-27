@@ -15,6 +15,7 @@ const emit = defineEmits<{
 interface Extras {
 	currentSettings: any[]
 	type: string
+	focused: boolean
 }
 
 const props = defineProps<Container & Extras>()
@@ -33,12 +34,11 @@ const focus = ref([false, false])
 </script>
 
 <template>
-	<div @mouseover="focus[0] = true" @mouseout="focus[0] = false" @focusin="focus[1] = true" @focusout="focus[1] = false" class="relative reviewContainer focus-within:outline hover:outline outline-[2px] transition-[outline_0.05s] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren}">
+	<div @mouseover="focus[0] = true" @mouseout="focus[0] = false" @click="emit('hasFocus', element!); focus[1] = true" class="relative reviewContainer outline-[2px] transition-[outline_0.05s] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': (focus[0] || focus[1]) && focused}">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div
 			ref="element"
 			v-if="canEditText"
-			@focus="emit('hasFocus', element!)"
 			@keyup="parseText"
 			@input="showPlaceholder = $el.innerText.length == 0"
 			:contenteditable="true"
@@ -48,8 +48,8 @@ const focus = ref([false, false])
 		</div>
 		<slot></slot>
 
-		<div v-if="!dependentOnChildren" class="absolute z-20 flex flex-col top-[-3px] right-[-31px] box-border">
-			<button @click="doShowSettings = true" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus[0] || focus[1]}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
+		<div v-if="!dependentOnChildren" class="absolute z-20 flex flex-col top-[-2px] right-[-30px] box-border">
+			<button @click="doShowSettings = true" @auxclick="emit('removeContainer')" :class="{'!opacity-100': (focus[0] || focus[1]) && focused}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
 		</div>
 
 		<ContainerSettings

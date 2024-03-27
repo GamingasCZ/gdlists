@@ -39,4 +39,5 @@ export const DEFAULT_RATINGS = ref<ReviewRating[]>([
     },
 ])
 
-export const selectedNestContainer = ref(0)
+export const selectedNestContainer= ref(0)
+export const flexNames = {left: "start", center: "center", right: "end", justify: "left"}

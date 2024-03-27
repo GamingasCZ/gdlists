@@ -13,12 +13,11 @@ import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData } from "@/Reviews";
+import { reviewData, flexNames } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
-import { nextTick } from "vue";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -55,11 +54,13 @@ const addContainer = (key: string) => {
             data: "",
             align: "left",
             settings: settingObject,
+            extraComponents: 0,
             id: Date.now()
         })
     }
     else {
         if (key == "twoColumns") {
+            reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
             reviewData.value.containers[selectedNestContainer.value[0]].settings.components.push([])
         }
         else
@@ -68,15 +69,29 @@ const addContainer = (key: string) => {
                 data: "",
                 align: "left",
                 settings: settingObject,
+                extraComponents: 0,
                 id: Date.now()
             })
     }
 }
 
+const removeContainer = (index: number) => {
+    reviewData.value.containers.splice(index, 1)
+    setTimeout(() => {
+        selectedNestContainer.value = [-1, -1]
+    }, 5)
+}
+
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
-    if (index < 0) return
-    reviewData.value.containers[index].align = alignment
-    selectedContainer.value[1]?.focus()
+    if (selectedNestContainer.value[0] == -1) {
+        if (index < 0) return
+        reviewData.value.containers[index].align = alignment
+        selectedContainer.value[1]?.focus()
+    }
+    else {
+        reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
+    }
+
 }
 
 const setFormatting = (format: string) => {
@@ -118,6 +133,8 @@ const taglinePlaceholders = [
 const tagline = ref(reviewData.value.tagline)
 
 const buttonState = ref("")
+
+const dataContainers = ref()
 </script>
 
 <template>
@@ -184,8 +201,9 @@ const buttonState = ref("")
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
                     v-bind="CONTAINERS[container.type]"
+                    ref="dataContainers"
                     @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1]"
-                    @remove-container="reviewData.containers.splice(index, 1)"
+                    @remove-container="removeContainer(index)"
                     @move-container="moveContainer(index, $event)"
                     @text-modified="container.data = $event"
                     @settings-button="buttonState = $event"
@@ -193,20 +211,23 @@ const buttonState = ref("")
                     :current-settings="container.settings"
                     :class="[CONTAINERS[container.type].styling ?? '']"
                     :style="{textAlign: container.align}"
-                    :align="container.align"
                     :key="container.id"
+                    :focused="selectedContainer[0] == index"
                 >
-                    <div class="flex w-full">
+                    <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                         <component
-                            v-for="(elements, subIndex) in CONTAINERS[container.type].additionalComponents"
+                            v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
                             class="grow"
                             :is="elements"
                             v-bind="CONTAINERS[container.type].componentProps ?? {}"
                             @clear-button="buttonState = ''"
+                            @remove-subcontainer="container.extraComponents -= 1"
+                            @remove="removeContainer(index)"
                             :button-state="buttonState"
                             :settings="container.settings"
                             :index="index"
                             :sub-index="subIndex"
+                            :key="container.id"
                         />
                     </div>
                 </DataContainer>
