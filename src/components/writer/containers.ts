@@ -165,7 +165,7 @@ const containers: Containers = {
         ]
     },
     twoColumns: {
-        styling: "grid grid-cols-2",
+        styling: "",
         nestable: true,
         canEditText: false,
         dependentOnChildren: true,
