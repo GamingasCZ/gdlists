@@ -21,8 +21,8 @@ const BASE_URL = import.meta.env.BASE_URL
 </script>
 
 <template>
-    <div class="mx-auto my-1 w-[30rem] max-w-full overflow-clip min-h-20">
-        <button v-show="videoLoading != 0" @click="emit('openSettings')" class="flex flex-col items-center p-2 w-full text-xl text-center rounded-md bg-lof-300">
+    <div class="mx-auto my-1 w-full overflow-clip min-h-20">
+        <button v-show="videoLoading != 0" @click="emit('openSettings')" class="flex flex-col items-center p-2 w-[30rem] text-xl text-center rounded-md bg-lof-200">
             <div v-if="videoLoading == -2">
                 <img :src="`${BASE_URL}/formatting/addVideo.svg`" class="p-2 mx-auto w-24 opacity-10" alt="">
                 <h2>Kliknutím nastav video.</h2>

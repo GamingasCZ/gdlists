@@ -2,7 +2,6 @@
 import {onMounted, ref } from 'vue';
 import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
-import { reviewData } from '@/Reviews';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -23,17 +22,18 @@ const props = defineProps<Container & Extras>()
 const doShowSettings = ref(false)
 const showPlaceholder = ref(true)
 const element = ref<HTMLDivElement>()
-const ID = Date.now()
 onMounted(() => element.value?.focus())
 
 const parseText = (e: Event) => {
 	emit('textModified', e.target.innerHTML)
 }
 
+const focus = ref([false, false])
+
 </script>
 
 <template>
-	<div class="relative reviewContainer group focus-within:outline hover:outline outline-[2px] transition-[outline_0.05s] min-h-8 outline-gray-600" :class="{'!outline-none': dependentOnChildren}">
+	<div @mouseover="focus[0] = true" @mouseout="focus[0] = false" @focusin="focus[1] = true" @focusout="focus[1] = false" class="relative reviewContainer focus-within:outline hover:outline outline-[2px] transition-[outline_0.05s] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren}">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div
 			ref="element"
@@ -48,8 +48,8 @@ const parseText = (e: Event) => {
 		</div>
 		<slot></slot>
 
-		<div class="absolute flex flex-col top-[-3px] right-[-31px] box-border">
-			<button @click="doShowSettings = true" @auxclick="emit('removeContainer')" class="p-0.5 opacity-0 group-focus-within:!opacity-100 group-hover:opacity-100 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
+		<div v-if="!dependentOnChildren" class="absolute z-20 flex flex-col top-[-3px] right-[-31px] box-border">
+			<button @click="doShowSettings = true" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus[0] || focus[1]}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
 		</div>
 
 		<ContainerSettings

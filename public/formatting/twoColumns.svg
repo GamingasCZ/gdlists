@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 <svg width="32" height="32" version="1.1" viewBox="0 0 8.4667 8.4667" xmlns="http://www.w3.org/2000/svg">
- <rect x=".85254" y=".75762" width="2.7236" height="6.9515" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width=".92604"/>
- <rect x="4.8906" y=".75762" width="2.7236" height="6.9515" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width=".92604"/>
+ <path d="m0.8537 0.29507a0.46307 0.46307 0 0 0-0.46509 0.46251v6.9515a0.46307 0.46307 0 0 0 0.46509 0.46251h3.9171v-0.92553h-3.4546v-6.0255h4.254v2.1311h0.92605v-2.5942a0.46307 0.46307 0 0 0-0.46302-0.46251h-5.1795zm4.7165 4.748v1.8722h0.92605v-1.8722h-0.92605z" color="#000000" fill="#fff" stroke-linecap="round" stroke-linejoin="round" style="-inkscape-stroke:none"/>
+ <path d="m4.3858 6.0611h3.2959m-1.648-1.648v3.2959" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width=".92604"/>
 </svg>

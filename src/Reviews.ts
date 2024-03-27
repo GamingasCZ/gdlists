@@ -38,3 +38,5 @@ export const DEFAULT_RATINGS = ref<ReviewRating[]>([
         color: [0, 0, 0]
     },
 ])
+
+export const selectedNestContainer = ref(0)

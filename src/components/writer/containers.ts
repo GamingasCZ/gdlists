@@ -4,6 +4,7 @@ import ReviewLevel from "./ReviewLevel.vue"
 import ReviewVideo from "./ReviewVideo.vue"
 import ReviewList from "./ReviewList.vue"
 import ReviewDivisor from "./ReviewDivisor.vue"
+import NestContainer from "./NestContainer.vue"
 
 const containers: Containers = {
     default: {
@@ -30,7 +31,7 @@ const containers: Containers = {
     heading3: {
         placeholder: "Nadpis 3",
         styling: "texl-xl leading-6",
-        nestable: false,
+        nestable: true,
         canEditText: true,
         settings: []
     },
@@ -165,16 +166,16 @@ const containers: Containers = {
     },
     twoColumns: {
         styling: "grid grid-cols-2",
-        nestable: false,
+        nestable: true,
         canEditText: false,
         dependentOnChildren: true,
-        additionalComponents: [DataContainer, DataContainer],
-        componentProps: {
-            nestable: false,
-            canEditText: true,
-            settings: []
-        },
-        settings: []
+        additionalComponents: [NestContainer, NestContainer],
+        settings: [{
+            key: "components",
+            title: "",
+            type: [-1],
+            default: [[], []]
+        }]
     }
 }
 

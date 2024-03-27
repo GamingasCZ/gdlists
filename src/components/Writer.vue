@@ -18,6 +18,7 @@ import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
+import { nextTick } from "vue";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -40,17 +41,36 @@ provide("settingsTitles", CONTAINERS)
 
 const selectedLevel = ref()
 
+const selectedNestContainer = ref([-1, -1])
+provide("selectedNestContainer", selectedNestContainer)
+
 const addContainer = (key: string) => {
     let settingObject = {}
     for (let i = 0; i < CONTAINERS[key].settings.length; i++)
         settingObject[CONTAINERS[key].settings[i].key] = CONTAINERS[key].settings[i].default
 
-    reviewData.value.containers.push({
-        type: key,
-        data: "",
-        align: "left",
-        settings: settingObject
-    })
+    if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
+        reviewData.value.containers.push({
+            type: key,
+            data: "",
+            align: "left",
+            settings: settingObject,
+            id: Date.now()
+        })
+    }
+    else {
+        if (key == "twoColumns") {
+            reviewData.value.containers[selectedNestContainer.value[0]].settings.components.push([])
+        }
+        else
+            reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].push({
+                type: key,
+                data: "",
+                align: "left",
+                settings: settingObject,
+                id: Date.now()
+            })
+    }
 }
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
@@ -71,9 +91,9 @@ const setFormatting = (format: string) => {
     }
 
     let val = el?.nodeValue
-    reviewData.containers[0].data = `${val?.slice(0, range?.startOffset)}${signs[format]}${signs[format]}${val?.slice(range?.startOffset, range?.endOffset)}${signs[format]}/${val?.slice(range?.endOffset)}`
+    reviewData.value.containers[0].data = `${val?.slice(0, range?.startOffset)}${signs[format]}${signs[format]}${val?.slice(range?.startOffset, range?.endOffset)}${signs[format]}/${val?.slice(range?.endOffset)}`
     
-    el.parentElement.innerHTML = reviewData.containers[0].data.replace("**", "<b>").replace("*/", "</b>")
+    el.parentElement.innerHTML = reviewData.value.containers[0].data.replace("**", "<b>").replace("*/", "</b>")
 }
 
 const startWriting = () => {
@@ -82,7 +102,9 @@ const startWriting = () => {
 }
 
 const moveContainer = (index: number, by: number) => {
-    reviewData.containers.splice(index+by, 1, reviewData.containers[index])
+    let data = reviewData.value.containers[index]
+    reviewData.value.containers.splice(index, 1)
+    reviewData.value.containers.splice(index+by, 0, data)
 }
 
 const taglinePlaceholders = [
@@ -93,7 +115,7 @@ const taglinePlaceholders = [
     useI18n().t('reviews.p5'),
     useI18n().t('reviews.p6'),
 ]
-const tagline = ref(reviewData.tagline)
+const tagline = ref(reviewData.value.tagline)
 
 const buttonState = ref("")
 </script>
@@ -162,7 +184,7 @@ const buttonState = ref("")
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
                     v-bind="CONTAINERS[container.type]"
-                    @has-focus="selectedContainer = [index, $event]"
+                    @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1]"
                     @remove-container="reviewData.containers.splice(index, 1)"
                     @move-container="moveContainer(index, $event)"
                     @text-modified="container.data = $event"
@@ -171,10 +193,12 @@ const buttonState = ref("")
                     :current-settings="container.settings"
                     :class="[CONTAINERS[container.type].styling ?? '']"
                     :style="{textAlign: container.align}"
+                    :align="container.align"
+                    :key="container.id"
                 >
-                    <div class="flex col-span-2 w-full">
+                    <div class="flex w-full">
                         <component
-                            v-for="elements in CONTAINERS[container.type].additionalComponents"
+                            v-for="(elements, subIndex) in CONTAINERS[container.type].additionalComponents"
                             class="grow"
                             :is="elements"
                             v-bind="CONTAINERS[container.type].componentProps ?? {}"
@@ -182,6 +206,7 @@ const buttonState = ref("")
                             :button-state="buttonState"
                             :settings="container.settings"
                             :index="index"
+                            :sub-index="subIndex"
                         />
                     </div>
                 </DataContainer>

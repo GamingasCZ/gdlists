@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
+import ContainerHelp from './ContainerHelp.vue';
+import { computed } from 'vue';
 
 
 const emit = defineEmits<{
@@ -27,7 +29,6 @@ onMounted(() => {
 })
 
 const BASE_URL = import.meta.env.BASE_URL
-const scaling = ref(false)
 
 const mousePos = ref([0, 0])
 const trackPos = (e: MouseEvent) => mousePos.value = [e.clientX, e.clientY]
@@ -36,13 +37,12 @@ const startScale = () => {
     document.body.addEventListener("mouseup", endScale, {once: true})
     document.body.addEventListener("mousemove", trackPos)
     
-    nextTick(() => {
-        scaleID = setInterval(() => {
-            let rect = gizmo.value?.getBoundingClientRect()
-            let mVec = [rect.x + 8, rect.y + 8]
-            imageScale.value = Math.min(Math.max(96, imageScale.value + mousePos.value[0] - mVec[0]), document.body.clientWidth * 0.85)
-        }, 20)
-    })
+    if (!mousePos.value) return
+    scaleID = setInterval(() => {
+        let rect = gizmo.value?.getBoundingClientRect()
+        let mVec = [rect.x + 8, rect.y + 8]
+        imageScale.value = Math.min(Math.max(96, imageScale.value + mousePos.value[0] - mVec[0]), document.body.clientWidth * 0.85)
+    }, 20)
 }
 
 const endScale = () => {
@@ -50,24 +50,20 @@ const endScale = () => {
     clearInterval(scaleID)
 }
 
+const text = computed(() => {
+    switch (imageLoading.value) {
+        case -2: return 0;
+        case 1: return 1;
+        case -1: return 2;
+    }  
+})
+
 </script>
 
 <template>
     <div class="mx-auto my-2 w-max max-w-full overflow-clip min-h-20">
-        <button v-show="imageLoading != 0" @click="emit('openSettings')" class="flex w-[30rem] m-2 flex-col items-center p-2 text-xl text-center rounded-md bg-lof-300">
-            <div v-if="imageLoading == -2">
-                <img :src="`${BASE_URL}/formatting/showImage.svg`" class="p-2 mx-auto w-24 opacity-10" alt="">
-                <h2>{{ $t('reviews.clickImgSet') }}</h2>
-            </div>
-            <div v-if="imageLoading == 1">
-                <img src="@/images/loading.webp" class="p-2 mx-auto w-24 opacity-10 animate-spin" alt="">
-                <h2>{{ $t('other.loading') }}...</h2>
-            </div>
-            <div v-if="imageLoading == -1">
-                <img src="@/images/close.svg" class="p-2 mx-auto w-24 opacity-10" alt="">
-                <h2>{{ $t('reviews.imgError') }}</h2>
-            </div>
-        </button>
+        <ContainerHelp v-show="imageLoading != 0" icon="showImage" :help-content="[$t('reviews.clickImgSet'), $t('other.loading'), $t('reviews.imgError')][text]" />
+
         <figure v-show="imageLoading == 0">
             <div class="flex relative group max-w-[85vw]" :style="{width: `${imageScale}px`}">
                 <img
@@ -77,7 +73,7 @@ const endScale = () => {
                     :alt="settings.alt"
                     :title="settings.alt"
                 >
-                <button ref="gizmo" @mousedown="startScale" class="absolute -right-1 -bottom-1 w-4 h-4 bg-white rounded-full scale-0 group-hover:scale-100"></button>
+                <button ref="gizmo" @mousedown="startScale" class="isolate absolute -right-1 -bottom-1 w-4 h-4 bg-white rounded-full scale-0 group-hover:scale-100"></button>
             </div>
             <figcaption>{{ settings.description }}</figcaption>
         </figure>
