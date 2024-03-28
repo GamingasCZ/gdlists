@@ -54,15 +54,22 @@ const openDialogs = inject("openedDialogs")
           <input v-model="reviewData.private" type="checkbox" class="w-12 button" name="" id="">
         </div>
       </div>
+      <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
+        <div class="flex justify-between w-full">
+          <span class="text-xl">{{ $t('reviews.private') }}</span>
+          <input v-model="reviewData.private" type="checkbox" class="w-12 button" name="" id="">
+        </div>
+      </div>
 
       <p class="mt-8 ml-2 text-xl">{{ $t('reviews.bgImage') }}</p>
       <div class="flex gap-2 mb-2">
-        <input v-model="reviewData.titleImg[0]" type="text" class="px-2 py-1 bg-white bg-opacity-10 rounded-md grow" placeholder="URL obrázku">
-        <button @click="openDialogs.bgPreview = !openDialogs.bgPreview" class="p-1 bg-black bg-opacity-40 rounded-md button">
-          <img :class="{'opacity-20': !openDialogs.bgPreview}" src="@/images/view.svg" class="w-6 transition-opacity" alt="">
-        </button>
         <button @click="openDialogs.bgPicker = true" class="p-1 bg-black bg-opacity-40 rounded-md button">
           <img src="@/images/gear.svg" class="w-6" alt="">
+          <span>{{ $t('other.pick') }}</span>
+        </button>
+        <button @click="openDialogs.bgPreview = !openDialogs.bgPreview" class="p-1 bg-black bg-opacity-40 rounded-md button">
+          <img :class="{'opacity-20': !openDialogs.bgPreview}" src="@/images/view.svg" class="w-6 transition-opacity" alt="">
+          <span>{{ $t('other.preview') }}</span>
         </button>
       </div>
 

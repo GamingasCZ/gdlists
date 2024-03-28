@@ -26,7 +26,7 @@ const addRating = (name = '') => {
 </script>
 
 <template>
-    <TabBar :tab-names="levelNames" />
+    <TabBar :tab-names="levelNames" v-show="reviewData.levels.length" />
 
     <div v-if="!reviewData.levels.length" class="flex gap-2 items-center p-2 mx-2 bg-red-600 bg-opacity-80 rounded-md">
         <img src="@/images/info.svg" class="w-6" alt="">

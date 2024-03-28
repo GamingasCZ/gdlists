@@ -11,6 +11,7 @@ import CONTAINERS from "./writer/containers";
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
+import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
 import { reviewData, flexNames } from "@/Reviews";
@@ -29,7 +30,8 @@ const openDialogs = reactive({
     "lists": [false, 0],
     "bgPicker": false,
     "ratings": false,
-    "bgPreview": false
+    "bgPreview": false,
+    "imagePicker": [false, 0]
 })
 
 const collabClipboard = ref([])
@@ -135,6 +137,15 @@ const tagline = ref(reviewData.value.tagline)
 const buttonState = ref("")
 
 const dataContainers = ref()
+const modifyImageURL = (newUrl: string) => {
+    if (selectedNestContainer.value[0] == -1) {
+        reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = newUrl
+    }
+    else {
+        console.log("aaaaa")
+        reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = newUrl
+    }
+}
 </script>
 
 <template>
@@ -167,6 +178,10 @@ const dataContainers = ref()
 
         <DialogVue :open="openDialogs.ratings" @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
             <WriterRatings />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
+            <ImageBrowser @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
         </DialogVue>
 
         

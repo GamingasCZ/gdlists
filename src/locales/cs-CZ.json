@@ -222,7 +222,10 @@
     "all": "Všechny",
     "contact": "Kontakt",
     "reportBug": "Nahlásit bug",
-    "custom": "Vlastní"
+    "custom": "Vlastní",
+    "storage": "Místo",
+    "external": "Extérní",
+    "pick": "Vybrat"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -405,6 +408,7 @@
     "description": "Popisek recenze",
     "points": "Body",
     "stars": "Hvězdičky",
-    "none": "Žádné"
+    "none": "Žádné",
+    "pickImage": "Vybrat obrázek"
   }
 }

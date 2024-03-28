@@ -2,14 +2,19 @@
 import { nextTick, onMounted, ref } from 'vue';
 import ContainerHelp from './ContainerHelp.vue';
 import { computed } from 'vue';
+import { inject } from 'vue';
+import { watch } from 'vue';
 
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
+    (e: 'clearButton'): void
 }>()
 
-defineProps<{
+const props = defineProps<{
     settings: object
+    index: number
+    buttonState: string
 }>()
 
 const image = ref<HTMLImageElement>()
@@ -27,8 +32,6 @@ onMounted(() => {
         if (imageLoading.value != -2) imageLoading.value = -1
     })
 })
-
-const BASE_URL = import.meta.env.BASE_URL
 
 const mousePos = ref([0, 0])
 const trackPos = (e: MouseEvent) => mousePos.value = [e.clientX, e.clientY]
@@ -60,10 +63,26 @@ const text = computed(() => {
     }  
 })
 
+watch(props, () => {
+    switch (props.buttonState) {
+        case "pick":
+            dialogs.imagePicker = [true, props.index]
+            break;
+    }
+    emit("clearButton")
+})
+
+const dialogs = inject("openedDialogs")
+
 </script>
 
 <template>
-    <ContainerHelp v-show="imageLoading != 0" icon="showImage" :help-content="[$t('reviews.clickImgSet'), $t('other.loading'), $t('reviews.imgError')][text]" />
+    <ContainerHelp v-show="imageLoading != 0" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+        <button @click="dialogs.imagePicker = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
+            <img src="@/images/browseMobHeader.svg" alt="" class="w-8">
+            <span>{{ $t('reviews.pickImage') }}</span>
+        </button>
+    </ContainerHelp>
 
     <figure v-show="imageLoading == 0">
         <div class="flex relative group min-h-[64px] max-w-[85vw]" :style="{width: `${imageScale}px`}">

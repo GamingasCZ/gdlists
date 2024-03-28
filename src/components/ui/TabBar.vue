@@ -18,7 +18,7 @@ const switchTab = (ind: number) => {
 </script>
 
 <template>
-    <section class="flex overflow-scroll w-full">
+    <section class="flex overflow-scroll w-full min-h-10">
         <button @click="switchTab(index)" :class="{'!bg-opacity-10': index == tabSelected}" class="relative p-2 text-lg text-center bg-white bg-opacity-5 hover:bg-opacity-20 grow" v-for="(tab, index) in tabNames">
             <span>{{ tab }}</span>
             <Transition name="fade">

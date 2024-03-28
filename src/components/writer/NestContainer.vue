@@ -45,7 +45,7 @@ const removeNestContainer = () => {
 </script>
 
 <template>
-    <section @click.stop="selectedNestContainer = [index, subIndex, selectedContainer[0]]" @dblclick="removeNestContainer" @focusout="selectedNestContainer = [-1, -1]" class="p-0.5 w-full border border-blue-400 border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
+    <section @click.stop="selectedNestContainer = [index, subIndex, selectedContainer[0]]" @dblclick="removeNestContainer" class="p-0.5 w-full border border-blue-400 border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
         <DataContainer
             v-for="(container, ind) in settings.components[subIndex]"
             v-bind="CONTAINERS[container.type]"

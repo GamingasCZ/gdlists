@@ -31,7 +31,7 @@ const BASE_URL = import.meta.env.BASE_URL
     <ContainerHelp v-if="!settings.level" icon="showList" :help-content="'Vyber seznam, který chceš zobrazit'">
         <button @click="dialogs.lists = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
             <img src="@/images/browseMobHeader.svg" alt="" class="w-8">
-            <span>{{ $t('reviews.pickList') }}{{ buttonState }}</span>
+            <span>{{ $t('reviews.pickList') }}</span>
         </button>
     </ContainerHelp>
     <figure v-else>

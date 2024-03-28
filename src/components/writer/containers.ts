@@ -71,9 +71,15 @@ const containers: Containers = {
         settings: [
             {
                 key: "url",
-                title: "URL obrázku",
-                type: [0],
+                title: "",
+                type: [-1],
                 default: ""
+            },
+            {
+                key: "pick",
+                title: "Vybrat obrázek",
+                type: [1],
+                default: 0
             },
             {
                 key: "alt",

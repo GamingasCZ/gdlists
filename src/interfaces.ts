@@ -248,3 +248,12 @@ export interface ReviewContainer {
   settings: any[]
 }
 export type TEXT_ALIGNMENTS = "left" | "center" | "right" | "justify"
+
+export interface ImageStorage {
+  uid: string
+  left: number
+  storageMax: number
+  filecount: number
+  maxFilecount: number
+  maxUploadSize: number
+}
