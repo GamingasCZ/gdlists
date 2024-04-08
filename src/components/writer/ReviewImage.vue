@@ -41,8 +41,8 @@ const startScale = () => {
     document.body.addEventListener("mousedown", trackPos)
     document.body.addEventListener("mousemove", trackPos)
     
-    if (!mousePos.value[0] || !mousePos.value[1]) return
     scaleID = setInterval(() => {
+        if (!mousePos.value[0] || !mousePos.value[1]) return
         let rect = gizmo.value?.getBoundingClientRect()
         let mVec = [rect.x + 8, rect.y + 8]
         let drag = Math.sqrt(Math.pow(mousePos.value[0], 2) + Math.pow(mousePos.value[1], 2)) - Math.sqrt(Math.pow(mVec[0], 2) + Math.pow(mVec[1], 2))

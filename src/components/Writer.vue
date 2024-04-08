@@ -34,6 +34,8 @@ const openDialogs = reactive({
     "imagePicker": [false, 0]
 })
 
+document.body.addEventListener("click", () => selectedContainer.value = [-1, -1])
+
 const collabClipboard = ref([])
 provide("openedDialogs", openDialogs)
 
@@ -48,8 +50,9 @@ provide("selectedNestContainer", selectedNestContainer)
 const addContainer = (key: string) => {
     let settingObject = {}
     for (let i = 0; i < CONTAINERS[key].settings.length; i++)
-        settingObject[CONTAINERS[key].settings[i].key] = CONTAINERS[key].settings[i].default
+        settingObject[CONTAINERS[key].settings[i].key] = JSON.parse(JSON.stringify(CONTAINERS[key].settings[i].default))
 
+    // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
         reviewData.value.containers.push({
             type: key,
@@ -60,8 +63,9 @@ const addContainer = (key: string) => {
             id: Date.now()
         })
     }
+    // Adding into a nested container
     else {
-        if (key == "twoColumns") {
+        if (key == "twoColumns") { // Adding a column to a nest container
             reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
             reviewData.value.containers[selectedNestContainer.value[0]].settings.components.push([])
         }
@@ -138,11 +142,16 @@ const buttonState = ref("")
 
 const dataContainers = ref()
 const modifyImageURL = (newUrl: string) => {
-    if (selectedNestContainer.value[0] == -1) {
+    // Review background
+    if (openDialogs.imagePicker[1] == -1) {
+        reviewData.value.titleImg[0] = newUrl
+    }
+    // Image container
+    else if (selectedNestContainer.value[0] == -1) {
         reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = newUrl
     }
+    // Image container in nested container
     else {
-        console.log("aaaaa")
         reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = newUrl
     }
 }
@@ -172,7 +181,7 @@ const modifyImageURL = (newUrl: string) => {
             <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
         </DialogVue>
         
-        <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false">
+        <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false" :title="$t('other.imageSettings')">
             <BackgroundImagePicker :source="reviewData" @close-popup="openDialogs.bgPicker = false" />
         </DialogVue>
 
@@ -186,7 +195,7 @@ const modifyImageURL = (newUrl: string) => {
 
         
         <Header @open-dialog="openDialogs[$event] = true" />
-        <section class="max-w-[90rem] mx-auto leadin">
+        <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
             <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
                 <input type="text" :placeholder="$t('reviews.reviewName')" class="text-5xl max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
@@ -210,7 +219,7 @@ const modifyImageURL = (newUrl: string) => {
             />
 
             <!-- Editor -->
-            <section class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-300 shadow-black': !reviewData.transparentPage, 'outline-4 outline outline-lof-200': reviewData.transparentPage}">
+            <section class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-300 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" />
 
                 <DataContainer

@@ -50,6 +50,10 @@ body {
   @apply outline outline-1 outline-white
 }
 
+input::placeholder, textarea::placeholder {
+  @apply text-gray-400
+}
+
 input[type="checkbox"] {
   @apply appearance-none border-white border-opacity-50 border-solid border-[0.15rem] bg-white bg-opacity-20 rounded relative align-middle w-6 h-6 mr-2;
 }

@@ -66,7 +66,7 @@ const localStorg = ref(hasLocalStorage())
     <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
       <div class="relative">
         <input type="text" name="q"
-          class="px-1 py-2 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
+          class="px-1 py-2 pr-10 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
           :placeholder="$t('homepage.searchLists')" />
 
         <RouterLink to="/random" class="absolute top-3 right-3 z-10 min-w-max button selectOutline">

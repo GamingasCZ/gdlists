@@ -89,7 +89,7 @@
     "levelName": "Jméno seznamu",
     "listDescription": "Popis seznamu",
     "titleImage": "Pozadí seznamu",
-    "bgColor": "Barva pozadí:",
+    "bgColor": "Obarvení",
     "levels": "Levely",
     "levelSaved": "Seznam uložen!",
     "listInProgress": "Máš tu rozpracovaný seznam!",
@@ -164,9 +164,9 @@
     "yes": "Ano",
     "no": "Ne",
     "imageSettings": "Nastavení obrázku",
-    "imageHelp": "Zadej <i>URL obrázku nebo animace</i> a zde pak budeš moct nastavit jeho vlastnosti!",
+    "imageHelp": "Po vybrání obrázku, budeš zde moct nastavit jeho vlastnosti!",
     "loadingImage": "Načítání obrázku...",
-    "imageLoadFailed": "Nepodařilo se načíst obrázek! URL obrázku velkou většinu času končí příponou <i>.jpg/.png/.webp/.gif!</i>",
+    "imageLoadFailed": "Nepodařilo se načíst obrázek! Obrázek možná již neexistuje.",
     "coverage": "Zakrytí",
     "alignment": "Zarovnání",
     "gradient": "Přechod",
@@ -225,7 +225,13 @@
     "custom": "Vlastní",
     "storage": "Místo",
     "external": "Extérní",
-    "pick": "Vybrat"
+    "pick": "Vybrat",
+    "german": "Němčina",
+    "spanish": "Španělština",
+    "korean": "Korejština",
+    "russian": "Ruština",
+    "other": "Jiný",
+    "bg": "Pozadí"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -409,6 +415,13 @@
     "points": "Body",
     "stars": "Hvězdičky",
     "none": "Žádné",
-    "pickImage": "Vybrat obrázek"
+    "pickImage": "Vybrat obrázek",
+    "language": "Jazyk recenze",
+    "bgcolor": "Barva pozadí",
+    "transparent": "Průhledná stránka",
+    "translucent": "Průsvitná stránka",
+    "opaque": "Normální stránka",
+    "scoring": "Vzhled bodování",
+    "review": "Recenze"
   }
 }

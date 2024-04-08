@@ -1,5 +1,66 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
-<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
- <path d="m27.249 0.21682c-0.60164 0.0026-1.8748 0.1693-2.6099 0.20813-0.93979 0.049634-3.0782 0.070199-3.0803 0.30803l0.027057 7.4198-4.2812-6.5102c-0.25911-0.39408-1.4063 0.28041-2.612 0.74718-2.5445 0.98508-7.4905 4.0923-7.1159 4.5205l5.2094 6.1377-7.7236-2.4726c-1.5959 2.4262-2.9667 8.811-1.5714 15.622l-3.5423 3.5423 2.2603 2.2603 5.9358-5.9358 18.086-17.585 2.2603 2.2603-18.698 18.18c4.8452 0.42531 8.7367-0.39607 11.793-2.0792 4.0433-2.227 6.5034-5.8708 7.9609-9.5905 2.8645-7.3106 2.1085-15.167 2.0813-15.439-9.9e-5 -9.913e-4 8e-5 -0.00962 0-0.010406-3.31e-4 -0.00419-0.0017-0.0083-0.0021-0.012488-1.44e-4 -0.00141-0.0021-0.027057-0.0021-0.027057h-0.0021c-0.073571-0.70917-0.61202-1.3574-1.4381-1.4361 0 0-1.1297-0.11602-2.9346-0.10823z" color="#000000" fill="#fff" fill-rule="evenodd" stroke-linejoin="round" stroke-width="1.0656" style="-inkscape-stroke:none"/>
+
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   viewBox="0 0 32 32"
+   id="svg1"
+   sodipodi:docname="reviews.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="mirror_symmetry"
+       start_point="32,0"
+       end_point="0,32"
+       center_point="16,16"
+       id="path-effect1"
+       is_visible="true"
+       lpeversion="1.2"
+       lpesatellites=""
+       mode="free"
+       discard_orig_path="false"
+       fuse_paths="true"
+       oposite_fuse="false"
+       split_items="false"
+       split_open="false"
+       link_styles="false" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#000000"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="8"
+     inkscape:cx="-4.8125"
+     inkscape:cy="26.5"
+     inkscape:window-width="1560"
+     inkscape:window-height="872"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+     d="M 7.455034,24.551426 C 13.860998,25.773558 33.850392,12.283161 30.054492,1.9455078 19.716839,-1.8503921 6.2264421,18.139002 7.4485741,24.544966"
+     id="path1"
+     inkscape:path-effect="#path-effect1"
+     inkscape:original-d="M 30.081565,1.9555058 C 19.740409,-1.8853113 6.225375,18.133408 7.4485741,24.544966"
+     sodipodi:nodetypes="cc"
+     transform="translate(-0.32529865,0.32529865)" />
+  <path
+     style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none"
+     d="m 1.802124,30.17627 5.65291,-5.624844"
+     id="path2"
+     sodipodi:nodetypes="cc" />
 </svg>

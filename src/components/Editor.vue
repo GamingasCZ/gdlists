@@ -472,7 +472,7 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     v-if="isLoggedIn && listExists && listBelongsToYou"
   >
     <div
-      class="grid grid-cols-2 grid-rows-3 grid-flow-col gap-x-3 place-items-center my-2 mr-3 w-full"
+      class="grid grid-cols-2 grid-rows-2 grid-flow-col gap-x-3 place-items-center p-2 w-full"
     >
     
       <!-- List name -->
@@ -490,39 +490,36 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
         <div class="w-8"></div>
       </div>
 
-      <!-- List Background -->
-      <div class="flex gap-2">
-        <input
-          autocomplete="off"
-          type="text"
-          maxlength="150"
-          :placeholder="$t('editor.titleImage')"
-          class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg"
-          v-model="levelList.titleImg[0]"
-        />
-        <button type="button">
-          <img
-            class="p-1.5 w-8 bg-black bg-opacity-50 rounded-md button"
-            src="../images/gear.svg"
-            alt=""
-            @click="BGpickerPopupOpen = true"
-          />
-        </button>
-      </div>
-
-      <div class="flex gap-2 items-center my-1 mr-6">
-        <span>{{$t('editor.bgColor')}}</span>
-        <button
-          type="button"
-          class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
-          @click="bgColorPickerOpen = !bgColorPickerOpen"
-          :style="{background: getBGcolor()}"
-        >
-          <img src="../images/color.svg" alt="" class="w-5" />
-        </button>
-        <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click="levelList.pageBGcolor = modifyListBG([0,0,0], true)">
-          <img src="@/images/close.svg" class="w-4" alt="">
-        </button>
+      <div class="flex justify-around w-full">
+        <div class="flex flex-col gap-2 items-center">
+            <button
+            type="button"
+              class="box-border flex justify-center items-center w-16 h-8 rounded-md border-2 border-white focus:outline focus:outline-current"
+              @click="bgColorPickerOpen = !bgColorPickerOpen"
+              :style="{background: getBGcolor()}"
+            >
+              <img src="../images/color.svg" alt="" class="w-5" />
+              <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click.stop="levelList.pageBGcolor = modifyListBG([0,0,0], true)">
+                <img src="@/images/close.svg" class="w-4" alt="">
+              </button>
+            </button>
+          <span>{{$t('editor.bgColor')}}</span>
+        </div>
+        
+        <div class="flex flex-col gap-2 items-center">
+            <button
+            type="button"
+              class="box-border flex justify-center items-center w-16 h-8 rounded-md border-2 border-white focus:outline focus:outline-current"
+              @click="bgColorPickerOpen = !bgColorPickerOpen"
+              :style="{background: getBGcolor()}"
+            >
+              <img src="../images/color.svg" alt="" class="w-5" />
+              <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click.stop="levelList.pageBGcolor = modifyListBG([0,0,0], true)">
+                <img src="@/images/close.svg" class="w-4" alt="">
+              </button>
+            </button>
+          <span>{{ $t('other.bg') }}</span>
+        </div>
       </div>
 
       <!-- List description -->

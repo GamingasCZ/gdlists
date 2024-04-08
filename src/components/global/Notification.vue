@@ -13,12 +13,15 @@ switch (props.icon) {
     case 'save':
         import(`@/images/save.svg`).then(res => getIcon.value = res.default)
         break;
+    case 'error':
+        import(`@/images/close.svg`).then(res => getIcon.value = res.default)
+        break;
 }
 
 const shown = ref(false)
 watch(props, () => { // todo rozbitý když měníš jazyk
     shown.value = true
-    setTimeout(() => shown.value = false, 1500);
+    setTimeout(() => shown.value = false, 1500 + props.content.length * 100);
 })
 
 </script>

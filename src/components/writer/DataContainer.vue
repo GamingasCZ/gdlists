@@ -34,7 +34,7 @@ const focus = ref([false, false])
 </script>
 
 <template>
-	<div @mouseover="focus[0] = true" @mouseout="focus[0] = false" @click="emit('hasFocus', element!); focus[1] = true" class="relative reviewContainer outline-[2px] transition-[outline_0.05s] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': (focus[0] || focus[1]) && focused}">
+	<div @mouseover="focus[0] = true" @mouseout="focus[0] = false" @click.stop="emit('hasFocus', element!); focus[1] = true" class="relative reviewContainer outline-[2px] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': (focus[0] || focus[1]) && focused}">
 		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div
 			ref="element"

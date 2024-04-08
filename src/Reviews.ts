@@ -11,6 +11,7 @@ export const REVIEW_EXTRAS: ReviewList = {
     private: false,
     transparentPage: false,
     disabledRatings: false,
+    language: 0
 }
 
 export const reviewData = ref({...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS})

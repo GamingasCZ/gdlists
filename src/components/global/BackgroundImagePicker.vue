@@ -51,7 +51,7 @@ const setDragboxPos = (e: MouseEvent) => {
           source.titleImg[3]
         ],
       }"
-      class="absolute z-[-1] h-full w-full bg-cover bg-no-repeat opacity-40 blur-md"
+      class="absolute z-10 w-full h-full bg-no-repeat bg-cover opacity-40 blur-md"
     ></div>
 
     <div
@@ -84,7 +84,7 @@ const setDragboxPos = (e: MouseEvent) => {
       >
     </div>
 
-    <main v-else class="flex gap-6 m-2 max-sm:flex-col max-sm:items-center">
+    <main v-else class="flex z-20 gap-6 m-2 max-sm:flex-col max-sm:items-center">
       <section class="relative w-max h-max">
         <img
           :src="source.titleImg[0]"

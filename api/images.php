@@ -1,7 +1,10 @@
 <?php
 header('Content-type: application/json'); // Return as JSON
 require("globals.php");
+
 /* Return codes:
+-4 = invalid image
+-3 = invalid hash
 -2 = not logged in
 -1 = empty request
 0 = database error
@@ -15,6 +18,14 @@ if (!$user) die(-2);
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli -> connect_errno) die("0");
+
+// Path for user content
+$userPath;
+$LOCAL = $_SERVER["SERVER_NAME"] == "localhost";
+if ($LOCAL)
+    $userPath = "userContent/" . $user["id"];
+else
+    $userPath = "../../userContent/" . $user["id"];
 
 function getStorage($uid) {
     global $mysqli, $MAX_STORAGE, $MAX_UPLOADSIZE, $MAX_FILECOUNT;
@@ -43,37 +54,55 @@ switch ($method) {
 
     case 'POST':
         $DATA = file_get_contents("php://input");
-        $LOCAL = $_SERVER["SERVER_NAME"] == "localhost";
-
+        $filesize = strlen($DATA);
+        if ($filesize > $MAX_UPLOADSIZE) die("-4");
+        if ($filesize < 50) die("-4");
+        
         // Create directory for user
-        $userPath;
-        if ($LOCAL)
-            $userPath = "userContent/" . $user["id"];
-        else
-            $userPath = "../../userContent/" . $user["id"];
         if (!is_dir($userPath)) {
             mkdir($userPath);
         }
         
         // Image data
         $imageHash = sha1($DATA);
-        $filesize = strlen($DATA);
+        if (is_file($userPath . "/" . $imageHash . ".webp")) die(-3); // No duplicate files
 
+        // Create image
+        $img = imagecreatefromstring($DATA);
+        if (!$img) die("-5");
+        imagesavealpha($img, true);
         
-        // Save file, thumbnail
-        $file = fopen($userPath . "/" . $imageHash . ".webp", "w");
-        fwrite($file, $DATA);
-        fclose($file);
-
-        $file = fopen($userPath . "/" . $imageHash . "-thumb.webp", "w");
-        fwrite($file, $DATA);
-        fclose($file);
+        // Save image
+        imagewebp($img, $userPath . "/" . $imageHash . ".webp", 80);
+        
+        // Create thumbnail
+        $thumbnail = imagescale($img, 128);
+        imagesavealpha($thumbnail, true);
+        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 60);
+        
+        // Free images
+        imagedestroy($img);
+        imagedestroy($thumbnail);
 
         doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$user["id"], $imageHash, $filesize], "ssi");
 
         break;
 
     case 'DELETE':
+        $hash = substr($_GET["hash"], 0, 40);
+        if (!ctype_alnum($hash)) die(-3); // check if the user is a hackerman
+
+        if (is_file($userPath . "/" . $hash . ".webp")) {
+            // Remove files
+            unlink($userPath . "/" . $hash . ".webp");
+            unlink($userPath . "/" . $hash . "-thumb.webp");
+
+            // Remove from database
+            doRequest($mysqli, "DELETE FROM `images` WHERE `uploaderID`=? AND `hash`=?", [$user["id"], $hash], "ss");
+            
+            die(getStorage($user["id"]));
+        }
+        else die(-3);
         break;
     
     default:

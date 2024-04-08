@@ -227,8 +227,9 @@ export interface ReviewList {
   settings: ReviewSettings
   rateTheme: number
   private: boolean
-  transparentPage: boolean
+  transparentPage: 0 | 1 | 2
   disabledRatings: boolean
+  language: number
 }
 
 export interface ReviewRating {
