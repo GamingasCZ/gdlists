@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
 import type { ContainerSettings } from './containers';
+import { reviewData } from '@/Reviews';
 
 const emit = defineEmits<{
     (e: "remove"): void
@@ -54,14 +55,36 @@ const closeSettings = (m: MouseEvent) => {
                     <label :for="key">{{ containers[type].settings[index].title }}</label><br>
                     <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="text">
                 </div>
+                
                 <button v-if="containers[type].settings[index].type[0] == 1" @click="emit('pressedButton', key)" class="p-2 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
+                
                 <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="checkbox">
                 </div>
+
+                <!-- Number selector -->
                 <div v-if="containers[type].settings[index].type[0] == 3" class="flex justify-between">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <input :name="key" :min="containers[type].settings[index].type[1]" :max="containers[type].settings[index].type[2]" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 mr-2 w-16 bg-white bg-opacity-10 rounded-md" type="number">
+                </div>
+
+                <!-- Level dropdown -->
+                <div v-if="containers[type].settings[index].type[0] == 4" class="flex justify-between items-center">
+                    <label :for="key">{{ containers[type].settings[index].title }}</label>
+                    <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
+                        <option :value="-1">{{ $t('other.all') }}</option>
+                        <option v-for="(level, index) in reviewData.levels" :value="index">{{ level.levelName || $t('other.unnamesd') }}</option>
+                    </select>
+                </div>
+
+                <!-- Rating dropdown -->
+                <div v-if="containers[type].settings[index].type[0] == 5" class="flex justify-between items-center">
+                    <label :for="key">{{ containers[type].settings[index].title }}</label>
+                    <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
+                        <option :value="-1">{{ $t('other.all') }}</option>
+                        <option v-for="(rating, index) in reviewData.ratings.concat(reviewData.defaultRatings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
+                    </select>
                 </div>
             </div>
 

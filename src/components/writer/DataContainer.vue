@@ -48,7 +48,7 @@ const focus = ref([false, false])
 		</div>
 		<slot></slot>
 
-		<div v-if="!dependentOnChildren" class="absolute z-20 flex flex-col top-[-2px] right-[-30px] box-border">
+		<div v-if="!dependentOnChildren" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border">
 			<button @click="doShowSettings = true" @auxclick="emit('removeContainer')" :class="{'!opacity-100': (focus[0] || focus[1]) && focused}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
 		</div>
 

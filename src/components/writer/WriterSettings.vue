@@ -44,13 +44,13 @@ const openDialogs = inject("openedDialogs")
           <input v-model="reviewData.rateTheme" :value="2" type="radio" name="style" id="styleNone">
         </div>
       </fieldset>
-      <p v-show="reviewData.rateTheme == 2" class="text-sm text-center">Hodí se, pokud chceš recenzovat event, kontroverzi apod.</p>
+      <p v-show="reviewData.rateTheme == 2" class="text-sm text-center">{{ $t('reviews.noratingHelp') }}</p>
 
       <p class="mt-8 ml-2 text-xl">{{ $t('reviews.description') }}</p>
       <div class="relative">
         <textarea v-model="reviewData.description" class="p-1 w-full h-28 bg-white bg-opacity-10 rounded-md resize-none">
         </textarea>
-        <button class="absolute right-1.5 bottom-2 bg-black bg-opacity-40 rounded-md">
+        <button class="absolute right-1.5 bottom-2 bg-black bg-opacity-40 rounded-sm">
           <img src="@/images/fullscreen.svg" class="p-1 w-8" alt="">
         </button>
       </div>
@@ -116,7 +116,7 @@ const openDialogs = inject("openedDialogs")
           <div class="flex justify-between items-center w-full">
             <div class="ml-1">
               <p class="text-xl leading-none">{{ $t('reviews.opaque') }}</p>
-              <p class="text-sm opacity-40">Stránka je neprůhledná</p>
+              <p class="text-sm opacity-40">{{ $t('reviews.opaqueHelp') }}</p>
             </div>
             <input v-model="reviewData.transparentPage" :value="0" type="radio" class="w-12 button" name="transparency" id="opaque">
           </div>
@@ -125,7 +125,7 @@ const openDialogs = inject("openedDialogs")
           <div class="flex justify-between items-center w-full">
             <div class="ml-1">
               <p class="text-xl leading-none">{{ $t('reviews.transparent') }}</p>
-              <p class="text-sm opacity-40">Text bude přímo na pozadí.</p>
+              <p class="text-sm opacity-40">{{ $t('reviews.transparentHelp') }}</p>
             </div>
             <input v-model="reviewData.transparentPage" :value="1" type="radio" class="w-12 button" name="transparency" id="full">
           </div>
@@ -134,7 +134,7 @@ const openDialogs = inject("openedDialogs")
           <div class="flex justify-between items-center w-full">
             <div class="ml-1">
               <p class="text-xl leading-none">{{ $t('reviews.translucent') }}</p>
-              <p class="text-sm opacity-40">Stránka bude rozmlžená a ztmavená.</p>
+              <p class="text-sm opacity-40">{{ $t('reviews.translucentHelp') }}</p>
             </div>
             <input v-model="reviewData.transparentPage" :value="2" type="radio" class="w-12 button" name="transparency" id="mid">
           </div>

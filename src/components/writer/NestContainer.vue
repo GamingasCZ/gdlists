@@ -2,7 +2,10 @@
 import { ref } from 'vue';
 import { inject } from 'vue';
 import DataContainer from './DataContainer.vue';
-import { flexNames } from '@/Reviews';
+import { flexNames, reviewData } from '@/Reviews';
+import { computed } from 'vue';
+import chroma from 'chroma-js';
+import { watch } from 'vue';
 
 const props = defineProps<{
     settings: {components: any[]}
@@ -16,6 +19,10 @@ const emit = defineEmits<{
 }>()
 
 const selectedNestContainer = inject<number[]>("selectedNestContainer")!
+const selectedRootContainer = inject<number[]>("selectedContainer")!
+watch(selectedRootContainer, () => {
+    if (selectedNestContainer.value[0] != selectedRootContainer.value[0]) selectedContainer.value = [-1, null]
+})
 const selectedContainer = ref([-1, null])
 
 const moveContainer = (i: number, by: number) => {
@@ -42,14 +49,16 @@ const removeNestContainer = () => {
     }
 }
 
+const borderColor = computed(() => chroma.css(chroma.hsl([reviewData.value.pageBGcolor[0]+90, 0.94, 0.68])))
+
 </script>
 
 <template>
-    <section @click.stop="selectedNestContainer = [index, subIndex, selectedContainer[0]]" @dblclick="removeNestContainer" class="p-0.5 w-full border border-blue-400 border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
+    <section @click.stop="selectedNestContainer = [index, subIndex, selectedContainer[0]]; selectedRootContainer = [selectedContainer[0], -1]" @dblclick="removeNestContainer" :style="{borderColor: borderColor}" class="p-0.5 w-full border border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
         <DataContainer
             v-for="(container, ind) in settings.components[subIndex]"
             v-bind="CONTAINERS[container.type]"
-            @has-focus="selectedContainer = [ind, $event]"
+            @has-focus="selectedContainer = [ind, $event]; selectedRootContainer = [-1, -1]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @text-modified="container.data = $event"
@@ -64,7 +73,6 @@ const removeNestContainer = () => {
             <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component
                     v-for="elements in CONTAINERS[container.type].additionalComponents"
-                    class="grow"
                     :is="elements"
                     v-bind="CONTAINERS[container.type].componentProps ?? {}"
                     @clear-button="buttonState = ''"

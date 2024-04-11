@@ -6,6 +6,9 @@ const props = defineProps<{
   open: boolean
   title: string
   width?: string
+  sideButtonText?: string
+  sideButtonDisabled?: boolean
+  action?: any
 }>()
 
 const emit = defineEmits<{
@@ -24,7 +27,6 @@ watch(props, () => {
   }
 })
 
-const hello = ref()
 </script>
 
 
@@ -35,7 +37,11 @@ const hello = ref()
       <section @click.stop=""
         :style="{width: width ?? '35rem'}"
         class="flex max-h-[95vh] max-w-[95vw] flex-col relative rounded-lg bg-greenGradient text-white shadow-lg shadow-black">
-        <div class="relative m-2">
+        <div class="relative z-50 m-2">
+          <button :disabled="sideButtonDisabled!" @click="action" class="flex absolute gap-3 p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button" v-if="sideButtonText">
+            <slot name="icon"></slot>
+            <span class="max-sm:hidden">{{ sideButtonText }}</span>
+          </button>
           <h1 class="ml-1 text-xl font-bold text-center">{{ props.title }}</h1>
           <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
         </div>

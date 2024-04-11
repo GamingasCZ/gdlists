@@ -56,7 +56,7 @@ const doAction = (action: number, button: string) => {
 </script>
 
 <template>
-	<section class="flex overflow-auto sticky top-10 z-10 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
+	<section class="flex overflow-auto sticky top-10 z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
 		<div v-for="(action, index) in actions" class="flex gap-1 items-center">
 			<hr v-show="index > 0" class="inline-flex mx-2 w-0.5 h-6 bg-white border-none opacity-10 aspect-square">
 			<button

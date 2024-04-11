@@ -134,7 +134,7 @@ onErrorCaptured(() => {
 
 <template>
   <section v-if="guessResult"
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F]"
+    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"

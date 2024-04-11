@@ -224,11 +224,11 @@ export interface ReviewList {
   tagline: string
   containers: object[] 
   ratings: ReviewRating[]
+  defaultRatings: ReviewRating[]
   settings: ReviewSettings
   rateTheme: number
   private: boolean
   transparentPage: 0 | 1 | 2
-  disabledRatings: boolean
   language: number
 }
 

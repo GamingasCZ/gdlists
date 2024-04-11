@@ -15,7 +15,7 @@ import { onBeforeUnmount } from "vue";
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
 const storageInUse = computed(() => (storage.value.left / storage.value.storageMax) * 100)
-const pre = import.meta.env.VITE_API
+const pre = import.meta.env.VITE_USERCONTENT
 const imageInput = ref<HTMLInputElement>()
 const fileDrag = ref(false)
 

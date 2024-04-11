@@ -5,6 +5,7 @@ import ReviewVideo from "./ReviewVideo.vue"
 import ReviewList from "./ReviewList.vue"
 import ReviewDivisor from "./ReviewDivisor.vue"
 import NestContainer from "./NestContainer.vue"
+import ReviewRatings from "./ReviewRatings.vue"
 
 const containers: Containers = {
     default: {
@@ -120,6 +121,26 @@ const containers: Containers = {
             }
         ]
     },
+    showRating: {
+        nestable: true,
+        canEditText: false,
+        additionalComponents: [ReviewRatings],
+        settings: [
+            {
+                key: "level",
+                title: "Level",
+                type: [4],
+                default: 0
+            },
+            {
+                key: "show",
+                title: "Hodnocení",
+                type: [5],
+                default: -1
+            }
+        ]
+
+    },
     showLevel: {
         nestable: false,
         canEditText: false,
@@ -198,6 +219,7 @@ export type Containers = {
     showLevel: Container
     showList: Container
     addVideo: Container
+    showRating: Container
     twoColumns: Container
 }
 

@@ -231,7 +231,10 @@
     "korean": "Korejština",
     "russian": "Ruština",
     "other": "Jiný",
-    "bg": "Pozadí"
+    "bg": "Pozadí",
+    "none": "Žádný",
+    "unnamed2": "Bezejmenné",
+    "other2": "Ostatní"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -422,6 +425,11 @@
     "translucent": "Průsvitná stránka",
     "opaque": "Normální stránka",
     "scoring": "Vzhled bodování",
-    "review": "Recenze"
+    "review": "Recenze",
+    "rateoff": "Máš vyplé hodnocení levelů.",
+    "noratingHelp": "Hodí se, pokud chceš recenzovat event, kontroverzi apod.",
+    "opaqueHelp": "Stránka je neprůhledná",
+    "transparentHelp": "Text bude přímo na pozadí.",
+    "translucentHelp": "Stránka bude rozmlžená a ztmavená."
   }
 }

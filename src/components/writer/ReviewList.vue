@@ -34,7 +34,7 @@ const BASE_URL = import.meta.env.BASE_URL
             <span>{{ $t('reviews.pickList') }}</span>
         </button>
     </ContainerHelp>
-    <figure v-else>
+    <figure v-else class="p-2 w-[60rem] max-w-full">
         <ListPreview class="w-full" :disable-link="true" v-bind="settings.level" />
         <figcaption>{{ settings.description }}</figcaption>
     </figure>

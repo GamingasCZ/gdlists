@@ -34,18 +34,24 @@ const openDialogs = reactive({
     "imagePicker": [false, 0]
 })
 
-document.body.addEventListener("click", () => selectedContainer.value = [-1, -1])
+document.body.addEventListener("click", () => {
+    selectedContainer.value = [-1, -1]
+    selectedNestContainer.value = [-1, -1]
+})
 
 const collabClipboard = ref([])
 provide("openedDialogs", openDialogs)
 
 const selectedContainer = ref<[number, HTMLDivElement | null]>([-1, null])
-provide("settingsTitles", CONTAINERS)
+provide("selectedContainer", selectedContainer)
 
 const selectedLevel = ref()
 
 const selectedNestContainer = ref([-1, -1])
 provide("selectedNestContainer", selectedNestContainer)
+
+
+provide("settingsTitles", CONTAINERS)
 
 const addContainer = (key: string) => {
     let settingObject = {}
@@ -165,8 +171,9 @@ const modifyImageURL = (newUrl: string) => {
             <WriterSettings />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.levels" @close-popup="openDialogs.levels = false" :width="dialog.large">
-            <LevelPopup ref="selectedLevel" @close-popup="openDialogs.levels = false" />
+        <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
+            <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
+            <LevelPopup ref="selectedLevel" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium">
@@ -177,12 +184,12 @@ const modifyImageURL = (newUrl: string) => {
             <CollabEditor :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
         </DialogVue>
         
-        <DialogVue :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
-            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
+        <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
+            <ListPickerPopup :data="reviewData.containers" />
         </DialogVue>
         
         <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false" :title="$t('other.imageSettings')">
-            <BackgroundImagePicker :source="reviewData" @close-popup="openDialogs.bgPicker = false" />
+            <BackgroundImagePicker :source="reviewData" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.ratings" @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
@@ -190,7 +197,7 @@ const modifyImageURL = (newUrl: string) => {
         </DialogVue>
 
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
-            <ImageBrowser @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
+            <ImageBrowser @pick-image="modifyImageURL" />
         </DialogVue>
 
         
@@ -219,7 +226,7 @@ const modifyImageURL = (newUrl: string) => {
             />
 
             <!-- Editor -->
-            <section class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-300 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+            <section class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" />
 
                 <DataContainer
@@ -241,7 +248,6 @@ const modifyImageURL = (newUrl: string) => {
                     <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                         <component
                             v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                            class="grow"
                             :is="elements"
                             v-bind="CONTAINERS[container.type].componentProps ?? {}"
                             @clear-button="buttonState = ''"

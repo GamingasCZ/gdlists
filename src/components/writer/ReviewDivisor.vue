@@ -7,7 +7,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div :style="{margin: `${settings.size}px 0`}">
+    <div :style="{margin: `${settings.size}px 0`}" class="grow">
         <hr :style="{opacity: settings.visible ? 0.5 : 0}" class="px-4 my-auto w-full h-1 bg-white bg-none rounded-full">
     </div>
 </template>
