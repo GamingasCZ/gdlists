@@ -335,10 +335,11 @@ provide("saveCollab", saveCollab)
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
   </DialogVue>
   
-  <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" @close-popup="uploadedDialogShown = 0">
+  <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" header-disabled>
     <ListUploadedDialog
       :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
       :is-updating="uploadedDialogShown == 2"
+      :is-review="true"
       @do-edit="listActions('editList')"
       @close-popup="uploadedDialogShown = 0"
     />

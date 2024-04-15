@@ -161,14 +161,16 @@ const modifyImageURL = (newUrl: string) => {
         reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = newUrl
     }
 }
+
+const preUpload = ref(false)
 </script>
 
 <template>
     <main class="p-2">
         <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
-        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false" :title="$t('other.settings')" :width="dialog.medium">
-            <WriterSettings />
+        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false" :title="$t('other.settings')" :width="dialog.medium">
+            <WriterSettings :uploading="preUpload" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
@@ -185,7 +187,7 @@ const modifyImageURL = (newUrl: string) => {
         </DialogVue>
         
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
-            <ListPickerPopup :data="reviewData.containers" />
+            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
         </DialogVue>
         
         <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false" :title="$t('other.imageSettings')">
@@ -197,15 +199,15 @@ const modifyImageURL = (newUrl: string) => {
         </DialogVue>
 
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
-            <ImageBrowser @pick-image="modifyImageURL" />
+            <ImageBrowser @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
         </DialogVue>
 
         
-        <Header @open-dialog="openDialogs[$event] = true" />
+        <Header @upload="preUpload = true; openDialogs.settings = true" @open-dialog="openDialogs[$event] = true" />
         <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
             <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
-                <input type="text" :placeholder="$t('reviews.reviewName')" class="text-5xl max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
+                <input v-model="reviewData.reviewName" type="text" :placeholder="$t('reviews.reviewName')" class="text-5xl max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>

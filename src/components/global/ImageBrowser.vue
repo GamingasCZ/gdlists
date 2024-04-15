@@ -34,6 +34,7 @@ const storage = ref<ImageStorage>({
 })
 const images = ref<string[]>(imageCache)
 const externaImages = ref<string[]>([])
+const loadingImages = ref(true)
 
 if (!storageCache) {
     axios.get(import.meta.env.VITE_API + "/images.php?storage").then(res => {
@@ -45,6 +46,7 @@ if (!storageCache) {
     })
 }
 else {
+    loadingImages.value = false
     storage.value = storageCache
 }
 
@@ -137,7 +139,6 @@ const uploadExternalImage = async (link: string) => {
     }, 10);
 }
 
-const loadingImages = ref(true)
 const refreshContent = () => {
     loadingImages.value = true
     axios.get(import.meta.env.VITE_API + "/images.php").then(res => {
@@ -203,7 +204,6 @@ document.addEventListener("keyup", modShift)
 
 const pasteImage = (e: Event) => {
     e.preventDefault()
-    console.log(e)
     if (currentTab.value == 1) return // Not on external images
     if (!e.clipboardData.files.length) return notify(8)
     uploadImage(e.clipboardData?.files, true)

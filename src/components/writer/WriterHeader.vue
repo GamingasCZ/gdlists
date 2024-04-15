@@ -4,6 +4,7 @@ import { reviewData } from '@/Reviews';
 
 const emit = defineEmits<{
     (e: "openDialog", key: string): void
+    (e: "upload"): void
 }>()
 
 </script>
@@ -27,7 +28,7 @@ const emit = defineEmits<{
             </button>
         </div>
         <div>
-            <button v-if="true" class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
+            <button v-if="true" @click="emit('upload')" class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
                 <img src="@/images/upload.svg" alt="" class="w-6">
                 <span class="max-sm:hidden">{{ $t('editor.upload') }}</span>
             </button>

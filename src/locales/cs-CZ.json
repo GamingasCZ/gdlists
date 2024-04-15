@@ -327,7 +327,10 @@
   "list": {
     "uploadFinished": "Seznam byl {0}!",
     "updated": "aktualizován",
-    "uploaded": "nahrán"
+    "uploaded": "nahrán",
+    "uploadFinished2": "Recenze byla {0}!",
+    "updated2": "aktualizována",
+    "uploaded2": "nahrána"
   },
   "collabTools": {
     "hostRole": "Role hosta",
@@ -430,6 +433,7 @@
     "noratingHelp": "Hodí se, pokud chceš recenzovat event, kontroverzi apod.",
     "opaqueHelp": "Stránka je neprůhledná",
     "transparentHelp": "Text bude přímo na pozadí.",
-    "translucentHelp": "Stránka bude rozmlžená a ztmavená."
+    "translucentHelp": "Stránka bude rozmlžená a ztmavená.",
+    "settingsOk": "Je nastavení v pořádku?"
   }
 }

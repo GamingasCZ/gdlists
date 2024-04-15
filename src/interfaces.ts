@@ -221,6 +221,7 @@ export interface ytSearchDetails {
 }
 
 export interface ReviewList {
+  reviewName: string
   tagline: string
   containers: object[] 
   ratings: ReviewRating[]

@@ -317,7 +317,10 @@
   "list": {
     "uploadFinished": "List {0}!",
     "updated": "updated",
-    "uploaded": "uploaded"
+    "uploaded": "uploaded",
+    "uploadFinished2": "Review {0}!",
+    "updated2": "updated",
+    "uploaded2": "uploaded"
   },
   "collabTools": {
     "addRoleToAddMember": "You haven't created a collab yet.",
@@ -413,6 +416,7 @@
     "none": "None",
     "language": "Language",
     "bgcolor": "Background color",
-    "bgImage": "Background image"
+    "bgImage": "Background image",
+    "settingsOk": "Are these settings OK?"
   }
 }

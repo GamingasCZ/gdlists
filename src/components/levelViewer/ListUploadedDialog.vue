@@ -5,7 +5,8 @@ import { removeBackup} from '../../Editor'
 
 const props = defineProps<{
     listID: string
-    isUpdating
+    isUpdating: boolean
+    isReview: boolean
 }>()
 const emit = defineEmits(["closePopup", "doEdit"])
 
@@ -41,9 +42,11 @@ onMounted(() => {
     <section @click.stop=""
         class="absolute top-1/2 left-1/2 flex max-h-[95vh] w-[25rem] max-w-[95vw] -translate-x-1/2 -translate-y-32 flex-col rounded-b-md bg-greenGradient p-2 text-white shadow-lg shadow-black">
         <div class="absolute left-0 -top-24 w-full h-24 bg-gradient-to-t to-transparent from-lof-300"></div>
-        <img class="absolute left-0 -top-44 z-10 w-96 cursor-default pointer-events-none ship" src="@/images/uploading.webp" alt="" :id="!closing ? 'float' : ''" :class="{'-translate-y-full' : closing}">
+        <img v-if="!isReview" class="absolute left-0 -top-44 z-10 w-96 cursor-default pointer-events-none ship" src="@/images/uploading.webp" alt="" :id="!closing ? 'float' : ''" :class="{'-translate-y-full' : closing}">
+        <img v-else class="absolute left-0 -top-44 z-10 w-96 cursor-default pointer-events-none ship" src="@/images/upload2.webp" alt="" :id="!closing ? 'float' : ''" :class="{'-translate-y-full' : closing}">
 
-        <h1 class="mt-32 mb-5 text-3xl font-extrabold text-center">{{ $t('list.uploadFinished', [isUpdating ? $t('list.updated') : $t('list.uploaded')]) }}</h1>
+        <h1 v-if="!isReview" class="mt-32 mb-5 text-3xl font-extrabold text-center">{{ $t('list.uploadFinished', [isUpdating ? $t('list.updated') : $t('list.uploaded')]) }}</h1>
+        <h1 v-else class="mt-32 mb-5 text-3xl font-extrabold text-center">{{ $t('list.uploadFinished2', [isUpdating ? $t('list.updated2') : $t('list.uploaded2')]) }}</h1>
 
         <label>{{ $t('other.share') }}</label>
         <input type="text" class="p-1 text-lg bg-black bg-opacity-40 rounded-md outline-none" readonly @mouseover="$event.target?.select()" :value="sharelink">
@@ -63,13 +66,13 @@ onMounted(() => {
 
 <style scoped>
 @keyframes float {
-    from { translate: 0 -2rem; }
+    from { translate: 0 -1rem; }
     to { translate: 0 0rem; }
 }
 
 .ship {
     transition: transform 1s ease-out;
 }
-#float {animation: float 1s cubic-bezier(.46,.03,.52,.96) alternate infinite none;}
+#float {animation: float 3s cubic-bezier(.46,.03,.52,.96) alternate infinite none;}
 
 </style>

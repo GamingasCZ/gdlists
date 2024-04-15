@@ -26,6 +26,7 @@ export const DEFAULT_RATINGS = ref<ReviewRating[]>([
 ])
 
 export const REVIEW_EXTRAS: ReviewList = {
+    reviewName: "",
     tagline: "",
     containers: [],
     ratings: [],
@@ -38,6 +39,14 @@ export const REVIEW_EXTRAS: ReviewList = {
 }
 
 export const reviewData = ref({...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS})
+
+export function checkReview() {
+    const err = (err: string) => ({success: false, error: err})
+    if (reviewData.value.reviewName.length < 3) return err('Jméno recenze je moc krátké!')
+    if (reviewData.value.reviewName.length > 30) return err('Jméno recenze je moc dlouhé!')
+
+    if (!reviewData.value.containers.length) return err('')
+}
 
 export const selectedNestContainer= ref(0)
 export const flexNames = {left: "start", center: "center", right: "end", justify: "left"}

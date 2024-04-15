@@ -22,7 +22,7 @@ const BASE_URL = import.meta.env.BASE_URL
 </script>
 
 <template>
-    <div class="my-1 w-full overflow-clip min-h-20">
+    <div class="my-1 overflow-clip min-h-20">
         <ContainerHelp v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? 'Nepodařilo se načíst video!' : 'Kliknutím nastav video.'"></ContainerHelp>
         <figure v-else>
             <iframe

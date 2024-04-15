@@ -20,12 +20,12 @@ $time = new DateTime();
 $DATA = json_decode(file_get_contents("php://input"), true);
 
 // Invalid listName length
-if (strlen($DATA["lName"]) < 3 || strlen($DATA["lName"]) > 40) {
+if (strlen($DATA["reviewName"]) < 3 || strlen($DATA["reviewName"]) > 30) {
   die(json_encode([-1, 2]));
 }
 
 // Check list size
-$len = strlen($DATA["listData"]);
+$len = strlen(json_encode($DATA));
 if ($len > 25000 || $len < 150) {
   die(json_encode([-1, 4]));
 }
@@ -35,18 +35,21 @@ $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $disableComments = $DATA["disComments"] == 1 ? 1 : 0;
 
 // Check list
+/*
 $listCheck = checkList($DATA["listData"]);
 if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
+*/
 
 
 
 // Checking request
 error_reporting($debugMode ? -1 : 0);
-$fuckupData = sanitizeInput(array($DATA["lName"],$DATA["listData"]));
+$fuckupData = sanitizeInput(array($DATA["reviewName"]));
 $timestamp = $time -> getTimestamp();
 
 // Generate id if list private
-if ($DATA["hidden"]) { $hidden = privateIDGenerator($fuckupData[1], $fuckupData[0], $timestamp); }
+$hidden;
+if ($DATA["private"]) { $hidden = privateIDGenerator($fuckupData[1], $fuckupData[0], $timestamp); }
 else { $hidden = "0"; }
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -57,10 +60,10 @@ if ($mysqli -> connect_errno) {
 
 // Send to database
 $teplate = "INSERT INTO `reviews`(`name`,`uid`,`reviewData`,`tagline`,`hidden`,`commDisabled`) VALUES (?,?,?,?,?,?)";
-$values = array();
-doRequest($mysqli, $teplate, $values, "sissssii");
+$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments);
+doRequest($mysqli, $teplate, $values, "sisssi");
 
-if ($DATA["hidden"]) {
+if ($DATA["private"]) {
     // Hidden lists
     $listID = $hidden;
 }
@@ -73,9 +76,11 @@ else {
 }
 
 // Adds levels to database
-if (!$DATA["hidden"]) {
+/*
+if (!$DATA["private"]) {
   addLevelsToDatabase($mysqli, $listCheck["levels"], $listID, $user_id);
 }
+*/
 
 $mysqli -> close();
 

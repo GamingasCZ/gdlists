@@ -382,12 +382,11 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
   </DialogVue>
 
   
-  <DialogVue :open="collabEditorOpen && levelList.levels.length > 0" @close-popup="closeCollabTools()">
+  <DialogVue :open="collabEditorOpen && levelList.levels.length > 0" @close-popup="closeCollabTools()" :title="$t('collabTools.funny1')" :width="dialog.xl">
     <CollabEditor
       :index="currentlyOpenedCard"
       :clipboard="collabClipboard"
       @send-clipboard="collabClipboard = $event"
-      @close-popup="closeCollabTools()"
     />
   </DialogVue>
 

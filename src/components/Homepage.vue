@@ -52,9 +52,8 @@ const localStorg = ref(hasLocalStorage())
 </script>
 
 <template>
-  <DialogVue :open="firstTimeUser && returnedFromLogin" @close-popup="returnedFromLogin = false">
-    <LoggedInPopup @close-popup="returnedFromLogin = false"
-    :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
+  <DialogVue :open="firstTimeUser && returnedFromLogin" header-disabled :close-popup="returnedFromLogin = false">
+    <LoggedInPopup :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
   </DialogVue>
   
   <div id="loginToast" v-if="!firstTimeUser && localStorg"

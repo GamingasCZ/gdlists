@@ -4,17 +4,28 @@ import ColorPicker from '../global/ColorPicker.vue';
 import { reviewData } from '@/Reviews';
 import { ref } from 'vue';
 import { inject } from 'vue';
+import axios from 'axios';
 
 const bgColorPickerOpen = ref(false)
 const openDialogs = inject("openedDialogs")
 
+defineProps<{
+  uploading: boolean
+}>()
+
+const uploadList = () => {
+  axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
+    alert(res.data)
+  })
+}
+
 </script>
 
 <template>
-    <div class="flex justify-between items-center p-2 mx-2 mb-2 bg-black bg-opacity-40 rounded-md">
-      <span class="text-xl">Je nastavení v pořádku?</span>
-      <button class="flex gap-2 items-center px-2 py-1 rounded-md button bg-lof-400">
-      <img src="@/images/upload.svg" alt="" class="w-7">
+    <div v-if="uploading" class="flex justify-between items-center p-2 mx-2 mb-2 bg-black bg-opacity-40 rounded-md">
+      <span class="text-xl">{{ $t('reviews.settingsOk') }}</span>
+      <button @click="uploadList"class="flex gap-2 items-center px-2 py-1 rounded-md button bg-lof-400">
+        <img src="@/images/upload.svg" alt="" class="w-7">
         <span class="text-xl font-bold text-black">{{ $t('editor.upload') }}</span>
       </button>
     </div>
@@ -55,10 +66,16 @@ const openDialogs = inject("openedDialogs")
         </button>
       </div>
 
-      <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
+      <div class="p-2 pr-0 mt-2 bg-black bg-opacity-40 rounded-md">
         <div class="flex justify-between w-full">
           <span class="text-xl">{{ $t('reviews.private') }}</span>
           <input v-model="reviewData.private" type="checkbox" class="w-12 button" name="" id="">
+        </div>
+      </div>
+      <div class="p-2 pr-0 mt-2 bg-black bg-opacity-40 rounded-md">
+        <div class="flex justify-between w-full">
+          <span class="text-xl">{{ $t('other.disableComments') }}</span>
+          <input v-model="reviewData.disComments" type="checkbox" class="w-12 button" name="" id="">
         </div>
       </div>
       <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
@@ -96,10 +113,10 @@ const openDialogs = inject("openedDialogs")
 
       <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
         <div class="flex justify-between w-full">
-          <span class="ml-1 text-xl">{{ $t('reviews.bgcolor') }}</span>
+          <span class="text-xl">{{ $t('reviews.bgcolor') }}</span>
           <button
             type="button"
-            class="box-border flex justify-center items-center mr-2 w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
+            class="box-border flex justify-center items-center w-8 h-8 rounded-md border-2 border-white focus:outline focus:outline-current button"
             @click="bgColorPickerOpen = !bgColorPickerOpen"
             :style="{background: getBGcolor()}"
           >
