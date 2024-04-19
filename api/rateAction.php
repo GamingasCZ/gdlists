@@ -47,21 +47,25 @@ switch ($method) {
         $checkRate = doRequest($mysqli, "SELECT rate FROM ratings WHERE `uid`=? AND `list_id`=?", [$accountCheck, $fuckupData], "ii");
         $result = ["result" => null, "ratings" => null];
         if (is_null($checkRate)) { // No rating
+            // todo: maybe check for errors? PLEASEE, this could break could disjoin ratings and rate_ratio
             $inc = $rating ? 1 : -1;
             $rowQuery = doRequest($mysqli,"INSERT INTO `ratings`(`rate`,`uid`,`list_id`) VALUES (?,?,?)", [$rating, $accountCheck, $fuckupData], "iss");
-            if (array_key_exists("error", $rowQuery)) $result["result"] = "bro, the list is nonexistent";
+            if (is_array($rowQuery) && array_key_exists("error", $rowQuery)) $result["result"] = "error";
             else {
+
                 $valueQuery = doRequest($mysqli,"UPDATE lists SET rate_ratio = rate_ratio+? WHERE id=?", [$inc, $fuckupData], "ii");
                 $result["result"] = "added";
             }
         }
         elseif ($checkRate["rate"] != $rating) { // Change rating
+            // todo: maybe check for errors? PLEASEE, this could break could disjoin ratings and rate_ratio
             $inc = $rating ? 2 : -2;
             doRequest($mysqli, "UPDATE `ratings` SET `rate`=? WHERE `uid`=? AND `list_id`=?", [$rating, $accountCheck, $fuckupData], "iii");
             doRequest($mysqli,"UPDATE lists SET rate_ratio = rate_ratio+? WHERE id=?", [$inc, $fuckupData], "ii");
             $result["result"] = "changed";
         }
         elseif ($checkRate["rate"] == $rating) { // Remove rating
+            // todo: maybe check for errors? PLEASEE, this could break could disjoin ratings and rate_ratio
             $inc = !$rating ? 1 : -1;
             doRequest($mysqli, "DELETE FROM ratings WHERE `uid`=? AND `list_id`=?", [$accountCheck, $fuckupData], "ii");
             doRequest($mysqli,"UPDATE lists SET rate_ratio = rate_ratio+? WHERE id=?", [$inc, $fuckupData], "ii");
