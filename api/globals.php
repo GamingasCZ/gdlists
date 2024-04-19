@@ -43,7 +43,10 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes)
     // Fill in template
     $query->bind_param($valueTypes, ...$values);
 
-    $query->execute();
+    try {
+        $query->execute();
+    }
+    catch (Exception $e) { return ["error" => $e]; }
     $result = $query->get_result();
 
     $query->close();
