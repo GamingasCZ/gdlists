@@ -17,8 +17,8 @@ if ($mysqli->connect_errno) {
   exit();
 }
 
-$selRange = "creator, name, id, timestamp, hidden, uid, rate_ratio, views, diffGuesser";
-$selReviewRange = "name, uid, reviewData, rate_ratio, timestamp, id, views, hidden";
+$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, rate_ratio, views, diffGuesser";
+$selReviewRange = "name, reviews.uid, reviewData, rate_ratio, timestamp, reviews.id, views, hidden";
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0) {
   global $mysqli;
   $ind = 0;
@@ -150,11 +150,16 @@ if (count($_GET) == 1) {
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
-  $query = sprintf("SELECT %s FROM %s
-            WHERE %s `id`<=%d AND `name` LIKE '%%%s%%' %s
-            ORDER BY `hidden` DESC, `id` DESC
-            LIMIT %d 
-            OFFSET %s", $range, $type, $showHidden, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+  $query = sprintf("SELECT %s, sum(rate*2-1) AS rate_ratio FROM ratings
+    RIGHT JOIN %s ON %s.id = ratings.list_id
+    WHERE %s lists.id<=%d AND `name` LIKE '%%%s%%' %s
+    GROUP BY `name`
+    ORDER BY hidden DESC, lists.id DESC
+    LIMIT %s
+    OFFSET %s", $range, $type, $type, $showHidden, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+  error_log($query);
+
+
 
   $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $type, $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
   $maxpage = ceil($maxpageQuery->fetch_array()[0] / clamp(intval($_GET["fetchAmount"]), 2, 15));

@@ -73,9 +73,9 @@ const creatorName = computed(() => props.creator?.length ? props.creator : getUs
     :class="{'!border-dotted !border-white !border-opacity-40': hidden != '0'}"
     @click="emit('selectedLink', creatorName)"
   >
-    <section v-if="rate_ratio" class="flex flex-col items-center text-xs">
+    <section class="flex flex-col items-center text-xs">
       <img src="../../images/genericRate.svg" alt="" class="w-3.5" />{{
-        rate_ratio
+        rate_ratio ?? 0
       }}
     </section>
 
