@@ -41,7 +41,7 @@ const contactMenuOpen = ref<boolean>(false);
       >
         {{ $t('other.help') }}
       </button>
-      <a target="_blank" href="https://github.com/GamingasCZ/gdlists-vue-frontend/">
+      <a target="_blank" href="https://github.com/GamingasCZ/gdlists">
         <button class="p-1 underline rounded-md opacity-80">
           {{ $t('other.sourceCod') }}
         </button>
@@ -49,9 +49,6 @@ const contactMenuOpen = ref<boolean>(false);
       <button class="p-1 underline rounded-md opacity-80" @click="contactMenuOpen = true">
         {{ $t('other.contact') }}
       </button>
-      <!-- <a href="https://github.com/GamingasCZ/gdlists-vue-frontend/issues/new?title=Bug:%20">
-                <button class="p-1 bg-black bg-opacity-40 rounded-md">Nahlásit bug</button>
-            </a> -->
     </div>
   </section>
 </template>

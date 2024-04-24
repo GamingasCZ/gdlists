@@ -59,9 +59,9 @@ if ($mysqli -> connect_errno) {
 }
 
 // Send to database
-$teplate = "INSERT INTO `reviews`(`name`,`uid`,`reviewData`,`tagline`,`hidden`,`commDisabled`) VALUES (?,?,?,?,?,?)";
-$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments);
-doRequest($mysqli, $teplate, $values, "sisssi");
+$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`url`) VALUES (?,?,?,?,?,?,?)";
+$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $fuckupData[0] . '-1');
+doRequest($mysqli, $teplate, $values, "sisssis");
 
 if ($DATA["private"]) {
     // Hidden lists

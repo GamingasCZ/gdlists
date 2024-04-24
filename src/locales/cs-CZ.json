@@ -27,7 +27,7 @@
     "clickClose": "Zavírání dialogů kliknutím mimo"
   },
   "homepage": {
-    "searchLists": "Hledat seznamy...",
+    "searchLists": "Hledat v GD Seznamech...",
     "createList": "Vytvořit seznam",
     "tryLuck": "Zkusit štěstí",
     "welcomeToGDL": "Vítej v GD Seznamech!",
@@ -47,7 +47,10 @@
     "noListsVisited": "Zatím jsi nenavštívil žádné seznamy!",
     "noLevelsSaved": "Zatím jsi neuložil žádné levely!",
     "listsNonexistent": "Neexistují tyto seznamy!",
-    "welcomeBack": "Vítej zpět,"
+    "welcomeBack": "Vítej zpět,",
+    "writeReview": "Napsat recenzi",
+    "cookies1": "Nemáš povolené cookies!",
+    "cookies2": "Nepůjde se přihlásit, můžeš jen procházet."
   },
   "editor": {
     "tags": [
@@ -234,7 +237,8 @@
     "bg": "Pozadí",
     "none": "Žádný",
     "unnamed2": "Bezejmenné",
-    "other2": "Ostatní"
+    "other2": "Ostatní",
+    "cringeAhhTextLmao2": "Recenze: {0}"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -297,7 +301,8 @@
     "edit": "Upravit",
     "unpin": "Odepnout",
     "pin": "Připnout",
-    "levelNamePlat": "Jméno platformer levelu"
+    "levelNamePlat": "Jméno platformer levelu",
+    "noDescription2": "Recenze nemá popisek."
   },
   "date": {
     "fewSecsAgo": "před pár sekundami",

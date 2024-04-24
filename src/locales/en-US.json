@@ -117,12 +117,14 @@
     "official": "Official",
     "pinned": "Pinned",
     "savedMix": "Saved Mix",
-    "searchLists": "Search for lists...",
+    "searchLists": "Search in GD Lists...",
     "tryLuck": "Try luck",
     "uploaded": "Uploaded",
     "visited": "Visited",
     "welcomeBack": "Welcome back,",
-    "welcomeToGDL": "Welcome to GD Lists!"
+    "welcomeToGDL": "Welcome to GD Lists!",
+    "cookies1": "You have cookies disabled!",
+    "cookies2": "You won't be able to login, only browse."
   },
   "level": {
     "comments": "Comments",
@@ -136,7 +138,8 @@
     "unpin": "Unpin",
     "video": "Video",
     "views": " views",
-    "levelNamePlat": "Platformer Level Name"
+    "levelNamePlat": "Platformer Level Name",
+    "noDescription2": "No description provided"
   },
   "listViewer": {
     "goHome": "Go home",
@@ -275,7 +278,9 @@
     "custom": "Custom",
     "pick": "Pick",
     "russian": "Russian",
-    "spanish": "Spanish"
+    "spanish": "Spanish",
+    "cringeAhhTextLmao2": "Review: {0}",
+    "bg": "Background"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -417,6 +422,7 @@
     "language": "Language",
     "bgcolor": "Background color",
     "bgImage": "Background image",
-    "settingsOk": "Are these settings OK?"
+    "settingsOk": "Are these settings OK?",
+    "description": "Review Description"
   }
 }

@@ -85,7 +85,7 @@ const AUTOSAVE_TIMEOUT = SETTINGS.value.autosave*1000
 const listExists = ref<boolean>(true)
 const listBelongsToYou = ref<boolean>(true)
 if (props.editing) {
-  axios.post(import.meta.env.VITE_API+"/pwdCheckAction.php", {id: props.listID}, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
+  axios.post(import.meta.env.VITE_API+"/pwdCheckAction.php", {id: props.listID, type: 'list'}, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     let listData: ListUpdateFetch | number = res.data;
     if (typeof listData == 'number') {
       switch (listData) {
@@ -279,6 +279,7 @@ function updateList() {
     isNowHidden: isNowHidden ? "true" : "false",
     diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
     hidden: listHiddenSelected(),
+    type: 'list',
     disComments: (levelList.value.disComments as any) | 0
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
@@ -301,7 +302,8 @@ function updateList() {
 function removeList() {
   axios.post(import.meta.env.VITE_API+"/removeList.php", {
     id: props.listID,
-    hidden: listHiddenSelected()
+    hidden: listHiddenSelected(),
+    type: 'list'
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data == 3) {
       removeBackup()

@@ -29,17 +29,20 @@ $DATA = json_decode(file_get_contents("php://input"), true);
 
 $fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"]));
 
-
-
 // Password check
-if (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "true") {
-    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [$fuckupData[0]], "s");
-}
-elseif (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "false") {
-    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
+if ($DATA["type"] == "list") {
+    if (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "true") {
+        $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [$fuckupData[0]], "s");
+    }
+    elseif (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "false") {
+        $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
+    }
+    else {
+        $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
+    }
 }
 else {
-    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
+    $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url` = ?", [$fuckupData[0]], "s");
 }
 
 // When no changes are made in the list
@@ -55,32 +58,39 @@ if (!$checkUser) {
   die(json_encode([-1, 2]));
 }
 
-$diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $disableComments = $DATA["disComments"] == 1 ? 1 : 0;
 $retListID = [$DATA["id"]];
+
 // Private list settings
-if ($DATA["hidden"] == 1 and $DATA["isNowHidden"] == "true") {
-    doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
-}
-elseif ($DATA["hidden"] == 1 and $DATA["isNowHidden"] == "false") {
-    $hidden = privateIDGenerator($listData["name"], $listData["creator"], $listData["timestamp"]);
-    $retListID[0] = $hidden;
-    doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
-}
-elseif ($DATA["hidden"] == 0 and $DATA["isNowHidden"] == "false") {
-    doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
+if ($DATA["type"] == "list") {
+    $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
+    if ($DATA["hidden"] == 1 and $DATA["isNowHidden"] == "true") {
+        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
+    }
+    elseif ($DATA["hidden"] == 1 and $DATA["isNowHidden"] == "false") {
+        $hidden = privateIDGenerator($listData["name"], $listData["creator"], $listData["timestamp"]);
+        $retListID[0] = $hidden;
+        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
+    }
+    elseif ($DATA["hidden"] == 0 and $DATA["isNowHidden"] == "false") {
+        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
+    }
+    else {
+        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden`='0', `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
+        $retListID[0] = $listData["id"];
+    }
+    
+    // Adding levels to database
+    if ($DATA["hidden"] == 0) {
+        doRequest($mysqli, "DELETE FROM `levels` WHERE `listID`=?", [$DATA["id"]], "i");
+        $levels = json_decode($DATA["listData"], true);
+        
+        // hope it's not an old list :D
+        addLevelsToDatabase($mysqli, $levels["levels"], $DATA["id"], $listData["uid"]);
+    }
 }
 else {
-    doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden`='0', `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
-    $retListID[0] = $listData["id"];
-}
-
-if ($DATA["hidden"] == 0) {
-    doRequest($mysqli, "DELETE FROM `levels` WHERE `listID`=?", [$DATA["id"]], "i");
-    $levels = json_decode($DATA["listData"], true);
-
-    // hope it's not an old list :D
-    addLevelsToDatabase($mysqli, $levels["levels"], $DATA["id"], $listData["uid"]);
+    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ? WHERE `url` = ?", [$fuckupData[1], 0, $DATA["tagline"], $disableComments, $DATA["id"]], "sisis");
 }
 
 echo json_encode($retListID);

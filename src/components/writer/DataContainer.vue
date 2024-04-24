@@ -16,10 +16,13 @@ interface Extras {
 	currentSettings: any[]
 	type: string
 	focused: boolean
+	editable?: boolean
+	text?: string
 }
 
 const props = defineProps<Container & Extras>()
 
+const textOnce = props.text
 const doShowSettings = ref(false)
 const showPlaceholder = ref(true)
 const element = ref<HTMLDivElement>()
@@ -35,16 +38,16 @@ const focus = ref([false, false])
 
 <template>
 	<div @mouseover="focus[0] = true" @mouseout="focus[0] = false" @click.stop="emit('hasFocus', element!); focus[1] = true" class="relative reviewContainer outline-[2px] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': (focus[0] || focus[1]) && focused}">
-		<span v-if="showPlaceholder" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
+		<span v-show="showPlaceholder && editable && !text.length" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
 		<div
 			ref="element"
 			v-if="canEditText"
 			@keyup="parseText"
 			@input="showPlaceholder = $el.innerText.length == 0"
-			:contenteditable="true"
+			:contenteditable="editable"
 			class="break-words outline-none"
 			:class="childStyling || []
-		">
+		">{{ textOnce }}
 		</div>
 		<slot></slot>
 

@@ -29,10 +29,14 @@ import { hasLocalStorage, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
+import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
+import DataContainer from "./writer/DataContainer.vue";
+import { flexNames } from "@/Reviews";
 
 const props = defineProps({
   listID: { type: String, required: false },
+  isReview: Boolean,
   randomList: Boolean,
 });
 
@@ -42,8 +46,8 @@ onUnmounted(() => {
 
 let gdlists = useI18n().t('other.websiteName')
 
-watch(props, () => main())
-onMounted(() => main())
+watch(props, () => props.isReview ? loadReview() : loadList())
+onMounted(() => props.isReview ? loadReview() : loadList())
 
 // other way around bruh (private list=false, public=true)
 let PRIVATE_LIST: boolean =
@@ -62,7 +66,7 @@ const LEVEL_COUNT = ref(0)
 const listErrorLoading = ref(false)
 
 const nonexistentList = ref<boolean>(false)
-function main() {
+function loadList() {
   let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
   if (props.randomList) {
     listURL = "random";
@@ -146,6 +150,71 @@ function main() {
     })
 }
 
+function loadReview() {
+  nonexistentList.value = false
+
+  axios
+    .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: props.listID}})
+    .then((res: AxiosResponse) => {
+      try {
+        if (res.data == 2) {
+          nonexistentList.value = true
+          return
+        }
+
+        LIST_DATA.value = res.data[0];
+        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
+        LIST_CREATORDATA.value = res.data[1]?.[0]
+
+        if (hasLocalStorage()) {
+          favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
+          recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
+
+          addIntoRecentlyViewed =
+            recentlyViewed.filter((list: ListPreview) => list.url == props.listID)
+              .length == 0; // Has not been viewed yet
+        }
+
+        if (addIntoRecentlyViewed) {
+          recentlyViewed.push({
+            creator: LIST_CREATOR.value,
+            url: props.listID,
+            name: LIST_DATA.value?.name!,
+            uploadDate: Date.now(),
+            hidden: "0",
+          });
+          if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
+          localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+        }
+
+        document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
+
+        // Set review colors
+        let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
+        if (typeof listColors == "object") listColors[2] /= 64
+        else if (listColors) { listColors = chroma(listColors).hsl() }
+        LIST_COL.value = listColors
+        
+        // Saturation 0
+        if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
+
+        if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
+          modifyListBG(LIST_COL.value);
+
+        // Check pinned status
+        if (hasLocalStorage()) {
+          JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
+            if (props.listID == pin.url) listPinned.value = true
+          });
+        }
+
+        LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
+      } catch (e) {
+        listErrorLoading.value = true
+      }
+    })
+}
+
 let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
   "goto"
 );
@@ -190,19 +259,21 @@ const toggleListPin = () => {
     if (listPinned.value) { // Remove from pinned
       let i = 0
       pinned.forEach((pin: ListPreview) => {
-        if (pin.id == LIST_DATA.value.id) pinned.splice(i, 1)
+        if (pin.id == LIST_DATA.value.id || pin.url == props.listID) pinned.splice(i, 1)
         i++
       })
     }
     else {
-      pinned.push({
+      let pinData = {
         name: LIST_DATA.value.name,
         creator: LIST_CREATOR.value,
         uploadDate: Date.now(),
-        id: LIST_DATA.value.id,
         hidden: LIST_DATA.value.hidden,
         isPinned: true
-      })
+      }
+      if (props.isReview) pinData.url = props.listID
+      else pinData.id = LIST_DATA.value.id
+      pinned.push(pinData)
     }
     if (pinned.length > 5) { // Remove last pinned level
       pinned.splice(0, 1)
@@ -213,7 +284,11 @@ const toggleListPin = () => {
   }
 }
 
-const getURL = () => `${window.location.host}/gdlists/s/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`;
+const getURL = () => {
+  let base = `${window.location.host}/gdlists/s/`
+  if (props.isReview) return base + LIST_DATA.value?.url
+  else return base + (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
+}
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
 const commentsShowing = ref(false)
@@ -243,7 +318,10 @@ const listActions = (action: string) => {
       toggleListPin()
       break;
     case "editList":
-      router.push(`/edit/list/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
+      if (props.isReview)
+        router.push(`/edit/review/${LIST_DATA.value?.url!}`)
+      else
+        router.push(`/edit/list/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
       break;
     case "mobileExtras":
       mobileExtrasOpen.value = true
@@ -317,7 +395,7 @@ provide("saveCollab", saveCollab)
   </DialogVue>
   
   <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.small">
-    <SharePopup :share-text="getURL()" />
+    <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
   
   <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.jumpTo')">
@@ -350,7 +428,7 @@ provide("saveCollab", saveCollab)
       <div class=""></div>
       <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :creator-data="LIST_CREATORDATA!"
         :id="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-pinned="listPinned" class="mb-8"
-        v-if="LIST_DATA.name != undefined && !nonexistentList" />
+        v-if="LIST_DATA.name != undefined && !nonexistentList" :review="isReview" />
     </header>
     <main class="flex flex-col gap-4">
 
@@ -390,24 +468,56 @@ provide("saveCollab", saveCollab)
       </DialogVue>
 
       <!-- List -->
-      <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
-        class="levelCard"
-        :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
-        v-show="!commentsShowing"
-        v-bind="level"
-        :favorited="favoritedIDs?.includes(level.levelID!)"
-        :level-index="index"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-        :list-name="LIST_DATA?.name!"
-        :translucent-card="LIST_DATA?.data.translucent!" 
-        :disable-stars="false" 
-        :guessing-now="cardGuessing == index"
-        :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-        @vue:mounted="tryJumping(index)"
-        @next-guess="doNextGuess($event)"
-        @open-collab="openCollabTools"
-        @error="listErrorLoading = true"
-      />
+      <div v-if="!isReview">
+        <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+          class="levelCard"
+          :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
+          v-show="!commentsShowing"
+          v-bind="level"
+          :favorited="favoritedIDs?.includes(level.levelID!)"
+          :level-index="index"
+          :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+          :list-name="LIST_DATA?.name!"
+          :translucent-card="LIST_DATA?.data.translucent!" 
+          :disable-stars="false" 
+          :guessing-now="cardGuessing == index"
+          :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
+          @vue:mounted="tryJumping(index)"
+          @next-guess="doNextGuess($event)"
+          @open-collab="openCollabTools"
+          @error="listErrorLoading = true"
+        />      
+      </div>
+      <div v-else v-show="!commentsShowing">
+        <!-- Review -->
+        <section class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2}">
+          <DataContainer
+              v-for="(container, index) in LIST_DATA.data.containers"
+              v-bind="CONTAINERS[container.type]"
+              :type="container.type"
+              :current-settings="container.settings"
+              :class="[CONTAINERS[container.type].styling ?? '']"
+              :style="{textAlign: container.align}"
+              :key="container.id"
+              :focused="false"
+              :text="container.data"
+          >
+              <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
+                  <component
+                      v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
+                      :is="elements"
+                      v-bind="CONTAINERS[container.type].componentProps ?? {}"
+                      :button-state="false"
+                      :settings="container.settings"
+                      :index="index"
+                      :sub-index="subIndex"
+                      :key="container.id"
+                  />
+              </div>
+          </DataContainer>
+        </section>
+      </div>
+
 
       <!-- Guessing bottom padding -->
       <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != -1 && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>

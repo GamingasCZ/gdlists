@@ -4,6 +4,7 @@ import axios, { type AxiosResponse } from "axios";
 import { onMounted, ref, watch } from "vue";
 import parseText from "../global/parseEditorFormatting";
 import { hasLocalStorage } from "@/siteSettings";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   name: string;
@@ -16,6 +17,7 @@ const props = defineProps<{
   commAmount: number;
   listPinned: boolean;
   creatorData: { username: string, discord_id: string, avatar_hash: string } | false;
+  review: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -85,6 +87,13 @@ function sendRating(action: 1 | 0) {
   })
 }
 
+const listDescription = props.data?.description || props.review ?
+  useI18n().t('level.noDescription2') : useI18n().t('level.noDescription')
+
+const listUploadDate = props.timestamp || props.review ?
+  new Date(props.timestamp!).toLocaleDateString() :
+  new Date(parseInt(props.timestamp!) * 1000).toLocaleDateString()
+
 </script>
 
 <template>
@@ -139,9 +148,7 @@ function sendRating(action: 1 | 0) {
             <hr class="w-1 h-4 bg-white bg-opacity-60 rounded-full border-none" />
             
             <!-- Date -->
-            <span>{{
-              new Date(parseInt(timestamp!) * 1000).toLocaleDateString()
-            }}</span>
+            <span>{{ listUploadDate }}</span>
           </div>
         </header>
         <pre id="listDescription"
@@ -149,7 +156,7 @@ function sendRating(action: 1 | 0) {
           :class="{
                 'text-opacity-40': ['', undefined].includes(data?.description),
                 'before:opacity-0': !tallDescription || toggleDescription,
-              }" v-html="parseText(data?.description || $t('level.noDescription'))"></pre>
+              }" v-html="parseText(listDescription)"></pre>
         <button v-if="tallDescription" class="absolute bottom-0 left-1/2 w-10 rounded-t-lg"
           :style="{ backgroundColor: getCol() }" @click="toggleDescription = !toggleDescription">
           <img src="@/images/descMore.svg" :class="{ '-scale-y-100': toggleDescription }" class="p-1 mx-auto w-6"

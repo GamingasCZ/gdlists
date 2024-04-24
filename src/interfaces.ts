@@ -13,7 +13,7 @@ export interface ListFetchResponse {
   name: string;
   creator: string;
   id: number;
-  data: LevelList;
+  data: LevelList | ReviewList;
   views: number;
   rate_ratio: number;
   commAmount: number;

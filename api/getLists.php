@@ -17,9 +17,9 @@ if ($mysqli->connect_errno) {
   exit();
 }
 
-$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, rate_ratio, views, diffGuesser";
-$selReviewRange = "name, reviews.uid, reviewData, rate_ratio, timestamp, reviews.id, views, hidden";
-function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0) {
+$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
+$selReviewRange = "name, reviews.uid, data, timestamp, reviews.id, views, hidden, url";
+function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;
   $dbInfo = [];
@@ -81,7 +81,14 @@ if (count($_GET) == 1) {
     } else {
       parseResult($result, true);
     }
-  } elseif (in_array("pid", array_keys($_GET))) {
+  } elseif (in_array("review", array_keys($_GET))) {
+    // Reviews
+    $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url`= ?", [$_GET["review"]], "s");
+
+    if ($result == null) echo "2";
+    else parseResult($result, true, review: true);
+  }
+   elseif (in_array("pid", array_keys($_GET))) {
     // Private lists
     $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden`= ?", [$_GET["pid"]], "s");
 
@@ -97,23 +104,24 @@ if (count($_GET) == 1) {
     parseResult($result, true);
 
   } elseif (in_array("homepage", array_keys($_GET))) {
-    $result = $mysqli->query("SELECT " . $selRange . " FROM `lists` WHERE `hidden` = '0' ORDER BY `lists`.`id` DESC LIMIT 3 ");
+    $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
     parseResult($result->fetch_all(MYSQLI_ASSOC));
 
   } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
     $account = checkAccount();
     if (!$account) die("[]"); // Not logged in
-    $result = $mysqli->query(sprintf("SELECT %s FROM `lists` WHERE `uid`=%s AND `hidden` LIKE 0 ORDER BY `id` DESC LIMIT 3", $selRange, $account["id"]));
+    $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
     parseResult($result->fetch_all(MYSQLI_ASSOC));
   }
-} else {
+}
+    else {
   // --- Loading all lists ---
 
   // Are values numbers?
   if (!is_numeric($_GET["page"]) &&
       !is_numeric($_GET["startID"]) &&
-      !is_numeric($_GET["sort"] &&
-      !is_numeric($_GET["fetchAmount"]))) {
+      !is_numeric($_GET["sort"]) &&
+      !is_numeric($_GET["fetchAmount"])) {
     die("1");
   }
 
@@ -123,12 +131,12 @@ if (count($_GET) == 1) {
   if (isset($_GET["user"])) {
     if (!getAuthorization()) die();
     $user = checkAccount()["id"];
-    $addReq = "AND `uid`=" . $user . " AND `hidden` LIKE 0";
+    $addReq = "AND " . $type . ".uid=" . $user . " AND `hidden` LIKE 0";
   }
   if (isset($_GET["hidden"])) {
     if (!getAuthorization()) die();
     $user = checkAccount()["id"];
-    $addReq = "AND `uid`=" . $user;
+    $addReq = "AND " . $type . ".uid=" . $user;
     $showHidden = "";
   }
   
@@ -150,16 +158,13 @@ if (count($_GET) == 1) {
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
-  $query = sprintf("SELECT %s, sum(rate*2-1) AS rate_ratio FROM ratings
+  $query = sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio FROM ratings
     RIGHT JOIN %s ON %s.id = ratings.list_id
-    WHERE %s lists.id<=%d AND `name` LIKE '%%%s%%' %s
+    WHERE %s %s.id<=%d AND `name` LIKE '%%%s%%' %s
     GROUP BY `name`
-    ORDER BY hidden DESC, lists.id DESC
+    ORDER BY hidden DESC, id DESC
     LIMIT %s
-    OFFSET %s", $range, $type, $type, $showHidden, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
-  error_log($query);
-
-
+    OFFSET %s", $range, $type, $type, $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
 
   $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $type, $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
   $maxpage = ceil($maxpageQuery->fetch_array()[0] / clamp(intval($_GET["fetchAmount"]), 2, 15));
@@ -169,10 +174,3 @@ if (count($_GET) == 1) {
 }
 
 $mysqli->close();
-
-/*
-GET
-&id |pid || random || homepage
-
-&page=0?startID=10?searchQuery=hello?sort=0?fetchAmount=10
-*/

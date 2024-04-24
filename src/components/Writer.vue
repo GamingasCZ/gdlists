@@ -19,8 +19,23 @@ import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import { modifyListBG } from "@/Editor";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
+
+const props = defineProps<{
+    reviewID?: string
+    editing?: boolean
+}>()
+
+if (props.editing) {
+    axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", {id: props.reviewID, type: 'review'}).then(res => {
+        reviewData.value = res.data.data
+        modifyListBG(reviewData.value.pageBGcolor, false, true)
+    })
+}
 
 const openDialogs = reactive({
     "settings": false,
@@ -162,6 +177,18 @@ const modifyImageURL = (newUrl: string) => {
     }
 }
 
+const removeReview = () => {
+    axios.post(import.meta.env.VITE_API + "/removeList.php", {id: props.reviewID, type: 'review'}).then(res => {
+        useRouter().replace("/browse/reviews")
+    })
+}
+
+const updateReview = () => {
+    axios.post(import.meta.env.VITE_API + "/updateList.php", {id: props.reviewID, type: 'review', listData: JSON.stringify(reviewData.value), tagline: reviewData.value.tagline, hidden: 0, isNowHidden: 0, disComments: reviewData.value.disComments | 0}).then(res => {
+        useRouter().replace(`/review/${res.data[0]}`)
+    })
+}
+
 const preUpload = ref(false)
 </script>
 
@@ -182,7 +209,7 @@ const preUpload = ref(false)
             <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
         </DialogVue>
         
-        <DialogVue :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false">
+        <DialogVue :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl">
             <CollabEditor :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
         </DialogVue>
         
@@ -203,17 +230,24 @@ const preUpload = ref(false)
         </DialogVue>
 
         
-        <Header @upload="preUpload = true; openDialogs.settings = true" @open-dialog="openDialogs[$event] = true" />
+        <Header
+            :editing="editing"
+            @update="updateReview"
+            @remove="removeReview"
+            @upload="preUpload = true; openDialogs.settings = true"
+            @open-dialog="openDialogs[$event] = true"
+        />
+        
         <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
             <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
-                <input v-model="reviewData.reviewName" type="text" :placeholder="$t('reviews.reviewName')" class="text-5xl max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
+                <input v-model="reviewData.reviewName" type="text" :disabled="editing" :placeholder="$t('reviews.reviewName')" class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
-                    <input type="text" v-model="reviewData.tagline" autofocus class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400" :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
+                    <input type="text" v-once v-model="reviewData.tagline" autofocus class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400" :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
                     <button @click="tagline = false">
                         <img src="@/images/trash.svg" alt="" class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md group-focus-within:block button">
                     </button>
@@ -246,6 +280,8 @@ const preUpload = ref(false)
                     :style="{textAlign: container.align}"
                     :key="container.id"
                     :focused="selectedContainer[0] == index"
+                    :editable="true"
+                    :text="container.data"
                 >
                     <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                         <component

@@ -5,6 +5,7 @@ import { reviewData } from '@/Reviews';
 import { ref } from 'vue';
 import { inject } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
 const bgColorPickerOpen = ref(false)
 const openDialogs = inject("openedDialogs")
@@ -15,7 +16,9 @@ defineProps<{
 
 const uploadList = () => {
   axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
-    alert(res.data)
+    sessionStorage.setItem("uploadFinished", "1")
+    // todo: add error checking
+    useRouter().replace(`/review/${res.data[0]}`)
   })
 }
 

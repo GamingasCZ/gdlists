@@ -23,8 +23,6 @@ watch(props, () => {
 })
 
 const dialogs = inject("openedDialogs")
-
-const BASE_URL = import.meta.env.BASE_URL
 </script>
 
 <template>

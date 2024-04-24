@@ -40,7 +40,13 @@ const router = createRouter({
     {
       path: "/:id",
       name: "listViewer",
-      props: (route) => ({ listID: route.params.id }),
+      props: (route) => ({ isReview: false, listID: route.params.id }),
+      component: () => import("@/components/ListView.vue"),
+    },
+    {
+      path: "/review/:review",
+      name: "reviewViewer",
+      props: (route) => ({ isReview: true, listID: route.params.review }),
       component: () => import("@/components/ListView.vue"),
     },
     {

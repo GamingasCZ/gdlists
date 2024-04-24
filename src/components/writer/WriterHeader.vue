@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { reviewData } from '@/Reviews';
 
+defineProps<{
+    editing: boolean
+}>()
 
 const emit = defineEmits<{
     (e: "openDialog", key: string): void
     (e: "upload"): void
+    (e: "remove"): void
+    (e: "update"): void
 }>()
 
 </script>
@@ -28,16 +33,16 @@ const emit = defineEmits<{
             </button>
         </div>
         <div>
-            <button v-if="true" @click="emit('upload')" class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
+            <button v-if="!editing" @click="emit('upload')" class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
                 <img src="@/images/upload.svg" alt="" class="w-6">
                 <span class="max-sm:hidden">{{ $t('editor.upload') }}</span>
             </button>
             <div class="flex gap-1" v-else>
-                <button class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
+                <button @click="emit('update')" class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
                     <img src="@/images/upload.svg" alt="" class="w-6">
                     <span class="max-sm:hidden">{{ $t('editor.update') }}</span>
                 </button>
-                <button class="flex gap-2 px-2 py-1 font-bold text-black bg-red-400 rounded-md button">
+                <button @click="emit('remove')" class="flex gap-2 px-2 py-1 font-bold text-black bg-red-400 rounded-md button">
                     <img src="@/images/del.svg" alt="" class="w-6">
                 </button>
             </div>

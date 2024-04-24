@@ -4,12 +4,14 @@ import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   shareText: string;
+  review: boolean;
 }>();
 
 let text = `${useI18n().t('other.cringeAhhTextLmao')} - ${props.shareText}`;
+let reviewText = `${useI18n().t('other.cringeAhhTextLmao2', [props.shareText])}`;
 const links = ref<string[]>([
-  `https://www.reddit.com/submit?url=${encodeURIComponent(text)}`,
-  `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+  `https://www.reddit.com/submit?url=${encodeURIComponent(props.review ? reviewText : text)}`,
+  `https://twitter.com/intent/tweet?text=${encodeURIComponent(props.review ? reviewText : text)}`,
 ]);
 </script>
 

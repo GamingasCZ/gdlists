@@ -22,17 +22,26 @@ error_reporting(0);
 
 $DATA = json_decode(file_get_contents("php://input"), true);
 
-if (isset($DATA["id"])) {
-    $listType = Array($DATA["id"], is_numeric($DATA["id"]) ? "id" : "hidden");
+$listData;
+switch ($DATA["type"]) {
+    case 'list':
+        if (isset($DATA["id"])) {
+            $listType = Array($DATA["id"], is_numeric($DATA["id"]) ? "id" : "hidden");
+        }
+        else {
+            echo "1";
+            http_response_code(204);
+            exit();
+        }
+        
+        $datacheck = sanitizeInput([$listType[0]]);
+        $listData = doRequest($mysqli, sprintf("SELECT * FROM `lists` WHERE `%s`= ?", $listType[1]), [$datacheck[0]], "s");
+        break;
+    case 'review':
+        $datacheck = sanitizeInput([$DATA["id"]]);
+        $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url`= ?", [$datacheck[0]], "s");
+        break;
 }
-else {
-    echo "1";
-    http_response_code(204);
-    exit();
-}
-$datacheck = sanitizeInput([$listType[0]]);
-
-$listData = doRequest($mysqli, sprintf("SELECT * FROM `lists` WHERE `%s`= ?", $listType[1]), [$datacheck[0]], "s");
 if ($listData === null) {
     die("3");
 }
