@@ -77,6 +77,12 @@ const containers: Containers = {
                 default: ""
             },
             {
+                key: "width",
+                title: "",
+                type: [-1],
+                default: 64
+            },
+            {
                 key: "pick",
                 title: "Vybrat obrázek",
                 type: [1],

@@ -11,6 +11,7 @@ const props = defineProps<{
     settings: {components: any[]}
     index: number
     subIndex: number
+    editable: boolean
 }>()
 
 const emit = defineEmits<{
@@ -18,8 +19,8 @@ const emit = defineEmits<{
     (e: "removeSubcontainer"): void
 }>()
 
-const selectedNestContainer = inject<number[]>("selectedNestContainer")!
-const selectedRootContainer = inject<number[]>("selectedContainer")!
+const selectedNestContainer = inject<number[]>("selectedNestContainer", [-1, -1, -1])!
+const selectedRootContainer = inject<number[]>("selectedContainer", [-1, -1, -1])!
 watch(selectedRootContainer, () => {
     if (selectedNestContainer.value[0] != selectedRootContainer.value[0]) selectedContainer.value = [-1, null]
 })
@@ -35,6 +36,7 @@ const buttonState = ref('')
 const CONTAINERS = inject("settingsTitles")!
 
 const removeNestContainer = () => {
+    if (props.editable) return
     // Don't try to remove non-empty containers
     if (props.settings.components[props.subIndex].length > 0) return
 
@@ -51,14 +53,26 @@ const removeNestContainer = () => {
 
 const borderColor = computed(() => chroma.css(chroma.hsl([reviewData.value.pageBGcolor[0]+90, 0.94, 0.68])))
 
+const selectNestContainer = (e: Event) => {
+    if (!props.editable) return
+    selectedNestContainer.value = [props.index, props.subIndex, selectedContainer.value[0]];
+    selectedRootContainer.value = [props.index, -1]
+}
+
 </script>
 
 <template>
-    <section @click.stop="selectedNestContainer = [index, subIndex, selectedContainer[0]]; selectedRootContainer = [selectedContainer[0], -1]" @dblclick="removeNestContainer" :style="{borderColor: borderColor}" class="p-0.5 w-full border border-opacity-30 transition-colors duration-75 min-h-8" :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex}">
+    <section
+        @click="selectNestContainer"
+        @dblclick="removeNestContainer"
+        :style="{borderColor: borderColor}"
+        class="p-0.5 w-full border border-opacity-30 transition-colors duration-75 min-h-8"
+        :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!border-none': !editable}"
+    >
         <DataContainer
             v-for="(container, ind) in settings.components[subIndex]"
             v-bind="CONTAINERS[container.type]"
-            @has-focus="selectedContainer = [ind, $event]; selectedRootContainer = [-1, -1]"
+            @has-focus="selectedNestContainer = [index, ind, $event]; selectedContainer = [ind, $event]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @text-modified="container.data = $event"
@@ -68,7 +82,9 @@ const borderColor = computed(() => chroma.css(chroma.hsl([reviewData.value.pageB
             :class="[CONTAINERS[container.type].styling ?? '']"
             :style="{textAlign: container.align}"
             :key="container.id"
-            :focused="selectedContainer[0] == ind"
+            :editable="editable"
+            :text="container.data"
+            :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0]"
         >
             <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component
@@ -79,6 +95,7 @@ const borderColor = computed(() => chroma.css(chroma.hsl([reviewData.value.pageB
                     :button-state="buttonState"
                     :settings="container.settings"
                     :index="index"
+                    :editable="editable"
                 />
             </div>
         </DataContainer>

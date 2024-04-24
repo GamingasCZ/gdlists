@@ -14,14 +14,16 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames } from "@/Reviews";
+import { reviewData, flexNames, REVIEW_EXTRAS } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { modifyListBG } from "@/Editor";
+import { DEFAULT_LEVELLIST, modifyListBG } from "@/Editor";
+import { onUnmounted } from "vue";
+import router from "@/router";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -47,11 +49,6 @@ const openDialogs = reactive({
     "ratings": false,
     "bgPreview": false,
     "imagePicker": [false, 0]
-})
-
-document.body.addEventListener("click", () => {
-    selectedContainer.value = [-1, -1]
-    selectedNestContainer.value = [-1, -1]
 })
 
 const collabClipboard = ref([])
@@ -179,15 +176,20 @@ const modifyImageURL = (newUrl: string) => {
 
 const removeReview = () => {
     axios.post(import.meta.env.VITE_API + "/removeList.php", {id: props.reviewID, type: 'review'}).then(res => {
-        useRouter().replace("/browse/reviews")
+        router.replace("/browse/reviews")
     })
 }
 
 const updateReview = () => {
     axios.post(import.meta.env.VITE_API + "/updateList.php", {id: props.reviewID, type: 'review', listData: JSON.stringify(reviewData.value), tagline: reviewData.value.tagline, hidden: 0, isNowHidden: 0, disComments: reviewData.value.disComments | 0}).then(res => {
-        useRouter().replace(`/review/${res.data[0]}`)
+        sessionStorage.setItem("uploadFinished", "2")
+        router.replace(`/review/${res.data[0]}`)
     })
 }
+
+onUnmounted(() => {
+  reviewData.value = {...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS}
+})
 
 const preUpload = ref(false)
 </script>
@@ -262,14 +264,14 @@ const preUpload = ref(false)
             />
 
             <!-- Editor -->
-            <section class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+            <section ref="writer" class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" />
 
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
                     v-bind="CONTAINERS[container.type]"
                     ref="dataContainers"
-                    @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1]"
+                    @has-focus="selectedContainer = [index, $event]"
                     @remove-container="removeContainer(index)"
                     @move-container="moveContainer(index, $event)"
                     @text-modified="container.data = $event"
@@ -296,6 +298,7 @@ const preUpload = ref(false)
                             :index="index"
                             :sub-index="subIndex"
                             :key="container.id"
+                            :editable="true"
                         />
                     </div>
                 </DataContainer>

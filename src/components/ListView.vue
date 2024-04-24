@@ -381,6 +381,7 @@ const saveCollab = (ind: number) => {
   localStorage.setItem("savedCollabIDs", JSON.stringify(currSavedIDs))
 }
 
+provide("settingsTitles", CONTAINERS)
 provide("saveCollab", saveCollab)
 
 </script>
@@ -415,7 +416,7 @@ provide("saveCollab", saveCollab)
   
   <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" header-disabled>
     <ListUploadedDialog
-      :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+      :list-i-d="getURL()"
       :is-updating="uploadedDialogShown == 2"
       :is-review="true"
       @do-edit="listActions('editList')"
@@ -501,6 +502,7 @@ provide("saveCollab", saveCollab)
               :key="container.id"
               :focused="false"
               :text="container.data"
+              :editable="false"
           >
               <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                   <component
@@ -512,6 +514,7 @@ provide("saveCollab", saveCollab)
                       :index="index"
                       :sub-index="subIndex"
                       :key="container.id"
+                      :editable="false"
                   />
               </div>
           </DataContainer>

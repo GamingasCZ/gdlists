@@ -4,9 +4,10 @@ import { levelList, makeColor } from "@/Editor";
 import LevelCard from "../editor/EditorCard.vue";
 import { computed, inject, ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
+import { reviewData } from "@/Reviews";
 
 const addLevel = () => {
-    levelList.value.levels.push({
+    reviewData.value.levels.push({
         "levelName": "",
         "creator": "",
         "color": makeColor(),
@@ -16,7 +17,7 @@ const addLevel = () => {
         "tags": [],
         "video": ""
     })
-    openedCard.value = levelList.value.levels.length - 1
+    openedCard.value = reviewData.value.levels.length - 1
 }
 
 const openedCard = ref(0)
@@ -33,16 +34,16 @@ defineExpose({
 <template>
     <div
         class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 overflow-y-auto flex flex-col gap-2">
-        <div v-if="!levelList.levels.length"
+        <div v-if="!reviewData.levels.length"
             class="flex absolute top-1/2 left-1/2 flex-col items-center w-full text-center opacity-40 -translate-x-1/2 -translate-y-1/2">
             <img src="@/images/collabDudes.svg" alt="" class="w-64">
             <h2 class="text-2xl">{{ $t('reviews.noLevelsYet') }}</h2>
             <p>{{ $t('reviews.upToTen') }}</p>
         </div>
         
-        <div v-for="(level, index) in levelList.levels">
+        <div v-for="(level, index) in reviewData.levels">
             <EditorCardHeader v-if="openedCard != index" :data="level" :updating-positions="updatingPosition" :index="index" @update-opened-card="openedCard = index" />
-            <LevelCard v-else :updating-positions="-1"
+            <LevelCard v-else :updating-positions="-1" :level-array="reviewData"
                 :data="level" :index="index" @open-tag-popup="dialogs.tags = true" @open-collab-tools="dialogs.collabs = true"/>
         </div>
     </div>

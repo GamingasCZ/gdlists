@@ -87,7 +87,7 @@ function sendRating(action: 1 | 0) {
   })
 }
 
-const listDescription = props.data?.description || props.review ?
+const listDescription = props.review ?
   useI18n().t('level.noDescription2') : useI18n().t('level.noDescription')
 
 const listUploadDate = props.timestamp || props.review ?
@@ -156,7 +156,7 @@ const listUploadDate = props.timestamp || props.review ?
           :class="{
                 'text-opacity-40': ['', undefined].includes(data?.description),
                 'before:opacity-0': !tallDescription || toggleDescription,
-              }" v-html="parseText(listDescription)"></pre>
+              }" v-html="parseText(listDescription ? data.description : listDescription)"></pre>
         <button v-if="tallDescription" class="absolute bottom-0 left-1/2 w-10 rounded-t-lg"
           :style="{ backgroundColor: getCol() }" @click="toggleDescription = !toggleDescription">
           <img src="@/images/descMore.svg" :class="{ '-scale-y-100': toggleDescription }" class="p-1 mx-auto w-6"
