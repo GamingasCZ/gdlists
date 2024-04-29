@@ -11,18 +11,18 @@ Return codes:
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli -> connect_errno) die("0");
 
-function getRatings($userID, $list_id) {
+function getRatings($userID, $type, $object_id) {
     global $mysqli;
+
     // todo: may be optimized by doing just one request, counting client-side
-    $likeQuery = doRequest($mysqli,"SELECT count(*) FROM ratings WHERE rate=1 AND list_id=?", [$list_id], "s");
-    $dislikeQuery = doRequest($mysqli,"SELECT count(*) FROM ratings WHERE rate=0 AND list_id=?", [$list_id], "s");
+    $likeQuery = doRequest($mysqli, sprintf("SELECT count(id) as total, sum(rate) as likes FROM ratings WHERE %s=?", $type), [$object_id], "s");
     $hasRatedQuery;
     if ($userID) {
-        $hasRatedQuery = doRequest($mysqli,"SELECT `rate` FROM ratings WHERE `uid`=? AND list_id=?", [$userID, $list_id], "ii");
+        $hasRatedQuery = doRequest($mysqli, sprintf("SELECT `rate` FROM ratings WHERE `uid`=? AND %s=?", $type), [$userID, $object_id], "ii");
         $hasRatedQuery = $hasRatedQuery === null ? -1 : $hasRatedQuery["rate"];
     }
     else $hasRatedQuery = -2;
-    return array($likeQuery["count(*)"], $dislikeQuery["count(*)"], $hasRatedQuery);
+    return array(intval($likeQuery["likes"]), $likeQuery["total"]-$likeQuery["likes"], $hasRatedQuery);
 }
 
 $method = $_SERVER["REQUEST_METHOD"];
@@ -31,7 +31,8 @@ switch ($method) {
         $user = checkAccount();
         if ($user) $user = $user["id"]; // Use user's id if no error occured, else is false
 
-        echo json_encode(getRatings($user, $_GET["id"]));
+        $type = isset($_GET["list_id"]) ? "list_id" : "review_id";
+        echo json_encode(getRatings($user, $type, $_GET[$type]));
         break;
         
     case 'POST': // No rate => rate
@@ -39,25 +40,26 @@ switch ($method) {
         if (!$accountCheck) die("3");
 
         $DATA = json_decode(file_get_contents("php://input"), true);
-        $fuckupData = intval($DATA["id"]);
+        $type = isset($DATA["list_id"]) ? "list_id" : "review_id";
+        $objectID = intval($DATA[$type]);
         $rating = $DATA["action"] == 1 ? 1 : 0;
 
-        $checkRate = doRequest($mysqli, "SELECT rate FROM ratings WHERE `uid`=? AND `list_id`=?", [$accountCheck, $fuckupData], "ii");
+        $checkRate = doRequest($mysqli, sprintf("SELECT rate FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
         $result = ["result" => null, "ratings" => null];
         if (is_null($checkRate)) { // No rating
-            $rowQuery = doRequest($mysqli,"INSERT INTO `ratings`(`rate`,`uid`,`list_id`) VALUES (?,?,?)", [$rating, $accountCheck, $fuckupData], "iss");
+            $rowQuery = doRequest($mysqli,sprintf("INSERT INTO `ratings`(`rate`,`uid`,`%s`) VALUES (?,?,?)", $type), [$rating, $accountCheck, $objectID], "isi");
             if (is_array($rowQuery) && array_key_exists("error", $rowQuery)) $result["result"] = "error";
             else $result["result"] = "added";
         }
         elseif ($checkRate["rate"] != $rating) { // Change rating
-            doRequest($mysqli, "UPDATE `ratings` SET `rate`=? WHERE `uid`=? AND `list_id`=?", [$rating, $accountCheck, $fuckupData], "iii");
+            doRequest($mysqli, sprintf("UPDATE `ratings` SET `rate`=? WHERE `uid`=? AND %s=?", $type), [$rating, $accountCheck, $objectID], "iii");
             $result["result"] = "changed";
         }
         elseif ($checkRate["rate"] == $rating) { // Remove rating
-            doRequest($mysqli, "DELETE FROM ratings WHERE `uid`=? AND `list_id`=?", [$accountCheck, $fuckupData], "ii");
+            doRequest($mysqli, sprintf("DELETE FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
             $result["result"] = "deleted";
         }
-        $result["ratings"] = getRatings($accountCheck, $fuckupData);
+        $result["ratings"] = getRatings($accountCheck, $type, $objectID);
         echo json_encode($result);
         break;
     default:

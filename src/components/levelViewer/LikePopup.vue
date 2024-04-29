@@ -6,8 +6,7 @@ const emit = defineEmits(["closePopup"])
 </script>
 
 <template>
-    <section @click.stop=""
-        class="absolute top-1/2 left-1/2 flex max-h-[95vh] w-[25rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black">
+    <div class="m-4">
         <p class="text-lg text-center">{{ $t('listViewer.likeNotLoggedIn') }}</p>
         <section class="grid grid-cols-2 gap-3 mt-4">
             <LoginButton />
@@ -16,5 +15,5 @@ const emit = defineEmits(["closePopup"])
                 {{ $t('other.notNow') }}
             </button>
         </section>
-    </section>
+    </div>
 </template>

@@ -28,8 +28,12 @@ const hoveringRating = ref(false)
 const rating = ref<[number, number, -2 | -1 | 0 | 1]>([0, 0, 0]);
 const rate = ref<number>();
 onMounted(() => {
+  let ratingParams
+  if (props.review) ratingParams = {review_id: props.id}
+  else ratingParams = {list_id: props.id}
+
   axios
-    .get(import.meta.env.VITE_API + `/rateAction.php/?id=${props.id}`)
+    .get(import.meta.env.VITE_API + `/rateAction.php`, {params: ratingParams})
     .then((res: AxiosResponse) => {
       rating.value = res.data;
       rate.value = res.data[0] - res.data[1];
@@ -79,7 +83,11 @@ function sendRating(action: 1 | 0) {
   }
 
   sendingRating = true
-  axios.post(import.meta.env.VITE_API + "/rateAction.php", { id: props.id, action: action }).then(res => {
+  let ratingParams = {action: action}
+  if (props.review) ratingParams.review_id = props.id
+  else ratingParams.list_id = props.id
+
+  axios.post(import.meta.env.VITE_API + "/rateAction.php", ratingParams).then(res => {
     const likeData: LikeFetchResponse = res.data
     rate.value = likeData.ratings[0] - likeData.ratings[1]
     rating.value[2] = likeData.ratings[2]!
@@ -87,10 +95,10 @@ function sendRating(action: 1 | 0) {
   })
 }
 
-const listDescription = props.review ?
+const noDescription = props.review ?
   useI18n().t('level.noDescription2') : useI18n().t('level.noDescription')
 
-const listUploadDate = props.timestamp || props.review ?
+const listUploadDate = props.review ?
   new Date(props.timestamp!).toLocaleDateString() :
   new Date(parseInt(props.timestamp!) * 1000).toLocaleDateString()
 
@@ -156,7 +164,7 @@ const listUploadDate = props.timestamp || props.review ?
           :class="{
                 'text-opacity-40': ['', undefined].includes(data?.description),
                 'before:opacity-0': !tallDescription || toggleDescription,
-              }" v-html="parseText(listDescription ? data.description : listDescription)"></pre>
+              }" v-html="parseText(data.description ? data.description : noDescription)"></pre>
         <button v-if="tallDescription" class="absolute bottom-0 left-1/2 w-10 rounded-t-lg"
           :style="{ backgroundColor: getCol() }" @click="toggleDescription = !toggleDescription">
           <img src="@/images/descMore.svg" :class="{ '-scale-y-100': toggleDescription }" class="p-1 mx-auto w-6"
@@ -194,6 +202,16 @@ const listUploadDate = props.timestamp || props.review ?
             <label
               class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-sm:absolute max-sm:bottom-1 max-sm:right-1">{{
                 commAmount }}</label>
+          </button>
+        </div>
+
+        <!-- Review level ratings button -->
+        <div class="ml-2" v-if="review">
+          <button class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
+            <img src="@/images/rating.svg" class="inline w-6 sm:mr-2" /><label class="max-sm:hidden">{{ $t('editor.levels') }}</label>
+            <label
+              class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-sm:absolute max-sm:bottom-1 max-sm:right-1">{{
+                data.levels.length }}</label>
           </button>
         </div>
       </div>

@@ -27,7 +27,10 @@ onMounted(() => {
     image.value?.addEventListener("loadstart", () => imageLoading.value = 1)
     image.value?.addEventListener("load", () => {
         imageLoading.value = 0;
-        imageScale.value = Math.min(image.value?.width, document.body.clientWidth * 0.4)
+
+        // Default - image width, overriden by epic dasher set width :)
+        imageScale.value = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
+
     })
     image.value?.addEventListener("error", () => {
         if (imageLoading.value != -2) imageLoading.value = -1
@@ -79,7 +82,7 @@ const dialogs = inject("openedDialogs")
 </script>
 
 <template>
-    <ContainerHelp v-show="imageLoading != 0" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+    <ContainerHelp v-show="imageLoading != 0 && editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <button @click="dialogs.imagePicker = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
             <img src="@/images/browseMobHeader.svg" alt="" class="w-8">
             <span>{{ $t('reviews.pickImage') }}</span>

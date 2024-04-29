@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     listID: string
+    isReview: boolean
 }>()
 
 const MIN_COMMENT_LEN = 10
@@ -112,12 +113,15 @@ function sendComment(com = "") {
     commentLength.value = 0
 
     // why tf did i have to stringify the post data? it wouldn't show up in the backend otherwise fuck!!!!
-    axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify({
+    let postData = {
         comment: parsedComment,
         comType: "0",
-        listID: props.listID,
         comColor: parsedColor.value,
-    }), {headers: {Authorization: cookier("access_token").get()}}).then((res: AxiosResponse) => {
+    }
+    if (props.isReview) postData.reviewID = props.listID
+    else postData.listID = props.listID
+
+    axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify(postData), {headers: {Authorization: cookier("access_token").get()}}).then((res: AxiosResponse) => {
         if (res.data == 6)
             (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
         else {

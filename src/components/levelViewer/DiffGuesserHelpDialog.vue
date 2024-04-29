@@ -24,7 +24,7 @@ const page = ref(0)
     <article v-if="page == 0" >
         <img src="@/images/diffGuessSign.svg" class="mx-auto w-60 h-72 opacity-40" alt="">
         <h1 class="mt-2 mb-6 text-2xl text-center">{{ $t('listViewer.diffGHelp1') }}</h1>
-        <ul class="sm:px-10">
+        <ul class="px-4 list-inside">
           <li class="list-disc text-left" v-html="$t('listViewer.diffGHelp4')"></li>
           <li class="list-disc text-left" v-html="$t('listViewer.diffGHelp5')"></li>
         </ul>
@@ -32,7 +32,7 @@ const page = ref(0)
     <article v-else-if="page == 1">
         <img src="@/images/guesshelpidk.svg" class="mx-auto w-72 h-72 opacity-40" alt="">
         <h1 class="mt-2 mb-6 text-2xl text-center">{{ $t('listViewer.diffGHelp2') }}</h1>
-        <ul class="sm:px-10">
+        <ul class="px-4 list-inside">
           <li class="list-disc text-left" v-html="$t('listViewer.diffGHelp6')"></li>
           <li class="list-disc text-left">{{ $t('listViewer.diffGHelp7') }}</li>
           <li class="list-disc text-left">{{ $t('listViewer.diffGHelp8') }}</li>
@@ -41,7 +41,7 @@ const page = ref(0)
     <article v-else>
         <img src="@/images/diffGuesserHelp.svg" class="mx-auto w-72 h-72 opacity-40" alt="">
         <h1 class="mt-2 mb-6 text-2xl text-center">{{ $t('listViewer.diffGHelp3') }}</h1>
-        <ul class="sm:px-10">
+        <ul class="px-4 list-inside">
             <li class="list-disc text-left" v-html="$t('listViewer.diffGHelp9')"></li>
             <li class="list-disc text-left" v-html="$t('listViewer.diffGHelp10')"></li>
             <li class="list-disc text-left" v-html="$t('listViewer.diffGHelp11')"></li>

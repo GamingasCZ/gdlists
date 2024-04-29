@@ -53,10 +53,6 @@ export function addLevel(values: Level | null) {
   levelList.value.levels.push(levelInfo);
 }
 
-export const deleteLevel = (index: number) => {
-  levelList.value.levels.splice(index, 1);
-};
-
 export const moveLevel = (from: number, to: number) => {
   if (to < 0 || to >= levelList.value.levels.length) return from;
 

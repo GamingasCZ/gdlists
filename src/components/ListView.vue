@@ -32,7 +32,7 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { flexNames } from "@/Reviews";
+import { flexNames, reviewData } from "@/Reviews";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -46,11 +46,12 @@ onUnmounted(() => {
 
 let gdlists = useI18n().t('other.websiteName')
 
-watch(props, () => props.isReview ? loadReview() : loadList())
-onMounted(() => props.isReview ? loadReview() : loadList())
+const loadContent = () => props.isReview ? loadReview() : loadList()
 
-// other way around bruh (private list=false, public=true)
-let PRIVATE_LIST: boolean =
+watch(props, loadContent)
+onMounted(loadContent)
+
+let NONPRIVATE_LIST: boolean =
   props.randomList ? false : props?.listID?.match(/^\d+$/g)?.length == 1;
 
 const favoritedIDs = ref<string[] | null>();
@@ -66,11 +67,11 @@ const LEVEL_COUNT = ref(0)
 const listErrorLoading = ref(false)
 
 const nonexistentList = ref<boolean>(false)
-function loadList() {
-  let listURL = `${!PRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
+function loadList(firstRandomPass = false) {
+  let listURL = `${!NONPRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
   if (props.randomList) {
     listURL = "random";
-    PRIVATE_LIST = true
+    NONPRIVATE_LIST = true
   }
 
   nonexistentList.value = false
@@ -103,14 +104,14 @@ function loadList() {
           recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
 
           addIntoRecentlyViewed =
-            recentlyViewed.filter((list: ListPreview) => list.id == (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
+            recentlyViewed.filter((list: ListPreview) => list.id == (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
               .length == 0; // Has not been viewed yet
         }
 
         if (addIntoRecentlyViewed) {
           recentlyViewed.push({
             creator: LIST_CREATOR.value,
-            id: (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
+            id: (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
             name: LIST_DATA.value?.name!,
             uploadDate: Date.now(),
             hidden: "0",
@@ -128,7 +129,7 @@ function loadList() {
         LIST_COL.value = listColors
         
         // Saturation 0
-        if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
+        if (LIST_COL.value?.[0]) LIST_COL.value[0] = 0
 
         if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
           modifyListBG(LIST_COL.value);
@@ -145,6 +146,7 @@ function loadList() {
         LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
         if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
       } catch (e) {
+        console.log(e)
         listErrorLoading.value = true
       }
     })
@@ -152,6 +154,7 @@ function loadList() {
 
 function loadReview() {
   nonexistentList.value = false
+  NONPRIVATE_LIST = true // damn you, old gamingsus >:(
 
   axios
     .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: props.listID}})
@@ -163,6 +166,8 @@ function loadReview() {
         }
 
         LIST_DATA.value = res.data[0];
+        reviewData.value.levels = LIST_DATA.value.data.levels;
+
         LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
         LIST_CREATORDATA.value = res.data[1]?.[0]
 
@@ -287,7 +292,7 @@ const toggleListPin = () => {
 const getURL = () => {
   let base = `${window.location.host}/gdlists/s/`
   if (props.isReview) return base + LIST_DATA.value?.url
-  else return base + (!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
+  else return base + (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
@@ -321,7 +326,7 @@ const listActions = (action: string) => {
       if (props.isReview)
         router.push(`/edit/review/${LIST_DATA.value?.url!}`)
       else
-        router.push(`/edit/list/${!PRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
+        router.push(`/edit/list/${!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
       break;
     case "mobileExtras":
       mobileExtrasOpen.value = true
@@ -371,7 +376,7 @@ const saveCollab = (ind: number) => {
       memberCount: c[2].length,
       timestamp: Date.now(),
       collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
-      listID: [PRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
+      listID: [NONPRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)
@@ -391,7 +396,7 @@ provide("saveCollab", saveCollab)
     backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
 
-  <DialogVue :open="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false">
+  <DialogVue :open="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false" :width="dialog.small">
     <LikePopup @close-popup="likeNotLoggedInOpen = false" />
   </DialogVue>
   
@@ -410,7 +415,7 @@ provide("saveCollab", saveCollab)
     <MobileExtras @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
   </DialogVue>
 
-  <DialogVue :open="guessHelpOpened" @close-popup="guessHelpOpened = false">
+  <DialogVue :open="guessHelpOpened" @close-popup="guessHelpOpened = false" :header-disabled="true">
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
   </DialogVue>
   
@@ -428,7 +433,7 @@ provide("saveCollab", saveCollab)
     <header>
       <div class=""></div>
       <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :creator-data="LIST_CREATORDATA!"
-        :id="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()" :list-pinned="listPinned" class="mb-8"
+        :id="LIST_DATA?.id" :list-pinned="listPinned" class="mb-8"
         v-if="LIST_DATA.name != undefined && !nonexistentList" :review="isReview" />
     </header>
     <main class="flex flex-col gap-4">
@@ -477,7 +482,7 @@ provide("saveCollab", saveCollab)
           v-bind="level"
           :favorited="favoritedIDs?.includes(level.levelID!)"
           :level-index="index"
-          :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+          :list-i-d="!NONPRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
           :list-name="LIST_DATA?.name!"
           :translucent-card="LIST_DATA?.data.translucent!" 
           :disable-stars="false" 
@@ -530,18 +535,20 @@ provide("saveCollab", saveCollab)
         :guesses="guesses"
         :list-creator="LIST_CREATOR"
         :list-name="LIST_DATA.name"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden: LIST_DATA?.id.toString()"
+        :list-i-d="!NONPRIVATE_LIST ? LIST_DATA?.hidden: LIST_DATA?.id.toString()"
         :both-modes-enabled="LIST_DATA.data.diffGuesser[1] && LIST_DATA.data.diffGuesser[2]"
         @replay-list="guesses = []; cardGuessing = 0"
       />
 
       <CommentSection
-        v-show="commentsShowing"
         v-if="LIST_DATA?.id != undefined"
+        v-show="commentsShowing"
+        @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
-        :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
+        :list-i-d="LIST_DATA?.id"
         :showing="commentsShowing"
-        :comments-disabled="LIST_DATA.data.disComments"  
+        :comments-disabled="LIST_DATA.data.disComments"
+        :is-review="isReview"
       />
     </main>
   </section>

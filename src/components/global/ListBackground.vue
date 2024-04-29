@@ -13,6 +13,8 @@ const positionListBackground = () => ["left", "center", "right"][props.imageData
 
 const getColorData = () => {
     let lightness
+    if (!props.listColor) return [140, 0.36, 0.049]
+
     if (props.listColor[2] > 1) lightness = props.listColor[2] / 64
     else lightness = props.listColor[2]
     return [props.listColor[0], props.listColor[1], lightness]

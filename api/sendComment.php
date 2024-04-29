@@ -16,8 +16,10 @@ require("globals.php");
 header('Content-type: application/json'); // Return as JSON
 
 $DATA = json_decode(file_get_contents("php://input"), true);
+$column = isset($DATA["listID"]) ? "lists" : "reviews";
+$type = isset($DATA["listID"]) ? "listID" : "reviewID";
 
-$fuckupData = sanitizeInput(array($DATA["comment"], $DATA["comType"], $DATA["listID"], $DATA["comColor"]));
+$fuckupData = sanitizeInput(array($DATA["comment"], $DATA["comType"], $DATA[$type], $DATA["comColor"]));
 
 // Checking comment and user string length
 if (strlen($DATA["comment"]) > 300 || strlen($DATA["comment"]) < 10) die("2");
@@ -45,19 +47,14 @@ $user_id = $uid_query -> fetch_all(MYSQLI_ASSOC)[0]["id"];
 
 $time = new DateTime();
 
-// Get ID of hidden list
-if (preg_match('/[A-z]/', $fuckupData[2])) {
-  $hiddenID = $mysqli->query(sprintf("SELECT `id` FROM `lists` WHERE `hidden`= '%s'", $fuckupData[2])) or die($mysqli->error);
-  $fuckupData[2] = $hiddenID->fetch_all(MYSQLI_ASSOC)[0]["id"];
-}
-
 // Disabled comments
-$list = doRequest($mysqli, "SELECT `commDisabled` FROM `lists` WHERE `id` = ?", [$fuckupData[2]], "i");
+$list = doRequest($mysqli, sprintf("SELECT `commDisabled` FROM `%s` WHERE `id` = ?", $column), [$fuckupData[2]], "i");
 if ($list["commDisabled"] == 1) die("8");
 
-$template = "INSERT INTO `comments` (`username`,`comment`,`comType`,`bgcolor`,`listID`,`verified`,`timestamp`,`uid`) VALUES ('',?, ?, ?, ?, ?, ?, ?)";
+$template = sprintf("INSERT INTO `comments` (`username`,`comment`,`comType`,`bgcolor`,`%s`,`verified`,`timestamp`,`uid`) VALUES ('',?, ?, ?, ?, ?, ?, ?)", $type);
 $values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], "1", $time->getTimestamp(), $user_id);
 $result = doRequest($mysqli, $template, $values, "sssssss");
+if (is_array($result) && array_key_exists("error", $result)) die(2);
 
 echo "6";
 $mysqli->close();

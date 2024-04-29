@@ -39,6 +39,11 @@ if (props.editing) {
     })
 }
 
+document.body.addEventListener("click", () => {
+    selectedContainer.value = [-1, null]
+    selectedNestContainer.value = [-1, -1, -1]
+})
+
 const openDialogs = reactive({
     "settings": false,
     "levels": false,
@@ -59,7 +64,7 @@ provide("selectedContainer", selectedContainer)
 
 const selectedLevel = ref()
 
-const selectedNestContainer = ref([-1, -1])
+const selectedNestContainer = ref([-1, -1, -1])
 provide("selectedNestContainer", selectedNestContainer)
 
 
@@ -207,11 +212,11 @@ const preUpload = ref(false)
             <LevelPopup ref="selectedLevel" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium">
+        <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">
             <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
         </DialogVue>
         
-        <DialogVue :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl">
+        <DialogVue :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :top-most="true">
             <CollabEditor :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
         </DialogVue>
         
@@ -271,9 +276,9 @@ const preUpload = ref(false)
                     v-for="(container, index) in reviewData.containers"
                     v-bind="CONTAINERS[container.type]"
                     ref="dataContainers"
-                    @has-focus="selectedContainer = [index, $event]"
                     @remove-container="removeContainer(index)"
                     @move-container="moveContainer(index, $event)"
+                    @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
                     @text-modified="container.data = $event"
                     @settings-button="buttonState = $event"
                     :type="container.type"

@@ -10,6 +10,7 @@ const props = defineProps<{
   sideButtonDisabled?: boolean
   action?: any
   headerDisabled?: boolean
+  topMost?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -38,7 +39,7 @@ watch(props, () => {
       <section @click.stop=""
         :style="{width: width ?? '35rem'}"
         class="flex max-h-[95vh] max-w-[95vw] flex-col relative rounded-lg bg-greenGradient text-white shadow-lg shadow-black">
-        <div v-show="!headerDisabled" class="relative z-50 m-2">
+        <div v-show="!headerDisabled" class="relative z-40 m-2" :class="{'z-50': topMost}">
           <button :disabled="sideButtonDisabled!" @click="action" class="flex absolute gap-3 p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button" v-if="sideButtonText">
             <slot name="icon"></slot>
             <span class="max-sm:hidden">{{ sideButtonText }}</span>

@@ -1,4 +1,6 @@
 export default function parseText(textToParse: string): string {
+  if (!textToParse) return ""
+
   let chars = ["\\*\\*", "\\/\\/", "__", "--"];
   let tags = ["b", "i", "u", "strike"];
   let i = 0;

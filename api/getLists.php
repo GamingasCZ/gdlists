@@ -18,7 +18,7 @@ if ($mysqli->connect_errno) {
 }
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
-$selReviewRange = "name, reviews.uid, data, timestamp, reviews.id, views, hidden, url";
+$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, url";
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;
@@ -61,8 +61,8 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     setcookie("lastViewed", $rows["id"], time()+300, "/");
 
     // Fetch comment amount
-    $commAmount = doRequest($mysqli, "SELECT COUNT(*) FROM comments WHERE listID = ?", [list_id($rows)], "s");
-    $rows["commAmount"] = $commAmount["COUNT(*)"];
+    $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [list_id($rows)], "s");
+    $rows["commAmount"] = $commAmount["COUNT(*)"]; 
     $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);                  
   }
   
@@ -99,9 +99,10 @@ if (count($_GET) == 1) {
       parseResult($result, true);
     }
   } elseif (in_array("random", array_keys($_GET))) {
-    // Picking a random list
-    $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` LIKE 0 ORDER BY RAND() LIMIT ?", [1], "i");
-    parseResult($result, true);
+    // Picking a random list or review
+    $randType = rand(0, 1) ? "lists" : "reviews";
+    $result = doRequest($mysqli, sprintf("SELECT * FROM `%s` WHERE `hidden` LIKE 0 ORDER BY RAND() LIMIT ?", $randType), [1], "i");
+    parseResult($result, true, review: $randType == "reviews");
 
   } elseif (in_array("homepage", array_keys($_GET))) {
     $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
@@ -159,12 +160,12 @@ if (count($_GET) == 1) {
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
   $query = sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio FROM ratings
-    RIGHT JOIN %s ON %s.id = ratings.list_id
+    RIGHT JOIN %s ON %s.id = ratings.%s_id
     WHERE %s %s.id<=%d AND `name` LIKE '%%%s%%' %s
     GROUP BY `name`
     ORDER BY hidden DESC, id DESC
     LIMIT %s
-    OFFSET %s", $range, $type, $type, $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+    OFFSET %s", $range, $type, $type, substr($type, 0, -1), $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
 
   $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $type, $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
   $maxpage = ceil($maxpageQuery->fetch_array()[0] / clamp(intval($_GET["fetchAmount"]), 2, 15));

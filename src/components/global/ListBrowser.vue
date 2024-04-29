@@ -13,18 +13,18 @@ const emit = defineEmits<{
   (e: "refreshedBrowser", objectAmount: number): void;
 }>();
 
-const props = defineProps({
-  browserName: String,
-  search: String,
-  onlineBrowser: { type: Boolean, required: true },
-  onlineType: { type: String, default: "", immediate: true },
-  onlineSubtype: { type: String, default: "", immediate: true, },
-  isLoggedIn: Boolean,
-  hideSearch: { type: Boolean, default: false },
-  commentID: { type: String, default: 0 },
-  refreshButton: { type: Boolean, default: false },
-  component: { type: Object, required: true }
-});
+const props = defineProps<{
+  browserName: string
+  search: string
+  onlineBrowser: boolean
+  onlineType: string
+  onlineSubtype: string
+  isLoggedIn: boolean
+  hideSearch: boolean
+  commentID: {type: 'list' | 'review', objectID: number}
+  refreshButton: boolean
+  component: object
+}>()
 
 // Page title
 if (props.browserName) {
@@ -136,8 +136,9 @@ function refreshBrowser() {
       startID: 999999,
       path: "/getComments.php",
       fetchAmount: LISTS_ON_PAGE,
-      listid: props.commentID
     }
+    if (props.commentID.type == "list") fetchQuery.listID = props.commentID.objectID
+    else fetchQuery.reviewID = props.commentID.objectID
   }
 
   axios
@@ -167,7 +168,10 @@ function refreshBrowser() {
 
       LISTS.value = res.data[0];
 
-      emit("refreshedBrowser", LISTS.value.length)
+      if (props.onlineType == 'comments')
+        emit("refreshedBrowser", res.data[2].commAmount)
+      else
+        emit("refreshedBrowser", LISTS.value.length)
       loading.value = false
       USERS.value?.push(...res.data[1]);
       loadFailed.value = false;
@@ -355,7 +359,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
           <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
-            <img src="@/images/replay.svg" class="w-10 text-2xl" alt="" />{{ $t('other.reload') }}
+            <img src="@/images/replay.svg" class="p-1 w-10 text-2xl" alt="" />{{ $t('other.reload') }}
           </button>
         </div>
 

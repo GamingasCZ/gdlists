@@ -17,8 +17,7 @@ watch(props, () => {
 })
 
 const videoLoading = ref(-2)
-
-const BASE_URL = import.meta.env.BASE_URL
+if (props.settings.url) videoLoading.value = 0
 </script>
 
 <template>

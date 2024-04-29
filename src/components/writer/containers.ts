@@ -44,17 +44,29 @@ const containers: Containers = {
         additionalComponents: [ReviewDivisor],
         settings: [
             {
+                key: "sizeX",
+                title: "",
+                type: [-1],
+                default: -1,
+            },
+            {
+                key: "sizeY",
+                title: "",
+                type: [-1],
+                default: 32,
+            },
+            {
                 key: "visible",
                 title: "Viditelný",
                 type: [2],
                 default: true,
             },
             {
-                key: "size",
-                title: "Velikost",
-                type: [3, 12, 64],
-                default: 12
-            }
+                key: "fill",
+                title: "Vyplnit prostor",
+                type: [2],
+                default: false,
+            },
         ]
     },
     list: {
@@ -80,7 +92,7 @@ const containers: Containers = {
                 key: "width",
                 title: "",
                 type: [-1],
-                default: 64
+                default: -1
             },
             {
                 key: "pick",
@@ -152,6 +164,12 @@ const containers: Containers = {
         canEditText: false,
         additionalComponents: [ReviewLevel],
         settings: [
+            {
+                key: "pickedIndex",
+                title: "",
+                type: [-1],
+                default: -1
+            },
             {
                 key: "pickLevel",
                 title: "Vybrat level",

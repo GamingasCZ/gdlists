@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import LevelCard from '../global/LevelCard.vue';
 import ContainerHelp from "./ContainerHelp.vue";
-import type { Level } from '@/interfaces';
 import { reviewData } from '@/Reviews';
 
 const emit = defineEmits<{
@@ -16,23 +15,21 @@ const props = defineProps<{
 }>()
 
 watch(props, () => {
-    console.log(props)
     switch (props.buttonState) {
-        case "pickLevel": levelData.value = null; break;
+        case "pickLevel": props.settings.pickedIndex = -1; break;
     }
     emit("clearButton")
 })
 
-const levelData = ref<Level | null>(null)
-const pickedIndex = ref(0)
+let indPicked = ref(0)
 
 </script>
 
 <template>
     <div class="w-max">
-        <ContainerHelp v-if="levelData == null" icon="showLevel" :help-content="reviewData.levels.length > 0 ? 'Vyber level, který chceš zobrazit.' : 'Zatím jsi nepřidal žádné levely!'">
-            <form v-show="reviewData.levels.length > 0" target="." class="flex gap-1 justify-center w-full" @submit.prevent="levelData = reviewData.levels[pickedIndex]">
-                <select v-model="pickedIndex" class="p-2 bg-white bg-opacity-10 rounded-md">
+        <ContainerHelp v-if="settings.pickedIndex == -1" icon="showLevel" :help-content="reviewData.levels.length > 0 ? 'Vyber level, který chceš zobrazit.' : 'Zatím jsi nepřidal žádné levely!'">
+            <form v-show="reviewData.levels.length > 0" target="." class="flex gap-1 justify-center w-full" @submit.prevent="settings.pickedIndex = indPicked">
+                <select v-model.lazy="indPicked" class="p-2 bg-white bg-opacity-10 rounded-md">
                     <option :value="index" v-for="(level, index) in reviewData.levels">{{ level.levelName || $t('other.unnamesd') }}</option>
                 </select>
                 <button type="submit" class="p-1 w-10 rounded-md bg-lof-400">
@@ -42,7 +39,7 @@ const pickedIndex = ref(0)
         </ContainerHelp>
         
         <figure class="p-2 w-max" v-else>
-            <LevelCard v-bind="levelData" :disable-stars="true" />
+            <LevelCard v-bind="reviewData.levels[settings.pickedIndex]" :disable-stars="true" />
             <figcaption class="mt-2">{{ settings.description }}</figcaption>
         </figure>
     </div>

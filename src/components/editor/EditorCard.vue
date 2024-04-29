@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { deleteLevel, diffScaleOffsets, diffTranslateOffsets, shortenYTLink } from "@/Editor";
+import { diffScaleOffsets, diffTranslateOffsets, shortenYTLink } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, onMounted, ref } from "vue";
@@ -382,7 +382,7 @@ const switchPlatformer = () => {
         </div>
         <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
           alt="" />
-        <img class="ml-4 w-10 button" :title="$t('editor.removeTitle')" @click="deleteLevel(index!)" src="../../images/deleteLevel.svg" alt="" />
+        <img class="ml-4 w-10 button" :title="$t('editor.removeTitle')" @click="levelArray.levels.splice(index, 1);" src="../../images/deleteLevel.svg" alt="" />
       </div>
     </div>
 

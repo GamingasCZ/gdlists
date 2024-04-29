@@ -36,7 +36,7 @@ const buttonState = ref('')
 const CONTAINERS = inject("settingsTitles")!
 
 const removeNestContainer = () => {
-    if (props.editable) return
+    if (!props.editable) return
     // Don't try to remove non-empty containers
     if (props.settings.components[props.subIndex].length > 0) return
 
@@ -63,7 +63,7 @@ const selectNestContainer = (e: Event) => {
 
 <template>
     <section
-        @click="selectNestContainer"
+        @click.stop="selectNestContainer"
         @dblclick="removeNestContainer"
         :style="{borderColor: borderColor}"
         class="p-0.5 w-full border border-opacity-30 transition-colors duration-75 min-h-8"
@@ -72,7 +72,7 @@ const selectNestContainer = (e: Event) => {
         <DataContainer
             v-for="(container, ind) in settings.components[subIndex]"
             v-bind="CONTAINERS[container.type]"
-            @has-focus="selectedNestContainer = [index, ind, $event]; selectedContainer = [ind, $event]"
+            @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @text-modified="container.data = $event"
