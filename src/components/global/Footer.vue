@@ -20,6 +20,7 @@ const contactMenuOpen = ref<boolean>(false);
 
 
   <section
+    id="footer"
     class="flex z-50 flex-col justify-center items-center mt-20 w-full h-24 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
   >
     <div class="flex items-center">

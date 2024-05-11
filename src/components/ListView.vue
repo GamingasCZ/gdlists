@@ -32,7 +32,8 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { flexNames, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, reviewData } from "@/Reviews";
+import { onUpdated } from "vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -42,6 +43,7 @@ const props = defineProps({
 
 onUnmounted(() => {
   document.body.style.backgroundImage = '';
+  reviewData.value = DEFAULT_REVIEWDATA()
 });
 
 let gdlists = useI18n().t('other.websiteName')
@@ -65,6 +67,8 @@ const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash:
 const LIST_COL = ref<number[]>([0, 0, 0]);
 const LEVEL_COUNT = ref(0)
 const listErrorLoading = ref(false)
+
+const backToReview = ref()
 
 const nonexistentList = ref<boolean>(false)
 function loadList(firstRandomPass = false) {
@@ -308,6 +312,20 @@ if (hasLocalStorage()) {
   }
 }
 
+onUpdated(() => {
+    // load viewed review
+    let viewedReview = sessionStorage.getItem("reviewScroll")
+    if (viewedReview) {
+      backToReview.value = JSON.parse(viewedReview)
+      sessionStorage.removeItem("reviewScroll")
+    }
+    if (backToReview.value) {
+      document.documentElement.scrollTop = backToReview.value.scrollY
+      backToReview.value = undefined
+    } 
+      
+})
+
 const listActions = (action: string) => {
   switch (action) {
     case "comments":
@@ -324,7 +342,7 @@ const listActions = (action: string) => {
       break;
     case "editList":
       if (props.isReview)
-        router.push(`/edit/review/${LIST_DATA.value?.url!}`)
+        router.push(`/edit/review/${LIST_DATA.value?.id!}`)
       else
         router.push(`/edit/list/${!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
       break;
@@ -437,11 +455,17 @@ provide("saveCollab", saveCollab)
         v-if="LIST_DATA.name != undefined && !nonexistentList" :review="isReview" />
     </header>
     <main class="flex flex-col gap-4">
+      <!-- Back to review from link -->
+      <RouterLink v-if="backToReview" @click="backToReview = -1" :to="backToReview.id" class="flex gap-2 p-2 mx-auto w-max rounded-md bg-greenGradient">
+        <img src="@/images/showCommsL.svg" class="w-3" alt="">
+        <span>Zpět na <b>{{ backToReview.name }}</b></span>
+      </RouterLink>
 
       <!-- Nonexistent list -->
       <section v-if="nonexistentList" class="flex flex-col items-center my-20 text-white">
         <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
-        <h2 class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentList') }}</h2>
+        <h2 v-if="isReview" class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentReview') }}</h2>
+        <h2 v-else class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentList') }}</h2>
         <div class="flex gap-3 mt-5 max-sm:flex-col">
           <RouterLink to="/random">
             <button class="p-2 w-full rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8"
@@ -496,7 +520,7 @@ provide("saveCollab", saveCollab)
       </div>
       <div v-else v-show="!commentsShowing">
         <!-- Review -->
-        <section class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2}">
+        <section id="reviewText" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2}">
           <DataContainer
               v-for="(container, index) in LIST_DATA.data.containers"
               v-bind="CONTAINERS[container.type]"

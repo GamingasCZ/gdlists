@@ -2,6 +2,9 @@
 import { inject, onMounted, ref, watch } from 'vue';
 import ListPreview from '../global/ListPreview.vue';
 import ContainerHelp from './ContainerHelp.vue';
+import { hasLocalStorage } from '@/siteSettings';
+import router from '@/router';
+import { nextTick } from 'vue';
 
 
 const emit = defineEmits<{
@@ -13,6 +16,7 @@ const props = defineProps<{
     settings: object
     index: number
     buttonState: string
+    editable: boolean
 }>()
 
 watch(props, () => {
@@ -21,6 +25,17 @@ watch(props, () => {
     }
     emit("clearButton")
 })
+
+const saveScrolling = () => {
+    if (hasLocalStorage()) {
+        let listName = document.getElementById("objectName")?.innerText // Ber z elementu
+        let listID = router.currentRoute.value.fullPath
+        let pos = {name: listName, id: listID, scrollY: document.documentElement.scrollTop}
+        sessionStorage.setItem("reviewScroll", JSON.stringify(pos))
+        nextTick(() => router.push("/" + props.settings.level.id))
+        
+    }
+}
 
 const dialogs = inject("openedDialogs")
 </script>
@@ -32,7 +47,7 @@ const dialogs = inject("openedDialogs")
             <span>{{ $t('reviews.pickList') }}</span>
         </button>
     </ContainerHelp>
-    <figure v-else class="p-2 w-[60rem] max-w-full">
+    <figure v-else @click="saveScrolling" class="p-2 w-[60rem] max-w-full">
         <ListPreview class="w-full" :disable-link="true" v-bind="settings.level" />
         <figcaption>{{ settings.description }}</figcaption>
     </figure>

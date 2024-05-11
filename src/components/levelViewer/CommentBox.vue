@@ -74,13 +74,21 @@ const commentLength = ref(0)
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
-let placeholders = [
+let listPlaceholders = [
     useI18n().t("listViewer.commHelp1"),
     useI18n().t("listViewer.commHelp2"),
     useI18n().t("listViewer.commHelp3"),
     useI18n().t("listViewer.commHelp4"),
 ]
-placeholder.value = placeholders[Math.floor(Math.random() * placeholders.length)]
+let reviewPlaceholders = [
+    useI18n().t('listViewer.commHelpR1'),
+    useI18n().t('listViewer.commHelpR2'),
+    useI18n().t('listViewer.commHelpR3'),
+    useI18n().t('listViewer.commHelpR4'),
+]
+
+placeholder.value = [listPlaceholders, reviewPlaceholders][props.isReview | 0][Math.floor(Math.random() * listPlaceholders.length)]
+
 
 const chatboxEmpty = () => {
     if (!document.getElementById("commentBox")?.textContent) placeholderActive.value = true

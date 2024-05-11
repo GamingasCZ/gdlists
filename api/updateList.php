@@ -42,7 +42,7 @@ if ($DATA["type"] == "list") {
     }
 }
 else {
-    $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url` = ?", [$fuckupData[0]], "s");
+    $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$fuckupData[0]], "s");
 }
 
 // When no changes are made in the list
@@ -90,7 +90,8 @@ if ($DATA["type"] == "list") {
     }
 }
 else {
-    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ? WHERE `url` = ?", [$fuckupData[1], 0, $DATA["tagline"], $disableComments, $DATA["id"]], "sisis");
+    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ? WHERE id = ?", [$fuckupData[1], 0, $DATA["tagline"], $disableComments, $DATA["id"]], "sisis");
+    $retListID = str_replace(' ', '-', $listData["name"]) . '-' . $listData["id"];
 }
 
 echo json_encode($retListID);

@@ -238,12 +238,34 @@
     "none": "Žádný",
     "unnamed2": "Bezejmenné",
     "other2": "Ostatní",
-    "cringeAhhTextLmao2": "Recenze: {0}"
+    "cringeAhhTextLmao2": "Recenze: {0}",
+    "imgRemove1": "Opravdu chceš smazat tento obrázek?",
+    "imgRemove2": "Nepůjde vrátit a jestli jej někdě používáš, zmizí odtud!",
+    "imgRemove3": "Držením SHIFT přeskočíš tento dialog",
+    "removal": "Mazání",
+    "imageBig": "Obrázek je moc velký!",
+    "imgSmall": "Obrázek je moc malý!",
+    "notEnoughSpace": "Není dost místa na uložení obrázku!",
+    "sameUploaded": "Stejný obrázek už byl nahrán!",
+    "deleteFail": "Nepodařilo se smazat obrázek!",
+    "loginFuckup": "Přihlášení není platné!",
+    "unsupportedFormat": "Formát není podporovaný!",
+    "clipboardEmpty": "Ve schránce není obrázek!",
+    "error": "Chyba",
+    "enterURI": "Zadej URL obrázku",
+    "uploadHelp2": "Můžeš i vložit obrázky přes CTRL+V.",
+    "uploadHelp1": "Sem můžeš přetáhnout obrázky!",
+    "uploadHelp5": "Upusť soubor sem!",
+    "formats": "Formáty",
+    "maxFilesize": "Max. velikost souboru {0}MB",
+    "uploadHelp6": "Přidej obrázek polem nahoře!",
+    "uploadHelp7": "URL obrázku většinou končí na .png, .jpg atp.",
+    "uploadHelp8": "Můžeš použít i animované obrázky!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
     "nonexistentList": "Tento seznam neexistuje!",
-    "goToRandom": "Jít na náhodný seznam",
+    "goToRandom": "Prozkoumat GD Seznamy",
     "goHome": "Jít domů",
     "communityLists": "Komunitní seznamy",
     "commentLogin": "Pro komentování se prosím přihlaš!",
@@ -287,7 +309,12 @@
     "diffResult15": "Ty se asi moc nedotýkáš trávníku!",
     "diffResult16": "Přeci jen se ty tisíce hodin dashování k něčemu byly!",
     "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!",
-    "failLoad": "Seznam se nepodařilo načíst!"
+    "failLoad": "Seznam se nepodařilo načíst!",
+    "commHelpR1": "Tvá recenze je...",
+    "commHelpR2": "Tahle recenze opravdu změnila můj pohled na...",
+    "commHelpR3": "Kdopak nám to vzkřísil Shakespeara? Tohle je...",
+    "commHelpR4": "Souhlasím s tvou recenzí, ale...",
+    "nonexistentReview": "Tato recenze neexistuje!"
   },
   "level": {
     "levelID": "ID levelu",
@@ -434,11 +461,13 @@
     "opaque": "Normální stránka",
     "scoring": "Vzhled bodování",
     "review": "Recenze",
-    "rateoff": "Máš vyplé hodnocení levelů.",
+    "rateoff": "Máš vyplé hodnocení levelů v nastavení.",
     "noratingHelp": "Hodí se, pokud chceš recenzovat event, kontroverzi apod.",
     "opaqueHelp": "Stránka je neprůhledná",
     "transparentHelp": "Text bude přímo na pozadí.",
     "translucentHelp": "Stránka bude rozmlžená a ztmavená.",
-    "settingsOk": "Je nastavení v pořádku?"
+    "settingsOk": "Je nastavení v pořádku?",
+    "whitePage": "Bílá stránka",
+    "whitePageHelp": "Recenze bude mít bílé pozadí a černý text"
   }
 }

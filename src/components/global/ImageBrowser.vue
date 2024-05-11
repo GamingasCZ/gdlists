@@ -11,6 +11,7 @@ import Dropdown from "../ui/Dropdown.vue";
 import Notification from "./Notification.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -54,10 +55,10 @@ if (hasLocalStorage()) {
     externaImages.value = JSON.parse(localStorage.getItem("externalImages")!) ?? []
 }
 
-const removeConfirmationOpen = ref(false)
-const startRemoval = (hash: string) => {
-    if (holdingShift.value) removeImage(hash, false)
-    else removeConfirmationOpen.value = true
+const removeConfirmationOpen = ref(-1)
+const startRemoval = (index: number) => {
+    if (holdingShift.value) removeImage(images.value[index], false)
+    else removeConfirmationOpen.value = index
 }
 const removeImage = (hash: string, external: boolean) => {
     if (!external) {
@@ -170,25 +171,25 @@ const imageOptsShown = ref(-1)
 const imageHovering = ref(-1)
 const dropdown = ref()
 
-const imageAction = (id: number, hash: string, external: boolean) => {
+const imageAction = (id: number, external: boolean, val: string | number) => {
     switch (id) {
         case 0: // Remove
-            removeImage(hash, external); break;
+            startRemoval(val)
         case 1:
-            downloadImage(hash, external); break
+            downloadImage(val, external); break
     }
 }
 
 const errorMessages = [
-    "Nepodařilo se načíst obrázek!",
-    "Obrázek je moc velký!",
-    "Obrázek je moc malý!",
-    "Není dost místa na uložení obrázku!",
-    "Stejný obrázek už byl nahrán!",
-    "Nepodařilo se smazat obrázek!",
-    "Přihlášení není platné!",
-    "Formát není podporovaný!",
-    "Ve schránce není obrázek!"
+    useI18n().t('reviews.imgError'),
+    useI18n().t('other.imageBig'),
+    useI18n().t('other.imgSmall'),
+    useI18n().t('other.notEnoughSpace'),
+    useI18n().t('other.sameUploaded'),
+    useI18n().t('other.deleteFail'),
+    useI18n().t('other.loginFuckup'),
+    useI18n().t('other.unsupportedFormat'),
+    useI18n().t('other.clipboardEmpty')
 ]
 const notifStamp = ref(-1)
 const notifContent = ref("")
@@ -219,17 +220,17 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="flex gap-10 justify-between mx-2 mb-2">
-        <Notification :content="notifContent" :title="'Chyba'" icon="error" :stamp="notifStamp" />
+        <Notification :content="notifContent" :title="$t('other.error')" icon="error" :stamp="notifStamp" />
 
         <!-- Remove confirmation -->
-        <Dialog :title="'Mazání'" @close-popup="removeConfirmationOpen = false" :open="removeConfirmationOpen">
+        <Dialog :title="$t('other.removal')" @close-popup="removeConfirmationOpen = -1" :open="removeConfirmationOpen > -1">
             <div class="flex px-2 py-4">
-                <img src="@/images/trash.svg" class="w-32" alt="">
+                <img src="@/images/trash.svg" class="mr-2 w-32 opacity-10" alt="">
                 <div>
-                    <h2 class="text-xl font-black">Opravdu chceš smazat tento obrázek?</h2>
-                    <p>Nepůjde vrátit a jestli jej někdě používáš, zmizí odtud!</p>
-                    <p class="my-2 text-sm text-yellow-200">Držením SHIFT přeskočíš tento dialog</p>
-                    <button class="flex gap-2 items-center px-2 py-1 text-2xl font-bold text-black bg-red-400 rounded-md button">
+                    <h2 class="text-xl font-black">{{ $t('other.imgRemove1') }}</h2>
+                    <p>{{ $t('other.imgRemove2') }}</p>
+                    <p class="my-2 text-sm text-yellow-200">{{ $t('other.imgRemove3') }}</p>
+                    <button @click="removeImage(images[removeConfirmationOpen], false)" class="flex gap-2 items-center px-2 py-1 text-2xl font-bold text-black bg-red-400 rounded-md button">
                         <img src="@/images/del.svg" class="w-6">
                         {{ $t('editor.remove') }}
                     </button>
@@ -239,7 +240,7 @@ onBeforeUnmount(() => {
 
         <!-- External image input -->
         <form v-if="currentTab == 1" action="." @submit.prevent="uploadExternalImage($event.target[0].value)" class="w-full">
-            <input :placeholder="'Zadej URL obrázku'" :disabled="loadingImages" v-model="extImgInput" @paste="uploadExternalImage($event.target.value)"
+            <input :placeholder="$t('other.enterURI')" :disabled="loadingImages" v-model="extImgInput" @paste="uploadExternalImage($event.target.value)"
                 class="p-1 pl-8 w-full bg-white bg-opacity-20 rounded-md transition-opacity disabled:opacity-40">
         </form>
 
@@ -272,7 +273,7 @@ onBeforeUnmount(() => {
         <div class="flex flex-wrap gap-4 justify-evenly m-4" v-show="currentTab == 0">
             <button v-for="(image, index) in images"
                 @click="emit('pickImage', `${pre}/userContent/${storage.uid}/${image}.webp`); emit('closePopup')"
-                @auxclick="startRemoval(image)"
+                @auxclick="startRemoval(index)"
                 @mouseover="imageHovering = index"
                 @mouseout="imageHovering = -1"
                 class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
@@ -282,7 +283,7 @@ onBeforeUnmount(() => {
                     class="absolute top-1 right-1 z-20 w-5 bg-white rounded-full duration-75">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown @close="imageOptsShown = -1" @picked-option="imageAction($event, image, false)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Stáhnout']" :title="'Možnosti'" />
+                    <Dropdown @close="imageOptsShown = -1" @picked-option="imageAction($event, false, index)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Stáhnout']" :title="'Možnosti'" />
                 </button>
                 
                 <img :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
@@ -317,20 +318,20 @@ onBeforeUnmount(() => {
             </div>
             <div v-else-if="currentTab == 0 && !fileDrag" class="w-max">
                 <img src="@/images/collabDudes.svg" class="mb-2 w-96" alt="">
-                <h2 class="text-xl">Sem můžeš přetáhnout obrázky!</h2>
-                <p>Můžeš i vložit obrázky přes CTRL+V.</p>
-                <p>Max. velikost souboru {{ toMB(storage.maxUploadSize) }}MB</p>
-                <p>Formáty: .jpg, .png, .webp</p>
+                <h2 class="text-xl">{{ $t('other.uploadHelp1') }}</h2>
+                <p>{{ $t('other.uploadHelp2') }}</p>
+                <p>{{ $t('other.maxFilesize', [toMB(storage.maxUploadSize)]) }}</p>
+                <p>{{ $t('other.formats') }}: .jpg, .png, .webp</p>
             </div>
             <div v-else-if="currentTab == 0 && fileDrag" class="w-max">
                 <img src="@/images/collabDudes.svg" class="mb-2 w-96" alt="">
-                <h2 class="text-xl">Upusť soubor sem!</h2>
+                <h2 class="text-xl">{{ $t('other.uploadHelp5') }}</h2>
             </div>
             <div v-else class="w-max">
                 <img src="@/images/searchOpaque.svg" class="mx-auto mb-2 w-32" alt="">
-                <h2 class="text-xl">Přidej obrázek polem nahoře!</h2>
-                <p>URL obrázku většinou končí na .png, .jpg atp.</p>
-                <p>Můžeš použít i animované obrázky!</p>
+                <h2 class="text-xl">{{ $t('other.uploadHelp6') }}</h2>
+                <p>{{ $t('other.uploadHelp7') }}</p>
+                <p>{{ $t('other.uploadHelp8') }}</p>
             </div>
         </div>
     </form>

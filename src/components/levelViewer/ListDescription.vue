@@ -105,8 +105,13 @@ const listUploadDate = props.review ?
 </script>
 
 <template>
+  
   <section class="mx-auto flex w-[80rem] max-w-[95vw] flex-col">
-    <section class="flex gap-2">
+    <section class="hidden print:!visible">
+      <h1 class="text-xl">{{ name }}</h1>
+      <h2 class="text-xl">{{ creator }}</h2>
+    </section>
+    <section class="flex gap-2 descriptionControls">
       <!-- Likes and dislikes -->
       <div class="box-border flex flex-col items-center min-w-max max-sm:hidden">
 
@@ -137,9 +142,9 @@ const listUploadDate = props.review ?
 
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
-        <header class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
+        <section role="none" class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
           <img :src="pfp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" alt="" />
-          <h1 class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
+          <h1 id="objectName" class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
 
           <!-- List information -->
           <div class="flex gap-2 items-center py-0.5 ml-16 text-base">
@@ -158,7 +163,7 @@ const listUploadDate = props.review ?
             <!-- Date -->
             <span>{{ listUploadDate }}</span>
           </div>
-        </header>
+        </section>
         <pre id="listDescription"
           class="descriptionFade h-24 overflow-y-hidden break-words max-w-[95vw] whitespace-pre-wrap rounded-b-md bg-gray-800 bg-opacity-80 px-2 font-[poppins] leading-5 text-white transition-[height] duration-75 ease-in-out before:transition-opacity"
           :class="{
@@ -173,7 +178,7 @@ const listUploadDate = props.review ?
       </main>
     </section>
 
-    <section class="flex justify-between items-start mt-2">
+    <section class="flex justify-between items-start mt-2 descriptionControls">
       <div class="flex">
         <!-- Mobile likes and dislikes -->
         <div class="box-border flex gap-1.5 items-center sm:hidden">

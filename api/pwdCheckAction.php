@@ -17,6 +17,7 @@ if ($mysqli -> connect_errno) {
     //http_response_code(500);
     exit();
 }
+$mysqli->set_charset("utf8mb4");
 
 error_reporting(0);
 
@@ -39,7 +40,7 @@ switch ($DATA["type"]) {
         break;
     case 'review':
         $datacheck = sanitizeInput([$DATA["id"]]);
-        $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url`= ?", [$datacheck[0]], "s");
+        $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$datacheck[0]], "s");
         break;
 }
 if ($listData === null) {

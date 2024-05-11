@@ -10,7 +10,7 @@ import ReviewRatings from "./ReviewRatings.vue"
 const containers: Containers = {
     default: {
         placeholder: "Odstavec",
-        styling: "",
+        styling: "my-2",
         nestable: true,
         canEditText: true,
         settings: []
@@ -92,7 +92,7 @@ const containers: Containers = {
                 key: "width",
                 title: "",
                 type: [-1],
-                default: -1
+                default: 0
             },
             {
                 key: "pick",

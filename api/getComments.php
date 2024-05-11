@@ -19,6 +19,7 @@ if (!preg_match('/[A-z]/', $_GET[$type])) {
 $mysqli = new mysqli($hostname, $username, $password, $database);
 
 if ($mysqli -> connect_errno) die("0");
+$mysqli->set_charset("utf8mb4");
 
 // Are values numbers?
 if (!is_numeric($_GET["page"]) &&

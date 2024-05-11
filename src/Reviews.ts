@@ -35,10 +35,13 @@ export const REVIEW_EXTRAS: ReviewList = {
     rateTheme: 0,
     private: false,
     transparentPage: 0,
-    language: 0
+    language: 0,
+    whitePage: false
 }
 
-export const reviewData = ref({...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS})
+export const DEFAULT_REVIEWDATA = () => ({...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS})
+export const reviewData = ref(DEFAULT_REVIEWDATA())
+
 
 export function checkReview() {
     const err = (err: string) => ({success: false, error: err})

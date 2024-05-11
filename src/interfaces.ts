@@ -231,6 +231,7 @@ export interface ReviewList {
   private: boolean
   transparentPage: 0 | 1 | 2
   language: number
+  whitePage: boolean
 }
 
 export interface ReviewRating {

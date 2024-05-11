@@ -14,7 +14,7 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, REVIEW_EXTRAS } from "@/Reviews";
+import { reviewData, flexNames, REVIEW_EXTRAS, DEFAULT_REVIEWDATA } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -75,16 +75,26 @@ const addContainer = (key: string) => {
     for (let i = 0; i < CONTAINERS[key].settings.length; i++)
         settingObject[CONTAINERS[key].settings[i].key] = JSON.parse(JSON.stringify(CONTAINERS[key].settings[i].default))
 
+    let containerData = {
+        type: key,
+        data: "",
+        align: "left",
+        settings: settingObject,
+        extraComponents: 0,
+        id: Date.now()
+    }
+
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
-        reviewData.value.containers.push({
-            type: key,
-            data: "",
-            align: "left",
-            settings: settingObject,
-            extraComponents: 0,
-            id: Date.now()
-        })
+        if (selectedContainer.value[0] == -1) {
+            reviewData.value.containers
+            .push(containerData)
+            selectedContainer.value[0] = reviewData.value.containers.length - 1
+        } else {
+            reviewData.value.containers
+            .splice(selectedContainer.value[0] + 1, 0, containerData)
+            selectedContainer.value[0] += 1
+        }
     }
     // Adding into a nested container
     else {
@@ -93,14 +103,8 @@ const addContainer = (key: string) => {
             reviewData.value.containers[selectedNestContainer.value[0]].settings.components.push([])
         }
         else
-            reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].push({
-                type: key,
-                data: "",
-                align: "left",
-                settings: settingObject,
-                extraComponents: 0,
-                id: Date.now()
-            })
+            reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
+            .push(containerData)
     }
 }
 
@@ -138,6 +142,15 @@ const setFormatting = (format: string) => {
     reviewData.value.containers[0].data = `${val?.slice(0, range?.startOffset)}${signs[format]}${signs[format]}${val?.slice(range?.startOffset, range?.endOffset)}${signs[format]}/${val?.slice(range?.endOffset)}`
     
     el.parentElement.innerHTML = reviewData.value.containers[0].data.replace("**", "<b>").replace("*/", "</b>")
+}
+
+const moveToParagraph = (currentContainerIndex: number) => {
+    if (reviewData.value.containers?.[currentContainerIndex+1]?.type == "default") {
+        selectedContainer.value[0] += 1
+        dataContainers.value[selectedContainer.value[0]].doFocusText()
+    }
+    else
+        addContainer("default")
 }
 
 const startWriting = () => {
@@ -188,12 +201,12 @@ const removeReview = () => {
 const updateReview = () => {
     axios.post(import.meta.env.VITE_API + "/updateList.php", {id: props.reviewID, type: 'review', listData: JSON.stringify(reviewData.value), tagline: reviewData.value.tagline, hidden: 0, isNowHidden: 0, disComments: reviewData.value.disComments | 0}).then(res => {
         sessionStorage.setItem("uploadFinished", "2")
-        router.replace(`/review/${res.data[0]}`)
+        router.replace(`/review/${res.data}`)
     })
 }
 
 onUnmounted(() => {
-  reviewData.value = {...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS}
+  reviewData.value = DEFAULT_REVIEWDATA()
 })
 
 const preUpload = ref(false)
@@ -269,7 +282,7 @@ const preUpload = ref(false)
             />
 
             <!-- Editor -->
-            <section ref="writer" class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+            <section ref="writer" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" />
 
                 <DataContainer
@@ -281,6 +294,7 @@ const preUpload = ref(false)
                     @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
                     @text-modified="container.data = $event"
                     @settings-button="buttonState = $event"
+                    @add-paragraph="moveToParagraph(index)"
                     :type="container.type"
                     :current-settings="container.settings"
                     :class="[CONTAINERS[container.type].styling ?? '']"
@@ -307,7 +321,7 @@ const preUpload = ref(false)
                         />
                     </div>
                 </DataContainer>
-                <button @click="addContainer('default')" v-show="reviewData.containers.length" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed">
+                <button @click="addContainer('default')" v-show="reviewData.containers.length" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span>{{ $t('reviews.addParagraph') }}</span>
                 </button>

@@ -85,14 +85,19 @@ const scrollerHome = () => {
 const localStorg = ref(hasLocalStorage())
 const editorDropdownOpen = ref(false)
 const openEditorDropdown = () => {
+  if (editorDropdownOpen.value) return
   editorDropdownOpen.value = true
   document.body.addEventListener("click", () => editorDropdownOpen.value = false, { once: true, capture: true },)
 }
+
+const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = false, 10)
 
 </script>
 
 <template>
   <nav
+    role="navigation"
+    id="navbar"
     class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-drop overflow-x-clip bg-greenGradient">
     <!-- Home link -->
     <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
@@ -110,18 +115,22 @@ const openEditorDropdown = () => {
       <!-- Editor -->
       <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
         class="flex relative flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }"><img src="../images/editorMobHeader.svg"
-          alt="" class="w-6 group-active:rotate-[20deg] transition-transform" />{{ $t("navbar.editor") }}
-        <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full bg-greenGradient" v-if="editorDropdownOpen">
-          <RouterLink to="/make/list" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @click="editorDropdownOpen = false">
-            <img src="@/images/browseMobHeader.svg" class="w-10 scale-[0.6]" alt="">
-            <span>{{ $t('other.list') }}</span>
-          </RouterLink>
-          <RouterLink to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @click="editorDropdownOpen = false">
-            <img src="@/images/reviews.svg" class="w-10 scale-[0.6]" alt="">
-            <span>{{ $t('other.review') }}</span>
-          </RouterLink>
-        </div>
+        :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }">
+        <img src="../images/editorMobHeader.svg" :class="{'rotate-[45deg]': editorDropdownOpen}"
+          alt="" class="w-6 transition-transform" />{{ $t("navbar.editor") }}
+        
+        <Transition name="fadeSlide">
+          <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full min-w-max text-lg max-sm:top-14 bg-greenGradient" v-if="editorDropdownOpen">
+            <RouterLink to="/make/list" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
+              <img src="@/images/browseMobHeader.svg" class="w-10 scale-[0.6]" alt="">
+              <span>{{ $t('other.list') }}</span>
+            </RouterLink>
+            <RouterLink to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
+              <img src="@/images/reviews.svg" class="w-10 scale-[0.6]" alt="">
+              <span>{{ $t('other.review') }}</span>
+            </RouterLink>
+          </div>
+        </Transition>
       </button>
 
       <!-- Browse -->

@@ -62,7 +62,7 @@ const selectNestContainer = (e: Event) => {
 </script>
 
 <template>
-    <section
+    <article
         @click.stop="selectNestContainer"
         @dblclick="removeNestContainer"
         :style="{borderColor: borderColor}"
@@ -99,5 +99,5 @@ const selectNestContainer = (e: Event) => {
                 />
             </div>
         </DataContainer>
-    </section>
+    </article>
 </template>

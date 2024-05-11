@@ -26,7 +26,7 @@ $fuckupData = sanitizeInput(array($DATA["id"]));
 
 // Password check
 if ($DATA["type"] == "review")
-  $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url` = ?", [strval($fuckupData[0])], "s");
+  $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [strval($fuckupData[0])], "s");
 else {
   if ($DATA["hidden"] == 0) {
     $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [strval($fuckupData[0])], "i");
@@ -46,7 +46,7 @@ if (!$creatorCheck) {
 
 // Removing list
 if ($DATA["type"] == "review")
-  doRequest($mysqli, "DELETE FROM `reviews` WHERE `url` = ?", [$listData["url"]], "s");
+  doRequest($mysqli, "DELETE FROM `reviews` WHERE `id` = ?", [$listData["id"]], "s");
 else {
   if ($DATA["hidden"] == 0) {
     doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");

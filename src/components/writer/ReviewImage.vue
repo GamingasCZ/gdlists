@@ -90,7 +90,7 @@ const dialogs = inject("openedDialogs")
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0">
-        <div class="flex relative group min-h-[64px] max-w-[85vw]" :style="{width: `${imageScale}px`}">
+        <div class="flex relative group min-h-[48px] max-w-[min(512px,85vw)]" :style="{width: `${imageScale}px`}">
             <img
                 ref="image"
                 class="w-full rounded-md border-transparent pointer-events-none min-w-24"

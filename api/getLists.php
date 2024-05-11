@@ -16,9 +16,10 @@ if ($mysqli->connect_errno) {
   echo "0";
   exit();
 }
+$mysqli->set_charset("utf8mb4");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
-$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, url";
+$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url";
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;
@@ -55,7 +56,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     }
 
     if (isset($_COOKIE["lastViewed"]) && $_COOKIE["lastViewed"] != $rows["id"]) {
-      doRequest($mysqli, "UPDATE lists SET views = views+1 WHERE id=?", [$rows["id"]], "i");
+      doRequest($mysqli, sprintf("UPDATE %s SET views = views+1 WHERE id=?", $review ? "reviews" : "lists"), [$rows["id"]], "i");
       $rows["views"] += 1;
     }
     setcookie("lastViewed", $rows["id"], time()+300, "/");
@@ -68,7 +69,8 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   
   $result = $mysqli -> query($query) or die($mysqli -> error);
   $users = $result -> fetch_all(MYSQLI_ASSOC);
-  echo json_encode(array($rows, $users, $dbInfo));
+  $res = array($rows, $users, $dbInfo);
+  echo json_encode($res);
 }
 
 if (count($_GET) == 1) {
@@ -83,7 +85,7 @@ if (count($_GET) == 1) {
     }
   } elseif (in_array("review", array_keys($_GET))) {
     // Reviews
-    $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `url`= ?", [$_GET["review"]], "s");
+    $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE replace(concat(name,'-',id), ' ', '-') = ?", [$_GET["review"]], "s");
 
     if ($result == null) echo "2";
     else parseResult($result, true, review: true);

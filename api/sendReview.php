@@ -44,7 +44,7 @@ if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
 // Checking request
 error_reporting($debugMode ? -1 : 0);
-$fuckupData = sanitizeInput(array($DATA["reviewName"]));
+$fuckupData = sanitizeInput(array(trim($DATA["reviewName"])));
 $timestamp = $time -> getTimestamp();
 
 // Generate id if list private
@@ -59,16 +59,18 @@ if ($mysqli -> connect_errno) {
 }
 
 // Send to database
-$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`url`) VALUES (?,?,?,?,?,?,?)";
-$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $fuckupData[0] . '-1');
-doRequest($mysqli, $teplate, $values, "sisssis");
+$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`) VALUES (?,?,?,?,?,?)";
+$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments);
+$res = doRequest($mysqli, $teplate, $values, "sisssi");
+if (is_array($res) && array_key_exists("error", $res)) die(5);
+
 
 if ($DATA["private"]) {
     // Hidden lists
     $listID = $hidden;
 }
 else {
-    $listIDquery = $mysqli -> query("SELECT LAST_INSERT_ID()");
+    $listIDquery = $mysqli -> query("SELECT LAST_INSERT_ID() as id");
     $rows = $listIDquery -> fetch_all(MYSQLI_ASSOC);
     foreach ($rows as $row) {
       $listID = join("",$row);
@@ -85,6 +87,6 @@ if (!$DATA["private"]) {
 $mysqli -> close();
 
 
-echo json_encode([$listID]);
+echo json_encode([str_replace(' ', '-', $fuckupData[0]) . '-' . $listID]);
 
 ?>

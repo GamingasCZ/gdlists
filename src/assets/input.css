@@ -181,3 +181,19 @@ dialog {
   75% { transform: translate(0px, 5px); }
   100% { transform: translate(5px, 0px); }
 }
+
+#reviewText[data-white-page=true] p,figcaption {
+  color: black
+}
+#reviewText[data-white-page=true] {
+  transition: background 0.25s;
+  background: #ece6d9 !important;
+}
+
+@media print {
+  #navbar {@apply hidden}
+  #footer {@apply hidden}
+  .button img {@apply !invert}
+  .descriptionControls {@apply hidden}
+  * {text-shadow: none !important; box-shadow: none !important; filter: none !important; font-family: unset !important;}
+}

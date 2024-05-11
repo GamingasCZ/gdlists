@@ -99,7 +99,8 @@
     "pickVideoTitle": "Pick video",
     "uploadFile": "Upload File",
     "idlist": "From List ID",
-    "tables": "From spreadsheets"
+    "tables": "From spreadsheets",
+    "importLevels": "Level Import"
   },
   "homepage": {
     "clear": "Clear",
@@ -119,12 +120,13 @@
     "savedMix": "Saved Mix",
     "searchLists": "Search in GD Lists...",
     "tryLuck": "Try luck",
-    "uploaded": "Uploaded",
+    "uploaded": "Uploads",
     "visited": "Visited",
     "welcomeBack": "Welcome back,",
     "welcomeToGDL": "Welcome to GD Lists!",
     "cookies1": "You have cookies disabled!",
-    "cookies2": "You won't be able to login, only browse."
+    "cookies2": "You won't be able to login, only browse.",
+    "writeReview": "Write a review"
   },
   "level": {
     "comments": "Comments",
@@ -143,7 +145,7 @@
   },
   "listViewer": {
     "goHome": "Go home",
-    "goToRandom": "Go to a random list",
+    "goToRandom": "Dive into GD Lists",
     "jumpTo": "Jump to",
     "nonexistentList": "This list does not exist!",
     "communityLists": "Community Lists",
@@ -188,7 +190,12 @@
     "diffResult9": "Imperfect, you'll be grinding map packs as punishment.",
     "diffResult16": "The thousands of hours of dashing are finally paying off!",
     "commDisableHelp": "Comments are disabled on this list!",
-    "failLoad": "The list failed to load!"
+    "failLoad": "The list failed to load!",
+    "commHelpR1": "Your review is...",
+    "commHelpR2": "This review really changed my view on...",
+    "commHelpR3": "Alright, who resurrected Shakespeare? This is...",
+    "commHelpR4": "I agree with your review, but...",
+    "nonexistentReview": "This review doesn't exist!"
   },
   "navbar": {
     "editor": "Create",
@@ -280,7 +287,31 @@
     "russian": "Russian",
     "spanish": "Spanish",
     "cringeAhhTextLmao2": "Review: {0}",
-    "bg": "Background"
+    "bg": "Background",
+    "imgRemove1": "Do you really want to remove this image?",
+    "imgRemove2": "It will be lost forever and disappear from where it's used.",
+    "imgRemove3": "Hold SHIFT to skip this dialog",
+    "removal": "Removal",
+    "clipboardEmpty": "Your clipboard is empty!",
+    "deleteFail": "Failed to remove the image!",
+    "imageBig": "The image is too big!",
+    "imgSmall": "The image is too small!",
+    "notEnoughSpace": "Not enough storage for the image!",
+    "sameUploaded": "This image has already been uploaded!",
+    "unsupportedFormat": "Unsupported format!",
+    "unnamed2": "Unnamed",
+    "none": "None",
+    "loginFuckup": "Your session has expired!",
+    "other2": "Other",
+    "uploadHelp1": "You can drag in images here!",
+    "uploadHelp2": "Images can also be pasted with CTRL+V.",
+    "formats": "Formats",
+    "uploadHelp5": "Drop the file here!",
+    "error": "Error!",
+    "enterURI": "Enter the Image's URL",
+    "maxFilesize": "Max. filesize {0}MB",
+    "uploadHelp8": "You can also use animated images!",
+    "uploadHelp7": "The URL of an image usually ends with .png, .jpg, etc."
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -423,6 +454,14 @@
     "bgcolor": "Background color",
     "bgImage": "Background image",
     "settingsOk": "Are these settings OK?",
-    "description": "Review Description"
+    "description": "Review Description",
+    "review": "Review",
+    "translucentHelp": "Page will be translucent with and have a dark backdrop",
+    "whitePage": "White Page",
+    "whitePageHelp": "The background will be white and the text black",
+    "noratingHelp": "Useful when reviewing events, controversies, etc...",
+    "opaqueHelp": "The page will be opaque",
+    "rateoff": "You've disabled ratings in the settings!",
+    "transparentHelp": "Text will be directly on the background"
   }
 }
