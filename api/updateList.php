@@ -27,17 +27,13 @@ $DATA = json_decode(file_get_contents("php://input"), true);
 // $listCheck = checkList($DATA["listData"]);
 // if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
-$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"]));
+$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"]));
 
 // Password check
 if ($DATA["type"] == "list") {
-    if (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "true") {
+    if ($DATA["isNowHidden"] == "true") {
         $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [$fuckupData[0]], "s");
-    }
-    elseif (in_array($DATA["hidden"], Array(0,1)) and $DATA["isNowHidden"] == "false") {
-        $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
-    }
-    else {
+    } else {
         $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
     }
 }
@@ -46,7 +42,7 @@ else {
 }
 
 // When no changes are made in the list
-$isBeingHidden = ($DATA["hidden"] == 1 && $DATA["isNowHidden"] == "false") || ($DATA["hidden"] == 0 && $DATA["isNowHidden"] == "true");
+$isBeingHidden = ($fuckupData[3] == 1 && $fuckupData[2] == "false") || ($fuckupData[3] == 0 && $fuckupData[2] == "true");
 if ($listData["data"] == $fuckupData[1] && !$isBeingHidden) {
     die(json_encode([-1, 4]));
 }
@@ -64,15 +60,15 @@ $retListID = [$DATA["id"]];
 // Private list settings
 if ($DATA["type"] == "list") {
     $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
-    if ($DATA["hidden"] == 1 and $DATA["isNowHidden"] == "true") {
+    if ($fuckupData[3] == 1 and $fuckupData[2] == "true") {
         doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
     }
-    elseif ($DATA["hidden"] == 1 and $DATA["isNowHidden"] == "false") {
+    elseif ($fuckupData[3] == 1 and $fuckupData[2] == "false") {
         $hidden = privateIDGenerator($listData["name"], $listData["creator"], $listData["timestamp"]);
         $retListID[0] = $hidden;
         doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
     }
-    elseif ($DATA["hidden"] == 0 and $DATA["isNowHidden"] == "false") {
+    elseif ($fuckupData[3] == 0 and $fuckupData[2] == "false") {
         doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
     }
     else {
@@ -81,7 +77,7 @@ if ($DATA["type"] == "list") {
     }
     
     // Adding levels to database
-    if ($DATA["hidden"] == 0) {
+    if ($fuckupData[3] == 0) {
         doRequest($mysqli, "DELETE FROM `levels` WHERE `listID`=?", [$DATA["id"]], "i");
         $levels = json_decode($DATA["listData"], true);
         
@@ -90,7 +86,7 @@ if ($DATA["type"] == "list") {
     }
 }
 else {
-    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ? WHERE id = ?", [$fuckupData[1], 0, $DATA["tagline"], $disableComments, $DATA["id"]], "sisis");
+    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3] == "true"), $DATA["tagline"], $disableComments, $DATA["id"]], "sisis");
     $retListID = str_replace(' ', '-', $listData["name"]) . '-' . $listData["id"];
 }
 

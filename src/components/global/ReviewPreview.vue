@@ -62,7 +62,7 @@ const creatorName = getUsername()
 
 <template>
   <component :is="disableLink ? 'button' : 'RouterLink'"
-  :to="'/review' + (hidden != '0' ? hidden ?? `/${url.toString()}` : `/${url.toString()}`!)"
+  :to="`/review/${url.toString()}`"
   class="flex flex-col w-5/6 max-w-6xl cursor-pointer gap-3 relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),

@@ -202,11 +202,15 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 
 
 const isOldCollab = computed(() => typeof props.levelArray.levels[props.index!].creator == 'object' && !props.levelArray.levels[props.index!].creator[3])
+const mess = [
+  useI18n().t('collabTools.noEditOldCollab'),
+  useI18n().t('editor.collabNoPhones')
+]
 const openCollabTools = () => {
   if (isOldCollab.value)
-    emit('throwError', useI18n().t('collabTools.noEditOldCollab'))
+    emit('throwError', mess[0])
   else if (/iPhone|Android/i.test(navigator.userAgent))
-    emit('throwError', useI18n().t('editor.collabNoPhones'))
+    emit('throwError', mess[1])
   else
     emit('openCollabTools', props.index!)
 }

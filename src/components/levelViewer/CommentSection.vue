@@ -33,7 +33,7 @@ watch(props, () => { // only refresh comments once
         <!-- Comments disabled info -->
         <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max rounded-md bg-greenGradient" v-if="commentsDisabled">
             <img src="../../images/noComments.svg" class="w-12 opacity-60" alt="">
-            <span>{{ $t('listViewer.commDisableHelp') }}</span>
+            <span>{{ $t('listViewer.commDisableHelp', [isReview ? $t('listViewer.thisReview') : $t('listViewer.thisList')]) }}</span>
         </div>
 
         <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">

@@ -39,7 +39,7 @@ let indPicked = ref(0)
         </ContainerHelp>
         
         <figure class="p-2 w-max" v-else>
-            <LevelCard v-bind="reviewData.levels[settings.pickedIndex]" :disable-stars="true" />
+            <LevelCard v-bind="reviewData.levels[settings.pickedIndex]" :disable-stars="true"/>
             <figcaption class="mt-2">{{ settings.description }}</figcaption>
         </figure>
     </div>

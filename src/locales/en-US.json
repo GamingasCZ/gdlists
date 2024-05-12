@@ -189,13 +189,15 @@
     "diffResult1": "a monkey would fair better than you!",
     "diffResult9": "Imperfect, you'll be grinding map packs as punishment.",
     "diffResult16": "The thousands of hours of dashing are finally paying off!",
-    "commDisableHelp": "Comments are disabled on this list!",
+    "commDisableHelp": "Comments are disabled on this {0}!",
     "failLoad": "The list failed to load!",
     "commHelpR1": "Your review is...",
     "commHelpR2": "This review really changed my view on...",
     "commHelpR3": "Alright, who resurrected Shakespeare? This is...",
     "commHelpR4": "I agree with your review, but...",
-    "nonexistentReview": "This review doesn't exist!"
+    "nonexistentReview": "This review doesn't exist!",
+    "thisReview": "review",
+    "thisList": "list"
   },
   "navbar": {
     "editor": "Create",

@@ -4,7 +4,7 @@ import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterRatings from "./writer/WriterRatings.vue";
-import LevelPopup from "./writer/LevelPopup.vue";
+import WrtierLevels from "./writer/WriterLevels.vue";
 import DataContainer from "./writer/DataContainer.vue"
 import FormattingBar from "./writer/FormattingBar.vue"
 import CONTAINERS from "./writer/containers";
@@ -32,8 +32,10 @@ const props = defineProps<{
     editing?: boolean
 }>()
 
+let isNowHidden = false
 if (props.editing) {
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", {id: props.reviewID, type: 'review'}).then(res => {
+        isNowHidden = res.data.hidden != 0
         reviewData.value = res.data.data
         modifyListBG(reviewData.value.pageBGcolor, false, true)
     })
@@ -199,7 +201,16 @@ const removeReview = () => {
 }
 
 const updateReview = () => {
-    axios.post(import.meta.env.VITE_API + "/updateList.php", {id: props.reviewID, type: 'review', listData: JSON.stringify(reviewData.value), tagline: reviewData.value.tagline, hidden: 0, isNowHidden: 0, disComments: reviewData.value.disComments | 0}).then(res => {
+    axios.post(import.meta.env.VITE_API + "/updateList.php", {
+        id: props.reviewID,
+        type: 'review',
+        listData: JSON.stringify(reviewData.value),
+        tagline: reviewData.value.tagline,
+        hidden: reviewData.value.private ? "true" : "false",
+        isNowHidden: isNowHidden ? "true" : "false",
+        disComments: reviewData.value.disComments | 0
+    }) 
+        .then(res => {
         sessionStorage.setItem("uploadFinished", "2")
         router.replace(`/review/${res.data}`)
     })
@@ -222,7 +233,7 @@ const preUpload = ref(false)
 
         <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <LevelPopup ref="selectedLevel" />
+            <WrtierLevels ref="selectedLevel" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">

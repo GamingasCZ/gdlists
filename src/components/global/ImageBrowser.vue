@@ -72,6 +72,7 @@ const removeImage = (hash: string, external: boolean) => {
             setImgCache(images.value)
             setStorageCache(storage.value)
         })
+        removeConfirmationOpen.value = -1
     }
     else {
         externaImages.value.splice(externaImages.value.indexOf(hash), 1)
@@ -174,7 +175,7 @@ const dropdown = ref()
 const imageAction = (id: number, external: boolean, val: string | number) => {
     switch (id) {
         case 0: // Remove
-            startRemoval(val)
+            startRemoval(val); break
         case 1:
             downloadImage(val, external); break
     }

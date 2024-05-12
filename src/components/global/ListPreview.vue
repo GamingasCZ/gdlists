@@ -60,7 +60,7 @@ const unpinList = () => {
 
 const creatorName = computed(() => props.creator?.length ? props.creator : getUsername())
 
-const postLink = props.url ? `/review/${props.url}` : `/${!props.hidden || props.id}`
+const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? props.id : props.hidden}`
 </script>
 
 <template>

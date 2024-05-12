@@ -130,7 +130,20 @@ if (count($_GET) == 1) {
 
   $addReq = "";
   $showHidden = "`hidden` = '0' AND";
+
+  // Request type
   $type = "lists";
+  if (isset($_GET["type"])) {
+    switch ($_GET["type"]) {
+      case 'reviews':
+        $type = "reviews";
+        break;
+      
+      default: break;
+    }
+  }
+
+  // User/Private objects
   if (isset($_GET["user"])) {
     if (!getAuthorization()) die();
     $user = checkAccount()["id"];
@@ -141,16 +154,6 @@ if (count($_GET) == 1) {
     $user = checkAccount()["id"];
     $addReq = "AND " . $type . ".uid=" . $user;
     $showHidden = "";
-  }
-  
-  if (isset($_GET["type"])) {
-    switch ($_GET["type"]) {
-      case 'reviews':
-        $type = "reviews";
-        break;
-      
-      default: break;
-    }
   }
 
   $range = [$selRange, $selReviewRange][$type != "reviews" ? 0 : 1];

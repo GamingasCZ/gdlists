@@ -48,9 +48,7 @@ $fuckupData = sanitizeInput(array(trim($DATA["reviewName"])));
 $timestamp = $time -> getTimestamp();
 
 // Generate id if list private
-$hidden;
-if ($DATA["private"]) { $hidden = privateIDGenerator($fuckupData[1], $fuckupData[0], $timestamp); }
-else { $hidden = "0"; }
+$hidden = intval($DATA["private"]);
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 // Cannot connect to database
@@ -64,17 +62,10 @@ $values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], 
 $res = doRequest($mysqli, $teplate, $values, "sisssi");
 if (is_array($res) && array_key_exists("error", $res)) die(5);
 
-
-if ($DATA["private"]) {
-    // Hidden lists
-    $listID = $hidden;
-}
-else {
-    $listIDquery = $mysqli -> query("SELECT LAST_INSERT_ID() as id");
-    $rows = $listIDquery -> fetch_all(MYSQLI_ASSOC);
-    foreach ($rows as $row) {
-      $listID = join("",$row);
-    }
+$listIDquery = $mysqli -> query("SELECT LAST_INSERT_ID() as id");
+$rows = $listIDquery -> fetch_all(MYSQLI_ASSOC);
+foreach ($rows as $row) {
+  $listID = join("",$row);
 }
 
 // Adds levels to database
