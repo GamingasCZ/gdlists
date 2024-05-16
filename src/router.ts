@@ -83,25 +83,25 @@ router.beforeEach(async () => {
     loadingProgress.value = 99
   }, 5)
   
-  document.documentElement.style.setProperty("--siteBackground", "");
+      document.documentElement.style.setProperty("--siteBackground", "");
 
   if (
     getComputedStyle(document.documentElement).getPropertyValue(
       "--primaryColor"
     ) == document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
-    document.querySelector("nav")?.classList.add("slidingNavbar");
-
-    setTimeout(() => {
-      document.documentElement.style.setProperty("--primaryColor", "");
-      document.documentElement.style.setProperty("--secondaryColor", "");
-      document.documentElement.style.setProperty("--brightGreen", "");
-    }, 150);
-
-    setTimeout(() => {
-      document.querySelector("nav")?.classList.remove("slidingNavbar");
-    }, 300);
-  }
+      document.querySelector("nav")?.classList.add("slidingNavbar");
+  
+      setTimeout(() => {
+        document.documentElement.style.setProperty("--primaryColor", "");
+        document.documentElement.style.setProperty("--secondaryColor", "");
+        document.documentElement.style.setProperty("--brightGreen", "");
+      }, 150);
+  
+      setTimeout(() => {
+        document.querySelector("nav")?.classList.remove("slidingNavbar");
+      }, 300);
+    }
 });
 
 // Finish loading bar

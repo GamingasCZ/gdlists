@@ -35,7 +35,7 @@ const parseText = (e: Event) => {
 		emit('addParagraph', false)
 	}
 	else
-		emit('textModified', e.target.innerHTML)
+		emit('textModified', e.target.innerText)
 }
 
 const doFocusText = () => {
@@ -59,7 +59,7 @@ const focus = ref(false)
 			ref="element"
 			v-if="canEditText"
 			@focus="emit('hasFocus', element!); focus = true"
-			@keydown="parseText"
+			@keyup="parseText"
 			@input="showPlaceholder = $el.innerText.length == 0"
 			:contenteditable="editable"
 			class="break-words outline-none"

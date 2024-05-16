@@ -23,14 +23,15 @@ $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, repl
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;
+  $ratings = [];
   $dbInfo = [];
+  $uid_array = array();
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
       die("3");
     }
     
-    $uid_array = array();
     foreach ($rows as $row) {
       array_push($uid_array, $row["uid"]);
 
@@ -65,11 +66,17 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [list_id($rows)], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"]; 
     $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);                  
+
+    // Fetch ratings
+    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"]);
   }
   
-  $result = $mysqli -> query($query) or die($mysqli -> error);
-  $users = $result -> fetch_all(MYSQLI_ASSOC);
-  $res = array($rows, $users, $dbInfo);
+  $users;
+  if ( sizeof($uid_array) || $rows["uid"] != "") {
+    $result = $mysqli -> query($query) or die($mysqli -> error);
+    $users = $result -> fetch_all(MYSQLI_ASSOC);
+  }
+  $res = array($rows, $users, $dbInfo, $ratings);
   echo json_encode($res);
 }
 

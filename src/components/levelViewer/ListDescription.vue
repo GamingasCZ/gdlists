@@ -18,27 +18,17 @@ const props = defineProps<{
   listPinned: boolean;
   creatorData: { username: string, discord_id: string, avatar_hash: string } | false;
   review: boolean;
+  openDialogs: [boolean, boolean]
+  ratings: [number, number, number]
 }>();
 
 const emit = defineEmits<{
-  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras" | "rateNotLoggedIn"): void;
+  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras" | "rateNotLoggedIn" | "reviewLevels"): void;
+  (e: "updateRatings", newRatings: [number, number, number]): void
 }>();
 
 const hoveringRating = ref(false)
-const rating = ref<[number, number, -2 | -1 | 0 | 1]>([0, 0, 0]);
-const rate = ref<number>();
 onMounted(() => {
-  let ratingParams
-  if (props.review) ratingParams = {review_id: props.id}
-  else ratingParams = {list_id: props.id}
-
-  axios
-    .get(import.meta.env.VITE_API + `/rateAction.php`, {params: ratingParams})
-    .then((res: AxiosResponse) => {
-      rating.value = res.data;
-      rate.value = res.data[0] - res.data[1];
-    });
-
   let description = document.getElementById("listDescription")!;
   tallDescription.value = description.scrollHeight > description.clientHeight;
 });
@@ -89,9 +79,9 @@ function sendRating(action: 1 | 0) {
 
   axios.post(import.meta.env.VITE_API + "/rateAction.php", ratingParams).then(res => {
     const likeData: LikeFetchResponse = res.data
-    rate.value = likeData.ratings[0] - likeData.ratings[1]
-    rating.value[2] = likeData.ratings[2]!
     sendingRating = false
+    if (typeof res.data != "object") return
+    emit('updateRatings', likeData.ratings)
   })
 }
 
@@ -117,26 +107,26 @@ const listUploadDate = props.review ?
 
         <!-- Like button -->
         <button id="likeButton" class="button relative rounded-lg bg-[#21cc5b] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
-        :style="{ boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
-        :class="{ '!bg-[#051c0c]': rating?.[2] == 0, '!bg-[#14805c]': rating?.[2] == 1 }" @click="sendRating(1)">
+        :style="{ boxShadow: ratings?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
+        :class="{ '!bg-[#051c0c]': ratings?.[2] == 0, '!bg-[#14805c]': ratings?.[2] == 1 }" @click="sendRating(1)">
 
-          <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -top-5 left-1/2 text-sm text-lime-400 -translate-x-1/2">{{ rating[0] }}</h6></Transition>
-          <img class="w-5" src="@/images/like.svg" alt="" :class="{ 'brightness-[6]': rating?.[2] == 1 }" />
+          <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -top-5 left-1/2 text-sm text-lime-400 -translate-x-1/2">{{ ratings[0] }}</h6></Transition>
+          <img class="w-5" src="@/images/like.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 1 }" />
         </button>
 
         <!-- Rating text -->
-        <span @mouseenter="hoveringRating = true" @mouseleave="hoveringRating = false" class="my-0.5 text-lg font-bold cursor-help">{{ rate }}
-          <hr v-if="rate == undefined" class="w-4 h-3 bg-white bg-opacity-50 rounded-full border-none" />
+        <span @mouseenter="hoveringRating = true" @mouseleave="hoveringRating = false" class="my-0.5 text-lg font-bold cursor-help">{{ ratings[0]-ratings[1] }}
+          <hr v-if="ratings == undefined" class="w-4 h-3 bg-white bg-opacity-50 rounded-full border-none" />
         </span>
 
         <!-- Dislike button -->
         <button id="dislikeButton" class="button relative rounded-lg bg-[#cc2121] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
           @click="sendRating(0)"
-          :style="{ boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
-          :class="{ '!bg-[#1c0505]': rating?.[2] == 1, '!bg-[#730909]': rating?.[2] == 0 }">
+          :style="{ boxShadow: ratings?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
+          :class="{ '!bg-[#1c0505]': ratings?.[2] == 1, '!bg-[#730909]': ratings?.[2] == 0 }">
 
-          <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -bottom-5 left-1/2 text-sm text-red-500 -translate-x-1/2">{{ rating[1] }}</h6></Transition>
-          <img class="w-5" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': rating?.[2] == 0 }" />
+          <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -bottom-5 left-1/2 text-sm text-red-500 -translate-x-1/2">{{ ratings[1] }}</h6></Transition>
+          <img class="w-5" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 0 }" />
         </button>
       </div>
 
@@ -183,17 +173,17 @@ const listUploadDate = props.review ?
         <!-- Mobile likes and dislikes -->
         <div class="box-border flex gap-1.5 items-center sm:hidden">
           <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg" @click="sendRating(1)"
-            :style="{ boxShadow: rating?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
-            :class="{ '!bg-[#051c0c]': rating?.[2] == 0, '!bg-[#14805c]': rating?.[2] == 1 }">
-            <img class="w-6" src="@/images/like.svg" alt="" :class="{ 'brightness-[6]': rating?.[2] == 1 }" />
+            :style="{ boxShadow: ratings?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
+            :class="{ '!bg-[#051c0c]': ratings?.[2] == 0, '!bg-[#14805c]': ratings?.[2] == 1 }">
+            <img class="w-6" src="@/images/like.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 1 }" />
           </button>
-          <span class="text-center min-w-[2rem] text-lg font-bold">{{ rate }}
+          <span class="text-center min-w-[2rem] text-lg font-bold">{{ ratings[0]-ratings[1] }}
             <hr v-if="rate == undefined" class="w-4 h-1 bg-white bg-opacity-50 rounded-full border-none" />
           </span>
           <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg" @click="sendRating(0)"
-            :style="{ boxShadow: rating?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
-            :class="{ '!bg-[#1c0505]': rating?.[2] == 1, '!bg-[#730909]': rating?.[2] == 0 }">
-            <img class="w-6" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': rating?.[2] == 0 }" />
+            :style="{ boxShadow: ratings?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
+            :class="{ '!bg-[#1c0505]': ratings?.[2] == 1, '!bg-[#730909]': ratings?.[2] == 0 }">
+            <img class="w-6" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 0 }" />
           </button>
         </div>
 
@@ -201,7 +191,7 @@ const listUploadDate = props.review ?
 
         <!-- Comments button -->
         <div class="sm:ml-9">
-          <button class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
+          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
             <img src="@/images/comment.svg" class="inline w-6 sm:mr-2" /><label class="max-sm:hidden">{{
               $t('level.comments') }}</label>
             <label
@@ -211,8 +201,8 @@ const listUploadDate = props.review ?
         </div>
 
         <!-- Review level ratings button -->
-        <div class="ml-2" v-if="review">
-          <button class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
+        <div class="ml-2" v-if="review && data.rateTheme != 2 && data.levels.length > 0">
+          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
             <img src="@/images/rating.svg" class="inline w-6 sm:mr-2" /><label class="max-sm:hidden">{{ $t('editor.levels') }}</label>
             <label
               class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-sm:absolute max-sm:bottom-1 max-sm:right-1">{{

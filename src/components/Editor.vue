@@ -31,8 +31,6 @@ import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
 import parseText from "./global/parseEditorFormatting";
 import { dialog } from "./ui/sizes";
-import { onUnmounted } from "vue";
-import { DEFAULT_RATINGS } from "@/Reviews";
 
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;

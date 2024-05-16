@@ -134,6 +134,15 @@ const uploadList = () => {
       <div class="p-2 mt-8 bg-black bg-opacity-40 rounded-md">
         <div class="flex justify-between items-center w-full">
           <div class="ml-1">
+            <p class="text-xl leading-none">{{ $t('reviews.readerMode') }}</p>
+            <p class="text-sm opacity-40">{{ $t('reviews.readerModeHelp') }}</p>
+          </div>
+          <input v-model="reviewData.readerMode" type="checkbox" class="w-12 button" name="transparency" id="opaque">
+        </div>
+      </div>
+      <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
+        <div class="flex justify-between items-center w-full">
+          <div class="ml-1">
             <p class="text-xl leading-none">{{ $t('reviews.whitePage') }}</p>
             <p class="text-sm opacity-40">{{ $t('reviews.whitePageHelp') }}</p>
           </div>
@@ -141,7 +150,7 @@ const uploadList = () => {
         </div>
       </div>
       <fieldset>
-        <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
+        <div class="p-2 mt-8 bg-black bg-opacity-40 rounded-md">
           <div class="flex justify-between items-center w-full">
             <div class="ml-1">
               <p class="text-xl leading-none">{{ $t('reviews.opaque') }}</p>

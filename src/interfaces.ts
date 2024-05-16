@@ -232,6 +232,7 @@ export interface ReviewList {
   transparentPage: 0 | 1 | 2
   language: number
   whitePage: boolean
+  readerMode: boolean
 }
 
 export interface ReviewRating {

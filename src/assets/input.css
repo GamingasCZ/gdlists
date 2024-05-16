@@ -197,3 +197,7 @@ dialog {
   .descriptionControls {@apply hidden}
   * {text-shadow: none !important; box-shadow: none !important; filter: none !important; font-family: unset !important;}
 }
+
+.readabilityMode {
+  @apply max-w-[80ch] leading-relaxed font-serif text-xl;
+}

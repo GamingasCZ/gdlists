@@ -6,6 +6,7 @@ import ReviewList from "./ReviewList.vue"
 import ReviewDivisor from "./ReviewDivisor.vue"
 import NestContainer from "./NestContainer.vue"
 import ReviewRatings from "./ReviewRatings.vue"
+import { i18n } from "@/locales"
 
 const containers: Containers = {
     default: {
@@ -57,13 +58,13 @@ const containers: Containers = {
             },
             {
                 key: "visible",
-                title: "Viditelný",
+                title: i18n.global.t('other.visible'),
                 type: [2],
                 default: true,
             },
             {
                 key: "fill",
-                title: "Vyplnit prostor",
+                title: i18n.global.t('reviews.fillSpace'),
                 type: [2],
                 default: false,
             },
@@ -75,7 +76,19 @@ const containers: Containers = {
         nestable: true,
         canEditText: true,
         additionalComponents: [],
-        settings: []
+        settings: [{
+            key: "checked",
+            title: "",
+            type: [-1],
+            default: []
+        },
+        {
+            key: "checklist",
+            title: i18n.global.t("reviews.checkable"),
+            type: [2],
+            default: false
+        }
+        ]
     },
     showImage: {
         nestable: true,
@@ -96,25 +109,25 @@ const containers: Containers = {
             },
             {
                 key: "pick",
-                title: "Vybrat obrázek",
+                title: i18n.global.t('reviews.pickImage'),
                 type: [1],
                 default: 0
             },
             {
                 key: "alt",
-                title: "Alternativní text",
+                title: i18n.global.t('reviews.alttext'),
                 type: [0],
                 default: ""
             },
             {
                 key: "description",
-                title: "Popis obrázku",
+                title: i18n.global.t('reviews.imageDesc'),
                 type: [0],
                 default: ""
             },
             {
                 key: "link",
-                title: "Odkaz",
+                title: i18n.global.t('other.link'),
                 type: [0],
                 default: ""
             },
@@ -127,13 +140,13 @@ const containers: Containers = {
         settings: [
             {
                 key: "url",
-                title: "YouTube odkaz",
+                title: i18n.global.t('reviews.ytLink'),
                 type: [0],
                 default: ""
             },
             {
                 key: "description",
-                title: "Popis videa",
+                title: i18n.global.t('reviews.videoDesc'),
                 type: [0],
                 default: ""
             }
@@ -146,13 +159,13 @@ const containers: Containers = {
         settings: [
             {
                 key: "level",
-                title: "Level",
+                title: i18n.global.t('other.level'),
                 type: [4],
                 default: 0
             },
             {
                 key: "show",
-                title: "Hodnocení",
+                title: i18n.global.t('reviews.rating'),
                 type: [5],
                 default: -1
             }
@@ -172,19 +185,19 @@ const containers: Containers = {
             },
             {
                 key: "pickLevel",
-                title: "Vybrat level",
+                title: i18n.global.t('reviews.pickLevel'),
                 type: [1],
                 default: 0
             },
             {
                 key: "showCollab",
-                title: "Zobrazit collab",
+                title: i18n.global.t('reviews.dispCollab'),
                 type: [2],
                 default: true
             },
             {
                 key: "description",
-                title: "Popis levelu",
+                title: i18n.global.t('reviews.levelDesc'),
                 type: [0],
                 default: ""
             }
@@ -203,13 +216,13 @@ const containers: Containers = {
             },
             {
                 key: "pick",
-                title: "Vybrat seznam",
+                title: i18n.global.t('reviews.pickList'),
                 type: [1],
                 default: 0
             },
             {
                 key: "description",
-                title: "Popis seznamu",
+                title: i18n.global.t('editor.listDescription'),
                 type: [0],
                 default: ""
             }

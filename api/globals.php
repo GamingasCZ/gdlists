@@ -168,6 +168,15 @@ function getAuthorization() {
     else return false;
 }
 
+function getLocalUserID() {
+    // Use when security is not number one priority :D
+    $auth = getAuthorization();
+    if (!$auth) return false;
+    
+    $token = explode("|", decrypt(base64_decode(getAuthorization())));
+    return $token[2]; // User ID
+}
+
 function checkAccount($forceToken = false) {
     global $DO_REFRESH;
     if (!getAuthorization()) return false;
@@ -208,6 +217,17 @@ function list_id($row) {
 
 function clamp($current, $min, $max) {
     return max($min, min($max, $current));
+}
+
+function getRatings($mysqli, $userID, $type, $object_id) {
+    $likeQuery = doRequest($mysqli, sprintf("SELECT count(id) as total, sum(rate) as likes FROM ratings WHERE %s=?", $type), [$object_id], "s");
+    $hasRatedQuery;
+    if ($userID) {
+        $hasRatedQuery = doRequest($mysqli, sprintf("SELECT `rate` FROM ratings WHERE `uid`=? AND %s=?", $type), [$userID, $object_id], "ii");
+        $hasRatedQuery = $hasRatedQuery === null ? -1 : $hasRatedQuery["rate"];
+    }
+    else $hasRatedQuery = -2;
+    return array(intval($likeQuery["likes"]), $likeQuery["total"]-$likeQuery["likes"], $hasRatedQuery);
 }
 
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID) {

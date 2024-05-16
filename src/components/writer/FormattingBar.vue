@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 
 const emit = defineEmits<{
 	(e: "addContainer", key: string): string
@@ -10,34 +12,34 @@ const BASE_URL = import.meta.env.BASE_URL
 
 const actions = [
 	[
-		["bold", "Tučně", ""],
-		["cursive", "Kurzívou", ""],
-		["underline", "Podtrženě", ""],
-		["strike", "Přeškrtnutě", ""],
-		["color", "Barva písma", ""],
-		["link", "Odkaz", ""]
+		["bold", useI18n().t('reviews.bold'), ""],
+		["cursive", useI18n().t('reviews.italics'), ""],
+		["underline", useI18n().t('reviews.underline'), ""],
+		["strike", useI18n().t('reviews.strike'), ""],
+		["color", useI18n().t('reviews.textcolor'), ""],
+		["link", useI18n().t('other.link'), ""]
 	],
 	[
-		["heading1", "Nadpis 1"],
-		["heading2", "Nadpis 2"],
-		["heading3", "Nadpis 3"]
+		["heading1", useI18n().t('reviews.title', ['1'])],
+		["heading2", useI18n().t('reviews.title', ['2'])],
+		["heading3", useI18n().t('reviews.title', ['3'])]
 	],
 	[
-		["alignLeft", "Zarovnat doleva", "left"],
-		["alignCenter", "Zarovnat doprostřed", "center"],
-		["alignRight", "Zarovnat doprava", "right"],
-		["alignJustify", "Zarovnat do bloku", "justify"]
+		["alignLeft", useI18n().t('reviews.align', [useI18n().t('reviews.aLeft')]), "left"],
+		["alignCenter", useI18n().t('reviews.align', [useI18n().t('reviews.aCenter')]), "center"],
+		["alignRight", useI18n().t('reviews.align', [useI18n().t('reviews.aRight')]), "right"],
+		["alignJustify", useI18n().t('reviews.align', [useI18n().t('reviews.aJustify')]), "justify"]
 	],
 	[
-		["divisor", "Přidat oddělovač"],
-		["list", "Přidat odrážky"],
-		["showList", "Odkaz na seznam"],
-		["showLevel", "Zobrazit level"],
-		["showCollab", "Přidat uživatele"],
-		["showImage", "Přidat obrázek"],
-		["addVideo", "Přidat video"],
-		["showRating", "Zobrazit hodnocení"],
-		["twoColumns", "Dva sloupce"]
+		["divisor", useI18n().t('reviews.addDivisor')],
+		["list", useI18n().t('reviews.addBpoints')],
+		["showList", useI18n().t('reviews.listLink')],
+		["showLevel", useI18n().t('reviews.showLevel')],
+		["showCollab", useI18n().t('reviews.addUsers')],
+		["showImage", useI18n().t('reviews.addImage')],
+		["addVideo", useI18n().t('reviews.addVideo')],
+		["showRating", useI18n().t('reviews.dispRatings')],
+		["twoColumns", useI18n().t('reviews.multicolumn')]
 	]
 ]
 

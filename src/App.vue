@@ -35,7 +35,7 @@ if (hasLocalStorage()) {
   if (langIndex.value != SETTINGS.value.language) setLanguage(SETTINGS.value.language)
 }
 
-const loggedIn = ref<boolean>(false);
+const loggedIn = ref<boolean | null>(null);
 onMounted(() => {
   if (!hasLocalStorage()) return
   axios

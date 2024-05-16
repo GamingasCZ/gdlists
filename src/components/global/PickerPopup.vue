@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import { onUpdated, reactive, ref, watch } from "vue";
-import FavoriteBubble from "./FavoriteBubble.vue";
-import LevelBubble from "./LevelBubble.vue";
 import type { FavoritedLevel, Level } from "@/interfaces";
 
 const emit = defineEmits(["selectOption"]);
 const props = defineProps<{
-  outerErrorText: string
-  outerError: boolean
-  pickerData: Level[] | FavoritedLevel[] | string;
-  pickerDataType: "favoriteLevel" | "level";
 }>();
 
 const bubbleType = ref<number>(
@@ -24,13 +18,6 @@ if (typeof props.pickerData == "string") {
 } else {
   data.value = props.pickerData ?? [];
 }
-
-watch(props, () => {
-  if (typeof props.pickerData == 'object') {
-    data.value = props.pickerData
-    filteredData.value = props.pickerData
-  }
-})
 
 const highlightFirstElement = () => {
   document.querySelector(".pickerBubble")!.focus()
@@ -61,38 +48,18 @@ onUpdated(() => {
       <main
         class="mt-2 flex-grow-[1] overflow-y-auto overflow-x-clip p-2 bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem]"
       >
-        <div
-          v-if="!data.length"
-          class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
-        >
-          <img src="@/images/savedMobHeader.svg" class="w-36" />
-          <h2>{{ $t('other.noSavedLevels') }}</h2>
-        </div>
+        <div class="flex flex-col gap-2">
 
-        <div
-          v-else-if="!filteredData.length"
-          class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
-        >
-          <img src="@/images/searchOpaque.svg" class="w-36" />
-          <h2>{{ $t('other.noLevelsFound') }}</h2>
-        </div>
+          
+          <div
+            class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
+            v-if="$slots.error"
+            >
+            <img src="@/images/close.svg" class="w-36" />
+            <slot name="error" />
+          </div>
 
-        <div
-          v-else-if="outerError"
-          class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
-        >
-          <img src="@/images/close.svg" class="w-36" />
-          <h2>{{ outerErrorText }}</h2>
-        </div>
-        
-        <div v-if="!outerError" class="flex flex-col gap-2">
-          <component
-            v-for="level in filteredData"
-            @click="emit('selectOption', level)"
-            :is="[FavoriteBubble, LevelBubble][bubbleType]"
-            :data="level"
-            class="pickerBubble"
-          />
+          <slot />
         </div>
       </main>
 </template>

@@ -90,7 +90,7 @@ const localStorg = ref(hasLocalStorage())
   </header>
 
   <section class="flex justify-center">
-    <div v-if="!isLoggedIn && localStorg"
+    <div v-if="isLoggedIn == false && localStorg"
       class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>

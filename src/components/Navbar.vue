@@ -92,6 +92,11 @@ const openEditorDropdown = () => {
 
 const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = false, 10)
 
+const deployPeterGriffin = async (e: Event) => {
+  // NANI??
+  e.target.src = await import('../images/defaultPFP.webp').then(res => res.default)
+}
+
 </script>
 
 <template>
@@ -149,17 +154,25 @@ const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = fal
     </section>
 
     <!-- Logged out -->
-    <img v-if="!isLoggedIn && localStorg" @click="showSettings" src="../images/user.svg" alt=""
+    <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
       class="px-1 w-10 h-10 button" />
+
+    <!-- Loading response from accounts.php -->
+    <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
+      class="mr-1 w-6 animate-spin aspect-square" />
     
     <!-- Logged in, settings -->
     <div v-else-if="localStorg" @click="showSettings" id="settingsOpener"
       class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
+
+      <!-- ping background when offine -->
       <img alt="" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
         :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
         class="absolute animate-ping top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture" v-if="!isOnline" />
-      <img alt="" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
+      
+      <!-- profile picture -->
+      <img alt="" @error="deployPeterGriffin" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
         :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
         class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture" />

@@ -24,6 +24,7 @@ import { useRouter } from "vue-router";
 import { DEFAULT_LEVELLIST, modifyListBG } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
+import ErrorPopup from "./editor/errorPopup.vue";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -225,6 +226,13 @@ const preUpload = ref(false)
 
 <template>
     <main class="p-2">
+        <ErrorPopup
+            :error-text="errorText"
+            show-dblclick-info
+            :previewing="false"
+            :stamp="errorStamp"
+        />
+
         <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
         <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false" :title="$t('other.settings')" :width="dialog.medium">
@@ -293,8 +301,8 @@ const preUpload = ref(false)
             />
 
             <!-- Editor -->
-            <section ref="writer" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 text-white rounded-md" :class="{'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
-                <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" />
+            <section ref="writer" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode,'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+                <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
 
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
@@ -332,7 +340,7 @@ const preUpload = ref(false)
                         />
                     </div>
                 </DataContainer>
-                <button @click="addContainer('default')" v-show="reviewData.containers.length" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed" :class="{'invert': reviewData.whitePage}">
+                <button @click="addContainer('default')" v-show="reviewData.containers.length" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span>{{ $t('reviews.addParagraph') }}</span>
                 </button>

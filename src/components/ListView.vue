@@ -32,8 +32,10 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, parseReviewContainers, reviewData } from "@/Reviews";
 import { onUpdated } from "vue";
+import LevelBubble from "./global/LevelBubble.vue";
+import FormattingBubble from "./global/FormattingBubble.vue";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -66,6 +68,7 @@ const LIST_CREATOR = ref<string>("");
 const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash: string} | false>()
 const LIST_COL = ref<number[]>([0, 0, 0]);
 const LEVEL_COUNT = ref(0)
+const LIST_RATING = ref([0,0]);
 const listErrorLoading = ref(false)
 
 const backToReview = ref()
@@ -92,6 +95,7 @@ function loadList(firstRandomPass = false) {
         LIST_DATA.value = res.data[0];
         LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
         LIST_CREATORDATA.value = res.data[1]?.[0]
+        LIST_RATING.value = res.data[3]
 
         // Use new levelList structure (put levels into 'levels' array)
         if (!LIST_DATA.value?.data.levels) {
@@ -150,12 +154,12 @@ function loadList(firstRandomPass = false) {
         LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
         if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
       } catch (e) {
-        console.log(e)
         listErrorLoading.value = true
       }
     })
 }
 
+const REVIEW_CONTENTS = ref<[number, string][]>([])
 function loadReview() {
   nonexistentList.value = false
   NONPRIVATE_LIST = true // damn you, old gamingsus >:(
@@ -171,6 +175,8 @@ function loadReview() {
 
         LIST_DATA.value = res.data[0];
         reviewData.value.levels = LIST_DATA.value.data.levels;
+        REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
+        LIST_RATING.value = res.data[3]
 
         LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
         LIST_CREATORDATA.value = res.data[1]?.[0]
@@ -304,6 +310,7 @@ const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
 const likeNotLoggedInOpen = ref(false)
 const uploadedDialogShown = ref(0)
+const reviewLevelsOpen = ref(false)
 if (hasLocalStorage()) {
   let uploadKey = sessionStorage.getItem("uploadFinished")
   if (uploadKey != null) {
@@ -329,6 +336,7 @@ onUpdated(() => {
 const listActions = (action: string) => {
   switch (action) {
     case "comments":
+      reviewLevelsOpen.value = false
       commentsShowing.value = !commentsShowing.value;
       break;
     case "sharePopup":
@@ -351,6 +359,10 @@ const listActions = (action: string) => {
       break;
     case "rateNotLoggedIn":
       likeNotLoggedInOpen.value = true
+      break;
+    case "reviewLevels":
+      commentsShowing.value = false
+      reviewLevelsOpen.value = !reviewLevelsOpen.value
       break;
   }
 };
@@ -423,9 +435,13 @@ provide("saveCollab", saveCollab)
   </DialogVue>
   
   <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.jumpTo')">
-    <PickerPopup @select-option="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)"
-      picker-data-type="level" :picker-data="LIST_DATA.data.levels"
-      :browser-name="$t('listViewer.jumpTo')" :outer-error="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" :outer-error-text="$t('listViewer.noGuessJumping')"/>
+    <PickerPopup>
+      <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
+        <span>{{ $t('listViewer.noGuessJumping') }}</span>
+      </template>
+      <FormattingBubble v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS" :text="link[1]" :type="link[0]" />
+      <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="!isReview || reviewLevelsOpen" v-for="level in LIST_DATA.data.levels" :data="level" />
+  </PickerPopup>
   </DialogVue>
 
   <!-- Mobile options popup -->
@@ -450,9 +466,20 @@ provide("saveCollab", saveCollab)
   <section class="mt-12 text-white">
     <header>
       <div class=""></div>
-      <ListDescription @do-list-action="listActions" v-bind="LIST_DATA" :creator="LIST_CREATOR" :creator-data="LIST_CREATORDATA!"
-        :id="LIST_DATA?.id" :list-pinned="listPinned" class="mb-8"
-        v-if="LIST_DATA.name != undefined && !nonexistentList" :review="isReview" />
+      <ListDescription
+        v-if="LIST_DATA.name != undefined && !nonexistentList"
+        class="mb-8"
+        v-bind="LIST_DATA"
+        @do-list-action="listActions"
+        @update-ratings="LIST_RATING = $event"
+        :creator="LIST_CREATOR"
+        :creator-data="LIST_CREATORDATA!"
+        :id="LIST_DATA?.id"
+        :list-pinned="listPinned"
+        :review="isReview"
+        :open-dialogs="[commentsShowing, reviewLevelsOpen]"
+        :ratings="LIST_RATING"
+      />
     </header>
     <main class="flex flex-col gap-4">
       <!-- Back to review from link -->
@@ -498,7 +525,7 @@ provide("saveCollab", saveCollab)
       </DialogVue>
 
       <!-- List -->
-      <div v-if="!isReview">
+      <div v-if="!isReview" class="flex flex-col gap-4">
         <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
           class="levelCard"
           :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
@@ -508,7 +535,7 @@ provide("saveCollab", saveCollab)
           :level-index="index"
           :list-i-d="!NONPRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
           :list-name="LIST_DATA?.name!"
-          :translucent-card="LIST_DATA?.data.translucent!" 
+          :translucent-card="LIST_DATA?.data.translucent! ?? false" 
           :disable-stars="false" 
           :guessing-now="cardGuessing == index"
           :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
@@ -518,9 +545,9 @@ provide("saveCollab", saveCollab)
           @error="listErrorLoading = true"
         />      
       </div>
-      <div v-else v-show="!commentsShowing">
+      <div v-else v-show="!commentsShowing && !reviewLevelsOpen">
         <!-- Review -->
-        <section id="reviewText" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2}">
+        <section id="reviewText" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2}">
           <DataContainer
               v-for="(container, index) in LIST_DATA.data.containers"
               v-bind="CONTAINERS[container.type]"
@@ -548,6 +575,23 @@ provide("saveCollab", saveCollab)
               </div>
           </DataContainer>
         </section>
+      </div>
+
+      <div v-if="reviewLevelsOpen" class="flex flex-col gap-4">
+        <LevelCard v-for="(level, index) in LIST_DATA?.data.levels"
+          class="levelCard"
+          v-bind="level"
+          :style="{animationDelay: `${index/25}s`}"
+          :favorited="favoritedIDs?.includes(level.levelID!)"
+          :level-index="index"
+          :list-i-d="LIST_DATA?.url"
+          :list-name="LIST_DATA?.name!"
+          :translucent-card="false" 
+          :disable-stars="false" 
+          @vue:mounted="tryJumping(index)"
+          @open-collab="openCollabTools"
+          @error="listErrorLoading = true"
+        />      
       </div>
 
 
@@ -591,7 +635,7 @@ provide("saveCollab", saveCollab)
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .levelCard {
+  .levelCard:nth-child(-n + 5) {
     animation: slideIn 0.4s ease forwards;
     opacity: 0;
   }
