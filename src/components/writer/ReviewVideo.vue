@@ -2,6 +2,7 @@
 import { shortenYTLink } from '@/Editor';
 import { onMounted, ref, watch } from 'vue';
 import ContainerHelp from './ContainerHelp.vue';
+import Resizer from '../global/Resizer.vue';
 
 
 const emit = defineEmits<{
@@ -10,6 +11,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
     settings: object
+    editable: boolean
 }>()
 
 watch(props, () => {
@@ -22,17 +24,19 @@ if (props.settings.url) videoLoading.value = 0
 
 <template>
     <div class="my-1 overflow-clip min-h-20">
-        <ContainerHelp v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? 'Nepodařilo se načíst video!' : 'Kliknutím nastav video.'"></ContainerHelp>
+        <ContainerHelp v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? $t('reviews.loadVideoFail') : $t('reviews.setVideo')"></ContainerHelp>
         <figure v-else>
-            <iframe
-                width="560" height="315"
-                :src="`https://www.youtube-nocookie.com/embed/${shortenYTLink(settings.url)}`"
-                title="YouTube video player" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-                class="rounded-md"
-                >
-            </iframe>
+            <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event">
+                <iframe
+                    :width="settings.width" :height="settings.width/1.77"
+                    :src="`https://www.youtube-nocookie.com/embed/${shortenYTLink(settings.url)}`"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                    class="rounded-md"
+                    >
+                </iframe>
+            </Resizer>
             <figcaption>{{ settings.description }}</figcaption>
         </figure>
     </div>

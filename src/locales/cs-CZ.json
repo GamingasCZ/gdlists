@@ -50,7 +50,8 @@
     "welcomeBack": "Vítej zpět,",
     "writeReview": "Napsat recenzi",
     "cookies1": "Nemáš povolené cookies!",
-    "cookies2": "Nepůjde se přihlásit, můžeš jen procházet."
+    "cookies2": "Nepůjde se přihlásit, můžeš jen procházet.",
+    "loginFail": "Přihlašování selhalo, zkus to znova později!"
   },
   "editor": {
     "tags": [
@@ -196,7 +197,7 @@
     "greatFeatures": "Teď můžeš vytvářet seznamy, likovat a komentovat!",
     "ok": "Ok!",
     "options": "Možnosti",
-    "myLists": "Moje {0}",
+    "myLists": "Mé {0}",
     "disconnected": "Nejsi připojený k internetu!",
     "notNow": "Zatím ne",
     "uploadFail": "Nepodařilo se nahrát seznam. Kód chyby: ",
@@ -264,7 +265,12 @@
     "level": "Level",
     "reviews": "recenze",
     "lists": "seznamy",
-    "visible": "Viditelný"
+    "visible": "Viditelný",
+    "gallery": "Galerie",
+    "download": "Stáhnout",
+    "uploading": "Nahrávání",
+    "removing": "Mazání",
+    "modify": "Změnit"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -511,6 +517,12 @@
     "start": "Začít psát!",
     "readerMode": "Zvýšit čitelnost",
     "readerModeHelp": "Zvětší písmo, výšky řádků a zmenší počet znaků na řádek",
-    "checkable": "Odškrtávací"
-  }
+    "checkable": "Odškrtávací",
+    "paragraph": "Odstavec",
+    "loadVideoFail": "Nepodařilo se načíst video!",
+    "setVideo": "Kliknutím nastav video.",
+    "font": "Písmo recenze",
+    "thumbnail": "Náhled recenze"
+  },
+  "review": {}
 }

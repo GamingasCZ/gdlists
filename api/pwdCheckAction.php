@@ -57,5 +57,6 @@ if ($owner) {
     }
     echo json_encode($listData);
 }
+elseif ($listData["hidden"] != '0') die('3'); // do not give away private list
 else die("2");
 ?>

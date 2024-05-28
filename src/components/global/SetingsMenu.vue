@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { defineAsyncComponent, ref, watch } from "vue";
 import LoginButton from "./LoginButton.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
 import { setLanguage } from "@/locales";
+import { dialog } from "../ui/sizes";
+import LoadingBlock from "../global/LoadingBlock.vue"
 
 defineProps<{
   isLoggedIn: boolean;
@@ -16,13 +18,32 @@ function logout() {
   window.location.reload();
 }
 
+const galleryOpen = ref(false)
+
+const Dialog = defineAsyncComponent({
+  loader: () => import("@/components/global/Dialog.vue"),
+  loadingComponent: LoadingBlock
+})
+const Gallery = defineAsyncComponent({
+  loader: () => import("@/components/global/ImageBrowser.vue"),
+  loadingComponent: LoadingBlock
+})
+
 const screenWidth = ref(window.innerWidth)
 </script>
 
 <template>
+  
   <div
-    class="flex fixed right-2 top-16 flex-col gap-3 p-2 text-white rounded-md bg-greenGradient sm:top-12"
+  class="flex fixed right-2 top-16 flex-col gap-3 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
+    <div v-if="galleryOpen" class="z-20">
+      <Teleport to="body">
+        <Dialog :open="galleryOpen" :title="$t('other.gallery')" :width="dialog.large" @close-popup="galleryOpen = false">
+          <Gallery unselectable />
+        </Dialog>
+      </Teleport>
+    </div>
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
@@ -43,6 +64,12 @@ const screenWidth = ref(window.innerWidth)
       </button> -->
     </section>
 
+    <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="galleryOpen = true"
+    >
+      <img src="@/images/image.svg" class="inline mr-2 w-5" alt="" />Galerie
+    </button>
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >

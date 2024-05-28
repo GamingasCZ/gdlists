@@ -134,7 +134,7 @@ function addFormatting(type: number) {
         :placeholder="$t('editor.listDescription')"
       ></textarea>
       <div
-        class="h-max flex-grow-[1] rounded-lg border-4 border-solid border-white border-opacity-10 px-1"
+        class="h-max flex-grow-[1] rounded-lg border-4 border-solid border-white border-opacity-10 regularParsing px-1"
         v-show="isPreviewing"
         v-html="
           parseText(

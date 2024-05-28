@@ -14,7 +14,7 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, REVIEW_EXTRAS, DEFAULT_REVIEWDATA } from "@/Reviews";
+import { reviewData, flexNames, REVIEW_EXTRAS, DEFAULT_REVIEWDATA, pickFont } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -58,6 +58,8 @@ const openDialogs = reactive({
     "bgPreview": false,
     "imagePicker": [false, 0]
 })
+
+const previewMode = ref(true)
 
 const collabClipboard = ref([])
 provide("openedDialogs", openDialogs)
@@ -131,6 +133,11 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 }
 
 const setFormatting = (format: string) => {
+    switch (format) {
+        case "view": previewMode.value = !previewMode.value; break;
+    }
+
+    return
     let sel = window.getSelection()
     let el = sel?.focusNode
     let range = sel?.getRangeAt(0)
@@ -185,6 +192,10 @@ const modifyImageURL = (newUrl: string) => {
     if (openDialogs.imagePicker[1] == -1) {
         reviewData.value.titleImg[0] = newUrl
     }
+    // Review background
+    else if (openDialogs.imagePicker[1] == -2) {
+        reviewData.value.thumbnail = newUrl
+    }
     // Image container
     else if (selectedNestContainer.value[0] == -1) {
         reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = newUrl
@@ -193,6 +204,14 @@ const modifyImageURL = (newUrl: string) => {
     else {
         reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = newUrl
     }
+}
+
+const uploadReview = () => {
+  axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
+    sessionStorage.setItem("uploadFinished", "1")
+    // todo: add error checking
+    router.replace(`/review/${res.data[0]}`)
+  })
 }
 
 const removeReview = () => {
@@ -236,7 +255,7 @@ const preUpload = ref(false)
         <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
         <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false" :title="$t('other.settings')" :width="dialog.medium">
-            <WriterSettings :uploading="preUpload" />
+            <WriterSettings :uploading="preUpload" @upload="uploadReview" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
@@ -265,7 +284,7 @@ const preUpload = ref(false)
         </DialogVue>
 
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
-            <ImageBrowser @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
+            <ImageBrowser :disable-external="openDialogs.imagePicker[1] == -2" :unselectable="false" @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
         </DialogVue>
 
         
@@ -281,13 +300,13 @@ const preUpload = ref(false)
             <!-- Hero -->
             <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
                 <input v-model="reviewData.reviewName" type="text" :disabled="editing" :placeholder="$t('reviews.reviewName')" class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
-                <button v-if="!tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
+                <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
                     <input type="text" v-once v-model="reviewData.tagline" autofocus class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400" :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
-                    <button @click="tagline = false">
+                    <button @click="reviewData.tagline = ''; tagline = false">
                         <img src="@/images/trash.svg" alt="" class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md group-focus-within:block button">
                     </button>
                 </div>
@@ -301,7 +320,7 @@ const preUpload = ref(false)
             />
 
             <!-- Editor -->
-            <section ref="writer" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode,'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode,'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
 
                 <DataContainer
@@ -319,8 +338,8 @@ const preUpload = ref(false)
                     :class="[CONTAINERS[container.type].styling ?? '']"
                     :style="{textAlign: container.align}"
                     :key="container.id"
-                    :focused="selectedContainer[0] == index"
-                    :editable="true"
+                    :focused="previewMode && selectedContainer[0] == index"
+                    :editable="previewMode"
                     :text="container.data"
                 >
                     <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
@@ -336,7 +355,7 @@ const preUpload = ref(false)
                             :index="index"
                             :sub-index="subIndex"
                             :key="container.id"
-                            :editable="true"
+                            :editable="previewMode"
                         />
                     </div>
                 </DataContainer>

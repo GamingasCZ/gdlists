@@ -9,6 +9,7 @@ Return codes:
 4 - List too big
 5 - Invalid list data
 6 - Invalid list parameters
+7 - Invalid thumbnail
 */
 
 require("globals.php");
@@ -29,6 +30,9 @@ $len = strlen(json_encode($DATA));
 if ($len > 25000 || $len < 150) {
   die(json_encode([-1, 4]));
 }
+
+// Valid thumbnail
+if (strlen($DATA["thumbnail"]) != 40) die("7");
 
 $user_id = checkAccount()["id"];
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
@@ -55,11 +59,12 @@ $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli -> connect_errno) {
   die(json_encode([-1, 0]));
 }
+$mysqli->set_charset("utf8mb4");
 
 // Send to database
-$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`) VALUES (?,?,?,?,?,?)";
-$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments);
-$res = doRequest($mysqli, $teplate, $values, "sisssi");
+$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`) VALUES (?,?,?,?,?,?,?)";
+$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $DATA["thumbnail"]);
+$res = doRequest($mysqli, $teplate, $values, "sisssis");
 if (is_array($res) && array_key_exists("error", $res)) die(5);
 
 $listIDquery = $mysqli -> query("SELECT LAST_INSERT_ID() as id");

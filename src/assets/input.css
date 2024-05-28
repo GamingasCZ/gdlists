@@ -199,5 +199,17 @@ dialog {
 }
 
 .readabilityMode {
-  @apply max-w-[80ch] leading-relaxed font-serif text-xl;
+  @apply max-w-[80ch] leading-relaxed text-xl;
 }
+
+/* Use when you want regular parsing */
+.regularParsing h1 { @apply ml-3 mt-2 text-2xl}
+.regularParsing h2 { @apply ml-2 mt-1 text-xl}
+.regularParsing h3 { @apply ml-1 text-lg}
+.regularParsing ul { @apply list-disc list-inside}
+.regularParsing ol { @apply list-decimal list-inside}
+.regularParsing a { @apply underline}
+.regularParsing blockquote { @apply border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
+.regularParsing img { @apply max-w-48}
+.regularParsing code { @apply font-mono bg-white rounded-md p-1 bg-opacity-10 w-full block font-normal}
+

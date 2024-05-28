@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import {onMounted, ref } from 'vue';
+import {nextTick, onMounted, ref, watch } from 'vue';
 import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
+import parseMD from "../global/parseEditorFormatting";
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -23,7 +24,22 @@ interface Extras {
 
 const props = defineProps<Container & Extras>()
 
+let doEdit = props.editable
 const textOnce = props.text
+const actualText = ref(textOnce)
+const previewText = ref("")
+watch(props, () => {
+	if (doEdit != props.editable) {
+		if (!props.editable) {
+			previewText.value = parseMD(element.value?.innerText)
+		}
+		else {
+			nextTick(() => element.value.innerText = actualText.value)
+		}
+		doEdit = props.editable
+	}
+})
+
 const doShowSettings = ref(false)
 const showPlaceholder = ref(true)
 const element = ref<HTMLDivElement>()
@@ -34,14 +50,21 @@ const parseText = (e: Event) => {
 		e.preventDefault()
 		emit('addParagraph', false)
 	}
-	else
-		emit('textModified', e.target.innerText)
+	else {
+		actualText.value = e.target.innerText
+		emit('textModified', actualText.value)
+	}
 }
 
 const doFocusText = () => {
 	element.value?.focus()
 	let sel = window.getSelection()
 	sel?.collapse(element.value?.lastChild, element.value?.innerText.length)
+}
+
+const untagText = (e: FileEvent) => {
+	e.preventDefault()
+	e.target.innerText = e.clipboardData?.getData('Text')
 }
 
 defineExpose({
@@ -61,10 +84,11 @@ const focus = ref(false)
 			@focus="emit('hasFocus', element!); focus = true"
 			@keyup="parseText"
 			@input="showPlaceholder = $el.innerText.length == 0"
+			@paste="untagText"
 			:contenteditable="editable"
-			class="break-words outline-none"
-			:class="childStyling || []
-		">{{ textOnce }}
+			class="break-words outline-none regularParsing"
+			v-html="editable ? textOnce : previewText"
+			:class="childStyling || []">
 		</p>
 		<slot></slot>
 

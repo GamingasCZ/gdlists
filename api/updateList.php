@@ -19,9 +19,11 @@ $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli -> connect_errno) {
     die(json_encode([-1, 0]));
 }
+$mysqli->set_charset("utf8mb4");
 
 // Checking request
 $DATA = json_decode(file_get_contents("php://input"), true);
+$decoded = json_decode($DATA["listData"], true);
 
 // Check list
 // $listCheck = checkList($DATA["listData"]);
@@ -31,13 +33,12 @@ $fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidd
 
 // Password check
 if ($DATA["type"] == "list") {
-    if ($DATA["isNowHidden"] == "true") {
-        $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [$fuckupData[0]], "s");
-    } else {
-        $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
-    }
+    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
 }
 else {
+    // Valid thumbnail
+    
+    if (strlen($decoded["thumbnail"]) != 40) die("7");
     $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$fuckupData[0]], "s");
 }
 
@@ -54,27 +55,23 @@ if (!$checkUser) {
   die(json_encode([-1, 2]));
 }
 
-$disableComments = $DATA["disComments"] == 1 ? 1 : 0;
+$disableComments = intval($DATA["disComments"]);
+$doHide = intval($DATA["hidden"]) == 1;
+$diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
+
 $retListID = [$DATA["id"]];
 
 // Private list settings
 if ($DATA["type"] == "list") {
-    $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
-    if ($fuckupData[3] == 1 and $fuckupData[2] == "true") {
-        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
-    }
-    elseif ($fuckupData[3] == 1 and $fuckupData[2] == "false") {
-        $hidden = privateIDGenerator($listData["name"], $listData["creator"], $listData["timestamp"]);
-        $retListID[0] = $hidden;
-        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
-    }
-    elseif ($fuckupData[3] == 0 and $fuckupData[2] == "false") {
-        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
-    }
-    else {
-        doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden`='0', `diffGuesser` = ?, `commDisabled` = ? WHERE `hidden` = ?", [$fuckupData[1], $diffGuess, $disableComments, $DATA["id"]], "sssi");
-        $retListID[0] = $listData["id"];
-    }
+
+    $hiddenID =  privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
+    $hidden = $doHide ? $hiddenID : '0';
+    
+    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
+    if (array_key_exists("error", $res)) die("5");
+    
+    // Return either ID or privateID
+    $retListID[0] = $doHide ? $hiddenID : $listData["id"];
     
     // Adding levels to database
     if ($fuckupData[3] == 0) {
@@ -86,7 +83,7 @@ if ($DATA["type"] == "list") {
     }
 }
 else {
-    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3] == "true"), $DATA["tagline"], $disableComments, $DATA["id"]], "sisis");
+    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3] == "true"), $decoded["tagline"], $disableComments, $decoded["thumbnail"], $DATA["id"]], "sisiss");
     $retListID = str_replace(' ', '-', $listData["name"]) . '-' . $listData["id"];
 }
 

@@ -52,7 +52,7 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes)
     $query->close();
 
     if (!$result) {
-        return -1;
+        return ["success" => true];
     }
 
     return $result -> fetch_assoc();
@@ -219,15 +219,29 @@ function clamp($current, $min, $max) {
     return max($min, min($max, $current));
 }
 
-function getRatings($mysqli, $userID, $type, $object_id) {
-    $likeQuery = doRequest($mysqli, sprintf("SELECT count(id) as total, sum(rate) as likes FROM ratings WHERE %s=?", $type), [$object_id], "s");
+function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) {
+    $likeQuery;
+    $ratingArray = [0, 0, false];
+    if ($splitRatings) {
+        $likeQuery = doRequest($mysqli, sprintf("SELECT sum(rate = 1) as likes, sum(rate = 0) as dislikes FROM ratings WHERE %s=?", $type), [$object_id], "s");
+        $ratingArray[0] = $likeQuery["likes"];
+        $ratingArray[1] = $likeQuery["dislikes"];
+    }
+    else {
+        $likeQuery = doRequest($mysqli, sprintf("SELECT count(id) as total, sum(rate) as likes FROM ratings WHERE %s=?", $type), [$object_id], "s");
+        $ratingArray[0] = $likeQuery["likes"];
+        $ratingArray[1] = $likeQuery["total"]-$likeQuery["likes"];
+    }
+
     $hasRatedQuery;
     if ($userID) {
         $hasRatedQuery = doRequest($mysqli, sprintf("SELECT `rate` FROM ratings WHERE `uid`=? AND %s=?", $type), [$userID, $object_id], "ii");
         $hasRatedQuery = $hasRatedQuery === null ? -1 : $hasRatedQuery["rate"];
     }
     else $hasRatedQuery = -2;
-    return array(intval($likeQuery["likes"]), $likeQuery["total"]-$likeQuery["likes"], $hasRatedQuery);
+
+    $ratingArray[2] = $hasRatedQuery;
+    return $ratingArray;
 }
 
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID) {

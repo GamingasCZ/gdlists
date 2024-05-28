@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { arrow, createPopper, offset } from '@popperjs/core';
+import { onMounted, ref } from 'vue';
 
-defineProps<{
+
+const props = defineProps<{
     title: string
     options: string[]
+    button: HTMLElement
 }>()
 
 const emit = defineEmits<{
@@ -10,21 +14,54 @@ const emit = defineEmits<{
     (e: "close"): void
 }>()
 
-document.body.addEventListener("click", () => emit("close"), {once: true, passive: false})
+const dropdown = ref<HTMLElement>()
+onMounted(() => {
+    createPopper(props.button, dropdown.value, {
+        placement: 'bottom',
+        modifiers: [{name: 'arrow'}, {name:'offset', options: {offset: [0, 12]}}]
+    })
+})
+
+const closeDropdown = e => {
+    let rect = dropdown.value?.getBoundingClientRect()
+    if (e.x < rect?.left || e.x > rect?.right+rect?.width || e.y < rect?.top || e.y > rect?.top+rect?.height) {
+        emit('close')
+        document.body.removeEventListener("click", closeDropdown, {capture: true})
+    }
+}
+
+document.body.addEventListener("click", closeDropdown, {capture: true})
 
 </script>
 
 <template>
-    <Transition name="fade">
-        <div
-        class="flex absolute left-1/2 flex-col gap-1 p-1 w-40 text-center bg-black bg-opacity-90 rounded-md backdrop-blur-sm translate-x-[calc(-50%_-_4px)]">
-        <img src="@/images/popupArr.svg" class="absolute -top-5 left-1/2 w-5 opacity-90 -translate-x-1.5" alt="">
-            <h2 class="font-bold">{{ title }}</h2>
-            <button
-                v-for="(sort, index) in options"
-                @click.stop="emit('pickedOption', index); emit('close')"
-                class="block p-1 w-full text-white bg-white bg-opacity-10 rounded-md button focus-visible:!outline focus-visible:!outline-current">{{
-                    sort }}</button>
-        </div>
+    <Transition name="fade" >
+        <Teleport to="body">
+            <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
+                <div
+                class="flex flex-col w-40 bg-opacity-90 rounded-md bg-lof-100" id="tooltip">
+                    <div data-popper-arrow class="bg-lof-100 -z-10" id="arrow" alt=""></div>    
+                    <button
+                            v-for="(sort, index) in options"
+                            @click.stop="emit('pickedOption', index); emit('close')"
+                            class="pl-8 block text-left p-1 text-white hover:bg-lof-300 transition-colors duration-75 rounded-md m-1 focus-visible:!outline focus-visible:!outline-current">{{
+                                sort }}</button>
+                    </div>
+            </div>
+        </Teleport>
     </Transition>
 </template>
+
+<style>
+#arrow,
+#arrow::before {@apply absolute w-4 h-4 bg-inherit -translate-y-2}
+
+#arrow {@apply invisible}
+
+#arrow::before {@apply visible content-[''] rotate-45;}
+
+#tooltip[data-popper-placement^='top'] > #arrow {@apply -bottom-4; }
+#tooltip[data-popper-placement^='bottom'] > #arrow {@apply -top-4; }
+#tooltip[data-popper-placement^='left'] > #arrow {@apply -right-4; }
+#tooltip[data-popper-placement^='right'] > #arrow {@apply -left-4; }
+</style>

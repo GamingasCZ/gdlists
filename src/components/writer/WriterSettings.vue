@@ -4,30 +4,26 @@ import ColorPicker from '../global/ColorPicker.vue';
 import { reviewData } from '@/Reviews';
 import { ref } from 'vue';
 import { inject } from 'vue';
-import axios from 'axios';
-import router from '@/router';
 
 const bgColorPickerOpen = ref(false)
 const openDialogs = inject("openedDialogs")
+const pre = import.meta.env.VITE_USERCONTENT
+const uid = JSON.parse(localStorage.getItem("account_info"))[1]
+
+const emit = defineEmits<{
+  (e: "upload"): void
+}>()
 
 defineProps<{
   uploading: boolean
 }>()
-
-const uploadList = () => {
-  axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
-    sessionStorage.setItem("uploadFinished", "1")
-    // todo: add error checking
-    router.replace(`/review/${res.data[0]}`)
-  })
-}
 
 </script>
 
 <template>
     <div v-if="uploading" class="flex justify-between items-center p-2 mx-2 mb-2 bg-black bg-opacity-40 rounded-md">
       <span class="text-xl">{{ $t('reviews.settingsOk') }}</span>
-      <button @click="uploadList"class="flex gap-2 items-center px-2 py-1 rounded-md button bg-lof-400">
+      <button @click="emit('upload')" class="flex gap-2 items-center px-2 py-1 rounded-md button bg-lof-400">
         <img src="@/images/upload.svg" alt="" class="w-7">
         <span class="text-xl font-bold text-black">{{ $t('editor.upload') }}</span>
       </button>
@@ -96,19 +92,39 @@ const uploadList = () => {
         </div>
       </div>
 
-      <div class="p-2 mt-8 bg-black bg-opacity-40 rounded-md">
+      <div class="p-2 mt-8 bg-black bg-opacity-40 bg-center rounded-md bg-blend-darken" :style="{backgroundImage: `url(${pre}/userContent/${uid}/${reviewData.thumbnail}.webp)`}">
+        <div class="flex justify-between items-center w-full">
+          <div>
+            <p class="text-xl leading-none">{{ $t('reviews.thumbnail') }}</p>
+            <p class="text-sm opacity-40">Tento obrázek se zobrazí v prohlížeči recenzí</p>
+          </div>
+          <div class="flex gap-2">
+            <button @click="openDialogs.imagePicker = [true, -2]" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+              <img src="@/images/copy.svg" class="w-6" alt="">
+              <span>{{ reviewData.thumbnail ? $t('other.modify') : $t('other.pick') }}</span>
+            </button>
+            <button v-show="reviewData.thumbnail.length" @click="reviewData.thumbnail = ''" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+              <img src="@/images/trash.svg" class="w-6" alt="">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="p-2 mt-2 bg-black bg-opacity-40 bg-center rounded-md bg-blend-darken" :style="{backgroundImage: `url(${reviewData.titleImg[0]})`}">
         <div class="flex justify-between w-full">
           <span class="text-xl">{{ $t('reviews.bgImage') }}</span>
           <div class="flex gap-2">
             <button @click="openDialogs.imagePicker = [true, -1]" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/copy.svg" class="w-6" alt="">
-              <span>{{ $t('other.pick') }}</span>
+              <span>{{ reviewData.titleImg[0] ? $t('other.modify') : $t('other.pick') }}</span>
             </button>
             <button @click="openDialogs.bgPicker = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/gear.svg" class="w-6" alt="">
             </button>
             <button @click="openDialogs.bgPreview = !openDialogs.bgPreview" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img :class="{'opacity-20': !openDialogs.bgPreview}" src="@/images/view.svg" class="w-6 transition-opacity" alt="">
+            </button>
+            <button @click="reviewData.titleImg[0] = ''" v-show="reviewData.titleImg[0] != ''" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+              <img src="@/images/trash.svg" class="w-6" alt="">
             </button>
           </div>
         </div>
@@ -129,6 +145,19 @@ const uploadList = () => {
         <Transition name="fade">
           <ColorPicker v-if="bgColorPickerOpen" class="mt-4" @colors-modified="reviewData.pageBGcolor = modifyListBG($event, false, true)" :hue="reviewData.pageBGcolor[0]" :saturation="0.36" :lightness="reviewData.pageBGcolor[2]" />
         </Transition>
+      </div>
+      <div class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
+        <div class="flex justify-between w-full">
+          <span class="text-xl">{{ $t('reviews.font') }}</span>
+          <select v-model="reviewData.font" name="" id="" class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40">
+            <option :value="0">Poppins</option>
+            <option :value="1">Serif</option>
+            <option :value="2">Sans-Serif</option>
+            <option :value="3">Monospace</option>
+            <option :value="4">Systémové</option>
+            <option :value="5">Pusab</option>
+          </select>
+        </div>
       </div>
 
       <div class="p-2 mt-8 bg-black bg-opacity-40 rounded-md">

@@ -78,8 +78,10 @@ const modifyCreator = (e: Event | string) => {
   let newCreator = typeof e == 'string' ? e : (e.currentTarget as HTMLInputElement).value
   if (typeof props.levelArray.levels[props.index!].creator == 'string')
     props.levelArray.levels[props.index!].creator = newCreator
-  else
+  else {
+    if (isOldCollab.value) return
     props.levelArray.levels[props.index!].creator[0][0].name = newCreator
+  }
   levelCreator.value = newCreator
 }
 
@@ -331,8 +333,8 @@ const switchPlatformer = () => {
       <!-- Creator input -->
       <div class="flex gap-2 max-sm:flex-row-reverse max-sm:w-full">
         <input autocomplete="off"
-          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text" name="creator" maxlength="15" :value="levelCreator" @change="modifyCreator"
+          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full disabled:opacity-20"
+          type="text" name="creator" maxlength="15" :disabled="isOldCollab" :value="levelCreator" @change="modifyCreator"
           :placeholder="$t('level.creator')" @keyup.enter="searchLevel(false)"/>
         <button class="relative bg-black bg-opacity-30 rounded-md focus-within:!outline-current button"
           @click="openCollabTools()"

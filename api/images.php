@@ -65,7 +65,7 @@ switch ($method) {
         
         // Image data
         $imageHash = sha1($DATA);
-        if (is_file($userPath . "/" . $imageHash . ".webp")) die(-3); // No duplicate files
+        if (is_file($userPath . "/" . $imageHash . ".webp")) die("-3"); // No duplicate files
 
         // Create image
         $img = imagecreatefromstring($DATA);
@@ -73,24 +73,26 @@ switch ($method) {
         imagesavealpha($img, true);
         
         // Save image
-        imagewebp($img, $userPath . "/" . $imageHash . ".webp", 80);
+        imagewebp($img, $userPath . "/" . $imageHash . ".webp", 50);
+        $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
         
         // Create thumbnail
         $thumbnail = imagescale($img, 128);
         imagesavealpha($thumbnail, true);
-        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 60);
+        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 40);
         
+
         // Free images
         imagedestroy($img);
         imagedestroy($thumbnail);
 
-        doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$user["id"], $imageHash, $filesize], "ssi");
+        doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$user["id"], $imageHash, $compressedFilesize], "ssi");
 
         break;
 
     case 'DELETE':
         $hash = substr($_GET["hash"], 0, 40);
-        if (!ctype_alnum($hash)) die(-3); // check if the user is a hackerman
+        if (!ctype_alnum($hash)) die("-3"); // check if the user is a hackerman
 
         if (is_file($userPath . "/" . $hash . ".webp")) {
             // Remove files
@@ -102,11 +104,11 @@ switch ($method) {
             
             die(getStorage($user["id"]));
         }
-        else die(-3);
+        else die("-3");
         break;
     
     default:
-        die(-1);
+        die("-1");
         break;
 }
 

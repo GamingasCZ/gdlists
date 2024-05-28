@@ -352,7 +352,7 @@ const listActions = (action: string) => {
       if (props.isReview)
         router.push(`/edit/review/${LIST_DATA.value?.id!}`)
       else
-        router.push(`/edit/list/${!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!}`)
+        router.push(`/edit/list/${LIST_DATA.value?.id!}`)
       break;
     case "mobileExtras":
       mobileExtrasOpen.value = true
@@ -418,6 +418,8 @@ const saveCollab = (ind: number) => {
 
 provide("settingsTitles", CONTAINERS)
 provide("saveCollab", saveCollab)
+
+const collabViewerColor = ref("")
 
 </script>
 
@@ -520,8 +522,8 @@ provide("saveCollab", saveCollab)
         <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />
       </Teleport>
 
-      <DialogVue :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
-        <CollabViewer v-bind="collabData" :translucent="LIST_DATA?.data.translucent!" @close-popup="collabData.collabData = null"/>
+      <DialogVue :custom-color="collabViewerColor" :width="dialog.xl" :title="collabData.levelName" :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
+        <CollabViewer @custom-color="collabViewerColor = $event" v-bind="collabData" :translucent="LIST_DATA?.data.translucent!"/>
       </DialogVue>
 
       <!-- List -->

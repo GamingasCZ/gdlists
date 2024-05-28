@@ -12,6 +12,7 @@ import Notification from "./Notification.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
+import { dialog } from "../ui/sizes";
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -19,6 +20,11 @@ const storageInUse = computed(() => (storage.value.left / storage.value.storageM
 const pre = import.meta.env.VITE_USERCONTENT
 const imageInput = ref<HTMLInputElement>()
 const fileDrag = ref(false)
+
+const props = defineProps<{
+    unselectable: boolean
+    disableExternal?: boolean
+}>()
 
 const emit = defineEmits<{
     (e: "pickImage", url: string): void
@@ -63,7 +69,9 @@ const startRemoval = (index: number) => {
 const removeImage = (hash: string, external: boolean) => {
     if (!external) {
         loadingImages.value = true
+        uploadingImage.value = 2
         axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash } }).then(res => {
+            uploadingImage.value = 0
             if (res.data == "-3") return notify(5)
             
             storage.value = res.data
@@ -71,7 +79,13 @@ const removeImage = (hash: string, external: boolean) => {
             loadingImages.value = false
             setImgCache(images.value)
             setStorageCache(storage.value)
+            previewImage.value = -1
+        }).catch(() => {
+            loadingImages.value = false
+            uploadingImage.value = 0
+            notify(5)
         })
+        
         removeConfirmationOpen.value = -1
     }
     else {
@@ -80,8 +94,9 @@ const removeImage = (hash: string, external: boolean) => {
     }
 }
 
+const uploadingImage = ref(0)
 const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
-    if (loadingImages.value) return
+    if (loadingImages.value || uploadingImage.value) return
 
     let file
     if (!fileList)
@@ -95,6 +110,7 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
 
     else {
         let data = await file?.arrayBuffer()
+        uploadingImage.value = true
         axios({
             method: 'post',
             url: import.meta.env.VITE_API + "/images.php",
@@ -102,9 +118,11 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         }).then(res => {
+            uploadingImage.value = 0
             if (res.data == -5) notify(7) // Bad format
+            if (res.data == -3) notify(4) // Already uploaded
             else refreshContent()
-        })
+        }).catch(() => uploadingImage.value = 0)
     }
 }
 
@@ -141,6 +159,23 @@ const uploadExternalImage = async (link: string) => {
     }, 10);
 }
 
+const previewImage = ref(-1)
+const pickImage = (index: number, external: boolean) => {
+    if (props.unselectable) {
+        previewImage.value = index
+        return
+    }
+    else {
+        if (props.disableExternal)
+            emit('pickImage', images.value[index])
+        else {
+            if (external) emit('pickImage', externaImages.value[index])
+            else emit('pickImage', `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`)
+        }
+        emit('closePopup')
+    }
+}
+
 const refreshContent = () => {
     loadingImages.value = true
     axios.get(import.meta.env.VITE_API + "/images.php").then(res => {
@@ -156,7 +191,7 @@ const downloadImage = (hash: string, external: boolean) => {
     if (external) navigator.clipboard.writeText(hash)
     else {
         let link = document.createElement("a")
-        link.href = `${pre}/userContent/${storage.value.uid}/${hash}-thumb.webp`
+        link.href = `${pre}/userContent/${storage.value.uid}/${hash}.webp`
         link.click()
         link.remove()
     }
@@ -217,11 +252,24 @@ onBeforeUnmount(() => {
     document.removeEventListener("keydown", modShift)
     document.removeEventListener("keyup", modShift)
 })
+
+const button = ref()
 </script>
 
 <template>
     <div class="flex gap-10 justify-between mx-2 mb-2">
         <Notification :content="notifContent" :title="$t('other.error')" icon="error" :stamp="notifStamp" />
+
+        <Dialog :title="$t('other.preview')" :width="dialog.large" :open="previewImage >= 0" @close-popup="previewImage = -1">
+            <div class="flex relative flex-col gap-2 items-center p-2 w-full bg-black bg-opacity-40">
+                <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="absolute inset-0 w-full max-w-full h-full text-center text-white rounded-md opacity-50 mix-blend-overlay blur-lg pointer-events-none">
+                <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="w-max pointer-events-none isolate max-w-full text-white max-h-[80vh] text-center rounded-md">
+                <div class="grid grid-cols-2 gap-2 w-full">
+                    <button @click="imageAction(0, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/trash.svg">Smazat</button>
+                    <button @click="imageAction(1, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/copy.svg">Stáhnout</button>
+                </div>
+            </div>
+        </Dialog>
 
         <!-- Remove confirmation -->
         <Dialog :title="$t('other.removal')" @close-popup="removeConfirmationOpen = -1" :open="removeConfirmationOpen > -1">
@@ -246,8 +294,8 @@ onBeforeUnmount(() => {
         </form>
 
 
-        <button v-else @click="imageInput?.click()"
-            class="flex gap-2 items-center p-1 px-2 bg-black bg-opacity-40 rounded-md button">
+        <button v-else @click="imageInput?.click()" :disabled="uploadingImage"
+            class="flex gap-2 items-center p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button">
             <img src="@/images/copy.svg" alt="" class="w-6">
             <span>{{ $t('editor.uploadFile') }}</span>
         </button>
@@ -263,7 +311,7 @@ onBeforeUnmount(() => {
             </div>
         </div>
     </div>
-    <TabBar :tab-names="[$t('homepage.uploaded'), $t('other.external')]" @switched-tab="currentTab = $event" />
+    <TabBar :tab-names="[$t('homepage.uploaded')].concat(disableExternal ? [] : [$t('other.external')])" @switched-tab="currentTab = $event" />
     <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
         @dragexit="fileDrag = false" @submit.prevent=""
         class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
@@ -271,39 +319,40 @@ onBeforeUnmount(() => {
             class="absolute w-full h-full opacity-0 pointer-events-none">
 
         <!-- Images -->
-        <div class="flex flex-wrap gap-4 justify-evenly m-4" v-show="currentTab == 0">
+        <div class="flex flex-wrap gap-4 justify-evenly m-4" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
             <button v-for="(image, index) in images"
-                @click="emit('pickImage', `${pre}/userContent/${storage.uid}/${image}.webp`); emit('closePopup')"
+                @click="pickImage(index, false)"
                 @auxclick="startRemoval(index)"
                 @mouseover="imageHovering = index"
                 @mouseout="imageHovering = -1"
                 class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
-                :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false }">
+                :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false,  }">
                 <!-- Image settings -->
-                <button v-show="imageOptsShown == index || imageHovering == index" @click.stop="imageOptsShown = index; dropdown[0].open()"
+                <button ref="button" v-show="imageOptsShown == index || imageHovering == index" @click.stop="imageOptsShown = index"
                     class="absolute top-1 right-1 z-20 w-5 bg-white rounded-full duration-75">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown @close="imageOptsShown = -1" @picked-option="imageAction($event, false, index)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Stáhnout']" :title="'Možnosti'" />
+                    <Dropdown :button="button[index]" @close="imageOptsShown = -1" @picked-option="imageAction($event, false, index)" v-if="imageOptsShown == index" :options="[$t('editor.remove'), $t('other.download')]" :title="$t('other.options')" />
                 </button>
                 
                 <img :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
-                    class="object-cover z-10 w-full h-full transition-transform hover:scale-125 aspect-auto">
+                    class="object-cover z-10 w-full h-full transition-transform aspect-auto" :class="{'hover:scale-125': !unselectable}">
             </button>
         </div>
 
         <!-- Images -->
         <div class="flex flex-wrap gap-4 justify-evenly m-4" v-show="currentTab == 1">
-            <button v-for="(image, index) in externaImages" @click="emit('pickImage', image); emit('closePopup')"
+            <button v-for="(image, index) in externaImages"
+                @click="pickImage(index, true)"
                 @auxclick="removeImage(externaImages[index], true)"
                 class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer group shadow-drop hover:scale-125 min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
                 :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false }">
                 <!-- Image settings -->
-                <button @click.stop=""
+                <button ref="button" @click.stop=""
                     class="absolute top-1 right-1 z-20 w-5 overflow-clip bg-white rounded-full opacity-0 transition-opacity duration-75 button group-hover:opacity-100">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown @close="imageOptsShown = -1" @picked-option="imageAction($event, image, false)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Odkaz']" :title="'Možnosti'" />
+                    <Dropdown  @close="imageOptsShown = -1" @picked-option="imageAction($event, image, false)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Odkaz']" :title="'Možnosti'" />
                 </button>
 
                 <img :src="image" alt="" class="object-cover z-10 w-full h-full aspect-auto">
@@ -317,15 +366,15 @@ onBeforeUnmount(() => {
                 <img src="@/images/loading.webp" class="mb-2 w-32 animate-spin" alt="">
                 <h2 class="text-xl">{{ $t('other.loading') }}...</h2>
             </div>
-            <div v-else-if="currentTab == 0 && !fileDrag" class="w-max">
-                <img src="@/images/collabDudes.svg" class="mb-2 w-96" alt="">
+            <div v-else-if="currentTab == 0 && !fileDrag" class="flex flex-col items-center w-max">
+                <img src="@/images/image.svg" class="mb-2 w-48" alt="">
                 <h2 class="text-xl">{{ $t('other.uploadHelp1') }}</h2>
                 <p>{{ $t('other.uploadHelp2') }}</p>
                 <p>{{ $t('other.maxFilesize', [toMB(storage.maxUploadSize)]) }}</p>
                 <p>{{ $t('other.formats') }}: .jpg, .png, .webp</p>
             </div>
-            <div v-else-if="currentTab == 0 && fileDrag" class="w-max">
-                <img src="@/images/collabDudes.svg" class="mb-2 w-96" alt="">
+            <div v-else-if="currentTab == 0 && fileDrag" class="pt-2 pr-8 pb-4 pl-4 w-max bg-black rounded-xl animate-pulse">
+                <img src="@/images/dropfile.svg" class="mb-2 w-64" alt="">
                 <h2 class="text-xl">{{ $t('other.uploadHelp5') }}</h2>
             </div>
             <div v-else class="w-max">
@@ -335,5 +384,29 @@ onBeforeUnmount(() => {
                 <p>{{ $t('other.uploadHelp8') }}</p>
             </div>
         </div>
+
+        <Transition name="fade">
+            <div v-show="uploadingImage" class="sticky bottom-0 w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
+                <div class="absolute bottom-0 w-full text-3xl text-center">
+                    <h2 class="opacity-60">{{ uploadingImage == 2 ? $t('other.removing') : $t('other.uploading') }}...</h2>
+                    <div :class="{'invert': uploadingImage == 2}" class="relative mt-3 h-2 overflow-clip rounded-b-md border-none bg-lof-400">
+                        <div id="barAnim" class="absolute w-32 h-full bg-white blur-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </form>
 </template>
+
+<style>
+
+@keyframes slide {
+    from {left: -40px;}
+    to {left: calc(100% + 40px);}
+}
+
+#barAnim {
+    @apply animate-[slide_1s_infinite]
+}
+
+</style>

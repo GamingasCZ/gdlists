@@ -12,12 +12,8 @@ const BASE_URL = import.meta.env.BASE_URL
 
 const actions = [
 	[
-		["bold", useI18n().t('reviews.bold'), ""],
-		["cursive", useI18n().t('reviews.italics'), ""],
-		["underline", useI18n().t('reviews.underline'), ""],
-		["strike", useI18n().t('reviews.strike'), ""],
-		["color", useI18n().t('reviews.textcolor'), ""],
-		["link", useI18n().t('other.link'), ""]
+		["md", useI18n().t('reviews.bold'), ""],
+		["view", useI18n().t('reviews.bold'), ""],
 	],
 	[
 		["heading1", useI18n().t('reviews.title', ['1'])],

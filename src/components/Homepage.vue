@@ -3,7 +3,7 @@ import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
@@ -22,6 +22,14 @@ const returnfromLoginName = ref<string>("");
 
 const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.value.homepageColumns) : '1fr')
 
+onMounted(() => {
+  let get = new URLSearchParams(location.search)
+  if (get.has("loginerr")) {
+    let errorToast = document.getElementById("loginErrorToast");
+    errorToast?.classList.add("popout");
+  }
+})
+
 watch(props, () => {
   let loginCookie = cookier("logindata").get();
   if (props.isLoggedIn && loginCookie != null) {
@@ -34,11 +42,7 @@ watch(props, () => {
     firstTimeUser.value = loginCookie[3];
     if (!firstTimeUser.value) {
       let loginToast = document.getElementById("loginToast");
-      loginToast?.classList.remove("-translate-y-16");
-      setTimeout(() => {
-        loginToast?.classList.add("-translate-y-16");
-        setTimeout(() => loginToast?.remove(), 500);
-      }, 2500);
+      loginToast?.classList.add("popout");
     }
 
     returnfromLoginPFP.value = `https://cdn.discordapp.com/avatars/${loginCookie[1]}/${loginCookie[2]}.png`;
@@ -57,8 +61,14 @@ const localStorg = ref(hasLocalStorage())
   </DialogVue>
   
   <div id="loginToast" v-if="!firstTimeUser && localStorg"
-    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-16">
+    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
     {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!
+  </div>
+
+  <div id="loginErrorToast" v-if="!firstTimeUser && localStorg"
+    class="flex absolute top-16 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
+    <img src="@/images/warn.svg" alt="" class="w-8">
+    <span class="text-white">{{ $t('homepage.loginFail') }}</span>
   </div>
 
   <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
@@ -94,8 +104,8 @@ const localStorg = ref(hasLocalStorage())
       class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
-        <p class="max-sm:text-xs">{{ $t("homepage.welcomeToGDL") }}</p>
-        <p class="max-md:hidden">{{ $t("homepage.connectDiscord") }}</p>
+        <p class="text-xl font-bold leading-tight max-sm:text-xs">{{ $t("homepage.welcomeToGDL") }}</p>
+        <p class="mr-4 text-sm max-md:hidden">{{ $t("homepage.connectDiscord") }}</p>
       </div>
       <LoginButton class="ml-auto" />
     </div>
@@ -131,3 +141,16 @@ const localStorg = ref(hasLocalStorage())
       content-type="oldLists" />
   </main>
 </template>
+
+<style>
+@keyframes slideTop {
+  0% {@apply -translate-y-24}
+  5% {@apply translate-y-0}
+  95% {@apply translate-y-0}
+  100% {@apply -translate-y-24}
+}
+
+.popout {
+  animation: slideTop 5s ease forwards;
+}
+</style>

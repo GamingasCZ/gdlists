@@ -18,7 +18,7 @@ const props = defineProps<{
     editor?: boolean
 }>()
 
-const emit = defineEmits(['closePopup'])
+const emit = defineEmits(['customColor'])
 
 const colorLeft = chroma.hsl(props.levelColor?.[0], 0.906, 0.167, props.translucent ? 0.5 : 1).hex()
 const colorRight = chroma.hsl(props.levelColor?.[0], 0.231, 0.102, props.translucent ? 0.5 : 1).hex()
@@ -39,31 +39,17 @@ if (hasLStorage) {
 var roleCount = Array(props.collabData[1].length).fill(0)
 props.collabData[2].forEach(h => roleCount[h.role] += 1)
 const visibleRoles = computed(() => props.collabData[1].filter((_, i) => !props.collabData?.[4]?.[i] ?? true))
+
+emit('customColor', `linear-gradient(9deg, ${colorRight}, ${colorLeft})`)
 </script>
 
 <template>
-  <section
-    @click.stop=""
-    :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
-    :class="{'backdrop-blur-sm': translucent}"
-    class=" w-[70rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-1 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[50rem]"
-  >
-    <div class="flex relative justify-between items-center mx-1.5 mt-0.5 mb-1 -translate-y-0.5">
-      <button v-if="!editor && levelID != -1 && collabData[3]" class="flex gap-3 px-2 py-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-30" @click="collabSaved = !collabSaved; saveCollab(index)" :disabled="!hasLStorage">
+      <button v-if="!editor && levelID != -1 && collabData[3]" class="flex absolute top-1 left-1 z-50 gap-3 px-2 py-1 w-max bg-black bg-opacity-40 rounded-md button disabled:opacity-30" @click="collabSaved = !collabSaved; saveCollab(index)" :disabled="!hasLStorage">
         <img v-if="!collabSaved" src="@/images/savedMobHeader.svg" class="w-6" alt="">
         <img v-else src="@/images/trash.svg" class="w-6" alt="">
         <span class="max-sm:hidden">{{ collabSaved ? $t('collabTools.removeSaved') : $t('other.save') }}</span>
       </button>
       <div v-else></div>
-
-      <h1 class="absolute left-1/2 text-2xl font-extrabold text-center -translate-x-1/2">{{ levelName || $t('other.unnamesd') }}</h1>
-      <img
-        src="@/images/close.svg"
-        alt=""
-        class="w-6 button"
-        @click="emit('closePopup')"
-      />
-    </div>
     <!-- Graphs --> 
     <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]" v-if="visibleRoles.length">
       <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="(role, ind) in visibleRoles" />
@@ -83,5 +69,4 @@ const visibleRoles = computed(() => props.collabData[1].filter((_, i) => !props.
     <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-auto justify-start content-start">
         <component :is="gridView ? CollabViewerMember : CollabViewerMemberRow" v-for="(member, ind) in collabData[2].toSorted((a,b) => collabData?.[4]?.[a.role] < collabData?.[4]?.[b.role])" :hidden-role="collabData?.[4]?.[member.role]" :index="ind" :role-count="roleCount" :human="member" :role-name="collabData[1][member.role]"/>
     </div>
-  </section>
 </template>

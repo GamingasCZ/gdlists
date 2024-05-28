@@ -183,7 +183,10 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
   let listError: object | undefined
   levelList.value.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name.length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name) {
+      if (typeof level.creator[0][0] == 'string') return // Old collabs
+      listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    }
     if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
     i++
   })

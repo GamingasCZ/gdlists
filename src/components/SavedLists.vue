@@ -6,6 +6,7 @@ import FavoritePreview from "./global/FavoritePreview.vue";
 import DialogVue from "./global/Dialog.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import type { SavedCollab } from "@/interfaces";
+import { dialog } from "./ui/sizes";
 
 const browser = ref<'' | 'collabs'>('')
 
@@ -26,11 +27,13 @@ const openCollabTools = (collab: SavedCollab) => {
 }
 provide("openCollabTools", openCollabTools)
 
+const customColor = ref("")
+
 </script>
 
 <template>
-  <DialogVue :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
-    <CollabViewer :editor="true" :translucent="false" v-bind="collabData" @close-popup="collabData.collabData = null" />
+  <DialogVue :title="collabData.levelName" :custom-color="customColor" :width="dialog.xl" :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
+    <CollabViewer @custom-color="customColor = $event" :editor="true" :translucent="false" v-bind="collabData" />
   </DialogVue>
   <section>
     <ListBrowser :component="browser == 'collabs' ? SavedCollabVue : FavoritePreview" :online-browser="false" :online-type="browser" @switch-browser="browser = $event" :browser-name="$t('other.savedLevels')" />

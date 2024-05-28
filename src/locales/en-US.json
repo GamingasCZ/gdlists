@@ -73,9 +73,9 @@
     "error": "Uh-oh!",
     "nameShort": "List name is too short!",
     "emptyListSend": "You're trying to post an empty list lmao :D.",
-    "invalidID": "The  {0}. level has an invalid level ID!",
-    "noCreatorAt": "The {0}. level is missing its creator!",
-    "noNameAt": "The {0}. level is missing a level name!",
+    "invalidID": "Level {0} has an invalid level ID!",
+    "noCreatorAt": "Level {0} is missing its creator!",
+    "noNameAt": "Level {0} is missing a level name!",
     "overLimit": "Your list is too big. \nYou'll have to remove some levels or collabs. \nYou are {0}% over the limit.",
     "maxLevels": "You cannot add more levels!",
     "collabTools": "Collab Tools",
@@ -126,7 +126,8 @@
     "welcomeToGDL": "Welcome to GD Lists!",
     "cookies1": "You have cookies disabled!",
     "cookies2": "You won't be able to login, only browse.",
-    "writeReview": "Write a review"
+    "writeReview": "Write a review",
+    "loginFail": "Login failed! Try again later."
   },
   "level": {
     "comments": "Comments",
@@ -318,7 +319,12 @@
     "lists": "Lists",
     "reviews": "Reviews",
     "level": "Level",
-    "visible": "Visible"
+    "visible": "Visible",
+    "gallery": "Gallery",
+    "download": "Download",
+    "uploading": "Nahrávání",
+    "removing": "Removing",
+    "modify": "Change"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -481,7 +487,7 @@
     "italics": "Italics",
     "strike": "Strikethrough",
     "textcolor": "Text Color",
-    "title": "Title",
+    "title": "Title {0}",
     "showLevel": "Display Level",
     "underline": "Underline",
     "aCenter": "Center",
@@ -503,6 +509,10 @@
     "readerMode": "Readability Mode",
     "start": "Start Writing!",
     "readerModeHelp": "Increases font size, line height and limits characters per line",
-    "checkable": "Checklist"
+    "checkable": "Checklist",
+    "setVideo": "Click to set a video.",
+    "loadVideoFail": "Failed to load the video!",
+    "paragraph": "Paragraph",
+    "thumbnail": "Review Thumbnail"
   }
 }

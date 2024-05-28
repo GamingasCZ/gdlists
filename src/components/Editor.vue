@@ -473,11 +473,10 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     v-if="isLoggedIn && listExists && listBelongsToYou"
   >
     <div
-      class="grid grid-cols-2 grid-rows-2 grid-flow-col gap-x-3 place-items-center p-2 w-full"
+      class="flex flex-col gap-3 place-items-center p-2 w-full"
     >
     
       <!-- List name -->
-      <div class="flex gap-2">
         <input
           autocomplete="off"
           type="text"
@@ -486,9 +485,35 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
           :disabled="editing"
           v-model="listName"
           :placeholder="$t('editor.levelName')"
-          class="h-8 w-[77vw] max-w-[20em] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg disabled:bg-opacity-0 disabled:cursor-not-allowed"
+          class="h-8 w-[35rem] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg disabled:bg-opacity-0 disabled:cursor-not-allowed disabled:border-white disabled:border-2 disabled:border-opacity-10"
         />
-        <div class="w-8"></div>
+
+        <!-- List description -->
+      <div class="flex min-h-10 relative row-span-3 gap-2 items-start w-[35rem] h-full group" @click="descriptionFocused = true">
+        <textarea
+          autocomplete="off"
+          type="text"
+          id="description"
+          maxlength="3000"
+          vue:updated="$el.focus()"
+          rows="3"
+          :placeholder="$t('editor.listDescription')"
+          class="px-2 h-full bg-white bg-opacity-5 rounded-md resize-none grow placeholder:text-lg"
+          v-model="levelList.description"
+          @blur="descriptionFocused = false"
+          v-if="descriptionFocused || !levelList.description"
+        ></textarea>
+        <div v-else
+        class="overflow-auto overflow-y-auto px-2 h-full max-h-96 bg-white bg-opacity-5 rounded-md min-h-[72px] regularParsing grow"
+        v-html="parseText(levelList.description)"
+        ></div>
+        <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-black bg-opacity-50 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
+          <img
+            class="w-8"
+            src="../images/fullscreen.svg"
+            alt=""
+          />
+        </button>
       </div>
 
       <div class="flex justify-around w-full">
@@ -521,33 +546,6 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
             </button>
           <span>{{ $t('other.bg') }}</span>
         </div>
-      </div>
-
-      <!-- List description -->
-      <div class="flex relative row-span-3 gap-2 items-start w-full h-full group" @click="descriptionFocused = true">
-        <textarea
-          autocomplete="off"
-          type="text"
-          id="description"
-          maxlength="3000"
-          vue:updated="$el.focus()"
-          :placeholder="$t('editor.listDescription')"
-          class="px-2 h-full bg-white bg-opacity-5 rounded-md resize-none grow placeholder:text-lg"
-          v-model="levelList.description"
-          @blur="descriptionFocused = false"
-          v-if="descriptionFocused"
-        ></textarea>
-        <div v-else
-        class="overflow-auto px-2 h-full bg-white bg-opacity-5 rounded-md grow"
-        v-html="parseText(levelList.description)"
-        ></div>
-        <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-black bg-opacity-50 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
-          <img
-            class="w-8"
-            src="../images/fullscreen.svg"
-            alt=""
-          />
-        </button>
       </div>
 
     </div>

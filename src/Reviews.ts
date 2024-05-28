@@ -1,7 +1,6 @@
 import { ref } from "vue"
 import { DEFAULT_LEVELLIST } from "./Editor"
 import type { ReviewList, ReviewRating } from "./interfaces"
-import { useI18n } from "vue-i18n"
 import { i18n } from "./locales"
 
 export const DEFAULT_RATINGS = ref<ReviewRating[]>([
@@ -29,6 +28,7 @@ export const DEFAULT_RATINGS = ref<ReviewRating[]>([
 
 export const REVIEW_EXTRAS: ReviewList = {
     reviewName: "",
+    thumbnail: "",
     tagline: "",
     containers: [],
     ratings: [],
@@ -39,7 +39,8 @@ export const REVIEW_EXTRAS: ReviewList = {
     transparentPage: 0,
     language: 0,
     whitePage: false,
-    readerMode: false
+    readerMode: false,
+    font: 0
 }
 
 export const DEFAULT_REVIEWDATA = () => ({...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS})
@@ -84,4 +85,9 @@ export function parseReviewContainers(containers: object[]) {
         }
     });
     return main
+}
+
+export const pickFont = (ind: number) => {
+    let fonts = ['Poppins', 'serif', 'sans-serif', 'monospace', 'system-ui', 'Pusab']
+    return fonts[ind]
 }

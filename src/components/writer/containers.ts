@@ -1,4 +1,3 @@
-import DataContainer from "./DataContainer.vue"
 import ReviewImage from "./ReviewImage.vue"
 import ReviewLevel from "./ReviewLevel.vue"
 import ReviewVideo from "./ReviewVideo.vue"
@@ -10,28 +9,28 @@ import { i18n } from "@/locales"
 
 const containers: Containers = {
     default: {
-        placeholder: "Odstavec",
+        placeholder: i18n.global.t('reviews.paragraph'),
         styling: "my-2",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading1: {
-        placeholder: "Nadpis 1",
+        placeholder: i18n.global.t('reviews.title', [1]),
         styling: "text-3xl leading-10",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
-        placeholder: "Nadpis 2",
+        placeholder: i18n.global.t('reviews.title', [2]),
         styling: "text-2xl leading-8",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
-        placeholder: "Nadpis 3",
+        placeholder: i18n.global.t('reviews.title', [3]),
         styling: "texl-xl leading-6",
         nestable: true,
         canEditText: true,
@@ -138,6 +137,12 @@ const containers: Containers = {
         canEditText: false,
         additionalComponents: [ReviewVideo],
         settings: [
+            {
+                key: "width",
+                title: "",
+                type: [-1],
+                default: 320
+            },
             {
                 key: "url",
                 title: i18n.global.t('reviews.ytLink'),

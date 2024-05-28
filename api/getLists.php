@@ -19,7 +19,7 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
-$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url";
+$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url, thumbnail, tagline";
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;
@@ -38,7 +38,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       $ind += 1;
     }
 
-    $query = sprintf("SELECT DISTINCT username,discord_id
+    $query = sprintf("SELECT DISTINCT username,discord_id,avatar_hash
                       FROM users
                       WHERE discord_id IN ('%s')", join("','", array_unique($uid_array)));
     $dbInfo["maxPage"] = $maxpage;
@@ -68,7 +68,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);                  
 
     // Fetch ratings
-    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"]);
+    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);
   }
   
   $users;
@@ -150,6 +150,13 @@ if (count($_GET) == 1) {
     }
   }
 
+  // Split ratings if neccessary
+  $ratings;
+  if ($ŧype == 'lists')
+    $ratings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
+  else
+    $ratings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
+
   // User/Private objects
   if (isset($_GET["user"])) {
     if (!getAuthorization()) die();
@@ -171,13 +178,13 @@ if (count($_GET) == 1) {
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
-  $query = sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio FROM ratings
+  $query = sprintf("SELECT %s, %s FROM ratings
     RIGHT JOIN %s ON %s.id = ratings.%s_id
     WHERE %s %s.id<=%d AND `name` LIKE '%%%s%%' %s
     GROUP BY `name`
     ORDER BY hidden DESC, id DESC
     LIMIT %s
-    OFFSET %s", $range, $type, $type, substr($type, 0, -1), $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+    OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
 
   $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $type, $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
   $maxpage = ceil($maxpageQuery->fetch_array()[0] / clamp(intval($_GET["fetchAmount"]), 2, 15));

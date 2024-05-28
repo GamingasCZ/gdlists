@@ -296,7 +296,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           </button>
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             :class="{ 'bg-lof-300': onlineType == 'reviews' }" @click="emit('switchBrowser', 'reviews')">
-            Recenze
+            {{ $t('reviews.review') }}
           </button>
         </header>
         <!-- Search box -->
@@ -318,7 +318,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             $t('other.refresh') }}</label>
         </button>
       </header>
-      <main class="flex flex-col gap-3 items-center mt-4">
+      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid grid-cols-3': onlineSubtype == 'reviews'}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">

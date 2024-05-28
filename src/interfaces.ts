@@ -140,6 +140,7 @@ interface HumanSocialLink {
 export interface ListCreatorInfo {
   username: string;
   discord_id: string;
+  avatar_hash: string;
 }
 
 export interface LevelBackup {
@@ -222,6 +223,7 @@ export interface ytSearchDetails {
 
 export interface ReviewList {
   reviewName: string
+  thumbnail: string
   tagline: string
   containers: object[] 
   ratings: ReviewRating[]
@@ -233,6 +235,7 @@ export interface ReviewList {
   language: number
   whitePage: boolean
   readerMode: boolean
+  font: number
 }
 
 export interface ReviewRating {
