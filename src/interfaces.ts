@@ -9,6 +9,15 @@ export interface ListPreview {
   isPinned?: boolean
 }
 
+export interface ReviewDetailsResponse {
+  reviewID: string
+  level_count: string
+  gameplay: string
+  decoration: string
+  difficulty: string
+  overall: string
+}
+
 export interface ListFetchResponse {
   name: string;
   creator: string;
@@ -169,13 +178,14 @@ export interface Level {
   color: [number, number, number];
   tags: LevelTag[];
   platf: boolean;
+  ratings?: [number[], number[]]
 }
 
 export interface ListBackground {
   0: string
   1: number
   2: number
-  3: number
+  3: 0 | 1 | 2
   4: boolean
 }
 
@@ -223,7 +233,7 @@ export interface ytSearchDetails {
 
 export interface ReviewList {
   reviewName: string
-  thumbnail: string
+  thumbnail: ListBackground
   tagline: string
   containers: object[] 
   ratings: ReviewRating[]

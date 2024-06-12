@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview, SavedCollab } from "@/interfaces";
+import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
@@ -53,6 +53,7 @@ const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
 const USERS = ref<ListCreatorInfo[]>([]);
 const LISTS = ref<ListPreview[]>([]);
+const REVIEW_DETAILS = ref<ReviewDetailsResponse[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
@@ -173,7 +174,8 @@ function refreshBrowser() {
       else
         emit("refreshedBrowser", LISTS.value.length)
       loading.value = false
-      USERS.value?.push(...res.data[1]);
+      USERS.value = res.data[1];
+      REVIEW_DETAILS.value = res.data[4]
       loadFailed.value = false;
     })
     .catch(e => {
@@ -277,10 +279,12 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             {{ $t('homepage.newest') }}
           </button>
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+            v-show="onlineSubtype != 'levels'"
             :class="{ 'bg-lof-300': onlineType == 'user' }" @click="emit('switchBrowser', 'user')">
             {{ $t('other.myLists', [onlineSubtype == 'lists' ? $t('other.lists') : $t('other.reviews')]) }}
           </button>
           <button class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
+            v-show="onlineSubtype != 'levels'"
             :class="{ 'bg-lof-300': onlineType == 'hidden' }" @click="emit('switchBrowser', 'hidden')">
             <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
           </button>
@@ -390,8 +394,8 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
         </div>
 
         <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index"
-          :is-pinned="false" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
+          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove
+          :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         <!-- Page Switcher -->
         <div class="flex gap-2 items-center mt-2" v-if="maxPages > 1">

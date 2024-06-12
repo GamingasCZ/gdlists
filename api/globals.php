@@ -224,12 +224,12 @@ function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) 
     $ratingArray = [0, 0, false];
     if ($splitRatings) {
         $likeQuery = doRequest($mysqli, sprintf("SELECT sum(rate = 1) as likes, sum(rate = 0) as dislikes FROM ratings WHERE %s=?", $type), [$object_id], "s");
-        $ratingArray[0] = $likeQuery["likes"];
+        $ratingArray[0] = intval($likeQuery["likes"]);
         $ratingArray[1] = $likeQuery["dislikes"];
     }
     else {
         $likeQuery = doRequest($mysqli, sprintf("SELECT count(id) as total, sum(rate) as likes FROM ratings WHERE %s=?", $type), [$object_id], "s");
-        $ratingArray[0] = $likeQuery["likes"];
+        $ratingArray[0] = intval($likeQuery["likes"]);
         $ratingArray[1] = $likeQuery["total"]-$likeQuery["likes"];
     }
 
@@ -244,9 +244,11 @@ function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) 
     return $ratingArray;
 }
 
-function addLevelsToDatabase($mysqli, $levels, $listID, $userID) {
+function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
     foreach ($levels as $l) {
-        $hash = substr(md5(json_encode($l)), 0, 8);
+        $hash = $l["levelID"];
+        if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 100000000) continue;
+
         $isCollab = is_array($l["creator"]);
         $creator;
         if (!$isCollab) $creator = $l["creator"];
@@ -257,26 +259,31 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID) {
                 $creator = $l["creator"][0][0];
         }
 
-        try {
-            doRequest($mysqli, "
-    INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, color, video, platformer, uploaderID, listID, hash)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        $res = doRequest($mysqli, "
+        INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, uploaderID, hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ",
+            [
+                $l["levelName"],
+                $creator,
+                $isCollab ? sizeof($l["creator"][2]) : 0,
+                $l["levelID"],
+                isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
+                isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
+                isset($l["platf"]) ? $l["platf"] : false,
+                $userID,
+                $hash
+            ], "ssiiiiiss");
+
+        // Add list/review connections
+        doRequest($mysqli, sprintf("
+    INSERT INTO `levels_uploaders` (levelID, %s)
+    VALUES (?, ?)
+            ", $isReview ? "reviewID" : "listID"),
         [
-            $l["levelName"],
-            $creator,
-            $isCollab ? sizeof($l["creator"][2]) : 0,
             $l["levelID"],
-            isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
-            isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
-            json_encode($l["color"]),
-            $l["video"] ? $l["video"] : null,
-            isset($l["platf"]) ? $l["platf"] : false,
-            $userID,
             $listID,
-            $hash
-        ], "ssiiiissiiis");
-        } catch (mysqli_sql_exception $err) {}
+        ], "ii");
         }
     }
 

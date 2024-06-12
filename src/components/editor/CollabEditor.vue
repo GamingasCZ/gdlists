@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { levelList, creatorToCollab, makeColor } from '@/Editor';
 import chroma from 'chroma-js';
-import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, watch } from 'vue';
+import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, useAttrs, watch } from 'vue';
 import type { CollabData, CollabHumans, SavedCollab } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import SavedCollabVue from './SavedCollab.vue';
@@ -64,6 +64,12 @@ const allLastUsedRoles = ref([...pinnedLastUsedRoles.value ?? [], ...lastUsedRol
 watch(props, () => {
   colorLeft.value = chroma.hsl(levelColor?.[0], 0.906, 0.167).hex()
   colorRight.value = chroma.hsl(levelColor?.[0], 0.231, 0.102).hex()
+})
+
+const background = computed(() => `linear-gradient(9deg, ${colorRight.value}, ${colorLeft.value})`)
+
+defineExpose({
+  background
 })
 
 /*
@@ -137,7 +143,10 @@ function changeRole(levelIndex: number) {
   nextTick(() => (document.querySelector(".roleBubble") as HTMLButtonElement).focus())
 }
 
+let parent = getCurrentInstance()?.parent?.subTree.el
 function openSidebar(which: number) {
+  console.log(parent)
+  parent.style.transform = "translateX(-10.5rem)"
   if (pickingRole.value > -1) return
   if (which == 0) {
     roleSidebarOpen.value = !roleSidebarOpen.value
@@ -147,6 +156,7 @@ function openSidebar(which: number) {
     savedSidebarOpen.value = !savedSidebarOpen.value
     roleSidebarOpen.value = false
   }
+  if (!savedSidebarOpen.value && !roleSidebarOpen.value) parent.style.transform = ""
 }
 
 const invisibleRole = (pos: number) => {
@@ -599,160 +609,165 @@ onUnmounted(() => {
       </main>
     </section>
   
-    <aside @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
-      class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black max-sm:w-full"
-      v-show="roleSidebarOpen || pickingRole > -1" v-if="(typeof collab != 'string')">
-  
-      <!-- Role header -->
-      <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
-        <button :title="$t('collabTools.hideSidebarTitle')" @click="roleSidebarOpen = false" class="button">
-          <img src="@/images/hideSidebar.svg" alt="" class="w-6" />
-        </button>
-        <h1 class="text-xl font-black text-center">{{ $t('collabTools.roles') }}</h1>
-        <div class="flex gap-1">
-          <button :title="$t('collabTools.presetsTitle')"
-            class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
-            :disabled="rolePresets.filter(x => !collab[1].includes(x)).length == 0" @click="openPresetsDropdown()">
-            <img src="@/images/moveDown.svg" alt="" class="box-border p-2 w-8" />
+    <Transition name="fadeSlide">
+      <aside @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
+        class=" w-[20rem] absolute top-0 -right-[21rem] bottom-0 max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black max-sm:w-full"
+        v-show="roleSidebarOpen || pickingRole > -1" v-if="(typeof collab != 'string')">
+    
+        <!-- Role header -->
+        <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
+          <button :title="$t('collabTools.hideSidebarTitle')" @click="roleSidebarOpen = false" class="button">
+            <img src="@/images/hideSidebar.svg" alt="" class="w-6" />
           </button>
-        </div>
-      </header>
-      <main
-        class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 relative overflow-y-auto overflow-x-clip"
-        :class="{ 'h-[21.75rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1 }">
-  
-        <!-- Presets and role help -->
-        <Transition name="fade">
-          <article v-if="presetDropdownOpen"
-            class="flex absolute right-2 top-6 z-40 flex-col gap-1 justify-center items-center p-1 w-40 bg-black bg-opacity-90 rounded-md backdrop-blur-sm">
-            <img src="@/images/popupArr.svg" class="absolute right-1.5 -top-5 w-5 opacity-90" alt="">
-            <p class="text-lg font-bold">{{ $t('collabTools.examples') }}</p>
-            <button v-for="preset in rolePresets.filter(x => !collab[1].includes(x[0]))" @click="addRole(preset)"
-              class="w-full text-white bg-white bg-opacity-10 rounded-md button">
-              {{ preset[0] }}
-            </button>
-          </article>
-        </Transition>
-  
-        <!-- Role bubble -->
-        <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]"
-          class="flex p-1 h-9 text-white rounded-md transition-colors roleBubble items-middle shadow-drop focus-visible:!outline focus-visible:!outline-current"
-          :style="{ backgroundColor: roleColors[pos] }" :class="{ 'button': pickingRole > -1 }">
-          <input :disabled="pickingRole > -1" :class="{ 'pointer-events-none': pickingRole > -1 }" type="text"
-            v-model="levelList.levels[index].creator[1][pos]" :placeholder="$t('collabTools.roleName')"
-            class="px-1 mr-2 h-full bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
+          <h1 class="text-xl font-black text-center">{{ $t('collabTools.roles') }}</h1>
           <div class="flex gap-1">
-            <button :title="$t('collabTools.hideTitle')"
-              class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button"
-              @click="invisibleRole(pos)"><img src="@/images/view.svg" :class="{ 'opacity-20': collab?.[4]?.[pos] }"
-                alt=""></button>
-            <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1 || collab[1].length == 1"
-              class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm group button"
-              @click="(collab as CollabData)[1].splice(pos, 1); (collab as CollabData)[4].splice(pos, 1); makeRoleColors()"><img
-                class="group-disabled:opacity-20" src="@/images/trash.svg" alt=""></button>
+            <button :title="$t('collabTools.presetsTitle')"
+              class="bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
+              :disabled="rolePresets.filter(x => !collab[1].includes(x)).length == 0" @click="openPresetsDropdown()">
+              <img src="@/images/moveDown.svg" alt="" class="box-border p-2 w-8" />
+            </button>
           </div>
-        </button>
-  
-        <!-- Add button-->
-        <button class="flex gap-2 justify-center items-center bg-black bg-opacity-40 rounded-md opacity-70 button"
-          v-if="pickingRole == -1" @click="addRole()">
-          <img src="@/images/plus.svg" alt="" class="box-border p-1 w-8" />{{ $t('collabTools.addRole') }}
-        </button>
-      </main>
-  
-      <section v-if="localStrg && pickingRole == -1">
-        <!-- Recently used header -->
-        <header class="flex justify-between items-center bg-[url(@/images/headerBG.webp)] bg-top p-1">
-          <h2 class="w-full text-xl font-black text-center max-sm:hidden">{{ $t('collabTools.recentlyUsed') }}</h2>
         </header>
-  
-        <!-- Recently used content -->
         <main
-          class="h-52 overflow-x-clip bg-[url(@/images/fade.webp)] bg-repeat-x overflow-y-auto flex flex-col gap-2 py-2">
-  
-          <!-- History empty help -->
-          <article class="flex flex-col gap-4 justify-center items-center h-full opacity-20"
-            v-if="!allLastUsedRoles.length">
-            <img src="@/images/time.svg" class="w-28" alt="">
-            <h2 class="w-52 text-lg leading-tight text-center">{{ $t('collabTools.recentRolesHere') }}</h2>
-          </article>
-  
-          <!-- Last used roles buttons -->
-          <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md shadow-drop"
-            :style="{ backgroundColor: colorLeft }" @click="addRole(role)" v-for="role in allLastUsedRoles
-          ">
-            <span class="ml-1 w-full">{{ role }}</span>
-            <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="pinRole(role)"><img src="@/images/pin.svg"
-                alt="" class="box-border p-1 w-7" :class="{ 'opacity-30': !pinnedLastUsedRoles?.includes(role) }"></button>
-            <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="removeLastUsedRole(role)"><img
-                src="@/images/trash.svg" alt="" class="box-border p-1 w-7"></button>
+          class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 relative overflow-y-auto overflow-x-clip"
+          :class="{ 'h-[21.75rem]': pickingRole == -1, 'h-[37rem]': pickingRole > -1 }">
+    
+          <!-- Presets and role help -->
+          <Transition name="fade">
+            <article v-if="presetDropdownOpen"
+              class="flex absolute right-2 top-6 z-40 flex-col gap-1 justify-center items-center p-1 w-40 bg-black bg-opacity-90 rounded-md backdrop-blur-sm">
+              <img src="@/images/popupArr.svg" class="absolute right-1.5 -top-5 w-5 opacity-90" alt="">
+              <p class="text-lg font-bold">{{ $t('collabTools.examples') }}</p>
+              <button v-for="preset in rolePresets.filter(x => !collab[1].includes(x[0]))" @click="addRole(preset)"
+                class="w-full text-white bg-white bg-opacity-10 rounded-md button">
+                {{ preset[0] }}
+              </button>
+            </article>
+          </Transition>
+    
+          <!-- Role bubble -->
+          <button @click="pickRole(pickingRole, pos)" v-for="(role, pos) in collab[1]"
+            class="flex p-1 h-9 text-white rounded-md transition-colors roleBubble items-middle shadow-drop focus-visible:!outline focus-visible:!outline-current"
+            :style="{ backgroundColor: roleColors[pos] }" :class="{ 'button': pickingRole > -1 }">
+            <input :disabled="pickingRole > -1" :class="{ 'pointer-events-none': pickingRole > -1 }" type="text"
+              v-model="levelList.levels[index].creator[1][pos]" :placeholder="$t('collabTools.roleName')"
+              class="px-1 mr-2 h-full bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
+            <div class="flex gap-1">
+              <button :title="$t('collabTools.hideTitle')"
+                class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button"
+                @click="invisibleRole(pos)"><img src="@/images/view.svg" :class="{ 'opacity-20': collab?.[4]?.[pos] }"
+                  alt=""></button>
+              <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1 || collab[1].length == 1"
+                class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm group button"
+                @click="(collab as CollabData)[1].splice(pos, 1); (collab as CollabData)[4].splice(pos, 1); makeRoleColors()"><img
+                  class="group-disabled:opacity-20" src="@/images/trash.svg" alt=""></button>
+            </div>
           </button>
-  
+    
+          <!-- Add button-->
+          <button class="flex gap-2 justify-center items-center bg-black bg-opacity-40 rounded-md opacity-70 button"
+            v-if="pickingRole == -1" @click="addRole()">
+            <img src="@/images/plus.svg" alt="" class="box-border p-1 w-8" />{{ $t('collabTools.addRole') }}
+          </button>
         </main>
-      </section>
-    </aside>
-    <aside @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
-      class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black max-sm:w-full" v-show="savedSidebarOpen">
-  
-      <!-- Saved collabs header -->
-      <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
-        <button @click="savedSidebarOpen = false" class="button">
-          <img src="@/images/hideSidebar.svg" alt="" class="w-6" />
-        </button>
-        <h1 class="text-xl font-black text-center">{{ $t('navbar.saved') }}</h1>
-        <div></div>
-      </header>
-      <main
-        class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[37rem]">
-        <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
-          :disabled="(typeof collab == 'string')" @click="saveCollab()">
-          <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
-          {{ $t('collabTools.saveCollab') }}
-        </button>
-  
-        <article v-if="!savedCollabs?.length"
-          class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
-          <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
-          {{ $t('collabTools.savedHelp') }}
-        </article>
-  
-        <!-- Currently editing -->
-        <div v-if="currentlyUsedSaved != -1" class="mb-4">
-          <header class="flex gap-3 items-center mt-3 mb-1 opacity-80">
-            <hr class="w-4 h-1 bg-white border-none">
-            <h2 class="text-xl">{{ $t('collabTools.beingEdited') }}</h2>
-            <hr class="h-1 bg-white border-none grow">
+    
+        <section v-if="localStrg && pickingRole == -1">
+          <!-- Recently used header -->
+          <header class="flex justify-between items-center bg-[url(@/images/headerBG.webp)] bg-top p-1">
+            <h2 class="w-full text-xl font-black text-center max-sm:hidden">{{ $t('collabTools.recentlyUsed') }}</h2>
           </header>
-          <SavedCollabVue :on-saves-page="false" :save="savedCollabs![currentlyUsedSaved]" :coll-index="currentlyUsedSaved"
-            :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
-        </div>
-  
-        <!-- Same ID -->
-        <!-- <div v-if="currentlyUsedSaved != -1">
-          <header class="flex gap-3 items-center mb-1 opacity-80">
-            <button @click="savedWithSameIDCollapsed = !savedWithSameIDCollapsed"><img src="@/images/showComms.svg" class="p-0.5 w-4 bg-white bg-opacity-20 rounded-full aspect-square" :class="{'rotate-90': !savedWithSameIDCollapsed}"></button>
-            <h2 class="text-xl">Se stejným ID</h2>
-            <hr class="h-1 bg-white border-none grow">
-          </header>
-          <div v-if="!savedWithSameIDCollapsed" class="flex flex-col gap-2">
-            <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" @change-name="modifySaveName" @load-collab="loadCollab" @remove-collab="removeCollab" />
+    
+          <!-- Recently used content -->
+          <main
+            class="h-52 overflow-x-clip bg-[url(@/images/fade.webp)] bg-repeat-x overflow-y-auto flex flex-col gap-2 py-2">
+    
+            <!-- History empty help -->
+            <article class="flex flex-col gap-4 justify-center items-center h-full opacity-20"
+              v-if="!allLastUsedRoles.length">
+              <img src="@/images/time.svg" class="w-28" alt="">
+              <h2 class="w-52 text-lg leading-tight text-center">{{ $t('collabTools.recentRolesHere') }}</h2>
+            </article>
+    
+            <!-- Last used roles buttons -->
+            <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md shadow-drop"
+              :style="{ backgroundColor: colorLeft }" @click="addRole(role)" v-for="role in allLastUsedRoles
+            ">
+              <span class="ml-1 w-full">{{ role }}</span>
+              <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="pinRole(role)"><img src="@/images/pin.svg"
+                  alt="" class="box-border p-1 w-7" :class="{ 'opacity-30': !pinnedLastUsedRoles?.includes(role) }"></button>
+              <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="removeLastUsedRole(role)"><img
+                  src="@/images/trash.svg" alt="" class="box-border p-1 w-7"></button>
+            </button>
+    
+          </main>
+        </section>
+      </aside>
+    </Transition>
+    
+    <Transition name="fadeSlide">
+      <aside @click.stop="" :style="{ background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})` }"
+        class=" w-[20rem] absolute -right-[21rem] top-0 bottom-0 max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black max-sm:w-full" v-show="savedSidebarOpen">
+    
+        <!-- Saved collabs header -->
+        <header class="relative mx-2 bg-[url(@/images/headerBG.webp)] py-2 flex justify-between h-12 items-center">
+          <button @click="savedSidebarOpen = false" class="button">
+            <img src="@/images/hideSidebar.svg" alt="" class="w-6" />
+          </button>
+          <h1 class="text-xl font-black text-center">{{ $t('navbar.saved') }}</h1>
+          <div></div>
+        </header>
+        <main
+          class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[37rem]">
+          <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
+            :disabled="(typeof collab == 'string')" @click="saveCollab()">
+            <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
+            {{ $t('collabTools.saveCollab') }}
+          </button>
+    
+          <article v-if="!savedCollabs?.length"
+            class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
+            <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
+            {{ $t('collabTools.savedHelp') }}
+          </article>
+    
+          <!-- Currently editing -->
+          <div v-if="currentlyUsedSaved != -1" class="mb-4">
+            <header class="flex gap-3 items-center mt-3 mb-1 opacity-80">
+              <hr class="w-4 h-1 bg-white border-none">
+              <h2 class="text-xl">{{ $t('collabTools.beingEdited') }}</h2>
+              <hr class="h-1 bg-white border-none grow">
+            </header>
+            <SavedCollabVue :on-saves-page="false" :save="savedCollabs![currentlyUsedSaved]" :coll-index="currentlyUsedSaved"
+              :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
           </div>
-        </div> -->
-  
-        <!-- All collabs -->
-        <div>
-          <header class="flex gap-3 items-center mt-3 mb-1 opacity-80" v-if="savedCollabs?.length">
-            <hr class="w-4 h-1 bg-white border-none">
-            <h2 class="text-xl">{{ $t('collabTools.allCollabs') }}</h2>
-            <hr class="h-1 bg-white border-none grow">
-          </header>
-          <div class="flex flex-col gap-2">
-            <SavedCollabVue v-for="(save, index) in savedCollabs" :save="save" :collIndex="index"
-              :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
-              @load-collab="loadCollab" @remove-collab="removeCollab" />
+    
+          <!-- Same ID -->
+          <!-- <div v-if="currentlyUsedSaved != -1">
+            <header class="flex gap-3 items-center mb-1 opacity-80">
+              <button @click="savedWithSameIDCollapsed = !savedWithSameIDCollapsed"><img src="@/images/showComms.svg" class="p-0.5 w-4 bg-white bg-opacity-20 rounded-full aspect-square" :class="{'rotate-90': !savedWithSameIDCollapsed}"></button>
+              <h2 class="text-xl">Se stejným ID</h2>
+              <hr class="h-1 bg-white border-none grow">
+            </header>
+            <div v-if="!savedWithSameIDCollapsed" class="flex flex-col gap-2">
+              <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" @change-name="modifySaveName" @load-collab="loadCollab" @remove-collab="removeCollab" />
+            </div>
+          </div> -->
+    
+          <!-- All collabs -->
+          <div>
+            <header class="flex gap-3 items-center mt-3 mb-1 opacity-80" v-if="savedCollabs?.length">
+              <hr class="w-4 h-1 bg-white border-none">
+              <h2 class="text-xl">{{ $t('collabTools.allCollabs') }}</h2>
+              <hr class="h-1 bg-white border-none grow">
+            </header>
+            <div class="flex flex-col gap-2">
+              <SavedCollabVue v-for="(save, index) in savedCollabs" :save="save" :collIndex="index"
+                :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
+                @load-collab="loadCollab" @remove-collab="removeCollab" />
+            </div>
           </div>
-        </div>
-      </main>
-    </aside>
+        </main>
+      </aside>
+    </Transition>
   </section>
 </template>

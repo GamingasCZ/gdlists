@@ -73,6 +73,7 @@ const removeImage = (hash: string, external: boolean) => {
         axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash } }).then(res => {
             uploadingImage.value = 0
             if (res.data == "-3") return notify(5)
+            if (res.data == "-5") return notify(9)
             
             storage.value = res.data
             images.value.splice(images.value.indexOf(hash), 1)
@@ -133,16 +134,18 @@ const uploadExternalImage = async (link: string) => {
     setTimeout(async () => {
         const load = new Promise((res, err) => {
             let img = document.createElement("img")
-            img.src = extImgInput.value
+            img.src = link
             img.onload = () => res(true)
             img.onerror = () => err("Image not found :D")
             img.remove()
         })
+        
         await load.catch((err) => {
             notify(0)
             loadingImages.value = false
             return err;
         })
+        
         await load.then(() => {
             if (externaImages.value.includes(extImgInput.value)) {
                 emit("pickImage", extImgInput.value)
@@ -225,7 +228,8 @@ const errorMessages = [
     useI18n().t('other.deleteFail'),
     useI18n().t('other.loginFuckup'),
     useI18n().t('other.unsupportedFormat'),
-    useI18n().t('other.clipboardEmpty')
+    useI18n().t('other.clipboardEmpty'),
+    useI18n().t('other.imgInUse'),
 ]
 const notifStamp = ref(-1)
 const notifContent = ref("")
@@ -289,7 +293,7 @@ const button = ref()
 
         <!-- External image input -->
         <form v-if="currentTab == 1" action="." @submit.prevent="uploadExternalImage($event.target[0].value)" class="w-full">
-            <input :placeholder="$t('other.enterURI')" :disabled="loadingImages" v-model="extImgInput" @paste="uploadExternalImage($event.target.value)"
+            <input :placeholder="$t('other.enterURI')" :disabled="loadingImages" @change="uploadExternalImage($event.target.value)" @paste="uploadExternalImage($event.target.value)"
                 class="p-1 pl-8 w-full bg-white bg-opacity-20 rounded-md transition-opacity disabled:opacity-40">
         </form>
 
@@ -297,7 +301,7 @@ const button = ref()
         <button v-else @click="imageInput?.click()" :disabled="uploadingImage"
             class="flex gap-2 items-center p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button">
             <img src="@/images/copy.svg" alt="" class="w-6">
-            <span>{{ $t('editor.uploadFile') }}</span>
+            <span class="max-sm:hidden">{{ $t('editor.uploadFile') }}</span>
         </button>
 
         <!-- Storage left -->
@@ -336,7 +340,7 @@ const button = ref()
                 </button>
                 
                 <img :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
-                    class="object-cover z-10 w-full h-full transition-transform aspect-auto" :class="{'hover:scale-125': !unselectable}">
+                    class="object-cover z-10 w-full h-full transition-transform pointer-events-none aspect-auto" :class="{'hover:scale-125': !unselectable}">
             </button>
         </div>
 

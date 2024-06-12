@@ -149,7 +149,11 @@
     "idlistHelp": "Vlož ID levelů. Mohou být odděleny čímkoliv, až na čísla.",
     "tables": "Z tabulek",
     "tablesHelp": "Importuj tabulku ve formátu .csv. CSV soubor lze exportovat ve všech tabulkových procesorech.",
-    "uploadFile": "Nahrát soubor"
+    "uploadFile": "Nahrát soubor",
+    "mdHelp": "... Můžeš použít Markdown",
+    "listItems": "Odrážky",
+    "citations": "Citování",
+    "startHelp": "Jak bys rád začal?"
   },
   "other": {
     "lockQuotes": [
@@ -193,7 +197,7 @@
     "shareOn": "Sdílet na",
     "preview": "Náhled",
     "searchInHelp": "Hledat v nápovědě",
-    "welcomeToGDL": "Vítej v GD Seznamech,",
+    "welcomeToGDL": "Vítej,",
     "greatFeatures": "Teď můžeš vytvářet seznamy, likovat a komentovat!",
     "ok": "Ok!",
     "options": "Možnosti",
@@ -270,7 +274,18 @@
     "download": "Stáhnout",
     "uploading": "Nahrávání",
     "removing": "Mazání",
-    "modify": "Změnit"
+    "modify": "Změnit",
+    "imgInUse": "Obrázek se někde používá, nelze smazat.",
+    "left": "Vlevo",
+    "center": "Uprostřed",
+    "right": "Vpravo",
+    "positioningHelp": "Umístění, když je obrázek širší než obrazovka",
+    "dissolveHelp": "Splyne obrázek s pozadím",
+    "picture": "Obrázek",
+    "color": "Barva",
+    "moveUp": "Posunout výš",
+    "moveDown": "Posunout níž",
+    "levels": "{n} level | {n} levely | {n} levelů"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -522,7 +537,19 @@
     "loadVideoFail": "Nepodařilo se načíst video!",
     "setVideo": "Kliknutím nastav video.",
     "font": "Písmo recenze",
-    "thumbnail": "Náhled recenze"
+    "thumbnail": "Náhled recenze",
+    "ratingName": "Název hodnocení",
+    "moreFeaturesHelp1": "Můžeš hodnotit víc vlastností levelu!",
+    "moreFeaturesHelp2": "Jen základní se ale počítají do statistik.",
+    "levelNo": "{0}. level nemá {1}!",
+    "theming": "Theming",
+    "sync": "Sync",
+    "music": "Hudba",
+    "consistency": "Konzistence",
+    "sightreadability": "Sightreadovatelnost",
+    "originality": "Originalita",
+    "md": "Markdown zkratky",
+    "preview": "Náhled recenze"
   },
   "review": {}
 }

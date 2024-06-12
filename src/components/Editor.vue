@@ -31,6 +31,8 @@ import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
 import parseText from "./global/parseEditorFormatting";
 import { dialog } from "./ui/sizes";
+import ImageBrowser from "./global/ImageBrowser.vue";
+import { getDominantColor } from "@/Reviews";
 
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
@@ -140,6 +142,8 @@ const descriptionEditorOpen = ref(false);
 const favoriteLevelPickerOpen = ref(false);
 const removeListPopupOpen = ref(false);
 const importDialogOpen = ref(false);
+const imageBrowserOpen = ref(false);
+const previewBackground = ref(false);
 const collabEditorOpen = ref(false);
 const descriptionFocused = ref(false);
 
@@ -364,6 +368,15 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 
 }
 
+const useAccentColor = () => {
+  let img = document.createElement("img")
+  img.src = levelList.value.titleImg[0]
+  img.onload = () => {
+    levelList.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
+    img.remove()
+  }
+}
+
 </script>
 
 <template>
@@ -373,8 +386,8 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     ></TagPickerPopup>
   </DialogVue>
   
-  <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false" :title="$t('other.imageSettings')">
-    <BGImagePicker :source="levelList" />
+  <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
+    <BGImagePicker :source="levelList.titleImg" />
   </DialogVue>
 
   <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
@@ -407,6 +420,15 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     <LevelImportPopup @add-level="addLevel($event)" />
   </DialogVue>
 
+  <DialogVue :open="imageBrowserOpen" @close-popup="imageBrowserOpen = false" :title="$t('editor.titleImage')" :width="dialog.large">
+    <ImageBrowser :unselectable="false" @pick-image="levelList.titleImg[0] = $event; useAccentColor()" @close-popup="imageBrowserOpen = false" />
+  </DialogVue>
+
+  <!-- Background preview -->
+  <Transition name="fade">
+    <ListBackground v-if="previewBackground || previewingList" :image-data="levelList.titleImg" :list-color="levelList.pageBGcolor" />
+  </Transition>
+
   <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>
 
   <NotLoggedIn
@@ -422,7 +444,6 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 
   <!-- List Preview -->
   <section v-if="previewingList" class="mt-4">
-    <ListBackground :image-data="levelList.titleImg" :list-color="<any>levelList.pageBGcolor" />
     <div :class="{'!mt-16': !isOnline}" class="flex fixed top-16 sm:top-12 left-1/2 z-10 justify-center items-center px-3 py-2 w-96 max-w-[95vw] text-white bg-black bg-opacity-80 rounded-lg -translate-x-1/2">
       <h1 class="text-3xl text-center text-white">{{ $t('editor.preview') }}</h1>
       <button @click="previewingList = false" class="box-border absolute left-1 top-1/2 p-1 w-10 -translate-y-1/2 button">
@@ -473,9 +494,9 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     v-if="isLoggedIn && listExists && listBelongsToYou"
   >
     <div
-      class="flex flex-col gap-3 place-items-center p-2 w-full"
+      class="flex gap-2 justify-around p-2 w-full max-w-[55rem] max-sm:flex-col"
     >
-    
+    <div class="flex flex-col gap-2 grow">
       <!-- List name -->
         <input
           autocomplete="off"
@@ -485,29 +506,28 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
           :disabled="editing"
           v-model="listName"
           :placeholder="$t('editor.levelName')"
-          class="h-8 w-[35rem] rounded-md bg-white bg-opacity-5 px-2 placeholder:text-lg disabled:bg-opacity-0 disabled:cursor-not-allowed disabled:border-white disabled:border-2 disabled:border-opacity-10"
-        />
+          class="px-2 py-1 w-full text-2xl bg-black bg-opacity-40 rounded-md disabled:bg-opacity-0 disabled:cursor-not-allowed disabled:border-white disabled:border-2 disabled:border-opacity-10"
+          />
 
         <!-- List description -->
-      <div class="flex min-h-10 relative row-span-3 gap-2 items-start w-[35rem] h-full group" @click="descriptionFocused = true">
+      <div class="flex relative row-span-3 gap-2 items-start w-full h-full min-h-10 group" @click="descriptionFocused = true">
         <textarea
           autocomplete="off"
           type="text"
           id="description"
           maxlength="3000"
           vue:updated="$el.focus()"
-          rows="3"
           :placeholder="$t('editor.listDescription')"
-          class="px-2 h-full bg-white bg-opacity-5 rounded-md resize-none grow placeholder:text-lg"
+          class="px-2 w-full h-full bg-black bg-opacity-20 rounded-md resize-none placeholder:text-lg"
           v-model="levelList.description"
           @blur="descriptionFocused = false"
           v-if="descriptionFocused || !levelList.description"
         ></textarea>
         <div v-else
-        class="overflow-auto overflow-y-auto px-2 h-full max-h-96 bg-white bg-opacity-5 rounded-md min-h-[72px] regularParsing grow"
+        class="overflow-auto overflow-y-auto px-2 h-full max-h-96 bg-black bg-opacity-20 rounded-md min-h-[72px] regularParsing grow"
         v-html="parseText(levelList.description)"
         ></div>
-        <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-black bg-opacity-50 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
+        <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-white bg-opacity-10 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
           <img
             class="w-8"
             src="../images/fullscreen.svg"
@@ -515,44 +535,47 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
           />
         </button>
       </div>
-
-      <div class="flex justify-around w-full">
-        <div class="flex flex-col gap-2 items-center">
-            <button
-            type="button"
-              class="box-border flex justify-center items-center w-16 h-8 rounded-md border-2 border-white focus:outline focus:outline-current"
-              @click="bgColorPickerOpen = !bgColorPickerOpen"
-              :style="{background: getBGcolor()}"
-            >
-              <img src="../images/color.svg" alt="" class="w-5" />
-              <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click.stop="levelList.pageBGcolor = modifyListBG([0,0,0], true)">
-                <img src="@/images/close.svg" class="w-4" alt="">
-              </button>
-            </button>
-          <span>{{$t('editor.bgColor')}}</span>
-        </div>
-        
-        <div class="flex flex-col gap-2 items-center">
-            <button
-            type="button"
-              class="box-border flex justify-center items-center w-16 h-8 rounded-md border-2 border-white focus:outline focus:outline-current"
-              @click="bgColorPickerOpen = !bgColorPickerOpen"
-              :style="{background: getBGcolor()}"
-            >
-              <img src="../images/color.svg" alt="" class="w-5" />
-              <button v-if="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)" class="ml-1 button" @click.stop="levelList.pageBGcolor = modifyListBG([0,0,0], true)">
-                <img src="@/images/close.svg" class="w-4" alt="">
-              </button>
-            </button>
-          <span>{{ $t('other.bg') }}</span>
-        </div>
-      </div>
-
     </div>
+      <div class="flex gap-2 justify-around">
+          <div class="flex flex-col items-center p-1 px-2 w-full bg-black bg-opacity-20 rounded-md sm:w-32">
+            <img src="@/images/color.svg" class="p-1 w-12 opacity-40" alt="">
+            <span class="mb-2 text-xl">{{ $t('editor.bgColor') }}</span>
+            <div class="flex gap-1">
+              <button @click="bgColorPickerOpen = !bgColorPickerOpen" :style="{backgroundColor: getBGcolor()}" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+                <img src="@/images/pippete.svg" class="box-content p-0.5 px-2 w-4 rounded-md border-2 border-white" alt="">
+              </button>
+              <button
+                @click="levelList.pageBGcolor = modifyListBG([0,0,0], true); bgColorPickerOpen = false"
+                v-show="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)"
+                class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button"
+              >
+                <img src="@/images/trash.svg" class="w-6" alt="">
+              </button>
+            </div>
+          </div>
+          <div :style="{backgroundImage: `url(${levelList.titleImg[0]})`}" :class="{'!bg-opacity-60': levelList.titleImg[0]}" class="flex flex-col items-center p-1 w-full bg-black bg-opacity-20 bg-center bg-cover rounded-md bg-blend-overlay sm:w-48">
+            <img src="@/images/image.svg" class="p-1 w-12 opacity-40" alt="">
+            <span class="mb-2 text-xl">{{ $t('other.bg') }}</span>
+            <div class="flex gap-1">
+              <button @click="BGpickerPopupOpen = true" v-show="levelList.titleImg[0]" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+              <img src="@/images/gear.svg" class="w-6" alt="">
+              </button>
+              <button @click="imageBrowserOpen = true" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+                <img src="@/images/copy.svg" class="w-6" alt="">
+                <span>{{ levelList.titleImg[0] ? $t('other.modify') : $t('other.pick') }}</span>
+              </button>
+              <button @click="previewBackground = !previewBackground" v-show="levelList.titleImg[0]" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+                <img src="@/images/view.svg" class="w-6 opacity-100 transition-opacity duration-75" :class="{'opacity-20': !previewBackground}" alt="">
+              </button>
+            </div>
+          </div>
+        </div>
+    </div>
+
 
     <div
       v-show="bgColorPickerOpen"
-      class="px-3 py-2 my-2 w-9/12 bg-black bg-opacity-40 rounded-md"
+      class="px-3 py-2 my-2 w-full max-w-[54rem] bg-white bg-opacity-10 rounded-md"
     >
       <ColorPicker @colors-modified="levelList.pageBGcolor = modifyListBG($event, false, false)" :hue="levelList.pageBGcolor[0]" :saturation="0.36" :lightness="levelList.pageBGcolor[2]"/>
     </div>
@@ -602,12 +625,12 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
     >
       <EditorBackup v-if="levelList.levels.length == 0" :backup-data="backupData" @load-backup="loadBackup(); backupData.backupDate = '0'" @remove-backup="removeBackup(); backupData.backupDate = '0'"/>
 
-      <div v-if="!levelList.levels.length" class="mt-4">
-        <h2 class="text-xl text-center">Jak bys rád začal?</h2>
-        <div class="flex flex-col gap-2 items-center">
-          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60"><img src="../images/addLevel.svg" class="w-8" alt="">Přidat level</button>
-          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60"><img src="../images/addfromFaves.svg" class="w-8" alt="">Přidat z uložených</button>
-          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60"><img src="../images/importLevels.svg" class="w-8" alt="">Importovat z GD nebo tabulek</button>
+      <h2 class="text-xl text-center">{{ $t('editor.startHelp') }}</h2>
+      <div v-if="!levelList.levels.length" class="mt-2 mb-8 w-full mx-auto max-w-[50rem]">
+        <div class="flex gap-2 items-center max-sm:flex-col">
+          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addLevel.svg" class="w-8" alt="">Přidat level</button>
+          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addfromFaves.svg" class="w-8" alt="">Přidat z uložených</button>
+          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/importLevels.svg" class="w-8" alt="">Importovat ze hry</button>
         </div>
       </div>
 

@@ -6,16 +6,9 @@ import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
+import RatingContainer from './RatingContainer.vue'
 
-const props = defineProps<{
-  levelName: string;
-  creator: string | CollabData;
-  levelID: string | null;
-  video: string | null;
-  difficulty: [number, number];
-  color: [number, number, number] | string;
-  tags: LevelTag[];
-  platf: boolean;
+interface Extras {
   favorited: boolean | undefined;
   levelIndex: number;
   listID: string;
@@ -24,7 +17,9 @@ const props = defineProps<{
   translucentCard: boolean;
   guessingNow: boolean;
   diffGuessArray: [boolean, boolean, boolean];
-}>();
+}
+
+const props = defineProps<Level & Extras>();
 
 const emit = defineEmits<{
   (e: "error"): void;
@@ -274,6 +269,8 @@ onErrorCaptured(() => {
     </section>
 
     <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
+  
+    <RatingContainer v-if="ratings" :ratings="ratings[0]" :user-ratings="ratings[1]" />
   </section>
 </template>
 

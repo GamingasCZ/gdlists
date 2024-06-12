@@ -87,7 +87,7 @@ const focus = ref(false)
 			@paste="untagText"
 			:contenteditable="editable"
 			class="break-words outline-none regularParsing"
-			v-html="editable ? textOnce : previewText"
+			v-html="textOnce"
 			:class="childStyling || []">
 		</p>
 		<slot></slot>

@@ -20,6 +20,8 @@ switch (props.icon) {
 
 const shown = ref(false)
 watch(props, () => { // todo rozbitý když měníš jazyk
+    if (!props.content) return
+
     shown.value = true
     setTimeout(() => shown.value = false, 1500 + props.content.length * 100);
 })

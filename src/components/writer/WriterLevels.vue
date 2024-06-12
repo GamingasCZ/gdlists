@@ -4,18 +4,19 @@ import { makeColor } from "@/Editor";
 import LevelCard from "../editor/EditorCard.vue";
 import { inject, ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
-import { reviewData } from "@/Reviews";
+import { DEFAULT_RATINGS, reviewData } from "@/Reviews";
 
 const addLevel = () => {
     reviewData.value.levels.push({
-        "levelName": "",
-        "creator": "",
-        "color": makeColor(),
-        "difficulty": [0, 0],
-        "levelID": "",
-        "platf": false,
-        "tags": [],
-        "video": ""
+        levelName: "",
+        creator: "",
+        color: makeColor(),
+        difficulty: [0, 0],
+        levelID: "",
+        platf: false,
+        tags: [],
+        video: "",
+        ratings: [Array(DEFAULT_RATINGS.length).fill(-1), []]
     })
     openedCard.value = reviewData.value.levels.length - 1
 }

@@ -3,6 +3,7 @@ header('Content-type: application/json'); // Return as JSON
 require("globals.php");
 
 /* Return codes:
+-5 = image is IN USE
 -4 = invalid image
 -3 = invalid hash
 -2 = not logged in
@@ -49,7 +50,7 @@ switch ($method) {
 
         $allImages = $mysqli -> query(sprintf("SELECT `hash` FROM images WHERE `uploaderID`=%s", $user["id"]));
 
-        die(json_encode([json_decode(getStorage($user["id"])), array_merge(...$allImages -> fetch_all())]));
+        die(json_encode([json_decode(getStorage($user["id"])), array_reverse(array_merge(...$allImages -> fetch_all()))]));
         break;
 
     case 'POST':
@@ -95,12 +96,14 @@ switch ($method) {
         if (!ctype_alnum($hash)) die("-3"); // check if the user is a hackerman
 
         if (is_file($userPath . "/" . $hash . ".webp")) {
+            // Remove from database
+            $res = doRequest($mysqli, "DELETE FROM `images` WHERE `uploaderID`=? AND `hash`=?", [$user["id"], $hash], "ss");
+            if (array_key_exists("error", $res)) die('-5'); // Image is in use
+
             // Remove files
             unlink($userPath . "/" . $hash . ".webp");
             unlink($userPath . "/" . $hash . "-thumb.webp");
 
-            // Remove from database
-            doRequest($mysqli, "DELETE FROM `images` WHERE `uploaderID`=? AND `hash`=?", [$user["id"], $hash], "ss");
             
             die(getStorage($user["id"]));
         }

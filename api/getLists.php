@@ -19,23 +19,41 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
-$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url, thumbnail, tagline";
+$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url, thumbnail, tagline, thumbProps";
+$selLevelRange = "levelName, creator, collabMemberCount, levels.levelID, difficulty, rating, platformer, ifnull(listID, concat('review/', (SELECT replace(concat(name,'-',reviews.id),' ','-') FROM reviews WHERE id=reviewID))) as listID";
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;
   $ratings = [];
   $dbInfo = [];
   $uid_array = array();
+  $reviewDetails = [];
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
       die("3");
     }
-    
+
+    $allIDs = [];
     foreach ($rows as $row) {
       array_push($uid_array, $row["uid"]);
+      array_push($allIDs, $row["id"]);
 
       $ind += 1;
+    }
+
+    if ($review) {
+      $res = $mysqli -> query(sprintf("SELECT
+                              reviewID,
+                              count(reviewID) AS level_count,
+                              ifnull(avg(gameplay), 1) AS gameplay,
+                              avg(decoration) AS decoration,
+                              avg(difficulty) AS difficulty, 
+                              avg(overall) AS overall
+                              FROM levels_ratings
+                              WHERE reviewID IN (%s)
+                              GROUP BY reviewID", join(",", $allIDs)));
+      $reviewDetails = $res -> fetch_all(MYSQLI_ASSOC) or die($mysqli -> error);
     }
 
     $query = sprintf("SELECT DISTINCT username,discord_id,avatar_hash
@@ -76,7 +94,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $result = $mysqli -> query($query) or die($mysqli -> error);
     $users = $result -> fetch_all(MYSQLI_ASSOC);
   }
-  $res = array($rows, $users, $dbInfo, $ratings);
+  $res = array($rows, $users, $dbInfo, $ratings, $reviewDetails);
   echo json_encode($res);
 }
 
@@ -139,20 +157,23 @@ if (count($_GET) == 1) {
   $showHidden = "`hidden` = '0' AND";
 
   // Request type
-  $type = "lists";
+  $type;
   if (isset($_GET["type"])) {
     switch ($_GET["type"]) {
+      case 'lists':
+        $type = "lists"; break;
       case 'reviews':
-        $type = "reviews";
-        break;
+        $type = "reviews"; break;
+      case 'levels':
+        $type = "levels"; break;
       
-      default: break;
+      default: die("-2");
     }
   }
 
   // Split ratings if neccessary
   $ratings;
-  if ($ŧype == 'lists')
+  if ($type == 'lists')
     $ratings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
   else
     $ratings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
@@ -178,19 +199,33 @@ if (count($_GET) == 1) {
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
-  $query = sprintf("SELECT %s, %s FROM ratings
-    RIGHT JOIN %s ON %s.id = ratings.%s_id
-    WHERE %s %s.id<=%d AND `name` LIKE '%%%s%%' %s
-    GROUP BY `name`
-    ORDER BY hidden DESC, id DESC
-    LIMIT %s
-    OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+  // Lists/Reviews
+  $maxpageQuery;
+  if ($type != "levels") {
+    $query = sprintf("SELECT %s, %s FROM ratings
+      RIGHT JOIN %s ON %s.id = ratings.%s_id
+      WHERE %s %s.id<=%d AND `name` LIKE '%%%s%%' %s
+      GROUP BY `name`
+      ORDER BY hidden DESC, id DESC
+      LIMIT %s
+      OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $_GET["startID"], $_GET["searchQuery"], $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+    $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $type, $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
+  }
+  else {
+    $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders
+      INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
+      WHERE levels_uploaders.id<=%d AND `levelName` LIKE '%%%s%%'
+      GROUP BY levels_uploaders.levelID
+      ORDER BY levels.id DESC
+      LIMIT %s
+      OFFSET %s", $selLevelRange, $_GET["startID"], $_GET["searchQuery"], clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+    $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM levels WHERE `levelName` LIKE '%%%s%%' AND `id`<=%d", $_GET["searchQuery"], $_GET["startID"]));
+  }
 
-  $maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=%d %s", $type, $showHidden, $_GET["searchQuery"], $_GET["startID"], $addReq));
   $maxpage = ceil($maxpageQuery->fetch_array()[0] / clamp(intval($_GET["fetchAmount"]), 2, 15));
   
   $result = $mysqli->query($query);
-  parseResult($result->fetch_all(MYSQLI_ASSOC), false, $maxpage, $_GET["searchQuery"], $_GET["page"]);
+  parseResult($result->fetch_all(MYSQLI_ASSOC), false, $maxpage, $_GET["searchQuery"], $_GET["page"], $type == "reviews");
 }
 
 $mysqli->close();

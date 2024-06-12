@@ -37,7 +37,7 @@ const startScale = () => {
         else
             drag = mousePos.value[1] + mVec.value[1]
 
-        imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientHeight + drag), props.maxSize ?? document.body.clientWidth * 0.85)
+        imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientWidth + drag), props.maxSize ?? document.body.clientWidth * 0.85)
         emit("resize", imageScale.value)
     }, 20)
 }

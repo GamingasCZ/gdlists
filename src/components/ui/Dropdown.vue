@@ -6,6 +6,7 @@ import { onMounted, ref } from 'vue';
 const props = defineProps<{
     title: string
     options: string[]
+    icons?: string[]
     button: HTMLElement
 }>()
 
@@ -39,12 +40,13 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
         <Teleport to="body">
             <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
                 <div
-                class="flex flex-col w-40 bg-opacity-90 rounded-md bg-lof-100" id="tooltip">
+                class="flex flex-col bg-opacity-90 rounded-md min-w-40 bg-lof-100" id="tooltip">
                     <div data-popper-arrow class="bg-lof-100 -z-10" id="arrow" alt=""></div>    
                     <button
                             v-for="(sort, index) in options"
                             @click.stop="emit('pickedOption', index); emit('close')"
-                            class="pl-8 block text-left p-1 text-white hover:bg-lof-300 transition-colors duration-75 rounded-md m-1 focus-visible:!outline focus-visible:!outline-current">{{
+                            :style="{backgroundImage: `url(${icons?.[index] ?? ''})`, backgroundSize: '1.25rem', backgroundPosition: '5px center'}"
+                            class="pl-8 block bg-no-repeat text-left p-1 text-white hover:bg-lof-300 transition-colors duration-75 rounded-md m-1 focus-visible:!outline focus-visible:!outline-current">{{
                                 sort }}</button>
                     </div>
             </div>

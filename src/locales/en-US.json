@@ -100,7 +100,9 @@
     "uploadFile": "Upload File",
     "idlist": "From List ID",
     "tables": "From spreadsheets",
-    "importLevels": "Level Import"
+    "importLevels": "Level Import",
+    "mdHelp": "... You can use Markdown",
+    "startHelp": "How would you like to start?"
   },
   "homepage": {
     "clear": "Clear",
@@ -211,7 +213,7 @@
     "cringeAhhTextLmao": "Check out my GD list",
     "failedLoad": "Failed to load content!",
     "gdListsBy": "GD Lists",
-    "gradient": "Gradient",
+    "gradient": "Dissolve",
     "greatFeatures": "Now you can create lists, like and comment!",
     "help": "Help",
     "imageHelp": "Here, you can modify the properties of an image after picking one.",
@@ -249,7 +251,7 @@
     "sourceCod": "Source code",
     "unnamesd": "Unnamed",
     "websiteName": "GD Lists",
-    "welcomeToGDL": "Welcome to GD Lists,",
+    "welcomeToGDL": "Welcome,",
     "yes": "Yes",
     "myLists": "My {0}",
     "disconnected": "You're disconnected from the Internet!",
@@ -324,7 +326,18 @@
     "download": "Download",
     "uploading": "Nahrávání",
     "removing": "Removing",
-    "modify": "Change"
+    "modify": "Change",
+    "imgInUse": "Image is in use somewhere, it cannot be deleted.",
+    "center": "Center",
+    "left": "Left",
+    "right": "Right",
+    "positioningHelp": "Positioning on narrow screen sizes",
+    "dissolveHelp": "Gradually fades out image",
+    "levels": "{n} level | {n} levels",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "picture": "Image",
+    "color": "Color"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -513,6 +526,18 @@
     "setVideo": "Click to set a video.",
     "loadVideoFail": "Failed to load the video!",
     "paragraph": "Paragraph",
-    "thumbnail": "Review Thumbnail"
+    "thumbnail": "Review Thumbnail",
+    "font": "Review Font",
+    "ratingName": "Rating name",
+    "moreFeaturesHelp1": "You can rate more features of the levels!",
+    "moreFeaturesHelp2": "These won't be counted into global statistics for the level.",
+    "consistency": "Consistency",
+    "music": "Song",
+    "sightreadability": "Sightreadability",
+    "originality": "Originality",
+    "sync": "Sync",
+    "theming": "Theming",
+    "md": "Markdown help",
+    "preview": "Review preview"
   }
 }

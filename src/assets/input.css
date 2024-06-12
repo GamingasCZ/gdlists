@@ -84,6 +84,10 @@ input[type="radio"]:checked::after {
   @apply content-[''] absolute bg-white w-3/5 h-3/5 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
 
+select {
+  @apply px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40
+}
+
 .disabled {
   @apply opacity-20 grayscale
 }
@@ -145,7 +149,7 @@ dialog {
 
 .fadeSlide-enter-active,
 .fadeSlide-leave-active {
-  transition: opacity 0.1s ease, margin-top 0.1s ease;
+  transition: opacity 0.15s ease, margin-top 0.15s ease;
 }
 
 .fadeSlide-enter-from,
@@ -203,13 +207,17 @@ dialog {
 }
 
 /* Use when you want regular parsing */
-.regularParsing h1 { @apply ml-3 mt-2 text-2xl}
-.regularParsing h2 { @apply ml-2 mt-1 text-xl}
-.regularParsing h3 { @apply ml-1 text-lg}
+.regularParsing h1 { @apply mt-2 text-2xl}
+.regularParsing h2 { @apply mt-1 text-xl}
+.regularParsing h3 { @apply text-lg}
 .regularParsing ul { @apply list-disc list-inside}
 .regularParsing ol { @apply list-decimal list-inside}
 .regularParsing a { @apply underline}
 .regularParsing blockquote { @apply border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
-.regularParsing img { @apply max-w-48}
+.regularParsing img { @apply max-w-48 my-1}
 .regularParsing code { @apply font-mono bg-white rounded-md p-1 bg-opacity-10 w-full block font-normal}
+.regularParsing table,th,td { @apply border border-collapse p-1 border-lof-400}
+.regularParsing table { @apply m-1}
+.regularParsing hr { @apply border opacity-30 rounded-full my-2}
+.regularParsing th { @apply bg-lof-300}
 

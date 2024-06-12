@@ -2,8 +2,9 @@ import { ref } from "vue"
 import { DEFAULT_LEVELLIST } from "./Editor"
 import type { ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
+import chroma from "chroma-js"
 
-export const DEFAULT_RATINGS = ref<ReviewRating[]>([
+export const DEFAULT_RATINGS: ReviewRating[] = [
     {
         name: "Gameplay",
         rating: 5,
@@ -20,15 +21,15 @@ export const DEFAULT_RATINGS = ref<ReviewRating[]>([
         color: [180, 0.74, 0.52]
     },
     {
-        name: "Gameplay",
+        name: "Celkové",
         rating: 5,
         color: [270, 0.74, 0.52]
     },
-])
+]
 
 export const REVIEW_EXTRAS: ReviewList = {
     reviewName: "",
-    thumbnail: "",
+    thumbnail: ["", 0, 33, 1, true],
     tagline: "",
     containers: [],
     ratings: [],
@@ -49,9 +50,18 @@ export const reviewData = ref(DEFAULT_REVIEWDATA())
 
 export function checkReview() {
     const err = (err: string) => ({success: false, error: err})
+    if (!reviewData.value.containers.length) return err('Bratře, ty jsi nic nenapsal!!')
     if (reviewData.value.reviewName.length < 3) return err('Jméno recenze je moc krátké!')
     if (reviewData.value.reviewName.length > 30) return err('Jméno recenze je moc dlouhé!')
-
+    
+    let i = 0
+    reviewData.value.levels.forEach(level => {
+        i += 1
+        if (!level.levelName.length) return err(i18n.global.t('reviews.levelNo', [i, 'jméno']))
+        if (!level.creator.length) return err(i18n.global.t('reviews.levelNo', [i, 'tvůrce'])) // COLLABY TODO
+        if (!level.levelID && level.levelID?.match(/\d+/)) return err(i18n.global.t('reviews.levelNo', [i, 'ID']))
+    })
+        
     if (!reviewData.value.containers.length) return err('')
 }
 
@@ -90,4 +100,14 @@ export function parseReviewContainers(containers: object[]) {
 export const pickFont = (ind: number) => {
     let fonts = ['Poppins', 'serif', 'sans-serif', 'monospace', 'system-ui', 'Pusab']
     return fonts[ind]
+}
+
+export function getDominantColor(image: HTMLImageElement) {
+    if (!image) return chroma(0)
+
+    let canvas = new OffscreenCanvas(1,1)
+    let ctx = canvas.getContext("2d")
+    ctx?.drawImage(image, 0, 0, 1, 1)
+    let dominantColor = chroma.rgb(...ctx?.getImageData(0,0,1,1).data)
+    return dominantColor 
 }

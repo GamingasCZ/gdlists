@@ -23,6 +23,7 @@ $mysqli->set_charset("utf8mb4");
 
 // Checking request
 $DATA = json_decode(file_get_contents("php://input"), true);
+$IS_LIST = $DATA["type"] == "list";
 $decoded = json_decode($DATA["listData"], true);
 
 // Check list
@@ -32,13 +33,13 @@ $decoded = json_decode($DATA["listData"], true);
 $fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"]));
 
 // Password check
-if ($DATA["type"] == "list") {
+if ($IS_LIST) {
     $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [$fuckupData[0]], "i");
 }
 else {
     // Valid thumbnail
     
-    if (strlen($decoded["thumbnail"]) != 40) die("7");
+    if (!$decoded["thumbnail"][0] == '' && strlen($decoded["thumbnail"][0]) != 40) die("7");
     $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$fuckupData[0]], "s");
 }
 
@@ -57,13 +58,12 @@ if (!$checkUser) {
 
 $disableComments = intval($DATA["disComments"]);
 $doHide = intval($DATA["hidden"]) == 1;
+$thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
-
 $retListID = [$DATA["id"]];
 
 // Private list settings
-if ($DATA["type"] == "list") {
-
+if ($IS_LIST) {
     $hiddenID =  privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
     $hidden = $doHide ? $hiddenID : '0';
     
@@ -72,19 +72,29 @@ if ($DATA["type"] == "list") {
     
     // Return either ID or privateID
     $retListID[0] = $doHide ? $hiddenID : $listData["id"];
-    
-    // Adding levels to database
-    if ($fuckupData[3] == 0) {
-        doRequest($mysqli, "DELETE FROM `levels` WHERE `listID`=?", [$DATA["id"]], "i");
-        $levels = json_decode($DATA["listData"], true);
-        
-        // hope it's not an old list :D
-        addLevelsToDatabase($mysqli, $levels["levels"], $DATA["id"], $listData["uid"]);
-    }
 }
 else {
-    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3] == "true"), $decoded["tagline"], $disableComments, $decoded["thumbnail"], $DATA["id"]], "sisiss");
+    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3]), $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $DATA["id"]], "sisisss");
     $retListID = str_replace(' ', '-', $listData["name"]) . '-' . $listData["id"];
+}
+
+// Adding levels to database
+if ($fuckupData[3] == 0) {
+    // $object =  ? "listID" : "reviewID";
+    // doRequest($mysqli, "DELETE FROM `levels` WHERE `" . $object . "`=?", [$DATA["id"]], "i");
+    
+    // // hope it's not an old list :D
+    doRequest($mysqli, sprintf("DELETE FROM `levels_uploaders` WHERE `%s`=?", $IS_LIST ? "listID" : "reviewID"), [$DATA["id"]], "i");
+    addLevelsToDatabase($mysqli, $decoded["levels"], $DATA["id"], $listData["uid"], !$IS_LIST);
+    if (!$IS_LIST) {
+        doRequest($mysqli, "DELETE FROM `levels_ratings` WHERE `reviewID`=?", [$DATA["id"]], "i");
+        foreach ($decoded["levels"] as $level) {
+            doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
+                [$level["levelID"], $DATA["id"], $level["ratings"][0][0], $level["ratings"][0][1], $level["ratings"][0][2], $level["ratings"][0][3]],
+                "iiiiii");
+        }
+
+    }
 }
 
 echo json_encode($retListID);

@@ -35,7 +35,7 @@ const contactMenuOpen = ref<boolean>(false);
         <p class="text-[0.6rem] opacity-40">2021 - 2024 </p>
       </div>
     </div>
-    <div class="flex gap-1.5 text-xs max-sm:flex-col sm:gap-4 sm:text-sm">
+    <div class="flex gap-4 text-sm">
       <button
         class="p-1 underline rounded-md opacity-80"
         @click="helpMenuOpen = true"

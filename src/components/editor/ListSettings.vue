@@ -15,62 +15,62 @@ const modifyDiffGuesser = (ind: number) => {
 </script>
 
 <template>
-  <section class="w-80 max-w-[90vw]">
-    <h2 class="text-xl font-bold text-center">{{ $t('other.settings') }}</h2>
-    <div class="flex flex-col gap-2 px-2 py-2 bg-white bg-opacity-5 rounded-md">
-      <div>
+  <section class="w-full max-w-[40rem]">
+    <h2 class="text-2xl text-center">{{ $t('other.settings') }}</h2>
+    <div class="grid grid-cols-1 gap-2 px-2 py-2 bg-opacity-5 rounded-md sm:grid-cols-2">
+      <div class="flex justify-between py-2 pl-4 bg-black bg-opacity-20 rounded-md">
+        <label class="text-xl" for="private">{{ $t('editor.privateList') }}</label>
         <input type="checkbox" name="private" class="button" />
-        <label for="private">{{ $t('editor.privateList') }}</label>
       </div>
-      <div>
+      <div class="flex justify-between py-2 pl-4 bg-black bg-opacity-20 rounded-md">
+        <label class="text-xl" for="diffGuessing" id="diffGuess">{{ $t('editor.levelGuessing') }}</label>
         <input
             type="checkbox"
             class="button"
             v-model="levelList.diffGuesser[0]"
           />
-        <label for="diffGuessing" id="diffGuess">{{ $t('editor.levelGuessing') }}</label>
-      </div>
-      <Transition name="fade">
-        <div
-          v-show="levelList.diffGuesser[0]"
-          class="box-border flex gap-2 items-center px-3 py-2 ml-8 w-max bg-black bg-opacity-25 rounded-md"
-        >
-          <span>{{ $t('editor.guess') }}: </span>
-          <button @click="modifyDiffGuesser(1)">
-            <img
-              src="@/images/faces/4.webp"
-              alt=""
-              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
-              :class="{ disabled: !levelList.diffGuesser[1] }"
-            />
-          </button>
-          <button @click="modifyDiffGuesser(2)">
-            <img
-              src="@/images/faces/epic.webp"
-              alt=""
-              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
-              :class="{ disabled: !levelList.diffGuesser[2] }"
-            />
-          </button>
         </div>
-      </Transition>
-      <div>
+        <Transition name="fade">
+          <div
+            v-show="levelList.diffGuesser[0]"
+            class="box-border flex gap-2 items-center px-2 py-2 ml-auto w-max bg-black bg-opacity-20 rounded-md -translate-y-1"
+          >
+            <span>{{ $t('editor.guess') }}: </span>
+            <button @click="modifyDiffGuesser(1)">
+              <img
+                src="@/images/faces/4.webp"
+                alt=""
+                class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
+                :class="{ disabled: !levelList.diffGuesser[1] }"
+              />
+            </button>
+            <button @click="modifyDiffGuesser(2)">
+              <img
+                src="@/images/faces/epic.webp"
+                alt=""
+                class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
+                :class="{ disabled: !levelList.diffGuesser[2] }"
+              />
+            </button>
+          </div>
+        </Transition>
+      <div class="flex justify-between py-2 pl-4 bg-black bg-opacity-20 rounded-md">
+        <label class="text-xl" for="translucency">{{ $t('editor.translucentCards') }}</label>
         <input
           v-model="levelList.translucent"
           type="checkbox"
           name="translucency"
           class="button"
         />
-        <label for="translucency">{{ $t('editor.translucentCards') }}</label>
       </div>
-      <div>
+      <div class="flex justify-between py-2 pl-4 bg-black bg-opacity-20 rounded-md">
+        <label class="text-xl" for="translucency">{{ $t('other.disableComments') }}</label>
         <input
           v-model="levelList.disComments"
           type="checkbox"
           name="translucency"
           class="button"
         />
-        <label for="translucency">{{ $t('other.disableComments') }}</label>
       </div>
     </div>
   </section>

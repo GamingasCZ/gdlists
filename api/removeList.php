@@ -49,7 +49,7 @@ if ($DATA["type"] == "review")
   doRequest($mysqli, "DELETE FROM `reviews` WHERE `id` = ?", [$listData["id"]], "s");
 else {
   if ($DATA["hidden"] == 0) {
-    doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
+    $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
   }
   else {
     doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");

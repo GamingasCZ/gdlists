@@ -33,7 +33,7 @@ if ($len > 25000 || $len < 150) {
 
 // how did i forget about this lmao :D
 $user = checkAccount();
-if (!$user) die(json_encode([-1, 7]))
+if (!$user) die(json_encode([-1, 7]));
 
 $user_id = $user["id"];
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
@@ -80,7 +80,7 @@ else {
 
 // Adds levels to database
 if (!$DATA["hidden"]) {
-  addLevelsToDatabase($mysqli, $listCheck["levels"], $listID, $user_id);
+  addLevelsToDatabase($mysqli, $listCheck["levels"], $listID, $user_id, false);
 }
 
 $mysqli -> close();

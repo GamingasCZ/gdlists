@@ -92,7 +92,7 @@ defineProps<{
         </div>
       </div>
 
-      <div class="p-2 mt-8 bg-black bg-opacity-40 bg-center rounded-md bg-blend-darken" :style="{backgroundImage: `url(${pre}/userContent/${uid}/${reviewData.thumbnail}.webp)`}">
+      <div class="p-2 mt-8 bg-black bg-opacity-40 bg-center rounded-md bg-blend-darken" :style="{backgroundImage: `url(${pre}/userContent/${uid}/${reviewData.thumbnail[0]}.webp)`}">
         <div class="flex justify-between items-center w-full">
           <div>
             <p class="text-xl leading-none">{{ $t('reviews.thumbnail') }}</p>
@@ -101,9 +101,12 @@ defineProps<{
           <div class="flex gap-2">
             <button @click="openDialogs.imagePicker = [true, -2]" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/copy.svg" class="w-6" alt="">
-              <span>{{ reviewData.thumbnail ? $t('other.modify') : $t('other.pick') }}</span>
+              <span>{{ reviewData?.thumbnail[0] ? $t('other.modify') : $t('other.pick') }}</span>
             </button>
-            <button v-show="reviewData.thumbnail.length" @click="reviewData.thumbnail = ''" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+            <button @click="openDialogs.bgPicker[1] = 0; openDialogs.bgPicker[0] = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+              <img src="@/images/gear.svg" class="w-6" alt="">
+            </button>
+            <button v-show="reviewData?.thumbnail[0]" @click="reviewData.thumbnail[0] = ''" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/trash.svg" class="w-6" alt="">
             </button>
           </div>
@@ -117,7 +120,7 @@ defineProps<{
               <img src="@/images/copy.svg" class="w-6" alt="">
               <span>{{ reviewData.titleImg[0] ? $t('other.modify') : $t('other.pick') }}</span>
             </button>
-            <button @click="openDialogs.bgPicker = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+            <button @click="openDialogs.bgPicker[1] = 1; openDialogs.bgPicker[0] = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/gear.svg" class="w-6" alt="">
             </button>
             <button @click="openDialogs.bgPreview = !openDialogs.bgPreview" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">

@@ -12,6 +12,7 @@ const props = defineProps<{
   headerDisabled?: boolean
   topMost?: boolean
   customColor?: string
+  disableTapClose?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -35,8 +36,8 @@ watch(props, () => {
 
 <template>
   <Transition name="fade">
-    <dialog ref="main" @click="SETTINGS.dialogClickClose ? emit('closePopup') : ''" tabindex="0"
-      @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center" v-if="open">
+    <dialog ref="main" @click="(SETTINGS.dialogClickClose && !disableTapClose) ? emit('closePopup') : ''" tabindex="0"
+      @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center transition-all duration-75" v-if="open">
       <section @click.stop=""
         :style="{width: width ?? '35rem', backgroundImage: customColor}"
         class="flex max-h-[95vh] max-w-[95vw] flex-col relative rounded-lg text-white shadow-lg shadow-black" :class="{'bg-greenGradient': !customColor, 'backdrop-blur-md': customColor}">

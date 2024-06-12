@@ -7,6 +7,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
+import { dialog } from "./ui/sizes";
 
 document.title = useI18n().t("other.websiteName");
 
@@ -56,8 +57,8 @@ const localStorg = ref(hasLocalStorage())
 </script>
 
 <template>
-  <DialogVue :open="firstTimeUser && returnedFromLogin" header-disabled :close-popup="returnedFromLogin = false">
-    <LoggedInPopup :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
+  <DialogVue :width="dialog.large" :open="firstTimeUser && returnedFromLogin" header-disabled :close-popup="returnedFromLogin = false">
+    <LoggedInPopup :username="returnfromLoginName || 'g4mingaz'" :pfplink="returnfromLoginPFP || 'https://cdn.discordapp.com/avatars/336373548526469120/d9d484b46aa6a0310fdf9d37ff597825.png'" />
   </DialogVue>
   
   <div id="loginToast" v-if="!firstTimeUser && localStorg"

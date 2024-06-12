@@ -7,28 +7,33 @@ const props = defineProps<{
 </script>
 
 <template>
-  <section
-    @click.stop=""
-    class="absolute top-1/2 left-1/2 flex max-h-[95vh] w-[25rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-lg bg-greenGradient text-white shadow-lg shadow-black"
-  >
+<div
+  class="flex flex-col text-left"
+>
+  <div class="flex gap-4 items-center m-2">
     <img
       :src="pfplink"
-      class="w-28 rounded-full border-8 border-solid -translate-y-14 border-lof-300"
+      class="w-12 rounded-full border-2 border-white border-solid"
       alt=""
     />
-    <div
-      class="flex flex-col gap-2 justify-center items-center mx-2 text-center -translate-y-7"
-    >
-      <h1 class="text-lg text-yellow-200">
-        {{ $t('other.welcomeToGDL') }} <b>{{ username }}!</b>
-      </h1>
-      <p>{{ $t('other.greatFeatures') }}</p>
-      <button
-        class="px-3 py-2 text-2xl font-black text-black align-bottom rounded-md bg-lof-400"
-        @click="emit('closePopup')"
-      >
-        <img src="@/images/check.svg" alt="" class="inline mr-3 w-8" />{{ $t('other.ok') }}
+    <h1 class="text-2xl text-yellow-200">
+      <span>{{ $t('other.welcomeToGDL') }}</span>
+      <b>{{ username }}!</b>
+      <img src="@/images/emoji/11.webp" class="inline ml-2 w-8" alt="">
+    </h1>
+  </div>
+
+  <div class="bg-[url(@/images/fade.webp)] bg-repeat-x p-2">
+    <div class="grid rounded-md p-1 items-center gap-2 text-sm bg-black bg-opacity-40 grid-cols-[max-content_1fr_max-content]">
+      <img src="@/images/info.svg" class="w-6" alt="">
+      <p>GD Seznamy jsou sociální síť, kde můžeš vytvářet a recenzovat Geometry Dash levely!<br>
+      Máš-li nějaké otázky, mrkni se do nápovědy! 
+      </p>
+      <button class="p-1 bg-black bg-opacity-40 rounded-md">
+        <img src="" alt="">
+        <span>{{ $t('other.help') }}</span>
       </button>
     </div>
-  </section>
+  </div>
+</div>
 </template>

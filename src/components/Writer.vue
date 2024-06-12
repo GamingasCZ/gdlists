@@ -13,15 +13,14 @@ import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
-import type { ReviewContainer, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, REVIEW_EXTRAS, DEFAULT_REVIEWDATA, pickFont } from "@/Reviews";
+import type { TEXT_ALIGNMENTS } from "@/interfaces";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { useRouter } from "vue-router";
-import { DEFAULT_LEVELLIST, modifyListBG } from "@/Editor";
+import { modifyListBG } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -53,7 +52,7 @@ const openDialogs = reactive({
     "tags": false,
     "collabs": false,
     "lists": [false, 0],
-    "bgPicker": false,
+    "bgPicker": [false, 0],
     "ratings": false,
     "bgPreview": false,
     "imagePicker": [false, 0]
@@ -194,7 +193,7 @@ const modifyImageURL = (newUrl: string) => {
     }
     // Review background
     else if (openDialogs.imagePicker[1] == -2) {
-        reviewData.value.thumbnail = newUrl
+        reviewData.value.thumbnail[0] = newUrl
     }
     // Image container
     else if (selectedNestContainer.value[0] == -1) {
@@ -226,7 +225,7 @@ const updateReview = () => {
         type: 'review',
         listData: JSON.stringify(reviewData.value),
         tagline: reviewData.value.tagline,
-        hidden: reviewData.value.private ? "true" : "false",
+        hidden: reviewData.value.private | 0,
         isNowHidden: isNowHidden ? "true" : "false",
         disComments: reviewData.value.disComments | 0
     }) 
@@ -240,6 +239,7 @@ onUnmounted(() => {
   reviewData.value = DEFAULT_REVIEWDATA()
 })
 
+const collabBackground = ref()
 const preUpload = ref(false)
 </script>
 
@@ -261,22 +261,22 @@ const preUpload = ref(false)
         <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
             <WrtierLevels ref="selectedLevel" />
+            <DialogVue :custom-color="collabBackground?.background" :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :top-most="true">
+                <CollabEditor ref="collabBackground" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
+            </DialogVue>
         </DialogVue>
 
         <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">
             <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
         </DialogVue>
         
-        <DialogVue :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :top-most="true">
-            <CollabEditor :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
-        </DialogVue>
         
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
             <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
         </DialogVue>
         
-        <DialogVue :open="openDialogs.bgPicker" @close-popup="openDialogs.bgPicker = false" :title="$t('other.imageSettings')">
-            <BackgroundImagePicker :source="reviewData" />
+        <DialogVue :open="openDialogs.bgPicker[0]" @close-popup="openDialogs.bgPicker[0] = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
+            <BackgroundImagePicker :force-aspect-height="openDialogs.bgPicker[1] ? 0 : 10.8" :source="openDialogs.bgPicker[1] ? reviewData.titleImg : reviewData.thumbnail" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.ratings" @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
@@ -359,7 +359,7 @@ const preUpload = ref(false)
                         />
                     </div>
                 </DataContainer>
-                <button @click="addContainer('default')" v-show="reviewData.containers.length" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
+                <button @click="addContainer('default')" v-show="reviewData.containers.length && previewMode" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span>{{ $t('reviews.addParagraph') }}</span>
                 </button>

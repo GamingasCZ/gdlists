@@ -78,7 +78,7 @@ export const modifyListBG = (newColors: number[] | string, reset = false, review
     document.documentElement.style.setProperty("--primaryColor","")
     document.documentElement.style.setProperty("--secondaryColor","")
     document.documentElement.style.setProperty("--brightGreen","")
-    return DEFAULT_LEVELLIST.pageBGcolor
+    return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   }
   
   // Default colors

@@ -32,7 +32,7 @@ if ($len > 25000 || $len < 150) {
 }
 
 // Valid thumbnail
-if (strlen($DATA["thumbnail"]) != 40) die("7");
+if (strlen($DATA["thumbnail"][0]) != 40) die("7");
 
 $user_id = checkAccount()["id"];
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
@@ -63,7 +63,7 @@ $mysqli->set_charset("utf8mb4");
 
 // Send to database
 $teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`) VALUES (?,?,?,?,?,?,?)";
-$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $DATA["thumbnail"]);
+$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $DATA["thumbnail"][0]);
 $res = doRequest($mysqli, $teplate, $values, "sisssis");
 if (is_array($res) && array_key_exists("error", $res)) die(5);
 
