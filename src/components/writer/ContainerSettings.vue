@@ -83,7 +83,7 @@ const closeSettings = (m: MouseEvent) => {
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
                         <option :value="-1">{{ $t('other.all') }}</option>
-                        <option v-for="(rating, index) in reviewData.ratings.concat(reviewData.defaultRatings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
+                        <option v-for="(rating, index) in reviewData.defaultRatings.concat(reviewData.ratings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
                     </select>
                 </div>
             </div>

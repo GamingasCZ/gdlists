@@ -38,17 +38,19 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 <template>
     <Transition name="fade" >
         <Teleport to="body">
-            <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
+            <div ref="dropdown" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
                 <div
-                class="flex flex-col bg-opacity-90 rounded-md min-w-40 bg-lof-100" id="tooltip">
-                    <div data-popper-arrow class="bg-lof-100 -z-10" id="arrow" alt=""></div>    
+                class="flex flex-col bg-opacity-90 rounded-md max-w-52 min-w-40 bg-lof-200" id="tooltip">
+                    <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
+                    <slot name="header" />
                     <button
                             v-for="(sort, index) in options"
+                            @mousedown.prevent=""
                             @click.stop="emit('pickedOption', index); emit('close')"
                             :style="{backgroundImage: `url(${icons?.[index] ?? ''})`, backgroundSize: '1.25rem', backgroundPosition: '5px center'}"
-                            class="pl-8 block bg-no-repeat text-left p-1 text-white hover:bg-lof-300 transition-colors duration-75 rounded-md m-1 focus-visible:!outline focus-visible:!outline-current">{{
-                                sort }}</button>
-                    </div>
+                            class="pl-8 block bg-no-repeat text-left p-1 text-white hover:bg-lof-300 transition-colors duration-75 rounded-md m-1 focus-visible:!outline focus-visible:!outline-current">{{ sort }}</button>
+                    <slot name="footer" />
+                </div>
             </div>
         </Teleport>
     </Transition>

@@ -66,7 +66,7 @@ const selectNestContainer = (e: Event) => {
         @click.stop="selectNestContainer"
         @dblclick="removeNestContainer"
         :style="{borderColor: borderColor}"
-        class="p-0.5 w-full border border-opacity-30 transition-colors duration-75 min-h-8"
+        class="p-0.5 border border-opacity-30 transition-colors duration-75 grow min-h-8"
         :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!border-none': !editable}"
     >
         <DataContainer
@@ -85,6 +85,7 @@ const selectNestContainer = (e: Event) => {
             :editable="editable"
             :text="container.data"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0]"
+            v-model="container.data"
         >
             <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component

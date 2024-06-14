@@ -285,7 +285,12 @@
     "color": "Barva",
     "moveUp": "Posunout výš",
     "moveDown": "Posunout níž",
-    "levels": "{n} level | {n} levely | {n} levelů"
+    "levels": "{n} level | {n} levely | {n} levelů",
+    "post": "Post",
+    "long": "dlouhé",
+    "short": "krátké",
+    "name": "jméno",
+    "creator": "tvůrce"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -365,7 +370,8 @@
     "hours": "před {count} hodinou | před {count} hodinami",
     "days": "před {count} dnem | před {count} dny",
     "weeks": "před {count} týdnem | před {count} týdny",
-    "months": "před {count} měsícem | před {count} měsíci"
+    "months": "před {count} měsícem | před {count} měsíci",
+    "future": "vydáno v budoucnosti"
   },
   "help": {
     "Lists": "Seznamy",
@@ -480,7 +486,7 @@
     "points": "Body",
     "stars": "Hvězdičky",
     "none": "Žádné",
-    "pickImage": "Vybrat obrázek",
+    "pickImage": "Vybrat",
     "language": "Jazyk recenze",
     "bgcolor": "Barva pozadí",
     "transparent": "Průhledná stránka",
@@ -549,7 +555,13 @@
     "sightreadability": "Sightreadovatelnost",
     "originality": "Originalita",
     "md": "Markdown zkratky",
-    "preview": "Náhled recenze"
+    "preview": "Náhled recenze",
+    "imgUrl": "Adresa obrázku",
+    "notFilledIn": "{0} není vyplněný!",
+    "notRatedYet": "{0}. level není zcela ohodnocen!",
+    "bro": "Bratře, ty jsi nic nenapsal!!",
+    "nameToo": "Jméno recenze je moc {0}!",
+    "noLevels": "Nebyly přidány žádné levely k recenzování!"
   },
   "review": {}
 }

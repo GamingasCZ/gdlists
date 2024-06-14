@@ -34,9 +34,13 @@ const addRatingsToLevels = () => {
 addRatingsToLevels() // Adds ratings to any newly added levels
 
 const addRating = (name = '') => {
+    if (reviewData.value.ratings.length > 3) return
+
+    let col = makeColor()
+    col[2] = 0.5 * Math.random() / 2
     reviewData.value.ratings.push({
         name: name,
-        color: makeColor(),
+        color: col,
         rating: -1
     })
     addRatingsToLevels()
@@ -90,13 +94,13 @@ const suggestions = ref<HTMLButtonElement>()
         <section class="flex justify-between p-2 items-center bg-[url(@/images/headerBG.webp)]">
             <span class="text-2xl font-bold">{{ $t('other.custom') }}</span>
             <div class="flex relative z-20 gap-2 items-center">
-                <button ref="suggestions" :title="$t('collabTools.presetsTitle')" @click="suggShown = true"
-                    class="p-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40">
+                <button :disabled="reviewData.ratings.length > 3" ref="suggestions" :title="$t('collabTools.presetsTitle')" @click="suggShown = true"
+                    class="p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button disabled:opacity-40">
                     <img src="@/images/moveDown.svg" alt="" class="box-border p-1 w-7" />
 
                 </button>
                 <Dropdown v-if="suggShown" @close="suggShown = false" @picked-option="addRating(SUGGESTIONS[$event])" :button="suggestions" :options="SUGGESTIONS" :title="$t('collabTools.examples')" />
-                <button @click="addRating()" class="p-1 bg-black bg-opacity-40 rounded-md button">
+                <button :disabled="reviewData.ratings.length > 3" @click="addRating()" class="p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button">
                     <img src="@/images/addLevel.svg" alt="" class="w-7">
                 </button>
             </div>

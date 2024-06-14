@@ -175,6 +175,7 @@ function loadReview() {
 
         LIST_DATA.value = res.data[0];
         reviewData.value.levels = LIST_DATA.value.data.levels;
+        reviewData.value.ratings = LIST_DATA.value.data.ratings;
         REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
         LIST_RATING.value = res.data[3]
 

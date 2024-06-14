@@ -72,28 +72,13 @@ const getGradient = (col) =>
 
 const uploadDate = new Date(props.timestamp);
 
-const unpinList = () => {
-  let pinned: ListPreview[] = JSON.parse(localStorage.getItem('pinnedLists')!)
-  let i = 0
-  let removedIndex = -1
-  pinned.forEach((pin: ListPreview) => {
-    if (pin.id == props.id) {
-      pinned.splice(i, 1)
-      removedIndex = i
-    }
-    i++
-  })
-  localStorage.setItem("pinnedLists", JSON.stringify(pinned))
-  emit('unpinList', removedIndex)
-}
-
 const creator = getUser()
 
 const pre = import.meta.env.VITE_USERCONTENT
 const base = import.meta.env.BASE_URL
 
 const getDefaultThumb = () => {
-  return props.name.split("").map(x => x.charCodeAt(0)).reduce((x,y) => x+y) % 4
+  return props.name.split("").map(x => x.charCodeAt(0)).reduce((x,y) => x+y) % 3
 }
 
 let thumbLink
@@ -150,7 +135,7 @@ let xPos = ["left", "center", "right"][background[3]]
         <img class="w-10 rounded-full" :src="`https://cdn.discordapp.com/avatars/${creator.discord_id}/${creator.avatar_hash}.png`" alt="">
         <div>
           <h3 class="text-lg font-bold leading-none">{{ creator.username }}</h3>
-          <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate((new Date()).getTime() - uploadDate.getTime()) }}</h4>
+          <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate(((new Date()).getTime() - uploadDate.getTime())/1000) }}</h4>
         </div>
       </p>
     </section>

@@ -15,7 +15,7 @@ const emit = defineEmits<{
 }>()
 
 interface Extras {
-	currentSettings: any[]
+	currentSettings: object
 	type: string
 	focused: boolean
 	editable?: boolean
@@ -24,74 +24,65 @@ interface Extras {
 
 const props = defineProps<Container & Extras>()
 
-let doEdit = props.editable
-const textOnce = props.text
-const actualText = ref(textOnce)
+let text = defineModel()
+
 const previewText = ref("")
-watch(props, () => {
-	if (doEdit != props.editable) {
-		if (!props.editable) {
-			previewText.value = parseMD(element.value?.innerText)
-		}
-		else {
-			nextTick(() => element.value.innerText = actualText.value)
-		}
-		doEdit = props.editable
-	}
-})
 
 const doShowSettings = ref(false)
-const showPlaceholder = ref(true)
-const element = ref<HTMLDivElement>()
-onMounted(() => element.value?.focus())
+const mainText = ref<HTMLTextAreaElement>()
+onMounted(() => {
+	if (!props.editable) previewText.value = parseMD(props.text, true)
+})
 
-const parseText = (e: Event) => {
+watch(props, () => {
+	if (props.editable) previewText.value = parseMD(text.value, true)
+})
+
+const makeNextParagraph = () => {
 	if (props.type.startsWith("heading") && e.key == "Enter") {
 		e.preventDefault()
 		emit('addParagraph', false)
 	}
-	else {
-		actualText.value = e.target.innerText
-		emit('textModified', actualText.value)
-	}
 }
 
-const doFocusText = () => {
-	element.value?.focus()
-	let sel = window.getSelection()
-	sel?.collapse(element.value?.lastChild, element.value?.innerText.length)
+const mutation = (mutationList: MutationRecord[]) => {
+	textChanges.disconnect()
+	mainText.value.dataset.modf = "0"
+	
+	text.value = mutationList[0].target.value
+	textChanges.observe(mainText.value!, {attributes: true, attributeFilter: ['data-modf']})
 }
 
-const untagText = (e: FileEvent) => {
-	e.preventDefault()
-	e.target.innerText = e.clipboardData?.getData('Text')
+const textChanges = new MutationObserver(mutation)
+const observeChanges = () => {
+	if (props.editable)
+		textChanges.observe(mainText.value!, {attributes: true, attributeFilter: ['data-modf']})
 }
-
-defineExpose({
-	doFocusText
-})
 
 const focus = ref(false)
 
 </script>
 
 <template>
-	<div @click.stop="emit('hasFocus', element!); focus = true" class="relative reviewContainer outline-[2px] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
-	<span v-if="showPlaceholder && editable" v-show="!text.length" class="absolute left-1 text-white text-opacity-10 pointer-events-none">{{ placeholder ?? "" }}</span>
-		<p
-			ref="element"
+	<div @click.stop="emit('hasFocus', mainText!); focus = true" class="relative reviewContainer outline-[2px] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
+		<component
 			v-if="canEditText"
-			@focus="emit('hasFocus', element!); focus = true"
-			@keyup="parseText"
-			@input="showPlaceholder = $el.innerText.length == 0"
-			@paste="untagText"
-			:contenteditable="editable"
-			class="break-words outline-none regularParsing"
-			v-html="textOnce"
+			:is="editable ? (type.startsWith('heading') ? 'input' : 'textarea') : 'p'"
+			ref="mainText"
+			@vue:mounted="observeChanges"
+			@focus="emit('hasFocus', mainText!); focus = true"
+			@input="mainText.rows = mainText?.value.match(/\n/g)?.length + 1"
+			@keyup="text = $event.target.value"
+			@keyup.enter="makeNextParagraph"
+			:rows="(mainText?.value ?? '0').match(/\n/g)?.length + 1"
+			:placeholder="placeholder"
+			v-html="editable ? '' : previewText"
+			:value="text"
+			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
+			data-modf="0"
 			:class="childStyling || []">
-		</p>
+		</component>
 		<slot></slot>
-
 		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border">
 			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
 		</div>

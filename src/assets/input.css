@@ -210,12 +210,13 @@ dialog {
 .regularParsing h1 { @apply mt-2 text-2xl}
 .regularParsing h2 { @apply mt-1 text-xl}
 .regularParsing h3 { @apply text-lg}
-.regularParsing ul { @apply list-disc list-inside}
-.regularParsing ol { @apply list-decimal list-inside}
+.regularParsing li:has(input) { @apply list-none m-[revert] my-2 pl-2}
+.regularParsing ul { @apply list-disc list-inside m-[revert] pl-2}
+.regularParsing ol { @apply list-decimal list-inside m-[revert] pl-2}
 .regularParsing a { @apply underline}
 .regularParsing blockquote { @apply border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
 .regularParsing img { @apply max-w-48 my-1}
-.regularParsing code { @apply font-mono bg-white rounded-md p-1 bg-opacity-10 w-full block font-normal}
+.regularParsing code { @apply font-mono bg-white rounded-md p-1 bg-opacity-10 font-normal}
 .regularParsing table,th,td { @apply border border-collapse p-1 border-lof-400}
 .regularParsing table { @apply m-1}
 .regularParsing hr { @apply border opacity-30 rounded-full my-2}

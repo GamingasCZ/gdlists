@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CollabData, FavoritedLevel, Level, LevelTag } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
-import { onErrorCaptured, onMounted, ref } from "vue";
+import { onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
@@ -129,7 +129,7 @@ onErrorCaptured(() => {
 
 <template>
   <section v-if="guessResult"
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
+    class="relative font-[poppins] w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"

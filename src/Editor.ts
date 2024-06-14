@@ -119,7 +119,8 @@ export const modifyListBG = (newColors: number[] | string, reset = false, review
 };
 
 export const prettyDate = (datePassed: number) => {
-  if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
+  if (datePassed < 0) return i18n.global.t('date.future')
+  else if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
   else if (datePassed <= 60) return i18n.global.t('date.secs', datePassed)
   else if (Math.floor(datePassed/60) == 1) return i18n.global.t('date.mins', Math.floor(datePassed/60))
   else if (Math.floor(datePassed/60) <= 60) return i18n.global.t('date.mins', Math.floor(datePassed/60))

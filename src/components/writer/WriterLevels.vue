@@ -2,7 +2,7 @@
 const emit = defineEmits(["closePopup"]);
 import { makeColor } from "@/Editor";
 import LevelCard from "../editor/EditorCard.vue";
-import { inject, ref } from "vue";
+import { inject, onBeforeUnmount, ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
 import { DEFAULT_RATINGS, reviewData } from "@/Reviews";
 
@@ -36,6 +36,19 @@ defineExpose({
         @move-controls="enableMoveControls"
         @throw-error="throwError($event, false)"
 */
+
+const hashLevels = () => {
+    let hashes: number[] = []
+    reviewData.value.levels.forEach(level => {
+        hashes.push(Math.pow(JSON.stringify(level).split("").map(x => x.charCodeAt(0)).reduce((x,y) => x+y), 2) % 65535)
+    })
+    return hashes
+}
+
+const {levelHashes, updateHashes} = inject("levelHashes")!
+onBeforeUnmount(() => {
+    updateHashes(hashLevels())
+})
 
 const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
   if (pos == -1) {

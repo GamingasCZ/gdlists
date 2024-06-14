@@ -6,7 +6,8 @@
     "mins": "{count} minute ago | {count} minutes ago",
     "months": "{count} month ago | {count} months ago",
     "secs": "{count} second ago | {count} seconds ago",
-    "weeks": "{count} week ago | {count} weeks ago"
+    "weeks": "{count} week ago | {count} weeks ago",
+    "future": "released in the future"
   },
   "editor": {
     "bgColor": "Accent",
@@ -473,7 +474,7 @@
     "reviewEditor": "Review Editor",
     "private": "Private Review",
     "points": "Points",
-    "pickImage": "Pick image",
+    "pickImage": "Pick",
     "opaque": "Opaque page",
     "none": "None",
     "language": "Language",
@@ -538,6 +539,7 @@
     "sync": "Sync",
     "theming": "Theming",
     "md": "Markdown help",
-    "preview": "Review preview"
+    "preview": "Review preview",
+    "imgUrl": "Image source"
   }
 }

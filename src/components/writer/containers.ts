@@ -7,6 +7,13 @@ import NestContainer from "./NestContainer.vue"
 import ReviewRatings from "./ReviewRatings.vue"
 import { i18n } from "@/locales"
 
+const success = {success: true}
+
+const error = (ind: number, msg = 0) => {
+    const message = ["Chybí %s!", "Není vybrán %s!"]
+    return {success: false, error: message[msg], index: ind}
+}
+
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
@@ -69,26 +76,6 @@ const containers: Containers = {
             },
         ]
     },
-    list: {
-        placeholder: "Seznam",
-        childStyling: "listChildren",
-        nestable: true,
-        canEditText: true,
-        additionalComponents: [],
-        settings: [{
-            key: "checked",
-            title: "",
-            type: [-1],
-            default: []
-        },
-        {
-            key: "checklist",
-            title: i18n.global.t("reviews.checkable"),
-            type: [2],
-            default: false
-        }
-        ]
-    },
     showImage: {
         nestable: true,
         canEditText: false,
@@ -96,9 +83,9 @@ const containers: Containers = {
         settings: [
             {
                 key: "url",
-                title: "",
+                title: i18n.global.t('reviews.imgUrl'),
                 type: [-1],
-                default: ""
+                default: "",
             },
             {
                 key: "width",
@@ -130,7 +117,8 @@ const containers: Containers = {
                 type: [0],
                 default: ""
             },
-        ]
+        ],
+        errorCheck: (settings: object) => settings.url.length ? success : error(0)
     },
     addVideo: {
         nestable: true,
@@ -147,6 +135,7 @@ const containers: Containers = {
                 key: "url",
                 title: i18n.global.t('reviews.ytLink'),
                 type: [0],
+                required: true,
                 default: ""
             },
             {
@@ -155,7 +144,8 @@ const containers: Containers = {
                 type: [0],
                 default: ""
             }
-        ]
+        ],
+        errorCheck: (settings: object) => settings.url.length ? success : error(1)
     },
     showRating: {
         nestable: true,
@@ -184,8 +174,9 @@ const containers: Containers = {
         settings: [
             {
                 key: "pickedIndex",
-                title: "",
+                title: i18n.global.t('other.level'),
                 type: [-1],
+                required: true,
                 default: -1
             },
             {
@@ -206,7 +197,8 @@ const containers: Containers = {
                 type: [0],
                 default: ""
             }
-        ]
+        ],
+        errorCheck: (settings: object) => settings.pickedIndex != -1 ? success : error(0, 1)
     },
     showList: {
         nestable: false,
@@ -215,8 +207,9 @@ const containers: Containers = {
         settings: [
             {
                 key: "level",
-                title: "",
+                title: i18n.global.t('other.post'),
                 type: [-1],
+                required: true,
                 default: false
             },
             {
@@ -231,7 +224,8 @@ const containers: Containers = {
                 type: [0],
                 default: ""
             }
-        ]
+        ],
+        errorCheck: (settings: object) => settings.level ? success : error(0, 1)
     },
     twoColumns: {
         styling: "",
@@ -275,6 +269,7 @@ export type Container = {
     nestable: boolean,
     canEditText: boolean,
     settings: ContainerSettings[],
+    errorCheck?: (x: object) => {success: boolean, mess?: string}
 }
 
 export type ContainerSettings = {
@@ -282,4 +277,5 @@ export type ContainerSettings = {
     title: string
     type: number[]
     default: any
+    required?: boolean
 }

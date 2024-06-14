@@ -32,12 +32,17 @@ const startScale = () => {
         let rect = gizmo.value?.getBoundingClientRect()
         let mVec = [rect.x + 8, rect.y + 8]
         let drag
-        if (props.gizmoPos == 'corner')
+        if (props.gizmoPos == 'corner') {
             drag = Math.sqrt(Math.pow(mousePos.value[0], 2) + Math.pow(mousePos.value[1], 2)) - Math.sqrt(Math.pow(mVec[0], 2) + Math.pow(mVec[1], 2))
-        else
-            drag = mousePos.value[1] + mVec.value[1]
+            imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientWidth + drag), props.maxSize ?? document.body.clientWidth * 0.85)
+        }
+        else {
+            drag = mousePos.value[1] - mVec[1]
+            imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientHeight + drag), props.maxSize ?? 1024)
+        }
 
-        imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientWidth + drag), props.maxSize ?? document.body.clientWidth * 0.85)
+        imageScale.value = Math.trunc(imageScale.value/10)*10
+
         emit("resize", imageScale.value)
     }, 20)
 }

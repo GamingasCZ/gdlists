@@ -40,7 +40,7 @@ const getLists = (timeout = 250) => {
     
     typeTimeout = setTimeout(() => {
         state.value = -3
-        let params = {fetchAmount: 10, sort: 0, startID: 999999, page: 0, searchQuery: query.value}
+        let params = {fetchAmount: 10, sort: 0, startID: 999999, page: 0, searchQuery: query.value, type: 'lists'}
         if (tab.value == 1) params.user = true
         
         axios.get(import.meta.env.VITE_API + "/getLists.php", {params: params}).then(res => {

@@ -14,7 +14,7 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont } from "@/Reviews";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -70,6 +70,11 @@ const selectedLevel = ref()
 
 const selectedNestContainer = ref([-1, -1, -1])
 provide("selectedNestContainer", selectedNestContainer)
+
+
+const levelHashes = ref<number[]>([])
+const updateHashes = (newVal: number[]) => levelHashes.value = newVal
+provide("levelHashes", {levelHashes, updateHashes})
 
 
 provide("settingsTitles", CONTAINERS)
@@ -135,22 +140,6 @@ const setFormatting = (format: string) => {
     switch (format) {
         case "view": previewMode.value = !previewMode.value; break;
     }
-
-    return
-    let sel = window.getSelection()
-    let el = sel?.focusNode
-    let range = sel?.getRangeAt(0)
-    let signs = {
-        bold: "*",
-        underline: "_",
-        strike: "-",
-        cursive: "/",
-    }
-
-    let val = el?.nodeValue
-    reviewData.value.containers[0].data = `${val?.slice(0, range?.startOffset)}${signs[format]}${signs[format]}${val?.slice(range?.startOffset, range?.endOffset)}${signs[format]}/${val?.slice(range?.endOffset)}`
-    
-    el.parentElement.innerHTML = reviewData.value.containers[0].data.replace("**", "<b>").replace("*/", "</b>")
 }
 
 const moveToParagraph = (currentContainerIndex: number) => {
@@ -205,12 +194,35 @@ const modifyImageURL = (newUrl: string) => {
     }
 }
 
+const errorStamp = ref(Date.now())
+const errorText = ref("")
+const checkForErrors = () => {
+    let check = checkReview()
+    if (!check?.success) {
+        errorStamp.value = Date.now()
+        errorText.value = check?.error
+    }
+    return check?.success
+}
+
+const startUpload = () => {
+    if (!checkForErrors()) return
+
+    preUpload.value = true
+    openDialogs.settings = true
+}
+
 const uploadReview = () => {
-  axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
-    sessionStorage.setItem("uploadFinished", "1")
-    // todo: add error checking
-    router.replace(`/review/${res.data[0]}`)
-  })
+    if (!checkForErrors()) {
+        openDialogs.settings = false
+        return
+    }
+    
+    axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
+        sessionStorage.setItem("uploadFinished", "1")
+        // todo: add error checking
+        router.replace(`/review/${res.data[0]}`)
+    })
 }
 
 const removeReview = () => {
@@ -220,6 +232,8 @@ const removeReview = () => {
 }
 
 const updateReview = () => {
+    if (!checkForErrors()) return
+
     axios.post(import.meta.env.VITE_API + "/updateList.php", {
         id: props.reviewID,
         type: 'review',
@@ -247,7 +261,6 @@ const preUpload = ref(false)
     <main class="p-2">
         <ErrorPopup
             :error-text="errorText"
-            show-dblclick-info
             :previewing="false"
             :stamp="errorStamp"
         />
@@ -262,7 +275,7 @@ const preUpload = ref(false)
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
             <WrtierLevels ref="selectedLevel" />
             <DialogVue :custom-color="collabBackground?.background" :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :top-most="true">
-                <CollabEditor ref="collabBackground" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
+                <CollabEditor ref="collabBackground" :level-array="reviewData.levels" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
             </DialogVue>
         </DialogVue>
 
@@ -292,7 +305,7 @@ const preUpload = ref(false)
             :editing="editing"
             @update="updateReview"
             @remove="removeReview"
-            @upload="preUpload = true; openDialogs.settings = true"
+            @upload="startUpload"
             @open-dialog="openDialogs[$event] = true"
         />
         
@@ -333,6 +346,7 @@ const preUpload = ref(false)
                     @text-modified="container.data = $event"
                     @settings-button="buttonState = $event"
                     @add-paragraph="moveToParagraph(index)"
+                    v-model="container.data"
                     :type="container.type"
                     :current-settings="container.settings"
                     :class="[CONTAINERS[container.type].styling ?? '']"
@@ -342,7 +356,7 @@ const preUpload = ref(false)
                     :editable="previewMode"
                     :text="container.data"
                 >
-                    <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
+                    <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
                         <component
                             v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
                             :is="elements"

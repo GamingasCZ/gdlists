@@ -62,13 +62,13 @@ const dialogs = inject("openedDialogs")
 <template>
     <ContainerHelp v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <button @click="dialogs.imagePicker = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
-            <img src="@/images/browseMobHeader.svg" alt="" class="w-8">
+            <img src="@/images/image.svg" alt="" class="w-8">
             <span>{{ $t('reviews.pickImage') }}</span>
         </button>
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0">
-        <div class="flex relative group min-h-[48px] max-w-[min(720px,85vw)]" :style="{width: `${imageScale}px`}">
+        <div class="flex relative group min-h-[48px] max-w-[min(720px,100%)]" :style="{width: `${imageScale}px`}">
             <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
                 <img
                     ref="image"

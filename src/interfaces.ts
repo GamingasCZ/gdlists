@@ -235,7 +235,7 @@ export interface ReviewList {
   reviewName: string
   thumbnail: ListBackground
   tagline: string
-  containers: object[] 
+  containers: ReviewContainer[]
   ratings: ReviewRating[]
   defaultRatings: ReviewRating[]
   settings: ReviewSettings
@@ -246,6 +246,15 @@ export interface ReviewList {
   whitePage: boolean
   readerMode: boolean
   font: number
+}
+
+export interface ReviewContainer {
+  align: 'left' | 'center' | 'right' | 'justify'
+  data: string
+  extraComponents: number
+  id: number
+  settings: object[]
+  type: string
 }
 
 export interface ReviewRating {

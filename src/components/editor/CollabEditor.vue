@@ -2,7 +2,7 @@
 import { levelList, creatorToCollab, makeColor } from '@/Editor';
 import chroma from 'chroma-js';
 import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, useAttrs, watch } from 'vue';
-import type { CollabData, CollabHumans, SavedCollab } from '@/interfaces'
+import type { CollabData, CollabHumans, Level, SavedCollab } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import SavedCollabVue from './SavedCollab.vue';
 import { SETTINGS, hasLocalStorage } from '@/siteSettings';
@@ -10,18 +10,20 @@ import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSi
 import { useI18n } from 'vue-i18n';
 import { i18n } from '@/locales';
 
-const props = defineProps({
-  index: { type: Number, required: true },
-  clipboard: { type: Object }
-})
+const props = defineProps<{
+  levelArray: Level[]
+  index: number
+  clpboard: object
+
+}>()
 
 const emit = defineEmits<{
   (e: "closePopup"): void;
   (e: "sendClipboard", memberClipboard: [number, string, CollabHumans]): void;
 }>();
 
-var collab = ref(levelList.value.levels[props.index!].creator)
-var levelColor = levelList.value.levels?.[props.index]?.color
+var collab = ref(props.levelArray[props.index!].creator)
+var levelColor = props.levelArray?.[props.index]?.color
 
 const hyperfunnyNames = [
   useI18n().t('collabTools.funny1'),
@@ -96,7 +98,7 @@ function createCollab() {
 function addRole(preset: [string, boolean] = ["", false]) {
   if (typeof collab.value == 'string') {
     collab.value = creatorToCollab(collab.value)
-    levelList.value.levels[props.index!].creator = collab.value
+    props.levelArray[props.index!].creator = collab.value
   }
   if (!collab.value[1].includes(preset[0])) {
     collab.value?.[1].push(preset[0])
@@ -391,9 +393,9 @@ function saveCollab() {
     collabName:
       updating ?
         savedCollabs.value![currentlyUsedSaved.value].collabName :
-        levelList.value.levels[props.index].levelName || i18n.global.t('collabTools.unnamedCollab'),
+        props.levelArray[props.index].levelName || i18n.global.t('collabTools.unnamedCollab'),
     collabHost: collab.value[0][0].name,
-    levelID: parseInt(levelList.value.levels[props.index].levelID || "-1"),
+    levelID: parseInt(props.levelArray[props.index].levelID || "-1"),
     collabID: collab.value[3],
     data: collab.value,
     memberCount: collab.value[2].length,
@@ -415,9 +417,9 @@ function removeCollab(ind: number) {
 }
 
 function loadCollab(saveData: SavedCollab, collabIndex: number) {
-  levelList.value.levels[props.index].creator = saveData.data
+  props.levelArray[props.index].creator = saveData.data
   if (saveData.levelID != "-1")
-    levelList.value.levels[props.index].levelID = saveData.levelID.toString()
+    props.levelArray[props.index].levelID = saveData.levelID.toString()
   collab.value = saveData.data
   currentlyUsedSaved.value = collabIndex
   makeRoleColors()
@@ -428,7 +430,7 @@ onMounted(() => {
   if (!localStrg) return
 
   let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
-  hasSavedCollab.value = saveIDs.indexOf(parseInt(levelList.value.levels[props.index].levelID))
+  hasSavedCollab.value = saveIDs.indexOf(parseInt(props.levelArray[props.index].levelID))
 
   let getCurrCollabID = savedCollabs.value?.filter(saved => saved.collabID == collab.value[3])
   currentlyUsedSaved.value = savedCollabs.value?.indexOf(getCurrCollabID?.[0] ?? <any>[])!
@@ -455,7 +457,7 @@ onUnmounted(() => {
   <section class="flex">
     <section class="w-full">
       <section class="flex items-center mr-2" v-if="(typeof collab != 'string')">
-          <CollabCreator class="ml-1 grow" v-bind="collab[0][0]" :pos="999" :level-index="index"
+          <CollabCreator class="ml-1 grow" v-bind="collab[0][0]" :pos="999" :level-index="index" :collab-array="collab"
             :role-color="roleColors?.[collab[0][0].role]" :host="true" v-if="(typeof collab != 'string')"
             @change-role="pickingRole = $event" @remove-member="removeMember" @copy-member="copyMember"
             @add-social="addSocial" @remove-social="removeSocial(0, $event)" />
@@ -506,7 +508,7 @@ onUnmounted(() => {
             </Transition>
           </div>
           <button :title="$t('collabTools.addMemberTitle')"
-            class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:!outline focus-visible:!outline-current"
+            class="box-border p-1.5 w-10 h-10 bg-black bg-opacity-40 rounded-md button focus-visible:outline-4 focus-visible:outline-lof-400 focus-within:bg-lof-300"
             v-if="(typeof collab != 'string')" @click="addMember()" id="addCollabMember"
             :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
             :class="{ 'disabled': typeof collab != 'string' && (noRoles || collab[2].length >= 100) }">
@@ -548,12 +550,12 @@ onUnmounted(() => {
     
     
             <button :title="$t('other.accept')" type="submit" :disabled="socialPickerURL.length < 5"
-              class="p-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-50"><img src="@/images/checkThick.svg"
+              class="p-1 bg-black bg-opacity-40 rounded-md focus-within:outline-current button disabled:opacity-50"><img src="@/images/checkThick.svg"
                 class="w-6" alt=""></button>
             <button :title="$t('other.cancel')" v-if="socialPicker.editing == -1" type="button"
-              class="p-1 bg-black bg-opacity-40 rounded-md button" @click="socialPicker.open = false"><img
+              class="p-1 bg-black bg-opacity-40 rounded-md focus-within:outline-current button" @click="socialPicker.open = false"><img
                 src="@/images/close.svg" class="w-6" alt=""></button>
-            <button :title="$t('editor.remove')" v-else type="button" class="p-1 bg-black bg-opacity-40 rounded-md button"
+            <button :title="$t('editor.remove')" v-else type="button" class="p-1 bg-black bg-opacity-40 rounded-md focus-within:outline-current button"
               @click="removeSocial(socialPicker.creatorIndex, socialPicker.socialIndex)"><img src="@/images/trash.svg"
                 class="w-6" alt=""></button>
     
@@ -601,7 +603,7 @@ onUnmounted(() => {
     
         <!-- Collab humans -->
         <div class="flex flex-col gap-1" v-if="(typeof collab != 'string')">
-          <CollabCreator v-for="(member, pos) in (collab as CollabData)[2]" :key="member.name" v-bind="member" :pos="pos"
+          <CollabCreator v-for="(member, pos) in (collab as CollabData)[2]" :key="member.name" v-bind="member" :pos="pos" :collab-array="collab"
             :level-index="index" :role-color="roleColors[member.role]" :host="false" @change-role="changeRole"
             @remove-member="removeMember" @copy-member="copyMember" @add-social="addSocial"
             @remove-social="removeSocial(pos, $event)" />
@@ -650,7 +652,7 @@ onUnmounted(() => {
             class="flex p-1 h-9 text-white rounded-md transition-colors roleBubble items-middle shadow-drop focus-visible:!outline focus-visible:!outline-current"
             :style="{ backgroundColor: roleColors[pos] }" :class="{ 'button': pickingRole > -1 }">
             <input :disabled="pickingRole > -1" :class="{ 'pointer-events-none': pickingRole > -1 }" type="text"
-              v-model="levelList.levels[index].creator[1][pos]" :placeholder="$t('collabTools.roleName')"
+              v-model="levelArray[index].creator[1][pos]" :placeholder="$t('collabTools.roleName')"
               class="px-1 mr-2 h-full bg-transparent rounded-sm border-opacity-40 border-solid transition-colors outline-none focus:bg-opacity-40 border-b-black focus:bg-black grow">
             <div class="flex gap-1">
               <button :title="$t('collabTools.hideTitle')"
