@@ -3,12 +3,16 @@ import { levelList } from "@/Editor";
 import { ref } from "vue";
 import parseText, { addFormatting, autoLink } from "./parseEditorFormatting";
 import { i18n } from "@/locales";
+import type { LevelList, ReviewList } from "@/interfaces";
 
 const isPreviewing = ref<boolean>(false);
+const props = defineProps<{
+  editValue: LevelList | ReviewList
+}>()
 
 const doFormat = (type: number) => {
-  if (!isPreviewing.value) return;
-  levelList.value.description = addFormatting(type, document.querySelector("#mainTextbox"))
+  if (isPreviewing.value) return;
+  props.editValue.description = addFormatting(type, document.querySelector("#mainTextbox"))
 }
 
 const base = import.meta.env.BASE_URL
@@ -31,13 +35,13 @@ const formatting = [
 </script>
 
 <template>
-    <main class="flex flex-grow-[1] flex-col gap-0 m-2 mt-0 h-[30rem]">
-      <div class="box-border flex flex-wrap gap-1.5 items-center">
+    <main class="flex flex-grow-[1] flex-col gap-0 mt-0 h-[30rem]">
+      <div class="box-border flex flex-wrap gap-1.5 items-center px-2">
         <div v-for="(format, index) in formatting">
           <button
             @click="doFormat(index)"
             :title="format[1]"
-            class="p-1 bg-black bg-opacity-0 rounded-md hover:bg-opacity-40 button"
+            class="p-1 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40 button"
             :class="{ disabled: isPreviewing }"
             v-if="format[0] != 'div'"
           >
@@ -61,14 +65,14 @@ const formatting = [
         @paste="addFormatting(autoLink($event), $event.target)"
         id="mainTextbox"
         v-show="!isPreviewing"
-        v-model="levelList.description"
-        class="h-max w-full flex-grow-[1] resize-none rounded-lg bg-black bg-opacity-40 px-2 py-1"
+        v-model="editValue.description"
+        class="h-max w-full grow resize-none bg-[url(@/images/fade.webp)] bg-repeat-x bg-black bg-opacity-20 focus-within:bg-opacity-40 focus-within:outline-none px-2 py-1"
         :placeholder="$t('editor.listDescription') + $t('editor.mdHelp')"
       ></textarea>
       <div
-        class="h-max flex-grow-[1] rounded-lg border-4 border-solid overflow-y-auto border-white border-opacity-10 regularParsing px-1"
+        class="h-max grow bg-[url(@/images/fade.webp)] bg-repeat-x bg-opacity-10 bg-black overflow-y-auto regularParsing px-1"
         v-show="isPreviewing"
-        v-html="parseText(levelList.description)"
+        v-html="parseText(editValue.description)"
       ></div>
     </main>
 </template>

@@ -19,17 +19,15 @@ onMounted(() => {
 </script>
 
 <template>
-    <Transition name="fade" >
-        <Teleport to="body">
-            <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
-                <div
-                class="p-1 text-sm text-white rounded-md shadow-drop max-w-52 bg-lof-200" id="tooltip">
-                    <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
-                    <p>{{ text }}</p>
-                </div>
+    <Teleport to="body">
+        <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
+            <div
+            class="p-1 text-sm text-white rounded-md shadow-drop max-w-52 bg-lof-200" id="tooltip">
+                <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
+                <p>{{ text }}</p>
             </div>
-        </Teleport>
-    </Transition>
+        </div>
+    </Teleport>
 </template>
 
 <style>

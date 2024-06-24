@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
 import type { ContainerSettings } from './containers';
-import { reviewData } from '@/Reviews';
+import { DEFAULT_RATINGS, reviewData } from '@/Reviews';
 
 const emit = defineEmits<{
     (e: "remove"): void
@@ -48,19 +48,22 @@ const closeSettings = (m: MouseEvent) => {
 </script>
 
 <template>
-    <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 font-[poppins] -right-1 z-10 flex-col gap-3 p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
-        <div v-for="(setting, key, index) in settingsArr" class="flex flex-col">
+    <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 font-[poppins] -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
+        <div v-for="(_, key, index) in settingsArr" class="flex flex-col" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
             <div class="flex flex-col">
+                <!-- Text input -->
                 <div v-if="containers[type].settings[index].type[0] == 0">
                     <label :for="key">{{ containers[type].settings[index].title }}</label><br>
                     <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="text">
                 </div>
                 
+                <!-- Button -->
                 <button v-if="containers[type].settings[index].type[0] == 1" @click="emit('pressedButton', key)" class="p-2 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
                 
+                <!-- Checkbox -->
                 <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
-                    <input :name="key" :value="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md" type="checkbox">
+                    <input :name="key" :checked="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md button" type="checkbox">
                 </div>
 
                 <!-- Number selector -->
@@ -83,7 +86,7 @@ const closeSettings = (m: MouseEvent) => {
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
                         <option :value="-1">{{ $t('other.all') }}</option>
-                        <option v-for="(rating, index) in reviewData.defaultRatings.concat(reviewData.ratings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
+                        <option v-for="(rating, index) in DEFAULT_RATINGS.concat(reviewData.ratings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
                     </select>
                 </div>
             </div>

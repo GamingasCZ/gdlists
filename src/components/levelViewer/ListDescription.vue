@@ -5,6 +5,7 @@ import { onMounted, ref, watch } from "vue";
 import parseText from "../global/parseEditorFormatting";
 import { hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
+import Tooltip from "../ui/Tooltip.vue";
 
 const props = defineProps<{
   name: string;
@@ -28,6 +29,7 @@ const emit = defineEmits<{
 }>();
 
 const hoveringRating = ref(false)
+const hoveringRatebox = ref(false)
 onMounted(() => {
   let description = document.getElementById("listDescription")!;
   tallDescription.value = description.scrollHeight > description.clientHeight;
@@ -63,6 +65,7 @@ else {
   img.addEventListener("error", () => import("@/images/defaultPFP.webp").then(res => pfp.value = res.default))
 }
 
+const ratingButs = ref()
 let sendingRating = false
 function sendRating(action: 1 | 0) {
   if (sendingRating) return
@@ -114,7 +117,7 @@ const listUploadDate = props.review ?
     </section>
     <section class="flex gap-2 descriptionControls">
       <!-- Likes and dislikes -->
-      <div class="box-border flex flex-col items-center min-w-max max-md:hidden">
+      <div @mouseenter="hoveringRatebox = true" @mouseleave="hoveringRatebox = false" class="box-border flex flex-col items-center min-w-max max-md:hidden">
 
         <!-- Like button -->
         <button id="likeButton" class="button relative rounded-lg bg-[#21cc5b] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
@@ -129,7 +132,7 @@ const listUploadDate = props.review ?
         <span @mouseenter="hoveringRating = true" @mouseleave="hoveringRating = false" class="my-0.5 text-lg font-bold cursor-help">{{ ratings[0]-ratings[1] }}</span>
 
         <!-- Dislike button -->
-        <button id="dislikeButton" class="button relative rounded-lg bg-[#cc2121] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
+        <button ref="ratingButs" id="dislikeButton" class="button relative rounded-lg bg-[#cc2121] p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
           @click="sendRating(0)"
           :style="{ boxShadow: ratings?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
           :class="{ '!bg-[#1c0505]': ratings?.[2] == 1, '!bg-[#730909]': ratings?.[2] == 0 }">
@@ -137,7 +140,11 @@ const listUploadDate = props.review ?
           <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -bottom-5 left-1/2 text-sm text-red-500 -translate-x-1/2">{{ ratings[1] }}</h6></Transition>
           <img class="w-5" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 0 }" />
         </button>
+
       </div>
+      <Transition name="fade">
+        <Tooltip v-if="userUID == '' && hoveringRatebox" :text="$t('listViewer.likeNotLoggedIn')" :button="ratingButs" />
+      </Transition>
 
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
@@ -181,14 +188,14 @@ const listUploadDate = props.review ?
       <div class="flex">
         <!-- Mobile likes and dislikes -->
         <div class="box-border flex gap-1.5 items-center md:hidden">
-          <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg" @click="sendRating(1)"
+          <button class="button rounded-lg bg-[#21cc5b] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg || userUID == ''" @click="sendRating(1)"
             :style="{ boxShadow: ratings?.[2] == 1 ? 'rgba(32, 198, 143, 0.5) 0px 0px 29px' : '' }"
             :class="{ '!bg-[#051c0c]': ratings?.[2] == 0, '!bg-[#14805c]': ratings?.[2] == 1 }">
             <img class="w-6" src="@/images/like.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 1 }" />
           </button>
           <span class="text-lg font-bold text-center min-w-8">{{ ratings[0]-ratings[1] }}
           </span>
-          <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg" @click="sendRating(0)"
+          <button class="button rounded-lg bg-[#cc2121] p-2 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg || userUID == ''" @click="sendRating(0)"
             :style="{ boxShadow: ratings?.[2] == 0 ? 'rgba(255, 12, 0, 0.79) 0px 0px 29px' : '' }"
             :class="{ '!bg-[#1c0505]': ratings?.[2] == 1, '!bg-[#730909]': ratings?.[2] == 0 }">
             <img class="w-6" src="@/images/dislike.svg" alt="" :class="{ 'brightness-[6]': ratings?.[2] == 0 }" />
@@ -209,7 +216,7 @@ const listUploadDate = props.review ?
         </div>
 
         <!-- Review level ratings button -->
-        <div class="ml-2" v-if="review && data.rateTheme != 2 && data.levels.length > 0">
+        <div class="ml-2" v-if="review && !data.disabledRatings && data.levels.length > 0">
           <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
             <img src="@/images/rating.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{ $t('editor.levels') }}</label>
             <label

@@ -21,7 +21,7 @@ $time = new DateTime();
 $DATA = json_decode(file_get_contents("php://input"), true);
 
 // Invalid listName length
-if (strlen($DATA["reviewName"]) < 3 || strlen($DATA["reviewName"]) > 30) {
+if (strlen($DATA["reviewName"]) < 3 || strlen($DATA["reviewName"]) > 40) {
   die(json_encode([-1, 2]));
 }
 
@@ -32,7 +32,10 @@ if ($len > 25000 || $len < 150) {
 }
 
 // Valid thumbnail
-if (strlen($DATA["thumbnail"][0]) != 40) die("7");
+if ($DATA["thumbnail"][0] != "" && strlen($DATA["thumbnail"][0]) != 40) die("7");
+$thumbProps = json_encode(array_slice($DATA["thumbnail"], 1));
+$thumb = $DATA["thumbnail"][0];
+if (!strlen($thumb)) $thumb = null;
 
 $user_id = checkAccount()["id"];
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
@@ -48,7 +51,7 @@ if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
 // Checking request
 error_reporting($debugMode ? -1 : 0);
-$fuckupData = sanitizeInput(array(trim($DATA["reviewName"])));
+$fuckupData = sanitizeInput(array(trim(urlencode($DATA["reviewName"]))));
 $timestamp = $time -> getTimestamp();
 
 // Generate id if list private
@@ -62,10 +65,10 @@ if ($mysqli -> connect_errno) {
 $mysqli->set_charset("utf8mb4");
 
 // Send to database
-$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`) VALUES (?,?,?,?,?,?,?)";
-$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $DATA["thumbnail"][0]);
-$res = doRequest($mysqli, $teplate, $values, "sisssis");
-if (is_array($res) && array_key_exists("error", $res)) die(5);
+$teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`) VALUES (?,?,?,?,?,?,?,?,?)";
+$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $thumb, $thumbProps, $DATA["language"]);
+$res = doRequest($mysqli, $teplate, $values, "sisssisss");
+if (is_array($res) && array_key_exists("error", $res)) die(print_r($res));
 
 $listIDquery = $mysqli -> query("SELECT LAST_INSERT_ID() as id");
 $rows = $listIDquery -> fetch_all(MYSQLI_ASSOC);

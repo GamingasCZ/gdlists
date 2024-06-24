@@ -27,8 +27,7 @@ onMounted(async () => {
   }
   );
   if (props.forceAspectHeight > 0) {
-    console.log(dragboxImage.value?.clientWidth / props.forceAspectHeight)
-    props.source[2] = Math.min(100, Math.max(0, dragboxImage.value?.clientWidth / props.forceAspectHeight))
+    props.source[2] = Math.floor(Math.min(100, Math.max(0, dragboxImage.value?.clientWidth / props.forceAspectHeight)))
   }
 
 });
@@ -50,25 +49,25 @@ const setDragboxPos = (e: MouseEvent | TouchEvent) => {
   if (overResizer.value) {
     let resizer = document.querySelector("#resizer").getBoundingClientRect()
     if (resizer.bottom - resizer.height / 2 <= dragboxImage.value.getBoundingClientRect().bottom || nowDrag < 0)
-      props.source[2] = Math.min(100, Math.max(10, props.source[2] + nowDrag / 4))
+      props.source[2] = Math.floor(Math.min(100, Math.max(10, props.source[2] + nowDrag / 4)))
     if (resizer.bottom - resizer.height / 2 > dragboxImage.value.getBoundingClientRect().bottom)
       dragBoxTopOffset.value = 0
   }
   else {
     dragBoxTopOffset.value += nowDrag
 
-    dragBoxTopOffset.value = Math.max(
+    dragBoxTopOffset.value = Math.floor(Math.max(
       0,
       Math.min(
         dragBoxTopOffset.value,
         dragboxImage.value.clientHeight - dragbox.clientHeight - 4
       )
-    ); // 4 = dragbox border width
+    )); // 4 = dragbox border width
 
   }
   props.source[1] =
-    (dragBoxTopOffset.value / (dragboxImage.value.clientHeight - dragbox.clientHeight - 4)) *
-    100; // percentage
+    Math.floor((dragBoxTopOffset.value / (dragboxImage.value.clientHeight - dragbox.clientHeight - 4)) *
+    100); // percentage
 };
 
 const endDrag = () => {

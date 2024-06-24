@@ -5,6 +5,7 @@ import ReviewList from "./ReviewList.vue"
 import ReviewDivisor from "./ReviewDivisor.vue"
 import NestContainer from "./NestContainer.vue"
 import ReviewRatings from "./ReviewRatings.vue"
+import ReviewUsers from "./ReviewUsers.vue"
 import { i18n } from "@/locales"
 
 const success = {success: true}
@@ -51,12 +52,6 @@ const containers: Containers = {
         additionalComponents: [ReviewDivisor],
         settings: [
             {
-                key: "sizeX",
-                title: "",
-                type: [-1],
-                default: -1,
-            },
-            {
                 key: "sizeY",
                 title: "",
                 type: [-1],
@@ -67,13 +62,7 @@ const containers: Containers = {
                 title: i18n.global.t('other.visible'),
                 type: [2],
                 default: true,
-            },
-            {
-                key: "fill",
-                title: i18n.global.t('reviews.fillSpace'),
-                type: [2],
-                default: false,
-            },
+            }
         ]
     },
     showImage: {
@@ -95,7 +84,7 @@ const containers: Containers = {
             },
             {
                 key: "pick",
-                title: i18n.global.t('reviews.pickImage'),
+                title: i18n.global.t('reviews.pick'),
                 type: [1],
                 default: 0
             },
@@ -228,7 +217,6 @@ const containers: Containers = {
         errorCheck: (settings: object) => settings.level ? success : error(0, 1)
     },
     twoColumns: {
-        styling: "",
         nestable: true,
         canEditText: false,
         dependentOnChildren: true,
@@ -238,6 +226,31 @@ const containers: Containers = {
             title: "",
             type: [-1],
             default: [[], []]
+        }]
+    },
+    showCollab: {
+        nestable: true,
+        canEditText: false,
+        additionalComponents: [ReviewUsers],
+        settings: [
+        {
+            key: "users",
+            title: i18n.global.t('other.users'),
+            type: [-1],
+            required: true,
+            default: false
+        },
+        {
+            key: "pick",
+            title: i18n.global.t('reviews.editMembers'),
+            type: [1],
+            default: 0
+        },
+        {
+            key: "colums",
+            title: i18n.global.t('reviews.displayColumns'),
+            type: [2],
+            default: false
         }]
     }
 }
@@ -257,6 +270,7 @@ export type Containers = {
     addVideo: Container
     showRating: Container
     twoColumns: Container
+    showCollab: Container
 }
 
 export type Container = {

@@ -71,7 +71,7 @@ const pickList = (listData: ListFetchResponse, creator: string) => {
 <template>
     <input autofocus type="text" v-model="query" :placeholder="$t('other.search')" class="px-2 py-1 mx-2 my-3 bg-white bg-opacity-10 rounded-md">
 
-    <TabBar @switched-tab="switchTab" :tab-names="[$t('other.all'), $t('other.myLists')]" />
+    <TabBar @switched-tab="switchTab" :tab-names="[$t('other.all'), $t('other.myLists', $t('other.lists'))]" />
 
     <div
         class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 overflow-y-auto flex flex-col gap-2">
@@ -79,7 +79,7 @@ const pickList = (listData: ListFetchResponse, creator: string) => {
             class="absolute top-1/2 left-1/2 w-full text-center opacity-40 -translate-x-1/2 -translate-y-1/2">
             <div v-if="state == 0" class="flex flex-col gap-3 items-center">
                 <img src="@/images/searchOpaque.svg" alt="" class="w-48">
-                <h2 class="text-2xl">Začni psát pro hledání seznamů.</h2>
+                <h2 class="text-2xl">{{ $t('other.typeToFindList') }}</h2>
             </div>
             <div v-else-if="state == -3" class="flex flex-col gap-3 items-center">
                 <img src="@/images/loading.webp" alt="" class="w-48 animate-spin">
@@ -87,11 +87,11 @@ const pickList = (listData: ListFetchResponse, creator: string) => {
             </div>
             <div v-else-if="state == -1" class="flex flex-col gap-3 items-center">
                 <img src="@/images/searchOpaque.svg" alt="" class="w-48">
-                <h2 class="text-2xl">Nenašly se žádné seznamy!</h2>
+                <h2 class="text-2xl">{{ $t('other.noListsFound') }}</h2>
             </div>
             <div v-else-if="state == -2" class="flex flex-col gap-3 items-center">
                 <img src="@/images/close.svg" alt="" class="w-48">
-                <h2 class="text-2xl">Nastala chyba při hledání!</h2>
+                <h2 class="text-2xl">{{ $t('other.listFindError') }}</h2>
             </div>
         </div>
         

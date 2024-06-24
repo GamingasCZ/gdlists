@@ -35,7 +35,7 @@ const screenWidth = ref(window.innerWidth)
 <template>
   
   <div
-  class="flex fixed right-2 top-16 flex-col gap-3 p-2 text-white rounded-md bg-greenGradient sm:top-12"
+  class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
     <div v-if="galleryOpen" class="z-20">
       <Teleport to="body">
@@ -67,8 +67,9 @@ const screenWidth = ref(window.innerWidth)
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
       @click="galleryOpen = true"
+      v-if="isLoggedIn"
     >
-      <img src="@/images/image.svg" class="inline mr-2 w-5" alt="" />Galerie
+      <img src="@/images/image.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.gallery') }}
     </button>
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"

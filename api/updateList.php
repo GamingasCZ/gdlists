@@ -8,6 +8,7 @@ Return codes:
 4 - No changes made to list
 5 - Invalid list data
 6 - Invalid list parameters
+7 - Bad request
 */
 
 require("globals.php");
@@ -58,23 +59,26 @@ if (!$checkUser) {
 
 $disableComments = intval($DATA["disComments"]);
 $doHide = intval($DATA["hidden"]) == 1;
-$thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
+$thumbdata;
+if (!$IS_LIST) $thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $retListID = [$DATA["id"]];
 
 // Private list settings
 if ($IS_LIST) {
-    $hiddenID =  privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
+    $hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
     $hidden = $doHide ? $hiddenID : '0';
     
     $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$fuckupData[1], $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
-    if (array_key_exists("error", $res)) die("5");
+    if (array_key_exists("error", $res)) die([-1, 7]);
     
     // Return either ID or privateID
     $retListID[0] = $doHide ? $hiddenID : $listData["id"];
 }
 else {
-    doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3]), $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $DATA["id"]], "sisisss");
+    $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ?, `lang` = ? WHERE id = ?", [$fuckupData[1], intval($fuckupData[3]), $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $decoded["language"], $DATA["id"]], "sisissss");
+    if (array_key_exists("error", $res)) die([-1, 7]);
+
     $retListID = str_replace(' ', '-', $listData["name"]) . '-' . $listData["id"];
 }
 
@@ -97,7 +101,7 @@ if ($fuckupData[3] == 0) {
     }
 }
 
-echo json_encode($retListID);
+echo json_encode([$retListID]);
 
 $mysqli -> close();
 

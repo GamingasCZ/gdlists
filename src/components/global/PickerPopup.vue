@@ -1,29 +1,13 @@
 <script setup lang="ts">
-import { onUpdated, reactive, ref, watch } from "vue";
-import type { FavoritedLevel, Level } from "@/interfaces";
+import { onUpdated } from "vue";
 
 const emit = defineEmits(["selectOption"]);
-const props = defineProps<{
-}>();
-
-const bubbleType = ref<number>(
-  ["favoriteLevel", "level"].indexOf(props.pickerDataType)
-);
-const filteredData = ref<Level[] | FavoritedLevel[]>([]);
-const data = ref<Level[] | FavoritedLevel[]>([]);
-if (typeof props.pickerData == "string") {
-  if (props.pickerData.startsWith("@")) {
-    data.value = JSON.parse(localStorage.getItem(props.pickerData.slice(1))!);
-  }
-} else {
-  data.value = props.pickerData ?? [];
-}
 
 const highlightFirstElement = () => {
   document.querySelector(".pickerBubble")!.focus()
 }
 
-filteredData.value = data.value;
+const search = defineModel()
 
 onUpdated(() => {
   document.getElementById("pickerInput")?.focus()
@@ -38,11 +22,7 @@ onUpdated(() => {
           :placeholder="$t('other.search')+'...'"
           class="px-2 py-1 mx-2 mt-1 bg-white bg-opacity-10 rounded-md grow"
           id="pickerInput"
-          @input="
-            filteredData = data.filter((x) =>
-              x.levelName.toLowerCase().includes(($event.target as HTMLInputElement).value.toLowerCase())
-            )
-          "
+          v-model="search"
         />
       </form>
       <main

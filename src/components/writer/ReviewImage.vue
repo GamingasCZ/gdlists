@@ -56,19 +56,30 @@ watch(props, () => {
 })
 
 const dialogs = inject("openedDialogs")
+const linkHost = computed(() => {
+    let link: string
+    try {
+        link = new URL(props.settings.link)
+        return link.host
+    } catch (e) {
+        props.settings.link = ""
+        return ""
+    }
+})
+
+const noClickWhenEditing = (e: Event) => {
+    if (props.editable) e.preventDefault()
+}
 
 </script>
 
 <template>
-    <ContainerHelp v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
-        <button @click="dialogs.imagePicker = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
-            <img src="@/images/image.svg" alt="" class="w-8">
-            <span>{{ $t('reviews.pickImage') }}</span>
-        </button>
+    <ContainerHelp @click="dialogs.imagePicker = [true, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+        <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0">
-        <div class="flex relative group min-h-[48px] max-w-[min(720px,100%)]" :style="{width: `${imageScale}px`}">
+        <div class="flex relative group min-h-[48px] max-w-[min(720px,100%)] m-2" :style="{width: `${imageScale}px`}">
             <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
                 <img
                     ref="image"
@@ -78,6 +89,10 @@ const dialogs = inject("openedDialogs")
                     :title="settings.alt"
                 >
             </Resizer>
+            <a target="_blank" @click="noClickWhenEditing" :href="settings.link" v-if="settings.link" class="flex absolute top-2 right-2 gap-2 items-center px-2 text-black bg-white bg-opacity-80 rounded-full opacity-0 backdrop-blur-sm transition-opacity duration-75 group-hover:opacity-100">
+                <img src="@/images/link.svg" class="w-4 invert" alt="">
+                {{ linkHost }}
+            </a>
         </div>
         <figcaption class="text-inherit">{{ settings.description }}</figcaption>
     </figure>

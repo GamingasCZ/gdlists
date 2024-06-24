@@ -414,7 +414,7 @@ const switchPlatformer = () => {
 
       <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
         :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
-      <DifficultyPicker v-if="openedPanel == 2" :selected-rate="levelArray.levels[index!].difficulty[1]"
+      <DifficultyPicker v-if="openedPanel == 2" :key="levelArray.levels[index!].difficulty[0]" :selected-rate="levelArray.levels[index!].difficulty[1]"
         :selected-face="levelArray.levels[index!].difficulty[0]" @change-face="changeFace" @change-rate="changeRate" />
       <LevelTags :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
     </div>

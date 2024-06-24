@@ -118,13 +118,14 @@ function refreshBrowser() {
   let fetchURI: string
   let fetchQuery: Object
   if (props?.onlineType != 'comments') {
+    let listsMod = props.onlineSubtype == 'list' ? LISTS_ON_PAGE : 9
     fetchURI = `${import.meta.env.VITE_API}/getLists.php`
     fetchQuery = {
       startID: 999999,
       searchQuery: SEARCH_QUERY.value,
       page: PAGE.value,
       path: "/getLists.php",
-      fetchAmount: LISTS_ON_PAGE,
+      fetchAmount: listsMod,
       sort: 0,
       type: props.onlineSubtype
     }
@@ -276,7 +277,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
-            {{ $t('homepage.newest') }}
+            {{ $t('other.newest') }}
           </button>
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             v-show="onlineSubtype != 'levels'"
@@ -368,7 +369,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
         </div>
 
         <!-- Loading -->
-        <div v-else-if="loading" class="flex flex-col gap-4 items-center">
+        <div v-else-if="loading" class="flex absolute left-1/2 flex-col gap-4 items-center mt-24 -translate-x-1/2">
           <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
           <p class="text-xl text-opacity-40">{{ $t('other.loading') }}...</p>
         </div>
@@ -397,8 +398,9 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove
           :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
+        </main>
         <!-- Page Switcher -->
-        <div class="flex gap-2 items-center mt-2" v-if="maxPages > 1">
+        <div class="flex gap-2 items-center mx-auto mt-2 w-max" v-if="maxPages > 1 && !loading">
           <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
             <img src="@/images/showCommsL.svg" class="w-4" alt="" />
           </button>
@@ -426,8 +428,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           <button class="ml-2 button" @click="switchPage(PAGE! + 1)">
             <img src="@/images/showComms.svg" class="w-4" alt="" />
           </button>
-        </div>
-      </main>
+      </div>
     </main>
   </section>
 </template>

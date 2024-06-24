@@ -1,6 +1,6 @@
 <script setup lang="ts">
-
 const emit = defineEmits(['closePopup'])
+
 </script>
 
 <template>

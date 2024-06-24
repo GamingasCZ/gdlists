@@ -36,8 +36,11 @@ function sanitizeInput($inputArray)
     return $inputArray;
 }
 
-function doRequest($mysqli, $queryTemplate, $values, $valueTypes)
+function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = false)
 {
+    global $debugMode;
+    if ($debugMode) error_log($queryTemplate);
+
     $query = $mysqli->prepare($queryTemplate);
 
     // Fill in template
@@ -55,6 +58,8 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes)
         return ["success" => true];
     }
 
+    if ($fetchAll)
+        return $result -> fetch_all(MYSQLI_ASSOC);
     return $result -> fetch_assoc();
 }
 

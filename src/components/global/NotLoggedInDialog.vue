@@ -17,7 +17,7 @@ getEmoji()
 
 <template>
   <section
-    class="m-auto flex w-[40rem] max-w-[95vw] flex-col items-center justify-around gap-4 rounded-lg bg-greenGradient px-8 py-3 text-white"
+    class="m-auto h-max mt-10 flex w-[40rem] max-w-[95vw] flex-col items-center justify-around gap-4 rounded-lg bg-greenGradient px-8 py-3 text-white"
   >
     <div
       class="flex gap-2 items-center px-3 py-2 bg-black bg-opacity-50 rounded-lg"

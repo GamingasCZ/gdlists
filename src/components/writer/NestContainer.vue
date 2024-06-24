@@ -64,7 +64,6 @@ const selectNestContainer = (e: Event) => {
 <template>
     <article
         @click.stop="selectNestContainer"
-        @dblclick="removeNestContainer"
         :style="{borderColor: borderColor}"
         class="p-0.5 border border-opacity-30 transition-colors duration-75 grow min-h-8"
         :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!border-none': !editable}"

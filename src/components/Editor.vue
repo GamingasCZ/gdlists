@@ -33,6 +33,7 @@ import parseText from "./global/parseEditorFormatting";
 import { dialog } from "./ui/sizes";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { getDominantColor } from "@/Reviews";
+import LevelBubble from "./global/LevelBubble.vue";
 
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
@@ -49,6 +50,7 @@ const doBackup = () => {
   notifStamp.value = saveBackup(listName.value, !!listHiddenSelected())
 }
 
+const favoriteLevels = ref<FavoritedLevel>()
 const backupData = ref({backupName: "", backupDate: "0", backupData: "", choseHidden: "0"})
 let autosaveInterval
 onMounted(() => {
@@ -63,6 +65,8 @@ onMounted(() => {
       backupData.value.backupData = <any>backupParsed.levelData
       backupData.value.choseHidden = backupParsed.listHidden
     }
+
+    favoriteLevels.value = JSON.parse(localStorage.getItem("favorites")!) ?? []
   }
 
   if (SETTINGS.value.autosave) {
@@ -96,7 +100,6 @@ if (props.editing) {
       }
       return
     }
-
     loadList(listData.data, listData.name, listData.hidden)
   }).catch(() => listExists.value = false)
 }
@@ -120,7 +123,7 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
         return level
       } else return level
     })
-    
+
     levelList.value = list
 
     // Add missing values
@@ -210,6 +213,7 @@ const enableMoveControls = (pos: number, nowOpenedIndex: number) => {
   currentlyOpenedCard.value = -1;
 };
 
+const favoritesSearch = ref("")
 const addFromFavorites = (level: FavoritedLevel) => {
   let addedLevel: Level = {
     levelName: level.levelName,
@@ -333,7 +337,7 @@ function removeList() {
     i++
     if (i == levelCards.length) clearInterval(hide)
   }, timeoutLength)
-  
+
 }
 
 function throwError(messsage: string, dblClickHelp: boolean) {
@@ -385,18 +389,18 @@ const useAccentColor = () => {
       @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
     ></TagPickerPopup>
   </DialogVue>
-  
+
   <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
     <BGImagePicker :source="levelList.titleImg" />
   </DialogVue>
 
   <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
     <DescriptionEditor
-      :editor-title="$t('editor.descriptionEditor')"
+      :edit-value="levelList"
     />
   </DialogVue>
 
-  
+
   <DialogVue :open="collabEditorOpen && levelList.levels.length > 0" @close-popup="closeCollabTools()" :title="$t('collabTools.funny1')" :width="dialog.xl">
     <CollabEditor
       :index="currentlyOpenedCard"
@@ -408,16 +412,19 @@ const useAccentColor = () => {
   <DialogVue :open="favoriteLevelPickerOpen" @close-popup="favoriteLevelPickerOpen = false" :title="$t('other.savedLevels')">
     <PickerPopup
       v-if="favoriteLevelPickerOpen"
-      :outer-error-text="$t('editor.maxLevels')"
-      :outer-error="levelList.levels.length >= 50"
-      @select-option="addFromFavorites($event)"
-      picker-data="@favorites"
-      picker-data-type="favoriteLevel"
-    />
+      v-model="favoritesSearch"
+    >
+      <template #error v-if="levelList.levels.length >= 50">
+        <span>{{ $t('editor.maxLevels') }}</span>
+      </template>
+      <template #default v-else="favoriteLevels">
+        <LevelBubble @pick="addFromFavorites($event)" v-for="level in favoriteLevels.filter(x => x.levelName.toLowerCase().includes(favoritesSearch))" :data="level" />
+      </template>
+    </PickerPopup>
   </DialogVue>
 
   <DialogVue :open="importDialogOpen" @close-popup="importDialogOpen = false" :title="$t('editor.importLevels')">
-    <LevelImportPopup @add-level="addLevel($event)" />
+    <LevelImportPopup @close-popup="importDialogOpen = false" @add-level="addLevel($event)" />
   </DialogVue>
 
   <DialogVue :open="imageBrowserOpen" @close-popup="imageBrowserOpen = false" :title="$t('editor.titleImage')" :width="dialog.large">
@@ -437,7 +444,7 @@ const useAccentColor = () => {
   />
   <div v-else-if="!hasLocalStorage()" class="flex flex-col gap-4 justify-center items-center mx-auto mt-5">
     <img src="../images/disCookies.svg" class="w-48 opacity-20" alt="">
-    <h1 class="max-w-sm text-2xl text-center text-white opacity-20">Nemáš povolené cookies, můžeš jen procházet seznamy!</h1>
+    <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
   </div>
 
   <ErrorPopup :error-text="errorMessage" :stamp="errorStamp" :show-dblclick-info="errorDblclickHelp" :previewing="previewingList"/>
@@ -524,7 +531,7 @@ const useAccentColor = () => {
           v-if="descriptionFocused || !levelList.description"
         ></textarea>
         <div v-else
-        class="overflow-auto overflow-y-auto px-2 h-full max-h-96 bg-black bg-opacity-20 rounded-md min-h-[72px] regularParsing grow"
+        class="overflow-auto overflow-y-auto px-2 h-full max-h-20 bg-black bg-opacity-20 rounded-md min-h-[72px] regularParsing grow"
         v-html="parseText(levelList.description)"
         ></div>
         <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-white bg-opacity-10 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
@@ -625,12 +632,12 @@ const useAccentColor = () => {
     >
       <EditorBackup v-if="levelList.levels.length == 0" :backup-data="backupData" @load-backup="loadBackup(); backupData.backupDate = '0'" @remove-backup="removeBackup(); backupData.backupDate = '0'"/>
 
-      <h2 class="text-xl text-center">{{ $t('editor.startHelp') }}</h2>
       <div v-if="!levelList.levels.length" class="mt-2 mb-8 w-full mx-auto max-w-[50rem]">
+        <h2 class="mb-3 text-xl text-center">{{ $t('editor.startHelp') }}</h2>
         <div class="flex gap-2 items-center max-sm:flex-col">
-          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addLevel.svg" class="w-8" alt="">Přidat level</button>
-          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addfromFaves.svg" class="w-8" alt="">Přidat z uložených</button>
-          <button class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/importLevels.svg" class="w-8" alt="">Importovat ze hry</button>
+          <button @click="addLevel()" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addLevel.svg" class="w-8" alt="">{{ $t('reviews.addLevel') }}</button>
+          <button @click="favoriteLevelPickerOpen = true" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addfromFaves.svg" class="w-8" alt="">{{ $t('editor.addFromSaves') }}</button>
+          <button @click="importDialogOpen = true" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/importLevels.svg" class="w-8" alt="">{{ $t('editor.importFromGD') }}</button>
         </div>
       </div>
 

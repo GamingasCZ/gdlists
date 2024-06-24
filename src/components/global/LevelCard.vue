@@ -17,6 +17,7 @@ interface Extras {
   translucentCard: boolean;
   guessingNow: boolean;
   diffGuessArray: [boolean, boolean, boolean];
+  hideRatings?: boolean
 }
 
 const props = defineProps<Level & Extras>();
@@ -270,7 +271,7 @@ onErrorCaptured(() => {
 
     <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
   
-    <RatingContainer v-if="ratings" :ratings="ratings[0]" :user-ratings="ratings[1]" />
+    <RatingContainer v-if="ratings && !hideRatings" :compact="false" :ratings="ratings[0]" :user-ratings="ratings[1]" />
   </section>
 </template>
 

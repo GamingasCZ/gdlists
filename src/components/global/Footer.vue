@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { provide, ref } from "vue";
 import HelpMenu from "../helpMenu/HelpMenu.vue";
 import ContactDialog from "../global/ContactDialog.vue";
 import Dialog from "./Dialog.vue";
@@ -7,6 +7,9 @@ import { dialog } from "../ui/sizes";
 
 const helpMenuOpen = ref<boolean>(false);
 const contactMenuOpen = ref<boolean>(false);
+const openContactPopup = () => contactMenuOpen.value = true
+provide("openContactPopup" , 'aaaa')
+
 </script>
 
 <template>
@@ -47,7 +50,7 @@ const contactMenuOpen = ref<boolean>(false);
           {{ $t('other.sourceCod') }}
         </button>
       </a>
-      <button class="p-1 underline rounded-md opacity-80" @click="contactMenuOpen = true">
+      <button id="contactButton" class="p-1 underline rounded-md opacity-80" @click="contactMenuOpen = true">
         {{ $t('other.contact') }}
       </button>
     </div>

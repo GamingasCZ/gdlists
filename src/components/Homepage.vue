@@ -58,7 +58,7 @@ const localStorg = ref(hasLocalStorage())
 
 <template>
   <DialogVue :width="dialog.large" :open="firstTimeUser && returnedFromLogin" header-disabled :close-popup="returnedFromLogin = false">
-    <LoggedInPopup :username="returnfromLoginName || 'g4mingaz'" :pfplink="returnfromLoginPFP || 'https://cdn.discordapp.com/avatars/336373548526469120/d9d484b46aa6a0310fdf9d37ff597825.png'" />
+    <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName || 'g4mingaz'" :pfplink="returnfromLoginPFP || 'https://cdn.discordapp.com/avatars/336373548526469120/d9d484b46aa6a0310fdf9d37ff597825.png'" />
   </DialogVue>
   
   <div id="loginToast" v-if="!firstTimeUser && localStorg"
@@ -121,8 +121,11 @@ const localStorg = ref(hasLocalStorage())
   </section>
 
   <main id="homepageSections" class="grid" :style="{ gridTemplateColumns: columns }">
+    <ListSection :style="{gridColumn: `1 / span ${SETTINGS.homepageColumns}`}" :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
+      :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" content-type="/getLists.php?homepage=2" :list-type="2" />
+    
     <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
-      :empty-text="$t('homepage.listsUnavailable')" extra-action="/browse/lists" content-type="/getLists.php?homepage=1" />
+      :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" content-type="/getLists.php?homepage=1" />
 
     <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
       content-type="@pinnedLists" :max-items="5" />

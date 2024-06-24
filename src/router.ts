@@ -75,7 +75,7 @@ router.afterEach(() => window.scrollTo(0,0))
 
 export const loadingProgress = ref(0)
 let loadStart: number
-router.beforeEach(async () => {
+router.beforeEach(async (to, from) => {
 
   // Start loading bar
   loadingProgress.value = 0
@@ -83,13 +83,15 @@ router.beforeEach(async () => {
     loadingProgress.value = 99
   }, 5)
   
-      document.documentElement.style.setProperty("--siteBackground", "");
-
+  
   if (
     getComputedStyle(document.documentElement).getPropertyValue(
       "--primaryColor"
     ) == document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
+    if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
+    
+      document.documentElement.style.setProperty("--siteBackground", "");
       document.querySelector("nav")?.classList.add("slidingNavbar");
   
       setTimeout(() => {

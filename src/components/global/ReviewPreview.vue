@@ -97,7 +97,7 @@ let xPos = ["left", "center", "right"][background[3]]
 <template>
   <component :is="disableLink ? 'button' : 'RouterLink'"
     :to="`/review/${url.toString()}`"
-    class="flex flex-col w-5/6 max-w-6xl cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
+    class="flex flex-col w-full max-w-96 cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(listColor),
       borderColor: listColor.darken(2).hex(),
@@ -125,9 +125,9 @@ let xPos = ["left", "center", "right"][background[3]]
       </div>
     </div>
 
-    <section class="flex flex-col items-start m-1">
-      <h2 class="text-xl font-bold leading-tight">{{ name }}</h2>
-      <div class="w-full">
+    <section class="flex overflow-hidden flex-col items-start m-1">
+      <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name) }}</h2>
+      <div class="overflow-hidden w-full text-ellipsis">
         <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-4" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>

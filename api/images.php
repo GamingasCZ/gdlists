@@ -10,9 +10,9 @@ require("globals.php");
 -1 = empty request
 0 = database error
 */
-$MAX_STORAGE = 10_000_000;
+$MAX_STORAGE = 10000000;
 $MAX_FILECOUNT = 50;
-$MAX_UPLOADSIZE = 2_000_000;
+$MAX_UPLOADSIZE = 5000000;
 
 $user = checkAccount();
 if (!$user) die(-2);
@@ -71,10 +71,12 @@ switch ($method) {
         // Create image
         $img = imagecreatefromstring($DATA);
         if (!$img) die("-5");
-        imagesavealpha($img, true);
+
+        $maxsize = imagescale($img, 1920);
+        imagesavealpha($maxsize, true);
         
         // Save image
-        imagewebp($img, $userPath . "/" . $imageHash . ".webp", 50);
+        imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 60);
         $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
         
         // Create thumbnail
@@ -85,6 +87,7 @@ switch ($method) {
 
         // Free images
         imagedestroy($img);
+        imagedestroy($maxsize);
         imagedestroy($thumbnail);
 
         doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$user["id"], $imageHash, $compressedFilesize], "ssi");

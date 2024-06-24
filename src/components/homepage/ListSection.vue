@@ -5,12 +5,14 @@ import type {
   FavoritedLevel,
   ListCreatorInfo,
   ListPreview,
+  ReviewDetailsResponse,
 } from "../../interfaces";
 import FavoritePreview from "../global/FavoritePreview.vue";
 import ListPreviewElement from "../global/ListPreview.vue";
 import cookier from "cookier";
 import { oldLists } from "./officialLists";
 import { hasLocalStorage } from "@/siteSettings";
+import ReviewPreview from "../global/ReviewPreview.vue";
 
 const props = defineProps({
   headerName: { type: String, required: true },
@@ -26,6 +28,7 @@ const props = defineProps({
 
 const users = ref<ListCreatorInfo[]>();
 const lists = ref<ListPreview[] | FavoritedLevel[]>();
+const reviewDetails = ref<ReviewDetailsResponse>();
 
 if (props.contentType?.startsWith("/")) {
   // link
@@ -36,6 +39,7 @@ if (props.contentType?.startsWith("/")) {
     .then((response: AxiosResponse) => {
       lists.value = response.data[0];
       users.value = response.data[1];
+      reviewDetails.value = response.data[4]
     });
 } else if (props.contentType?.startsWith("@")) {
   if (!hasLocalStorage()) lists.value = []
@@ -97,6 +101,7 @@ const clearViewed = () => {
 
     <div
       class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs sm:ml-14"
+      :class="{'!flex-row max-w-7xl flex-wrap': listType == 2}"
     >
       <p class="text-yellow-200 max-sm:ml-12" v-if="!lists?.length">
         - {{ emptyText }} -
@@ -105,10 +110,10 @@ const clearViewed = () => {
         v-else
         v-for="level in lists"
         v-bind="level"
-        class="max-sm:w-full"
         :user-array="users"
         :hide-remove="true"
-        :is="[ListPreviewElement, FavoritePreview][listType]"
+        :review-details="reviewDetails"
+        :is="[ListPreviewElement, FavoritePreview, ReviewPreview][listType]"
         @unpin-list="lists.splice($event, 1)"
       />
     </div>

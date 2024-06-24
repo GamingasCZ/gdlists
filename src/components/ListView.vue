@@ -21,7 +21,6 @@ import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
 import { useI18n } from "vue-i18n";
-import LikePopup from "./levelViewer/LikePopup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
@@ -36,6 +35,7 @@ import { DEFAULT_REVIEWDATA, flexNames, parseReviewContainers, reviewData } from
 import { onUpdated } from "vue";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -93,8 +93,8 @@ function loadList(firstRandomPass = false) {
         }
 
         LIST_DATA.value = res.data[0];
-        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
-        LIST_CREATORDATA.value = res.data[1]?.[0]
+        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1].username;
+        LIST_CREATORDATA.value = res.data[1]
         LIST_RATING.value = res.data[3]
 
         // Use new levelList structure (put levels into 'levels' array)
@@ -165,7 +165,7 @@ function loadReview() {
   NONPRIVATE_LIST = true // damn you, old gamingsus >:(
 
   axios
-    .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: props.listID}})
+    .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: encodeURIComponent(props.listID).replaceAll("%2B", "+")}})
     .then((res: AxiosResponse) => {
       try {
         if (res.data == 2) {
@@ -174,13 +174,14 @@ function loadReview() {
         }
 
         LIST_DATA.value = res.data[0];
+        LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
         reviewData.value.levels = LIST_DATA.value.data.levels;
         reviewData.value.ratings = LIST_DATA.value.data.ratings;
         REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
         LIST_RATING.value = res.data[3]
 
-        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1][0].username;
-        LIST_CREATORDATA.value = res.data[1]?.[0]
+        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1].username;
+        LIST_CREATORDATA.value = res.data[1]
 
         if (hasLocalStorage()) {
           favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
@@ -190,12 +191,11 @@ function loadReview() {
             recentlyViewed.filter((list: ListPreview) => list.url == props.listID)
               .length == 0; // Has not been viewed yet
         }
-
         if (addIntoRecentlyViewed) {
           recentlyViewed.push({
             creator: LIST_CREATOR.value,
             url: props.listID,
-            name: LIST_DATA.value?.name!,
+            name: encodeURIComponent(LIST_DATA.value?.name!),
             uploadDate: Date.now(),
             hidden: "0",
           });
@@ -281,7 +281,7 @@ const toggleListPin = () => {
     }
     else {
       let pinData = {
-        name: LIST_DATA.value.name,
+        name: encodeURIComponent(LIST_DATA.value.name),
         creator: LIST_CREATOR.value,
         uploadDate: Date.now(),
         hidden: LIST_DATA.value.hidden,
@@ -302,14 +302,13 @@ const toggleListPin = () => {
 
 const getURL = () => {
   let base = `${window.location.host}/gdlists/s/`
-  if (props.isReview) return base + LIST_DATA.value?.url
+  if (props.isReview) return base + window.location.pathname.split("/").toReversed()[0]
   else return base + (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
 const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
-const likeNotLoggedInOpen = ref(false)
 const uploadedDialogShown = ref(0)
 const reviewLevelsOpen = ref(false)
 if (hasLocalStorage()) {
@@ -320,18 +319,20 @@ if (hasLocalStorage()) {
   }
 }
 
-onUpdated(() => {
+watch(router.currentRoute, () => {
     // load viewed review
-    let viewedReview = sessionStorage.getItem("reviewScroll")
-    if (viewedReview) {
-      backToReview.value = JSON.parse(viewedReview)
-      sessionStorage.removeItem("reviewScroll")
-    }
+    if (!hasLocalStorage()) return
+
     if (backToReview.value) {
       document.documentElement.scrollTop = backToReview.value.scrollY
       backToReview.value = undefined
     } 
-      
+
+    let viewedReview = localStorage.getItem("reviewScroll")
+    if (viewedReview) {
+      backToReview.value = JSON.parse(viewedReview)
+      localStorage.removeItem("reviewScroll")
+    } 
 })
 
 const listActions = (action: string) => {
@@ -417,6 +418,13 @@ const saveCollab = (ind: number) => {
   localStorage.setItem("savedCollabIDs", JSON.stringify(currSavedIDs))
 }
 
+const jumpToContent = (type: string, index: number) => {
+  // let get = document.querySelector(`p[data-type=${type}]:nth-of-type(${index+1})`)
+  let get = document.querySelectorAll(`div[data-type=${type}]`).item(index-1)
+  get?.scrollIntoView({'behavior': "smooth"})
+  jumpToPopupOpen.value = false
+}
+
 provide("settingsTitles", CONTAINERS)
 provide("saveCollab", saveCollab)
 
@@ -428,12 +436,8 @@ const collabViewerColor = ref("")
   <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
     backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
-
-  <DialogVue :open="likeNotLoggedInOpen" @close-popup="likeNotLoggedInOpen = false" :width="dialog.small">
-    <LikePopup @close-popup="likeNotLoggedInOpen = false" />
-  </DialogVue>
   
-  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.small">
+  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.medium">
     <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
   
@@ -442,7 +446,7 @@ const collabViewerColor = ref("")
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
         <span>{{ $t('listViewer.noGuessJumping') }}</span>
       </template>
-      <FormattingBubble v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS" :text="link[1]" :type="link[0]" />
+      <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS" :text="link[3]" :icon-index="link[2]" />
       <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="!isReview || reviewLevelsOpen" v-for="level in LIST_DATA.data.levels" :data="level" />
   </PickerPopup>
   </DialogVue>
@@ -488,7 +492,7 @@ const collabViewerColor = ref("")
       <!-- Back to review from link -->
       <RouterLink v-if="backToReview" @click="backToReview = -1" :to="backToReview.id" class="flex gap-2 p-2 mx-auto w-max rounded-md bg-greenGradient">
         <img src="@/images/showCommsL.svg" class="w-3" alt="">
-        <span>Zpět na <b>{{ backToReview.name }}</b></span>
+        <span>{{ $t('other.backTO') }} <b>{{ backToReview.name }}</b></span>
       </RouterLink>
 
       <!-- Nonexistent list -->
@@ -528,7 +532,7 @@ const collabViewerColor = ref("")
       </DialogVue>
 
       <!-- List -->
-      <div v-if="!isReview" class="flex flex-col gap-4">
+      <div v-if="!isReview" class="flex flex-col gap-4 items-center">
         <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
           class="levelCard"
           :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
@@ -580,7 +584,7 @@ const collabViewerColor = ref("")
         </section>
       </div>
 
-      <div v-if="reviewLevelsOpen" class="flex flex-col gap-4">
+      <div v-if="reviewLevelsOpen" class="flex flex-col gap-4 items-center">
         <LevelCard v-for="(level, index) in LIST_DATA?.data.levels"
           class="levelCard"
           v-bind="level"

@@ -5,10 +5,11 @@ require("globals.php");
 $returnData = [];
 
 function parseLevelList($response, $morePages = false) {
-    // if ($response == -1) { // No levels found
-    //     http_response_code(404);
-    //     die(-1);
-    // }
+    if ($response == -1) { // No levels found
+        http_response_code(400);
+        die(-1);
+    }
+    error_log($response);
     $allLevels = [];
     $fetchData = explode("#",$response);
     $levelData = explode("|", $fetchData[0]);
@@ -49,7 +50,7 @@ switch (array_keys($_GET)[0]) {
         break;
     }
     case "idList": {
-        $returnData = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>10, "str"=>$_GET["list"]], []));
+        $returnData = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["gameVersion"=>"22", "secret"=>"Wmfd2893gb7", "str"=>$_GET["list"], "type"=>10], []));
         break;
     }
     case "userAll": {
@@ -58,7 +59,7 @@ switch (array_keys($_GET)[0]) {
         $playerID = explode(":", $accountIDReq)[3];
 
         list($returnData, $pages) = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5, "str"=>$playerID], []), true);
-        for ($i=0; $i < ceil($pages[0]/$pages[2]); $i++) { 
+        for ($i=0; $i < ceil($pages[0]/$pages[2]) - 1; $i++) { 
             $returnData = array_merge($returnData, parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5,"page"=>($i), "str"=>$playerID], []), false));
         }
         break;

@@ -202,6 +202,7 @@ export interface LevelSearchResponse {
   difficulty: number;
   cp: number;
   platf: boolean
+  selected?: boolean
 }
 
 export interface userDataFetchResponse {
@@ -239,7 +240,7 @@ export interface ReviewList {
   ratings: ReviewRating[]
   defaultRatings: ReviewRating[]
   settings: ReviewSettings
-  rateTheme: number
+  disabledRatings: number
   private: boolean
   transparentPage: 0 | 1 | 2
   language: number

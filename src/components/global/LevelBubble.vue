@@ -7,9 +7,15 @@ const props = defineProps<{
   data: FavoritedLevel | Level;
 }>();
 
-const color = props.data.levelColor ??
-              typeof props.data.color == 'string'
-                ? fixHEX(props.data.color) : chroma.hsl(...props.data.color).hex()
+const emit = defineEmits<{
+  (e: "pick", level: FavoritedLevel | Level): void
+}>();
+
+let col = props.data.levelColor ?? props.data.color
+
+const color = col ??
+typeof col == 'string'
+? fixHEX(col) : chroma.hsl(...col).hex()
 
 const isCollab = typeof props.data.creator != "string"
 </script>
@@ -17,6 +23,7 @@ const isCollab = typeof props.data.creator != "string"
   <button
     :style="{ backgroundColor: color }"
     class="hover:translate-x-1 transition-transform duration-75 rounded-md px-2 py-1 text-left leading-4 focus-visible:!outline"
+    @click="emit('pick', data)"
   >
     <h3 class="font-bold">
       <img

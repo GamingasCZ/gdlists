@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const amount = ref(props.commAmount)
-const commentType = props.isReview ? "review" : "list"
+const commentType = computed(() => props.isReview ? "review" : "list")
 const showingOnce = ref(false)
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
 watch(props, () => { // only refresh comments once

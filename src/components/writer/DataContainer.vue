@@ -64,7 +64,7 @@ const focus = ref(false)
 </script>
 
 <template>
-	<div @click.stop="emit('hasFocus', mainText!); focus = true" class="relative reviewContainer outline-[2px] min-h-8 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
+	<div :data-type="type" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer outline-[2px] min-h-4 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
 		<component
 			v-if="canEditText"
 			:is="editable ? (type.startsWith('heading') ? 'input' : 'textarea') : 'p'"
@@ -80,10 +80,11 @@ const focus = ref(false)
 			:value="text"
 			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
 			data-modf="0"
+			:style="{textAlign: 'inherit', color: 'inherit'}"
 			:class="childStyling || []">
 		</component>
 		<slot></slot>
-		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border">
+		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border max-sm:right-0">
 			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
 		</div>
 

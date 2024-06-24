@@ -114,7 +114,7 @@ const deployPeterGriffin = async (e: Event) => {
 
       <!-- Button underline -->
       <hr v-if="scrollerInd != 0"
-        class="absolute w-[1px] bg-white border-none h-1 bottom-0 origin-left transition-transform"
+        class="absolute w-[1px] bg-white border-none h-1 z-10 bottom-0 origin-left transition-transform"
         :style="{ transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff / scrollerWidth}px)` }">
 
       <!-- Editor -->
@@ -126,11 +126,11 @@ const deployPeterGriffin = async (e: Event) => {
         
         <Transition name="fadeSlide">
           <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full min-w-max text-lg max-sm:top-14 bg-greenGradient" v-if="editorDropdownOpen">
-            <RouterLink to="/make/list" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
+            <RouterLink @click="modScrollerWidth" to="/make/list"  class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
               <img src="@/images/browseMobHeader.svg" class="w-10 scale-[0.6]" alt="">
               <span>{{ $t('other.list') }}</span>
             </RouterLink>
-            <RouterLink to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
+            <RouterLink @click="modScrollerWidth" to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
               <img src="@/images/reviews.svg" class="w-10 scale-[0.6]" alt="">
               <span>{{ $t('other.review') }}</span>
             </RouterLink>

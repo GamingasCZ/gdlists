@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, reactive, ref } from "vue";
+import { provide, reactive, ref, watch } from "vue";
 import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
@@ -14,7 +14,7 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview } from "@/Reviews";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -24,22 +24,41 @@ import { modifyListBG } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
+import RemoveListPopup from "./editor/RemoveListPopup.vue";
+import TextEditor from "./global/TextEditor.vue";
+import UserDialog from "./writer/UserDialog.vue";
+import { i18n } from "@/locales";
+import { hasLocalStorage } from "@/siteSettings";
+import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
 const props = defineProps<{
     reviewID?: string
+    isLoggedIn: boolean
     editing?: boolean
 }>()
 
 let isNowHidden = false
 if (props.editing) {
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", {id: props.reviewID, type: 'review'}).then(res => {
-        isNowHidden = res.data.hidden != 0
-        reviewData.value = res.data.data
-        modifyListBG(reviewData.value.pageBGcolor, false, true)
-    })
+        if (res.data?.data) {
+            isNowHidden = res.data.hidden != 0
+            reviewData.value = res.data.data
+            modifyListBG(reviewData.value.pageBGcolor, false, true)
+        }
+        else {
+            openDialogs.editError = true
+        }
+    }).catch(() => openDialogs.editError = true)
 }
+
+watch(props, () => {
+    if (!props.editing) {
+        reviewData.value = DEFAULT_REVIEWDATA()
+        modifyListBG(reviewData.value.pageBGcolor, true, true)
+    }
+})
 
 document.body.addEventListener("click", () => {
     selectedContainer.value = [-1, null]
@@ -47,15 +66,19 @@ document.body.addEventListener("click", () => {
 })
 
 const openDialogs = reactive({
-    "settings": false,
-    "levels": false,
-    "tags": false,
-    "collabs": false,
-    "lists": [false, 0],
-    "bgPicker": [false, 0],
-    "ratings": false,
-    "bgPreview": false,
-    "imagePicker": [false, 0]
+    settings: false,
+    levels: false,
+    tags: false,
+    collabs: false,
+    lists: [false, 0],
+    bgPicker: [false, 0],
+    ratings: false,
+    bgPreview: false,
+    imagePicker: [false, 0],
+    removeDialog: false,
+    description: false,
+    editError: false,
+    userAdder: [false, 0]
 })
 
 const previewMode = ref(true)
@@ -136,6 +159,17 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 
 }
 
+const columnCommand = (index: number) => {
+    switch (index) {
+        case 0: addContainer("twoColumns", -1); break;
+        case 1: addContainer("twoColumns", 1); break;
+        case 2: moveContainer(selectedNestContainer[0], -1); break;
+        case 3: moveContainer(selectedNestContainer[0], 1); break;
+        case 4: reviewData.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer[1], 1); break;
+        case 5: removeContainer(selectedNestContainer[0]); break;
+    }
+}
+
 const setFormatting = (format: string) => {
     switch (format) {
         case "view": previewMode.value = !previewMode.value; break;
@@ -179,8 +213,14 @@ const modifyImageURL = (newUrl: string) => {
     // Review background
     if (openDialogs.imagePicker[1] == -1) {
         reviewData.value.titleImg[0] = newUrl
+        let img = document.createElement("img")
+        img.src = newUrl
+        img.onload = () => {
+            reviewData.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
+            img.remove()
+        }
     }
-    // Review background
+    // Review thumbnail
     else if (openDialogs.imagePicker[1] == -2) {
         reviewData.value.thumbnail[0] = newUrl
     }
@@ -212,28 +252,61 @@ const startUpload = () => {
     openDialogs.settings = true
 }
 
+const reviewUploadErrors = (err: number) => {
+    let errs = {
+        "4": i18n.global.t('reviews.noChanges'),
+        "2": i18n.global.t('reviews.loginFail'),
+        "7": i18n.global.t('reviews.changesFail')
+    }
+    let errText = errs[err] ?? i18n.global.t('reviews.unexpectedError', [err])
+
+    errorStamp.value = Date.now()
+    errorText.value = errText
+}
+
+const uploadInProgress = ref(false)
 const uploadReview = () => {
     if (!checkForErrors()) {
         openDialogs.settings = false
         return
     }
     
+    uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
         sessionStorage.setItem("uploadFinished", "1")
-        // todo: add error checking
-        router.replace(`/review/${res.data[0]}`)
+
+        if (res.data[0] != -1) router.replace(`/review/${res.data[0]}`)
+        else reviewUploadErrors(res.data[1])
+
+        uploadInProgress.value = false
     })
+        .catch(() => {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.uploadFail')
+            uploadInProgress.value = false
+        })
 }
 
 const removeReview = () => {
+    uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/removeList.php", {id: props.reviewID, type: 'review'}).then(res => {
-        router.replace("/browse/reviews")
+        if (res.data == 3) router.replace("/browse/reviews")
+        else {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.removeFail')
+        }
+        uploadInProgress.value = false
+    }).catch(() => {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.removeFail')
+        uploadInProgress.value = false
     })
 }
 
 const updateReview = () => {
     if (!checkForErrors()) return
 
+    uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/updateList.php", {
         id: props.reviewID,
         type: 'review',
@@ -245,8 +318,17 @@ const updateReview = () => {
     }) 
         .then(res => {
         sessionStorage.setItem("uploadFinished", "2")
-        router.replace(`/review/${res.data}`)
+
+        if (res.data[0] != -1) router.replace(`/review/${res.data[0]}`)
+        else reviewUploadErrors(res.data[1])
+
+        uploadInProgress.value = false
     })
+        .catch(() => {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.uploadFail')
+            uploadInProgress.value = false
+        })
 }
 
 onUnmounted(() => {
@@ -258,17 +340,48 @@ const preUpload = ref(false)
 </script>
 
 <template>
-    <main class="p-2">
+    <section v-if="openDialogs.editError" class="flex flex-col gap-3 items-center mt-10 text-center text-white opacity-40">
+        <img class="w-64" src="@/images/listError.svg" alt="">
+        <span class="text-2xl">{{ $t('reviews.editError') }}</span>
+    </section>
+
+    <div v-else-if="!isLoggedIn && hasLocalStorage()">
+        <NotLoggedInDialog
+            :mess="$t('editor.loginToCreateReviews')"
+        />
+    </div>
+
+    <div v-else-if="!hasLocalStorage()" class="flex flex-col gap-4 justify-center items-center mx-auto mt-5">
+        <img src="../images/disCookies.svg" class="w-48 opacity-20" alt="">
+        <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
+    </div>
+
+    <main v-else class="p-2">
         <ErrorPopup
             :error-text="errorText"
             :previewing="false"
             :stamp="errorStamp"
         />
 
+        <Transition name="fade">
+            <RemoveListPopup v-if="openDialogs.removeDialog" is-review @delete-list="removeReview" @close-popup="openDialogs.removeDialog = false" />
+        </Transition>
+
+        <DialogVue :open="openDialogs.description" @close-popup="openDialogs.description = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
+            <TextEditor
+            :edit-value="reviewData"
+            />
+        </DialogVue>
+
         <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
         <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false" :title="$t('other.settings')" :width="dialog.medium">
             <WriterSettings :uploading="preUpload" @upload="uploadReview" />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.userAdder[0]" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('other.add')" :side-button-disabled="reviewData.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10" @close-popup="openDialogs.userAdder[0] = false" :width="dialog.large">
+            <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
+            <UserDialog />
         </DialogVue>
 
         <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
@@ -303,8 +416,9 @@ const preUpload = ref(false)
         
         <Header
             :editing="editing"
+            :uploading="uploadInProgress"
             @update="updateReview"
-            @remove="removeReview"
+            @remove="openDialogs.removeDialog = true"
             @upload="startUpload"
             @open-dialog="openDialogs[$event] = true"
         />
@@ -312,13 +426,13 @@ const preUpload = ref(false)
         <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
             <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
-                <input v-model="reviewData.reviewName" type="text" :disabled="editing" :placeholder="$t('reviews.reviewName')" class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
+                <input v-model="reviewData.reviewName" type="text" :maxlength="40" :disabled="editing" :placeholder="$t('reviews.reviewName')" class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
-                    <input type="text" v-once v-model="reviewData.tagline" autofocus class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400" :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
+                    <input type="text" v-once :maxlength="60" v-model="reviewData.tagline" autofocus class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400" :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
                     <button @click="reviewData.tagline = ''; tagline = false">
                         <img src="@/images/trash.svg" alt="" class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md group-focus-within:block button">
                     </button>
@@ -327,14 +441,16 @@ const preUpload = ref(false)
 
             <!-- Formatting -->
             <FormattingBar
+                :selected-nest="selectedNestContainer"
                 @set-formatting="setFormatting"
                 @add-container="addContainer"
                 @set-alignment="setAlignment(selectedContainer[0], $event)"
+                @column-command="columnCommand($event)"
             />
 
             <!-- Editor -->
-            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode,'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
-                <ReviewHelp v-if="!reviewData.containers.length" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
+            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+                <ReviewHelp v-if="!reviewData.containers.length" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
 
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
@@ -373,7 +489,7 @@ const preUpload = ref(false)
                         />
                     </div>
                 </DataContainer>
-                <button @click="addContainer('default')" v-show="reviewData.containers.length && previewMode" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
+                <button @click="addContainer('default')" v-show="previewMode" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span>{{ $t('reviews.addParagraph') }}</span>
                 </button>

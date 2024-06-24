@@ -13,6 +13,7 @@ import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { dialog } from "../ui/sizes";
+import { getDominantColor } from "@/Reviews";
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -46,7 +47,7 @@ const loadingImages = ref(true)
 if (!storageCache) {
     axios.get(import.meta.env.VITE_API + "/images.php?storage").then(res => {
         storage.value = res.data
-    
+
         // Fetch images
         if (storage.value.filecount > 0) refreshContent()
         else loadingImages.value = false
@@ -74,7 +75,7 @@ const removeImage = (hash: string, external: boolean) => {
             uploadingImage.value = 0
             if (res.data == "-3") return notify(5)
             if (res.data == "-5") return notify(9)
-            
+
             storage.value = res.data
             images.value.splice(images.value.indexOf(hash), 1)
             loadingImages.value = false
@@ -86,7 +87,7 @@ const removeImage = (hash: string, external: boolean) => {
             uploadingImage.value = 0
             notify(5)
         })
-        
+
         removeConfirmationOpen.value = -1
     }
     else {
@@ -139,20 +140,20 @@ const uploadExternalImage = async (link: string) => {
             img.onerror = () => err("Image not found :D")
             img.remove()
         })
-        
+
         await load.catch((err) => {
             notify(0)
             loadingImages.value = false
             return err;
         })
-        
+
         await load.then(() => {
-            if (externaImages.value.includes(extImgInput.value)) {
-                emit("pickImage", extImgInput.value)
+            if (externaImages.value.includes(link)) {
+                emit("pickImage", link)
                 emit('closePopup')
             }
             else {
-                externaImages.value.splice(0, 0, extImgInput.value)
+                externaImages.value.splice(0, 0, link)
                 externaImages.value = externaImages.value.slice(0, 20)
             }
             localStorage.setItem("externalImages", JSON.stringify(externaImages.value))
@@ -164,16 +165,26 @@ const uploadExternalImage = async (link: string) => {
 
 const previewImage = ref(-1)
 const pickImage = (index: number, external: boolean) => {
+    let url;
+    if (external) url = externaImages.value[index]
+    else url = `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`
+
     if (props.unselectable) {
+        let el = document.createElement("img")
+        el.src = url
         previewImage.value = index
+        el.onload = () => {
+            let getColor = getDominantColor(el)
+            previewDominant.value = `linear-gradient(9deg, ${getColor.darken().hex()}, ${getColor.brighten().hex()})`
+            el.remove()
+        }
         return
     }
     else {
         if (props.disableExternal)
             emit('pickImage', images.value[index])
         else {
-            if (external) emit('pickImage', externaImages.value[index])
-            else emit('pickImage', `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`)
+            emit('pickImage', url)
         }
         emit('closePopup')
     }
@@ -194,7 +205,7 @@ const downloadImage = (hash: string, external: boolean) => {
     if (external) navigator.clipboard.writeText(hash)
     else {
         let link = document.createElement("a")
-        link.href = `${pre}/userContent/${storage.value.uid}/${hash}.webp`
+        link.href = `${pre}/userContent/${storage.value.uid}/${images.value[hash]}.webp`
         link.click()
         link.remove()
     }
@@ -211,6 +222,8 @@ const imageHovering = ref(-1)
 const dropdown = ref()
 
 const imageAction = (id: number, external: boolean, val: string | number) => {
+    previewImage.value = -1
+    console.log("aaaa")
     switch (id) {
         case 0: // Remove
             startRemoval(val); break
@@ -256,6 +269,7 @@ onBeforeUnmount(() => {
     document.removeEventListener("keydown", modShift)
     document.removeEventListener("keyup", modShift)
 })
+const previewDominant = ref()
 
 const button = ref()
 </script>
@@ -264,13 +278,13 @@ const button = ref()
     <div class="flex gap-10 justify-between mx-2 mb-2">
         <Notification :content="notifContent" :title="$t('other.error')" icon="error" :stamp="notifStamp" />
 
-        <Dialog :title="$t('other.preview')" :width="dialog.large" :open="previewImage >= 0" @close-popup="previewImage = -1">
+        <Dialog :custom-color="previewDominant" :title="$t('other.preview')" :width="dialog.large" :open="previewImage >= 0" @close-popup="previewImage = -1">
             <div class="flex relative flex-col gap-2 items-center p-2 w-full bg-black bg-opacity-40">
                 <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="absolute inset-0 w-full max-w-full h-full text-center text-white rounded-md opacity-50 mix-blend-overlay blur-lg pointer-events-none">
                 <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="w-max pointer-events-none isolate max-w-full text-white max-h-[80vh] text-center rounded-md">
                 <div class="grid grid-cols-2 gap-2 w-full">
-                    <button @click="imageAction(0, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/trash.svg">Smazat</button>
-                    <button @click="imageAction(1, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/copy.svg">Stáhnout</button>
+                    <button @click="imageAction(0, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/trash.svg">{{ $t('editor.remove') }}</button>
+                    <button @click="imageAction(1, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/copy.svg">{{ $t('other.download') }}</button>
                 </div>
             </div>
         </Dialog>
@@ -293,7 +307,7 @@ const button = ref()
 
         <!-- External image input -->
         <form v-if="currentTab == 1" action="." @submit.prevent="uploadExternalImage($event.target[0].value)" class="w-full">
-            <input :placeholder="$t('other.enterURI')" :disabled="loadingImages" @change="uploadExternalImage($event.target.value)" @paste="uploadExternalImage($event.target.value)"
+            <input :placeholder="$t('other.enterURI')" :disabled="loadingImages" @change="uploadExternalImage($event.target.value)" @paste="uploadExternalImage($event.clipboardData?.getData('Text'))"
                 class="p-1 pl-8 w-full bg-white bg-opacity-20 rounded-md transition-opacity disabled:opacity-40">
         </form>
 
@@ -323,7 +337,7 @@ const button = ref()
             class="absolute w-full h-full opacity-0 pointer-events-none">
 
         <!-- Images -->
-        <div class="flex flex-wrap gap-4 justify-evenly m-4" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
+        <div class="grid grid-cols-4 gap-4 m-4" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
             <button v-for="(image, index) in images"
                 @click="pickImage(index, false)"
                 @auxclick="startRemoval(index)"
@@ -336,16 +350,16 @@ const button = ref()
                     class="absolute top-1 right-1 z-20 w-5 bg-white rounded-full duration-75">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown :button="button[index]" @close="imageOptsShown = -1" @picked-option="imageAction($event, false, index)" v-if="imageOptsShown == index" :options="[$t('editor.remove'), $t('other.download')]" :title="$t('other.options')" />
+                    <Dropdown :button="button[index]" @close="imageOptsShown = -1" @picked-option="startRemoval(index)" v-if="imageOptsShown == index" :options="[$t('editor.remove'), $t('other.download')]" :title="$t('other.options')" />
                 </button>
-                
-                <img :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
+
+                <img loading="lazy" :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
                     class="object-cover z-10 w-full h-full transition-transform pointer-events-none aspect-auto" :class="{'hover:scale-125': !unselectable}">
             </button>
         </div>
 
-        <!-- Images -->
-        <div class="flex flex-wrap gap-4 justify-evenly m-4" v-show="currentTab == 1">
+        <!-- External Image -->
+        <div class="grid grid-cols-4 gap-4 m-4" v-show="currentTab == 1">
             <button v-for="(image, index) in externaImages"
                 @click="pickImage(index, true)"
                 @auxclick="removeImage(externaImages[index], true)"
@@ -356,10 +370,10 @@ const button = ref()
                     class="absolute top-1 right-1 z-20 w-5 overflow-clip bg-white rounded-full opacity-0 transition-opacity duration-75 button group-hover:opacity-100">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown  @close="imageOptsShown = -1" @picked-option="imageAction($event, image, false)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Odkaz']" :title="'Možnosti'" />
+                    <Dropdown @close="imageOptsShown = -1" @picked-option="imageAction($event, image, false)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Odkaz']" :title="'Možnosti'" />
                 </button>
 
-                <img :src="image" alt="" class="object-cover z-10 w-full h-full aspect-auto">
+                <img loading="lazy" :src="image" :alt="image" class="object-cover z-10 w-full h-full aspect-auto">
             </button>
         </div>
 
@@ -390,7 +404,7 @@ const button = ref()
         </div>
 
         <Transition name="fade">
-            <div v-show="uploadingImage" class="sticky bottom-0 w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
+            <div v-show="uploadingImage" class="sticky inset-full w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
                 <div class="absolute bottom-0 w-full text-3xl text-center">
                     <h2 class="opacity-60">{{ uploadingImage == 2 ? $t('other.removing') : $t('other.uploading') }}...</h2>
                     <div :class="{'invert': uploadingImage == 2}" class="relative mt-3 h-2 overflow-clip rounded-b-md border-none bg-lof-400">

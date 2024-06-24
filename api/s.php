@@ -10,6 +10,7 @@ Return codes:
 
 require("globals.php");
 
+$isReview = 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli->connect_errno) {
   echo "0";
@@ -30,10 +31,9 @@ function parseResult($rows) {
   $listMaker;
   if ($rows["creator"] == "") {
     // Fetch comment amount
-    $query = sprintf("SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=%s", $rows["uid"]);
+    $res = doRequest($mysqli, "SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    if (array_key_exists($res, "error")) die();
 
-    $result = $mysqli -> query($query) or die($mysqli -> error);
-    $users = $result -> fetch_all(MYSQLI_ASSOC);
     $listMaker = $users[0]["username"];
   }
   else $listMaker = $rows["creator"];
@@ -41,14 +41,23 @@ function parseResult($rows) {
 
   echo "<head>";
   echo '<meta name="twitter:card" content="summary">';
-  echo '<meta name="twitter:image" content="http://gamingas.wz.cz/lofttop10/images/twitImg.webp">';
+  echo '<meta name="twitter:image" content="http://gamingas.cz/gdlists/images/twitImg.webp">';
   echo '<meta name="twitter:title" property="og:title" itemprop="name" content="'.$rows["name"].' by '.$listMaker.' | GD Lists">';
   echo '<meta name="twitter:description" property="og:description" itemprop="description" content="'.$desc.'">';
-  echo '<script>window.location.replace("https://gamingas.wz.cz/gdlists/' . $rows["id"] . '")</script>';
+  
+  echo '<meta name="twitter:card" content="summary_large_image">';
+  echo '<meta name="twitter:image" content="http://gamingas.cz/gdlists/images/twitImg.webp">';
+  echo '<meta name="twitter:title" property="og:title" itemprop="name" content=Review: "'. $rows["name"].' by '.$listMaker.' | GD Lists">';
+  echo '<meta name="twitter:description" property="og:description" itemprop="description" content="'.$desc.'">';
+  
+  echo '<script>window.location.replace("https://gamingas.cz/gdlists/' . $rows["id"] . '")</script>';
   echo "</head><body></body></html>";
 }
 
+
 if (count($_GET) == 1) {
+  
+
   // Loading a single list
   if (in_array("id", array_keys($_GET))) {
     // Private lists can't be accessed by their id!

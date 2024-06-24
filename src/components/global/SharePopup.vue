@@ -29,7 +29,7 @@ const links = ref<string[]>([
 
     <h4 class="mt-5 ml-2 font-bold leading-3">{{ $t('other.shareOn') }}:</h4>
     <div class="grid grid-cols-2 gap-2 p-2 mt-2">
-      <a :href="links[0]">
+      <a target="_blank" :href="links[0]">
         <button
           class="px-2 py-1 w-full leading-3 text-left bg-white bg-opacity-10 rounded-full button"
         >
@@ -40,7 +40,7 @@ const links = ref<string[]>([
           />Reddit
         </button>
       </a>
-      <a :href="links[1]">
+      <a target="_blank" :href="links[1]">
         <button
           class="px-2 py-1 w-full leading-3 text-left bg-white bg-opacity-10 rounded-full button"
         >

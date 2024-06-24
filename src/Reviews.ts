@@ -4,25 +4,26 @@ import type { ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
+import { SETTINGS } from "./siteSettings"
 
 export const DEFAULT_RATINGS: ReviewRating[] = [
     {
-        name: "Gameplay",
+        name: i18n.global.t('reviews.gameplay'),
         rating: 5,
         color: [0, 0.74, 0.52]
     },
     {
-        name: "Dekorace",
+        name: i18n.global.t('collabTools.deco'),
         rating: 5,
         color: [90, 0.74, 0.52]
     },
     {
-        name: "Obtížnost",
+        name: i18n.global.t('reviews.difficulty'),
         rating: 5,
         color: [180, 0.74, 0.52]
     },
     {
-        name: "Celkové",
+        name: i18n.global.t('reviews.totalScore'),
         rating: 5,
         color: [270, 0.74, 0.52]
     },
@@ -35,10 +36,10 @@ export const REVIEW_EXTRAS: ReviewList = {
     containers: [],
     ratings: [],
     settings: [],
-    rateTheme: 0,
+    disabledRatings: false,
     private: false,
     transparentPage: 0,
-    language: 0,
+    language: SETTINGS.value.language ? 'en' : 'cs',
     whitePage: false,
     readerMode: false,
     font: 0
@@ -50,16 +51,16 @@ export const reviewData = ref(DEFAULT_REVIEWDATA())
 
 export function checkReview() {
     const err = (err: string) => ({ success: false, error: err })
+    let error = { success: true, mess: '' }
     if (!reviewData.value.containers.length) return err(i18n.global.t('reviews.bro'))
     if (reviewData.value.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
-    if (reviewData.value.reviewName.length > 30) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
+    if (reviewData.value.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
 
-    if (!reviewData.value.levels.length && reviewData.value.rateTheme != 2) return err(i18n.global.t('reviews.noLevels'))
+    if (!reviewData.value.levels.length && !reviewData.value.disabledRatings) return err(i18n.global.t('reviews.noLevels'))
 
-    let error = { success: true, mess: '' }
     reviewData.value.ratings.forEach(customRating => {
         if (!customRating.name.length) {
-            error.mess = 'Jedno z hodnocení nemá jméno!'
+            error.mess = i18n.global.t('reviews.ratingMissingName')
             error.success = false
         }
     })
@@ -70,7 +71,9 @@ export function checkReview() {
         if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
-        if (level.ratings?.[0].concat(level.ratings[1]).includes(-1)) error.mess = i18n.global.t('reviews.notRatedYet', [i])
+        if (level.ratings?.[0].concat(level.ratings[1]).includes(-1) && !reviewData.value.disabledRatings) error.mess = i18n.global.t('reviews.notRatedYet', [i])
+        
+        if (error.mess) error.success = false
     })
 
     reviewData.value.containers.filter(c => c.type != 'twoColumns').forEach(container => {
@@ -99,20 +102,24 @@ export const flexNames = { left: "start", center: "center", right: "end", justif
 
 export function parseReviewContainers(containers: object[]) {
     // types: 0 - image; 1,2,3 - title 1,2,3; 4 - video
-    let main: [number, string][] = []
+    let main: [number, number, string][] = []
+    let indicies = [0,0,0]
     containers.forEach(container => {
         switch (container.type) {
             case "heading1":
             case "heading2":
             case "heading3":
-                main.push([parseInt(container.type.slice(-1)), container.data])
+                indicies[0] += 1
+                main.push([container.type, indicies[0], container.type.slice(-1), container.data])
                 break;
 
             case "showImage":
-                main.push([0, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
+                indicies[1] += 1
+                main.push([container.type, indicies[1], 0, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
                 break;
             case "addVideo":
-                main.push([4, container.settings.description || i18n.global.t("level.video")])
+                indicies[2] += 1
+                main.push([container.type, indicies[2], 4, container.settings.description || i18n.global.t("level.video")])
                 break;
 
             case "twoColumns":

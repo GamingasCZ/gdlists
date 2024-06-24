@@ -27,7 +27,7 @@ let indPicked = ref(0)
 </script>
 
 <template>
-    <ContainerHelp v-if="settings.pickedIndex == -1" icon="showLevel" :help-content="reviewData.levels.length > 0 ? 'Vyber level, který chceš zobrazit.' : 'Zatím jsi nepřidal žádné levely!'">
+    <ContainerHelp v-if="settings.pickedIndex == -1" icon="showLevel" :help-content="reviewData.levels.length > 0 ? $t('reviews.pickShowcase') : $t('reviews.noLevelsAddedYet')">
         <form v-show="reviewData.levels.length > 0" target="." class="flex gap-1 justify-center w-full" @submit.prevent="settings.pickedIndex = indPicked">
             <select v-model.lazy="indPicked" class="p-2 bg-white bg-opacity-10 rounded-md">
                 <option :value="index" v-for="(level, index) in reviewData.levels">{{ level.levelName || $t('other.unnamesd') }}</option>
@@ -39,7 +39,7 @@ let indPicked = ref(0)
     </ContainerHelp>
     
     <figure class="flex p-2 w-full" style="justify-content: inherit" v-else>
-        <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" v-bind="reviewData.levels[settings.pickedIndex]" :disable-stars="true"/>
+        <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" hide-ratings v-bind="reviewData.levels[settings.pickedIndex]" :disable-stars="true"/>
         <figcaption class="mt-2">{{ settings.description }}</figcaption>
     </figure>
 </template>

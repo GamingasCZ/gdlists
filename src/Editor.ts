@@ -73,6 +73,7 @@ export function testIfImageExists(url: string) {
 }
 
 export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
+  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return
   if (reset) {
     document.documentElement.style.setProperty("--siteBackground","")
     document.documentElement.style.setProperty("--primaryColor","")
@@ -121,7 +122,7 @@ export const modifyListBG = (newColors: number[] | string, reset = false, review
 export const prettyDate = (datePassed: number) => {
   if (datePassed < 0) return i18n.global.t('date.future')
   else if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
-  else if (datePassed <= 60) return i18n.global.t('date.secs', datePassed)
+  else if (datePassed <= 60) return i18n.global.t('date.secs', Math.floor(datePassed))
   else if (Math.floor(datePassed/60) == 1) return i18n.global.t('date.mins', Math.floor(datePassed/60))
   else if (Math.floor(datePassed/60) <= 60) return i18n.global.t('date.mins', Math.floor(datePassed/60))
   else if (Math.floor(datePassed/3600) == 1) return i18n.global.t('date.hours', Math.floor(datePassed/3600))
@@ -148,9 +149,8 @@ export function resetList() {
   if (router.currentRoute.value.name == "editor") router.push({path: "/editor", force: true})
 }
 
-export const makeColorFromString = (name: string) =>
-chroma(
-  Math.floor(
+export const makeColorFromString = (name: string) => {
+  let ok = Math.floor(
     16777215 *
       Math.sin(
         name
@@ -159,7 +159,8 @@ chroma(
           .reduce((x, y) => x + y)! % Math.PI
       )
   )
-);
+  return chroma(ok);
+}
 
 export function fixHEX(hexColor: string) {
   // If the code ends with a number, hex code is sometimes broken (completely random lmao)

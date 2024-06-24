@@ -46,15 +46,17 @@ if (!$creatorCheck) {
 
 // Removing list
 if ($DATA["type"] == "review")
-  doRequest($mysqli, "DELETE FROM `reviews` WHERE `id` = ?", [$listData["id"]], "s");
+  $res = doRequest($mysqli, "DELETE FROM `reviews` WHERE `id` = ?", [$listData["id"]], "s");
 else {
   if ($DATA["hidden"] == 0) {
     $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
   }
   else {
-    doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");
+    $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");
   }
 }
+if (array_key_exists("error", $res)) die("0");
+
 echo "3";
 
 $mysqli -> close();
