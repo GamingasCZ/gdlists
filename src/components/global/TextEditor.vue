@@ -41,7 +41,7 @@ const formatting = [
           <button
             @click="doFormat(index)"
             :title="format[1]"
-            class="p-1 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40 button"
+            class="p-1 px-2 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40 button"
             :class="{ disabled: isPreviewing }"
             v-if="format[0] != 'div'"
           >

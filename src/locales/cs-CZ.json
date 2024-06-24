@@ -180,7 +180,9 @@
     "serverBOOM": "Je možné, že GD servery explodovaly.",
     "sepList": "Zadej oddělená ID levelů (např. 96000699, 29107242, 128)",
     "loginToCreateReviews": "Pro vytvoření recenze se prosím přihlaš!",
-    "cookDisabled": "Nemáš povolené cookies, můžeš jen procházet seznamy!"
+    "cookDisabled": "Nemáš povolené cookies, můžeš jen procházet seznamy!",
+    "reviewInProgress": "Máš tu rozpracovanou recenzi!",
+    "unnamedReview": "Bezejmenná recenze"
   },
   "other": {
     "lockQuotes": [
@@ -627,7 +629,10 @@
     "noChanges": "Nezměnil jsi nic v recenzi!",
     "changesFail": "Nepovedlo se provést změny!",
     "unexpectedError": "Nastala neočekávaná chyba: {0}",
-    "loginFail": "Nepovedlo se přihlásit. Zkontroluj připojení k internetu nebo se přihlaš znova!"
+    "loginFail": "Nepovedlo se přihlásit. Zkontroluj připojení k internetu nebo se přihlaš znova!",
+    "disMD": "Zakázat Markdown",
+    "isMissing": "Chybí %s!",
+    "notSelected": "Není vybrán %s!"
   },
   "review": {}
 }

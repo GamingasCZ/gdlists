@@ -126,7 +126,9 @@
     "serverBOOM": "As we speak, the GD servers may be on fire.",
     "sepList": "Enter a seperated list of level IDs (ex. 96000699, 29107242, 128)",
     "cookDisabled": "Cookies are disabled. You can only browse posts!",
-    "loginToCreateReviews": "Please login to make reviews!"
+    "loginToCreateReviews": "Please login to make reviews!",
+    "reviewInProgress": "You have a review in the works!",
+    "unnamedReview": "Unnamed Review"
   },
   "homepage": {
     "clear": "Clear",
@@ -625,6 +627,9 @@
     "unexpectedError": "An unexpected error occured: {0}",
     "changesFail": "Failed to make changes!",
     "noChanges": "You haven't made any changes to the review!",
-    "loginFail": "Authentication failed. Check your internet or login again!"
+    "loginFail": "Authentication failed. Check your internet or login again!",
+    "disMD": "Disable Markdown",
+    "isMissing": "%s is missing!",
+    "notSelected": "%s is not selected!"
   }
 }

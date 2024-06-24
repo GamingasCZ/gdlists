@@ -10,8 +10,8 @@ const invert = ref(props.inverted ? 'invert(1)' : 'invert(0)')
 </script>
 
 <template>
-	<div class="grid sm:grid-cols-2 font-[poppins]">
-		<div class="flex flex-col gap-4 items-center opacity-30 invertable">
+	<div class="grid sm:grid-cols-2 font-[poppins] py-10">
+		<div class="flex flex-col gap-4 items-center opacity-30 translate-y-4 invertable">
 			<img src="@/images/reviews.svg" class="w-36" alt="">
 			<h2 class="text-2xl">{{ $t('reviews.help1') }}</h2>
 		</div>

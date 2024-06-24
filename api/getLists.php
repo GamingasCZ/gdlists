@@ -118,7 +118,7 @@ if (count($_GET) == 1) {
     }
   } elseif (in_array("review", array_keys($_GET))) {
     // Reviews
-    $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE replace(concat(name,'-',id), ' ', '-') = ?", [$_GET["review"]], "s");
+    $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$_GET["review"]], "s");
 
     if ($result == null) echo "2";
     else parseResult($result, true, review: true);

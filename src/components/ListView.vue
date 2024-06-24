@@ -165,7 +165,7 @@ function loadReview() {
   NONPRIVATE_LIST = true // damn you, old gamingsus >:(
 
   axios
-    .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: encodeURIComponent(props.listID).replaceAll("%2B", "+")}})
+    .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: encodeURIComponent(props.listID).match(/-(\d+)$/)[1]}})
     .then((res: AxiosResponse) => {
       try {
         if (res.data == 2) {

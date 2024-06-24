@@ -31,11 +31,11 @@ const previewText = ref("")
 const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
 onMounted(() => {
-	if (!props.editable) previewText.value = parseMD(props.text, true)
+	if (!props.editable) previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
 })
 
 watch(props, () => {
-	if (props.editable) previewText.value = parseMD(text.value, true)
+	if (props.editable) previewText.value = parseMD(text.value, true, props.currentSettings?.noMD)
 })
 
 const makeNextParagraph = () => {

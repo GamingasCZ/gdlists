@@ -126,7 +126,7 @@ let xPos = ["left", "center", "right"][background[3]]
     </div>
 
     <section class="flex overflow-hidden flex-col items-start m-1">
-      <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name) }}</h2>
+      <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
       <div class="overflow-hidden w-full text-ellipsis">
         <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-4" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />

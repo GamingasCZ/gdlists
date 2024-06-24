@@ -20,7 +20,7 @@ import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { modifyListBG } from "@/Editor";
+import { DEFAULT_LEVELLIST, modifyListBG, removeBackup, saveBackup } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -28,8 +28,11 @@ import RemoveListPopup from "./editor/RemoveListPopup.vue";
 import TextEditor from "./global/TextEditor.vue";
 import UserDialog from "./writer/UserDialog.vue";
 import { i18n } from "@/locales";
-import { hasLocalStorage } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
+import EditorBackup from "./editor/EditorBackup.vue";
+import { onMounted } from "vue";
+import { onBeforeRouteLeave, type RouteLocationNormalized } from "vue-router";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -134,9 +137,16 @@ const addContainer = (key: string) => {
             reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
             reviewData.value.containers[selectedNestContainer.value[0]].settings.components.push([])
         }
-        else
-            reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
-            .push(containerData)
+        else {
+            if (selectedContainer.value[2] == -1) {
+                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
+                .push(containerData)
+            } else {
+                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
+                .splice(selectedNestContainer.value[2] + 1, 0, containerData)
+        }
+
+        }
     }
 }
 
@@ -266,6 +276,8 @@ const reviewUploadErrors = (err: number) => {
 
 const uploadInProgress = ref(false)
 const uploadReview = () => {
+    if (uploadInProgress.value) return
+
     if (!checkForErrors()) {
         openDialogs.settings = false
         return
@@ -288,6 +300,8 @@ const uploadReview = () => {
 }
 
 const removeReview = () => {
+    if (uploadInProgress.value) return
+
     uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/removeList.php", {id: props.reviewID, type: 'review'}).then(res => {
         if (res.data == 3) router.replace("/browse/reviews")
@@ -304,6 +318,7 @@ const removeReview = () => {
 }
 
 const updateReview = () => {
+    if (uploadInProgress.value) return
     if (!checkForErrors()) return
 
     uploadInProgress.value = true
@@ -333,6 +348,47 @@ const updateReview = () => {
 
 onUnmounted(() => {
   reviewData.value = DEFAULT_REVIEWDATA()
+})
+
+const doBackup = (from: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
+  if (reviewData.value.containers.length == 0) return // Do not save without any content
+  if (!to) { // Do not backup when redirected from editor
+      saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value)
+  }
+}
+const backupData = ref({backupName: "", backupDate: 0, backupData: "", choseHidden: "0"})
+const loadBackup = () => {
+    reviewData.value = JSON.parse(backupData.value.backupData)
+    modifyListBG(reviewData.value.pageBGcolor, false, true)
+    removeBackup(true)
+}
+let autosaveInterval: number
+onMounted(() => {
+  if (localStorage) {
+    let backup = localStorage.getItem("reviewBackup")
+    if (backup) {
+      let backupParsed: LevelBackup = JSON.parse(backup)
+      backupData.value.backupName = backupParsed.listName
+      backupData.value.backupDate = new Date(backupParsed.listDate).toLocaleDateString()
+      backupData.value.backupData = <any>backupParsed.levelData
+      backupData.value.choseHidden = backupParsed.listHidden
+    }
+  }
+
+  if (SETTINGS.value.autosave) {
+    // Save when leaving the site
+    window.addEventListener("beforeunload", doBackup)
+    onBeforeRouteLeave(doBackup)
+
+    autosaveInterval = setInterval(() => {
+      if (!SETTINGS.value.autosave) { // If setting changes, do not autosave
+        clearInterval(autosaveInterval)
+        return
+      }
+    }, SETTINGS.value.autosave*1000)
+
+    doBackup()
+}
 })
 
 const collabBackground = ref()
@@ -367,16 +423,15 @@ const preUpload = ref(false)
             <RemoveListPopup v-if="openDialogs.removeDialog" is-review @delete-list="removeReview" @close-popup="openDialogs.removeDialog = false" />
         </Transition>
 
-        <DialogVue :open="openDialogs.description" @close-popup="openDialogs.description = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
-            <TextEditor
-            :edit-value="reviewData"
-            />
-        </DialogVue>
-
         <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg" :list-color="reviewData.pageBGcolor" />
 
         <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false" :title="$t('other.settings')" :width="dialog.medium">
             <WriterSettings :uploading="preUpload" @upload="uploadReview" />
+            <DialogVue :open="openDialogs.description" @close-popup="openDialogs.description = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
+                <TextEditor
+                :edit-value="reviewData"
+                />
+            </DialogVue>
         </DialogVue>
 
         <DialogVue :open="openDialogs.userAdder[0]" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('other.add')" :side-button-disabled="reviewData.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10" @close-popup="openDialogs.userAdder[0] = false" :width="dialog.large">
@@ -450,6 +505,8 @@ const preUpload = ref(false)
 
             <!-- Editor -->
             <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+                <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
+                
                 <ReviewHelp v-if="!reviewData.containers.length" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
 
                 <DataContainer

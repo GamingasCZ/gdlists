@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, LevelBackup } from "./interfaces";
+import type { LevelList, Level, CollabData, LevelBackup, ReviewList } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import router from "./router";
@@ -214,17 +214,17 @@ export const isOnline = ref(true)
 window.addEventListener("offline", () => isOnline.value = false)
 window.addEventListener("online", () => isOnline.value = true)
 
-export function saveBackup(listName: string, hidden: boolean) {
+export function saveBackup(listName: string, hidden: boolean, review: boolean | ReviewList = false) {
   if (localStorage && SETTINGS.value.autosave) {
-    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(levelList.value), listHidden: hidden, listDate: Date.now() }
+    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(review !== false ? review : levelList.value), listHidden: hidden, listDate: Date.now() }
 
-    localStorage.setItem("listBackup", JSON.stringify(backup))
+    localStorage.setItem(`${review ? 'review' : 'list'}Backup`, JSON.stringify(backup))
   }
   return Math.random()
 }
 
-export const removeBackup = () => {
-  localStorage.removeItem("listBackup")
+export const removeBackup = (isReview = false) => {
+  localStorage.removeItem(`${isReview ? 'review' : 'list'}Backup`)
 }
 
 export const shortenYTLink = (link: string) => {

@@ -1,8 +1,10 @@
 import { marked } from "marked";
 import striptags from "striptags";
 
-export default function parseText(textToParse: string, limited?: boolean): string {
+export default function parseText(textToParse: string, limited?: boolean, no?: boolean): string {
   if (!textToParse) return ""
+  if (no) return textToParse // NOooOOooOoo
+
 
   let keepTags
   if (limited) // Removes heading and image tags

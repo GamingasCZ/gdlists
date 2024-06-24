@@ -11,7 +11,7 @@ import { i18n } from "@/locales"
 const success = {success: true}
 
 const error = (ind: number, msg = 0) => {
-    const message = ["Chybí %s!", "Není vybrán %s!"]
+    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected')]
     return {success: false, error: message[msg], index: ind}
 }
 
@@ -21,7 +21,12 @@ const containers: Containers = {
         styling: "my-2",
         nestable: true,
         canEditText: true,
-        settings: []
+        settings: [{
+            key: "noMD",
+            title: i18n.global.t('reviews.disMD'),
+            type: [2],
+            default: false,
+        }]
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),

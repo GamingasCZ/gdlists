@@ -22,7 +22,7 @@ const emit = defineEmits<{
 const selectedNestContainer = inject<number[]>("selectedNestContainer", [-1, -1, -1])!
 const selectedRootContainer = inject<number[]>("selectedContainer", [-1, -1, -1])!
 watch(selectedRootContainer, () => {
-    if (selectedNestContainer.value[0] != selectedRootContainer.value[0]) selectedContainer.value = [-1, null]
+    if (selectedNestContainer.value[0] != props.index) selectedContainer.value = [-1, null]
 })
 const selectedContainer = ref([-1, null])
 
