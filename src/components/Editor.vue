@@ -160,6 +160,7 @@ const errorDblclickHelp = ref(false)
 const formShaking = ref(false)
 const notifStamp = ref(Math.random())
 const collabClipboard = ref()
+const collabBackground = ref<HTMLDivElement>()
 
 const loadBackup = () => {
   loadList(JSON.parse(<any>backupData.value.backupData), backupData.value.backupName, <any>backupData.value.choseHidden)
@@ -401,13 +402,14 @@ const useAccentColor = () => {
   </DialogVue>
 
 
-  <DialogVue :open="collabEditorOpen && levelList.levels.length > 0" @close-popup="closeCollabTools()" :title="$t('collabTools.funny1')" :width="dialog.xl">
-    <CollabEditor
-      :index="currentlyOpenedCard"
-      :clipboard="collabClipboard"
-      @send-clipboard="collabClipboard = $event"
-    />
-  </DialogVue>
+  <CollabEditor
+    v-if="collabEditorOpen"
+    :index="currentlyOpenedCard"
+    :level-array="levelList.levels"
+    :clipboard="collabClipboard"
+    @send-clipboard="collabClipboard = $event"
+    @close-popup="closeCollabTools()"
+  />
 
   <DialogVue :open="favoriteLevelPickerOpen" @close-popup="favoriteLevelPickerOpen = false" :title="$t('other.savedLevels')">
     <PickerPopup
