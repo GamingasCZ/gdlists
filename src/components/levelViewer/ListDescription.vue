@@ -21,6 +21,7 @@ const props = defineProps<{
   review: boolean;
   openDialogs: [boolean, boolean]
   ratings: [number, number, number]
+  hidden: string
 }>();
 
 const emit = defineEmits<{
@@ -78,7 +79,10 @@ function sendRating(action: 1 | 0) {
   sendingRating = true
   let ratingParams = {action: action}
   if (props.review) ratingParams.review_id = props.id
-  else ratingParams.list_id = props.id
+  else {
+    ratingParams.list_id = props.id
+    ratingParams.hidden = props.hidden
+  }
   
   // Make ratings visually instant
   let preRatings = props.ratings

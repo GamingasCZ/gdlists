@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     listID: string
+    hidden: string
     isReview: boolean
 }>()
 
@@ -127,9 +128,12 @@ function sendComment(com = "") {
         comColor: parsedColor.value,
     }
     if (props.isReview) postData.reviewID = props.listID
-    else postData.listID = props.listID
+    else {
+        postData.listID = props.listID
+        postData.hidden = props.hidden
+    }
 
-    axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify(postData), {headers: {Authorization: cookier("access_token").get()}}).then((res: AxiosResponse) => {
+    axios.post(import.meta.env.VITE_API+"/sendComment.php", postData).then((res: AxiosResponse) => {
         if (res.data == 6)
             (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
         else {
@@ -192,7 +196,7 @@ function sendComment(com = "") {
         <Transition name="fade">
             <div v-if="commentError" class="flex gap-2 items-center p-1 my-2 rounded-md max-sm:text-sm" :style="{backgroundColor: parsedColor}">
                 <img src="@/images/info.svg" alt="" class="w-4">
-                <p>Nepodařilo se odeslat komentář, zkus to později!</p>
+                <p>{{ $t('listViewer.failSendComm') }}</p>
             </div>
         </Transition>
         <footer class="flex justify-between mt-2">

@@ -486,6 +486,7 @@ const collabViewerColor = ref("")
         :review="isReview"
         :open-dialogs="[commentsShowing, reviewLevelsOpen]"
         :ratings="LIST_RATING"
+        :hidden="LIST_DATA.hidden"
       />
     </header>
     <main class="flex flex-col gap-4">
@@ -621,6 +622,7 @@ const collabViewerColor = ref("")
         @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
         :list-i-d="LIST_DATA?.id"
+        :hidden-i-d="LIST_DATA.hidden"
         :showing="commentsShowing"
         :comments-disabled="LIST_DATA.data.disComments"
         :is-review="isReview"

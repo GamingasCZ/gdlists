@@ -10,9 +10,13 @@ header('Content-type: application/json'); // Return as JSON
 
 $type = isset($_GET["listID"]) ? "listID" : "reviewID";
 
-if (!preg_match('/[A-z]/', $_GET[$type])) {
+$fuckupID;
+if (!preg_match('/[A-z]/', $_GET[$type])) { // get post ID based on type
     $fuckupID = preg_match("/-?\d+/", $_GET[$type], $match);
     $fuckupID = $match[0];
+}
+else {
+    if (is_int($_GET[$type])) $fuckupID = $_GET[$type];
 }
 
 // Fetching comments

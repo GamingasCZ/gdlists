@@ -30,8 +30,18 @@ switch ($method) {
         $objectID = intval($DATA[$type]);
         $rating = $DATA["action"] == 1 ? 1 : 0;
 
-        $checkRate = doRequest($mysqli, sprintf("SELECT rate FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
         $result = ["result" => null, "ratings" => null];
+        if ($type == "list_id") {
+            $hidCheck = doRequest($mysqli, "SELECT `id` FROM lists WHERE `hidden`=?", [$DATA["hidden"]], "s");
+
+            if (is_null($hidCheck)) {
+                $result["result"] = "error";
+                $result["ratings"] = [0,0,-1];
+                die(json_encode($result));
+            }
+        }
+
+        $checkRate = doRequest($mysqli, sprintf("SELECT rate FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
         if (is_null($checkRate)) { // No rating
             $rowQuery = doRequest($mysqli,sprintf("INSERT INTO `ratings`(`rate`,`uid`,`%s`) VALUES (?,?,?)", $type), [$rating, $accountCheck, $objectID], "isi");
             if (is_array($rowQuery) && array_key_exists("error", $rowQuery)) $result["result"] = "error";
