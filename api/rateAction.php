@@ -32,7 +32,7 @@ switch ($method) {
 
         $result = ["result" => null, "ratings" => null];
         if ($type == "list_id") {
-            $hidCheck = doRequest($mysqli, "SELECT `id` FROM lists WHERE `hidden`=?", [$DATA["hidden"]], "s");
+            $hidCheck = doRequest($mysqli, "SELECT `id` FROM lists WHERE `hidden`=? AND `id`=?", [$DATA["hidden"], $objectID], "si");
 
             if (is_null($hidCheck)) {
                 $result["result"] = "error";

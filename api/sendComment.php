@@ -53,7 +53,7 @@ if ($list["commDisabled"] == 1) die("8");
 
 
 if ($type == "listID") {
-    $hidCheck = doRequest($mysqli, "SELECT `id` FROM lists WHERE `hidden`=?", [$fuckupData[4]], "s");
+    $hidCheck = doRequest($mysqli, "SELECT `id` FROM lists WHERE `hidden`=? AND `id`=?", [$fuckupData[4], $fuckupData[2]], "si");
     if (is_null($hidCheck)) die("2");
 }
 
