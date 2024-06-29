@@ -86,7 +86,7 @@ const modifyCreator = (e: Event | string) => {
   levelCreator.value = newCreator
 }
 
-const selectedDiff = ref(levelList.value.levels[props.index!].difficulty)
+const selectedDiff = ref(props.levelArray.levels[props.index!].difficulty)
 
 const modifyVideo = (e: Event) => {
   let videoInput = (e.target as HTMLInputElement)
@@ -196,7 +196,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             level.difficulty,
             level.cp,
           ];
-          selectedDiff.value = levelList.value.levels[props.index!].difficulty
+          selectedDiff.value = props.levelArray.levels[props.index!].difficulty
     
           ytVideoData.value = await videoSearch()
           searching.value = false;
@@ -368,6 +368,11 @@ const switchPlatformer = () => {
           alt=""
         />
         <div class="flex relative justify-center items-center button" :title="$t('editor.diffTitle')" @click="openedPanel = openedPanel != 2 ? 2 : 0">
+          <img
+            class="w-10"
+            alt=""
+            src="../../images/difficultyBG.svg"
+          />
           <DifficultyIcon class="absolute inset-0 top-1/2 left-1/2 w-8 -translate-x-1/2 -translate-y-1/2" :difficulty="selectedDiff[0]" :rating="selectedDiff[1]" />
         </div>
         <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"

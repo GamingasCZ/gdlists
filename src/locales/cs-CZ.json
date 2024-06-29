@@ -331,7 +331,6 @@
     "newest": "Nejnovější",
     "duplicate": "Duplikovat",
     "move": "Přesunout",
-    "name": "Jméno",
     "info": "Informace"
   },
   "listViewer": {
@@ -389,9 +388,7 @@
     "nonexistentReview": "Tato recenze neexistuje!",
     "thisReview": "této recenzi",
     "thisList": "tomto seznamu",
-    "failSendComm": "Nepodařilo se odeslat komentář, zkus to později!"
-    "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!",
-    "failLoad": "Seznam se nepodařilo načíst!",
+    "failSendComm": "Nepodařilo se odeslat komentář, zkus to později!",
     "pickView1": "Vyber si vzhled seznamu!",
     "pickView2": "Vzhled lze kdykoliv změnit v nastavení.",
     "noTags": "Level nemá žádné štítky"

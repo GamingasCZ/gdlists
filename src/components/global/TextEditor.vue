@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { levelList } from "@/Editor";
 import { ref } from "vue";
 import parseText, { addFormatting, autoLink } from "./parseEditorFormatting";
 import { i18n } from "@/locales";

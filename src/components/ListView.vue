@@ -554,22 +554,7 @@ provide("idCopyTimestamp", copyID)
       <ViewModePicker />
 
       <!-- List -->
-      <div v-if="!isReview" class="flex flex-col gap-4 items-center">
-        <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
-          class="levelCard"
-          :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
-          v-show="!commentsShowing"
-          v-bind="level"
-          :favorited="favoritedIDs?.includes(level.levelID!)"
-          :level-index="index"
-          :list-i-d="!NONPRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-          :list-name="LIST_DATA?.name!"
-          :translucent-card="LIST_DATA?.data.translucent! ?? false" 
-          :disable-stars="false" 
-          :guessing-now="cardGuessing == index"
-          :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-
-      <div v-if="(SETTINGS.levelViewMode == 0 || LIST_DATA.diffGuesser) && !isReview" class="flex flex-col gap-4" v-show="!commentsShowing">
+      <div v-if="(SETTINGS.levelViewMode == 0 || LIST_DATA.diffGuesser) && !isReview" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
         <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
           class="levelCard"
           :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
@@ -587,7 +572,7 @@ provide("idCopyTimestamp", copyID)
         />      
       </div>
       
-            <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" class="flex flex-col gap-4">
+      <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" class="flex flex-col gap-4">
         <LevelCardCompact v-for="(level, index) in LIST_DATA?.data.levels"
           class="levelCard"
           :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
@@ -607,6 +592,7 @@ provide("idCopyTimestamp", copyID)
           @error="listErrorLoading = true"
         />
       </div>
+
       <div v-else-if="SETTINGS.levelViewMode == 2 && !isReview" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
         <table class="overflow-auto mx-auto w-full bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
           <th></th>

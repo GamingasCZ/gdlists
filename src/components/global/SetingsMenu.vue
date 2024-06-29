@@ -71,13 +71,6 @@ const screenWidth = ref(window.innerWidth)
     >
       <img src="@/images/image.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.gallery') }}
     </button>
-      {{ $t('settingsMenu.viewMode') }}
-      <select name="viewMode" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.levelViewMode">
-        <option :value="0">{{ $t('settingsMenu.classic') }}</option>
-        <option :value="1">{{ $t('settingsMenu.compact') }}</option>
-        <option :value="2">{{ $t('settingsMenu.table') }}</option>
-      </select>
-    </section>
 
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
@@ -86,6 +79,17 @@ const screenWidth = ref(window.innerWidth)
       <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.language" @change="setLanguage(SETTINGS.language)">
         <option :value="0">{{ $t("settingsMenu.czech") }}</option>
         <option :value="1">{{ $t("settingsMenu.english") }}</option>
+      </select>
+    </section>
+
+    <section
+      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
+    >
+      {{ $t('settingsMenu.viewMode') }}
+      <select name="viewMode" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.levelViewMode">
+        <option :value="0">{{ $t('settingsMenu.classic') }}</option>
+        <option :value="1">{{ $t('settingsMenu.compact') }}</option>
+        <option :value="2">{{ $t('settingsMenu.table') }}</option>
       </select>
     </section>
 

@@ -235,9 +235,7 @@
     "nonexistentReview": "This review doesn't exist!",
     "thisReview": "review",
     "thisList": "list",
-    "failSendComm": "Failed to send the comment. Please try again later!"
-    "commDisableHelp": "Comments are disabled on this list!",
-    "failLoad": "The list failed to load!",
+    "failSendComm": "Failed to send the comment. Please try again later!",
     "pickView1": "Pick the look of lists!",
     "pickView2": "You can change this anytime in the settings.",
     "noTags": "Level has no tags"
@@ -395,7 +393,6 @@
     "newest": "Newest",
     "duplicate": "Duplicate",
     "move": "Move",
-    "name": "Name",
     "info": "Info"
   },
   "settingsMenu": {
