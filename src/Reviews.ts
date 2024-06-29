@@ -48,9 +48,31 @@ export const REVIEW_EXTRAS: ReviewList = {
 export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS })
 export const reviewData = ref(DEFAULT_REVIEWDATA())
 
+const funnyErrorMessages = [
+    "",
+    "Umm... ",
+    "Stop that, ",
+    " STOP BEING SILLY!!",
+    `You dare defy the lord of darkness, `
+]
 
+let uploadTries = 0
 export function checkReview() {
-    const err = (err: string) => ({ success: false, error: err })
+    const err = (err: string) => {
+        let fancyErr = err
+        switch (uploadTries) {
+            case 1:
+            case 2: fancyErr = funnyErrorMessages[uploadTries] + err.slice(0,1).toLowerCase() + err.slice(1); break;
+            
+            case 3: fancyErr = err.toUpperCase() + funnyErrorMessages[uploadTries]; break;
+            case 4: fancyErr = funnyErrorMessages[uploadTries] + JSON.parse(localStorage.getItem("account_info"))[0] + "?"; break;
+
+            default: break;
+        }
+
+        uploadTries = (uploadTries + 1) % 5 // TODO
+        return { success: false, error: err }
+    }
     let error = { success: true, mess: '' }
     if (!reviewData.value.containers.length) return err(i18n.global.t('reviews.bro'))
     if (reviewData.value.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
@@ -76,7 +98,7 @@ export function checkReview() {
         if (error.mess) error.success = false
     })
 
-    reviewData.value.containers.filter(c => c.type != 'twoColumns').forEach(container => {
+    reviewData.value.containers.forEach(container => {
         if (containers[container.type].canEditText) {
             if (!container.data) {
                 error.mess = i18n.global.t('reviews.notFilledIn', [containers[container.type].placeholder])
@@ -90,10 +112,27 @@ export function checkReview() {
             error.success = false
         }
     })
+    reviewData.value.containers.filter(c => c.type == "twoColumns").forEach(nest => {
+        nest.settings.components.forEach(column => {
+            column.filter(x => x !== true).forEach(container => { // filter out maxWidth
+                if (containers[container.type].canEditText) {
+                    if (!container.data) {
+                        error.mess = i18n.global.t('reviews.notFilledIn', [containers[container.type].placeholder])
+                        error.success = false
+                    }
+                }
+        
+                let valCheck = containers[container.type].errorCheck?.(container.settings) ?? { success: true }
+                if (!valCheck.success) {
+                    error.mess = valCheck.error.replace("%s", containers[container.type].settings[valCheck.index].title)
+                    error.success = false
+                }
+            });
+        });
+    })
     if (!error.success) return err(error.mess)
 
-    if (!reviewData.value.containers.length) return err('')
-
+    uploadTries = 0
     return { success: true, error: '' }
 }
 

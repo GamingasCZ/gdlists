@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reviewData } from '@/Reviews';
+import { computed } from 'vue';
 
 defineProps<{
     editing: boolean
@@ -13,6 +14,16 @@ const emit = defineEmits<{
     (e: "update"): void
 }>()
 
+const hasUnrated = computed(() => {
+    if (!reviewData.value.levels.length) return true
+
+    let unrated = false
+    reviewData.value.levels.forEach(l => {
+        if (l.ratings[0].concat(l.ratings[1]).includes(-1)) unrated = true
+    })
+    return unrated
+})
+
 </script>
 
 <template>
@@ -23,9 +34,9 @@ const emit = defineEmits<{
                 <img src="@/images/warn.svg" v-show="!reviewData.levels.length && !reviewData.disabledRatings" alt="" class="absolute bottom-1 left-5 w-3">
                 <span class="max-sm:hidden">{{ $t('editor.levels') }}</span>
             </button>
-            <button :disabled="reviewData.disabledRatings" class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60 disabled:opacity-20" @click="emit('openDialog', 'ratings')">
+            <button :disabled="reviewData.disabledRatings && hasUnrated" class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60 disabled:opacity-20" @click="emit('openDialog', 'ratings')">
                 <img src="@/images/rating.svg" alt="" class="w-6">
-                <img src="@/images/warn.svg" v-show="!reviewData.disabledRatings" alt="" class="absolute bottom-1 left-5 w-3">
+                <img src="@/images/warn.svg" v-show="!reviewData.disabledRatings && hasUnrated" alt="" class="absolute bottom-1 left-5 w-3">
                 <span class="max-sm:hidden">{{ $t('reviews.rating') }}</span>
             </button>
             <button class="flex relative gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60" @click="emit('openDialog', 'settings')">

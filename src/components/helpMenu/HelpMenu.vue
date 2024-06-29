@@ -46,45 +46,20 @@ const qa: question[] = [
   },
   {
     question: useI18n().t('editor.translucentCards'),
-    answer:
-      useI18n().t('help.translucentHelp'),
+    answer: useI18n().t('help.translucentHelp'),
   },
   {
     startSection: useI18n().t('reviews.review'),
-    question: "Prohlížeč recenzí",
-    answer: ""
+    question: useI18n().t('help.textFormatting'),
+    answer: useI18n().t('help.formatHelp')
   },
   {
-    question: "Rychlé recenze",
-    answer: ""
+    question: useI18n().t('help.containers'),
+    answer: useI18n().t('help.containerHelp')
   },
   {
-    question: "Editor recenzí",
-    answer: ""
-  },
-  {
-    question: "Levely",
-    answer: ""
-  },
-  {
-    question: "Hodnocení",
-    answer: ""
-  },
-  {
-    question: "Nastavení",
-    answer: ""
-  },
-  {
-    question: "Formátování textu",
-    answer: ""
-  },
-  {
-    question: "Komponenty",
-    answer: ""
-  },
-  {
-    question: "Více sloupců",
-    answer: ""
+    question: useI18n().t('help.moreColumns'),
+    answer: useI18n().t('help.columnHelp')
   },
   {
     startSection: useI18n().t('other.other2'),
@@ -96,12 +71,16 @@ const qa: question[] = [
     answer: `
   vue, \n
   vue i18n, \n
+  vue router, \n
   tailwind, \n
   axios, \n
   typescript, \n
   chroma-js, \n
   cookier, \n
   pure-editor \n
+  striptags \n
+  marked \n
+  popperjs
       `,
   },
 ];

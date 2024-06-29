@@ -42,7 +42,7 @@
     "more": "Více",
     "clear": "Promazat",
     "listsUnavailable": "Nejsou dostupné žádné {0}!",
-    "noListsPinned": "Zatím jsi nepřipnul žádné seznamy!",
+    "noListsPinned": "Zatím jsi nepřipnul žádné posty!",
     "noListsUploaded": "Zatím jsi nenahrál žádné seznamy!",
     "noListsVisited": "Zatím jsi nenavštívil žádné seznamy!",
     "noLevelsSaved": "Zatím jsi neuložil žádné levely!",
@@ -153,11 +153,9 @@
     "moveDownTitle": "Přesunout level dolů",
     "importLevels": "Import levelů",
     "iglists": "Ze hry",
-    "iglHelp": "Pro import, zadej ID listu z Geometry Dashe.",
     "idlist": "Ze seznamu ID",
     "idlistHelp": "Vlož ID levelů. Mohou být odděleny čímkoliv. Můžeš hledat jen rated levely.",
     "tables": "Z tabulek",
-    "tablesHelp": "Importuj tabulku ve formátu .csv. CSV soubor lze exportovat ve všech tabulkových procesorech.",
     "uploadFile": "Nahrát soubor",
     "mdHelp": "... Můžeš použít Markdown",
     "listItems": "Odrážky",
@@ -329,7 +327,9 @@
     "noListsFound": "Nenašly se žádné seznamy!",
     "listFindError": "Nastala chyba při hledání!",
     "users": "Uživatelé",
-    "newest": "Nejnovější"
+    "newest": "Nejnovější",
+    "duplicate": "Duplikovat",
+    "move": "Přesunout"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -385,7 +385,8 @@
     "commHelpR4": "Souhlasím s tvou recenzí, ale...",
     "nonexistentReview": "Tato recenze neexistuje!",
     "thisReview": "této recenzi",
-    "thisList": "tomto seznamu"
+    "thisList": "tomto seznamu",
+    "failSendComm": "Nepodařilo se odeslat komentář, zkus to později!"
   },
   "level": {
     "levelID": "ID levelu",
@@ -425,7 +426,13 @@
     "listGuessingHelp": "Pokud zapneš hádání obtížností, seznam se bude postupně odemykat po tom, co zkusíš hádat obtížnosti a rating levelů. V editoru, tlačítko s obtížností, značí hádání obtížností. Tlačítko s plamínekem značí rating levelu.",
     "translucentHelp": "Po zapnutí budou v seznamu karty levelů průsvitné. Průsvitné karty nejlíp fungují s nějakým obrázkem seznamu.",
     "usedPackages": "Použité balíčky",
-    "license": "Licence"
+    "license": "Licence",
+    "moreColumns": "Více sloupců",
+    "containers": "Prvky recenze",
+    "textFormatting": "Formátování textu",
+    "formatHelp": "Formátování používá GFM (GitHub Flavoured Markdown).<br><br> V nabídce formátování je odkaz na to, jak GFM používat.<br><br> Pokud nechceš Markdown používat, můžeš ho v nastavení odstavce zakázat.",
+    "containerHelp": "Prvky na přidání obrázků, videí apod. jsou vedle tlačítek na zarovnávání.<br><br> Kliknutím na přidaný prvek ho vybereš. Každý prvek má svoje vlastní nastavení, které je dostupné pod ozubeným kolem napravo od prvku.<br><br> Kliknutím kolečka myši na nastavení, můžeš prvek rychle smazat. V recenzi můžeš mít max. 100 vizuálních/textových prvků.",
+    "columnHelp": "Sloupce ti umožňují pokládat text a většinu dalších prvků vedle sebe.<br><br> Abys mohl do sloupce přidat obsah, musíš na něj prvně kliknout. Vybraný sloupec má silnější obrys.<br><br> Po vybrání sloupce se tlačítko na přidávání změní na upravovací, kde můžeš layout nastavovat.<br><br> Vedle sebe můžeš mít max. 10 sloupců. Sloupce přetékají, pokud na obsah není dost místa.<br><br> Ve výchozím stavu se sloupce snaží zabrat co nejvíc místa. V nastavení sloupce lze nastavit, aby se přizpůsobily šířce obsahu.<br> Tip: Pokud jsou všechy sloupce přispůsobeny na šířku, můžeš celý layout zarovnávat např. doprostřed.<br><br> Pokud ti zbývají 2 sloupce a smažeš jeden ze sloupců, obsah druhého sloupce se vytrhne zpět do recenze."
   },
   "levelViewer": {},
   "list": {
@@ -579,13 +586,13 @@
     "checkable": "Odškrtávací",
     "paragraph": "Odstavec",
     "loadVideoFail": "Nepodařilo se načíst video!",
-    "setVideo": "Kliknutím nastav video.",
+    "setVideo": "Vlož prosím YouTube odkaz.",
     "font": "Písmo recenze",
     "thumbnail": "Náhled recenze",
     "ratingName": "Název hodnocení",
     "moreFeaturesHelp1": "Můžeš hodnotit víc vlastností levelu!",
     "moreFeaturesHelp2": "Jen základní se ale počítají do statistik.",
-    "levelNo": "{0}. level nemá {1}!",
+    "levelNo": "{0}\\. level nemá {1}!",
     "theming": "Theming",
     "sync": "Sync",
     "music": "Hudba",
@@ -596,7 +603,7 @@
     "preview": "Náhled recenze",
     "imgUrl": "Adresa obrázku",
     "notFilledIn": "{0} není vyplněný!",
-    "notRatedYet": "{0}. level není zcela ohodnocen!",
+    "notRatedYet": "{0}\\. level není zcela ohodnocen!",
     "bro": "Bratře, ty jsi nic nenapsal!!",
     "nameToo": "Jméno recenze je moc {0}!",
     "noLevels": "Nebyly přidány žádné levely k recenzování!",
@@ -632,7 +639,19 @@
     "loginFail": "Nepovedlo se přihlásit. Zkontroluj připojení k internetu nebo se přihlaš znova!",
     "disMD": "Zakázat Markdown",
     "isMissing": "Chybí %s!",
-    "notSelected": "Není vybrán %s!"
+    "notSelected": "Není vybrán %s!",
+    "areEmpty": "%s jsou prázdné!",
+    "columns": "Sloupce",
+    "removeColumn": "Smazat sloupec",
+    "tooManyContainers": "Víc prvků už přidat nemůžeš!",
+    "cFillSpace": "Vyplnit prostor",
+    "cMaxContent": "Šířka podle obsahu",
+    "gpHelp": "Gameplay jednoduše ohodnoť podle toho, jak příjemně se level hraje.<br><br>Do hodnocení gameplaye můžeš například zahrnout špatné přechody, nečekané difficulty spiky.",
+    "decoHelp": "Sem patří block design, pozadí, air deco a další vizuální stránky levelu!<br><br>Můžeš zde i třeba zahrnout, jestli se povedl theme, o který se level snažil.",
+    "diffHelp": "Obtížnost hodnoť vzhledem k její obtížnosti ve hře.<br><br>Klidně můžeš nejtěžší Easy level ohodnotit desítkou a nejvíce free Extreme nulou.",
+    "overallHelp": "Celkovým skórem shrneš všechno, o co se level snažil.<br><br>Může být klidně vyšší než všechna předešlá skóre, když je level objektivně špatný, ale ty ho máš rád."
   },
-  "review": {}
+  "review": {
+    "columnSetting": "{0} sloupec"
+  }
 }

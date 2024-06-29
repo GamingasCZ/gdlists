@@ -40,7 +40,7 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
         <Teleport to="body">
             <div ref="dropdown" @mousedown.prevent="" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
                 <div
-                class="flex flex-col bg-opacity-90 rounded-md max-w-52 min-w-40 bg-lof-200" id="tooltip">
+                class="flex flex-col bg-opacity-90 rounded-md max-w-60 min-w-40 bg-lof-200" id="tooltip">
                     <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
                     <slot name="header" />
                     <button

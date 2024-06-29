@@ -105,7 +105,25 @@ provide("levelHashes", {levelHashes, updateHashes})
 
 provide("settingsTitles", CONTAINERS)
 
-const addContainer = (key: string) => {
+const addContainer = (key: string, addTo?: number) => {
+    // Count of all components
+    let contAm = 0
+    reviewData.value.containers.forEach(c => {
+        if (c.type == "twoColumns") {
+            contAm += c.settings.components.forEach(n => {
+                contAm += n.length
+            });
+        }
+        contAm += 1
+    })
+
+    if (contAm >= 100) {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.tooManyContainers')
+        return
+    }
+
+
     let settingObject = {}
     for (let i = 0; i < CONTAINERS[key].settings.length; i++)
         settingObject[CONTAINERS[key].settings[i].key] = JSON.parse(JSON.stringify(CONTAINERS[key].settings[i].default))
@@ -135,7 +153,7 @@ const addContainer = (key: string) => {
     else {
         if (key == "twoColumns") { // Adding a column to a nest container
             reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
-            reviewData.value.containers[selectedNestContainer.value[0]].settings.components.push([])
+            reviewData.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
         }
         else {
             if (selectedContainer.value[2] == -1) {
@@ -153,7 +171,7 @@ const addContainer = (key: string) => {
 const removeContainer = (index: number) => {
     reviewData.value.containers.splice(index, 1)
     setTimeout(() => {
-        selectedNestContainer.value = [-1, -1]
+        selectedNestContainer.value = [-1, -1, -1]
     }, 5)
 }
 
@@ -170,14 +188,39 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 }
 
 const columnCommand = (index: number) => {
+    let nestAttay = selectedNestContainer.value.slice(0)
     switch (index) {
-        case 0: addContainer("twoColumns", -1); break;
+        case 0: addContainer("twoColumns", 0); break;
         case 1: addContainer("twoColumns", 1); break;
-        case 2: moveContainer(selectedNestContainer[0], -1); break;
-        case 3: moveContainer(selectedNestContainer[0], 1); break;
-        case 4: reviewData.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer[1], 1); break;
-        case 5: removeContainer(selectedNestContainer[0]); break;
+        case 2:
+        case 3:
+            reviewData.value.containers[selectedNestContainer.value[0]].settings.components
+                .splice(selectedNestContainer.value[1] + (index - 3), 0, JSON.parse(JSON.stringify(reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]])))
+                reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
+            break;
+        case 6:
+            let ind = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].indexOf(true)
+            if (ind != -1)
+                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].splice(ind, 1)
+            else    
+                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].push(true)
+            break;
+        case 7:
+            if (reviewData.value.containers[selectedNestContainer.value[0]].settings.components.length == 2) {
+                let columnData = JSON.parse(JSON.stringify(reviewData.value.containers[selectedNestContainer.value[0]].settings.components[1-selectedNestContainer.value[1]]))
+                removeContainer(selectedNestContainer.value[0])
+                reviewData.value.containers.splice(selectedNestContainer.value[0], 0, ...columnData.filter(x => x !== true))
+            }
+            else {
+                reviewData.value.containers[selectedNestContainer.value[0]].extraComponents -= 1
+                reviewData.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1], 1);
+            }
+            break;
+        case 8: moveContainer(selectedNestContainer.value[0], -1); break;
+        case 9: moveContainer(selectedNestContainer.value[0], 1); break;
+        case 10: removeContainer(selectedNestContainer.value[0]); break;
     }
+    // setTimeout(() => selectedNestContainer.value = nestAttay, 5); // great coding, gamingaaaas (body click event unselects containers, need to offset this)
 }
 
 const setFormatting = (format: string) => {
@@ -204,6 +247,9 @@ const moveContainer = (index: number, by: number) => {
     let data = reviewData.value.containers[index]
     reviewData.value.containers.splice(index, 1)
     reviewData.value.containers.splice(index+by, 0, data)
+    selectedContainer.value[0] += by
+    if (selectedNestContainer.value[0] != -1)
+        selectedNestContainer.value[0] += by
 }
 
 const taglinePlaceholders = [
@@ -216,7 +262,7 @@ const taglinePlaceholders = [
 ]
 const tagline = ref(reviewData.value.tagline)
 
-const buttonState = ref("")
+const buttonState = ref([0,0])
 
 const dataContainers = ref()
 const modifyImageURL = (newUrl: string) => {
@@ -350,7 +396,7 @@ onUnmounted(() => {
   reviewData.value = DEFAULT_REVIEWDATA()
 })
 
-const doBackup = (from: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
+const doBackup = (from?: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
   if (reviewData.value.containers.length == 0) return // Do not save without any content
   if (!to) { // Do not backup when redirected from editor
       saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value)
@@ -393,6 +439,11 @@ onMounted(() => {
 
 const collabBackground = ref()
 const preUpload = ref(false)
+const userDialog = ref()
+const writerRatings = ref<HTMLDivElement>()
+const openRatingHelp = () => {
+    if (writerRatings) writerRatings.value.helpOpen = !writerRatings.value.helpOpen
+}
 </script>
 
 <template>
@@ -434,22 +485,20 @@ const preUpload = ref(false)
             </DialogVue>
         </DialogVue>
 
-        <DialogVue :open="openDialogs.userAdder[0]" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('other.add')" :side-button-disabled="reviewData.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10" @close-popup="openDialogs.userAdder[0] = false" :width="dialog.large">
+        <DialogVue :open="openDialogs.userAdder[0]" :title="$t('editor.levels')" :action="userDialog?.addUser" :side-button-text="$t('other.add')" :side-button-disabled="reviewData.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10" @close-popup="openDialogs.userAdder[0] = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <UserDialog />
+            <UserDialog ref="userDialog" :user-array="reviewData.containers[selectedContainer[0]].settings.users" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
             <WrtierLevels ref="selectedLevel" />
-            <DialogVue :custom-color="collabBackground?.background" :open="openDialogs.collabs" @close-popup="openDialogs.collabs = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :top-most="true">
-                <CollabEditor ref="collabBackground" :level-array="reviewData.levels" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
+            <CollabEditor v-if="openDialogs.collabs" :level-array="reviewData.levels" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
+            <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">
+                <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
             </DialogVue>
         </DialogVue>
 
-        <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">
-            <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
-        </DialogVue>
         
         
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
@@ -460,8 +509,9 @@ const preUpload = ref(false)
             <BackgroundImagePicker :force-aspect-height="openDialogs.bgPicker[1] ? 0 : 10.8" :source="openDialogs.bgPicker[1] ? reviewData.titleImg : reviewData.thumbnail" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.ratings" @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
-            <WriterRatings />
+        <DialogVue :open="openDialogs.ratings" :side-button-text="$t('other.help')" :action="openRatingHelp" @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
+            <template #icon><img src="@/images/info.svg" alt="" class="w-6"></template>
+            <WriterRatings ref="writerRatings" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
@@ -517,7 +567,7 @@ const preUpload = ref(false)
                     @move-container="moveContainer(index, $event)"
                     @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
                     @text-modified="container.data = $event"
-                    @settings-button="buttonState = $event"
+                    @settings-button="buttonState = [$event, selectedContainer[0]]"
                     @add-paragraph="moveToParagraph(index)"
                     v-model="container.data"
                     :type="container.type"
@@ -534,7 +584,7 @@ const preUpload = ref(false)
                             v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
                             :is="elements"
                             v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                            @clear-button="buttonState = ''"
+                            @clear-button="buttonState[0] = ''"
                             @remove-subcontainer="container.extraComponents -= 1"
                             @remove="removeContainer(index)"
                             :button-state="buttonState"

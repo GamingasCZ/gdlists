@@ -60,10 +60,11 @@ if ($mysqli -> connect_errno) {
   die(json_encode([-1, 0]));
 }
 $mysqli->set_charset("utf8mb4");
+$compressedData = base64_encode(gzcompress(json_encode($DATA)));
 
 // Send to database
 $teplate = "INSERT INTO `lists`(`creator`,`name`,`data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`) VALUES ('',?,?,?,?,?,?,?)";
-$values = array($fuckupData[0], $fuckupData[1], $timestamp, $hidden, $user_id, $diffGuess, $disableComments);
+$values = array($fuckupData[0], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments);
 doRequest($mysqli, $teplate, $values, "ssssssi");
 
 if ($DATA["hidden"]) {

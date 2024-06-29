@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const hidden = ref(true)
 
+let timeout = -1
 watch(props, () => {
     if (!props.errorText) { // Empty error (=no error)
         hidden.value = true
@@ -24,7 +25,8 @@ watch(props, () => {
     }
 
     hidden.value = false
-    setTimeout(() => hidden.value = true, 2000);
+    if (timeout != -1) clearTimeout(timeout)
+    timeout = setTimeout(() => {hidden.value = true; timeout = -1}, 2000);
 })
 
 </script>

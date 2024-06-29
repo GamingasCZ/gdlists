@@ -27,12 +27,12 @@ if (strlen($DATA["reviewName"]) < 3 || strlen($DATA["reviewName"]) > 40) {
 
 // Check list size
 $len = strlen(json_encode($DATA));
-if ($len > 25000 || $len < 150) {
+if ($len > 50000 || $len < 150) {
   die(json_encode([-1, 4]));
 }
 
 // Valid thumbnail
-if ($DATA["thumbnail"][0] != "" && strlen($DATA["thumbnail"][0]) != 40) die("7");
+if ($DATA["thumbnail"][0] != "" && strlen($DATA["thumbnail"][0]) != 40) die(json_encode([-1, 7]));
 $thumbProps = json_encode(array_slice($DATA["thumbnail"], 1));
 $thumb = $DATA["thumbnail"][0];
 if (!strlen($thumb)) $thumb = null;
@@ -63,10 +63,11 @@ if ($mysqli -> connect_errno) {
   die(json_encode([-1, 0]));
 }
 $mysqli->set_charset("utf8mb4");
+$compressedData = base64_encode(gzcompress(json_encode($DATA)));
 
 // Send to database
 $teplate = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`) VALUES (?,?,?,?,?,?,?,?,?)";
-$values = array($fuckupData[0], $user_id, json_encode($DATA), $DATA["tagline"], $hidden, $disableComments, $thumb, $thumbProps, $DATA["language"]);
+$values = array($fuckupData[0], $user_id, $compressedData, $DATA["tagline"], $hidden, $disableComments, $thumb, $thumbProps, $DATA["language"]);
 $res = doRequest($mysqli, $teplate, $values, "sisssisss");
 if (is_array($res) && array_key_exists("error", $res)) die(print_r($res));
 
@@ -77,11 +78,9 @@ foreach ($rows as $row) {
 }
 
 // Adds levels to database
-/*
 if (!$DATA["private"]) {
-  addLevelsToDatabase($mysqli, $listCheck["levels"], $listID, $user_id);
+  addLevelsToDatabase($mysqli, $DATA["levels"], $listID, $user_id, true);
 }
-*/
 
 $mysqli -> close();
 

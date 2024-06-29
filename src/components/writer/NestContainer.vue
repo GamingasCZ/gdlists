@@ -32,7 +32,7 @@ const moveContainer = (i: number, by: number) => {
     props.settings.components[props.subIndex].splice(i+by, 0, data)
 }
 
-const buttonState = ref('')
+const buttonState = ref([0,0])
 const CONTAINERS = inject("settingsTitles")!
 
 const removeNestContainer = () => {
@@ -64,18 +64,18 @@ const selectNestContainer = (e: Event) => {
 <template>
     <article
         @click.stop="selectNestContainer"
-        :style="{borderColor: borderColor}"
-        class="p-0.5 border border-opacity-30 transition-colors duration-75 grow min-h-8"
+        :style="{borderColor: borderColor, maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
+        class="p-0.5 border border-opacity-30 transition-colors duration-75 min-w-10 grow min-h-8"
         :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!border-none': !editable}"
     >
         <DataContainer
-            v-for="(container, ind) in settings.components[subIndex]"
+            v-for="(container, ind) in settings.components[subIndex].filter(x => x !== true)"
             v-bind="CONTAINERS[container.type]"
             @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @text-modified="container.data = $event"
-            @settings-button="buttonState = $event"
+            @settings-button="buttonState = [$event, ind]"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"
@@ -91,10 +91,10 @@ const selectNestContainer = (e: Event) => {
                     v-for="elements in CONTAINERS[container.type].additionalComponents"
                     :is="elements"
                     v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                    @clear-button="buttonState = ''"
+                    @clear-button="buttonState[0] = ''"
                     :button-state="buttonState"
                     :settings="container.settings"
-                    :index="index"
+                    :index="ind"
                     :editable="editable"
                 />
             </div>

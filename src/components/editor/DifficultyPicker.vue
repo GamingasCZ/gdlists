@@ -26,7 +26,7 @@ getDifficulties()
 <template>
   <section class="flex justify-between max-sm:flex-col">
     <div
-      class="box-border flex flex-grow-[1] mx-1 items-center gap-3 overflow-x-auto"
+      class="box-border flex flex-grow-[1] mx-1 items-center gap-3 overflow-x-auto overflow-y-clip"
     >
       <button
         v-for="(diff, index) in faces"
@@ -40,7 +40,7 @@ getDifficulties()
       </button>
     </div>
     <div
-      class="box-border grid-cols-3 gap-1 justify-between rounded-md min-w-ma max-sm:flex sm:grid"
+      class="box-border grid-cols-3 gap-1 justify-center mt-2 rounded-md min-w-ma max-sm:flex sm:grid"
     >
       <button
         type="button"

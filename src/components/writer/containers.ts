@@ -11,14 +11,14 @@ import { i18n } from "@/locales"
 const success = {success: true}
 
 const error = (ind: number, msg = 0) => {
-    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected')]
+    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty')]
     return {success: false, error: message[msg], index: ind}
 }
 
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
-        styling: "my-2",
+        styling: "",
         nestable: true,
         canEditText: true,
         settings: [{
@@ -30,21 +30,21 @@ const containers: Containers = {
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
-        styling: "text-3xl leading-10",
+        styling: "text-3xl leading-10 mb-3",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
         placeholder: i18n.global.t('reviews.title', [2]),
-        styling: "text-2xl leading-8",
+        styling: "text-2xl leading-8 mb-2",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "texl-xl leading-6",
+        styling: "texl-xl leading-6 mb-1",
         nestable: true,
         canEditText: true,
         settings: []
@@ -228,11 +228,19 @@ const containers: Containers = {
         additionalComponents: [NestContainer, NestContainer],
         settings: [{
             key: "components",
-            title: "",
+            title: i18n.global.t('reviews.columns'),
             type: [-1],
             default: [[], []]
-        }]
-    },
+        }],
+        errorCheck: (settings: object) => {
+            let len = 0
+            settings.components.forEach(e => len += e.length)
+            return len ? success : error(0, 2)
+        }
+    }
+}
+
+/*
     showCollab: {
         nestable: true,
         canEditText: false,
@@ -243,7 +251,7 @@ const containers: Containers = {
             title: i18n.global.t('other.users'),
             type: [-1],
             required: true,
-            default: false
+            default: []
         },
         {
             key: "pick",
@@ -258,7 +266,7 @@ const containers: Containers = {
             default: false
         }]
     }
-}
+        */
 
 export default containers
 

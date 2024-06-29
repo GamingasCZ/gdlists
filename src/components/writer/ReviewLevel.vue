@@ -11,11 +11,14 @@ const emit = defineEmits<{
 
 const props = defineProps<{
     settings: object
-    buttonState: string
+    buttonState: [string, number]
+    index: number
 }>()
 
 watch(props, () => {
-    switch (props.buttonState) {
+    if (props.buttonState[1] != props.index) return
+
+    switch (props.buttonState[0]) {
         case "pickLevel": props.settings.pickedIndex = -1; break;
     }
     emit("clearButton")

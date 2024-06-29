@@ -14,7 +14,7 @@ import LevelCard from "./global/LevelCard.vue";
 // import LevelCardPC from "./global/LevelCardPC.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, computed, provide } from "vue";
+import { ref, onMounted, watch, onUnmounted, provide } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -32,10 +32,8 @@ import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
 import { DEFAULT_REVIEWDATA, flexNames, parseReviewContainers, reviewData } from "@/Reviews";
-import { onUpdated } from "vue";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
-import { useRouter } from "vue-router";
 
 const props = defineProps({
   listID: { type: String, required: false },
@@ -230,6 +228,7 @@ function loadReview() {
       }
     })
 }
+
 
 let isJumpingFromFaves = new URLSearchParams(window.location.search).get(
   "goto"
@@ -427,6 +426,7 @@ const jumpToContent = (type: string, index: number) => {
 
 provide("settingsTitles", CONTAINERS)
 provide("saveCollab", saveCollab)
+provide("listData", LIST_DATA)
 
 const collabViewerColor = ref("")
 

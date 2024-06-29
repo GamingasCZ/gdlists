@@ -4,6 +4,7 @@ import { nextTick, ref } from 'vue';
 import Dropdown from '../ui/Dropdown.vue';
 import Tooltip from '../ui/Tooltip.vue';
 import { addFormatting } from '../global/parseEditorFormatting';
+import { reviewData } from '@/Reviews';
 
 const props = defineProps<{
 	selectedNest: number[]
@@ -38,18 +39,17 @@ const actions = [
 		["divisor", i18n.global.t('reviews.addDivisor')],
 		["showList", i18n.global.t('reviews.listLink')],
 		["showLevel", i18n.global.t('reviews.showLevel')],
-		["showCollab", i18n.global.t('reviews.addUsers')],
 		["showImage", i18n.global.t('reviews.addImage')],
 		["addVideo", i18n.global.t('reviews.addVideo')],
 		["showRating", i18n.global.t('reviews.dispRatings')],
 	],
 ]
+// ["showCollab", i18n.global.t('reviews.addUsers')],
 
 const columnData = ["twoColumns", i18n.global.t('reviews.multicolumn'),, "Přidat sloupec"]
 
 
 const columnOptionsShown = ref(false)
-const columnOptions = ["Přidat sloupec zleva", "Přidat sloupec zprava", "Přesunout sekci nahoru", "Přesunout sekci dolů", "Smazat sloupec", "Smazat vše"]
 
 const base = import.meta.env.BASE_URL
 const FORMATTING = [i18n.global.t('reviews.bold'), i18n.global.t('reviews.italics'), i18n.global.t('reviews.strike'), i18n.global.t('other.points'), i18n.global.t('other.blockquote'), i18n.global.t('other.link')]
@@ -132,7 +132,46 @@ const getIndex = (sectIndex: number, butIndex: number) => {
 			<span class="w-max text-sm pointer-events-none">{{ selectedNest[0] > -1 ? $t('reviews.editColumn') : $t('reviews.addColumn') }}</span>
 		</button>
 
-		<Dropdown v-if="columnOptionsShown" @picked-option="emit('columnCommand', $event)" :button="columnButton" @close="columnOptionsShown = false" :options="columnOptions"></Dropdown>
+		<Dropdown v-if="columnOptionsShown && selectedNest[0] != -1" @picked-option="emit('columnCommand', $event)" :button="columnButton" @close="columnOptionsShown = false">
+			<template #header>
+				<div class="m-2">
+					<div class="flex flex-col gap-3 justify-center mb-5 text-xl text-center text-white">
+						<div v-for="(setting, index) in [$t('other.add'), $t('other.duplicate')]">
+							<h2>{{ $t('review.columnSetting', [setting]) }}</h2>
+							<div>
+								<button :disabled="reviewData.containers[selectedNest[0]].settings.components.length > 9" @click="emit('columnCommand', index*2)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md disabled:opacity-40 hover:bg-opacity-60 aspect-square">
+									<img src="@/images/moveUp.svg" class="mx-auto w-5 -rotate-90 button" alt="">
+								</button>
+								<button :disabled="reviewData.containers[selectedNest[0]].settings.components.length > 9" @click="emit('columnCommand', index*2+1)" class="box-border p-1 ml-2 w-9 bg-black bg-opacity-40 rounded-md disabled:opacity-40 hover:bg-opacity-60 aspect-square">
+									<img src="@/images/moveUp.svg" class="mx-auto w-5 rotate-90 button" alt="">
+								</button>
+							</div>
+						</div>
+						<button @click="emit('columnCommand', 7); columnOptionsShown = false" class="flex gap-1 items-center p-1 text-base font-bold text-black bg-red-400 rounded-md">
+							<img src="@/images/del.svg" alt="" class="w-5">
+							<span>{{ $t('reviews.removeColumn') }}</span>
+						</button>
+						<button @click="emit('columnCommand', 6)" class="flex gap-1 items-center p-1 text-base font-bold text-black rounded-md bg-lof-400">
+							<img src="@/images/grow.svg" alt="" class="w-5">
+							<span v-if="!reviewData.containers?.[selectedNest[0]]?.settings?.components?.[selectedNest[1]].includes(true)">{{ $t('reviews.cMaxContent') }}</span>
+							<span v-else>{{ $t('reviews.cFillSpace') }}</span>
+						</button>
+					</div>
+					<div class="flex gap-1 justify-between">
+						<button @click="emit('columnCommand', 8)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+							<img src="@/images/moveUp.svg" class="mx-auto w-5 button" alt="">
+						</button>
+						<button @click="emit('columnCommand', 9)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+							<img src="@/images/moveDown.svg" class="mx-auto w-5 button" alt="">
+						</button>
+						<button @click="emit('columnCommand', 10); columnOptionsShown = false" class="flex gap-1 items-center p-1 ml-6 text-xl font-bold text-black bg-red-400 rounded-md">
+							<img src="@/images/del.svg" alt="" class="w-6">
+							<span>{{ $t('editor.remove') }}</span>
+						</button>
+					</div>
+				</div>
+			</template>
+		</Dropdown>
 
 		<Dropdown v-if="mdHelpShown" @close="mdHelpShown = false" @picked-option="doFormatting" :button="buttons[0]" :options="FORMATTING" :icons="icons">
 			<template #footer>

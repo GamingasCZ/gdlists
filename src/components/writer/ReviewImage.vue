@@ -15,7 +15,7 @@ const emit = defineEmits<{
 const props = defineProps<{
     settings: object
     index: number
-    buttonState: string
+    buttonState: [string, number]
     editable: boolean
 }>()
 
@@ -47,11 +47,13 @@ const text = computed(() => {
 })
 
 watch(props, () => {
-    switch (props.buttonState) {
+    if (props.buttonState[1] != props.index) return
+    
+    switch (props.buttonState[0]) {
         case "pick":
             dialogs.imagePicker = [true, props.index]
             break;
-    }
+        }
     emit("clearButton")
 })
 

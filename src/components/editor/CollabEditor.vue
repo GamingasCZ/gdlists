@@ -145,9 +145,7 @@ function changeRole(levelIndex: number) {
   nextTick(() => (document.querySelector(".roleBubble") as HTMLButtonElement).focus())
 }
 
-let parent = getCurrentInstance()?.parent?.subTree.el
 function openSidebar(which: number) {
-  parent.style.transform = "sm:-translate-x-40"
   if (pickingRole.value > -1) return
   if (which == 0) {
     roleSidebarOpen.value = !roleSidebarOpen.value
@@ -463,7 +461,7 @@ onUnmounted(() => {
     <section
       @click.stop=""
       :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
-      class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[max-content_max-content_max-content_40rem] text-white shadow-lg shadow-black"
+      class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[40rem]"
       :class="{'max-lg:hidden': roleSidebarOpen || savedSidebarOpen}"
     >
       <div class="flex relative justify-between items-center py-1 mx-2 -translate-y-0.5">
@@ -768,18 +766,6 @@ onUnmounted(() => {
             <SavedCollabVue :on-saves-page="false" :save="savedCollabs![currentlyUsedSaved]" :coll-index="currentlyUsedSaved"
               :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
         </div>
-
-        <!-- Same ID -->
-        <!-- <div v-if="currentlyUsedSaved != -1">
-          <header class="flex gap-3 items-center mb-1 opacity-80">
-            <button @click="savedWithSameIDCollapsed = !savedWithSameIDCollapsed"><img src="@/images/showComms.svg" class="p-0.5 w-4 bg-white bg-opacity-20 rounded-full aspect-square" :class="{'rotate-90': !savedWithSameIDCollapsed}"></button>
-            <h2 class="text-xl">Se stejným ID</h2>
-            <hr class="h-1 bg-white border-none grow">
-          </header>
-          <div v-if="!savedWithSameIDCollapsed" class="flex flex-col gap-2">
-            <SavedCollabVue :save="savedCollabs[currentlyUsedSaved]" :coll-index="currentlyUsedSaved" @change-name="modifySaveName" @load-collab="loadCollab" @remove-collab="removeCollab" />
-          </div>
-        </div> -->
         
         <!-- All collabs -->
         <div>

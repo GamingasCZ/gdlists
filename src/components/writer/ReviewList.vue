@@ -5,6 +5,7 @@ import ContainerHelp from './ContainerHelp.vue';
 import { hasLocalStorage } from '@/siteSettings';
 import router from '@/router';
 import { nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 
 
 const emit = defineEmits<{
@@ -15,18 +16,22 @@ const emit = defineEmits<{
 const props = defineProps<{
     settings: object
     index: number
-    buttonState: string
+    buttonState: [string, number]
     editable: boolean
 }>()
 
 watch(props, () => {
-    switch (props.buttonState) {
+    if (props.buttonState[1] != props.index) return
+
+    switch (props.buttonState[0]) {
         case "pick": props.settings.level = false; break;
     }
     emit("clearButton")
 })
 
 const saveScrolling = () => {
+    if (["writer", "editingReview"].includes(useRoute().name)) return
+
     if (hasLocalStorage()) {
         let listName = document.getElementById("objectName")?.innerText // Ber z elementu
         let listID = router.currentRoute.value.fullPath

@@ -273,7 +273,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
 <template>
   <section class="mx-auto mt-3 w-[80rem] max-w-[95vw] text-white">
     <main>
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
@@ -323,7 +323,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             $t('other.refresh') }}</label>
         </button>
       </header>
-      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid grid-cols-3': onlineSubtype == 'reviews'}">
+      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': onlineSubtype == 'reviews'}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">

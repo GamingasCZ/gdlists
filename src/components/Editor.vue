@@ -459,7 +459,7 @@ const useAccentColor = () => {
         <img src="@/images/close.svg" class="w-full" alt="" />
       </button>
     </div>
-    <div class="flex flex-col gap-3 mt-20" v-show="previewingList">
+    <div class="flex flex-col gap-3 items-center mt-20" v-show="previewingList">
       <LevelCard
         v-for="(level, ind) in levelList.levels"
         v-bind="level"

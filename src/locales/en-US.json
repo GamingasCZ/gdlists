@@ -113,7 +113,6 @@
     "listID": "List ID",
     "playername": "username",
     "enterThe": "Enter a ",
-    "idlistHelp2": "Enter at least 2 levels!",
     "idlistError1": "Enter at least 2 levels!",
     "foundLevels": "Found {0} levels!",
     "clickLeave": "All unselected levels will be left out.",
@@ -140,7 +139,7 @@
     "more": "More",
     "newest": "Recent Lists",
     "noLevelsSaved": "You haven't saved any levels yet!",
-    "noListsPinned": "You haven't pinned any lists yet!",
+    "noListsPinned": "You haven't pinned any posts yet!",
     "noListsUploaded": "You haven't uploaded any lists yet!",
     "noListsVisited": "You haven't visited any lists yet!",
     "official": "Official",
@@ -235,7 +234,8 @@
     "commHelpR4": "I agree with your review, but...",
     "nonexistentReview": "This review doesn't exist!",
     "thisReview": "review",
-    "thisList": "list"
+    "thisList": "list",
+    "failSendComm": "Failed to send the comment. Please try again later!"
   },
   "navbar": {
     "editor": "Create",
@@ -387,7 +387,9 @@
     "listFindError": "An error occured while searching!",
     "creator": "creator",
     "users": "Users",
-    "newest": "Newest"
+    "newest": "Newest",
+    "duplicate": "Duplicate",
+    "move": "Move"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -424,7 +426,13 @@
     "privListsHelp": "Private lists are not displayed publicly and you can only access them with a special link. \nYou can edit them at any time and make them public.",
     "translucentHelp": "When turned on, level cards will be translucent in the list. \nTranslucent cards work best with some sort of list background.",
     "usedPackages": "Used packages",
-    "usingTheEditor": "Level Searching"
+    "usingTheEditor": "Level Searching",
+    "textFormatting": "Text Formatting",
+    "containers": "Review Elements",
+    "moreColumns": "Column Layout",
+    "formatHelp": "Text formatting uses GFM (GitHub Flavoured Markdown).<br><br>In the Formatting dropdown, you can find help on how to use GFM.<br><br>If you don't want to use Markdown, you can disable it in the paragraph's settings.",
+    "containerHelp": "Elements for images, videos etc. are next to the buttons for aligning.<br><br>Click on an element to select it. Every element has it's own settings, under the cogwheel button in the top-right edge of the element.<br>Middle-clicking the settings button will remove the element.<br><br>You can have up to a 100 visual/text elements in the review.",
+    "columnHelp": "Columns allow you to have text text and most other elements next to each other.<br><br>To add content to a column, click on it first to select it. A selected column's outline is thicker.<br><br>After selecting a column, the \"Add column\" button wil turn into an edit button, where you can manage the layout.<br><br>You can have up to 10 columns next to each other. Columns overflow when there isn't enough room for the content.<br><br>By default, columns try filling as much space as possible. In the column settings, you can limit a column's width to it's content's width.<br><br>Tip: If all columns are width limited, you can center the entire layout with the align buttons.<br><br>If the layout has 2 columns and you remove one, the other column's content will be transferred back into the review."
   },
   "list": {
     "uploadFinished": "List {0}!",
@@ -573,7 +581,7 @@
     "start": "Start Writing!",
     "readerModeHelp": "Increases font size, line height and limits characters per line",
     "checkable": "Checklist",
-    "setVideo": "Click to set a video.",
+    "setVideo": "Please paste a YouTube link.",
     "loadVideoFail": "Failed to load the video!",
     "paragraph": "Paragraph",
     "thumbnail": "Review Thumbnail",
@@ -630,6 +638,19 @@
     "loginFail": "Authentication failed. Check your internet or login again!",
     "disMD": "Disable Markdown",
     "isMissing": "%s is missing!",
-    "notSelected": "%s is not selected!"
+    "notSelected": "%s is not selected!",
+    "areEmpty": "%s are empty!",
+    "columns": "Columns",
+    "removeColumn": "Remove column",
+    "tooManyContainers": "You cannot add more containers!",
+    "cFillSpace": "Fill Space",
+    "cMaxContent": "Width based on content",
+    "gpHelp": "You can rate gameplay based on how fun the level is to play.<br><br>Recall if the level has any bad transitions, sudden difficulty spikes and such.",
+    "decoHelp": "Block designs, backgrounds, air deco and all the other visual parts of the level fall under decoration.<br><br>If there's a theme, you can rate how well it's used.",
+    "diffHelp": "Rate difficulty relative to it's actual one in-game.<br><br>It's totally fine rating the hardest Easy level with a 10 and the most free Extreme with a 0.",
+    "overallHelp": "The overall score incorporates everything the level tried to go for.<br><br>You're free to make it higher than the other ratings, if the level's objectively bad, but you like it."
+  },
+  "review": {
+    "columnSetting": "{0} column"
   }
 }

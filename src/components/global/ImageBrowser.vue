@@ -202,7 +202,7 @@ const refreshContent = () => {
 }
 
 const downloadImage = (hash: string, external: boolean) => {
-    if (external) navigator.clipboard.writeText(hash)
+    if (external) navigator.clipboard.writeText(externaImages.value[hash])
     else {
         let link = document.createElement("a")
         link.href = `${pre}/userContent/${storage.value.uid}/${images.value[hash]}.webp`
@@ -223,10 +223,11 @@ const dropdown = ref()
 
 const imageAction = (id: number, external: boolean, val: string | number) => {
     previewImage.value = -1
-    console.log("aaaa")
     switch (id) {
         case 0: // Remove
-            startRemoval(val); break
+            if (external) removeImage(externaImages.value[val], true);
+            else startRemoval(val);
+            break;
         case 1:
             downloadImage(val, external); break
     }
@@ -272,6 +273,7 @@ onBeforeUnmount(() => {
 const previewDominant = ref()
 
 const button = ref()
+const extButton = ref()
 </script>
 
 <template>
@@ -350,7 +352,7 @@ const button = ref()
                     class="absolute top-1 right-1 z-20 w-5 bg-white rounded-full duration-75">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown :button="button[index]" @close="imageOptsShown = -1" @picked-option="startRemoval(index)" v-if="imageOptsShown == index" :options="[$t('editor.remove'), $t('other.download')]" :title="$t('other.options')" />
+                    <Dropdown :button="button[index]" @close="imageOptsShown = -1" @picked-option="imageAction($event, false, index)" v-if="imageOptsShown == index && currentTab == 0" :options="[$t('editor.remove'), $t('other.download')]" :title="$t('other.options')" />
                 </button>
 
                 <img loading="lazy" :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
@@ -363,14 +365,14 @@ const button = ref()
             <button v-for="(image, index) in externaImages"
                 @click="pickImage(index, true)"
                 @auxclick="removeImage(externaImages[index], true)"
-                class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer group shadow-drop hover:scale-125 min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
+                class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
                 :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false }">
                 <!-- Image settings -->
-                <button ref="button" @click.stop=""
+                <button ref="extButton" @click.stop="imageOptsShown = index"
                     class="absolute top-1 right-1 z-20 w-5 overflow-clip bg-white rounded-full opacity-0 transition-opacity duration-75 button group-hover:opacity-100">
                     <img src="@/images/more.svg" class="p-1 invert">
 
-                    <Dropdown @close="imageOptsShown = -1" @picked-option="imageAction($event, image, false)" ref="dropdown" class="top-8" v-if="imageOptsShown == index" :options="['Smazat', 'Odkaz']" :title="'Možnosti'" />
+                    <Dropdown :button="extButton[index]" @close="imageOptsShown = -1" @picked-option="imageAction($event, true, index)" ref="dropdown" class="top-8" v-if="imageOptsShown == index && currentTab == 1" :options="['Smazat', 'Odkaz']" :title="'Možnosti'" />
                 </button>
 
                 <img loading="lazy" :src="image" :alt="image" class="object-cover z-10 w-full h-full aspect-auto">

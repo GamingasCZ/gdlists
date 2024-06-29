@@ -69,7 +69,7 @@ const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
       <p class="text-xs">- {{ creator }} -</p>
     </section>
 
-    <div v-if="inLists" class="flex gap-3 items-center p-1 ml-auto bg-black bg-opacity-40 rounded-md">
+    <div v-if="inLists || inReviews" class="flex gap-3 items-center p-1 ml-auto bg-black bg-opacity-40 rounded-md">
       <div v-if="inLists > 0">
         <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-3" alt="">{{ inLists }}
       </div>

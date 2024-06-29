@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { CollabData, FavoritedLevel, Level, LevelTag } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
-import { onErrorCaptured, ref } from "vue";
+import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
 import RatingContainer from './RatingContainer.vue'
+import { DEFAULT_RATINGS } from "@/Reviews";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -125,6 +126,8 @@ function nextGuess(results: number) {
 onErrorCaptured(() => {
   emit("error")
 })
+
+const listData = inject("listData")
 
 </script>
 
@@ -271,7 +274,14 @@ onErrorCaptured(() => {
 
     <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
   
-    <RatingContainer v-if="ratings && !hideRatings" :compact="false" :ratings="ratings[0]" :user-ratings="ratings[1]" />
+    <div v-if="ratings && !hideRatings" class="flex gap-x-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
+      <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
+        <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
+        <span class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
+        
+        <span class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -290,6 +300,13 @@ onErrorCaptured(() => {
   background: v-bind(guessGradient);
   transition: opacity 150ms ease;
   opacity: v-bind(guessOpacity);
+}
+
+.ratingCircle::after {
+  mask: radial-gradient(51px, #0000 96%, #000);
+  background: conic-gradient(var(--bg) var(--fill), rgb(0 0 0 / 0.4) var(--fill));
+  @apply content-[''] rounded-full absolute -inset-2
+  ;
 }
 
 </style>
