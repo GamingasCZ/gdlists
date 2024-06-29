@@ -53,7 +53,7 @@ function placeImage(image:HTMLImageElement | null) {
         // Recoloring icon parts
         for (let j = 0; j < data.length; j += 4) {
             if (j % 4 == 0) // Optimization
-                newCol = chroma.blend(chroma.rgb(data[j], data[j+1], data[j+2]), colors[[props.glow, props.col1, props.col2][imageIndex]], 'multiply').rgb()
+                newCol = chroma.blend(chroma.rgb(data[j], data[j+1], data[j+2]), colors[[props.glow | 0, props.col1, props.col2][imageIndex]], 'multiply').rgb()
             data[j] = newCol[0];
             data[j + 1] = newCol[1]
             data[j + 2] = newCol[2]

@@ -1,11 +1,17 @@
 // TODO
 <script setup lang="ts">
-const goToDiscord = () =>
+import router from '@/router';
+
+const goToDiscord = () => {
+  let currRoute = router.currentRoute.value.fullPath
+  sessionStorage.setItem("loginRoute", currRoute)
+
   window.location.replace(
     `https://discord.com/api/oauth2/authorize?client_id=989511463360139264&redirect_uri=${encodeURIComponent(
       import.meta.env.VITE_DC_RETURNURI + "/accounts.php"
       )}&response_type=code&scope=identify`
   );
+}
 </script>
 
 <template>

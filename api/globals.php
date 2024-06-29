@@ -36,22 +36,30 @@ function sanitizeInput($inputArray)
     return $inputArray;
 }
 
-function doRequest($mysqli, $queryTemplate, $values, $valueTypes)
+function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = false)
 {
+    global $debugMode;
+    if ($debugMode) error_log($queryTemplate);
+
     $query = $mysqli->prepare($queryTemplate);
 
     // Fill in template
     $query->bind_param($valueTypes, ...$values);
 
-    $query->execute();
+    try {
+        $query->execute();
+    }
+    catch (Exception $e) { return ["error" => $e]; }
     $result = $query->get_result();
 
     $query->close();
 
     if (!$result) {
-        return -1;
+        return ["success" => true];
     }
 
+    if ($fetchAll)
+        return $result -> fetch_all(MYSQLI_ASSOC);
     return $result -> fetch_assoc();
 }
 
@@ -165,6 +173,15 @@ function getAuthorization() {
     else return false;
 }
 
+function getLocalUserID() {
+    // Use when security is not number one priority :D
+    $auth = getAuthorization();
+    if (!$auth) return false;
+    
+    $token = explode("|", decrypt(base64_decode(getAuthorization())));
+    return $token[2]; // User ID
+}
+
 function checkAccount($forceToken = false) {
     global $DO_REFRESH;
     if (!getAuthorization()) return false;
@@ -205,6 +222,103 @@ function list_id($row) {
 
 function clamp($current, $min, $max) {
     return max($min, min($max, $current));
+}
+
+function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) {
+    $likeQuery;
+    $ratingArray = [0, 0, false];
+    if ($splitRatings) {
+        $likeQuery = doRequest($mysqli, sprintf("SELECT sum(rate = 1) as likes, sum(rate = 0) as dislikes FROM ratings WHERE %s=?", $type), [$object_id], "s");
+        $ratingArray[0] = intval($likeQuery["likes"]);
+        $ratingArray[1] = $likeQuery["dislikes"];
+    }
+    else {
+        $likeQuery = doRequest($mysqli, sprintf("SELECT count(id) as total, sum(rate) as likes FROM ratings WHERE %s=?", $type), [$object_id], "s");
+        $ratingArray[0] = intval($likeQuery["likes"]);
+        $ratingArray[1] = $likeQuery["total"]-$likeQuery["likes"];
+    }
+
+    $hasRatedQuery;
+    if ($userID) {
+        $hasRatedQuery = doRequest($mysqli, sprintf("SELECT `rate` FROM ratings WHERE `uid`=? AND %s=?", $type), [$userID, $object_id], "ii");
+        $hasRatedQuery = $hasRatedQuery === null ? -1 : $hasRatedQuery["rate"];
+    }
+    else $hasRatedQuery = -2;
+
+    $ratingArray[2] = $hasRatedQuery;
+    return $ratingArray;
+}
+
+function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
+    foreach ($levels as $l) {
+        $hash = $l["levelID"];
+        if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 100000000) continue;
+
+        $isCollab = is_array($l["creator"]);
+        $creator;
+        if (!$isCollab) $creator = $l["creator"];
+        else {
+            if (isset($l["creator"][0][0]["name"]))
+                $creator = $l["creator"][0][0]["name"];
+            else
+                $creator = $l["creator"][0][0];
+        }
+
+        $res = doRequest($mysqli, "
+        INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, uploaderID, hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ",
+            [
+                $l["levelName"],
+                $creator,
+                $isCollab ? sizeof($l["creator"][2]) : 0,
+                $l["levelID"],
+                isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
+                isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
+                isset($l["platf"]) ? $l["platf"] : false,
+                $userID,
+                $hash
+            ], "ssiiiiiss");
+
+        // Add list/review connections
+        doRequest($mysqli, sprintf("
+    INSERT INTO `levels_uploaders` (levelID, %s)
+    VALUES (?, ?)
+            ", $isReview ? "reviewID" : "listID"),
+        [
+            $l["levelID"],
+            $listID,
+        ], "ii");
+        }
+    }
+
+function isnum($x) {return is_numeric($x);}
+
+function ass() {
+    global $hostname, $username, $password, $database;
+    $mysqli = new mysqli($hostname, $username, $password, $database);
+    
+    $result = $mysqli -> query("SELECT `data`,`id`,`uid` FROM lists");
+    $res = $result -> fetch_all();
+    for ($i=0; $i < sizeof($res); $i++) { 
+        $lev = base64_decode($res[$i][0], true);
+        if ($lev) {
+          $lev = json_decode(htmlspecialchars_decode(gzuncompress($decoded)), true);
+        } else {
+          $lev = json_decode(htmlspecialchars_decode($res[$i][0]), true);
+        }
+        if ($lev == null) continue;
+        $allLevels = [];
+        if (isset($lev["levels"])) {
+            $allLevels = $lev["levels"];
+        } else {
+            foreach (array_filter(array_keys($lev), "isnum") as $l) {
+                array_push($allLevels, $lev[$l]);
+            }
+        }
+
+        addLevelsToDatabase($mysqli, $allLevels, $res[$i][1], $res[$i][2]);
+    }
 }
 
 ?>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="32" height="32" version="1.1" viewBox="0 0 8.4667 8.4667" xmlns="http://www.w3.org/2000/svg">
+ <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width=".92605">
+  <path d="m3.2628 1.7434h4.2432"/>
+  <path d="m3.2628 4.2334h4.2432"/>
+  <path d="m3.2628 6.7233h4.2432"/>
+ </g>
+ <g fill="#fff" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width=".15849">
+  <circle cx="1.3895" cy="1.7434" r=".89187"/>
+  <circle cx="1.3895" cy="4.2333" r=".89187"/>
+  <circle cx="1.3895" cy="6.7233" r=".89187"/>
+ </g>
+</svg>

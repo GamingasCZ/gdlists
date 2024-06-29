@@ -13,17 +13,22 @@ const router = createRouter({
       component: () => import("@/components/Homepage.vue"),
     },
     {
-      path: "/editor",
+      path: "/make/list",
       name: "editor",
       component: () => import("@/components/Editor.vue"),
     },
     {
-      path: "/browse",
+      path: "/make/review",
+      name: "writer",
+      component: () => import("@/components/Writer.vue"),
+    },
+    {
+      path: "/browse/:type",
       name: "browser",
       props: (route) => ({
         query: route.query.q ?? "",
         onlineType: route.query.type ?? "",
-        browserName: useI18n().t('listViewer.communityLists')
+        browserType: route
       }),
       component: () => import("@/components/CommunityLists.vue"),
     },
@@ -35,14 +40,26 @@ const router = createRouter({
     {
       path: "/:id",
       name: "listViewer",
-      props: (route) => ({ listID: route.params.id }),
+      props: (route) => ({ isReview: false, listID: route.params.id }),
       component: () => import("@/components/ListView.vue"),
     },
     {
-      path: "/:id/edit",
+      path: "/review/:review",
+      name: "reviewViewer",
+      props: (route) => ({ isReview: true, listID: route.params.review }),
+      component: () => import("@/components/ListView.vue"),
+    },
+    {
+      path: "/edit/list/:id",
       name: "editing",
       props: (route) => ({ listID: route.params.id, editing: true }),
-      component: () => import("@/components/Editor.vue"),
+      component: () => import("@/components/Editor.vue")
+    },
+    {
+      path: "/edit/review/:id",
+      name: "editingReview",
+      props: (route) => ({ reviewID: route.params.id, editing: true }),
+      component: () => import("@/components/Writer.vue")
     },
     {
       path: "/random",
@@ -58,7 +75,7 @@ router.afterEach(() => window.scrollTo(0,0))
 
 export const loadingProgress = ref(0)
 let loadStart: number
-router.beforeEach(async () => {
+router.beforeEach(async (to, from) => {
 
   // Start loading bar
   loadingProgress.value = 0
@@ -66,25 +83,27 @@ router.beforeEach(async () => {
     loadingProgress.value = 99
   }, 5)
   
-  document.documentElement.style.setProperty("--siteBackground", "");
-
+  
   if (
     getComputedStyle(document.documentElement).getPropertyValue(
       "--primaryColor"
     ) == document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
-    document.querySelector("nav")?.classList.add("slidingNavbar");
-
-    setTimeout(() => {
-      document.documentElement.style.setProperty("--primaryColor", "");
-      document.documentElement.style.setProperty("--secondaryColor", "");
-      document.documentElement.style.setProperty("--brightGreen", "");
-    }, 150);
-
-    setTimeout(() => {
-      document.querySelector("nav")?.classList.remove("slidingNavbar");
-    }, 300);
-  }
+    if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
+    
+      document.documentElement.style.setProperty("--siteBackground", "");
+      document.querySelector("nav")?.classList.add("slidingNavbar");
+  
+      setTimeout(() => {
+        document.documentElement.style.setProperty("--primaryColor", "");
+        document.documentElement.style.setProperty("--secondaryColor", "");
+        document.documentElement.style.setProperty("--brightGreen", "");
+      }, 150);
+  
+      setTimeout(() => {
+        document.querySelector("nav")?.classList.remove("slidingNavbar");
+      }, 300);
+    }
 });
 
 // Finish loading bar

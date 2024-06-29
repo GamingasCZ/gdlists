@@ -50,6 +50,10 @@ body {
   @apply outline outline-1 outline-white
 }
 
+input::placeholder, textarea::placeholder {
+  @apply text-gray-400
+}
+
 input[type="checkbox"] {
   @apply appearance-none border-white border-opacity-50 border-solid border-[0.15rem] bg-white bg-opacity-20 rounded relative align-middle w-6 h-6 mr-2;
 }
@@ -65,12 +69,31 @@ input[type="checkbox"]:checked::after {
   @apply content-[''] absolute bg-white w-3/5 h-3/5 rounded-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
 
+input[type="radio"] {
+  @apply appearance-none border-white border-opacity-50 border-solid border-[0.15rem] bg-white bg-opacity-20 rounded-full relative align-middle w-6 h-6 mr-2;
+}
+
+input[type="radio"]:focus-within:after {
+  @apply content-[''] absolute bg-white bg-opacity-30 w-3/5 h-3/5 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+input[type="radio"]:hover:after {
+  @apply content-[''] absolute bg-white bg-opacity-30 w-3/5 h-3/5 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+
+input[type="radio"]:checked::after {
+  @apply content-[''] absolute bg-white w-3/5 h-3/5 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+
+select {
+  @apply px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40
+}
+
 .disabled {
   @apply opacity-20 grayscale
 }
 
 dialog {
-  @apply fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-80 backdrop-saturate-0
+  @apply fixed top-0 left-0 z-50 min-w-full min-h-full bg-black bg-opacity-80 backdrop-saturate-0
 }
 
 .descriptionFade::before {
@@ -93,6 +116,10 @@ dialog {
 }
 .slider::-moz-range-progress {
   @apply from-[#54c14b] to-[#31fda7] bg-gradient-to-l h-2 rounded-full
+}
+.slider[data-customcolor="true"]::-moz-range-progress {
+  background: var(--col);
+  @apply h-2 rounded-full border-black border-4 border-opacity-40 border-solid
 }
 .slider::-moz-range-thumb:hover {
   @apply scale-[1.25] cursor-pointer
@@ -126,7 +153,7 @@ dialog {
 
 .fadeSlide-enter-active,
 .fadeSlide-leave-active {
-  transition: opacity 0.1s ease, margin-top 0.1s ease;
+  transition: opacity 0.15s ease, margin-top 0.15s ease;
 }
 
 .fadeSlide-enter-from,
@@ -162,3 +189,40 @@ dialog {
   75% { transform: translate(0px, 5px); }
   100% { transform: translate(5px, 0px); }
 }
+
+#reviewText[data-white-page=true] p,figcaption {
+  color: black
+}
+#reviewText[data-white-page=true] {
+  transition: background 0.25s;
+  background: #ece6d9 !important;
+}
+
+@media print {
+  #navbar {@apply hidden}
+  #footer {@apply hidden}
+  .button img {@apply !invert}
+  .descriptionControls {@apply hidden}
+  * {text-shadow: none !important; box-shadow: none !important; filter: none !important; font-family: unset !important;}
+}
+
+.readabilityMode {
+  @apply max-w-[80ch] leading-relaxed text-xl;
+}
+
+/* Use when you want regular parsing */
+.regularParsing h1 { @apply mt-2 text-2xl}
+.regularParsing h2 { @apply mt-1 text-xl}
+.regularParsing h3 { @apply text-lg}
+.regularParsing li:has(input) { @apply list-none m-[revert] my-2 pl-2}
+.regularParsing ul { @apply list-disc list-inside m-[revert] pl-2}
+.regularParsing ol { @apply list-decimal list-inside m-[revert] pl-2}
+.regularParsing a { @apply underline}
+.regularParsing blockquote { @apply border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
+.regularParsing img { @apply max-w-48 my-1}
+.regularParsing code { @apply font-mono bg-white rounded-md p-1 bg-opacity-10 font-normal}
+.regularParsing table,th,td { @apply border border-collapse p-1 border-lof-400}
+.regularParsing table { @apply m-1}
+.regularParsing hr { @apply border opacity-30 rounded-full my-2}
+.regularParsing th { @apply bg-lof-300}
+

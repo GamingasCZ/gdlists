@@ -1,23 +1,17 @@
 <script setup lang="ts">
 import type { CollabData, FavoritedLevel, Level, LevelTag } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
-import { inject, onErrorCaptured, onMounted, ref } from "vue";
+import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
+import RatingContainer from './RatingContainer.vue'
+import { DEFAULT_RATINGS } from "@/Reviews";
 import { fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 
-const props = defineProps<{
-  levelName: string;
-  creator: string | CollabData;
-  levelID: string | null;
-  video: string | null;
-  difficulty: [number, number];
-  color: [number, number, number] | string;
-  tags: LevelTag[];
-  platf: boolean;
+interface Extras {
   favorited: boolean | undefined;
   levelIndex: number;
   listID: string;
@@ -26,7 +20,10 @@ const props = defineProps<{
   translucentCard: boolean;
   guessingNow: boolean;
   diffGuessArray: [boolean, boolean, boolean];
-}>();
+  hideRatings?: boolean
+}
+
+const props = defineProps<Level & Extras>();
 
 const emit = defineEmits<{
   (e: "error"): void;
@@ -71,11 +68,13 @@ onErrorCaptured(() => {
   emit("error")
 })
 
+const listData = inject("listData")
+
 </script>
 
 <template>
   <section v-if="guessResult"
-    class="relative mx-auto w-[70rem] max-w-[95vw] rounded-lg p-3 text-white shadow-lg shadow-[color:#0000008F]"
+    class="relative font-[poppins] w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
@@ -150,6 +149,15 @@ onErrorCaptured(() => {
     </section>
 
     <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
+  
+    <div v-if="ratings && !hideRatings" class="flex gap-x-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
+      <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
+        <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
+        <span class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
+        
+        <span class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -168,6 +176,13 @@ onErrorCaptured(() => {
   background: v-bind(guessGradient);
   transition: opacity 150ms ease;
   opacity: v-bind(guessOpacity);
+}
+
+.ratingCircle::after {
+  mask: radial-gradient(51px, #0000 96%, #000);
+  background: conic-gradient(var(--bg) var(--fill), rgb(0 0 0 / 0.4) var(--fill));
+  @apply content-[''] rounded-full absolute -inset-2
+  ;
 }
 
 </style>

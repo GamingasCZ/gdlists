@@ -1,174 +1,78 @@
 <script setup lang="ts">
 import { levelList } from "@/Editor";
 import { ref } from "vue";
-import parseText from "./parseEditorFormatting";
-import striptags from "striptags";
-
-defineProps({
-  editorTitle: String,
-});
-
-const emit = defineEmits(["closePopup"]);
+import parseText, { addFormatting, autoLink } from "./parseEditorFormatting";
+import { i18n } from "@/locales";
+import type { LevelList, ReviewList } from "@/interfaces";
 
 const isPreviewing = ref<boolean>(false);
+const props = defineProps<{
+  editValue: LevelList | ReviewList
+}>()
 
-function addFormatting(type: number) {
+const doFormat = (type: number) => {
   if (isPreviewing.value) return;
-
-  let chars = ["**", "//", "__", "--"][type];
-  let textbox = document.querySelector("#mainTextbox") as HTMLTextAreaElement;
-  let selStart = textbox.selectionStart;
-  switch (true) {
-    case type >= 0 && type <= 3:
-      if (selStart == textbox.selectionEnd) {
-        // No text selected
-        textbox.value =
-          textbox.value.slice(0, selStart) +
-          `${chars} ${chars}` +
-          textbox.value.slice(selStart);
-        textbox.focus();
-        textbox.selectionStart = selStart + 2;
-        textbox.selectionEnd = selStart + 3;
-      } else {
-        let selectedText = textbox.value.slice(selStart, textbox.selectionEnd);
-        textbox.value =
-          textbox.value.slice(0, selStart) +
-          `${chars}${selectedText}${chars}` +
-          textbox.value.slice(textbox.selectionEnd);
-        textbox.focus();
-        textbox.selectionStart = textbox.selectionEnd + 2;
-        textbox.selectionEnd = textbox.selectionEnd + 2;
-      }
-
-      break;
-    case [4, 5].includes(type):
-      let format = type == 4 ? "#" : "*";
-      let startLF = [undefined, "\n"].includes(textbox.value[selStart - 1])
-        ? ""
-        : "\n";
-      textbox.value =
-        textbox.value.slice(0, selStart) +
-        `${startLF}${format}` +
-        textbox.value.slice(selStart);
-      textbox.focus();
-      textbox.selectionStart = selStart + 2;
-      textbox.selectionEnd = selStart + 2;
-      break;
-
-    default:
-      break;
-  }
-  levelList.value.description = textbox.value
+  props.editValue.description = addFormatting(type, document.querySelector("#mainTextbox"))
 }
+
+const base = import.meta.env.BASE_URL
+const formatting = [
+  ["bold", i18n.global.t('reviews.bold')],
+  ["cursive", i18n.global.t('reviews.italics')],
+  ["strike", i18n.global.t('reviews.strike')],
+  ["div"],
+  ["list", i18n.global.t('editor.listItems')],
+  ["quotes", i18n.global.t('editor.citations')],
+  ["div"],
+  ["heading1", i18n.global.t('reviews.title', [1])],
+  ["heading2", i18n.global.t('reviews.title', [2])],
+  ["heading3", i18n.global.t('reviews.title', [3])],
+  ["div"],
+  ["link", i18n.global.t('other.link')],
+  ["showImage", i18n.global.t('other.picture')],
+  ["div"],
+]
 </script>
 
 <template>
-  <section
-    class="absolute top-1/2 left-1/2 flex h-[30rem] max-h-[95%] w-[60rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black"
-    @click.stop=""
-    >
-    <div class="relative mb-1 h-max">
-      <h2 class="text-xl font-bold text-center">{{ editorTitle }}</h2>
-      <img
-        src="@/images/close.svg"
-        alt=""
-        class="absolute top-0 right-0 w-6 button"
-        @click="emit('closePopup')"
-      />
-    </div>
-    <main class="flex flex-grow-[1] flex-col gap-1.5">
-      <div class="box-border flex gap-1.5 items-center">
-        <button
-          @click="addFormatting(0)"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ disabled: isPreviewing }"
-        >
-          <img class="w-5" src="@/images/formatting/bold.webp" alt="" />
-        </button>
-        <button
-          @click="addFormatting(1)"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ disabled: isPreviewing }"
-        >
-          <img class="w-5" src="@/images/formatting/italics.webp" alt="" />
-        </button>
-        <button
-          @click="addFormatting(2)"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ disabled: isPreviewing }"
-        >
-          <img class="w-5" src="@/images/formatting/underline.webp" alt="" />
-        </button>
-        <button
-          @click="addFormatting(3)"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ disabled: isPreviewing }"
-        >
-          <img
-            class="w-5"
-            src="@/images/formatting/strikethrough.webp"
-            alt=""
-          />
-        </button>
-        <hr
-          class="w-1.5 h-5 bg-white bg-opacity-10 rounded-full border-none"
-        />
-        <button
-          @click="addFormatting(4)"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ disabled: isPreviewing }"
-        >
-          <img class="w-5" src="@/images/formatting/header.webp" alt="" />
-        </button>
-        <hr
-          class="w-1.5 h-5 bg-white bg-opacity-10 rounded-full border-none"
-        />
-        <button
-          @click="addFormatting(5)"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ disabled: isPreviewing }"
-        >
-          <img class="w-5" src="@/images/formatting/list.webp" alt="" />
-        </button>
-        <hr
-          class="w-1.5 h-5 bg-white bg-opacity-10 rounded-full border-none"
-        />
+    <main class="flex flex-grow-[1] flex-col gap-0 mt-0 h-[30rem]">
+      <div class="box-border flex flex-wrap gap-1.5 items-center px-2">
+        <div v-for="(format, index) in formatting">
+          <button
+            @click="doFormat(index)"
+            :title="format[1]"
+            class="p-1 px-2 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40 button"
+            :class="{ disabled: isPreviewing }"
+            v-if="format[0] != 'div'"
+          >
+            <img class="w-5" :src="`${base}/formatting/${format[0]}.svg`" alt="aas" />
+          </button>
+          <del v-else class="my-auto w-1 h-full rounded-full border-2 border-black opacity-20"></del>
+        </div>
         <button
           @click="isPreviewing = !isPreviewing"
-          class="p-1 px-2 bg-white bg-opacity-10 rounded-md button"
-          :class="{ 'bg-opacity-[0.4]': isPreviewing }"
+          class="flex items-center p-1 px-2 bg-black bg-opacity-40 rounded-md button"
+          :class="{ 'bg-opacity-[0.8]': isPreviewing }"
         >
           <img
-            class="inline w-5 align-middle"
+            class="flex gap-1 w-5"
             src="@/images/view.svg"
             alt=""
-          /><span class="pl-1 max-sm:hidden">{{ $t('other.preview') }}</span>
+          /><span class="pl-1 leading-none">{{ $t('other.preview') }}</span>
         </button>
       </div>
       <textarea
+        @paste="addFormatting(autoLink($event), $event.target)"
         id="mainTextbox"
         v-show="!isPreviewing"
-        v-model="levelList.description"
-        class="h-max w-full flex-grow-[1] resize-none rounded-lg bg-white bg-opacity-10 px-2 py-1"
-        :placeholder="$t('editor.listDescription')"
+        v-model="editValue.description"
+        class="h-max w-full grow resize-none bg-[url(@/images/fade.webp)] bg-repeat-x bg-black bg-opacity-20 focus-within:bg-opacity-40 focus-within:outline-none px-2 py-1"
+        :placeholder="$t('editor.listDescription') + $t('editor.mdHelp')"
       ></textarea>
       <div
-        class="h-max flex-grow-[1] rounded-lg border-4 border-solid border-white border-opacity-10 px-1"
+        class="h-max grow bg-[url(@/images/fade.webp)] bg-repeat-x bg-opacity-10 bg-black overflow-y-auto regularParsing px-1"
         v-show="isPreviewing"
-        v-html="
-          parseText(
-            striptags(levelList.description, [
-              'a',
-              'b',
-              'i',
-              'u',
-              'strike',
-              'h1',
-              'li',
-            ])
-          )
-        "
+        v-html="parseText(editValue.description)"
       ></div>
     </main>
-  </section>
 </template>

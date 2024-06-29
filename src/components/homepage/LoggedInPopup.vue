@@ -1,34 +1,56 @@
 <script setup lang="ts">
+import { inject } from 'vue';
+
 const emit = defineEmits(["closePopup"]);
 const props = defineProps<{
   pfplink: string;
   username: string;
 }>();
+
+const openContactDialog = () => {
+  document.querySelector("#contactButton").click()
+}
+
 </script>
 
 <template>
-  <section
-    @click.stop=""
-    class="absolute top-1/2 left-1/2 flex max-h-[95vh] w-[25rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-lg bg-greenGradient text-white shadow-lg shadow-black"
-  >
+<div
+  class="flex flex-col text-left"
+>
+  <div class="flex gap-4 items-center m-2">
     <img
       :src="pfplink"
-      class="w-28 rounded-full border-8 border-solid -translate-y-14 border-lof-300"
+      class="w-12 rounded-full border-2 border-white border-solid"
       alt=""
     />
-    <div
-      class="flex flex-col gap-2 justify-center items-center mx-2 text-center -translate-y-7"
-    >
-      <h1 class="text-lg text-yellow-200">
-        {{ $t('other.welcomeToGDL') }} <b>{{ username }}!</b>
-      </h1>
-      <p>{{ $t('other.greatFeatures') }}</p>
-      <button
-        class="px-3 py-2 text-2xl font-black text-black align-bottom rounded-md bg-lof-400"
-        @click="emit('closePopup')"
-      >
-        <img src="@/images/check.svg" alt="" class="inline mr-3 w-8" />{{ $t('other.ok') }}
-      </button>
+    <h1 class="text-2xl text-yellow-200">
+      <span>{{ $t('other.welcomeToGDL') }}</span> 
+      <b>{{ username }}!</b>
+      <img src="@/images/emoji/11.webp" class="inline ml-2 w-8" alt="">
+    </h1>
+  </div>
+
+  <div class="bg-[url(@/images/fade.webp)] relative bg-repeat-x flex-col flex gap-2">
+    <div class="flex gap-2 items-center p-3 px-2 mx-2 mt-2 bg-black bg-opacity-20 rounded-md">
+      <img src="@/images/emoji.svg" class="w-6" alt="">
+      <p>{{ $t('homepage.loginHelp1') }}</p>
     </div>
-  </section>
+    <div class="flex gap-2 items-center p-3 px-2 mx-2 bg-black bg-opacity-10 rounded-md">
+      <img src="@/images/exclaim.svg" class="w-6" alt="">
+      <p>{{ $t('homepage.loginHelp2') }}</p>
+    </div>
+    <div class="flex z-10 gap-2 items-center p-3 px-2 mx-2 mb-2 bg-black bg-opacity-20 rounded-md">
+      <img src="@/images/comment.svg" class="w-6" alt="">
+      <p>{{ $t('homepage.loginHelp3') }} <button class="underline cursor-pointer" @click="openContactDialog">{{ $t('homepage.loginHelp4') }}</button>!</p>
+    </div>
+
+    <div class="absolute bottom-0 w-full h-12 bg-gradient-to-t from-black to-transparent opacity-20"></div>
+  </div>
+
+  <div class="grid gap-y-2 gap-x-4 items-center m-2 text-xl text-center sm:grid-cols-3">
+    <RouterLink :to="Math.random() >= 0.5 ? '/make/list' : '/make/review'"><buttton class="flex gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md sm:justify-center button"><img class="w-7" src="@/images/editorMobHeader.svg" alt="">{{ $t('homepage.startMaking') }}</buttton></RouterLink>
+    <RouterLink to="/random"><buttton class="flex gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md sm:justify-center button"><img class="w-7" src="@/images/dice.svg" alt="">{{ $t('homepage.startBrowsing') }}</buttton></RouterLink>
+    <buttton @click="emit('closePopup')" class="flex gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md sm:justify-center button"><img class="w-7" src="@/images/close.svg" alt="">{{ $t('other.close') }}</buttton>
+  </div>
+</div>
 </template>

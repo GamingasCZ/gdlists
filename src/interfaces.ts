@@ -9,11 +9,20 @@ export interface ListPreview {
   isPinned?: boolean
 }
 
+export interface ReviewDetailsResponse {
+  reviewID: string
+  level_count: string
+  gameplay: string
+  decoration: string
+  difficulty: string
+  overall: string
+}
+
 export interface ListFetchResponse {
   name: string;
   creator: string;
   id: number;
-  data: LevelList;
+  data: LevelList | ReviewList;
   views: number;
   rate_ratio: number;
   commAmount: number;
@@ -140,6 +149,7 @@ interface HumanSocialLink {
 export interface ListCreatorInfo {
   username: string;
   discord_id: string;
+  avatar_hash: string;
 }
 
 export interface LevelBackup {
@@ -168,13 +178,14 @@ export interface Level {
   color: [number, number, number];
   tags: LevelTag[];
   platf: boolean;
+  ratings?: [number[], number[]]
 }
 
 export interface ListBackground {
   0: string
   1: number
   2: number
-  3: number
+  3: 0 | 1 | 2
   4: boolean
 }
 
@@ -190,6 +201,8 @@ export interface LevelSearchResponse {
   author: string;
   difficulty: number;
   cp: number;
+  platf: boolean
+  selected?: boolean
 }
 
 export interface userDataFetchResponse {
@@ -218,4 +231,57 @@ export interface ytSearchDetails {
   thumbnails: string[];
   links: string[];
   publishTime: string[];
+}
+
+export interface ReviewList {
+  reviewName: string
+  thumbnail: ListBackground
+  tagline: string
+  containers: ReviewContainer[]
+  ratings: ReviewRating[]
+  defaultRatings: ReviewRating[]
+  settings: ReviewSettings
+  disabledRatings: number
+  private: boolean
+  transparentPage: 0 | 1 | 2
+  language: number
+  whitePage: boolean
+  readerMode: boolean
+  font: number
+}
+
+export interface ReviewContainer {
+  align: 'left' | 'center' | 'right' | 'justify'
+  data: string
+  extraComponents: number
+  id: number
+  settings: object[]
+  type: string
+}
+
+export interface ReviewRating {
+  name: number | string
+  rating: number
+  color: [number, number, number]
+}
+
+export interface ReviewSettings {
+  style: 0 | 1 | 2
+}
+
+export interface ReviewContainer {
+  type: string
+  data: string
+  align: TEXT_ALIGNMENTS
+  settings: any[]
+}
+export type TEXT_ALIGNMENTS = "left" | "center" | "right" | "justify"
+
+export interface ImageStorage {
+  uid: string
+  left: number
+  storageMax: number
+  filecount: number
+  maxFilecount: number
+  maxUploadSize: number
 }

@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, LevelBackup } from "./interfaces";
+import type { LevelList, Level, CollabData, LevelBackup, ReviewList } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import router from "./router";
@@ -14,7 +14,7 @@ export const diffTranslateOffsets = [0,0, "0 -0.05rem", "0 -0.05rem", "0 -0.09re
 
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
-  pageBGcolor: [140, 0.37, 5],
+  pageBGcolor: [140, 0.37, 3],
   diffGuesser: [false, true, true],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
@@ -32,9 +32,11 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
     let randomColor = chroma.hsv(
       Math.floor(Math.random() * 360), 1, Math.random() / 3
     )
-    return hex ? randomColor.hex() : randomColor.hsl()
+    return hex ? randomColor.hex() : randomColor.hsl().slice(0, 3)
   }
 }
+
+export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
 export function addLevel(values: Level | null) {
   let levelInfo: Level = {
@@ -50,10 +52,6 @@ export function addLevel(values: Level | null) {
 
   levelList.value.levels.push(levelInfo);
 }
-
-export const deleteLevel = (index: number) => {
-  levelList.value.levels.splice(index, 1);
-};
 
 export const moveLevel = (from: number, to: number) => {
   if (to < 0 || to >= levelList.value.levels.length) return from;
@@ -74,18 +72,18 @@ export function testIfImageExists(url: string) {
   });
 }
 
-export const modifyListBG = (newColors: number[] | string, reset = false) => {
+export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
+  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return
   if (reset) {
-    levelList.value.pageBGcolor = DEFAULT_LEVELLIST.pageBGcolor
     document.documentElement.style.setProperty("--siteBackground","")
     document.documentElement.style.setProperty("--primaryColor","")
     document.documentElement.style.setProperty("--secondaryColor","")
     document.documentElement.style.setProperty("--brightGreen","")
-    return
+    return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   }
   
   // Default colors
-  if (newColors[1] == 0.37) return
+  // if (newColors[1] == 0.37) return
 
   // Old lists - hex colors
   if (typeof newColors == 'string') newColors = chroma(newColors).hsl()
@@ -95,9 +93,6 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     0.36,
     newColors[2] < 1 ? newColors[2] : newColors[2] / 64
   )
-
-  levelList.value.pageBGcolor = [newColors[0], 0.36, newColors[2]]
-  
 
   document.documentElement.style.setProperty(
     "--siteBackground",
@@ -120,11 +115,14 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
     "theme-color",
     chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
   );
+
+  return [newColors[0], 0.36, newColors[2]] as [number, number, number]
 };
 
 export const prettyDate = (datePassed: number) => {
-  if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
-  else if (datePassed <= 60) return i18n.global.t('date.secs', datePassed)
+  if (datePassed < 0) return i18n.global.t('date.future')
+  else if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
+  else if (datePassed <= 60) return i18n.global.t('date.secs', Math.floor(datePassed))
   else if (Math.floor(datePassed/60) == 1) return i18n.global.t('date.mins', Math.floor(datePassed/60))
   else if (Math.floor(datePassed/60) <= 60) return i18n.global.t('date.mins', Math.floor(datePassed/60))
   else if (Math.floor(datePassed/3600) == 1) return i18n.global.t('date.hours', Math.floor(datePassed/3600))
@@ -151,9 +149,8 @@ export function resetList() {
   if (router.currentRoute.value.name == "editor") router.push({path: "/editor", force: true})
 }
 
-export const makeColorFromString = (name: string) =>
-chroma(
-  Math.floor(
+export const makeColorFromString = (name: string) => {
+  let ok = Math.floor(
     16777215 *
       Math.sin(
         name
@@ -162,7 +159,8 @@ chroma(
           .reduce((x, y) => x + y)! % Math.PI
       )
   )
-);
+  return chroma(ok);
+}
 
 export function fixHEX(hexColor: string) {
   // If the code ends with a number, hex code is sometimes broken (completely random lmao)
@@ -187,7 +185,10 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
   let listError: object | undefined
   levelList.value.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name.length) listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name) {
+      if (typeof level.creator[0][0] == 'string') return // Old collabs
+      listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
+    }
     if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
     i++
   })
@@ -213,15 +214,26 @@ export const isOnline = ref(true)
 window.addEventListener("offline", () => isOnline.value = false)
 window.addEventListener("online", () => isOnline.value = true)
 
-export function saveBackup(listName: string, hidden: boolean) {
+export function saveBackup(listName: string, hidden: boolean, review: boolean | ReviewList = false) {
   if (localStorage && SETTINGS.value.autosave) {
-    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(levelList.value), listHidden: hidden, listDate: Date.now() }
+    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(review !== false ? review : levelList.value), listHidden: hidden, listDate: Date.now() }
 
-    localStorage.setItem("listBackup", JSON.stringify(backup))
+    localStorage.setItem(`${review ? 'review' : 'list'}Backup`, JSON.stringify(backup))
   }
   return Math.random()
 }
 
-export const removeBackup = () => {
-  localStorage.removeItem("listBackup")
+export const removeBackup = (isReview = false) => {
+  localStorage.removeItem(`${isReview ? 'review' : 'list'}Backup`)
+}
+
+export const shortenYTLink = (link: string) => {
+  // Link is a regular YT link
+  if (link.match(/(watch\?v=)/g)) {
+    return <any>link.match(/(?<=\?v=).+/g);
+  }
+  // Link is most likely a shortened YT link
+  else {
+    return <any>link.match(/(?<=youtu.be\/).+/g);
+  }
 }

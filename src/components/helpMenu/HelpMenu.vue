@@ -46,10 +46,23 @@ const qa: question[] = [
   },
   {
     question: useI18n().t('editor.translucentCards'),
-    answer:
-      useI18n().t('help.translucentHelp'),
+    answer: useI18n().t('help.translucentHelp'),
   },
   {
+    startSection: useI18n().t('reviews.review'),
+    question: useI18n().t('help.textFormatting'),
+    answer: useI18n().t('help.formatHelp')
+  },
+  {
+    question: useI18n().t('help.containers'),
+    answer: useI18n().t('help.containerHelp')
+  },
+  {
+    question: useI18n().t('help.moreColumns'),
+    answer: useI18n().t('help.columnHelp')
+  },
+  {
+    startSection: useI18n().t('other.other2'),
     question: useI18n().t('help.license'),
     answer: "https://github.com/GamingasCZ/gdlists/blob/master/LICENSE",
   },
@@ -58,12 +71,16 @@ const qa: question[] = [
     answer: `
   vue, \n
   vue i18n, \n
+  vue router, \n
   tailwind, \n
   axios, \n
   typescript, \n
   chroma-js, \n
   cookier, \n
   pure-editor \n
+  striptags \n
+  marked \n
+  popperjs
       `,
   },
 ];
@@ -84,17 +101,12 @@ const search = (e: Event) => {
 </script>
 
 <template>
-  <section @click.stop=""
-    class="absolute flex flex-col top-1/2 left-1/2 h-[40rem] max-h-[95svh] w-[40rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black">
-    <div class="relative mb-2">
-      <h1 class="text-xl font-bold text-center">{{ $t('other.help') }}</h1>
-      <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
+    <div class="p-2">
+      <input type="text" :placeholder="$t('other.searchInHelp')"
+        class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-md" @input="search" />
     </div>
-    <input type="text" :placeholder="$t('other.searchInHelp')"
-      class="p-1 px-2 w-full bg-white bg-opacity-10 rounded-md" @input="search" />
-    <div class="flex overflow-y-auto flex-col gap-2 p-2 mt-2 bg-white bg-opacity-10 rounded-md grow">
+    <div class="flex h-[40em] overflow-y-auto flex-col gap-1 p-1 bg-[url(@/images/fade.webp)] bg-repeat-x grow">
       <HelpBubble v-for="(question, index) in qa" v-bind="question" :filter-show="filteredQuestions[0] == -1 || filteredQuestions.includes(index)
         " />
     </div>
-  </section>
 </template>

@@ -11,6 +11,8 @@ import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     listID: string
+    hidden: string
+    isReview: boolean
 }>()
 
 const MIN_COMMENT_LEN = 10
@@ -73,13 +75,21 @@ const commentLength = ref(0)
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
-let placeholders = [
+let listPlaceholders = [
     useI18n().t("listViewer.commHelp1"),
     useI18n().t("listViewer.commHelp2"),
     useI18n().t("listViewer.commHelp3"),
     useI18n().t("listViewer.commHelp4"),
 ]
-placeholder.value = placeholders[Math.floor(Math.random() * placeholders.length)]
+let reviewPlaceholders = [
+    useI18n().t('listViewer.commHelpR1'),
+    useI18n().t('listViewer.commHelpR2'),
+    useI18n().t('listViewer.commHelpR3'),
+    useI18n().t('listViewer.commHelpR4'),
+]
+
+placeholder.value = [listPlaceholders, reviewPlaceholders][props.isReview | 0][Math.floor(Math.random() * listPlaceholders.length)]
+
 
 const chatboxEmpty = () => {
     if (!document.getElementById("commentBox")?.textContent) placeholderActive.value = true
@@ -112,12 +122,18 @@ function sendComment(com = "") {
     commentLength.value = 0
 
     // why tf did i have to stringify the post data? it wouldn't show up in the backend otherwise fuck!!!!
-    axios.post(import.meta.env.VITE_API+"/sendComment.php", JSON.stringify({
+    let postData = {
         comment: parsedComment,
         comType: "0",
-        listID: props.listID,
         comColor: parsedColor.value,
-    }), {headers: {Authorization: cookier("access_token").get()}}).then((res: AxiosResponse) => {
+    }
+    if (props.isReview) postData.reviewID = props.listID
+    else {
+        postData.listID = props.listID
+        postData.hidden = props.hidden
+    }
+
+    axios.post(import.meta.env.VITE_API+"/sendComment.php", postData).then((res: AxiosResponse) => {
         if (res.data == 6)
             (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
         else {
@@ -180,7 +196,7 @@ function sendComment(com = "") {
         <Transition name="fade">
             <div v-if="commentError" class="flex gap-2 items-center p-1 my-2 rounded-md max-sm:text-sm" :style="{backgroundColor: parsedColor}">
                 <img src="@/images/info.svg" alt="" class="w-4">
-                <p>Nepodařilo se odeslat komentář, zkus to později!</p>
+                <p>{{ $t('listViewer.failSendComm') }}</p>
             </div>
         </Transition>
         <footer class="flex justify-between mt-2">

@@ -7,6 +7,7 @@ import cookier from "cookier";
 import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import { langIndex, setLanguage } from "./locales";
+import router from "./router";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -35,7 +36,16 @@ if (hasLocalStorage()) {
   if (langIndex.value != SETTINGS.value.language) setLanguage(SETTINGS.value.language)
 }
 
-const loggedIn = ref<boolean>(false);
+// Redirect to route from which login button pressed
+if (hasLocalStorage()) {
+  let loginRoute = sessionStorage.getItem("loginRoute")
+  if (loginRoute) {
+    sessionStorage.removeItem("loginRoute")
+    router.replace(loginRoute)
+  }
+}
+
+const loggedIn = ref<boolean | null>(null);
 onMounted(() => {
   if (!hasLocalStorage()) return
   axios

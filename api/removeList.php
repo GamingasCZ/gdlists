@@ -25,11 +25,15 @@ $DATA = json_decode(file_get_contents("php://input"), true);
 $fuckupData = sanitizeInput(array($DATA["id"]));
 
 // Password check
-if ($DATA["hidden"] == 0) {
-  $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [strval($fuckupData[0])], "i");
-}
+if ($DATA["type"] == "review")
+  $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [strval($fuckupData[0])], "s");
 else {
-  $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [strval($fuckupData[0])], "s");
+  if ($DATA["hidden"] == 0) {
+    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [strval($fuckupData[0])], "i");
+  }
+  else {
+    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [strval($fuckupData[0])], "s");
+  }
 }
 
 // This causes passwords to not work, hopefully no one minds :)
@@ -41,12 +45,18 @@ if (!$creatorCheck) {
 }
 
 // Removing list
-if ($DATA["hidden"] == 0) {
-  doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
-}
+if ($DATA["type"] == "review")
+  $res = doRequest($mysqli, "DELETE FROM `reviews` WHERE `id` = ?", [$listData["id"]], "s");
 else {
-  doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");
+  if ($DATA["hidden"] == 0) {
+    $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
+  }
+  else {
+    $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");
+  }
 }
+if (array_key_exists("error", $res)) die("0");
+
 echo "3";
 
 $mysqli -> close();

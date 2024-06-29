@@ -8,22 +8,22 @@
 require("globals.php");
 header('Content-type: application/json'); // Return as JSON
 
-if (!preg_match('/[A-z]/', $_GET["listid"])) {
-    $fuckupID = preg_match("/-?\d+/", $_GET["listid"], $match);
+$type = isset($_GET["listID"]) ? "listID" : "reviewID";
+
+$fuckupID;
+if (!preg_match('/[A-z]/', $_GET[$type])) { // get post ID based on type
+    $fuckupID = preg_match("/-?\d+/", $_GET[$type], $match);
     $fuckupID = $match[0];
+}
+else {
+    if (is_int($_GET[$type])) $fuckupID = $_GET[$type];
 }
 
 // Fetching comments
 $mysqli = new mysqli($hostname, $username, $password, $database);
 
 if ($mysqli -> connect_errno) die("0");
-
-// Get ID of hidden list
-if (preg_match('/[A-z]/', $_GET["listid"])) {
-    if (strlen($_GET["listid"]) != 10 && !in_array($_GET["listid"], ["y2019", "y2021"])) die("3");
-    $hiddenID = $mysqli->query(sprintf("SELECT `id` FROM `lists` WHERE `hidden`= '%s'", $_GET["listid"])) or die($mysqli->error);
-    $fuckupID = $hiddenID->fetch_all(MYSQLI_ASSOC)[0]["id"];
-}
+$mysqli->set_charset("utf8mb4");
 
 // Are values numbers?
 if (!is_numeric($_GET["page"]) &&
@@ -36,13 +36,12 @@ if (!is_numeric($_GET["page"]) &&
 $dbSlice = clamp(intval($_GET["fetchAmount"]), 2, 15) * intval($_GET["page"]);
 
 $query = sprintf("SELECT * FROM `comments`
-            WHERE `comID`<=%d AND `listID`=%d
+            WHERE `comID`<=%d AND %s=%d
             ORDER BY `comID` DESC
             LIMIT %d 
-            OFFSET %s", $_GET["startID"], $fuckupID, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+            OFFSET %s", $_GET["startID"], $type, $fuckupID, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
 
-$maxpageQuery = $mysqli->query(sprintf("SELECT COUNT(*) from `comments` WHERE `listID`=%d", $_GET["listid"]));
-$commAmount = $maxpageQuery->fetch_array()[0];
+$commAmount = intval(doRequest($mysqli, sprintf("SELECT COUNT(*) as commAmount from `comments` WHERE %s=?", $type), [$fuckupID], "i")["commAmount"]);
 $maxpage = ceil($commAmount / clamp(intval($_GET["fetchAmount"]), 2, 15));
 
 $result = $mysqli->query($query) or die($mysqli -> error);
@@ -70,7 +69,7 @@ foreach ($comments as $row) {
 
 $query = sprintf("SELECT DISTINCT username,discord_id,avatar_hash,id
                   FROM users
-                  WHERE id IN (%s)", join(",", array_unique($uid_array)), $_GET["listid"]);
+                  WHERE id IN (%s)", join(",", array_unique($uid_array)), $_GET["listID"]);
 $result = $mysqli -> query($query) or die($mysqli -> error);
 
 $users = $result -> fetch_all(MYSQLI_ASSOC);

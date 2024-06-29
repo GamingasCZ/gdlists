@@ -1,25 +1,28 @@
 <script setup lang="ts">
+import { makeColorFromString } from "@/Editor";
 import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
 const emit = defineEmits(["removeLevel"]);
-const props = defineProps({
-  levelName: String,
-  creator: String,
-  levelColor: String,
-  levelID: String,
-  listID: String,
-  listName: String,
-  listPosition: Number,
-  timeAdded: Number,
-  hideRemove: { type: Boolean, default: false },
+const props = defineProps<{
+  levelName: string
+  creator: string
+  levelColor?: string
+  levelID: string
+  listID: string
+  listName: string
+  listPosition?: number
+  timeAdded: number
+  hideRemove: boolean
+  inReviews: number
+  inLists: number
 
-  userArray: String,
-});
+  userArray: string
+}>()
 
-const listColor = ref<Color>(chroma(props.levelColor!));
+const listColor = ref<Color>(chroma(props.levelColor! ?? makeColorFromString(props.levelName)));
 
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
@@ -37,11 +40,12 @@ const getGradient = () =>
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
 
 const uploadDate = reactive(new Date(props.timeAdded!));
-</script>
+const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
+</script>1
 
 <template>
   <RouterLink
-    :to="`${listID!}?goto=${listPosition}`"
+    :to="`/${listID!}${goto}`"
     class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
@@ -64,6 +68,16 @@ const uploadDate = reactive(new Date(props.timeAdded!));
       <h1 class="text-lg font-bold">{{ levelName }}</h1>
       <p class="text-xs">- {{ creator }} -</p>
     </section>
+
+    <div v-if="inLists || inReviews" class="flex gap-3 items-center p-1 ml-auto bg-black bg-opacity-40 rounded-md">
+      <div v-if="inLists > 0">
+        <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-3" alt="">{{ inLists }}
+      </div>
+      <hr v-if="inLists > 0 && inReviews > 0" class="w-0.5 h-4 bg-white border-none opacity-40">
+      <div v-if="inReviews > 0">
+        <img src="@/images/reviews.svg" class="inline mr-2 w-3" alt="">{{ inReviews }}
+      </div>
+    </div>
 
     <button
       v-if="!hideRemove"

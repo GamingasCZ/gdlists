@@ -7,6 +7,16 @@ Return codes:
 header('Content-type: application/json'); // Return as JSON
 require("globals.php");
 
+$https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
+$local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
+
+// Error can happen when cancelling
+if (isset($_GET["error"])) {
+    header("Authentication: false");
+    header("Location: " . $https . $local . '/gdlists/?loginerr');
+    die(0);
+}
+
 if (sizeof($_GET) == 1) {
     if (array_keys($_GET)[0] == "check") { // Check login validity
         if (!getAuthorization()) {echo json_encode(["status" => "logged_out"]); return false;} // Not logged in
@@ -16,6 +26,8 @@ if (sizeof($_GET) == 1) {
         echo $accCheck ? json_encode($profileData) : 0;
         return true;
     }
+
+    if (!isset($_GET["code"])) die("0");
 
     // Get the access token from the authorization code
     $tokenUrl =  array(
@@ -61,8 +73,7 @@ if (sizeof($_GET) == 1) {
 
     $mysqli -> close();
 
-    $https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
-    header("Location: " . $https . $_SERVER["HTTP_HOST"] . '/gdlists');
+    header("Location: " . $https . $local . '/gdlists');
 }
 else {
     http_response_code(401);

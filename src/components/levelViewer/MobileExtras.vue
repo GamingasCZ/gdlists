@@ -12,12 +12,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-    <section @click.stop=""
-        class="absolute top-1/2 left-1/2 gap-3 flex max-h-[95vh] w-[25rem] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg bg-greenGradient p-2 text-white shadow-lg shadow-black">
-        <div class="relative">
-            <h1 class="text-xl font-bold text-center">{{ $t('other.options') }}</h1>
-            <img src="@/images/close.svg" alt="" class="absolute top-0 right-0 w-6 button" @click="emit('closePopup')" />
-        </div>
+    <div class="flex flex-col gap-2 p-2">
         <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
             @click="emit('closePopup'); emit('doListAction', 'sharePopup')">
             <img class="w-8" src="../../images/share.svg" alt="">{{ $t('other.share') }}
@@ -35,5 +30,6 @@ const emit = defineEmits<{
         <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
             @click="emit('closePopup'); emit('doListAction', 'editList')">
             <img class="w-8" src="../../images/edit.svg" alt="">{{ $t('level.edit') }}
-    </button>
-</section></template>
+        </button>
+    </div>
+</template>

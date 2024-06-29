@@ -32,6 +32,7 @@ const props = defineProps<{
     levelIndex: number;
     roleColor: string;
     host: boolean;
+    collabArray: CollabData
 }>()
 
 const colorPickerOpen = ref(false)
@@ -39,11 +40,10 @@ const colorPickerOpen = ref(false)
 const searchingCreator = ref(false)
 const noResults = ref(false)
 function getCreator(e: SubmitEvent) {
-    console.log("sex")
-    if (typeof levelList.value.levels[props.levelIndex].creator == 'string') return
+    if (typeof props.collabArray == 'string') return
     if (searchingCreator.value) return
     
-    let user = props.host ? levelList.value.levels[props.levelIndex].creator[0][0] : levelList.value.levels[props.levelIndex].creator[2][props.pos]
+    let user = props.host ? props.collabArray[0][0] : props.collabArray[2][props.pos]
     searchingCreator.value = true
     let searchUsername = (e.target as HTMLFormElement)?.elements?.[0]?.value!
     axios.get(
@@ -79,13 +79,13 @@ const writeName = (e: Event) => {
     setTimeout(() => {
         let val = (e.target as HTMLInputElement).value
         if (props.host) {
-            if (typeof levelList.value.levels[props.levelIndex].creator == 'string') 
-                levelList.value.levels[props.levelIndex].creator = val
+            if (typeof props.collabArray == 'string') 
+                props.collabArray = val
             else
-                levelList.value.levels[props.levelIndex].creator[0][0].name = val
+                props.collabArray[0][0].name = val
         }
         else
-            levelList.value.levels[props.levelIndex].creator[2][props.pos].name = val
+            props.collabArray[2][props.pos].name = val
     }, 50);
 }
 const modifyPart = (e: Event, which: number) => {
@@ -140,7 +140,7 @@ const modifyPart = (e: Event, which: number) => {
             
             <section class="flex flex-col items-center max-sm:hidden" :class="{'ml-4': host}">
                 <button :title="$t('collabTools.changeRoleTitle')" class="relative p-1 w-40 rounded-md button shadow-drop roleSwitcher focus-visible:!outline focus-visible:!outline-current" :style="{backgroundColor: roleColor ?? '#000'}" @click="emit('changeRole', pos)">
-                    {{ levelList.levels[levelIndex].creator?.[1]?.[role] || $t('collabTools.unnamedRole') }}
+                    {{ collabArray?.[1]?.[role] || $t('collabTools.unnamedRole') }}
                     <img src="@/images/edit.svg" class="box-border inline absolute right-1 top-1/2 p-0.5 ml-auto w-4 bg-black bg-opacity-40 rounded-sm -translate-y-1/2" alt="">
                 </button>
             </section>
@@ -158,7 +158,7 @@ const modifyPart = (e: Event, which: number) => {
             </div>
         </main>
         <Transition name="fade">
-            <ColorPicker v-if="colorPickerOpen && !host" :hex="color" @colors-modified="(levelList.levels[levelIndex].creator as CollabData)[2][pos].color = $event" />
+            <ColorPicker v-if="colorPickerOpen && !host" :hex="color" @colors-modified="collabArray[2][pos].color = $event" />
         </Transition>
     </section>
 </template>

@@ -13,6 +13,9 @@ switch (props.icon) {
     case 'save':
         import(`@/images/save.svg`).then(res => getIcon.value = res.default)
         break;
+    case 'error':
+        import(`@/images/close.svg`).then(res => getIcon.value = res.default)
+        break;
     case 'check':
         import(`@/images/checkThick.svg`).then(res => getIcon.value = res.default)
         break;
@@ -20,8 +23,10 @@ switch (props.icon) {
 
 const shown = ref(false)
 watch(props, () => { // todo rozbitý když měníš jazyk
+    if (!props.content) return
+
     shown.value = true
-    setTimeout(() => shown.value = false, 1500);
+    setTimeout(() => shown.value = false, 1500 + props.content.length * 100);
 })
 
 </script>
