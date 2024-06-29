@@ -6,14 +6,13 @@ Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and mo
 
 **Check out the site here:** https://gamingas.wz.cz/gdlists
 ## Features
-* An easy to use editor
+* An easy to use editor for making **lists** and writing **reviews**
 * Tons of customizations for spicing up lists
 * Likes and comments
 * Saving levels
 * Private lists
 
 ## Planned features
-* Reviews
 * Level Browser
 * Profiles
 * Improved comments
@@ -23,7 +22,7 @@ Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and mo
 * Private server support
 * Notifications
 * Sidebars for lists
-* Importing levels from GD, CSV files or IDs
+* Importing levels CSV files
 * Improved background images, support for videos
 * List tags
 
