@@ -5,9 +5,6 @@
     "saved": "Uložené"
   },
   "settingsMenu": {
-    "scrolling": "Listování",
-    "infinite": "Nekonečné",
-    "pages": "Stránky",
     "czech": "Čeština",
     "language": "Jazyk",
     "english": "Angličtina",
@@ -24,7 +21,11 @@
     "qLow": "Nízká",
     "qMed": "Výchozí",
     "qHigh": "Vysoká",
-    "clickClose": "Zavírání dialogů kliknutím mimo"
+    "clickClose": "Zavírání dialogů kliknutím mimo",
+    "viewMode": "Zobrazení levelů",
+    "classic": "Klasické",
+    "compact": "Kompaktní",
+    "table": "Tabulka"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -329,7 +330,9 @@
     "users": "Uživatelé",
     "newest": "Nejnovější",
     "duplicate": "Duplikovat",
-    "move": "Přesunout"
+    "move": "Přesunout",
+    "name": "Jméno",
+    "info": "Informace"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -387,6 +390,11 @@
     "thisReview": "této recenzi",
     "thisList": "tomto seznamu",
     "failSendComm": "Nepodařilo se odeslat komentář, zkus to později!"
+    "commDisableHelp": "Komentáře na tomto seznamu nejsou povolené!",
+    "failLoad": "Seznam se nepodařilo načíst!",
+    "pickView1": "Vyber si vzhled seznamu!",
+    "pickView2": "Vzhled lze kdykoliv změnit v nastavení.",
+    "noTags": "Level nemá žádné štítky"
   },
   "level": {
     "levelID": "ID levelu",

@@ -1,26 +1,29 @@
 <script setup lang="ts">
+import { levelList } from '@/Editor';
 import { ref } from 'vue';
 
-defineProps({
-  selectedFace: Number,
-  selectedRate: Number,
-});
+defineProps<{
+  level: number
+}>();
 
-const emit = defineEmits(["changeRate", "changeFace"]);
+const emit = defineEmits<{
+  (e: "update", newData: [number, number]): void
+}>()
 
 const faces = ref<string[]>([])
 const rates = ref<string[]>([])
 async function getDifficulties() {
   for (let i = 0; i <= 11; i++) {
-    faces.value.push(await import(`../../images/faces/${i}.webp`).then(res => res.default))
+    faces.value.push(import.meta.env.BASE_URL + `/faces/${i}.webp`)
   }
   
   let ratings = ['error', 'star', 'featured', 'epic', 'legendary', 'mythic']
   for (const rating in ratings) {
-    rates.value.push(await import(`../../images/faces/${ratings[rating]}.webp`).then(res => res.default))
+    rates.value.push(import.meta.env.BASE_URL + `/faces/${ratings[rating]}.webp`)
   }
 }
 getDifficulties()
+
 </script>
 
 <template>
@@ -33,8 +36,8 @@ getDifficulties()
         :key="index"
         type="button"
         class="p-1 w-12 h-12 bg-opacity-40 rounded-md button aspect-square"
-        @click="emit('changeFace', index)"
-        :class="{ 'bg-black': index == selectedFace }"
+        @click="levelList.levels[level].difficulty[0] = index; emit('update', levelList.levels[level].difficulty)"
+        :class="{ 'bg-black': index == levelList.levels[level].difficulty[0] }"
       >
         <img :src="diff" />
       </button>
@@ -46,12 +49,12 @@ getDifficulties()
         type="button"
         class="p-1 w-10 bg-black bg-opacity-40 rounded-md aspect-square"
         v-for="(rate, index) in rates"
-        @click="emit('changeRate', index)"
+        @click="levelList.levels[level].difficulty[1] = index; emit('update', levelList.levels[level].difficulty)"
       >
         <img
-          class="button"
+          class="w-full button"
           :src="rate"
-          :class="{ disabled: index != selectedRate }"
+          :class="{ disabled: index != levelList.levels[level].difficulty[1] }"
         />
       </button>
     </div>

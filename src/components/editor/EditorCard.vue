@@ -10,6 +10,7 @@ import LevelTags from "./LevelTags.vue";
 import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
+import DifficultyIcon from "../global/DifficultyIcon.vue";
 
 const props = defineProps<{
   levelArray: Level[]
@@ -84,6 +85,8 @@ const modifyCreator = (e: Event | string) => {
   }
   levelCreator.value = newCreator
 }
+
+const selectedDiff = ref(levelList.value.levels[props.index!].difficulty)
 
 const modifyVideo = (e: Event) => {
   let videoInput = (e.target as HTMLInputElement)
@@ -193,8 +196,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
             level.difficulty,
             level.cp,
           ];
-          diffFacePath.value = await getDiffFace()
-          rateImagePath.value = await getRateImage()
+          selectedDiff.value = levelList.value.levels[props.index!].difficulty
     
           ytVideoData.value = await videoSearch()
           searching.value = false;
@@ -366,25 +368,7 @@ const switchPlatformer = () => {
           alt=""
         />
         <div class="flex relative justify-center items-center button" :title="$t('editor.diffTitle')" @click="openedPanel = openedPanel != 2 ? 2 : 0">
-          <img
-            class="w-10"
-            alt=""
-            src="../../images/difficultyBG.svg"
-          />
-          <img
-            :src="diffFacePath"
-            alt=""
-            :class="{'translate-y-0.5': levelArray.levels[index!].difficulty?.[1] >= 3}"
-            :style="{scale: diffScaleOffsets[levelArray.levels[index!].difficulty?.[0]-6], translate: diffTranslateOffsets[levelArray.levels[index!].difficulty?.[0]-6]}"
-            class="absolute z-20 w-7 pointer-events-none"
-          />
-          <img
-            :src="rateImagePath"
-            alt=""
-            class="absolute z-10 w-10 pointer-events-none"
-            :class="{'w-5 left-2/4 top-2/4': levelArray.levels[index!].difficulty?.[1] == 1}"
-            :style="{zIndex: (levelArray.levels[index!].difficulty?.[1] ?? 0) -1 ? 10 : 30 }"
-          />
+          <DifficultyIcon class="absolute inset-0 top-1/2 left-1/2 w-8 -translate-x-1/2 -translate-y-1/2" :difficulty="selectedDiff[0]" :rating="selectedDiff[1]" />
         </div>
         <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
           alt="" />
@@ -414,8 +398,7 @@ const switchPlatformer = () => {
 
       <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
         :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
-      <DifficultyPicker v-if="openedPanel == 2" :key="levelArray.levels[index!].difficulty[0]" :selected-rate="levelArray.levels[index!].difficulty[1]"
-        :selected-face="levelArray.levels[index!].difficulty[0]" @change-face="changeFace" @change-rate="changeRate" />
+      <DifficultyPicker v-if="openedPanel == 2" :level="index" @update="selectedDiff = $event" />
       <LevelTags :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
     </div>
   </section>

@@ -236,6 +236,11 @@
     "thisReview": "review",
     "thisList": "list",
     "failSendComm": "Failed to send the comment. Please try again later!"
+    "commDisableHelp": "Comments are disabled on this list!",
+    "failLoad": "The list failed to load!",
+    "pickView1": "Pick the look of lists!",
+    "pickView2": "You can change this anytime in the settings.",
+    "noTags": "Level has no tags"
   },
   "navbar": {
     "editor": "Create",
@@ -389,7 +394,9 @@
     "users": "Users",
     "newest": "Newest",
     "duplicate": "Duplicate",
-    "move": "Move"
+    "move": "Move",
+    "name": "Name",
+    "info": "Info"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -400,18 +407,19 @@
     "everyMin": "Every {0}m",
     "everySec": "Every {0}s",
     "homepage": "Homepage",
-    "infinite": "Infinite",
     "language": "Language",
     "logout": "Log Out",
-    "pages": "Paged",
-    "scrolling": "Scrolling",
     "iconQuality": "Icon Quailty",
     "noColor": "No Colors",
     "noGenerate": "Disabled",
     "qHigh": "High",
     "qLow": "Low",
     "qMed": "Default",
-    "clickClose": "Clicking outside a dialog closes it"
+    "clickClose": "Clicking outside a dialog closes it",
+    "classic": "Classic",
+    "compact": "Compact",
+    "table": "Table",
+    "viewMode": "Level Styling"
   },
   "help": {
     "Lists": "Lists",

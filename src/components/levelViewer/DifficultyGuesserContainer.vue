@@ -22,12 +22,12 @@ const ratingClasses = ref([
 
 async function getFaces() {
     for (let i = 0; i <= 11; i++) {
-        difficultyFaces.value.push(await import(`../../images/faces/${i}.webp`).then(res => res.default))
+        difficultyFaces.value.push(import.meta.env.BASE_URL + `/faces/${i}.webp`)
     }
 
-    ratings.value?.push(await import('../../images/faces/star.webp').then(res => res.default))
-    ratings.value?.push(await import('../../images/faces/featured.webp').then(res => res.default))
-    ratings.value?.push(await import('../../images/faces/epic.webp').then(res => res.default))
+    ratings.value?.push(import.meta.env.BASE_URL + `/faces/star.webp`)
+    ratings.value?.push(import.meta.env.BASE_URL + `/faces/featured.webp`)
+    ratings.value?.push(import.meta.env.BASE_URL + `/faces/epic.webp`)
 
     nextTick(() => {
         (document.querySelector(".guessFace") as HTMLButtonElement).focus()

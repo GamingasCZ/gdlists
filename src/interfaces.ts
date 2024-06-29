@@ -220,6 +220,7 @@ export interface userDataFetchResponse {
 export interface viewedPopup {
   diffGuesserHelp?: boolean
   oldListsRedirectHelp?: boolean
+  pickedStyling?: boolean
 }
 
 export interface ytSearchDetails {

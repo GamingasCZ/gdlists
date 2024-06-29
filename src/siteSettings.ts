@@ -7,7 +7,8 @@ export const SETTINGS = ref({
   homepageColumns: 1,
   autosave: 60,
   iconQuality: 4,
-  dialogClickClose: true
+  dialogClickClose: true,
+  levelViewMode: 0
 });
 
 watch(SETTINGS, () => {

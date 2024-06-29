@@ -12,6 +12,10 @@ const modifyDiffGuesser = (ind: number) => {
   }
 }
 
+const diff = import.meta.env.BASE_URL + `/faces/4.webp`
+const rate = import.meta.env.BASE_URL + `/faces/star.webp`
+
+
 </script>
 
 <template>
@@ -29,6 +33,30 @@ const modifyDiffGuesser = (ind: number) => {
             class="button"
             v-model="levelList.diffGuesser[0]"
           />
+        <label for="diffGuessing" id="diffGuess">{{ $t('editor.levelGuessing') }}</label>
+      </div>
+      <Transition name="fade">
+        <div
+          v-show="levelList.diffGuesser[0]"
+          class="box-border flex gap-2 items-center px-3 py-2 ml-8 w-max bg-black bg-opacity-25 rounded-md"
+        >
+          <span>{{ $t('editor.guess') }}: </span>
+          <button @click="modifyDiffGuesser(1)">
+            <img
+              :src="diff"
+              alt=""
+              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
+              :class="{ disabled: !levelList.diffGuesser[1] }"
+            />
+          </button>
+          <button @click="modifyDiffGuesser(2)">
+            <img
+              :src="rate"
+              alt=""
+              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
+              :class="{ disabled: !levelList.diffGuesser[2] }"
+            />
+          </button>
         </div>
         <Transition name="fade">
           <div

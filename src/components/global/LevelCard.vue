@@ -8,6 +8,8 @@ import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
 import RatingContainer from './RatingContainer.vue'
 import { DEFAULT_RATINGS } from "@/Reviews";
+import { fixBrokenColors } from "./levelCard";
+import DifficultyIcon from "./DifficultyIcon.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -30,70 +32,7 @@ const emit = defineEmits<{
 }>();
 
 const isFavorited = ref<boolean>(props.favorited);
-const copyingID = ref<boolean>(false)
-const copyID = () => {
-  copyingID.value = true
-  setTimeout(() => copyingID.value = false, 2500);
-  
-  navigator.clipboard.writeText(props.levelID!);
-};
-const doFavoriteLevel = () => {
-  let faves: FavoritedLevel[] = JSON.parse(localStorage.getItem("favorites")!);
-  let favesIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
-
-  if (isFavorited.value) {
-    let levelIndex = favesIDs.indexOf(props.levelID!);
-    favesIDs.splice(levelIndex, 1);
-    faves.splice(levelIndex, 1);
-  } else {
-    favesIDs.push(props.levelID!);
-
-    
-    let isCollab = typeof props.creator == "object";
-    let levelCreator
-    if (isCollab) levelCreator = props.creator?.[3] ? props.creator[0][0].name : props.creator[0][0]
-    else levelCreator = props.creator
-
-    // TODO: add proper list name (list name may not always be sex)
-    faves.push({
-      levelName: props.levelName,
-      creator: levelCreator,
-      levelColor: CARD_COL.value?.hex(),
-      levelID: props.levelID!,
-      levelDiff: props.difficulty,
-      listID: props.listID,
-      listName: props.listName,
-      listPosition: props.levelIndex,
-      timeAdded: Date.now(),
-    });
-  }
-
-  localStorage.setItem("favorites", JSON.stringify(faves));
-  localStorage.setItem("favoriteIDs", JSON.stringify(favesIDs));
-  isFavorited.value = !isFavorited.value;
-};
-
-const CARD_COL = ref<Color>();
-
-// Old lists may have broken colors!! (damn you, old Gamingas :D)
-try {
-  CARD_COL.value = typeof props.color == 'string' ? chroma(fixHEX(props.color)) : chroma.hsl(...props.color);
-} catch (e) {
-  CARD_COL.value = chroma.random();
-}
-
-const difficultyFace = ref("")
-const difficultyGlow = ref("")
-
-async function getDifficulty() {
-  if (props.difficulty) {
-    difficultyFace.value = await import(`../../images/faces/${props.difficulty[0]}.webp`).then(res => res.default)
-    if (props.difficulty[1]) { // Must be rated
-      difficultyGlow.value = await import(`../../images/faces/${["","star","featured","epic","legendary","mythic"][props.difficulty[1]]}.webp`).then(res => res.default)
-    }
-  }
-}
-getDifficulty()
+const CARD_COL = ref<Color>(fixBrokenColors(props.color));
 
 const guessResult = ref([-1,-1])
 const guessGradient = ref("")
@@ -122,6 +61,8 @@ function nextGuess(results: number) {
   }, 150)
   emit('nextGuess', results)
 }
+
+const copyID = inject("idCopyTimestamp")
 
 onErrorCaptured(() => {
   emit("error")
@@ -152,77 +93,12 @@ const listData = inject("listData")
       </div>
     </Transition>
 
-    <!-- ID copy popup -->
-    <Transition name="fade">
-      <article v-if="copyingID" class="absolute top-1/2 left-1/2 z-10 px-4 py-2 w-max text-2xl text-center bg-black bg-opacity-80 rounded-lg -translate-x-1/2 -translate-y-1/2">
-        <h2 class="font-black">{{ $t('level.idCopied') }}</h2>
-        <hr class="rounded-full border-2 opacity-80">
-        <h3>{{ levelID }}</h3>
-      </article>
-    </Transition>
-
     <main class="flex justify-between items-center max-sm:flex-col">
       <div>
         <header class="flex items-center">
           <!-- Level difficulty -->
-          <div
-            class="relative m-2 mr-1 ml-0"
-            v-if="difficulty && !guessingNow"
-            :class="{ '!mx-2': difficulty[1] > 0 }"
-          >
-
-            <!-- Difficulty face -->
-            <img
-              class="relative z-10 w-10"
-              :src="difficultyFace"
-              :class="{'translate-y-0.5': difficulty[1] >= 3}"
-              :style="{scale: diffScaleOffsets[difficulty[0]-6], translate: diffTranslateOffsets[difficulty[0]-6]}"
-              alt=""  
-            />
-
-
-            <!-- Mythic glow -->
-            <img
-              v-if="difficulty[1] == 5"
-              class="absolute top-1/2 -translate-y-1/2 -translate-x-0.5 z-0 w-full scale-[1.8]"
-              :class="{
-              }"
-              :src="difficultyGlow"
-              alt=""
-            />
-            <!-- Legendary glow -->
-            <img
-              v-if="difficulty[1] == 4"
-              class="absolute top-1/2 -translate-y-1/2  z-0 w-full scale-[1.6]"
-              :class="{
-              }"
-              :src="difficultyGlow"
-              alt=""
-            />
-            
-            <!-- Featured glow -->
-            <img
-              v-if="difficulty[1] == 2"
-              class="absolute top-1/2 -translate-y-1/2  z-0 w-full scale-[1.4]"
-              :src="difficultyGlow"
-              alt=""
-            />
-
-            <!-- Epic rate -->
-            <img
-              v-if="difficulty[1] == 3"
-              class="absolute -top-1 z-0 w-full scale-[1.6]"
-              :src="difficultyGlow"
-              alt=""
-            />
-
-            <!-- Star rate -->
-            <img
-              v-if="difficulty[1] == 1"
-              class="absolute -right-0 -bottom-0 z-20 w-4 scale-150"
-              :src="difficultyGlow"
-              alt=""
-            />
+          <div class="relative m-2 mr-1 ml-0" v-if="difficulty && !guessingNow">
+            <DifficultyIcon class="w-14" :difficulty="difficulty[0]" :rating="difficulty[1]" />
           </div>
 
           <!-- Level name -->
@@ -241,7 +117,7 @@ const listData = inject("listData")
         <a class="button" v-if="levelID" :href="`https://gdbrowser.com/${levelID}`" target="_blank"
           ><img class="w-14 max-sm:w-10" src="@/images/modGDB.svg" alt=""
         /></a>
-        <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID">
+        <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID(levelID)">
           <img class="w-14 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
@@ -256,7 +132,7 @@ const listData = inject("listData")
     <!-- Favorite star -->
     <button
       class="absolute top-1 right-1 button"
-      @click="doFavoriteLevel"
+      @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
       :class="{ disabled: isFavorited }"
       v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars"
     >

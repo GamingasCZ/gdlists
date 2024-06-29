@@ -16,6 +16,9 @@ switch (props.icon) {
     case 'error':
         import(`@/images/close.svg`).then(res => getIcon.value = res.default)
         break;
+    case 'check':
+        import(`@/images/checkThick.svg`).then(res => getIcon.value = res.default)
+        break;
 }
 
 const shown = ref(false)
