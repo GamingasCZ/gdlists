@@ -13,9 +13,7 @@ const emit = defineEmits<{
 
 let col = props.data.levelColor ?? props.data.color
 
-const color = col ??
-typeof col == 'string'
-? fixHEX(col) : chroma.hsl(...col).hex()
+const color = typeof col == 'string' ? fixHEX(col) : chroma.hsl(...col).hex()
 
 const isCollab = typeof props.data.creator != "string"
 </script>
