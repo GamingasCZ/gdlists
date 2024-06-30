@@ -19,7 +19,7 @@ $DATA = json_decode(file_get_contents("php://input"), true);
 $column = isset($DATA["listID"]) ? "lists" : "reviews";
 $type = isset($DATA["listID"]) ? "listID" : "reviewID";
 
-$fuckupData = sanitizeInput(array($DATA["comment"], $DATA["comType"], $DATA[$type], $DATA["comColor"], $DATA["hidden"]));
+$fuckupData = sanitizeInput(array($DATA["comment"], $DATA["comType"], $DATA[$type], $DATA["comColor"], isset($DATA["hidden"]) ? $DATA["hidden"] : "0"));
 
 // Checking comment and user string length
 if (strlen($DATA["comment"]) > 300 || strlen($DATA["comment"]) < 10) die("2");

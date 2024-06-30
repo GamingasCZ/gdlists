@@ -1,6 +1,6 @@
 <?php
 /*
-Return codes: 
+Return codes:
 0 - Connection error
 1 - Empty request
 2 - Invalid parameters
@@ -36,6 +36,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   $dbInfo = [];
   $uid_array = array();
   $reviewDetails = [];
+  $users = [];
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
@@ -43,37 +44,40 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     }
 
     $allIDs = [];
-    foreach ($rows as $row) {
-      array_push($uid_array, $row["uid"]);
-      array_push($allIDs, $row["id"]);
+    if (isset($rows[0]["uid"])) {
+      foreach ($rows as $row) {
+        array_push($uid_array, $row["uid"]);
+        array_push($allIDs, $row["id"]);
 
-      $ind += 1;
+        $ind += 1;
+      }
+
+      if ($review) {
+        $idqm = makeIN($allIDs);
+        $reviewDetails = doRequest($mysqli, sprintf("SELECT
+                                            reviewID,
+                                            count(reviewID) AS level_count,
+                                            ifnull(avg(gameplay), 1) AS gameplay,
+                                            avg(decoration) AS decoration,
+                                            avg(difficulty) AS difficulty,
+                                            avg(overall) AS overall
+                                            FROM levels_ratings
+                                            WHERE reviewID IN %s
+                                            GROUP BY reviewID", $idqm[0]), $allIDs, $idqm[1], true);
+      }
+
+      $qqm = makeIN($uid_array);
+      $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,avatar_hash
+                        FROM users
+                        WHERE discord_id IN %s", $qqm[0]), $uid_array, $qqm[1], true);
     }
 
-    if ($review) {
-      $idqm = makeIN($allIDs);
-      $reviewDetails = doRequest($mysqli, sprintf("SELECT
-                                          reviewID,
-                                          count(reviewID) AS level_count,
-                                          ifnull(avg(gameplay), 1) AS gameplay,
-                                          avg(decoration) AS decoration,
-                                          avg(difficulty) AS difficulty, 
-                                          avg(overall) AS overall
-                                          FROM levels_ratings
-                                          WHERE reviewID IN %s
-                                          GROUP BY reviewID", $idqm[0]), [...$allIDs], $idqm[1], true);
-    }
-
-    $qqm = makeIN($uid_array);
-    $query = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,avatar_hash
-                      FROM users
-                      WHERE discord_id IN %s", $qqm[0]), [...$uid_array], $qqm[1], true);
     $dbInfo["maxPage"] = $maxpage;
-    $dbInfo["startID"] = $rows[0]["id"];
+    $dbInfo["startID"] = isset($rows[0]["id"]) ? $rows[0]["id"] : $rows[0]["levelID"];
     $dbInfo["searchQuery"] = $search;
     $dbInfo["page"] = $page;
     $dbInfo["path"] = $_SERVER["SCRIPT_NAME"];
-    
+
   } else {
     // Single list
     $decoded = base64_decode($rows["data"], true);
@@ -91,17 +95,13 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
 
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [list_id($rows)], "s");
-    $rows["commAmount"] = $commAmount["COUNT(*)"]; 
-    $query = doRequest($mysqli, "SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    $rows["commAmount"] = $commAmount["COUNT(*)"];
+    $users = doRequest($mysqli, "SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=?", [$rows["uid"]], "s");
 
     // Fetch ratings
     $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);
   }
-  
-  $users;
-  if ( sizeof($uid_array) || $rows["uid"] != "") {
-    $users = $query;
-  }
+
   $res = array($rows, $users, $dbInfo, $ratings, $reviewDetails);
   echo json_encode($res);
 }
@@ -121,7 +121,7 @@ if (count($_GET) == 1) {
     $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$_GET["review"]], "s");
 
     if ($result == null) echo "2";
-    else parseResult($result, true, review: true);
+    else parseResult($result, true, -1, "", 0, true);
   }
    elseif (in_array("pid", array_keys($_GET))) {
     // Private lists
@@ -137,7 +137,7 @@ if (count($_GET) == 1) {
     // Picking a random list or review
     $randType = rand(0, 1) ? "lists" : "reviews";
     $result = doRequest($mysqli, sprintf("SELECT * FROM `%s` WHERE `hidden` LIKE 0 ORDER BY RAND() LIMIT ?", $randType), [1], "i");
-    parseResult($result, true, review: $randType == "reviews");
+    parseResult($result, true, -1, "", 0, $randType == "reviews");
 
   } elseif (in_array("homepage", array_keys($_GET))) {
     if ($_GET["homepage"] == 1) $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
@@ -175,7 +175,7 @@ if (count($_GET) == 1) {
         $type = "reviews"; break;
       case 'levels':
         $type = "levels"; break;
-      
+
       default: die("-2");
     }
   }
@@ -204,7 +204,7 @@ if (count($_GET) == 1) {
 
   // How many list should be fetched and the offset (page)
   $dbSlice = clamp(intval($_GET["fetchAmount"]), 2, 15) * intval($_GET["page"]);
-  
+
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
@@ -230,9 +230,9 @@ if (count($_GET) == 1) {
       OFFSET %s", $selLevelRange, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
     $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels WHERE `levelName` LIKE '%%%s%%' AND `id`<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
-  
+
   $maxpage = ceil($maxpageQuery["amount"] / clamp(intval($_GET["fetchAmount"]), 2, 15));
-  
+
   $result = doRequest($mysqli, $query, [$_GET["startID"], "%".$_GET["searchQuery"]."%"], "is", true);
   parseResult($result, false, $maxpage, $_GET["searchQuery"], $_GET["page"], $type == "reviews");
 }
