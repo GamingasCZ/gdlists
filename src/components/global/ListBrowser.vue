@@ -299,10 +299,6 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             :class="{ 'bg-lof-300': onlineType == 'collabs' }" @click="emit('switchBrowser', 'collabs')">
             {{ $t('collabTools.collabs') }}
           </button>
-          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
-            :class="{ 'bg-lof-300': onlineType == 'reviews' }" @click="emit('switchBrowser', 'reviews')">
-            {{ $t('reviews.review') }}
-          </button>
         </header>
         <!-- Search box -->
         <form action="" class="flex items-center" @submit.prevent="doSearch"
