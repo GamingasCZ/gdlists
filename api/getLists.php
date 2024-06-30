@@ -228,7 +228,7 @@ if (count($_GET) == 1) {
       ORDER BY levels.id DESC
       LIMIT %s
       OFFSET %s", $selLevelRange, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
-    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels WHERE `levelName` LIKE '%%%s%%' AND `id`<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
+    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels_uploaders LEFT JOIN levels ON levels.levelID = levels_uploaders.levelID WHERE `levelName` LIKE '%%%s%%' AND levels.id<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
 
   $maxpage = ceil($maxpageQuery["amount"] / clamp(intval($_GET["fetchAmount"]), 2, 15));
