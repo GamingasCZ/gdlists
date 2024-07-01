@@ -186,3 +186,11 @@ export function getDominantColor(image: HTMLImageElement) {
     let dominantColor = chroma.rgb(...ctx?.getImageData(0, 0, 1, 1).data)
     return dominantColor
 }
+
+export function getWordCount() {
+    let count = 0
+    reviewData.value.containers.forEach(c => {
+        count += (c.data.match(/\w+/g) ?? []).length
+    })
+    return count
+}

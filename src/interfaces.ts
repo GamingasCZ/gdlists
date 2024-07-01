@@ -250,6 +250,14 @@ export interface ReviewList {
   font: number
 }
 
+export interface ReviewDraft {
+  name: string
+  createDate: number
+  saveDate: number
+  wordCount: number
+  reviewData: ReviewList
+}
+
 export interface ReviewContainer {
   align: 'left' | 'center' | 'right' | 'justify'
   data: string

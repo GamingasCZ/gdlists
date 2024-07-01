@@ -395,7 +395,10 @@
     "newest": "Newest",
     "duplicate": "Duplicate",
     "move": "Move",
-    "info": "Info"
+    "info": "Info",
+    "saveAs": "Save As",
+    "inUse": "In Use",
+    "words": "No words | {n} word | {n} words"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -656,9 +659,22 @@
     "gpHelp": "You can rate gameplay based on how fun the level is to play.<br><br>Recall if the level has any bad transitions, sudden difficulty spikes and such.",
     "decoHelp": "Block designs, backgrounds, air deco and all the other visual parts of the level fall under decoration.<br><br>If there's a theme, you can rate how well it's used.",
     "diffHelp": "Rate difficulty relative to it's actual one in-game.<br><br>It's totally fine rating the hardest Easy level with a 10 and the most free Extreme with a 0.",
-    "overallHelp": "The overall score incorporates everything the level tried to go for.<br><br>You're free to make it higher than the other ratings, if the level's objectively bad, but you like it."
+    "overallHelp": "The overall score incorporates everything the level tried to go for.<br><br>You're free to make it higher than the other ratings, if the level's objectively bad, but you like it.",
+    "drafts": "Drafts",
+    "draftNoPrev": "Review has no text.",
+    "saved": "Saved",
+    "created": "Created",
+    "copy1": "(copy)",
+    "copy3": "(third copy??)",
+    "copy2": "(another copy)",
+    "copy4": "(stop spamming D:)",
+    "copy5": "(god damnit!!)",
+    "copy6": "(how many do you need)",
+    "justSaved": "Saved"
   },
   "review": {
-    "columnSetting": "{0} column"
+    "columnSetting": "{0} column",
+    "unsaved": "Review not saved yet.",
+    "savedLast": "Last saved"
   }
 }
