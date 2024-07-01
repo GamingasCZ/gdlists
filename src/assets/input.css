@@ -87,6 +87,9 @@ input[type="radio"]:checked::after {
 select {
   @apply px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40
 }
+option {
+  @apply bg-lof-200
+}
 
 .disabled {
   @apply opacity-20 grayscale
@@ -221,7 +224,7 @@ dialog {
 .regularParsing blockquote { @apply border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
 .regularParsing img { @apply max-w-48 my-1}
 .regularParsing code { @apply font-mono bg-white rounded-md p-1 bg-opacity-10 font-normal}
-.regularParsing table,th,td { @apply border border-collapse p-1 border-lof-400}
+.regularParsing table, .regularParsing th, .regularParsing td { @apply border border-collapse p-1 border-lof-400}
 .regularParsing table { @apply m-1}
 .regularParsing hr { @apply border opacity-30 rounded-full my-2}
 .regularParsing th { @apply bg-lof-300}

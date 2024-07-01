@@ -463,7 +463,7 @@ const jumpSearch = ref("")
         <span>{{ $t('listViewer.noGuessJumping') }}</span>
       </template>
       <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS.filter(x => x[3].toLowerCase().includes(jumpSearch.toLowerCase()))" :text="link[3]" :icon-index="link[2]" />
-      <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="!isReview || reviewLevelsOpen" v-for="level in LIST_DATA.data.levels.filter(x => x.levelName.toLowerCase().includes(jumpSearch.toLowerCase()))" :data="level" />
+      <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="(!isReview || reviewLevelsOpen) && cardGuessing == -1" v-for="level in LIST_DATA.data.levels.filter(x => x.levelName.toLowerCase().includes(jumpSearch.toLowerCase()))" :data="level" />
   </PickerPopup>
   </DialogVue>
 
@@ -566,7 +566,9 @@ const jumpSearch = ref("")
           :list-i-d="!PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
           :list-name="LIST_DATA?.name!"
           :translucent-card="LIST_DATA?.data.translucent!" 
-          :disable-stars="false" 
+          :disable-stars="false"
+          :guessing-now="cardGuessing == index"
+          :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
           @vue:mounted="tryJumping(index)"
           @next-guess="doNextGuess($event)"
           @open-collab="openCollabTools"
