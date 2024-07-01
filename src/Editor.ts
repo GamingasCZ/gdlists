@@ -227,10 +227,14 @@ export const removeBackup = (isReview = false) => {
   localStorage.removeItem(`${isReview ? 'review' : 'list'}Backup`)
 }
 
-export const shortenYTLink = (link: string) => {
+export const shortenYTLink = (link: string, disableParams = false) => {
   // Link is a regular YT link
   if (link.match(/(watch\?v=)/g)) {
-    return <any>link.match(/(?<=\?v=).+/g);
+    let params: RegExpMatchArray = link.match(/(?<=\?v=).+/g);
+    if (disableParams) {
+      return params[0].match(/(.*)&/)[1]
+    }
+    else return params[0]
   }
   // Link is most likely a shortened YT link
   else {
