@@ -3,6 +3,7 @@ import { setLanguage } from "./locales";
 import { SETTINGS } from "./siteSettings";
 import { useI18n } from "vue-i18n";
 import { nextTick, ref } from "vue";
+import axios from "axios";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,7 +65,10 @@ const router = createRouter({
     {
       path: "/random",
       name: "random",
-      props: (route) => ({ randomList: true }),
+      props: () => {
+        let review = ['list', 'review'][Math.random() > 0.5 | 0]
+        return { randomList: true, isReview: review}
+      },
       component: () => import("@/components/ListView.vue"),
     },
   ],

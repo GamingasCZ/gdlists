@@ -8,6 +8,8 @@ import type {
 SavedCollab,
 CollabHumans,
 CollabData,
+LevelList,
+ReviewList,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -40,11 +42,11 @@ import LevelCardTable from "./global/LevelCardTable.vue";
 import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
 
-const props = defineProps({
-  listID: { type: String, required: false },
-  isReview: Boolean,
-  randomList: Boolean,
-});
+const props = defineProps<{
+  listID?: string
+  isReview: boolean
+  randomList: boolean
+}>()
 
 onUnmounted(() => {
   document.body.style.backgroundImage = '';
@@ -53,7 +55,12 @@ onUnmounted(() => {
 
 let gdlists = useI18n().t('other.websiteName')
 
-const loadContent = () => props.isReview ? loadReview() : loadList()
+const loadContent = () => {
+  if (props.randomList) {
+    axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: review}}).then(res => JSON.stringify(res.data))
+  }
+  props.isReview ? loadReview() : loadList()
+}
 
 watch(props, loadContent)
 onMounted(loadContent)
@@ -79,10 +86,6 @@ const backToReview = ref()
 const nonexistentList = ref<boolean>(false)
 function loadList() {
   let listURL = `${!NONPRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
-  if (props.randomList) {
-    listURL = "random";
-    NONPRIVATE_LIST = true
-  }
 
   nonexistentList.value = false
 

@@ -73,7 +73,7 @@ export function testIfImageExists(url: string) {
 }
 
 export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
-  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return
+  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return modifyListBG(0, true, review)
   if (reset) {
     document.documentElement.style.setProperty("--siteBackground","")
     document.documentElement.style.setProperty("--primaryColor","")

@@ -16,7 +16,7 @@ const invert = ref(props.inverted ? 'invert(1)' : 'invert(0)')
 <template>
 	<div class="grid sm:grid-cols-2 font-[poppins] py-10 gap-y-5">
 		<div class="flex flex-col gap-4 items-center opacity-30 translate-y-4 invertable">
-			<img src="@/images/reviews.svg" class="w-36" alt="">
+			<img src="@/images/reviews.svg" class="w-36" alt="" :class="{'invert': inverted}">
 			<h2 class="text-2xl">{{ $t('reviews.help1') }}</h2>
 		</div>
 		
@@ -29,7 +29,7 @@ const invert = ref(props.inverted ? 'invert(1)' : 'invert(0)')
 				</div>
 				<button @click="openedDialogs.levels = true" class="flex gap-2 p-2 min-w-max bg-black bg-opacity-40 rounded-md max-sm:hidden button">
 					<img src="@/images/browseMobHeader.svg" class="w-6" alt="">
-					<span>{{ $t('editor.levels') }}</span>
+					<span class="text-white">{{ $t('editor.levels') }}</span>
 				</button>
 				<img src="@/images/arrow.svg" class="ml-auto w-4 opacity-40 sm:hidden" alt="">
 			</div>
@@ -41,7 +41,7 @@ const invert = ref(props.inverted ? 'invert(1)' : 'invert(0)')
 
 				<button @click="openedDialogs.ratings = true" class="flex gap-2 p-2 min-w-max bg-black bg-opacity-40 rounded-md max-sm:hidden button">
 					<img src="@/images/rating.svg" class="w-6" alt="">
-					<span>{{ $t('reviews.rating') }}</span>
+					<span class="text-white">{{ $t('reviews.rating') }}</span>
 				</button>
 				<img src="@/images/arrow.svg" class="ml-auto w-4 opacity-40 sm:hidden" alt="">
 			</div>
