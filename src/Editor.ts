@@ -232,7 +232,9 @@ export const shortenYTLink = (link: string, disableParams = false) => {
   if (link.match(/(watch\?v=)/g)) {
     let params: RegExpMatchArray = link.match(/(?<=\?v=).+/g);
     if (disableParams) {
-      return params[0].match(/(.*)&/)[1]
+      let removeParams = params[0].match(/(.*)&/)?.[1]
+      if (!removeParams) return params[0]
+      else return removeParams
     }
     else return params[0]
   }
