@@ -1,21 +1,17 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { levelList } from "../../Editor";
+import Dropdown from "../ui/Dropdown.vue";
 
-const modifyDiffGuesser = (ind: number) => {
-  levelList.value.diffGuesser[ind] = !levelList.value.diffGuesser[ind]
+const modifyDiffGuesser = () => {
   levelList.value.diffGuesser[0] = levelList.value.diffGuesser[1] || levelList.value.diffGuesser[2] // Hide dropdown when both disabled
-  if (!levelList.value.diffGuesser[0]) {
-    setTimeout(() => {
-      levelList.value.diffGuesser[1] = true
-      levelList.value.diffGuesser[2] = true
-    }, 50)
-  }
 }
 
 const diff = import.meta.env.BASE_URL + `/faces/4.webp`
 const rate = import.meta.env.BASE_URL + `/faces/star.webp`
 
-
+const diffGuessOpen = ref(false)
+const diffGuessButton = ref()
 </script>
 
 <template>
@@ -26,38 +22,45 @@ const rate = import.meta.env.BASE_URL + `/faces/star.webp`
         <label class="text-xl" for="private">{{ $t('editor.privateList') }}</label>
         <input type="checkbox" name="private" class="button" />
       </div>
+      
       <div class="flex justify-between py-2 pl-4 bg-black bg-opacity-20 rounded-md">
         <label class="text-xl" for="diffGuessing" id="diffGuess">{{ $t('editor.levelGuessing') }}</label>
-        <input
-            type="checkbox"
-            class="button"
-            v-model="levelList.diffGuesser[0]"
-          />
+        <button ref="diffGuessButton" @click="diffGuessOpen = true" class="relative p-1 mr-1.5 bg-black bg-opacity-0 rounded-md aspect-square button hover:bg-opacity-40">
+          <img src="@/images/moveDown.svg" alt="" class="mx-auto w-4">
+          <div v-if="levelList.diffGuesser?.[0]" class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-lof-400"></div>
+        </button>
       </div>
-      <Transition name="fade">
-        <div
-          v-show="levelList.diffGuesser[0]"
-          class="box-border flex gap-2 items-center px-3 py-2 ml-8 w-max bg-black bg-opacity-25 rounded-md"
-        >
-          <span>{{ $t('editor.guess') }}: </span>
-          <button @click="modifyDiffGuesser(1)">
-            <img
-              :src="diff"
-              alt=""
-              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
-              :class="{ disabled: !levelList.diffGuesser[1] }"
-            />
-          </button>
-          <button @click="modifyDiffGuesser(2)">
-            <img
-              :src="rate"
-              alt=""
-              class="p-1 w-10 bg-black bg-opacity-50 rounded-md button"
-              :class="{ disabled: !levelList.diffGuesser[2] }"
-            />
-          </button>
-        </div>
-      </Transition>
+      <Dropdown v-if="diffGuessOpen" @close="diffGuessOpen = false" :options="[]" :button="diffGuessButton">
+        <template #header>
+          <div
+            class="flex flex-col gap-2 p-1 w-48 text-white"
+          >
+            <div class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md">
+              <img
+                :src="diff"
+                alt=""
+                class="w-7"
+              />
+              <label for="">{{ $t('editor.difficulties') }}</label>
+              <input @change="$nextTick(() => modifyDiffGuesser())" v-model="levelList.diffGuesser[1]" class="ml-auto button" type="checkbox" name="diff" id="">
+            </div>
+            <div class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md">
+              <img
+                :src="rate"
+                alt=""
+                class="w-7"
+                />
+                <label for="">{{ $t('editor.ratings') }}</label>
+                <input @change="$nextTick(() => modifyDiffGuesser())" v-model="levelList.diffGuesser[2]" class="ml-auto button" type="checkbox" name="rate" id="">
+            </div>
+            <div class="flex gap-1 items-start p-1 text-xs text-white bg-white bg-opacity-10 rounded-sm">
+              <img src="@/images/info.svg" class="inline mt-1 w-3 opacity-20" alt="">
+              <div>{{ $t('editor.diffGuessHelp') }}</div>
+				    </div>
+          </div>
+        </template>
+      </Dropdown>
+
       <div class="flex justify-between py-2 pl-4 bg-black bg-opacity-20 rounded-md">
         <label class="text-xl" for="translucency">{{ $t('editor.translucentCards') }}</label>
         <input

@@ -15,7 +15,7 @@ export const diffTranslateOffsets = [0,0, "0 -0.05rem", "0 -0.05rem", "0 -0.09re
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
   pageBGcolor: [140, 0.37, 3],
-  diffGuesser: [false, true, true],
+  diffGuesser: [false, false, false],
   titleImg: ["", 0, 33, 1, true],
   translucent: false,
   disComments: false,

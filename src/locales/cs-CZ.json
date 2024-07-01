@@ -134,7 +134,6 @@
     "invalidID": "Level na {0}. místě má neplatné ID levelu!",
     "maxLevels": "Víc levelů už nemůžeš přidat!",
     "listBGhelp": "# Nastavení \n *Zakrytí - Jak velkou část obrazovky zabere pozadí. \n*Zarovnání - Pokud má obrazovka užší poměr stran než pozadí, pozadí se zarovná na zvolenou stranu. \n*Přechod - Zda by měl být přidán přes pozadí přechod s barvou seznamu. \nV náhledu obrázku je i zelený rámeček, za ten můžeš tahat a vybrat tak jaká část pozadí se zobrazí. \n\n Pozadí seznamu funguje nejlépe s průsvitnými kartami!",
-    "diffGuessHelp": "Pokud je hádání obtížnostú zapnuté, seznam se bude postupně odemykat po tom, co hádáš obtížnosti, rating, či oboje.\n*V prohlížeči seznamů takový seznam poznáš podle otazníků v pozadí.\n*Hádání se vyruší, pokud přecházíš z uložených levelů.\n*Můžeš hrát i šipkami na klávesnicí.",
     "collabToolsSoon": "Collab nástroje ti umožňují vizuálně zobrazit části collabu. Pokud to nedofailíš, v seznamu se objeví graf s délkami částí, a co člen v collabu dělal, jeho GD ikonka a sociální sítě.<br>\nCollaby se vytvářejí v editoru. Dostaneš se k ním pomocí ikonky vedle pole pro zadání tvůrce levelu.<br>\nNový collab vytvoříš tlačítkem \"Vytvořit collab\". Po vytvoření se otevře se panel, kde se nastavují role. Předchystané role jsou v šipečce vpravo nahoře.<br>\nPro přidání člena klikni na zelené plus. Po přidání bude automaticky zaměřeno pole s jménem. Po napsání jména člena můžeš zmáčknout Enter nebo kliknout na lupu. Tím se automaticky vyplní ikonka a sociální sítě z GD profilu. Po vyhledání bude zaměřeno tlačítko na přidání člena. Můžeš tedy rovnou zmáčknout Enter a přidá se další člen. Zbytek vygómeš sám, megamysle :D",
     "collabTools": "Collab nástroje",
     "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**.",
@@ -181,7 +180,10 @@
     "loginToCreateReviews": "Pro vytvoření recenze se prosím přihlaš!",
     "cookDisabled": "Nemáš povolené cookies, můžeš jen procházet seznamy!",
     "reviewInProgress": "Máš tu rozpracovanou recenzi!",
-    "unnamedReview": "Bezejmenná recenze"
+    "unnamedReview": "Bezejmenná recenze",
+    "difficulties": "Obtížnosti",
+    "ratings": "Ratingy",
+    "diffGuessHelp": "Zapneš-li hádání, ze seznamu se stane minihra, kde se postupně odkrývají levely tím, že hádáš obtížnosti a ratingy."
   },
   "other": {
     "lockQuotes": [
@@ -437,7 +439,8 @@
     "textFormatting": "Formátování textu",
     "formatHelp": "Formátování používá GFM (GitHub Flavoured Markdown).<br><br> V nabídce formátování je odkaz na to, jak GFM používat.<br><br> Pokud nechceš Markdown používat, můžeš ho v nastavení odstavce zakázat.",
     "containerHelp": "Prvky na přidání obrázků, videí apod. jsou vedle tlačítek na zarovnávání.<br><br> Kliknutím na přidaný prvek ho vybereš. Každý prvek má svoje vlastní nastavení, které je dostupné pod ozubeným kolem napravo od prvku.<br><br> Kliknutím kolečka myši na nastavení, můžeš prvek rychle smazat. V recenzi můžeš mít max. 100 vizuálních/textových prvků.",
-    "columnHelp": "Sloupce ti umožňují pokládat text a většinu dalších prvků vedle sebe.<br><br> Abys mohl do sloupce přidat obsah, musíš na něj prvně kliknout. Vybraný sloupec má silnější obrys.<br><br> Po vybrání sloupce se tlačítko na přidávání změní na upravovací, kde můžeš layout nastavovat.<br><br> Vedle sebe můžeš mít max. 10 sloupců. Sloupce přetékají, pokud na obsah není dost místa.<br><br> Ve výchozím stavu se sloupce snaží zabrat co nejvíc místa. V nastavení sloupce lze nastavit, aby se přizpůsobily šířce obsahu.<br> Tip: Pokud jsou všechy sloupce přispůsobeny na šířku, můžeš celý layout zarovnávat např. doprostřed.<br><br> Pokud ti zbývají 2 sloupce a smažeš jeden ze sloupců, obsah druhého sloupce se vytrhne zpět do recenze."
+    "columnHelp": "Sloupce ti umožňují pokládat text a většinu dalších prvků vedle sebe.<br><br> Abys mohl do sloupce přidat obsah, musíš na něj prvně kliknout. Vybraný sloupec má silnější obrys.<br><br> Po vybrání sloupce se tlačítko na přidávání změní na upravovací, kde můžeš layout nastavovat.<br><br> Vedle sebe můžeš mít max. 10 sloupců. Sloupce přetékají, pokud na obsah není dost místa.<br><br> Ve výchozím stavu se sloupce snaží zabrat co nejvíc místa. V nastavení sloupce lze nastavit, aby se přizpůsobily šířce obsahu.<br> Tip: Pokud jsou všechy sloupce přispůsobeny na šířku, můžeš celý layout zarovnávat např. doprostřed.<br><br> Pokud ti zbývají 2 sloupce a smažeš jeden ze sloupců, obsah druhého sloupce se vytrhne zpět do recenze.",
+    "diffGuessHelp": "Pokud je hádání obtížnostú zapnuté, seznam se bude postupně odemykat po tom, co hádáš obtížnosti, rating, či oboje.\n*V prohlížeči seznamů takový seznam poznáš podle otazníků v pozadí.\n*Hádání se vyruší, pokud přecházíš z uložených levelů.\n*Můžeš hrát i šipkami na klávesnicí."
   },
   "levelViewer": {},
   "list": {
