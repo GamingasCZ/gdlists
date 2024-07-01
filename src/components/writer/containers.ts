@@ -44,7 +44,7 @@ const containers: Containers = {
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "texl-xl leading-6 mb-1",
+        styling: "text-xl leading-6 mb-1",
         nestable: true,
         canEditText: true,
         settings: []

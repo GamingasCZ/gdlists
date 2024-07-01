@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, reactive, ref, watch } from "vue";
+import { computed, provide, reactive, ref, watch } from "vue";
 import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
@@ -437,13 +437,25 @@ onMounted(() => {
 }
 })
 
-const collabBackground = ref()
 const preUpload = ref(false)
 const userDialog = ref()
 const writerRatings = ref<HTMLDivElement>()
 const openRatingHelp = () => {
     if (writerRatings) writerRatings.value.helpOpen = !writerRatings.value.helpOpen
 }
+
+const hasUnrated = computed(() => {
+    if (!reviewData.value.levels.length) return true
+
+    let unrated = false
+    reviewData.value.levels.forEach(l => {
+        if (l.ratings[0].concat(l.ratings[1]).includes(-1)) unrated = true
+    })
+    return unrated
+})
+
+const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.value.disabledRatings)
+
 </script>
 
 <template>
@@ -521,6 +533,8 @@ const openRatingHelp = () => {
         
         <Header
             :editing="editing"
+            :has-levels="hasLevels"
+            :has-unrated="hasUnrated"
             :uploading="uploadInProgress"
             @update="updateReview"
             @remove="openDialogs.removeDialog = true"
@@ -557,7 +571,7 @@ const openRatingHelp = () => {
             <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
                 
-                <ReviewHelp v-if="!reviewData.containers.length" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
+                <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
 
                 <DataContainer
                     v-for="(container, index) in reviewData.containers"
