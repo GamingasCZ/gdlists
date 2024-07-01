@@ -6,8 +6,8 @@ const props = defineProps<{
 }>();
 
 const tagPath = ref("")
-async function getTag() {
-  tagPath.value = await import(`../../images/badges/${props.tag[0]}.svg`).then(res => res.default)
+function getTag() {
+  tagPath.value =`${import.meta.env.BASE_URL}/tags/${props.tag[0]}.svg`
 }
 getTag()
 

@@ -9,9 +9,9 @@ const emit = defineEmits<{
 }>();
 
 const Tags = ref<string[]>([])
-async function loadTags() {
+function loadTags() {
   for (let i = 0; i < TAG_COUNT; i++) {
-    Tags.value.push(await import(`../../images/badges/${i}.svg`).then(res => res.default))
+    Tags.value.push(`${import.meta.env.BASE_URL}/tags/${i}.svg`)
   }
 }
 loadTags()
