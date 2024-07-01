@@ -8,7 +8,7 @@ import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
 import RatingContainer from './RatingContainer.vue'
 import { DEFAULT_RATINGS } from "@/Reviews";
-import { fixBrokenColors } from "./levelCard";
+import { doFavoriteLevel, fixBrokenColors, getDifficulty } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 
 interface Extras {
