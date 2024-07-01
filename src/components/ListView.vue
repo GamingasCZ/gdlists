@@ -77,7 +77,7 @@ const listErrorLoading = ref(false)
 const backToReview = ref()
 
 const nonexistentList = ref<boolean>(false)
-function loadList(firstRandomPass = false) {
+function loadList() {
   let listURL = `${!NONPRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
   if (props.randomList) {
     listURL = "random";
@@ -134,16 +134,8 @@ function loadList(firstRandomPass = false) {
         document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
         // Set list colors
-        let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
-        if (typeof listColors == "object") listColors[2] /= 64
-        else if (listColors) { listColors = chroma(listColors).hsl() }
-        LIST_COL.value = listColors
-        
-        // Saturation 0
-        if (LIST_COL.value?.[0]) LIST_COL.value[0] = 0
-
-        if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
-          modifyListBG(LIST_COL.value);
+        if (LIST_DATA.value?.data?.pageBGcolor)
+          modifyListBG(LIST_DATA.value?.data?.pageBGcolor);
 
         // Check pinned status
         if (hasLocalStorage()) {
