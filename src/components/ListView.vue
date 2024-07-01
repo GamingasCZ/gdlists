@@ -304,7 +304,7 @@ const toggleListPin = () => {
 }
 
 const getURL = () => {
-  let base = `${window.location.host}/gdlists/s/`
+  let base = `${window.location.protocol}//${window.location.host}/gdlists/s/`
   if (props.isReview) return base + window.location.pathname.split("/").toReversed()[0]
   else return base + (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
