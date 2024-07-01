@@ -11,6 +11,8 @@ const openContactDialog = () => {
   document.querySelector("#contactButton").click()
 }
 
+const BASE_URL = import.meta.env.BASE_URL
+
 </script>
 
 <template>
@@ -26,7 +28,7 @@ const openContactDialog = () => {
     <h1 class="text-2xl text-yellow-200">
       <span>{{ $t('other.welcomeToGDL') }}</span> 
       <b>{{ username }}!</b>
-      <img src="@/images/emoji/11.webp" class="inline ml-2 w-8" alt="">
+      <img :src="`${BASE_URL}/emoji/11.webp`" class="inline ml-2 w-8" alt="">
     </h1>
   </div>
 

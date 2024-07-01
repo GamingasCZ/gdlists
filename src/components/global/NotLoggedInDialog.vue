@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import LoginButton from "./LoginButton.vue";
-import { ref } from "vue";
 
 defineProps({
   mess: String,
@@ -9,9 +8,7 @@ defineProps({
 let faces = ["04", "05", "07", "08", "15", "12", "10"];
 let pick = Math.floor(Math.random() * faces.length);
 
-const emojiPath = ref("")
-const getEmoji = async () => await import(`../../images/emoji/${faces[pick]}.webp`).then(res => emojiPath.value = res.default)
-getEmoji()
+const emojiPath = `${import.meta.env.BASE_URL}/emoji/${faces[pick]}.webp`
 
 </script>
 

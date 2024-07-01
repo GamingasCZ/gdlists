@@ -15,9 +15,9 @@ const props = defineProps<CollabViewerRow & extras>()
 const hovering = inject<CollabHumans | null>("collabHovering")
 const allHumans = inject<CollabHumans[] | null>("collabHumanoids")
 const emoji = ref("")
-const getEmoji = async () => {
+const getEmoji = () => {
     if (!props.human.verified?.[1]) // Human not verified (didn't use the search button in the editor)
-        emoji.value =  await import(`../../images/emoji/${Math.floor(Math.random() * EMOJI_COUNT+1).toString().padStart(2,"0")}.webp`).then(res => res.default)
+        emoji.value = `${import.meta.env.BASE_URL}/emoji/${Math.floor(Math.random() * EMOJI_COUNT+1).toString().padStart(2,"0")}.webp`
 }
 getEmoji()
 

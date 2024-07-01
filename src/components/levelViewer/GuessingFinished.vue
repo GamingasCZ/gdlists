@@ -65,9 +65,7 @@ else if (percentage.value <= 75) resultMessagePick.value = [2, Math.floor(Math.r
 else if (percentage.value <= 99) resultMessagePick.value = [4, Math.floor(Math.random() * 3)]
 else resultMessagePick.value = [5, Math.floor(Math.random() * 3)]
 
-const resultEmojiPath = ref("")
-const getEmoji = async () => await import(`../../images/emoji/${resultEmoji[resultMessagePick.value[0]][resultMessagePick.value[1]]}.webp`).then(res => resultEmojiPath.value = res.default)
-getEmoji()
+const resultEmojiPath = ref(`${import.meta.env.BASE_URL}/emoji/${resultEmoji[resultMessagePick.value[0]][resultMessagePick.value[1]]}.webp`)
 
 let translation = [
     useI18n().t("other.by"),

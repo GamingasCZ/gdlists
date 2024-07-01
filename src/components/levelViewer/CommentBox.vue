@@ -32,9 +32,9 @@ if (localStorage) {
 }
 
 let emojis = ref<string[]>([])
-async function loadEmojis() {
+function loadEmojis() {
     for (let i = 0; i < EMOJI_COUNT; i++) {
-        emojis.value.push(await import(`../../images/emoji/${(i+1).toString().padStart(2, '0')}.webp`).then(res => res.default))
+        emojis.value.push(`${import.meta.env.BASE_URL}/emoji/${(i+1).toString().padStart(2, '0')}.webp`)
     }
 }
 loadEmojis()

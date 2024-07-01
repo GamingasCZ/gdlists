@@ -61,8 +61,8 @@ const parsedComment = ref<string>(props.comment)
 let emojis = props.comment.match(/&(\d{2})/g)
 if (emojis != null) {
   emojis.forEach(async emoji => {
-    let fetch = await import(`../../images/emoji/${emoji.slice(1)}.webp`).then(res => res.default)
-    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline w-5 pointer-events-none" src="${fetch}" alt="">`)
+    let emojiLink = `${import.meta.env.BASE_URL}/emoji/${emoji.slice(1)}.webp`
+    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline w-5 pointer-events-none" src="${emojiLink}" alt="">`)
   });
 } else parsedComment.value = props.comment
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
