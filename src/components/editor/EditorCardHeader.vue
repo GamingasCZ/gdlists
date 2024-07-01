@@ -20,18 +20,7 @@ function getCreator() {
         return props.data.creator
 }
 
-const tags = ref([])
-const getTags = async (ind: number) => {
-    tags.value = []
-    let tag = await import(`../../images/badges/${ind}.svg`).then(res => res.default)
-    tags.value.push(tag)
-}
-
-if (props.data.tags != undefined) {
-    props.data.tags.slice(0,5).forEach(tag => {
-       getTags(tag[0]) 
-    });
-}
+const tags = ref(props.data.tags.slice(0,5).map(x =>`${import.meta.env.BASE_URL}/tags/${x[0]}.svg`))
 
 </script>
 

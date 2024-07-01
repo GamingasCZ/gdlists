@@ -59,20 +59,19 @@ const changeFace = async (newFace: number) => {
   diffFacePath.value = await getDiffFace()
 }
 
+const BASE_URL = import.meta.env.BASE_URL
 const rateImagePath = ref("")
-const getRateImage = async () => {
+const getRateImage = () => {
   let rate = props.levelArray.levels[props.index!].difficulty?.[1] ?? 0;
   if (rate == 0) rateImagePath.value = ""; // Unrated level
   else {
-    return await import(`../../images/faces/${["star", "featured", "epic", "legendary", "mythic"][rate - 1]}.webp`).then(res => rateImagePath.value = res.default);
+    rateImagePath.value = `${BASE_URL}/faces/${["star", "featured", "epic", "legendary", "mythic"][rate - 1]}.webp`
   }
 };
 getRateImage()
 
-const diffFacePath = ref("")
-const getDiffFace = async () => await import(`../../images/faces/${props.levelArray.levels[props.index!].difficulty?.[0] ?? 0}.webp`).then(res => diffFacePath.value = res.default)
-getDiffFace()
 
+const diffFacePath = ref(`${BASE_URL}/faces/${props.levelArray.levels[props.index!].difficulty?.[0] ?? 0}.webp`)
 
 const levelCreator = ref(typeof props.levelArray.levels[props.index!].creator == 'object' ? props.levelArray.levels[props.index!].creator[0][0].name : props.levelArray.levels[props.index!].creator)
 const modifyCreator = (e: Event | string) => {
