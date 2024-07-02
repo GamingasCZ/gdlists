@@ -135,7 +135,7 @@ if (count($_GET) == 1) {
     }
   } elseif (in_array("random", array_keys($_GET))) {
     // Picking a random list or review
-    $randType = $_GET["random"] == "list" ? "lists" : "reviews";
+    $randType = $_GET["random"] == 0 ? "lists" : "reviews";
     $result = doRequest($mysqli, sprintf("SELECT * FROM `%s` WHERE `hidden` LIKE 0 ORDER BY RAND() LIMIT ?", $randType), [1], "i");
     parseResult($result, true, -1, "", 0, $randType == "reviews");
 

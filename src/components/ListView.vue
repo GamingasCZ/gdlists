@@ -55,11 +55,12 @@ onUnmounted(() => {
 
 let gdlists = useI18n().t('other.websiteName')
 
-const loadContent = () => {
+const loadContent = async () => {
+  let randomData = null
   if (props.randomList) {
-    axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: review}}).then(res => JSON.stringify(res.data))
+    randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}}).then(res => res.data)
   }
-  props.isReview ? loadReview() : loadList()
+  props.isReview ? loadReview(randomData) : loadList(randomData)
 }
 
 watch(props, loadContent)
@@ -84,149 +85,151 @@ const listErrorLoading = ref(false)
 const backToReview = ref()
 
 const nonexistentList = ref<boolean>(false)
-function loadList() {
+async function loadList(loadedData: LevelList | null) {
   let listURL = `${!NONPRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
 
   nonexistentList.value = false
 
-  axios
-    .get(import.meta.env.VITE_API + "/getLists.php?" + listURL)
-    .then((res: AxiosResponse) => {
-      try {
-        if (res.data == 2) {
-          nonexistentList.value = true
-          return
-        }
+  let res: LevelList | number;
+  if (loadedData) res = loadedData
+  else
+    res = await axios.get(import.meta.env.VITE_API + "/getLists.php?" + listURL).then((res: AxiosResponse) => res.data)
+    
+  try {
+    if (res == 2) {
+      nonexistentList.value = true
+      return
+    }
 
-        LIST_DATA.value = res.data[0];
-        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1].username;
-        LIST_CREATORDATA.value = res.data[1]
-        LIST_RATING.value = res.data[3]
+    LIST_DATA.value = res[0];
+    LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
+    LIST_CREATORDATA.value = res[1]
+    LIST_RATING.value = res[3]
 
-        // Use new levelList structure (put levels into 'levels' array)
-        if (!LIST_DATA.value?.data.levels) {
-          LIST_DATA.value!.data.levels = [];
-          Object.keys(LIST_DATA.value?.data!)
-            .filter((x: string) => x.match(/\d+/g))
-            .forEach((level: string) => {
-              LIST_DATA.value?.data.levels.push(LIST_DATA.value.data[level]);
-            });
-        }
+    // Use new levelList structure (put levels into 'levels' array)
+    if (!LIST_DATA.value?.data.levels) {
+      LIST_DATA.value!.data.levels = [];
+      Object.keys(LIST_DATA.value?.data!)
+        .filter((x: string) => x.match(/\d+/g))
+        .forEach((level: string) => {
+          LIST_DATA.value?.data.levels.push(LIST_DATA.value.data[level]);
+        });
+    }
 
-        if (hasLocalStorage()) {
-          favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
-          recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
+    if (hasLocalStorage()) {
+      favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
+      recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
 
-          addIntoRecentlyViewed =
-            recentlyViewed.filter((list: ListPreview) => list.id == (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
-              .length == 0; // Has not been viewed yet
-        }
+      addIntoRecentlyViewed =
+        recentlyViewed.filter((list: ListPreview) => list.id == (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
+          .length == 0; // Has not been viewed yet
+    }
 
-        if (addIntoRecentlyViewed) {
-          recentlyViewed.push({
-            creator: LIST_CREATOR.value,
-            id: (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
-            name: LIST_DATA.value?.name!,
-            uploadDate: Date.now(),
-            hidden: "0",
-          });
-          if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
-          localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
-        }
+    if (addIntoRecentlyViewed) {
+      recentlyViewed.push({
+        creator: LIST_CREATOR.value,
+        id: (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
+        name: LIST_DATA.value?.name!,
+        uploadDate: Date.now(),
+        hidden: "0",
+      });
+      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
+      localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+    }
 
-        document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
+    document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
-        // Set list colors
-        if (LIST_DATA.value?.data?.pageBGcolor)
-          modifyListBG(LIST_DATA.value?.data?.pageBGcolor);
+    // Set list colors
+    if (LIST_DATA.value?.data?.pageBGcolor)
+      modifyListBG(LIST_DATA.value?.data?.pageBGcolor);
 
-        // Check pinned status
-        if (hasLocalStorage()) {
-          JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
-            if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
-          });
-        }
+    // Check pinned status
+    if (hasLocalStorage()) {
+      JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
+        if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
+      });
+    }
 
-        // Set difficulty guessing
-        guessHelpOpened.value = hasLocalStorage() && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
-        LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
-        if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
-      } catch (e) {
-        listErrorLoading.value = true
-      }
-    })
+    // Set difficulty guessing
+    guessHelpOpened.value = hasLocalStorage() && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
+    LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
+    if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
+  } catch (e) {
+    listErrorLoading.value = true
+  }
 }
 
 const REVIEW_CONTENTS = ref<[number, string][]>([])
-function loadReview() {
+async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
   NONPRIVATE_LIST = true // damn you, old gamingsus >:(
 
-  axios
-    .get(import.meta.env.VITE_API + "/getLists.php", {params: {review: encodeURIComponent(props.listID).match(/-(\d+)$/)[1]}})
-    .then((res: AxiosResponse) => {
-      try {
-        if (res.data == 2) {
-          nonexistentList.value = true
-          return
-        }
+  let res: ReviewList | number;
+  if (loadedData) res = loadedData
+  else
+    res = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {review: encodeURIComponent(props.listID).match(/-(\d+)$/)[1]}}).then((res: AxiosResponse) => res.data)
+    
+  try {
+    if (res == 2) {
+      nonexistentList.value = true
+      return
+    }
 
-        LIST_DATA.value = res.data[0];
-        LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
-        reviewData.value.levels = LIST_DATA.value.data.levels;
-        reviewData.value.ratings = LIST_DATA.value.data.ratings;
-        REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
-        LIST_RATING.value = res.data[3]
+    LIST_DATA.value = res[0];
+    LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
+    reviewData.value.levels = LIST_DATA.value.data.levels;
+    reviewData.value.ratings = LIST_DATA.value.data.ratings;
+    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
+    LIST_RATING.value = res[3]
 
-        LIST_CREATOR.value = LIST_DATA.value?.creator! || res.data[1].username;
-        LIST_CREATORDATA.value = res.data[1]
+    LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
+    LIST_CREATORDATA.value = res[1]
 
-        if (hasLocalStorage()) {
-          favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
-          recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
+    if (hasLocalStorage()) {
+      favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
+      recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
 
-          addIntoRecentlyViewed =
-            recentlyViewed.filter((list: ListPreview) => list.url == props.listID)
-              .length == 0; // Has not been viewed yet
-        }
-        if (addIntoRecentlyViewed) {
-          recentlyViewed.push({
-            creator: LIST_CREATOR.value,
-            url: props.listID,
-            name: encodeURIComponent(LIST_DATA.value?.name!),
-            uploadDate: Date.now(),
-            hidden: "0",
-          });
-          if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
-          localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
-        }
+      addIntoRecentlyViewed =
+        recentlyViewed.filter((list: ListPreview) => list.url == props.listID)
+          .length == 0; // Has not been viewed yet
+    }
+    if (addIntoRecentlyViewed) {
+      recentlyViewed.push({
+        creator: LIST_CREATOR.value,
+        url: props.listID,
+        name: encodeURIComponent(LIST_DATA.value?.name!),
+        uploadDate: Date.now(),
+        hidden: "0",
+      });
+      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
+      localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
+    }
 
-        document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
+    document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
-        // Set review colors
-        let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
-        if (typeof listColors == "object") listColors[2] /= 64
-        else if (listColors) { listColors = chroma(listColors).hsl() }
-        LIST_COL.value = listColors
-        
-        // Saturation 0
-        if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
+    // Set review colors
+    let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
+    if (typeof listColors == "object") listColors[2] /= 64
+    else if (listColors) { listColors = chroma(listColors).hsl() }
+    LIST_COL.value = listColors
+    
+    // Saturation 0
+    if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
 
-        if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
-          modifyListBG(LIST_COL.value);
+    if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
+      modifyListBG(LIST_COL.value);
 
-        // Check pinned status
-        if (hasLocalStorage()) {
-          JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
-            if (props.listID == pin.url) listPinned.value = true
-          });
-        }
+    // Check pinned status
+    if (hasLocalStorage()) {
+      JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
+        if (props.listID == pin.url) listPinned.value = true
+      });
+    }
 
-        LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
-      } catch (e) {
-        listErrorLoading.value = true
-      }
-    })
+    LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
+  } catch (e) {
+    listErrorLoading.value = true
+  }
 }
 
 

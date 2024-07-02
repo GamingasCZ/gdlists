@@ -66,7 +66,7 @@ const router = createRouter({
       path: "/random",
       name: "random",
       props: () => {
-        let review = ['list', 'review'][Math.random() > 0.5 | 0]
+        let review = Math.random() > 0.5 | 0
         return { randomList: true, isReview: review}
       },
       component: () => import("@/components/ListView.vue"),
