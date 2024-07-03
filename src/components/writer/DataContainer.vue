@@ -59,6 +59,11 @@ const observeChanges = () => {
 		textChanges.observe(mainText.value!, {attributes: true, attributeFilter: ['data-modf']})
 }
 
+const setBoxHeight = () => {
+	mainText.value.style.height = `unset`;
+	mainText.value.style.height = `${mainText.value?.scrollHeight}px`;
+}
+
 const focus = ref(false)
 
 </script>
@@ -69,12 +74,12 @@ const focus = ref(false)
 			v-if="canEditText"
 			:is="editable ? (type.startsWith('heading') ? 'input' : 'textarea') : 'p'"
 			ref="mainText"
-			@vue:mounted="observeChanges"
+			@vue:mounted="observeChanges(); setBoxHeight()"
+			@vue:updated="setBoxHeight()"
 			@focus="emit('hasFocus', mainText!); focus = true"
-			@input="mainText.rows = mainText?.value.match(/\n/g)?.length + 1"
 			@keyup="text = $event.target.value"
+			@input="setBoxHeight"
 			@keyup.enter="makeNextParagraph"
-			:rows="(mainText?.value ?? '0').match(/\n/g)?.length + 1"
 			:placeholder="placeholder"
 			v-html="editable ? '' : previewText"
 			:value="text"
