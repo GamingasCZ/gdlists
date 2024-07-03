@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide, reactive, ref, watch } from "vue";
+import { computed, nextTick, provide, reactive, ref, watch } from "vue";
 import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
@@ -13,14 +13,14 @@ import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
-import type { TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor } from "@/Reviews";
+import type { ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { DEFAULT_LEVELLIST, modifyListBG, removeBackup, saveBackup } from "@/Editor";
+import { DEFAULT_LEVELLIST, modifyListBG, prettyDate, removeBackup, saveBackup } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -33,6 +33,7 @@ import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import { onMounted } from "vue";
 import { onBeforeRouteLeave, type RouteLocationNormalized } from "vue-router";
+import ReviewDrafts from "./writer/ReviewDrafts.vue";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -60,6 +61,9 @@ watch(props, () => {
     if (!props.editing) {
         reviewData.value = DEFAULT_REVIEWDATA()
         modifyListBG(reviewData.value.pageBGcolor, true, true)
+        previewMode.value = true
+        disableEdits.value = false
+        reviewSave.value = {backupID: 0, lastSaved: 0}
     }
 })
 
@@ -81,7 +85,8 @@ const openDialogs = reactive({
     removeDialog: false,
     description: false,
     editError: false,
-    userAdder: [false, 0]
+    userAdder: [false, 0],
+    drafts: false,
 })
 
 const previewMode = ref(true)
@@ -225,7 +230,10 @@ const columnCommand = (index: number) => {
 
 const setFormatting = (format: string) => {
     switch (format) {
-        case "view": previewMode.value = !previewMode.value; break;
+        case "view":
+            document.activeElement?.blur()
+            nextTick(() => previewMode.value = !previewMode.value)
+            break;
     }
 }
 
@@ -337,6 +345,7 @@ const uploadReview = () => {
         else reviewUploadErrors(res.data[1])
 
         uploadInProgress.value = false
+        removeDraft(reviewSave.value.backupID)
     })
         .catch(() => {
             errorStamp.value = Date.now()
@@ -356,6 +365,7 @@ const removeReview = () => {
             errorText.value = i18n.global.t('reviews.removeFail')
         }
         uploadInProgress.value = false
+        removeDraft(reviewSave.value.backupID)
     }).catch(() => {
         errorStamp.value = Date.now()
         errorText.value = i18n.global.t('reviews.removeFail')
@@ -384,6 +394,7 @@ const updateReview = () => {
         else reviewUploadErrors(res.data[1])
 
         uploadInProgress.value = false
+        removeDraft(reviewSave.value.backupID)
     })
         .catch(() => {
             errorStamp.value = Date.now()
@@ -397,44 +408,58 @@ onUnmounted(() => {
 })
 
 const doBackup = (from?: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
-  if (reviewData.value.containers.length == 0) return // Do not save without any content
+  if (reviewData.value.containers.length == 0) return false // Do not save without any content
   if (!to) { // Do not backup when redirected from editor
-      saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value)
+      saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value, reviewSave.value.backupID)
+      return true
   }
+  return false
 }
-const backupData = ref({backupName: "", backupDate: 0, backupData: "", choseHidden: "0"})
+const backupData = ref({backupName: "", backupDate: 0, backupData: "", choseHidden: "0", backupID: 0})
 const loadBackup = () => {
-    reviewData.value = JSON.parse(backupData.value.backupData)
+    reviewSave.value.backupID = backupData.value.backupID
+    if (!drafts.value[reviewSave.value.backupID]) {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.draftNoLoad')
+        reviewSave.value.backupID = 0
+    }
+
+    reviewSave.value.lastSaved = drafts.value[backupData.value.backupID].saveDate
+    reviewData.value = drafts.value[backupData.value.backupID].reviewData
     modifyListBG(reviewData.value.pageBGcolor, false, true)
     removeBackup(true)
 }
 let autosaveInterval: number
 onMounted(() => {
+    if (SETTINGS.value.autosave) {
+        // Save when leaving the site
+    window.addEventListener("beforeunload", () => {
+        if (reviewSave.value.backupID) saveDraft(false, true)
+    })
+    onBeforeRouteLeave((from, to) => {
+        let res = doBackup(from, to)
+        if (res) saveDraft(false, true)
+    })
+
+    autosaveInterval = setInterval(() => {
+        if (!SETTINGS.value.autosave) // If setting changes, do not autosave
+            return clearInterval(autosaveInterval)
+
+        saveDraft(false, true)
+      
+    }, SETTINGS.value.autosave*1000)
+}
+
   if (localStorage) {
     let backup = localStorage.getItem("reviewBackup")
     if (backup) {
       let backupParsed: LevelBackup = JSON.parse(backup)
+      if (!backupParsed?.backupID) return 
       backupData.value.backupName = backupParsed.listName
       backupData.value.backupDate = new Date(backupParsed.listDate).toLocaleDateString()
-      backupData.value.backupData = <any>backupParsed.levelData
-      backupData.value.choseHidden = backupParsed.listHidden
+      backupData.value.backupID = backupParsed.backupID
     }
   }
-
-  if (SETTINGS.value.autosave) {
-    // Save when leaving the site
-    window.addEventListener("beforeunload", doBackup)
-    onBeforeRouteLeave(doBackup)
-
-    autosaveInterval = setInterval(() => {
-      if (!SETTINGS.value.autosave) { // If setting changes, do not autosave
-        clearInterval(autosaveInterval)
-        return
-      }
-    }, SETTINGS.value.autosave*1000)
-
-    doBackup()
-}
 })
 
 const preUpload = ref(false)
@@ -455,6 +480,88 @@ const hasUnrated = computed(() => {
 })
 
 const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.value.disabledRatings)
+const reviewSave = ref({backupID: 0, lastSaved: 0})
+const draftPopup = ref<HTMLDivElement>()
+const loadDraft = (newData: {data: ReviewList, id: number, saved: number}) => {
+    reviewData.value = newData.data
+    reviewSave.value.backupID = newData.id
+    reviewSave.value.lastSaved = newData.saved
+    modifyListBG(newData.data.pageBGcolor, false, true)
+}
+
+let previewHold: ReviewList
+const disableEdits = ref(false)
+const previewDraft = (previewData: ReviewList) => {
+    previewHold = reviewData.value
+    reviewData.value = previewData
+    modifyListBG(previewData.pageBGcolor, false, true)
+    previewMode.value = false
+    disableEdits.value = true
+    openDialogs.drafts = false
+}
+const exitPreview = () => {
+    reviewData.value = previewHold
+    modifyListBG(previewHold.pageBGcolor, false, true)
+    previewHold = null
+
+    previewMode.value = true
+    disableEdits.value = false
+    openDialogs.drafts = true
+
+}
+
+const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
+const drafts = ref<object>(JSON.parse(localStorage.getItem("reviewDrafts")!) ?? {})
+const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
+    if (!reviewData.value.containers.length) return
+    let now = Date.now()
+    let backupID;
+    let preview = getReviewPreview()
+    if (reviewSave.value.backupID == 0 || saveAs) {
+        let saveAsName = reviewData.value.reviewName || i18n.global.t('editor.unnamedReview')
+        if (saveAs && reviewSave.value.backupID != 0) {
+            let i = 1
+            funnySaveAsMessages.forEach(x => {
+                if (drafts.value[reviewSave.value.backupID].name.includes(x)) saveAsName = " " + funnySaveAsMessages[Math.min(i, funnySaveAsMessages.length-1)]
+                i += 1
+            })
+            if (saveAsName == "") saveAsName = " " + funnySaveAsMessages[0]
+        }
+
+        drafts.value[now] = {
+            reviewData: reviewData.value,
+            name: saveAsName,
+            createDate: now,
+            saveDate: now,
+            wordCount: getWordCount(),
+            previewTitle: preview[0],
+            previewParagraph: preview[1]
+        }
+        backupID = now
+    }
+    else {
+        drafts.value[reviewSave.value.backupID].reviewData = reviewData.value
+        drafts.value[reviewSave.value.backupID].saveDate = now
+        drafts.value[reviewSave.value.backupID].wordCount = getWordCount()
+        drafts.value[reviewSave.value.backupID].previewTitle = preview[0]
+        drafts.value[reviewSave.value.backupID].previewParagraph = preview[1]
+        backupID = reviewSave.value.backupID
+    }
+    localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
+    reviewSave.value = {backupID: backupID, lastSaved: now}
+    if (leavingPage) doBackup()
+}
+
+const removeDraft = (key: number) => {
+    if (!drafts.value[key]) return
+
+    if (key == reviewSave.value.backupID) reviewSave.value = {backupID: 0, lastSaved: 0}
+    delete drafts.value[key]
+    localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
+}
+
+const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
+setInterval(() => burstTimer.value = Date.now(), 5000)
 
 </script>
 
@@ -529,9 +636,13 @@ const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
             <ImageBrowser :disable-external="openDialogs.imagePicker[1] == -2" :unselectable="false" @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
         </DialogVue>
-
+        
+        <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')" :width="dialog.medium">
+            <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
+        </DialogVue>
         
         <Header
+            :class="{'pointer-events-none opacity-20': disableEdits}"
             :editing="editing"
             :has-levels="hasLevels"
             :has-unrated="hasUnrated"
@@ -544,7 +655,7 @@ const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.
         
         <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
-            <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400">
+            <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400" :class="{'pointer-events-none opacity-20': disableEdits}">
                 <input v-model="reviewData.reviewName" type="text" :maxlength="40" :disabled="editing" :placeholder="$t('reviews.reviewName')" class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
@@ -560,12 +671,19 @@ const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.
 
             <!-- Formatting -->
             <FormattingBar
+                :class="{'pointer-events-none opacity-20': disableEdits}"
                 :selected-nest="selectedNestContainer"
                 @set-formatting="setFormatting"
                 @add-container="addContainer"
                 @set-alignment="setAlignment(selectedContainer[0], $event)"
                 @column-command="columnCommand($event)"
             />
+
+            <!-- Back from draft preview -->
+            <div v-if="disableEdits" @click="exitPreview" class="flex fixed top-14 left-1/2 z-40 justify-between items-center p-2 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
+                <span class="text-xl">Náhled recenze</span>
+                <button class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg" class="w-6" alt=""> Vrátit se</button>
+            </div>
 
             <!-- Editor -->
             <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
@@ -610,10 +728,18 @@ const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.
                         />
                     </div>
                 </DataContainer>
-                <button @click="addContainer('default')" v-show="previewMode" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
+                <button @click="addContainer('default')" v-show="previewMode && !disableEdits" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
-                    <span>{{ $t('reviews.addParagraph') }}</span>
+                    <span class="text-white">{{ $t('reviews.addParagraph') }}</span>
                 </button>
+                <div class="text-xs" v-if="!disableEdits && reviewData.containers.length">
+                    <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">
+                        <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
+                    </p>
+                    <p v-else class="mt-2 italic text-center">
+                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: {{ prettyDate((burstTimer - reviewSave.lastSaved)/1000) }}</span> <span @click="saveDraft(false)" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
+                    </p>
+                </div>
             </section>
         </section>
 

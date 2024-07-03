@@ -340,7 +340,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
             <p class="text-sm opacity-70">{{ $t('collabTools.noSavedSub') }}</p>
           </div>
-          <RouterLink to="/editor">
+          <RouterLink to="/make/list">
             <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
               <img src="@/images/editorMobHeader.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{
                 $t('collabTools.startBuilding') }}

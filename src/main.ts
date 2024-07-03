@@ -11,6 +11,5 @@ const app = createApp(App);
 
 app.use(i18n);
 app.use(router);
-setLanguage((['cz', 'sk'].includes(navigator.language) | 0))
 
 app.mount("#app");

@@ -179,7 +179,7 @@
     "sepList": "Zadej oddělená ID levelů (např. 96000699, 29107242, 128)",
     "loginToCreateReviews": "Pro vytvoření recenze se prosím přihlaš!",
     "cookDisabled": "Nemáš povolené cookies, můžeš jen procházet seznamy!",
-    "reviewInProgress": "Máš tu rozpracovanou recenzi!",
+    "reviewInProgress": "Chcete načíst poslední rozepsaný koncept?",
     "unnamedReview": "Bezejmenná recenze",
     "difficulties": "Obtížnosti",
     "ratings": "Ratingy",
@@ -333,7 +333,10 @@
     "newest": "Nejnovější",
     "duplicate": "Duplikovat",
     "move": "Přesunout",
-    "info": "Informace"
+    "info": "Informace",
+    "saveAs": "Uložit jako",
+    "inUse": "Používané",
+    "words": "Beze slov | {n} slovo | {n} slov"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -657,9 +660,28 @@
     "gpHelp": "Gameplay jednoduše ohodnoť podle toho, jak příjemně se level hraje.<br><br>Do hodnocení gameplaye můžeš například zahrnout špatné přechody, nečekané difficulty spiky.",
     "decoHelp": "Sem patří block design, pozadí, air deco a další vizuální stránky levelu!<br><br>Můžeš zde i třeba zahrnout, jestli se povedl theme, o který se level snažil.",
     "diffHelp": "Obtížnost hodnoť vzhledem k její obtížnosti ve hře.<br><br>Klidně můžeš nejtěžší Easy level ohodnotit desítkou a nejvíce free Extreme nulou.",
-    "overallHelp": "Celkovým skórem shrneš všechno, o co se level snažil.<br><br>Může být klidně vyšší než všechna předešlá skóre, když je level objektivně špatný, ale ty ho máš rád."
+    "overallHelp": "Celkovým skórem shrneš všechno, o co se level snažil.<br><br>Může být klidně vyšší než všechna předešlá skóre, když je level objektivně špatný, ale ty ho máš rád.",
+    "drafts": "Koncepty",
+    "draftNoPrev": "Recenze nemá žádný text.",
+    "saved": "Uloženo",
+    "created": "Vytvořeno",
+    "copy1": "(kopie)",
+    "copy2": "(další kopie)",
+    "copy3": "(třetí kopie??)",
+    "copy4": "(nespamuj D:)",
+    "copy5": "(ježišmarja!!)",
+    "copy6": "(kolik jich potřebuješ)",
+    "justSaved": "Uloženo",
+    "draftHelp1": "Tady jsou tvé nedopsané recenze!",
+    "draftHelp2": "Můžeš si tu své recenze ukládat a kdykoliv se k nim vrátit.",
+    "draftHelp3": "Vše se ukládá lokálně. Zobrazí se tedy jen na tomto zařízení a když smažeš cookies, smažou se i tyto recenze. Ukládat můžeš i při výpadku internetu nebo serverů.",
+    "draftHelp4": "Po nahrání se koncept smaže.",
+    "writeOn": "Načíst",
+    "draftNoLoad": "Nepodařilo se načíst koncept!"
   },
   "review": {
-    "columnSetting": "{0} sloupec"
+    "columnSetting": "{0} sloupec",
+    "unsaved": "Recenze není uložená.",
+    "savedLast": "Naposledy uloženo"
   }
 }

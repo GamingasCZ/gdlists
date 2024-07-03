@@ -3,7 +3,7 @@ import type { viewedPopup } from "./interfaces";
 
 export const SETTINGS = ref({
   scrolling: 1,
-  language: 0,
+  language: -1,
   homepageColumns: 1,
   autosave: 60,
   iconQuality: 4,

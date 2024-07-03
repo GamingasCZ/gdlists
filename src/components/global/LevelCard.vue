@@ -150,7 +150,7 @@ const listData = inject("listData")
 
     <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
   
-    <div v-if="ratings && !hideRatings" class="flex gap-x-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
+    <div v-if="ratings && !hideRatings" class="flex flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
       <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
         <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
         <span class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>

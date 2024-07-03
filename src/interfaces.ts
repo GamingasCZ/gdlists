@@ -157,6 +157,7 @@ export interface LevelBackup {
   levelData: LevelList
   listHidden: '0' | '1'
   listDate: number
+  backupID?: number
 }
 
 export interface LevelList {
@@ -248,6 +249,14 @@ export interface ReviewList {
   whitePage: boolean
   readerMode: boolean
   font: number
+}
+
+export interface ReviewDraft {
+  name: string
+  createDate: number
+  saveDate: number
+  wordCount: number
+  reviewData: ReviewList
 }
 
 export interface ReviewContainer {

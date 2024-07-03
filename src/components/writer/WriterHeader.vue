@@ -36,7 +36,10 @@ const emit = defineEmits<{
                 <span class="max-sm:hidden">{{ $t('other.settings') }}</span>
             </button>
         </div>
-        <div>
+        <div class="flex gap-1">
+            <button @click="emit('openDialog', 'drafts')" class="flex gap-2 px-2 py-1 font-bold rounded-md text-lof-400 hover:underline">
+                <span >{{ $t('reviews.drafts') }}</span>
+            </button>
             <button :disabled="uploading" v-if="!editing" @click="emit('upload')" class="flex gap-2 px-2 py-1 font-bold text-black rounded-md button bg-lof-400">
                 <img v-if="uploading" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                 <img v-else src="@/images/upload.svg" alt="" class="w-6">
