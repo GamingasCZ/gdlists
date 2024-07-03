@@ -194,3 +194,11 @@ export function getWordCount() {
     })
     return count
 }
+
+export const getReviewPreview = () => {
+    let firstHeading = (reviewData.value.containers.filter(c => c.type.startsWith("heading"))?.[0]?.data ?? "").slice(0, 21)
+    let firstParagraph = (reviewData.value.containers.filter(c => c.type.startsWith("default"))?.[0]?.data ?? "").slice(0, 101)
+    if (firstHeading.length > 100) firstHeading = firstHeading.slice(0, 100)+"..."
+    if (firstParagraph.length > 100) firstParagraph = firstParagraph.slice(0, 100)+"..."
+    return [firstHeading, firstParagraph]
+}

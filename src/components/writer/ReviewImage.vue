@@ -80,8 +80,8 @@ const noClickWhenEditing = (e: Event) => {
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
-    <figure v-show="imageLoading == 0">
-        <div class="flex relative group min-h-[48px] max-w-[min(720px,100%)] m-2" :style="{width: `${imageScale}px`}">
+    <figure v-show="imageLoading == 0" class="max-w-full">
+        <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: `${imageScale}px`}">
             <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
                 <img
                     ref="image"

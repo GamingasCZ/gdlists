@@ -9,7 +9,7 @@ const emit = defineEmits(['loadBackup', 'removeBackup'])
 </script>
 
 <template>
-    <section class="flex justify-between items-center px-3 py-1 m-1 bg-white bg-opacity-10 rounded-md"
+    <section class="flex gap-3 justify-between items-center px-3 py-1 m-1 bg-white bg-opacity-10 rounded-md max-sm:flex-col"
         v-if="backupData.backupDate != 0">
         <div class="flex items-center">
             <img v-if="isReview" src="@/images/reviews.svg" class="inline mr-3 w-10" alt="">
@@ -21,16 +21,28 @@ const emit = defineEmits(['loadBackup', 'removeBackup'])
                 </div>
             </div>
         </div>
-        <div class="flex gap-3 w-max max-sm:gap-1 max-sm:flex-col">
+        <div v-if="!isReview" class="flex gap-3 w-max max-sm:gap-1">
             <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button"
                 @click="emit('loadBackup')">
                 <img src="@/images/edit.svg" class="box-border inline p-0.5 w-6">
-                <label class="max-sm:hidden">{{ $t('editor.restore') }}</label>
+                <label>{{ $t('editor.restore') }}</label>
             </button>
             <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button"
                 @click="emit('removeBackup')">
                 <img src="@/images/trash.svg" class="box-border inline p-0.5 w-6">
-                <label class="max-sm:hidden">{{ $t('editor.remove') }}</label>
+                <label>{{ $t('editor.remove') }}</label>
+            </button>
+        </div>
+        <div v-else class="flex gap-3 w-max max-sm:gap-1">
+            <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button"
+                @click="emit('loadBackup')">
+                <img src="@/images/symbolicSave.svg" class="box-border inline p-0.5 w-6">
+                <label>{{ $t('reviews.writeOn') }}</label>
+            </button>
+            <button class="inline-flex gap-2 p-1 font-bold bg-black bg-opacity-40 rounded-md button"
+                @click="emit('removeBackup')">
+                <img src="@/images/close.svg" class="box-border inline p-0.5 w-6">
+                <label>{{ $t('other.cancel') }}</label>
             </button>
         </div>
 </section></template>

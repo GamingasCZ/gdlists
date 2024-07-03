@@ -125,7 +125,7 @@
     "sepList": "Enter a seperated list of level IDs (ex. 96000699, 29107242, 128)",
     "cookDisabled": "Cookies are disabled. You can only browse posts!",
     "loginToCreateReviews": "Please login to make reviews!",
-    "reviewInProgress": "You have a review in the works!",
+    "reviewInProgress": "Would you like to load the last draft?",
     "unnamedReview": "Unnamed Review",
     "difficulties": "Difficulties",
     "ratings": "Ratings",
@@ -670,7 +670,13 @@
     "copy4": "(stop spamming D:)",
     "copy5": "(god damnit!!)",
     "copy6": "(how many do you need)",
-    "justSaved": "Saved"
+    "justSaved": "Saved",
+    "draftHelp1": "Here are your unfinished reviews!",
+    "draftHelp4": "The draft will remove itself after posting.",
+    "draftHelp2": "You can save and come back to these reviews anytime.",
+    "draftHelp3": "Drafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.",
+    "writeOn": "Load",
+    "draftNoLoad": "Failed to load draft!"
   },
   "review": {
     "columnSetting": "{0} column",

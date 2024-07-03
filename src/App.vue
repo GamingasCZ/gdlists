@@ -6,8 +6,8 @@ import { onMounted, ref } from "vue";
 import cookier from "cookier";
 import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
-import { langIndex, setLanguage } from "./locales";
 import router from "./router";
+import { setLanguage } from "./locales";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -33,7 +33,9 @@ if (hasLocalStorage()) {
     localStorage.setItem("settings", JSON.stringify(loadedSettings))
   }
   SETTINGS.value = loadedSettings
-  if (langIndex.value != SETTINGS.value.language) setLanguage(SETTINGS.value.language)
+  let lang: 0 | 1 = SETTINGS.value.language == -1 ? (['cz', 'sk'].includes(navigator.language) | 0) : SETTINGS.value.language
+  setLanguage(lang)
+  if (SETTINGS.value.language == -1) SETTINGS.value.language = lang
 }
 
 // Redirect to route from which login button pressed

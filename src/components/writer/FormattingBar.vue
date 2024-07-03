@@ -83,7 +83,7 @@ const doAction = (action: number, button: string) => {
 
 const doFormatting = (ind: number) => {
 	document.activeElement.dataset.modf = 1
-	addFormatting(formatIndicies[ind], document.activeElement)
+	addFormatting(formatIndicies[ind], document.activeElement, false)
 }
 
 const hoveringIndex = ref(-1)

@@ -3,6 +3,7 @@ import {nextTick, onMounted, ref, watch } from 'vue';
 import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
 import parseMD from "../global/parseEditorFormatting";
+import { main } from '@popperjs/core';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -38,7 +39,7 @@ watch(props, () => {
 	if (props.editable) previewText.value = parseMD(text.value, true, props.currentSettings?.noMD)
 })
 
-const makeNextParagraph = () => {
+const makeNextParagraph = (e) => {
 	if (props.type.startsWith("heading") && e.key == "Enter") {
 		e.preventDefault()
 		emit('addParagraph', false)
@@ -60,6 +61,7 @@ const observeChanges = () => {
 }
 
 const setBoxHeight = () => {
+	if (!props.editable) return
 	mainText.value.style.height = `unset`;
 	mainText.value.style.height = `${mainText.value?.scrollHeight}px`;
 }
@@ -75,10 +77,10 @@ const focus = ref(false)
 			:is="editable ? (type.startsWith('heading') ? 'input' : 'textarea') : 'p'"
 			ref="mainText"
 			@vue:mounted="observeChanges(); setBoxHeight()"
-			@vue:updated="setBoxHeight()"
+			@change="setBoxHeight()"
+			@input="setBoxHeight()"
 			@focus="emit('hasFocus', mainText!); focus = true"
 			@keyup="text = $event.target.value"
-			@input="setBoxHeight"
 			@keyup.enter="makeNextParagraph"
 			:placeholder="placeholder"
 			v-html="editable ? '' : previewText"

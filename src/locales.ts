@@ -1,10 +1,9 @@
-import { nextTick, ref, watch } from "vue";
+import { nextTick, ref } from "vue";
 import { createI18n } from "vue-i18n";
 
 export const locales = ['cs-CZ', 'en-US']
 
 export const i18n = createI18n({
-  locale: locales[navigator.language != 'cs-CZ' | 0],
   legacy: false,
 });
 

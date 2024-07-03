@@ -214,9 +214,10 @@ export const isOnline = ref(true)
 window.addEventListener("offline", () => isOnline.value = false)
 window.addEventListener("online", () => isOnline.value = true)
 
-export function saveBackup(listName: string, hidden: boolean, review: boolean | ReviewList = false) {
+export function saveBackup(listName: string, hidden: boolean, review: boolean | ReviewList = false, draftID: number) {
   if (localStorage && SETTINGS.value.autosave) {
     let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(review !== false ? review : levelList.value), listHidden: hidden, listDate: Date.now() }
+    if (review) backup.backupID = draftID
 
     localStorage.setItem(`${review ? 'review' : 'list'}Backup`, JSON.stringify(backup))
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide, reactive, ref, watch } from "vue";
+import { computed, nextTick, provide, reactive, ref, watch } from "vue";
 import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
@@ -14,7 +14,7 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor } from "@/Reviews";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -61,6 +61,9 @@ watch(props, () => {
     if (!props.editing) {
         reviewData.value = DEFAULT_REVIEWDATA()
         modifyListBG(reviewData.value.pageBGcolor, true, true)
+        previewMode.value = true
+        disableEdits.value = false
+        reviewSave.value = {backupID: 0, lastSaved: 0}
     }
 })
 
@@ -227,7 +230,10 @@ const columnCommand = (index: number) => {
 
 const setFormatting = (format: string) => {
     switch (format) {
-        case "view": previewMode.value = !previewMode.value; break;
+        case "view":
+            document.activeElement?.blur()
+            nextTick(() => previewMode.value = !previewMode.value)
+            break;
     }
 }
 
@@ -339,6 +345,7 @@ const uploadReview = () => {
         else reviewUploadErrors(res.data[1])
 
         uploadInProgress.value = false
+        removeDraft(reviewSave.value.backupID)
     })
         .catch(() => {
             errorStamp.value = Date.now()
@@ -358,6 +365,7 @@ const removeReview = () => {
             errorText.value = i18n.global.t('reviews.removeFail')
         }
         uploadInProgress.value = false
+        removeDraft(reviewSave.value.backupID)
     }).catch(() => {
         errorStamp.value = Date.now()
         errorText.value = i18n.global.t('reviews.removeFail')
@@ -386,6 +394,7 @@ const updateReview = () => {
         else reviewUploadErrors(res.data[1])
 
         uploadInProgress.value = false
+        removeDraft(reviewSave.value.backupID)
     })
         .catch(() => {
             errorStamp.value = Date.now()
@@ -399,44 +408,58 @@ onUnmounted(() => {
 })
 
 const doBackup = (from?: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
-  if (reviewData.value.containers.length == 0) return // Do not save without any content
+  if (reviewData.value.containers.length == 0) return false // Do not save without any content
   if (!to) { // Do not backup when redirected from editor
-      saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value)
+      saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value, reviewSave.value.backupID)
+      return true
   }
+  return false
 }
-const backupData = ref({backupName: "", backupDate: 0, backupData: "", choseHidden: "0"})
+const backupData = ref({backupName: "", backupDate: 0, backupData: "", choseHidden: "0", backupID: 0})
 const loadBackup = () => {
-    reviewData.value = JSON.parse(backupData.value.backupData)
+    reviewSave.value.backupID = backupData.value.backupID
+    if (!drafts.value[reviewSave.value.backupID]) {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.draftNoLoad')
+        reviewSave.value.backupID = 0
+    }
+
+    reviewSave.value.lastSaved = drafts.value[backupData.value.backupID].saveDate
+    reviewData.value = drafts.value[backupData.value.backupID].reviewData
     modifyListBG(reviewData.value.pageBGcolor, false, true)
     removeBackup(true)
 }
 let autosaveInterval: number
 onMounted(() => {
+    if (SETTINGS.value.autosave) {
+        // Save when leaving the site
+    window.addEventListener("beforeunload", () => {
+        if (reviewSave.value.backupID) saveDraft(false, true)
+    })
+    onBeforeRouteLeave((from, to) => {
+        let res = doBackup(from, to)
+        if (res) saveDraft(false, true)
+    })
+
+    autosaveInterval = setInterval(() => {
+        if (!SETTINGS.value.autosave) // If setting changes, do not autosave
+            return clearInterval(autosaveInterval)
+
+        saveDraft(false, true)
+      
+    }, SETTINGS.value.autosave*1000)
+}
+
   if (localStorage) {
     let backup = localStorage.getItem("reviewBackup")
     if (backup) {
       let backupParsed: LevelBackup = JSON.parse(backup)
+      if (!backupParsed?.backupID) return 
       backupData.value.backupName = backupParsed.listName
       backupData.value.backupDate = new Date(backupParsed.listDate).toLocaleDateString()
-      backupData.value.backupData = <any>backupParsed.levelData
-      backupData.value.choseHidden = backupParsed.listHidden
+      backupData.value.backupID = backupParsed.backupID
     }
   }
-
-  if (SETTINGS.value.autosave) {
-    // Save when leaving the site
-    window.addEventListener("beforeunload", doBackup)
-    onBeforeRouteLeave(doBackup)
-
-    autosaveInterval = setInterval(() => {
-      if (!SETTINGS.value.autosave) { // If setting changes, do not autosave
-        clearInterval(autosaveInterval)
-        return
-      }
-    }, SETTINGS.value.autosave*1000)
-
-    doBackup()
-}
 })
 
 const preUpload = ref(false)
@@ -486,6 +509,59 @@ const exitPreview = () => {
     openDialogs.drafts = true
 
 }
+
+const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
+const drafts = ref<object>(JSON.parse(localStorage.getItem("reviewDrafts")!) ?? {})
+const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
+    if (!reviewData.value.containers.length) return
+    let now = Date.now()
+    let backupID;
+    let preview = getReviewPreview()
+    if (reviewSave.value.backupID == 0 || saveAs) {
+        let saveAsName = reviewData.value.reviewName || i18n.global.t('editor.unnamedReview')
+        if (saveAs && reviewSave.value.backupID != 0) {
+            let i = 1
+            funnySaveAsMessages.forEach(x => {
+                if (drafts.value[reviewSave.value.backupID].name.includes(x)) saveAsName = " " + funnySaveAsMessages[Math.min(i, funnySaveAsMessages.length-1)]
+                i += 1
+            })
+            if (saveAsName == "") saveAsName = " " + funnySaveAsMessages[0]
+        }
+
+        drafts.value[now] = {
+            reviewData: reviewData.value,
+            name: saveAsName,
+            createDate: now,
+            saveDate: now,
+            wordCount: getWordCount(),
+            previewTitle: preview[0],
+            previewParagraph: preview[1]
+        }
+        backupID = now
+    }
+    else {
+        drafts.value[reviewSave.value.backupID].reviewData = reviewData.value
+        drafts.value[reviewSave.value.backupID].saveDate = now
+        drafts.value[reviewSave.value.backupID].wordCount = getWordCount()
+        drafts.value[reviewSave.value.backupID].previewTitle = preview[0]
+        drafts.value[reviewSave.value.backupID].previewParagraph = preview[1]
+        backupID = reviewSave.value.backupID
+    }
+    localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
+    reviewSave.value = {backupID: backupID, lastSaved: now}
+    if (leavingPage) doBackup()
+}
+
+const removeDraft = (key: number) => {
+    if (!drafts.value[key]) return
+
+    if (key == reviewSave.value.backupID) reviewSave.value = {backupID: 0, lastSaved: 0}
+    delete drafts.value[key]
+    localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
+}
+
+const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
+setInterval(() => burstTimer.value = Date.now(), 5000)
 
 </script>
 
@@ -562,7 +638,7 @@ const exitPreview = () => {
         </DialogVue>
         
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')" :width="dialog.medium">
-            <ReviewDrafts @saved="reviewSave = $event" :in-use-i-d="reviewSave.backupID" ref="draftPopup" @load="loadDraft" @preview="previewDraft" />
+            <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
         </DialogVue>
         
         <Header
@@ -656,12 +732,14 @@ const exitPreview = () => {
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span class="text-white">{{ $t('reviews.addParagraph') }}</span>
                 </button>
-                <p v-if="reviewSave.backupID == 0 && !disableEdits" class="mt-2 text-center">
-                    <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span @click="draftPopup?.saveDraft" class="underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
-                </p>
-                <p v-else-if="!disableEdits" class="mt-2 italic text-center">
-                    <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: {{ prettyDate((Date.now() - reviewSave.lastSaved)/1000) }}</span> <span @click="draftPopup?.saveDraft" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
-                </p>
+                <div class="text-xs" v-if="!disableEdits && reviewData.containers.length">
+                    <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">
+                        <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
+                    </p>
+                    <p v-else class="mt-2 italic text-center">
+                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: {{ prettyDate((burstTimer - reviewSave.lastSaved)/1000) }}</span> <span @click="saveDraft(false)" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
+                    </p>
+                </div>
             </section>
         </section>
 

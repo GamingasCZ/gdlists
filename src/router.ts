@@ -1,9 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { setLanguage } from "./locales";
-import { SETTINGS } from "./siteSettings";
-import { useI18n } from "vue-i18n";
-import { nextTick, ref } from "vue";
-import axios from "axios";
+import { ref } from "vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

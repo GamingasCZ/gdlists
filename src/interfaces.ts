@@ -157,6 +157,7 @@ export interface LevelBackup {
   levelData: LevelList
   listHidden: '0' | '1'
   listDate: number
+  backupID?: number
 }
 
 export interface LevelList {

@@ -179,7 +179,7 @@
     "sepList": "Zadej oddělená ID levelů (např. 96000699, 29107242, 128)",
     "loginToCreateReviews": "Pro vytvoření recenze se prosím přihlaš!",
     "cookDisabled": "Nemáš povolené cookies, můžeš jen procházet seznamy!",
-    "reviewInProgress": "Máš tu rozpracovanou recenzi!",
+    "reviewInProgress": "Chcete načíst poslední rozepsaný koncept?",
     "unnamedReview": "Bezejmenná recenze",
     "difficulties": "Obtížnosti",
     "ratings": "Ratingy",
@@ -671,7 +671,13 @@
     "copy4": "(nespamuj D:)",
     "copy5": "(ježišmarja!!)",
     "copy6": "(kolik jich potřebuješ)",
-    "justSaved": "Uloženo"
+    "justSaved": "Uloženo",
+    "draftHelp1": "Tady jsou tvé nedopsané recenze!",
+    "draftHelp2": "Můžeš si tu své recenze ukládat a kdykoliv se k nim vrátit.",
+    "draftHelp3": "Vše se ukládá lokálně. Zobrazí se tedy jen na tomto zařízení a když smažeš cookies, smažou se i tyto recenze. Ukládat můžeš i při výpadku internetu nebo serverů.",
+    "draftHelp4": "Po nahrání se koncept smaže.",
+    "writeOn": "Načíst",
+    "draftNoLoad": "Nepodařilo se načíst koncept!"
   },
   "review": {
     "columnSetting": "{0} sloupec",
