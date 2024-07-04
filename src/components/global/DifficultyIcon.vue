@@ -26,6 +26,23 @@ function draw() {
     if (visibleCtx == undefined) return
     visibleCtx.reset()
 
+    const drawFace = () => new Promise((res, _) => {
+        // Difficulty face
+        let diff = new Image()
+        diff.src = import.meta.env.BASE_URL + `/faces/${props.difficulty}.webp`
+        diff.onload = () => {
+            if (props.rating)
+                if (props.difficulty > 6 && props.difficulty < 11)
+                    placeImage(diff, [0.8 * diffScaleOffsets[props.difficulty - 6], 0.8 * diffScaleOffsets[props.difficulty - 6]], [0, 3]) // Rated - make room for rating
+                else
+                    placeImage(diff, [0.8, 0.8], [0, 3]) // Rated - make room for rating
+            else
+                placeImage(diff, [1, 1], [0,0]) // Unrated - bigger
+            res(true)
+        }
+
+    })
+
     if (props.rating > 1) {
         let rating = new Image()
         rating.src = import.meta.env.BASE_URL + `/faces/${['star', 'featured', 'epic', 'legendary', 'mythic'][props.rating - 1]}.webp`
@@ -37,32 +54,22 @@ function draw() {
                     placeImage(rating, [1.5, 1.5], [-1,0]); break;
                 default:
                     placeImage(rating, [1.6, 1.6], [0,0]); break;
-            }
+                }
+            drawFace()
         }
     }
-
-    // Difficulty face
-    let diff = new Image()
-    diff.src = import.meta.env.BASE_URL + `/faces/${props.difficulty}.webp`
-    diff.onload = () => {
-        if (props.rating)
-            if (props.difficulty > 6 && props.difficulty < 11)
-                placeImage(diff, [0.8 * diffScaleOffsets[props.difficulty - 6], 0.8 * diffScaleOffsets[props.difficulty - 6]], [0, 3]) // Rated - make room for rating
-            else
-                placeImage(diff, [0.8, 0.8], [0, 3]) // Rated - make room for rating
-        else
-            placeImage(diff, [1, 1], [0,0]) // Unrated - bigger
-    }
-
     // Star rate
-    if (props.rating == 1) {
-        let rating = new Image()
-        rating.src = import.meta.env.BASE_URL + `/faces/star.webp`
-        rating.onload = () => {
-            placeImage(rating, [1.2, 1.2], [WIDTH/4,HEIGHT/4])
-        }
+    else if (props.rating == 1) {
+        drawFace().then(() => {
+            let rating = new Image()
+            rating.src = import.meta.env.BASE_URL + `/faces/star.webp`
+            rating.onload = () => {
+                placeImage(rating, [1.2, 1.2], [WIDTH/4,HEIGHT/4])
+            }
+        })
         
     }
+    else drawFace()
 }
 
 onMounted(draw)
