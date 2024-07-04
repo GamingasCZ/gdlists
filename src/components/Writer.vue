@@ -111,6 +111,7 @@ provide("levelHashes", {levelHashes, updateHashes})
 
 provide("settingsTitles", CONTAINERS)
 
+const containerLastAdded = ref(0)
 const addContainer = (key: string, addTo?: number) => {
     // Count of all components
     let contAm = 0
@@ -172,6 +173,7 @@ const addContainer = (key: string, addTo?: number) => {
 
         }
     }
+    containerLastAdded.value = Date.now()
 }
 
 const removeContainer = (index: number) => {
@@ -692,7 +694,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
                 
                 <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
-                <div v-memo="[reviewData.containers, selectedContainer, selectedNestContainer]">
+                <div v-memo="[containerLastAdded, selectedContainer, selectedNestContainer]">
                     <DataContainer
                         v-for="(container, index) in reviewData.containers"
                         v-bind="CONTAINERS[container.type]"
