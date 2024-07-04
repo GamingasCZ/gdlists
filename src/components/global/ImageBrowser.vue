@@ -117,6 +117,7 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
             method: 'post',
             url: import.meta.env.VITE_API + "/images.php",
             data: data,
+            headers: {"Content-Type": 'image/png'},
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         }).then(res => {

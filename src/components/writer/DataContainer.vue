@@ -72,24 +72,26 @@ const focus = ref(false)
 
 <template>
 	<div :data-type="type" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer outline-[2px] min-h-4 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
-		<component
-			v-if="canEditText"
-			:is="editable ? (type.startsWith('heading') ? 'input' : 'textarea') : 'p'"
+		<textarea
+			v-if="canEditText && editable"
 			ref="mainText"
 			@vue:mounted="observeChanges(); setBoxHeight()"
-			@change="setBoxHeight()"
 			@input="setBoxHeight()"
 			@focus="emit('hasFocus', mainText!); focus = true"
-			@keyup="text = $event.target.value"
+			v-model="text"
 			@keyup.enter="makeNextParagraph"
 			:placeholder="placeholder"
-			v-html="editable ? '' : previewText"
-			:value="text"
 			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
 			data-modf="0"
 			:style="{textAlign: 'inherit', color: 'inherit'}"
 			:class="childStyling || []">
-		</component>
+		</textarea>
+		<p v-else-if="canEditText && !editable"
+			v-html="previewText"
+			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
+			:style="{textAlign: 'inherit', color: 'inherit'}"
+			:class="childStyling || []"></p>
+			
 		<slot></slot>
 		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border max-sm:right-0">
 			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>

@@ -62,6 +62,7 @@ watch(props, () => {
         reviewData.value = DEFAULT_REVIEWDATA()
         modifyListBG(reviewData.value.pageBGcolor, true, true)
         previewMode.value = true
+        selectedContainer.value[0] = -1
         disableEdits.value = false
         reviewSave.value = {backupID: 0, lastSaved: 0}
     }
@@ -445,7 +446,7 @@ onMounted(() => {
         if (!SETTINGS.value.autosave) // If setting changes, do not autosave
             return clearInterval(autosaveInterval)
 
-        saveDraft(false, true)
+        saveDraft(false, false)
       
     }, SETTINGS.value.autosave*1000)
 }
@@ -540,7 +541,7 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
         backupID = now
     }
     else {
-        drafts.value[reviewSave.value.backupID].reviewData = reviewData.value
+        drafts.value[reviewSave.value.backupID].reviewData = reviewData.value,
         drafts.value[reviewSave.value.backupID].saveDate = now
         drafts.value[reviewSave.value.backupID].wordCount = getWordCount()
         drafts.value[reviewSave.value.backupID].previewTitle = preview[0]
@@ -562,6 +563,7 @@ const removeDraft = (key: number) => {
 
 const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
 setInterval(() => burstTimer.value = Date.now(), 5000)
+const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.lastSaved)/1000))
 
 </script>
 
@@ -681,53 +683,53 @@ setInterval(() => burstTimer.value = Date.now(), 5000)
 
             <!-- Back from draft preview -->
             <div v-if="disableEdits" @click="exitPreview" class="flex fixed top-14 left-1/2 z-40 justify-between items-center p-2 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
-                <span class="text-xl">Náhled recenze</span>
+                <span class="text-xl">{{ $t('reviews.preview') }}</span>
                 <button class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg" class="w-6" alt=""> Vrátit se</button>
             </div>
 
             <!-- Editor -->
-            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
                 
                 <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
-
-                <DataContainer
-                    v-for="(container, index) in reviewData.containers"
-                    v-bind="CONTAINERS[container.type]"
-                    ref="dataContainers"
-                    @remove-container="removeContainer(index)"
-                    @move-container="moveContainer(index, $event)"
-                    @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
-                    @text-modified="container.data = $event"
-                    @settings-button="buttonState = [$event, selectedContainer[0]]"
-                    @add-paragraph="moveToParagraph(index)"
-                    v-model="container.data"
-                    :type="container.type"
-                    :current-settings="container.settings"
-                    :class="[CONTAINERS[container.type].styling ?? '']"
-                    :style="{textAlign: container.align}"
-                    :key="container.id"
-                    :focused="previewMode && selectedContainer[0] == index"
-                    :editable="previewMode"
-                    :text="container.data"
-                >
-                    <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
-                        <component
-                            v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                            :is="elements"
-                            v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                            @clear-button="buttonState[0] = ''"
-                            @remove-subcontainer="container.extraComponents -= 1"
-                            @remove="removeContainer(index)"
-                            :button-state="buttonState"
-                            :settings="container.settings"
-                            :index="index"
-                            :sub-index="subIndex"
-                            :key="container.id"
-                            :editable="previewMode"
-                        />
-                    </div>
-                </DataContainer>
+                <div v-memo="[reviewData.containers, selectedContainer, selectedNestContainer]">
+                    <DataContainer
+                        v-for="(container, index) in reviewData.containers"
+                        v-bind="CONTAINERS[container.type]"
+                        ref="dataContainers"
+                        @remove-container="removeContainer(index)"
+                        @move-container="moveContainer(index, $event)"
+                        @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
+                        @settings-button="buttonState = [$event, selectedContainer[0]]"
+                        @add-paragraph="moveToParagraph(index)"
+                        v-model="container.data"
+                        :type="container.type"
+                        :current-settings="container.settings"
+                        :class="[CONTAINERS[container.type].styling ?? '']"
+                        :style="{textAlign: container.align}"
+                        :key="container.id"
+                        :focused="previewMode && selectedContainer[0] == index"
+                        :editable="previewMode"
+                        :text="container.data"
+                    >
+                        <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
+                            <component
+                                v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
+                                :is="elements"
+                                v-bind="CONTAINERS[container.type].componentProps ?? {}"
+                                @clear-button="buttonState[0] = ''"
+                                @remove-subcontainer="container.extraComponents -= 1"
+                                @remove="removeContainer(index)"
+                                :button-state="buttonState"
+                                :settings="container.settings"
+                                :index="index"
+                                :sub-index="subIndex"
+                                :key="container.id"
+                                :editable="previewMode"
+                            />
+                        </div>
+                    </DataContainer>
+                </div>
                 <button @click="addContainer('default')" v-show="previewMode && !disableEdits" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span class="text-white">{{ $t('reviews.addParagraph') }}</span>
@@ -737,7 +739,7 @@ setInterval(() => burstTimer.value = Date.now(), 5000)
                         <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
                     </p>
                     <p v-else class="mt-2 italic text-center">
-                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: {{ prettyDate((burstTimer - reviewSave.lastSaved)/1000) }}</span> <span @click="saveDraft(false)" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
+                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: {{ pretty }}</span> <span @click="saveDraft(false)" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
                     </p>
                 </div>
             </section>
