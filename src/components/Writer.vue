@@ -659,7 +659,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
         
         <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
-            <div class="pb-16 pl-10 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md from-slate-400" :class="{'pointer-events-none opacity-20': disableEdits}">
+            <div class="pb-16 pl-2 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md sm:pl-10 from-slate-400" :class="{'pointer-events-none opacity-20': disableEdits}">
                 <input v-model="reviewData.reviewName" type="text" :maxlength="40" :disabled="editing" :placeholder="$t('reviews.reviewName')" class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true" class="flex gap-2 items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
@@ -668,7 +668,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
                     <input type="text" v-once :maxlength="60" v-model="reviewData.tagline" autofocus class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400" :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
                     <button @click="reviewData.tagline = ''; tagline = false">
-                        <img src="@/images/trash.svg" alt="" class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md group-focus-within:block button">
+                        <img src="@/images/trash.svg" alt="" class="hidden p-1 bg-black bg-opacity-40 rounded-md min-w-6 group-focus-within:block button">
                     </button>
                 </div>
             </div>

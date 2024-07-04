@@ -76,7 +76,7 @@ defineProps<{
       </div>
 
       <div class="p-2 mt-8 bg-black bg-opacity-40 rounded-md bg-blend-darken bg-pr-0 center" :style="{backgroundImage: `url(${pre}/userContent/${uid}/${reviewData.thumbnail[0]}.webp)`}">
-        <div class="flex justify-between items-center w-full">
+        <div class="flex gap-y-2 justify-between items-center w-full max-sm:flex-col">
           <div>
             <p class="text-xl leading-none">{{ $t('reviews.thumbnail') }}</p>
             <p class="text-sm opacity-40">{{ $t('reviews.thumbnailHelp') }}</p>
@@ -96,7 +96,7 @@ defineProps<{
         </div>
       </div>
       <div class="p-2 mt-2 bg-black bg-opacity-40 bg-center rounded-md bg-blend-darken" :style="{backgroundImage: `url(${reviewData.titleImg[0]})`}">
-        <div class="flex justify-between w-full">
+        <div class="flex gap-y-2 justify-between items-center w-full max-sm:flex-col">
           <span class="text-xl">{{ $t('reviews.bgImage') }}</span>
           <div class="flex gap-2">
             <button @click="openDialogs.bgPreview = !openDialogs.bgPreview" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
