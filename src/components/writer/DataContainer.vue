@@ -56,8 +56,9 @@ const mutation = (mutationList: MutationRecord[]) => {
 
 const textChanges = new MutationObserver(mutation)
 const observeChanges = () => {
-	if (props.editable)
+	if (props.editable) {
 		textChanges.observe(mainText.value!, {attributes: true, attributeFilter: ['data-modf']})
+	}
 }
 
 const setBoxHeight = () => {
@@ -75,7 +76,7 @@ const focus = ref(false)
 		<textarea
 			v-if="canEditText && editable"
 			ref="mainText"
-			@vue:mounted="observeChanges(); setBoxHeight()"
+			@vue:mounted="observeChanges(); $nextTick(setBoxHeight)"
 			@input="setBoxHeight()"
 			@focus="emit('hasFocus', mainText!); focus = true"
 			v-model="text"
