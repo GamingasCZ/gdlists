@@ -620,7 +620,7 @@ setInterval(() => burstTimer.value = Date.now(), 5000)
 
         
         
-        <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
+        <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false" :width="dialog.large">
             <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
         </DialogVue>
         

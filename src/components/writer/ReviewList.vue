@@ -48,7 +48,7 @@ const dialogs = inject("openedDialogs")
 <template>
     <ContainerHelp v-if="!settings.level" icon="showList" :help-content="$t('reviews.listShowcase')">
         <button @click="dialogs.lists = [true, index]" class="flex gap-2 items-center p-2 mx-auto bg-black bg-opacity-40 rounded-md button">
-            <img src="@/images/browseMobHeader.svg" alt="" class="w-8">
+            <img src="@/images/view.svg" alt="" class="w-8">
             <span>{{ $t('reviews.pickList') }}</span>
         </button>
     </ContainerHelp>

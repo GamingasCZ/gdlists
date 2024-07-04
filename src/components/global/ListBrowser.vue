@@ -21,6 +21,7 @@ const props = defineProps<{
   onlineSubtype: string
   isLoggedIn: boolean
   hideSearch: boolean
+  hideTabs: boolean
   commentID: {type: 'list' | 'review', objectID: number}
   refreshButton: boolean
   component: object
@@ -271,9 +272,9 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
 </script>
 
 <template>
-  <section class="mx-auto mt-3 w-[80rem] max-w-[95vw] text-white">
+  <section class="mx-auto w-full max-w-[80rem] text-white">
     <main>
-      <div class="flex justify-between items-center max-sm:flex-col">
+      <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
