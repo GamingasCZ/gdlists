@@ -50,6 +50,7 @@ if (props.editing) {
             isNowHidden = res.data.hidden != 0
             reviewData.value = res.data.data
             modifyListBG(reviewData.value.pageBGcolor, false, true)
+            containerLastAdded.value = Date.now()
         }
         else {
             openDialogs.editError = true
@@ -490,6 +491,7 @@ const loadDraft = (newData: {data: ReviewList, id: number, saved: number}) => {
     reviewSave.value.backupID = newData.id
     reviewSave.value.lastSaved = newData.saved
     modifyListBG(newData.data.pageBGcolor, false, true)
+    containerLastAdded.value = Date.now()
 }
 
 let previewHold: ReviewList
