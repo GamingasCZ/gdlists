@@ -82,16 +82,16 @@ const noClickWhenEditing = (e: Event) => {
 
     <figure v-show="imageLoading == 0" class="max-w-full">
         <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: `${imageScale}px`}">
-            <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
+            <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
                 <img
                     ref="image"
-                    class="w-full text-xl text-white rounded-md border-transparent pointer-events-none min-w-24"
+                    class="w-full text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
                     :src="settings.url"
                     :alt="settings.alt"
                     :title="settings.alt"
                 >
             </Resizer>
-            <a target="_blank" @click="noClickWhenEditing" :href="settings.link" v-if="settings.link" class="flex absolute top-2 right-2 gap-2 items-center px-2 text-black bg-white bg-opacity-80 rounded-full opacity-0 backdrop-blur-sm transition-opacity duration-75 group-hover:opacity-100">
+            <a target="_blank" @click="noClickWhenEditing" :href="settings.link" v-if="settings.link" class="flex absolute top-2 right-2 gap-2 items-center px-2 w-max text-black bg-white bg-opacity-80 rounded-full opacity-0 backdrop-blur-sm transition-opacity duration-75 group-hover:opacity-100">
                 <img src="@/images/link.svg" class="w-4 invert" alt="">
                 {{ linkHost }}
             </a>
