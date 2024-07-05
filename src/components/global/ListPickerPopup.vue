@@ -27,11 +27,11 @@ const switchTab = (newTab: number) => {
 const contentType = ref(0)
 
 const dialogs = inject("openedDialogs")
-const pickList = (listData: ListFetchResponse, creator: string) => {
-    listData.creator = creator
-    listData.added = Date.now()
-    props.data[dialogs.lists[1]].settings.level = listData
-    emit('closePopup')
+const pickList = () => {
+    console.log("aaa")
+    props.data[dialogs.lists[1]].settings.level = null
+    switchTab(2)
+    // emit('closePopup')
 }
 
 </script>
@@ -41,8 +41,8 @@ const pickList = (listData: ListFetchResponse, creator: string) => {
         <input autofocus type="text" v-model="query" :placeholder="$t('other.search')" class="px-2 py-1 my-3 bg-white bg-opacity-10 rounded-md grow">
         <select v-model="contentType">
             <option :value="0">{{ $t('other.all') }}</option>
-            <option :value="1">Moje</option>
-            <option :value="2">Soukromé</option>
+            <option :value="1">{{ $t('other.mine') }}</option>
+            <option :value="2">{{ $t('other.private') }}</option>
         </select>
 
     </div>
@@ -78,8 +78,9 @@ const pickList = (listData: ListFetchResponse, creator: string) => {
                 :search="query"
                 :online-type="['', 'user', 'hidden'][contentType]"
                 :online-subtype="['lists', 'reviews', 'levels'][tab]"
-                hide-search hide-tabs is-logged-in
+                hide-search hide-tabs is-logged-in picking
                 @switch-browser="contentType = $event"
+                @selected-post-option="pickList()"
             />
         </div>
     </div>

@@ -336,7 +336,11 @@
     "info": "Informace",
     "saveAs": "Uložit jako",
     "inUse": "Používané",
-    "words": "Beze slov | {n} slovo | {n} slov"
+    "words": "Beze slov | {n} slovo | {n} slov",
+    "prevP": "Předchozí strana",
+    "nextP": "Další strana",
+    "private": "Soukromé",
+    "mine": "Moje"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

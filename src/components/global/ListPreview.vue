@@ -20,13 +20,13 @@ const props = defineProps<{
   isPinned: boolean
 
   userArray: ListCreatorInfo[];
-  disableLink?: boolean
+  disableLink?: boolean | 2
 }>();
 
 
 const listColor = ref<Color>(makeColorFromString(props.name));
 
-const emit = defineEmits(['unpinList', 'selectedLink'])
+const emit = defineEmits(['unpinList', 'selectedLink', 'clickOption'])
 
 function getUsername() {
   let listCreator: string = "";
@@ -61,26 +61,33 @@ const unpinList = () => {
 const creatorName = computed(() => props.creator?.length ? props.creator : getUsername())
 
 const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? props.id : props.hidden}`
+const listOptsOpen = ref(false)
+const clickList = () => {
+  if (props.disableLink == 2) listOptsOpen.value = !listOptsOpen.value
+  else emit('selectedLink', creatorName.value)
+}
+
 </script>
 
 <template>
   <component
     :is="disableLink ? 'button' : 'RouterLink'"
     :to="postLink"
-    class="flex font-[poppins] w-5/6 max-w-6xl cursor-pointer items-center gap-3 relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex flex-col font-[poppins] w-5/6 max-w-6xl cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
     }"
     :class="{'!border-dotted !border-white !border-opacity-40': hidden != '0', 'border-dashed !border-black !border-opacity-70': props.url}"
-    @click="emit('selectedLink', creatorName)"
+    @click="clickList"
   >
+  <div class="flex gap-3 items-center">
     <section v-if="rate_ratio" class="flex flex-col items-center text-xs">
       <img src="../../images/genericRate.svg" alt="" class="w-3.5" />{{
         rate_ratio
       }}
     </section>
-
+  
     <section class="flex flex-col gap-1 items-center">
       <div v-if="views" class="flex gap-1 text-xs">
         <img src="../../images/view.svg" alt="" class="w-4" />{{ views }}
@@ -95,17 +102,24 @@ const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? pr
         }}
       </div>
     </section>
-
+  
     <section class="flex flex-col items-start">
       <h1 class="text-lg font-bold">{{ name }}</h1>
       <p class="text-xs">- {{ creatorName }} -</p>
     </section>
-
+  
     <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-sm button">
       <img src="@/images/unpin.svg" alt="">
     </button>
-
-    <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
+  
+      <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
+  </div>
+  <div v-if="listOptsOpen" class="flex gap-2 justify-evenly my-2">
+    <button @click.stop="emit('clickOption', 0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+      <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">Vybrat seznam</button>
+    <button @click.stop="emit('clickOption', 1)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+      <img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">Zobrazit levely</button>
+  </div>
   </component>
 </template>
 3

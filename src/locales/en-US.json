@@ -398,7 +398,11 @@
     "info": "Info",
     "saveAs": "Save As",
     "inUse": "In Use",
-    "words": "No words | {n} word | {n} words"
+    "words": "No words | {n} word | {n} words",
+    "prevP": "Previous Page",
+    "nextP": "Next Page",
+    "private": "Private",
+    "mine": "Uploaded"
   },
   "settingsMenu": {
     "asOff": "Off",

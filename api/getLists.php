@@ -217,7 +217,7 @@ if (count($_GET) == 1) {
       GROUP BY `name`
       ORDER BY hidden DESC, id DESC
       LIMIT %s
-      OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+      OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $addReq, clamp(intval($_GET["fetchAmount"]), 2, 50), $dbSlice);
     $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
   }
   else {
