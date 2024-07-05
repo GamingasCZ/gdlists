@@ -35,9 +35,9 @@ onMounted(() => {
 	if (!props.editable) previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
 })
 
-watch(props, () => {
+watch(props, nextTick(() => {
 	if (props.editable) previewText.value = parseMD(text.value, true, props.currentSettings?.noMD)
-})
+}))
 
 const makeNextParagraph = (e) => {
 	if (props.type.startsWith("heading") && e.key == "Enter") {
