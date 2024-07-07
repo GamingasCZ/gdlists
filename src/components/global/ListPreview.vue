@@ -26,7 +26,12 @@ const props = defineProps<{
 
 const listColor = ref<Color>(makeColorFromString(props.name));
 
-const emit = defineEmits(['unpinList', 'selectedLink', 'clickOption'])
+const emit = defineEmits<{
+  (e: 'unpinList'): void
+  (e: 'selectedLink', creator: string): void
+  (e: 'clickedOption', id: number): void
+  (e: 'selected'): void
+}>()
 
 function getUsername() {
   let listCreator: string = "";
@@ -61,9 +66,8 @@ const unpinList = () => {
 const creatorName = computed(() => props.creator?.length ? props.creator : getUsername())
 
 const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? props.id : props.hidden}`
-const listOptsOpen = ref(false)
 const clickList = () => {
-  if (props.disableLink == 2) listOptsOpen.value = !listOptsOpen.value
+  if (props.disableLink) emit('selected')
   else emit('selectedLink', creatorName.value)
 }
 
@@ -115,9 +119,9 @@ const clickList = () => {
       <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
   </div>
   <div v-if="listOptsOpen" class="flex gap-2 justify-evenly my-2">
-    <button @click.stop="emit('clickOption', 0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+    <button @click.stop="emit('clickedOption', 0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
       <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">Vybrat seznam</button>
-    <button @click.stop="emit('clickOption', 1)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+    <button @click.stop="emit('clickedOption', 1)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
       <img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">Zobrazit levely</button>
   </div>
   </component>

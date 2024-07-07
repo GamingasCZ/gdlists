@@ -397,7 +397,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
 
         <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
           :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove
-          :disable-link="picking ? 2 : false" :click-option="emit('selectedPostOption', $event)"
+          :disable-link="picking ? picking + (picking == index | 0) : false" @clicked-option="emit('selectedPostOption', $event)" @selected="picking = index"
           :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         </main>

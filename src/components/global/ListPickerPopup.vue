@@ -28,7 +28,6 @@ const contentType = ref(0)
 
 const dialogs = inject("openedDialogs")
 const pickList = () => {
-    console.log("aaa")
     props.data[dialogs.lists[1]].settings.level = null
     switchTab(2)
     // emit('closePopup')
