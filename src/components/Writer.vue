@@ -696,7 +696,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
                 
                 <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
-                <div v-memo="[containerLastAdded, selectedContainer, selectedNestContainer]">
+                <div v-memo="[previewMode, containerLastAdded, selectedContainer, selectedNestContainer]">
                     <DataContainer
                         v-for="(container, index) in reviewData.containers"
                         v-bind="CONTAINERS[container.type]"
