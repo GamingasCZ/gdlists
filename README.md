@@ -27,8 +27,13 @@ Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and mo
 * List tags
 
 # Screenshots
-![homepage](https://github.com/GamingasCZ/gdlists/assets/51487573/01e6d86e-9750-4fde-a066-af902afb1720)
-![editor](https://github.com/GamingasCZ/gdlists/assets/51487573/79c956fc-2a3a-4bc1-8c6d-2bbd8d18a648)
+## Homepage
+![homepage](https://github.com/GamingasCZ/gdlists/assets/51487573/e47b09b4-7238-443c-a317-bf65bd413170)
+## Review Writer
+![review editor](https://github.com/GamingasCZ/gdlists/assets/51487573/e30bd33c-5735-4f2d-b03c-69e4b51f95a2)
+## List Editor
+![list editor](https://github.com/GamingasCZ/gdlists/assets/51487573/463f0220-dff8-4d4f-8f87-ccf3354a85fc)
+
 
 
 ## The original GD Lists
