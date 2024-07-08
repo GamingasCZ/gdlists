@@ -4,7 +4,7 @@ Welcome to the brand new, **rewritten from the ground up**, GD Lists, a website 
 
 Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and more scalable. Any contributions very welcome!
 
-**Check out the site here:** https://gamingas.wz.cz/gdlists
+**Check out the site here:** https://gamingas.cz/gdlists
 ## Features
 * An easy to use editor for making **lists** and writing **reviews**
 * Tons of customizations for spicing up lists
