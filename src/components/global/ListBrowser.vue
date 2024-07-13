@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab } from "@/interfaces";
+import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
@@ -11,7 +11,7 @@ import { onUnmounted } from "vue";
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden" | "collabs"): void;
   (e: "refreshedBrowser", objectAmount: number): void;
-  (e: "selectedPostOption", opt: number): void;
+  (e: "selectedPostOption", data: [selectedList, string]): void;
 }>();
 
 const props = defineProps<{
@@ -26,7 +26,7 @@ const props = defineProps<{
   commentID: {type: 'list' | 'review', objectID: number}
   refreshButton: boolean
   component: object
-  picking: boolean
+  picking: false | 1 | 2
 }>()
 
 // Page title
@@ -49,6 +49,7 @@ const listScroll = () =>
 const loadFailed = ref<boolean>(false);
 const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
+const unrolled = ref<boolean>(-1)
 
 const LISTS_ON_PAGE = 8;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
@@ -267,6 +268,8 @@ onMounted(() => {
 watch(props, (newBrowser) => {
   LISTS.value = []
   PAGE.value = 0
+  unrolled.value = -1
+  SEARCH_QUERY.value = props.search
   filtered = undefined
   refreshBrowser();
 });
@@ -396,8 +399,8 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
         </div>
 
         <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove
-          :disable-link="picking ? picking + (picking == index | 0) : false" @clicked-option="emit('selectedPostOption', $event)" @selected="picking = index"
+          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove :unrolled-options="unrolled == index"
+          :disable-link="picking" @clicked-option="emit('selectedPostOption', [$event, list.name])" @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         </main>

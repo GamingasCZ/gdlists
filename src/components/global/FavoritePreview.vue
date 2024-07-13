@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { makeColorFromString } from "@/Editor";
+import type { selectedList } from "@/interfaces";
 import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
-const emit = defineEmits(["removeLevel"]);
+const emit = defineEmits<{
+  (e: 'removeLevel', index: number): void
+  (e: 'clickedOption', data: selectedList): void
+}>()
 const props = defineProps<{
   levelName: string
   creator: string
@@ -20,6 +24,7 @@ const props = defineProps<{
   inLists: number
 
   userArray: string
+  disableLink?: boolean | 2
 }>()
 
 const listColor = ref<Color>(chroma(props.levelColor! ?? makeColorFromString(props.levelName)));
@@ -41,16 +46,22 @@ const getGradient = () =>
 
 const uploadDate = reactive(new Date(props.timeAdded!));
 const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
-</script>1
+
+const clickLevel = () => {
+  emit('clickedOption', {option: 0, postID: props.levelID, postType: 2})
+}
+</script>
 
 <template>
-  <RouterLink
+  <component
+    :is="disableLink ? 'button' : 'RouterLink'"
     :to="`/${listID!}${goto}`"
-    class="flex w-5/6 max-w-6xl cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex text-left w-[40rem] max-w-full cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(),
       borderColor: listColor.darken(2).hex(),
     }"
+    @click="clickLevel"
   >
     <section class="flex flex-col gap-1 items-center">
       <div
@@ -86,6 +97,5 @@ const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
     >
       <img src="@/images/trash.svg" class="w-7" alt="" />
     </button>
-  </RouterLink>
+  </component>
 </template>
-3

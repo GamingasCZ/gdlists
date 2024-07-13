@@ -340,7 +340,12 @@
     "prevP": "Předchozí strana",
     "nextP": "Další strana",
     "private": "Soukromé",
-    "mine": "Moje"
+    "mine": "Moje",
+    "pickLevels": "Zobrazit levely",
+    "pickList": "Vybrat seznam",
+    "pickReview": "Vybrat recenzi",
+    "randomLevel": "Náhodný level",
+    "searchLevels": "Hledat levely"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -637,7 +642,7 @@
     "pick": "Vybrat obrázek",
     "pickShowcase": "Vyber level, který chceš zobrazit.",
     "noLevelsAddedYet": "Zatím jsi nepřidal žádné levely!",
-    "listShowcase": "Vyber příspěvek, který chceš zobrazit",
+    "listShowcase": "Klikni pro výběr příspěvku",
     "editColumn": "Upravit sloupec",
     "addColumn": "Přidat sloupec",
     "pickUsers": "Klikni pro přidání uživatelů",
@@ -681,7 +686,13 @@
     "draftHelp3": "Vše se ukládá lokálně. Zobrazí se tedy jen na tomto zařízení a když smažeš cookies, smažou se i tyto recenze. Ukládat můžeš i při výpadku internetu nebo serverů.",
     "draftHelp4": "Po nahrání se koncept smaže.",
     "writeOn": "Načíst",
-    "draftNoLoad": "Nepodařilo se načíst koncept!"
+    "draftNoLoad": "Nepodařilo se načíst koncept!",
+    "import": "Import",
+    "noLevelsShow": "Levely nelze načíst!",
+    "thisTypeManyCont": "Víc prvků tohoto typu už nelze přidávat!",
+    "deletedPost": "Smazaný příspěvek",
+    "embedded": "Vložený příspěvek",
+    "embeddedHelp": "Načte se po načtení recenze"
   },
   "review": {
     "columnSetting": "{0} sloupec",

@@ -9,6 +9,16 @@ export interface ListPreview {
   isPinned?: boolean
 }
 
+
+/**
+ * Return data after picking a post from the review post showcase container
+ *
+ * @param number 0 - Showace the post, 1 - Showcase level from the post
+ * @param number ID of the list/review/level in question
+ * @param number List/Review/Level
+ */
+export interface selectedList {option: 0|1, postID: number, postType: 0|1|2}
+
 export interface ReviewDetailsResponse {
   reviewID: string
   level_count: string

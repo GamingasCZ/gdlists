@@ -5,7 +5,6 @@ export const doFavoriteLevel = (props: Object, favorited: boolean, col: Color) =
     let faves: FavoritedLevel[] = JSON.parse(localStorage.getItem("favorites")!);
     let favesIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
   
-    console.log(props)
     if (favorited) {
       let levelIndex = favesIDs.indexOf(props.levelID!);
       favesIDs.splice(levelIndex, 1);
@@ -43,7 +42,8 @@ export const fixBrokenColors = (color: string | number[]) => {
     try {
         return typeof color == 'string' ? chroma(fixHEX(color)) : chroma.hsl(...color);
       } catch (e) {
-        return chroma.random();
+        return chroma(document.documentElement.style.getPropertyValue("--primaryColor") ||
+               getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"));
       }
 }
 

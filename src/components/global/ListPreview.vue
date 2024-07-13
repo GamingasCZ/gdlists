@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { makeColorFromString, parseElapsed } from "@/Editor";
-import type { ListCreatorInfo, ListPreview } from "@/interfaces";
+import type { ListCreatorInfo, ListPreview, selectedList } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { computed, reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
@@ -21,20 +21,22 @@ const props = defineProps<{
 
   userArray: ListCreatorInfo[];
   disableLink?: boolean | 2
+  unrolledOptions: boolean
 }>();
-
 
 const listColor = ref<Color>(makeColorFromString(props.name));
 
 const emit = defineEmits<{
-  (e: 'unpinList'): void
+  (e: 'unpinList', index: number): void
   (e: 'selectedLink', creator: string): void
-  (e: 'clickedOption', id: number): void
+  (e: 'clickedOption', data: selectedList): void
   (e: 'selected'): void
 }>()
 
 function getUsername() {
   let listCreator: string = "";
+  if (!props.userArray) return ""
+
   props.userArray.forEach((user) => {
     if (props.uid == user.discord_id) listCreator = user.username;
   });
@@ -67,7 +69,8 @@ const creatorName = computed(() => props.creator?.length ? props.creator : getUs
 
 const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? props.id : props.hidden}`
 const clickList = () => {
-  if (props.disableLink) emit('selected')
+  if (props.disableLink == 1) emit('selected')
+  else if (props.disableLink == 2) emit('clickedOption', {option: 1, postID: props.id, postType: 0})
   else emit('selectedLink', creatorName.value)
 }
 
@@ -118,11 +121,11 @@ const clickList = () => {
   
       <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
   </div>
-  <div v-if="listOptsOpen" class="flex gap-2 justify-evenly my-2">
-    <button @click.stop="emit('clickedOption', 0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
-      <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">Vybrat seznam</button>
-    <button @click.stop="emit('clickedOption', 1)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
-      <img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">Zobrazit levely</button>
+  <div v-if="unrolledOptions" class="flex gap-2 justify-evenly my-2">
+    <button @click.stop="emit('clickedOption', {option: 0, postID: id, postType: 0})" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+      <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickList') }}</button>
+    <button @click.stop="emit('clickedOption', {option: 1, postID: id, postType: 0})" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+      <img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
   </div>
   </component>
 </template>

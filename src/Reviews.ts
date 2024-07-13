@@ -5,6 +5,7 @@ import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
 import { SETTINGS } from "./siteSettings"
+import axios from "axios"
 
 export const DEFAULT_RATINGS: ReviewRating[] = [
     {
@@ -201,4 +202,18 @@ export const getReviewPreview = () => {
     if (firstHeading.length > 100) firstHeading = firstHeading.slice(0, 100)+"..."
     if (firstParagraph.length > 100) firstParagraph = firstParagraph.slice(0, 100)+"..."
     return [firstHeading, firstParagraph]
+}
+
+export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | false = false) => {
+    let ids: number[][] = [[], [], []]
+    if (forceIDs === false) {
+        data.containers.forEach(container => {
+            // embeds aren't nestable, no need to check for columns (phew :D)
+            if (container.type == "showList") {
+                ids[container.settings.postType].push(container.settings.post)
+            }
+        })
+    } else ids = forceIDs
+    let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(',')}}).then(res => res.data)
+    return postData
 }

@@ -21,6 +21,8 @@ interface Extras {
   guessingNow: boolean;
   diffGuessArray: [boolean, boolean, boolean];
   hideRatings?: boolean
+  rating?: number
+  isEmbed?: boolean
 }
 
 const props = defineProps<Level & Extras>();
@@ -98,13 +100,13 @@ const listData = inject("listData")
         <header class="flex items-center">
           <!-- Level difficulty -->
           <div class="relative m-2 mr-1 ml-0" v-if="difficulty && !guessingNow">
-            <DifficultyIcon class="w-14" :difficulty="difficulty[0]" :rating="difficulty[1]" />
+            <DifficultyIcon class="w-14" :difficulty="difficulty?.[0] ?? difficulty" :rating="difficulty?.[1] ?? rating" />
           </div>
 
           <!-- Level name -->
           <h2 :class="{'ml-2': !guessingNow}" class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
             <h4 class="absolute -top-4 text-sm" v-if="platf">Platformer</h4>
-            {{ levelName || $t('other.unnamesd') }}
+            <component :is="isEmbed ? 'RouterLink' : 'span'" :to="'/'+listID" :class="{'underline cursor-pointer': isEmbed}">{{ levelName || $t('other.unnamesd') }}</component>
           </h2>
         </header>
       </div>
@@ -117,7 +119,7 @@ const listData = inject("listData")
         <a class="button" v-if="levelID" :href="`https://gdbrowser.com/${levelID}`" target="_blank"
           ><img class="w-14 max-sm:w-10" src="@/images/modGDB.svg" alt=""
         /></a>
-        <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID(levelID)">
+        <button class="button" v-if="levelID?.toString()?.match(/^\d+$/)" @click="copyID(levelID)">
           <img class="w-14 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
@@ -134,7 +136,7 @@ const listData = inject("listData")
       class="absolute top-1 right-1 button"
       @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
       :class="{ disabled: isFavorited }"
-      v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars"
+      v-if="favorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars"
     >
       <img src="@/images/star.webp" class="w-8" alt="" />
     </button>
