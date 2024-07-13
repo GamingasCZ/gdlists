@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { levelList } from "@/Editor";
+import type { LevelList, ReviewList } from "@/interfaces";
 import LinkIcon from "@/svgs/LinkIcon.vue";
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 
 const props = defineProps<{
   tagName: string | number;
@@ -9,19 +9,20 @@ const props = defineProps<{
   tagLink: string;
   cardIndex: number;
   tagIndex: number;
+  levelArray: ReviewList | LevelList
 }>();
 
 const editingLink = ref<boolean>(false);
 
 const moveTagPos = (from: number, to: number) => {
-  if (to < 0 || to >= levelList.value.levels[props.cardIndex!].tags.length)
+  if (to < 0 || to >= props.levelArray.value.levels[props.cardIndex!].tags.length)
     return;
   editingLink.value = false;
 
   let currentTag =
-    levelList.value.levels[props.cardIndex!].tags[props.tagIndex!];
-  levelList.value.levels[props.cardIndex!].tags.splice(from, 1);
-  levelList.value.levels[props.cardIndex!].tags.splice(to, 0, currentTag);
+    props.levelArray.value.levels[props.cardIndex!].tags[props.tagIndex!];
+  props.levelArray.value.levels[props.cardIndex!].tags.splice(from, 1);
+  props.levelArray.value.levels[props.cardIndex!].tags.splice(to, 0, currentTag);
 };
 
 const BASE_URL = import.meta.env.BASE_URL
@@ -55,13 +56,13 @@ const BASE_URL = import.meta.env.BASE_URL
           src="@/images/close.svg"
           alt=""
           class="w-5 button"
-          @click="levelList.levels[cardIndex!].tags.splice(tagIndex!, 1)"
+          @click="levelArray.levels[cardIndex!].tags.splice(tagIndex!, 1)"
         />
       </div>
       <input
         v-if="!editingLink"
         @input="
-          levelList.levels[cardIndex!].tags[tagIndex!][1] = (
+          levelArray.levels[cardIndex!].tags[tagIndex!][1] = (
             $event.target as HTMLInputElement
           ).value
         "
@@ -75,7 +76,7 @@ const BASE_URL = import.meta.env.BASE_URL
         v-else
         type="text"
         @input="
-          levelList.levels[cardIndex!].tags[tagIndex!][2] = (
+          levelArray.levels[cardIndex!].tags[tagIndex!][2] = (
             $event.target as HTMLInputElement
           ).value
         "

@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { levelList } from "../../Editor";
+import type { LevelList, ReviewList } from "@/interfaces";
 import TagEditBox from "./TagEditBox.vue";
 
 const emit = defineEmits(["openPopup"]);
-defineProps({
-  cardIndex: Number,
-});
+defineProps<{
+  cardIndex: number
+  levelArray: LevelList | ReviewList
+}>();
 </script>
 
 <template>
   <section class="box-border flex justify-between items-center">
     <div class="mr-2 flex min-h-[5rem] items-center gap-2 overflow-x-auto">
-      <span v-show="!levelList.levels[cardIndex!].tags.length" class=""
+      <span v-show="!levelArray.levels[cardIndex!].tags.length" class=""
         >{{ $t('editor.clickAdd3') }}
         <img
           src="@/images/plus.svg"
@@ -20,10 +21,11 @@ defineProps({
         {{ $t('editor.clickAddTags') }}</span
       >
       <TagEditBox
-        v-for="(tag, index) in levelList.levels[cardIndex!].tags"
+        v-for="(tag, index) in levelArray.levels[cardIndex!].tags"
         :tag-name="tag[1]!"
         :tag-i-d="tag[0]"
         :tag-link="tag[2]"
+        :level-array="levelArray"
         :card-index="cardIndex"
         :tag-index="index"
       />

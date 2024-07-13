@@ -115,7 +115,7 @@ const start = ref("#951b99")
         <section class="flex justify-between p-2 items-center bg-[url(@/images/headerBG.webp)]">
             <span class="text-2xl font-bold">{{ $t('other.custom') }}</span>
             <div class="flex relative z-20 gap-2 items-center">
-                <button :disabled="reviewData.ratings.length > 3" ref="suggestions" :title="$t('collabTools.presetsTitle')" @click="suggShown = true"
+                <button :disabled="reviewData.ratings.length > 3" ref="suggestions" @click="suggShown = true"
                     class="p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button disabled:opacity-40">
                     <img src="@/images/moveDown.svg" alt="" class="box-border p-1 w-7" />
 

@@ -74,8 +74,8 @@ const selectNestContainer = (e: Event) => {
             @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
-            @text-modified="container.data = $event"
             @settings-button="buttonState = [$event, ind]"
+            v-model="container.data"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"
@@ -84,7 +84,6 @@ const selectNestContainer = (e: Event) => {
             :editable="editable"
             :text="container.data"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0]"
-            v-model="container.data"
         >
             <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component

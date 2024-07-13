@@ -143,23 +143,27 @@ const listData = inject("listData")
 
     <!-- Level creator -->
     <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
-    <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
 
-    <!-- Level Tags -->
-    <section class="flex flex-wrap gap-2 mt-2">
-      <Tag v-for="tag in tags" :tag="tag" />
-    </section>
-
-    <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
+    <div class="flex flex-col gap-3 mt-2">
+      <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
-    <div v-if="ratings && !hideRatings" class="flex flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
-      <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
-        <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-        <span class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
-        
-        <span class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+      <!-- Level Tags -->
+      <section class="flex flex-wrap gap-2">
+        <Tag v-for="tag in tags" :tag="tag" />
+      </section>
+  
+      <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
+      
+      <!-- Level review ratings -->
+      <div v-if="ratings && !hideRatings" class="flex flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
+        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
+          <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
+          <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
+          <span class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+        </div>
       </div>
     </div>
+
   </section>
 </template>
 

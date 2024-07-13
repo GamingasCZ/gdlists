@@ -117,6 +117,7 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
             method: 'post',
             url: import.meta.env.VITE_API + "/images.php",
             data: data,
+            headers: {"Content-Type": 'image/png'},
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         }).then(res => {
@@ -335,7 +336,7 @@ const extButton = ref()
     <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
         @dragexit="fileDrag = false" @submit.prevent=""
         class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
-        <input @change="uploadImage" ref="imageInput" type="file"
+        <input accept="image/*" @change="uploadImage" ref="imageInput" type="file"
             class="absolute w-full h-full opacity-0 pointer-events-none">
 
         <!-- Images -->

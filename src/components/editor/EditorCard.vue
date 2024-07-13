@@ -403,7 +403,7 @@ const switchPlatformer = () => {
       <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
         :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
       <DifficultyPicker v-if="openedPanel == 2" :level="index" @update="selectedDiff = $event" :level-array="levelArray" />
-      <LevelTags :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
+      <LevelTags :level-array="levelArray" :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
     </div>
   </section>
 </template>

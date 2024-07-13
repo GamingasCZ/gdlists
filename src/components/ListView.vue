@@ -203,7 +203,7 @@ async function loadReview(loadedData: ReviewList | null) {
       recentlyViewed.push({
         creator: LIST_CREATOR.value,
         url: props.listID,
-        name: encodeURIComponent(LIST_DATA.value?.name!),
+        name: LIST_DATA.value?.name!,
         uploadDate: Date.now(),
         hidden: "0",
       });
@@ -635,7 +635,7 @@ const jumpSearch = ref("")
               :text="container.data"
               :editable="false"
           >
-              <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
+              <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
                   <component
                       v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
                       :is="elements"

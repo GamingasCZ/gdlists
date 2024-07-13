@@ -149,7 +149,8 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
   } elseif (in_array("homepage", array_keys($_GET))) {
     if ($_GET["homepage"] == 1) $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
     else $result = $mysqli->query(sprintf("SELECT %s,ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY reviews.id DESC LIMIT 3", $selReviewRange));
-    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
+     
+    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC), false, -1, "", 0, $_GET["homepage"] == 2));
 
   } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
     $account = checkAccount();
