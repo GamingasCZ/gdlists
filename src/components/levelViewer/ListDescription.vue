@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { LevelList, LikeFetchResponse } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import parseText from "../global/parseEditorFormatting";
 import { hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
@@ -55,16 +55,13 @@ if (hasLocalStorage()) {
   userUID.value = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? ""
 }
 
-const pfp = ref("")
-if (!props.creatorData) {
-  import(`../../images/oldPFP.png`).then(res => { pfp.value = res.default })
-}
-else {
-  let img = new Image()
-  img.src = `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
-  img.addEventListener("load", () => pfp.value = img.src)
-  img.addEventListener("error", () => import("@/images/defaultPFP.webp").then(res => pfp.value = res.default))
-}
+const pfp = computed(() => {
+  if (!props.creatorData)
+    return `../../images/oldPFP.png`
+  else
+    return `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
+})
+
 
 const ratingButs = ref()
 let sendingRating = false
@@ -106,9 +103,9 @@ function sendRating(action: 1 | 0) {
 const noDescription = props.review ?
   useI18n().t('level.noDescription2') : useI18n().t('level.noDescription')
 
-const listUploadDate = props.review ?
+const listUploadDate = computed(() =>props.review ?
   new Date(props.timestamp!).toLocaleDateString() :
-  new Date(parseInt(props.timestamp!) * 1000).toLocaleDateString()
+  new Date(parseInt(props.timestamp!) * 1000).toLocaleDateString())
 
 </script>
 
