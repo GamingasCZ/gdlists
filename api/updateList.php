@@ -85,7 +85,7 @@ else {
 
 // Adding levels to database
 if ($fuckupData[3] == 0) {
-    // $object =  ? "listID" : "reviewID";
+    // $object = $IS_LIST ? "listID" : "reviewID";
     // doRequest($mysqli, "DELETE FROM `levels` WHERE `" . $object . "`=?", [$DATA["id"]], "i");
     
     // // hope it's not an old list :D

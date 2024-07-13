@@ -198,28 +198,29 @@ const containers: Containers = {
         nestable: false,
         canEditText: false,
         additionalComponents: [ReviewList],
+        limit: 20,
         settings: [
             {
-                key: "level",
+                key: "post",
                 title: i18n.global.t('other.post'),
                 type: [-1],
                 required: true,
                 default: false
             },
             {
+                key: "postType",
+                title: i18n.global.t('other.post'),
+                type: [-1],
+                default: 0
+            },
+            {
                 key: "pick",
                 title: i18n.global.t('reviews.pickList'),
                 type: [1],
                 default: 0
-            },
-            {
-                key: "description",
-                title: i18n.global.t('editor.listDescription'),
-                type: [0],
-                default: ""
             }
         ],
-        errorCheck: (settings: object) => settings.level ? success : error(0, 1)
+        errorCheck: (settings: object) => settings.post ? success : error(0, 1)
     },
     twoColumns: {
         nestable: true,
@@ -293,6 +294,7 @@ export type Container = {
     dependentOnChildren?: boolean
     additionalComponents?: any[],
     componentProps?: Container,
+    limit?: number,
     nestable: boolean,
     canEditText: boolean,
     settings: ContainerSettings[],

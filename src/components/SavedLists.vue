@@ -35,7 +35,7 @@ const customColor = ref("")
   <DialogVue :title="collabData.levelName" :custom-color="customColor" :width="dialog.xl" :open="collabData.collabData != null" @close-popup="collabData.collabData = null">
     <CollabViewer @custom-color="customColor = $event" :editor="true" :translucent="false" v-bind="collabData" />
   </DialogVue>
-  <section>
+  <section class="mt-3">
     <ListBrowser :component="browser == 'collabs' ? SavedCollabVue : FavoritePreview" :online-browser="false" :online-type="browser" @switch-browser="browser = $event" :browser-name="$t('other.savedLevels')" />
   </section>
 </template>

@@ -22,6 +22,9 @@ $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffG
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url, thumbnail, tagline, thumbProps";
 $selLevelRange = "levelName, creator, collabMemberCount, levels.levelID, difficulty, rating, platformer, ifnull(listID, concat('review/', (SELECT replace(concat(name,'-',reviews.id),' ','-') FROM reviews WHERE id=reviewID))) as listID";
 
+$listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
+$reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
+
 function makeIN($arr) {
   return [
     "(" . substr(str_repeat("?,", sizeof($arr)), 0, sizeof($arr)*2-1) . ")",
@@ -102,11 +105,10 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);
   }
 
-  $res = array($rows, $users, $dbInfo, $ratings, $reviewDetails);
-  echo json_encode($res);
+  return array($rows, $users, $dbInfo, $ratings, $reviewDetails);
 }
 
-if (count($_GET) == 1) {
+if (count($_GET) <= 2 && !isset($_GET["batch"])) {
   // Loading a single list
   if (in_array("id", array_keys($_GET))) {
     // Private lists can't be accessed by their id!
@@ -114,14 +116,14 @@ if (count($_GET) == 1) {
     if ($result == null) {
       echo "2";
     } else {
-      parseResult($result, true);
+      echo json_encode(parseResult($result, true));
     }
   } elseif (in_array("review", array_keys($_GET))) {
     // Reviews
     $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$_GET["review"]], "s");
 
     if ($result == null) echo "2";
-    else parseResult($result, true, -1, "", 0, true);
+    else echo json_encode(parseResult($result, true, -1, "", 0, true));
   }
    elseif (in_array("pid", array_keys($_GET))) {
     // Private lists
@@ -131,28 +133,70 @@ if (count($_GET) == 1) {
       echo "2";
     } // When the pID is invalid
     else {
-      parseResult($result, true);
+      echo json_encode(parseResult($result, true));
     }
   } elseif (in_array("random", array_keys($_GET))) {
     // Picking a random list or review
     $randType = $_GET["random"] == 0 ? "lists" : "reviews";
     $result = doRequest($mysqli, sprintf("SELECT * FROM `%s` WHERE `hidden` LIKE 0 ORDER BY RAND() LIMIT ?", $randType), [1], "i");
-    parseResult($result, true, -1, "", 0, $randType == "reviews");
+    echo json_encode(parseResult($result, true, -1, "", 0, $randType == "reviews"));
+
+  } elseif (in_array("randomLevel", array_keys($_GET))) {
+    // Picking a random list or review
+    $result = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [1], "i");
+    echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {
     if ($_GET["homepage"] == 1) $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
-    else $result = $mysqli->query(sprintf("SELECT %s,ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY reviews.id DESC LIMIT 3", $selReviewRange,));
-    
-    parseResult($result->fetch_all(MYSQLI_ASSOC), false, -1, "", 0, $_GET["homepage"] == 2);
+    else $result = $mysqli->query(sprintf("SELECT %s,ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY reviews.id DESC LIMIT 3", $selReviewRange));
+     
+    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC), false, -1, "", 0, $_GET["homepage"] == 2));
 
   } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
     $account = checkAccount();
     if (!$account) die("[]"); // Not logged in
     $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
-    parseResult($result->fetch_all(MYSQLI_ASSOC));
+    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
+  } elseif (in_array("levelsIn", array_keys($_GET))) {
+    if (!intval($_GET["levelsIn"])) die("2");
+    $type = $_GET["fromReviews"] ? "reviewID" : "listID";
+    $result = doRequest($mysqli, sprintf("SELECT levels_uploaders.id,levels.levelID,listID,reviewID,levelName,creator,difficulty,rating FROM levels_uploaders RIGHT JOIN levels ON levels_uploaders.levelID = levels.levelID  WHERE %s = ?", $type), [$_GET["levelsIn"]], "i", true);
+    echo json_encode(parseResult($result));
   }
 }
+elseif (isset($_GET["batch"])) {
+  $types = ["lists", "reviews", "levels"];
+  $postData = [[],[],[]];
+  for ($type=0; $type < 3; $type++) {
+    if (!isset($_GET[$types[$type]])) continue;
+    if (!strlen($_GET[$types[$type]])) continue;
+
+    $ratings = [$listRatings, $reviewRatings][$type];
+    $range = [$selRange, $selReviewRange, $selLevelRange][$type];
+
+    $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
+    $in = makeIN($fetchIDs);
+    $res;
+
+    if ($type == 2) {
+      $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
+      INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
+      WHERE levels.levelID IN %s
+      GROUP BY levels_uploaders.levelID
+      ", $range, $in[0]), $fetchIDs, $in[1], true);
+    }
     else {
+      $res = doRequest($mysqli, sprintf("SELECT %s, %s FROM ratings
+      RIGHT JOIN %s ON %s.id = ratings.%s_id
+      WHERE %s.id IN %s AND `hidden`=0
+      GROUP BY `name`
+      ", $range, $ratings, $types[$type], $types[$type], substr($types[$type], 0, -1), $types[$type], $in[0]), $fetchIDs, $in[1], true);
+    }
+    $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1);
+  }
+  echo json_encode($postData);
+}
+else {
   // --- Loading all lists ---
 
   // Are values numbers?
@@ -182,11 +226,7 @@ if (count($_GET) == 1) {
   }
 
   // Split ratings if neccessary
-  $ratings;
-  if ($type == 'lists')
-    $ratings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
-  else
-    $ratings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
+  $ratings = $type == 'lists' ? $listRatings : $reviewRatings;
 
   // User/Private objects
   if (isset($_GET["user"])) {
@@ -218,7 +258,7 @@ if (count($_GET) == 1) {
       GROUP BY `name`
       ORDER BY hidden DESC, id DESC
       LIMIT %s
-      OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $addReq, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+      OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $addReq, clamp(intval($_GET["fetchAmount"]), 2, 50), $dbSlice);
     $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
   }
   else {
@@ -235,7 +275,7 @@ if (count($_GET) == 1) {
   $maxpage = ceil($maxpageQuery["amount"] / clamp(intval($_GET["fetchAmount"]), 2, 15));
 
   $result = doRequest($mysqli, $query, [$_GET["startID"], "%".$_GET["searchQuery"]."%"], "is", true);
-  parseResult($result, false, $maxpage, $_GET["searchQuery"], $_GET["page"], $type == "reviews");
+  echo json_encode(parseResult($result, false, $maxpage, $_GET["searchQuery"], $_GET["page"], $type == "reviews"));
 }
 
 $mysqli->close();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab } from "@/interfaces";
+import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
@@ -11,6 +11,7 @@ import { onUnmounted } from "vue";
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden" | "collabs"): void;
   (e: "refreshedBrowser", objectAmount: number): void;
+  (e: "selectedPostOption", data: [selectedList, string]): void;
 }>();
 
 const props = defineProps<{
@@ -21,9 +22,11 @@ const props = defineProps<{
   onlineSubtype: string
   isLoggedIn: boolean
   hideSearch: boolean
+  hideTabs: boolean
   commentID: {type: 'list' | 'review', objectID: number}
   refreshButton: boolean
   component: object
+  picking: false | 1 | 2
 }>()
 
 // Page title
@@ -46,6 +49,7 @@ const listScroll = () =>
 const loadFailed = ref<boolean>(false);
 const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
+const unrolled = ref<boolean>(-1)
 
 const LISTS_ON_PAGE = 8;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
@@ -68,6 +72,8 @@ function switchPage(setPage: number) {
 
 let filtered; // Search results from offline browsers
 const lastSearch = ref("")
+
+watch(SEARCH_QUERY, doSearch())
 function doSearch() {
   if (lastSearch.value == SEARCH_QUERY.value) return
 
@@ -262,6 +268,8 @@ onMounted(() => {
 watch(props, (newBrowser) => {
   LISTS.value = []
   PAGE.value = 0
+  unrolled.value = -1
+  SEARCH_QUERY.value = props.search
   filtered = undefined
   refreshBrowser();
 });
@@ -271,9 +279,9 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
 </script>
 
 <template>
-  <section class="mx-auto mt-3 w-[80rem] max-w-[95vw] text-white">
+  <section class="mx-auto w-full max-w-[80rem] text-white">
     <main>
-      <div class="flex justify-between items-center max-sm:flex-col">
+      <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
@@ -319,7 +327,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             $t('other.refresh') }}</label>
         </button>
       </header>
-      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': onlineSubtype == 'reviews'}">
+      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': onlineSubtype == 'reviews', 'md:!grid-cols-2': onlineSubtype == 'reviews' && picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
@@ -391,12 +399,13 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
         </div>
 
         <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove
+          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove :unrolled-options="unrolled == index"
+          :disable-link="picking" @clicked-option="emit('selectedPostOption', [$event, list.name])" @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         </main>
         <!-- Page Switcher -->
-        <div class="flex gap-2 items-center mx-auto mt-2 w-max" v-if="maxPages > 1 && !loading">
+        <div class="flex gap-2 items-center mx-auto mt-2 w-max" v-if="maxPages > 1 && !loading && !picking">
           <button class="mr-2 button" @click="switchPage(PAGE! - 1)">
             <img src="@/images/showCommsL.svg" class="w-4" alt="" />
           </button>
@@ -424,6 +433,18 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           <button class="ml-2 button" @click="switchPage(PAGE! + 1)">
             <img src="@/images/showComms.svg" class="w-4" alt="" />
           </button>
+      </div>
+      <div v-if="maxPages > 1 && !loading && picking" class="flex">
+        <div class="grid grid-cols-2 w-full">
+          <button :disabled="PAGE == 0" @click="switchPage(PAGE! - 1)" class="flex gap-2 justify-center p-1 mx-4 my-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 grow">
+            <img src="@/images/showCommsL.svg" alt="" class="w-2">
+            {{ $t('other.prevP') }}
+          </button>
+          <button :disabled="PAGE == maxPages - 1" @click="switchPage(PAGE! + 1)" class="flex gap-2 justify-center p-1 mx-4 my-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 grow">
+          <img src="@/images/showComms.svg" alt="" class="w-2">
+            {{ $t('other.nextP') }}
+          </button>
+        </div>
       </div>
     </main>
   </section>

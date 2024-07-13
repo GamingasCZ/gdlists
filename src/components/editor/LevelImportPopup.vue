@@ -7,7 +7,7 @@ import TabBar from '../ui/TabBar.vue';
 
 const emit = defineEmits<{
   (e: "closePopup"): void
-  (e: "addLevel", level: Level)
+  (e: "addLevel", level: Level): void
 }>();
 
 const page = ref(0) // 0 - main, 1 - loading, 2 - error, 3 - results

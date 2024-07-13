@@ -398,7 +398,16 @@
     "info": "Info",
     "saveAs": "Save As",
     "inUse": "In Use",
-    "words": "No words | {n} word | {n} words"
+    "words": "No words | {n} word | {n} words",
+    "prevP": "Previous Page",
+    "nextP": "Next Page",
+    "private": "Private",
+    "mine": "Uploaded",
+    "pickLevels": "Show levels",
+    "pickReview": "Pick review",
+    "pickList": "Pick list",
+    "searchLevels": "Search Levels",
+    "randomLevel": "Random Level"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -533,7 +542,7 @@
     "p6": "top players won't like this one!",
     "addLevel": "Add Level",
     "noLevelsYet": "You haven't added any levels yet!",
-    "pickList": "Pick List",
+    "pickList": "Pick Post",
     "upToTen": "You can review up to 10 levels at once!",
     "transparent": "Transparent page",
     "translucent": "Translucent page",
@@ -626,7 +635,7 @@
     "pick": "Pick Image",
     "noLevelsAddedYet": "You haven't added any levels yet!",
     "pickShowcase": "Pick a level to showcase.",
-    "listShowcase": "Pick a list to showcase.",
+    "listShowcase": "Click to pick a post",
     "editColumn": "Edit Column",
     "addColumn": "Add Column",
     "levelNo": "Level {0} is missing a {1}!",
@@ -676,7 +685,13 @@
     "draftHelp2": "You can save and come back to these reviews anytime.",
     "draftHelp3": "Drafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.",
     "writeOn": "Load",
-    "draftNoLoad": "Failed to load draft!"
+    "draftNoLoad": "Failed to load draft!",
+    "import": "Import",
+    "noLevelsShow": "Levels couldn't be loaded!",
+    "thisTypeManyCont": "You cannot add more containers of this type!",
+    "deletedPost": "Removed Post",
+    "embedded": "Embedded Post",
+    "embeddedHelp": "Load the review to display this post"
   },
   "review": {
     "columnSetting": "{0} column",

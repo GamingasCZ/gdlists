@@ -159,7 +159,7 @@ export const makeColorFromString = (name: string) => {
           .reduce((x, y) => x + y)! % Math.PI
       )
   )
-  return chroma(ok);
+  return chroma(isNaN(ok) ? "#0000" : ok);
 }
 
 export function fixHEX(hexColor: string) {

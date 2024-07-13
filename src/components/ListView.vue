@@ -10,6 +10,7 @@ CollabHumans,
 CollabData,
 LevelList,
 ReviewList,
+ReviewDetailsResponse,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -34,7 +35,7 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, parseReviewContainers, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, reviewData } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import ViewModePicker from "./global/ViewModePicker.vue";
@@ -160,6 +161,8 @@ async function loadList(loadedData: LevelList | null) {
 }
 
 const REVIEW_CONTENTS = ref<[number, string][]>([])
+const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchResponse]>([])
+provide("batchEmbeds", embedsContent)
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
   NONPRIVATE_LIST = true // damn you, old gamingsus >:(
@@ -184,6 +187,9 @@ async function loadReview(loadedData: ReviewList | null) {
 
     LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
     LIST_CREATORDATA.value = res[1]
+
+    // Fetch embeds
+    embedsContent.value = await getEmbeds(LIST_DATA.value.data)
 
     if (hasLocalStorage()) {
       favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
@@ -228,6 +234,7 @@ async function loadReview(loadedData: ReviewList | null) {
 
     LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
   } catch (e) {
+    console.log(e)
     listErrorLoading.value = true
   }
 }
@@ -326,16 +333,11 @@ watch(router.currentRoute, () => {
     // load viewed review
     if (!hasLocalStorage()) return
 
-    if (backToReview.value) {
-      document.documentElement.scrollTop = backToReview.value.scrollY
-      backToReview.value = undefined
-    } 
-
     let viewedReview = localStorage.getItem("reviewScroll")
     if (viewedReview) {
-      backToReview.value = JSON.parse(viewedReview)
+      backToReview.value = viewedReview
       localStorage.removeItem("reviewScroll")
-    } 
+    } else backToReview.value = false
 })
 
 const listActions = (action: string) => {
@@ -509,9 +511,9 @@ const jumpSearch = ref("")
     </header>
     <main class="flex flex-col gap-4">
       <!-- Back to review from link -->
-      <RouterLink v-if="backToReview" @click="backToReview = -1" :to="backToReview.id" class="flex gap-2 p-2 mx-auto w-max rounded-md bg-greenGradient">
+      <RouterLink v-if="backToReview" @click="$router.go(-1)" to="" class="flex gap-2 p-2 mx-auto w-max rounded-md bg-greenGradient">
         <img src="@/images/showCommsL.svg" class="w-3" alt="">
-        <span>{{ $t('other.backTO') }} <b>{{ backToReview.name }}</b></span>
+        <span>{{ $t('other.backTO') }} <b>{{ backToReview }}</b></span>
       </RouterLink>
 
       <!-- Nonexistent list -->

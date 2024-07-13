@@ -40,7 +40,7 @@ const modifyContentType = (to: Content) => {
 </script>
 
 <template>
-  <nav class="flex mx-auto mt-3 max-w-7xl text-xl font-bold text-white overflow-clip rounded-md bg-greenGradient">
+  <nav class="flex mx-auto my-3 max-w-7xl text-xl font-bold text-white overflow-clip rounded-md bg-greenGradient">
     <RouterLink @click="modifyContentType(0)" to="/browse/lists" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': contentType == 0}">
       <img src="../images/browseMobHeader.svg" alt="" class="w-5" />
       <span class="my-2">{{ $t('help.Lists') }}</span>

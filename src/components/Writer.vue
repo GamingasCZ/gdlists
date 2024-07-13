@@ -14,7 +14,7 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount } from "@/Reviews";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount, getEmbeds } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -49,6 +49,7 @@ if (props.editing) {
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
             reviewData.value = res.data.data
+            fetchEmbeds()
             modifyListBG(reviewData.value.pageBGcolor, false, true)
             containerLastAdded.value = Date.now()
         }
@@ -57,6 +58,20 @@ if (props.editing) {
         }
     }).catch(() => openDialogs.editError = true)
 }
+
+const embedsContent = ref()
+provide("batchEmbeds", embedsContent)
+
+const fetchEmbeds = async (fake = false) => {
+    if (fake) { embedsContent.value = -1; return }
+
+    embedsContent.value = await getEmbeds(reviewData.value)
+}
+
+const addToInjected = () => {
+    fetchEmbeds()
+}
+provide("addToInjected", addToInjected)
 
 watch(props, () => {
     if (!props.editing) {
@@ -79,7 +94,7 @@ const openDialogs = reactive({
     levels: false,
     tags: false,
     collabs: false,
-    lists: [false, 0],
+    lists: [false, 0, 0],
     bgPicker: [false, 0],
     ratings: false,
     bgPreview: false,
@@ -100,6 +115,7 @@ const selectedContainer = ref<[number, HTMLDivElement | null]>([-1, null])
 provide("selectedContainer", selectedContainer)
 
 const selectedLevel = ref()
+const levels = ref()
 
 const selectedNestContainer = ref([-1, -1, -1])
 provide("selectedNestContainer", selectedNestContainer)
@@ -116,14 +132,23 @@ const containerLastAdded = ref(0)
 const addContainer = (key: string, addTo?: number) => {
     // Count of all components
     let contAm = 0
+    let thisContAm = 0
     reviewData.value.containers.forEach(c => {
         if (c.type == "twoColumns") {
             contAm += c.settings.components.forEach(n => {
                 contAm += n.length
+                // add check for limit in nested containers if you ever need to :)
             });
         }
+        if (c.type == key) thisContAm += 1
         contAm += 1
     })
+
+    if (CONTAINERS[key]?.limit && thisContAm >= CONTAINERS[key].limit) {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.thisTypeManyCont')
+        return
+    }
 
     if (contAm >= 100) {
         errorStamp.value = Date.now()
@@ -431,6 +456,7 @@ const loadBackup = () => {
     reviewSave.value.lastSaved = drafts.value[backupData.value.backupID].saveDate
     reviewData.value = drafts.value[backupData.value.backupID].reviewData
     modifyListBG(reviewData.value.pageBGcolor, false, true)
+    fetchEmbeds()
     removeBackup(true)
 }
 let autosaveInterval: number
@@ -490,23 +516,28 @@ const loadDraft = (newData: {data: ReviewList, id: number, saved: number}) => {
     reviewData.value = newData.data
     reviewSave.value.backupID = newData.id
     reviewSave.value.lastSaved = newData.saved
+    fetchEmbeds()
     modifyListBG(newData.data.pageBGcolor, false, true)
     containerLastAdded.value = Date.now()
 }
 
-let previewHold: ReviewList
+let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
 const previewDraft = (previewData: ReviewList) => {
-    previewHold = reviewData.value
+    previewHold = [reviewData.value, embedsContent.value]
     reviewData.value = previewData
+    fetchEmbeds(true)
     modifyListBG(previewData.pageBGcolor, false, true)
     previewMode.value = false
     disableEdits.value = true
     openDialogs.drafts = false
 }
 const exitPreview = () => {
-    reviewData.value = previewHold
-    modifyListBG(previewHold.pageBGcolor, false, true)
+    if (!previewHold) return
+
+    reviewData.value = previewHold[0]
+    embedsContent.value = previewHold[1]
+    modifyListBG(previewHold[0].pageBGcolor, false, true)
     previewHold = null
 
     previewMode.value = true
@@ -615,9 +646,9 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
             <UserDialog ref="userDialog" :user-array="reviewData.containers[selectedContainer[0]].settings.users" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.levels" :action="selectedLevel?.addLevel" :title="$t('editor.levels')" :side-button-text="$t('reviews.addLevel')" :side-button-disabled="reviewData.levels.length >= 10" @close-popup="openDialogs.levels = false" :width="dialog.large">
+        <DialogVue :open="openDialogs.levels" :title="$t('editor.levels')" @close-popup="openDialogs.levels = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <WrtierLevels ref="selectedLevel" />
+            <WrtierLevels ref="levels" />
             <CollabEditor v-if="openDialogs.collabs" :level-array="reviewData.levels" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
             <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">
                 <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
@@ -626,8 +657,8 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
 
         
         
-        <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false">
-            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" />
+        <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false" :width="dialog.large">
+            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" :only-pick-levels="openDialogs.lists[2]" @add-level="levels?.addLevel" />
         </DialogVue>
         
         <DialogVue :open="openDialogs.bgPicker[0]" @close-popup="openDialogs.bgPicker[0] = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
@@ -696,6 +727,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
                 
                 <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
+
                 <div v-memo="[previewMode, containerLastAdded, selectedContainer, selectedNestContainer]">
                     <DataContainer
                         v-for="(container, index) in reviewData.containers"
@@ -734,6 +766,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                         </div>
                     </DataContainer>
                 </div>
+
                 <button @click="addContainer('default')" v-show="previewMode && !disableEdits" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
                     <span class="text-white">{{ $t('reviews.addParagraph') }}</span>
