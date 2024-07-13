@@ -271,8 +271,12 @@ const moveToParagraph = (currentContainerIndex: number) => {
         selectedContainer.value[0] += 1
         dataContainers.value[selectedContainer.value[0]].doFocusText()
     }
-    else
+    else {
+        let sel = selectedContainer.value[0] + 1
+
         addContainer("default")
+        nextTick(() => dataContainers.value[sel].doFocusText())
+    }
 }
 
 const startWriting = () => {

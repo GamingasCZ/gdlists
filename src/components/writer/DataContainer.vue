@@ -39,8 +39,8 @@ watch(props, nextTick(() => {
 	if (props.editable) previewText.value = parseMD(text.value, true, props.currentSettings?.noMD)
 }))
 
-const makeNextParagraph = (e) => {
-	if (props.type.startsWith("heading") && e.key == "Enter") {
+const makeNextParagraph = (e: KeyboardEvent) => {
+	if (props.type.startsWith("heading")) {
 		e.preventDefault()
 		emit('addParagraph', false)
 	}
@@ -67,6 +67,14 @@ const setBoxHeight = () => {
 	mainText.value.style.height = `${mainText.value?.scrollHeight}px`;
 }
 
+const doFocusText = () => {
+	mainText.value?.focus()
+}
+
+defineExpose({
+	doFocusText
+})
+
 const focus = ref(false)
 
 </script>
@@ -80,8 +88,9 @@ const focus = ref(false)
 			@input="setBoxHeight()"
 			@focus="emit('hasFocus', mainText!); focus = true"
 			v-model="text"
-			@keyup.enter="makeNextParagraph"
+			@keydown.enter="makeNextParagraph"
 			:placeholder="placeholder"
+			:rows="type.startsWith('heading') ? 1 : undefined"
 			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
 			data-modf="0"
 			:style="{textAlign: 'inherit', color: 'inherit'}"

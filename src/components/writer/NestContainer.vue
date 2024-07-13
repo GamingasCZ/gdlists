@@ -83,7 +83,7 @@ const selectNestContainer = (e: Event) => {
             :key="container.id"
             :editable="editable"
             :text="container.data"
-            :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0]"
+            :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0] && editable"
         >
             <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component
