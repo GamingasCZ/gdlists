@@ -10,6 +10,8 @@ $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
 $SECRET = getenv("SECRET"); // Use a random string :)
 
+error_reporting($debugMode ? -1 : 0);
+
 function privateIDGenerator($listName, $creator, $timestamp) {
     $str = $listName . $creator . $timestamp;
     return substr(sha1($str),0,10);
