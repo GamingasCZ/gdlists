@@ -77,7 +77,7 @@ watch(props, () => {
     if (!props.editing) {
         reviewData.value = DEFAULT_REVIEWDATA()
         modifyListBG(reviewData.value.pageBGcolor, true, true)
-        previewMode.value = true
+        setPreviewMode(true)
         selectedContainer.value[0] = -1
         disableEdits.value = false
         reviewSave.value = {backupID: 0, lastSaved: 0}
@@ -257,11 +257,16 @@ const columnCommand = (index: number) => {
     // setTimeout(() => selectedNestContainer.value = nestAttay, 5); // great coding, gamingaaaas (body click event unselects containers, need to offset this)
 }
 
+const setPreviewMode = (preview: boolean) => {
+    previewMode.value = preview
+    nextTick(() => dataContainers.value.forEach(c => c.togglePreview()))
+}
+
 const setFormatting = (format: string) => {
     switch (format) {
         case "view":
             document.activeElement?.blur()
-            nextTick(() => previewMode.value = !previewMode.value)
+            setPreviewMode(!previewMode.value)
             break;
     }
 }
@@ -532,7 +537,7 @@ const previewDraft = (previewData: ReviewList) => {
     reviewData.value = previewData
     fetchEmbeds(true)
     modifyListBG(previewData.pageBGcolor, false, true)
-    previewMode.value = false
+    setPreviewMode(false)
     disableEdits.value = true
     openDialogs.drafts = false
 }
@@ -544,7 +549,7 @@ const exitPreview = () => {
     modifyListBG(previewHold[0].pageBGcolor, false, true)
     previewHold = null
 
-    previewMode.value = true
+    setPreviewMode(true)
     disableEdits.value = false
     openDialogs.drafts = true
 

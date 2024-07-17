@@ -93,6 +93,86 @@ export function addFormatting(type: number, textbox: HTMLTextAreaElement) {
   return textbox.value
 }
 
+export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
+  let chars = ["**", "_", "~~"][type];
+  let selection = window.getSelection()
+  let range = selection?.getRangeAt(0)
+  let selStart = range?.startOffset;
+  let selEnd = range?.endOffset;
+  const selRange = (start: number, end: number) => {
+    let range = new Range()
+    range.setStart(textbox.firstChild, Math.min(start, textbox.firstChild?.textContent?.length))
+    range.setEnd(textbox.firstChild, Math.min(end, textbox.firstChild?.textContent?.length))
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
+
+  switch (type) {
+    case 0:
+    case 1:
+    case 2:
+      if (selStart == selEnd) {
+        // No text selected
+        textbox.innerText =
+          textbox.innerText.slice(0, selStart) +
+          `${chars} ${chars}` +
+          textbox.innerText.slice(selStart);
+          selRange(selStart + chars.length, selStart + chars.length + 1) 
+        } else {
+        let selectedText = textbox.innerText.slice(selStart, selEnd);
+        textbox.innerText =
+          textbox.innerText.slice(0, selStart) +
+          `${chars}${selectedText}${chars}` +
+          textbox.innerText.slice(selEnd);
+        selRange(selEnd+4, selEnd+4) 
+      }
+
+      break;
+    case 4:
+    case 5:
+    case 7:
+    case 8:
+    case 9:
+      let format = ["* ", "> ", null, "# ", "## ", "### "][type-4];
+      let startLF = [undefined, "\n"].includes(textbox.innerText[selStart - 1])
+        ? ""
+        : "\n";
+      textbox.innerText =
+        textbox.innerText.slice(0, selStart) +
+        `${startLF}${format}` +
+        textbox.innerText.slice(selStart);
+        
+      selRange(selStart + format?.length+2, selStart + format?.length+2)
+      break;
+    case 11:
+    case 12:
+      let helpText = type == 12 ? 'alt' : 'text'
+      let selectedText = textbox.innerText.slice(selStart, selEnd) || helpText
+      let isImage = type == 12 ? '!' : ''
+      if (textbox.innerText.slice(selStart, selStart + 4).startsWith("http")) {
+        textbox.innerText =
+          textbox.innerText.slice(0, selStart) +
+          `${isImage}[${helpText}](${selectedText})` +
+          textbox.innerText.slice(selEnd);
+          
+          selRange(selStart + isImage.length + 1, selStart + helpText.length + isImage.length + 1)
+        }
+      else {  
+        textbox.innerText =
+          textbox.innerText.slice(0, selStart) +
+          `${isImage}[${selectedText || 'text'}](link)` +
+          textbox.innerText.slice(selEnd);
+          
+          selRange(selStart + selectedText.length + isImage.length + 3, selStart + selectedText.length + isImage.length + 7)
+      }
+      break;
+
+    default:
+      break;
+  }
+  return textbox.innerText
+}
+
 export const autoLink = (e: Event) => {
   let text = e.clipboardData.getData('Text')
   if (text.startsWith("http")) {

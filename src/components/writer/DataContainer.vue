@@ -34,10 +34,10 @@ const getText = () => {
 	previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
 }
 
-watch(props, () => {
+const togglePreview = () => {
 	if (!props.editable) previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
 	else previewText.value = props.text?.replace("\n", "<br>")
-})
+}
 
 const makeNextParagraph = (e: KeyboardEvent) => {
 	if (props.type.startsWith("heading")) {
@@ -55,9 +55,19 @@ const pasteText = (e: Event) => {
 }
 
 defineExpose({
-	doFocusText
+	doFocusText,
+	togglePreview
 })
 
+const mutation = (record: MutationRecord[]) => {
+	if (record[0].attributeName == "data-modf")
+		nextTick(() => emit('textModified', mainText.value?.outerText!))
+}
+
+const observer = new MutationObserver(mutation)
+const startObserving = () => observer.observe(mainText.value!, {attributes: true})
+
+const a = () => console.log("aa")
 const focus = ref(false)
 const hasText = ref((props.text ?? "").trim().length > 0)
 
@@ -68,14 +78,14 @@ const hasText = ref((props.text ?? "").trim().length > 0)
 		<p
 			v-if="canEditText"
 			ref="mainText"
-			@vue:mounted="getText"
+			@vue:mounted="getText(); startObserving()"
 			@keydown.enter="makeNextParagraph"
 			@focus="emit('hasFocus', mainText!); focus = true"
 			@input="emit('textModified', $event.target.outerText); hasText = $event.target.outerText.trim().length > 0"
 			@paste="pasteText"
 			v-html="previewText"
 			data-modf="0"
-			:data-hastext="!hasText"
+			:data-hastext="!hasText && editable"
 			class="w-full text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
 			:placeholder="placeholder"
 			:contenteditable="editable"

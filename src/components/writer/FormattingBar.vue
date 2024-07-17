@@ -3,7 +3,7 @@ import { i18n } from '@/locales';
 import { nextTick, ref } from 'vue';
 import Dropdown from '../ui/Dropdown.vue';
 import Tooltip from '../ui/Tooltip.vue';
-import { addFormatting } from '../global/parseEditorFormatting';
+import { addCEFormatting, addFormatting } from '../global/parseEditorFormatting';
 import { reviewData } from '@/Reviews';
 
 const props = defineProps<{
@@ -83,7 +83,7 @@ const doAction = (action: number, button: string) => {
 
 const doFormatting = (ind: number) => {
 	document.activeElement.dataset.modf = 1
-	addFormatting(formatIndicies[ind], document.activeElement, false)
+	addCEFormatting(formatIndicies[ind], document.activeElement, false)
 }
 
 const hoveringIndex = ref(-1)
