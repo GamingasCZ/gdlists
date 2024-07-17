@@ -732,9 +732,9 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 
                 <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>
 
-                <div v-memo="[previewMode, containerLastAdded, selectedContainer, selectedNestContainer]">
                     <DataContainer
                         v-for="(container, index) in reviewData.containers"
+                        v-memo="[previewMode, containerLastAdded, selectedContainer, selectedNestContainer]"
                         v-bind="CONTAINERS[container.type]"
                         ref="dataContainers"
                         @remove-container="removeContainer(index)"
@@ -742,7 +742,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                         @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
                         @settings-button="buttonState = [$event, selectedContainer[0]]"
                         @add-paragraph="moveToParagraph(index)"
-                        v-model="container.data"
+                        @text-modified="container.data = $event"
                         :type="container.type"
                         :current-settings="container.settings"
                         :class="[CONTAINERS[container.type].styling ?? '']"
@@ -769,7 +769,6 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                             />
                         </div>
                     </DataContainer>
-                </div>
 
                 <button @click="addContainer('default')" v-show="previewMode && !disableEdits" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
                     <img class="w-6" src="@/images/plus.svg" alt="">
@@ -788,3 +787,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
 
     </main>
 </template>
+
+<style>
+
+</style>
