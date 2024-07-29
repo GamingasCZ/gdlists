@@ -28,7 +28,7 @@ if ($LOCAL)
 else
     $userPath = "../../userContent/" . $user["id"];
 
-function getStorage($uid) {
+function getStorage($uid, $addNewImage = null) {
     global $mysqli, $MAX_STORAGE, $MAX_UPLOADSIZE, $MAX_FILECOUNT;
     $req = doRequest($mysqli, "SELECT SUM(`filesize`), COUNT(`id`) FROM `images` WHERE `uploaderID`=?", [$uid], "s");
     return json_encode([
@@ -38,7 +38,15 @@ function getStorage($uid) {
         "filecount" => intval($req['COUNT(`id`)']),
         "maxFilecount" => $MAX_FILECOUNT,
         "maxUploadSize" => $MAX_UPLOADSIZE,
+        "newImage" => $addNewImage
     ]);
+}
+
+function getAll($uid) {
+    global $mysqli;
+    $allImages = $mysqli -> query(sprintf("SELECT `hash` FROM images WHERE `uploaderID`=%s", $uid));
+
+    return json_encode([json_decode(getStorage($uid)), array_reverse(array_merge(...$allImages -> fetch_all()))]);
 }
 
 $method = $_SERVER["REQUEST_METHOD"];
@@ -48,9 +56,7 @@ switch ($method) {
             die(getStorage($user["id"]));
         }
 
-        $allImages = $mysqli -> query(sprintf("SELECT `hash` FROM images WHERE `uploaderID`=%s", $user["id"]));
-
-        die(json_encode([json_decode(getStorage($user["id"])), array_reverse(array_merge(...$allImages -> fetch_all()))]));
+        die(getAll($user["id"]));
         break;
 
     case 'POST':
@@ -91,7 +97,8 @@ switch ($method) {
         imagedestroy($thumbnail);
 
         doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$user["id"], $imageHash, $compressedFilesize], "ssi");
-
+        
+        die(getStorage($user["id"], $imageHash));
         break;
 
     case 'DELETE':

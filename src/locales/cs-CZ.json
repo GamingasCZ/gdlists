@@ -61,7 +61,9 @@
     "loginHelp1": "Teď můžeš začít postovat, likovat a komentovat!",
     "loginHelp2": "Používej selský rozum a udržuj své příspěvky slušné.",
     "loginHelp3": "Pokud něco nefuguje jak má,",
-    "loginHelp4": "nahlaš mi prosím chybu"
+    "loginHelp4": "nahlaš mi prosím chybu",
+    "tAd1": "Sleduj",
+    "tAd2": "na Twitteru!"
   },
   "editor": {
     "tags": [
@@ -692,7 +694,8 @@
     "thisTypeManyCont": "Víc prvků tohoto typu už nelze přidávat!",
     "deletedPost": "Smazaný příspěvek",
     "embedded": "Vložený příspěvek",
-    "embeddedHelp": "Načte se po načtení recenze"
+    "embeddedHelp": "Načte se po načtení recenze",
+    "vertAlign": "Umístění"
   },
   "review": {
     "columnSetting": "{0} sloupec",

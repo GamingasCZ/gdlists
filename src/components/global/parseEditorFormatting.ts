@@ -99,10 +99,12 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
   let range = selection?.getRangeAt(0)
   let selStart = range?.startOffset;
   let selEnd = range?.endOffset;
+  let node = selection?.focusNode
   const selRange = (start: number, end: number) => {
     let range = new Range()
-    range.setStart(textbox.firstChild, Math.min(start, textbox.firstChild?.textContent?.length))
-    range.setEnd(textbox.firstChild, Math.min(end, textbox.firstChild?.textContent?.length))
+    console.log(node)
+    range.setStart(node, Math.min(start, textbox?.textContent?.length))
+    range.setEnd(node, Math.min(end, textbox?.textContent?.length))
     selection?.removeAllRanges()
     selection?.addRange(range)
   }

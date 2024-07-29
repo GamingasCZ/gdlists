@@ -165,7 +165,9 @@
     "loginHelp1": "You're free to make posts, like and comment now!",
     "loginHelp2": "Use common sense and keep all your posts civil.",
     "loginHelp3": "If something isn't working as it should, please",
-    "loginHelp4": "report the issue"
+    "loginHelp4": "report the issue",
+    "tAd1": "Follow",
+    "tAd2": "on Twitter!"
   },
   "level": {
     "comments": "Comments",
@@ -691,7 +693,8 @@
     "thisTypeManyCont": "You cannot add more containers of this type!",
     "deletedPost": "Removed Post",
     "embedded": "Embedded Post",
-    "embeddedHelp": "Load the review to display this post"
+    "embeddedHelp": "Load the review to display this post",
+    "vertAlign": "Vertical Align"
   },
   "review": {
     "columnSetting": "{0} column",

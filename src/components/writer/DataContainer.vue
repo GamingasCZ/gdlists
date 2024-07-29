@@ -30,13 +30,11 @@ const previewText = ref("")
 
 const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
-const getText = () => {
-	previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
-}
 
 const togglePreview = () => {
-	if (!props.editable) previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
-	else previewText.value = props.text?.replace("\n", "<br>")
+	let textToParse = props.currentSettings?.noMD ? props.text.replaceAll("\n", "<br>") : props.text
+	if (!props.editable) previewText.value = parseMD(textToParse, true, props.currentSettings?.noMD)
+	else previewText.value = striptags(props.text).replaceAll("\n", "<br>")
 }
 
 const makeNextParagraph = (e: KeyboardEvent) => {
@@ -67,7 +65,6 @@ const mutation = (record: MutationRecord[]) => {
 const observer = new MutationObserver(mutation)
 const startObserving = () => observer.observe(mainText.value!, {attributes: true})
 
-const a = () => console.log("aa")
 const focus = ref(false)
 const hasText = ref((props.text ?? "").trim().length > 0)
 
@@ -78,7 +75,7 @@ const hasText = ref((props.text ?? "").trim().length > 0)
 		<p
 			v-if="canEditText"
 			ref="mainText"
-			@vue:mounted="getText(); startObserving()"
+			@vue:mounted="togglePreview(); startObserving()"
 			@keydown.enter="makeNextParagraph"
 			@focus="emit('hasFocus', mainText!); focus = true"
 			@input="emit('textModified', $event.target.outerText); hasText = $event.target.outerText.trim().length > 0"

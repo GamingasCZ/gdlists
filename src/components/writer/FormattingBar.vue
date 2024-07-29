@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { i18n } from '@/locales';
-import { nextTick, ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import Dropdown from '../ui/Dropdown.vue';
 import Tooltip from '../ui/Tooltip.vue';
 import { addCEFormatting, addFormatting } from '../global/parseEditorFormatting';
@@ -93,11 +93,38 @@ const getIndex = (sectIndex: number, butIndex: number) => {
 	return actions.slice(0, sectIndex).map(a => a.length).reduce((b,c) => b+c, 0)+butIndex
 }
 
+const showFormatting = ref(false)
+const showFormattingBar = (e) => {
+	let sel = document.getSelection()
+	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing")
+}
+
+onMounted(() => {
+	document.addEventListener("selectionchange", showFormattingBar)
+})
+
+onUnmounted(() => {
+	document.removeEventListener("selectionchange", showFormattingBar)
+})
+
 </script>
 
 <template>
 	<section @click.stop="" class="flex overflow-auto sticky top-10 z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
-		<div class="flex gap-1 items-center grow">
+		<div class="flex gap-3" v-show="showFormatting">
+			<button
+				v-for="(button, buttonIndex) in FORMATTING"
+				@click="doFormatting(buttonIndex)"
+				@mousedown.prevent=""
+				:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view'}"
+				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			>
+				<img :src="icons[buttonIndex]" class="w-6 pointer-events-none min-w-6">
+				<span class="text-sm pointer-events-none">{{ button }}</span>
+			</button>
+		</div>
+		
+		<div class="flex gap-1 items-center grow" v-show="!showFormatting">
 			<div v-for="(action, index) in actions" class="flex gap-1 items-center">
 				<hr v-show="index > 0 && index < 4" class="inline-flex mx-2 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
 				<button
@@ -127,6 +154,7 @@ const getIndex = (sectIndex: number, butIndex: number) => {
 			@click="doAction(4, columnData)"
 			@mousedown.prevent=""
 			class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			v-show="!showFormatting"
 		>
 			<img :src="`${BASE_URL}/formatting/twoColumns.svg`" class="w-6 pointer-events-none min-w-6">
 			<span class="w-max text-sm pointer-events-none">{{ selectedNest[0] > -1 ? $t('reviews.editColumn') : $t('reviews.addColumn') }}</span>
@@ -147,13 +175,27 @@ const getIndex = (sectIndex: number, butIndex: number) => {
 								</button>
 							</div>
 						</div>
+						<div>
+							<h2>{{ $t('reviews.vertAlign') }}</h2>
+							<div>
+								<button @click="emit('columnCommand', 11)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+									<img src="@/images/moveUp.svg" :class="{'opacity-40': reviewData.containers[selectedNest[0]].settings.components[selectedNest[1]][11]}" class="mx-auto w-5 button" alt="">
+								</button>
+								<button @click="emit('columnCommand', 12)" class="box-border p-1 ml-2 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+									<img src="@/images/moveMiddle.svg" :class="{'opacity-40': !reviewData.containers[selectedNest[0]].settings.components[selectedNest[1]].includes(1)}" class="mx-auto w-5 rotate-180 button" alt="">
+								</button>
+								<button @click="emit('columnCommand', 13)" class="box-border p-1 ml-2 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+									<img src="@/images/moveUp.svg" :class="{'opacity-40': !reviewData.containers[selectedNest[0]].settings.components[selectedNest[1]].includes(2)}" class="mx-auto w-5 rotate-180 button" alt="">
+								</button>
+							</div>
+						</div>
 						<button @click="emit('columnCommand', 7); columnOptionsShown = false" class="flex gap-1 items-center p-1 text-base font-bold text-black bg-red-400 rounded-md">
 							<img src="@/images/del.svg" alt="" class="w-5">
 							<span>{{ $t('reviews.removeColumn') }}</span>
 						</button>
 						<button @click="emit('columnCommand', 6)" class="flex gap-1 items-center p-1 text-base font-bold text-black rounded-md bg-lof-400">
 							<img src="@/images/grow.svg" alt="" class="w-5">
-							<span v-if="!reviewData.containers?.[selectedNest[0]]?.settings?.components?.[selectedNest[1]].includes(true)">{{ $t('reviews.cMaxContent') }}</span>
+							<span v-if="!reviewData.containers?.[selectedNest[0]]?.settings?.components?.[selectedNest[1]]?.[10] == true">{{ $t('reviews.cMaxContent') }}</span>
 							<span v-else>{{ $t('reviews.cFillSpace') }}</span>
 						</button>
 					</div>

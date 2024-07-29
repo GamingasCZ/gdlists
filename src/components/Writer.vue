@@ -210,6 +210,8 @@ const removeContainer = (index: number) => {
 }
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
+    if (selectedContainer.value[0] == -1) return
+
     if (selectedNestContainer.value[0] == -1) {
         if (index < 0) return
         reviewData.value.containers[index].align = alignment
@@ -219,40 +221,43 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
         reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
     }
 
+    containerLastAdded.value = Date.now()
+
 }
 
 const columnCommand = (index: number) => {
     let nestAttay = selectedNestContainer.value.slice(0)
+    let nest = reviewData.value.containers[selectedNestContainer.value[0]]
+    let column = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
     switch (index) {
         case 0: addContainer("twoColumns", 0); break;
         case 1: addContainer("twoColumns", 1); break;
         case 2:
         case 3:
-            reviewData.value.containers[selectedNestContainer.value[0]].settings.components
-                .splice(selectedNestContainer.value[1] + (index - 3), 0, JSON.parse(JSON.stringify(reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]])))
-                reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
+            nest.settings.components
+                .splice(selectedNestContainer.value[1] + (index - 3), 0, JSON.parse(JSON.stringify(nest.settings.components[selectedNestContainer.value[1]])))
+                nest.extraComponents += 1
             break;
-        case 6:
-            let ind = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].indexOf(true)
-            if (ind != -1)
-                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].splice(ind, 1)
-            else    
-                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].push(true)
+        case 6: // fit width / fill space
+            column[10] = !Boolean(column[10])
             break;
         case 7:
-            if (reviewData.value.containers[selectedNestContainer.value[0]].settings.components.length == 2) {
-                let columnData = JSON.parse(JSON.stringify(reviewData.value.containers[selectedNestContainer.value[0]].settings.components[1-selectedNestContainer.value[1]]))
+            if (nest.settings.components.length == 2) {
+                let columnData = JSON.parse(JSON.stringify(nest.settings.components[1-selectedNestContainer.value[1]]))
                 removeContainer(selectedNestContainer.value[0])
-                reviewData.value.containers.splice(selectedNestContainer.value[0], 0, ...columnData.filter(x => x !== true))
+                reviewData.value.containers.splice(selectedNestContainer.value[0], 0, ...columnData.filter(x => x === Object(x)))
             }
             else {
-                reviewData.value.containers[selectedNestContainer.value[0]].extraComponents -= 1
-                reviewData.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1], 1);
+                nest.extraComponents -= 1
+                nest.settings.components.splice(selectedNestContainer.value[1], 1);
             }
             break;
         case 8: moveContainer(selectedNestContainer.value[0], -1); break;
         case 9: moveContainer(selectedNestContainer.value[0], 1); break;
         case 10: removeContainer(selectedNestContainer.value[0]); break;
+        case 11: column[11] = 0; break;
+        case 12: column[11] = 1; break;
+        case 13: column[11] = 2; break;
     }
     // setTimeout(() => selectedNestContainer.value = nestAttay, 5); // great coding, gamingaaaas (body click event unselects containers, need to offset this)
 }
