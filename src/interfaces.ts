@@ -232,6 +232,7 @@ export interface viewedPopup {
   diffGuesserHelp?: boolean
   oldListsRedirectHelp?: boolean
   pickedStyling?: boolean
+  twitterAd?: boolean
 }
 
 export interface ytSearchDetails {
