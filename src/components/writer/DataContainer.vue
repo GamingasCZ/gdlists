@@ -48,8 +48,23 @@ const doFocusText = () => {
 	mainText.value?.focus()
 }
 
-const pasteText = (e: Event) => {
-	nextTick(() => e.target.innerHTML = striptags(e.target.innerHTML, ['br', 'div']))
+const pasteText = (e: ClipboardEvent) => {
+	e.preventDefault()
+
+	let pasteText = e.clipboardData?.getData("Text")
+	let sel = window.getSelection()
+	if (!pasteText || !sel) return
+
+	let range = sel?.getRangeAt(0)
+	let textNode = document.createTextNode(pasteText)
+	range?.deleteContents()
+	range?.insertNode(textNode)
+
+	range?.setStartAfter(textNode)
+	range?.setEndAfter(textNode)
+
+	sel?.removeAllRanges()
+	sel?.addRange(range)
 }
 
 defineExpose({
@@ -83,7 +98,7 @@ const hasText = ref((props.text ?? "").trim().length > 0)
 			v-html="previewText"
 			data-modf="0"
 			:data-hastext="!hasText && editable"
-			class="w-full text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
+			class="w-full whitespace-pre text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
 			:placeholder="placeholder"
 			:contenteditable="editable"
 			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word'}"
