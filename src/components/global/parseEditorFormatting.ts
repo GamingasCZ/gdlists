@@ -8,7 +8,7 @@ export default function parseText(textToParse: string, limited?: boolean, no?: b
 
   let keepTags
   if (limited) // Removes heading and image tags
-    keepTags = ["ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "code", "input", "p"]
+    keepTags = ["ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "code", "input"]
   else
     keepTags = ["h1", "h2", "h3", "ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "img", "code", "input", "p"]
 
@@ -100,6 +100,7 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
   let selStart = range?.startOffset;
   let selEnd = range?.endOffset;
   let node = selection?.focusNode
+  let selectedTex = selection?.toString();
   const selRange = (start: number, end: number) => {
     let range = new Range()
     console.log(node)
@@ -109,26 +110,25 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
     selection?.addRange(range)
   }
 
+  const modifySelection = (newText: string, keepContent = false) => {
+    const style = document.createTextNode(newText)
+    if (!keepContent) range?.deleteContents()
+    range?.insertNode(style)
+
+    range?.setStartAfter(style)
+    range?.setEndAfter(style)
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
+
   switch (type) {
     case 0:
     case 1:
     case 2:
-      if (selStart == selEnd) {
-        // No text selected
-        textbox.innerText =
-          textbox.innerText.slice(0, selStart) +
-          `${chars} ${chars}` +
-          textbox.innerText.slice(selStart);
-          selRange(selStart + chars.length, selStart + chars.length + 1) 
-        } else {
-        let selectedText = textbox.innerText.slice(selStart, selEnd);
-        textbox.innerText =
-          textbox.innerText.slice(0, selStart) +
-          `${chars}${selectedText}${chars}` +
-          textbox.innerText.slice(selEnd);
-        selRange(selEnd+4, selEnd+4) 
-      }
-
+      if (selStart == selEnd)
+        modifySelection(`${chars} ${chars}`) // No text selected
+      else
+        modifySelection(`${chars}${selectedTex}${chars}`)
       break;
     case 4:
     case 5:
@@ -139,34 +139,18 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
       let startLF = [undefined, "\n"].includes(textbox.innerText[selStart - 1])
         ? ""
         : "\n";
-      textbox.innerText =
-        textbox.innerText.slice(0, selStart) +
-        `${startLF}${format}` +
-        textbox.innerText.slice(selStart);
-        
-      selRange(selStart + format?.length+2, selStart + format?.length+2)
+
+      modifySelection(`${startLF}${format}`, true)
       break;
     case 11:
     case 12:
       let helpText = type == 12 ? 'alt' : 'text'
-      let selectedText = textbox.innerText.slice(selStart, selEnd) || helpText
+      let selectedText = selectedTex || helpText
       let isImage = type == 12 ? '!' : ''
-      if (textbox.innerText.slice(selStart, selStart + 4).startsWith("http")) {
-        textbox.innerText =
-          textbox.innerText.slice(0, selStart) +
-          `${isImage}[${helpText}](${selectedText})` +
-          textbox.innerText.slice(selEnd);
-          
-          selRange(selStart + isImage.length + 1, selStart + helpText.length + isImage.length + 1)
-        }
-      else {  
-        textbox.innerText =
-          textbox.innerText.slice(0, selStart) +
-          `${isImage}[${selectedText || 'text'}](link)` +
-          textbox.innerText.slice(selEnd);
-          
-          selRange(selStart + selectedText.length + isImage.length + 3, selStart + selectedText.length + isImage.length + 7)
-      }
+      if (selectedTex.startsWith("http"))
+        modifySelection(`${isImage}[${helpText}](${selectedText})`)
+      else
+        modifySelection(`${isImage}[${selectedText || 'text'}](link)`)
       break;
 
     default:

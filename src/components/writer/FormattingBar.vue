@@ -82,8 +82,11 @@ const doAction = (action: number, button: string) => {
 }
 
 const doFormatting = (ind: number) => {
-	document.activeElement.dataset.modf = 1
-	addCEFormatting(formatIndicies[ind], document.activeElement, false)
+	let el = document.activeElement
+	if (!el || !el.classList.contains("dataContainer")) return
+	el.dataset.modf = 1
+
+	addCEFormatting(formatIndicies[ind], el, false)
 }
 
 const hoveringIndex = ref(-1)

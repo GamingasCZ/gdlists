@@ -48,6 +48,8 @@ const doFocusText = () => {
 	mainText.value?.focus()
 }
 
+const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
+
 const pasteText = (e: ClipboardEvent) => {
 	e.preventDefault()
 
@@ -65,6 +67,8 @@ const pasteText = (e: ClipboardEvent) => {
 
 	sel?.removeAllRanges()
 	sel?.addRange(range)
+	hasText.value = checkHasText()
+	emit('textModified', mainText.value?.innerText!)
 }
 
 defineExpose({
@@ -73,15 +77,17 @@ defineExpose({
 })
 
 const mutation = (record: MutationRecord[]) => {
-	if (record[0].attributeName == "data-modf")
+	if (record[0].attributeName == "data-modf") {
 		nextTick(() => emit('textModified', mainText.value?.outerText!))
+		hasText.value = checkHasText()
+	}
 }
 
 const observer = new MutationObserver(mutation)
 const startObserving = () => observer.observe(mainText.value!, {attributes: true})
 
 const focus = ref(false)
-const hasText = ref((props.text ?? "").trim().length > 0)
+const hasText = ref(checkHasText())
 
 </script>
 
@@ -93,12 +99,12 @@ const hasText = ref((props.text ?? "").trim().length > 0)
 			@vue:mounted="togglePreview(); startObserving()"
 			@keydown.enter="makeNextParagraph"
 			@focus="emit('hasFocus', mainText!); focus = true"
-			@input="emit('textModified', $event.target.outerText); hasText = $event.target.outerText.trim().length > 0"
+			@input="emit('textModified', $event.target.outerText); hasText = checkHasText()"
 			@paste="pasteText"
 			v-html="previewText"
 			data-modf="0"
 			:data-hastext="!hasText && editable"
-			class="w-full whitespace-pre text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
+			class="w-full dataContainer whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
 			:placeholder="placeholder"
 			:contenteditable="editable"
 			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word'}"
