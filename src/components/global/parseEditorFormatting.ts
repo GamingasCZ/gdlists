@@ -102,55 +102,66 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
   let node = selection?.focusNode
   let selectedTex = selection?.toString();
   const selRange = (start: number, end: number) => {
+    if (!node) return
     let range = new Range()
-    console.log(node)
-    range.setStart(node, Math.min(start, textbox?.textContent?.length))
-    range.setEnd(node, Math.min(end, textbox?.textContent?.length))
+    range.setStart(node, start)
+    range.setEnd(node, end)
     selection?.removeAllRanges()
     selection?.addRange(range)
   }
 
-  const modifySelection = (newText: string, keepContent = false) => {
+  const modifySelection = (newText: string, keepContent = false, selectPart: [number, number] | null = null) => {
     const style = document.createTextNode(newText)
     if (!keepContent) range?.deleteContents()
     range?.insertNode(style)
 
-    range?.setStartAfter(style)
-    range?.setEndAfter(style)
+    if (!selectPart) {
+      range?.setStartAfter(style)
+      range?.setEndAfter(style)
+    }
+    else {
+      range?.setStart(style, selectPart[0])
+      range?.setEnd(style, selectPart[1])
+    }
     selection?.removeAllRanges()
     selection?.addRange(range)
+    console.log(style)
   }
 
   switch (type) {
     case 0:
     case 1:
     case 2:
-      if (selStart == selEnd)
-        modifySelection(`${chars} ${chars}`) // No text selected
+      if (selStart == selEnd) {
+        modifySelection(`${chars} ${chars}`, false, [chars.length, chars.length+1]) // No text selected
+      }
       else
         modifySelection(`${chars}${selectedTex}${chars}`)
       break;
     case 4:
     case 5:
-    case 7:
+    case 6:
     case 8:
     case 9:
-      let format = ["* ", "> ", null, "# ", "## ", "### "][type-4];
+    case 10:
+      let format = ["* ", "> ", "- [ ] ", null, "# ", "## ", "### "][type-4];
       let startLF = [undefined, "\n"].includes(textbox.innerText[selStart - 1])
         ? ""
         : "\n";
 
-      modifySelection(`${startLF}${format}`, true)
+      let sel = type == 6 ? [startLF.length+3, startLF.length+4] : null
+      modifySelection(`${startLF}${format}`, true, sel)
       break;
-    case 11:
     case 12:
-      let helpText = type == 12 ? 'alt' : 'text'
+    case 13:
+      let helpText = type == 13 ? 'alt' : 'text'
       let selectedText = selectedTex || helpText
-      let isImage = type == 12 ? '!' : ''
+      let isImage = type == 13 ? '!' : ''
+      let descText = selectedText || 'text'
       if (selectedTex.startsWith("http"))
-        modifySelection(`${isImage}[${helpText}](${selectedText})`)
+        modifySelection(`${isImage}[${helpText}](${selectedText})`, false, [isImage.length+1, isImage.length+1+helpText.length])
       else
-        modifySelection(`${isImage}[${selectedText || 'text'}](link)`)
+        modifySelection(`${isImage}[${descText}](link)`, false, [isImage.length+descText.length+3, isImage.length+descText.length+7])
       break;
 
     default:
@@ -162,7 +173,7 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
 export const autoLink = (e: Event) => {
   let text = e.clipboardData.getData('Text')
   if (text.startsWith("http")) {
-    if (text.match(/^.*(.jpg|.png|.gif|.webp|.jpeg)/)) return 12
-    else return 11
+    if (text.match(/^.*(.jpg|.png|.gif|.webp|.jpeg)/)) return 13
+    else return 12
   }
 }

@@ -409,7 +409,8 @@
     "pickReview": "Pick review",
     "pickList": "Pick list",
     "searchLevels": "Search Levels",
-    "randomLevel": "Random Level"
+    "randomLevel": "Random Level",
+    "checklist": "Checklist"
   },
   "settingsMenu": {
     "asOff": "Off",

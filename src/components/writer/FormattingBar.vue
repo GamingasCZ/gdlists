@@ -52,9 +52,9 @@ const columnData = ["twoColumns", i18n.global.t('reviews.multicolumn'),, "Přida
 const columnOptionsShown = ref(false)
 
 const base = import.meta.env.BASE_URL
-const FORMATTING = [i18n.global.t('reviews.bold'), i18n.global.t('reviews.italics'), i18n.global.t('reviews.strike'), i18n.global.t('other.points'), i18n.global.t('other.blockquote'), i18n.global.t('other.link')]
-const icons = ["bold", "cursive", "strike", "list", "quotes", "link"].map(x => `${base}/formatting/${x}.svg`)
-const formatIndicies = [0,1,2,4,5,11]
+const FORMATTING = [i18n.global.t('reviews.bold'), i18n.global.t('reviews.italics'), i18n.global.t('reviews.strike'), i18n.global.t('other.points'), i18n.global.t('other.blockquote'), i18n.global.t('other.checklist'), i18n.global.t('other.link')]
+const icons = ["bold", "cursive", "strike", "list", "quotes", "check", "link"].map(x => `${base}/formatting/${x}.svg`)
+const formatIndicies = [0,1,2,4,5,6, 12]
 
 const previewEnabled = ref(false)
 const mdHelpShown = ref(false)
