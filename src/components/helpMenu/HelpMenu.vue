@@ -62,6 +62,10 @@ const qa: question[] = [
     answer: useI18n().t('help.columnHelp')
   },
   {
+    question: useI18n().t('reviews.drafts'),
+    answer: useI18n().t('reviews.draftHelp3')
+  },
+  {
     startSection: useI18n().t('other.other2'),
     question: useI18n().t('help.license'),
     answer: "https://github.com/GamingasCZ/gdlists/blob/master/LICENSE",

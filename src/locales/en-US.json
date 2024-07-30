@@ -686,7 +686,7 @@
     "draftHelp1": "Here are your unfinished reviews!",
     "draftHelp4": "The draft will remove itself after posting.",
     "draftHelp2": "You can save and come back to these reviews anytime.",
-    "draftHelp3": "Drafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.",
+    "draftHelp3": "Drafts are used to store your unfinished reviews.\\\n\\\nReviews save by themselves depending on your set autosave interval, or when you leave the page.\\\n\\\nDrafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.\\\n\\\nThe draft is removed once you upload your review.",
     "writeOn": "Load",
     "draftNoLoad": "Failed to load draft!",
     "import": "Import",
@@ -695,7 +695,8 @@
     "deletedPost": "Removed Post",
     "embedded": "Embedded Post",
     "embeddedHelp": "Load the review to display this post",
-    "vertAlign": "Vertical Align"
+    "vertAlign": "Vertical Align",
+    "back": "Go Back"
   },
   "review": {
     "columnSetting": "{0} column",

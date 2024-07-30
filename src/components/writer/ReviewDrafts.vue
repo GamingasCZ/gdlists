@@ -57,14 +57,12 @@ const filteredDrafts = computed(() => {
 
         <!-- Help -->
         <div v-if="!Object.keys(drafts).length" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-3/4 text-center opacity-20 -translate-x-1/2 -translate-y-1/2">
-            <img src="@/images/symbolicSave.svg" alt="" class="w-48">
+            <img src="@/images/reviews.svg" alt="" class="w-48">
             <h2 class="text-2xl">{{ $t('reviews.draftHelp1') }}</h2>
             <p class="">{{ $t('reviews.draftHelp2') }}</p>
-            <p class="">{{ $t('reviews.draftHelp3') }}</p>
-            <p class="">{{ $t('reviews.draftHelp4') }}</p>
         </div>
 
-        <div v-if="!Object.keys(filteredDrafts).length && query.length" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-3/4 text-center opacity-20 -translate-x-1/2 -translate-y-1/2">
+        <div v-else-if="!Object.keys(filteredDrafts).length && query.length" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-3/4 text-center opacity-20 -translate-x-1/2 -translate-y-1/2">
             <img src="@/images/searchOpaque.svg" alt="" class="w-48">
             <h2 class="text-2xl">{{ $t('editor.nothingFound') }}</h2>
         </div>

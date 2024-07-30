@@ -145,6 +145,8 @@ export function parseReviewContainers(containers: object[]) {
     let main: [number, number, string][] = []
     let indicies = [0,0,0]
     containers.forEach(container => {
+        if (container !== Object(container)) return
+
         switch (container.type) {
             case "heading1":
             case "heading2":

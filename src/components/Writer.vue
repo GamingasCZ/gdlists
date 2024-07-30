@@ -733,7 +733,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
             <!-- Back from draft preview -->
             <div v-if="disableEdits" @click="exitPreview" class="flex fixed top-14 left-1/2 z-40 justify-between items-center p-2 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
                 <span class="text-xl">{{ $t('reviews.preview') }}</span>
-                <button class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg" class="w-6" alt=""> Vrátit se</button>
+                <button class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg" class="w-6" alt=""> {{ $t('reviews.back') }}</button>
             </div>
 
             <!-- Editor -->
