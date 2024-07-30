@@ -99,16 +99,7 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
   let range = selection?.getRangeAt(0)
   let selStart = range?.startOffset;
   let selEnd = range?.endOffset;
-  let node = selection?.focusNode
   let selectedTex = selection?.toString();
-  const selRange = (start: number, end: number) => {
-    if (!node) return
-    let range = new Range()
-    range.setStart(node, start)
-    range.setEnd(node, end)
-    selection?.removeAllRanges()
-    selection?.addRange(range)
-  }
 
   const modifySelection = (newText: string, keepContent = false, selectPart: [number, number] | null = null) => {
     const style = document.createTextNode(newText)
@@ -125,7 +116,6 @@ export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
     }
     selection?.removeAllRanges()
     selection?.addRange(range)
-    console.log(style)
   }
 
   switch (type) {

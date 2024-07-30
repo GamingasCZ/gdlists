@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import { inject } from 'vue';
 import DataContainer from './DataContainer.vue';
 import { flexNames, reviewData } from '@/Reviews';
@@ -75,6 +75,7 @@ const selectNestContainer = (e: Event) => {
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @settings-button="buttonState = [$event, ind]"
+            @text-modified="container.data = $event"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"
@@ -84,7 +85,7 @@ const selectNestContainer = (e: Event) => {
             :text="container.data"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0] && editable"
         >
-            <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
+            <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component
                     v-for="elements in CONTAINERS[container.type].additionalComponents"
                     :is="elements"

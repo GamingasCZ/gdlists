@@ -99,7 +99,7 @@ const getIndex = (sectIndex: number, butIndex: number) => {
 const showFormatting = ref(false)
 const showFormattingBar = (e) => {
 	let sel = document.getSelection()
-	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing")
+	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing") && sel.anchorNode?.parentElement?.contentEditable === "true"
 }
 
 onMounted(() => {

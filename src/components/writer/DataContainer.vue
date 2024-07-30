@@ -32,10 +32,14 @@ const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
 
 const togglePreview = () => {
+	if (props.type == "twoColumns") return
+	
 	let textToParse = props.currentSettings?.noMD ? props.text.replaceAll("\n", "<br>") : props.text
 	if (!props.editable) previewText.value = parseMD(textToParse, true, props.currentSettings?.noMD)
 	else previewText.value = striptags(props.text).replaceAll("\n", "<br>")
 }
+
+watch(() => props.editable, togglePreview)
 
 const makeNextParagraph = (e: KeyboardEvent) => {
 	if (props.type.startsWith("heading")) {

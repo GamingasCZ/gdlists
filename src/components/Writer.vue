@@ -264,7 +264,7 @@ const columnCommand = (index: number) => {
 
 const setPreviewMode = (preview: boolean) => {
     previewMode.value = preview
-    nextTick(() => dataContainers.value.forEach(c => c.togglePreview()))
+    // nextTick(() => dataContainers.value.forEach(c => c.togglePreview()))
 }
 
 const setFormatting = (format: string) => {
