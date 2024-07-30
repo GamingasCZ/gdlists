@@ -124,7 +124,14 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
             uploadingImage.value = 0
             if (res.data == -5) notify(7) // Bad format
             if (res.data == -3) notify(4) // Already uploaded
-            else refreshContent()
+            else {
+                images.value.splice(0, 0, res.data.newImage)
+                delete res.data.newImage
+                storage.value = res.data
+                setImgCache(images.value)
+                setStorageCache(storage.value)
+                uploadingImage.value = false
+            }
         }).catch(() => uploadingImage.value = 0)
     }
 }
@@ -191,15 +198,17 @@ const pickImage = (index: number, external: boolean) => {
     }
 }
 
-const refreshContent = () => {
+const refreshContent = async (data?: string) => {
     loadingImages.value = true
-    axios.get(import.meta.env.VITE_API + "/images.php").then(res => {
-        images.value = res.data[1]
-        storage.value = res.data[0]
-        setImgCache(images.value)
-        setStorageCache(storage.value)
-        loadingImages.value = false
-    })
+    let content;
+    if (data) content = data
+    else content = await axios.get(import.meta.env.VITE_API + "/images.php").then(res => res.data)
+   
+    images.value = content[1]
+    storage.value = content[0]
+    setImgCache(images.value)
+    setStorageCache(storage.value)
+    loadingImages.value = false
 }
 
 const downloadImage = (hash: string, external: boolean) => {

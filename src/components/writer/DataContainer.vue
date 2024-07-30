@@ -4,6 +4,7 @@ import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
 import parseMD from "../global/parseEditorFormatting";
 import { main } from '@popperjs/core';
+import striptags from 'striptags';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -25,19 +26,20 @@ interface Extras {
 
 const props = defineProps<Container & Extras>()
 
-let text = defineModel()
-
 const previewText = ref("")
 
 const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
-onMounted(() => {
-	if (!props.editable) previewText.value = parseMD(props.text, true, props.currentSettings?.noMD)
-})
 
-watch(props, nextTick(() => {
-	if (props.editable) previewText.value = parseMD(text.value, true, props.currentSettings?.noMD)
-}))
+const togglePreview = () => {
+	if (props.type == "twoColumns") return
+	
+	let textToParse = props.currentSettings?.noMD ? props.text.replaceAll("\n", "<br>") : props.text
+	if (!props.editable) previewText.value = parseMD(textToParse, true, props.currentSettings?.noMD)
+	else previewText.value = striptags(props.text).replaceAll("\n", "<br>")
+}
+
+watch(() => props.editable, togglePreview)
 
 const makeNextParagraph = (e: KeyboardEvent) => {
 	if (props.type.startsWith("heading")) {
@@ -46,61 +48,72 @@ const makeNextParagraph = (e: KeyboardEvent) => {
 	}
 }
 
-const mutation = (mutationList: MutationRecord[]) => {
-	textChanges.disconnect()
-	mainText.value.dataset.modf = "0"
-	
-	text.value = mutationList[0].target.value
-	textChanges.observe(mainText.value!, {attributes: true, attributeFilter: ['data-modf']})
-}
-
-const textChanges = new MutationObserver(mutation)
-const observeChanges = () => {
-	if (props.editable) {
-		textChanges.observe(mainText.value!, {attributes: true, attributeFilter: ['data-modf']})
-	}
-}
-
-const setBoxHeight = () => {
-	if (!props.editable) return
-	mainText.value.style.height = `unset`;
-	mainText.value.style.height = `${mainText.value?.scrollHeight}px`;
-}
-
 const doFocusText = () => {
 	mainText.value?.focus()
 }
 
+const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
+
+const pasteText = (e: ClipboardEvent) => {
+	e.preventDefault()
+
+	let pasteText = e.clipboardData?.getData("Text")
+	let sel = window.getSelection()
+	if (!pasteText || !sel) return
+
+	let range = sel?.getRangeAt(0)
+	let textNode = document.createTextNode(pasteText)
+	range?.deleteContents()
+	range?.insertNode(textNode)
+
+	range?.setStartAfter(textNode)
+	range?.setEndAfter(textNode)
+
+	sel?.removeAllRanges()
+	sel?.addRange(range)
+	hasText.value = checkHasText()
+	emit('textModified', mainText.value?.innerText!)
+}
+
 defineExpose({
-	doFocusText
+	doFocusText,
+	togglePreview
 })
 
+const mutation = (record: MutationRecord[]) => {
+	if (record[0].attributeName == "data-modf") {
+		nextTick(() => emit('textModified', mainText.value?.outerText!))
+		hasText.value = checkHasText()
+	}
+}
+
+const observer = new MutationObserver(mutation)
+const startObserving = () => observer.observe(mainText.value!, {attributes: true})
+
 const focus = ref(false)
+const hasText = ref(checkHasText())
 
 </script>
 
 <template>
 	<div :data-type="type" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer outline-[2px] min-h-4 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
-		<textarea
-			v-if="canEditText && editable"
+		<p
+			v-if="canEditText"
 			ref="mainText"
-			@vue:mounted="observeChanges(); $nextTick(setBoxHeight)"
-			@input="setBoxHeight()"
-			@focus="emit('hasFocus', mainText!); focus = true"
-			v-model="text"
+			@vue:mounted="togglePreview(); startObserving()"
 			@keydown.enter="makeNextParagraph"
-			:placeholder="placeholder"
-			:rows="type.startsWith('heading') ? 1 : undefined"
-			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
-			data-modf="0"
-			:style="{textAlign: 'inherit', color: 'inherit'}"
-			:class="childStyling || []">
-		</textarea>
-		<p v-else-if="canEditText && !editable"
+			@focus="emit('hasFocus', mainText!); focus = true"
+			@input="emit('textModified', $event.target.outerText); hasText = checkHasText()"
+			@paste="pasteText"
 			v-html="previewText"
-			class="w-full text-[align:inherit] break-words bg-transparent border-none outline-none resize-none regularParsing"
-			:style="{textAlign: 'inherit', color: 'inherit'}"
-			:class="childStyling || []"></p>
+			data-modf="0"
+			:data-hastext="!hasText && editable"
+			class="w-full dataContainer whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
+			:placeholder="placeholder"
+			:contenteditable="editable"
+			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word'}"
+			:class="childStyling || []">
+		</p>
 			
 		<slot></slot>
 		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border max-sm:right-0">
@@ -126,6 +139,11 @@ const focus = ref(false)
 .listChildren > * {
 	display: list-item;
 	list-style-position: inside;
+}
+
+p[data-hasText=true]::before {
+	content: attr(placeholder);
+	@apply opacity-30 absolute;
 }
 
 </style>

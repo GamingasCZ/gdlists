@@ -18,7 +18,7 @@ const error = (ind: number, msg = 0) => {
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
-        styling: "",
+        styling: "min-h-12",
         nestable: true,
         canEditText: true,
         settings: [{

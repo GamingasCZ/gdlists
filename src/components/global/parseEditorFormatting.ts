@@ -8,7 +8,7 @@ export default function parseText(textToParse: string, limited?: boolean, no?: b
 
   let keepTags
   if (limited) // Removes heading and image tags
-    keepTags = ["ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "code", "input", "p"]
+    keepTags = ["ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "code", "input"]
   else
     keepTags = ["h1", "h2", "h3", "ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "img", "code", "input", "p"]
 
@@ -93,10 +93,77 @@ export function addFormatting(type: number, textbox: HTMLTextAreaElement) {
   return textbox.value
 }
 
+export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
+  let chars = ["**", "_", "~~"][type];
+  let selection = window.getSelection()
+  let range = selection?.getRangeAt(0)
+  let selStart = range?.startOffset;
+  let selEnd = range?.endOffset;
+  let selectedTex = selection?.toString();
+
+  const modifySelection = (newText: string, keepContent = false, selectPart: [number, number] | null = null) => {
+    const style = document.createTextNode(newText)
+    if (!keepContent) range?.deleteContents()
+    range?.insertNode(style)
+
+    if (!selectPart) {
+      range?.setStartAfter(style)
+      range?.setEndAfter(style)
+    }
+    else {
+      range?.setStart(style, selectPart[0])
+      range?.setEnd(style, selectPart[1])
+    }
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
+
+  switch (type) {
+    case 0:
+    case 1:
+    case 2:
+      if (selStart == selEnd) {
+        modifySelection(`${chars} ${chars}`, false, [chars.length, chars.length+1]) // No text selected
+      }
+      else
+        modifySelection(`${chars}${selectedTex}${chars}`)
+      break;
+    case 4:
+    case 5:
+    case 6:
+    case 8:
+    case 9:
+    case 10:
+      let format = ["* ", "> ", "- [ ] ", null, "# ", "## ", "### "][type-4];
+      let startLF = [undefined, "\n"].includes(textbox.innerText[selStart - 1])
+        ? ""
+        : "\n";
+
+      let sel = type == 6 ? [startLF.length+3, startLF.length+4] : null
+      modifySelection(`${startLF}${format}`, true, sel)
+      break;
+    case 12:
+    case 13:
+      let helpText = type == 13 ? 'alt' : 'text'
+      let selectedText = selectedTex || helpText
+      let isImage = type == 13 ? '!' : ''
+      let descText = selectedText || 'text'
+      if (selectedTex.startsWith("http"))
+        modifySelection(`${isImage}[${helpText}](${selectedText})`, false, [isImage.length+1, isImage.length+1+helpText.length])
+      else
+        modifySelection(`${isImage}[${descText}](link)`, false, [isImage.length+descText.length+3, isImage.length+descText.length+7])
+      break;
+
+    default:
+      break;
+  }
+  return textbox.innerText
+}
+
 export const autoLink = (e: Event) => {
   let text = e.clipboardData.getData('Text')
   if (text.startsWith("http")) {
-    if (text.match(/^.*(.jpg|.png|.gif|.webp|.jpeg)/)) return 12
-    else return 11
+    if (text.match(/^.*(.jpg|.png|.gif|.webp|.jpeg)/)) return 13
+    else return 12
   }
 }

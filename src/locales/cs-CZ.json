@@ -61,7 +61,9 @@
     "loginHelp1": "Teď můžeš začít postovat, likovat a komentovat!",
     "loginHelp2": "Používej selský rozum a udržuj své příspěvky slušné.",
     "loginHelp3": "Pokud něco nefuguje jak má,",
-    "loginHelp4": "nahlaš mi prosím chybu"
+    "loginHelp4": "nahlaš mi prosím chybu",
+    "tAd1": "Sleduj",
+    "tAd2": "na Twitteru!"
   },
   "editor": {
     "tags": [
@@ -345,7 +347,8 @@
     "pickList": "Vybrat seznam",
     "pickReview": "Vybrat recenzi",
     "randomLevel": "Náhodný level",
-    "searchLevels": "Hledat levely"
+    "searchLevels": "Hledat levely",
+    "checklist": "Políčko"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -683,7 +686,7 @@
     "justSaved": "Uloženo",
     "draftHelp1": "Tady jsou tvé nedopsané recenze!",
     "draftHelp2": "Můžeš si tu své recenze ukládat a kdykoliv se k nim vrátit.",
-    "draftHelp3": "Vše se ukládá lokálně. Zobrazí se tedy jen na tomto zařízení a když smažeš cookies, smažou se i tyto recenze. Ukládat můžeš i při výpadku internetu nebo serverů.",
+    "draftHelp3": "V konceptech se ukládají tvé nedopsané recenze.\\\n\\\nRecenze se do konceptů ukládají samy od sebe podle zvoleného autosave intervalu v nastavení, nebo když opustíš stránku.\\\n\\\nVše se ukládá lokálně. Zobrazí se tedy jen na tomto zařízení a když smažeš cookies, smažou se i tyto recenze. Ukládat můžeš i při výpadku internetu nebo serverů.\\\n\\\nKoncept se smaže po nahrání.",
     "draftHelp4": "Po nahrání se koncept smaže.",
     "writeOn": "Načíst",
     "draftNoLoad": "Nepodařilo se načíst koncept!",
@@ -692,7 +695,9 @@
     "thisTypeManyCont": "Víc prvků tohoto typu už nelze přidávat!",
     "deletedPost": "Smazaný příspěvek",
     "embedded": "Vložený příspěvek",
-    "embeddedHelp": "Načte se po načtení recenze"
+    "embeddedHelp": "Načte se po načtení recenze",
+    "vertAlign": "Umístění",
+    "back": "Vrátit se"
   },
   "review": {
     "columnSetting": "{0} sloupec",

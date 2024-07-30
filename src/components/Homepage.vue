@@ -4,7 +4,7 @@ import LoginButton from "./global/LoginButton.vue";
 import LoggedInPopup from "./homepage/LoggedInPopup.vue";
 import cookier from "cookier";
 import { computed, onMounted, ref, watch } from "vue";
-import { SETTINGS, hasLocalStorage } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
 import { dialog } from "./ui/sizes";
@@ -54,6 +54,12 @@ watch(props, () => {
 
 const localStorg = ref(hasLocalStorage())
 
+const closeTwitterAd = () => {
+  viewedPopups.twitterAd = true
+  localStorage.setItem("popupsViewed", JSON.stringify(viewedPopups))
+  document.querySelector("#twitterAd")?.remove()
+}
+
 </script>
 
 <template>
@@ -73,6 +79,13 @@ const localStorg = ref(hasLocalStorage())
   </div>
 
   <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
+    <!-- Twitter notif -->
+    <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
+      <img src="@/images/socials/twitter.svg" class="w-6" alt="">
+      <span>{{ $t('homepage.tAd1') }} <a @click="closeTwitterAd" target="_blank" href="https://twitter.com/geodlists" class="underline">@GDLists</a> {{ $t('homepage.tAd2') }}</span>
+      <button @click="closeTwitterAd" class="ml-3 text-xl text-white text-opacity-40">X</button>
+    </div>
+
     <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
       <div class="relative">
         <input type="text" name="q"

@@ -165,7 +165,9 @@
     "loginHelp1": "You're free to make posts, like and comment now!",
     "loginHelp2": "Use common sense and keep all your posts civil.",
     "loginHelp3": "If something isn't working as it should, please",
-    "loginHelp4": "report the issue"
+    "loginHelp4": "report the issue",
+    "tAd1": "Follow",
+    "tAd2": "on Twitter!"
   },
   "level": {
     "comments": "Comments",
@@ -407,7 +409,8 @@
     "pickReview": "Pick review",
     "pickList": "Pick list",
     "searchLevels": "Search Levels",
-    "randomLevel": "Random Level"
+    "randomLevel": "Random Level",
+    "checklist": "Checklist"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -683,7 +686,7 @@
     "draftHelp1": "Here are your unfinished reviews!",
     "draftHelp4": "The draft will remove itself after posting.",
     "draftHelp2": "You can save and come back to these reviews anytime.",
-    "draftHelp3": "Drafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.",
+    "draftHelp3": "Drafts are used to store your unfinished reviews.\\\n\\\nReviews save by themselves depending on your set autosave interval, or when you leave the page.\\\n\\\nDrafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.\\\n\\\nThe draft is removed once you upload your review.",
     "writeOn": "Load",
     "draftNoLoad": "Failed to load draft!",
     "import": "Import",
@@ -691,7 +694,9 @@
     "thisTypeManyCont": "You cannot add more containers of this type!",
     "deletedPost": "Removed Post",
     "embedded": "Embedded Post",
-    "embeddedHelp": "Load the review to display this post"
+    "embeddedHelp": "Load the review to display this post",
+    "vertAlign": "Vertical Align",
+    "back": "Go Back"
   },
   "review": {
     "columnSetting": "{0} column",

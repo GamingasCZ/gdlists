@@ -115,7 +115,7 @@ export function checkReview() {
     })
     reviewData.value.containers.filter(c => c.type == "twoColumns").forEach(nest => {
         nest.settings.components.forEach(column => {
-            column.filter(x => x !== true).forEach(container => { // filter out maxWidth
+            column.filter(x => x === Object(x)).forEach(container => { // filter out maxWidth
                 if (containers[container.type].canEditText) {
                     if (!container.data) {
                         error.mess = i18n.global.t('reviews.notFilledIn', [containers[container.type].placeholder])
@@ -145,6 +145,8 @@ export function parseReviewContainers(containers: object[]) {
     let main: [number, number, string][] = []
     let indicies = [0,0,0]
     containers.forEach(container => {
+        if (container !== Object(container)) return
+
         switch (container.type) {
             case "heading1":
             case "heading2":

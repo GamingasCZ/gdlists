@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import { inject } from 'vue';
 import DataContainer from './DataContainer.vue';
 import { flexNames, reviewData } from '@/Reviews';
@@ -64,18 +64,18 @@ const selectNestContainer = (e: Event) => {
 <template>
     <article
         @click.stop="selectNestContainer"
-        :style="{borderColor: borderColor, maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
-        class="p-0.5 border border-opacity-30 transition-colors duration-75 min-w-10 grow min-h-8"
+        :style="{borderColor: borderColor, justifyContent: ['start', 'center', 'end'][settings.components[subIndex][settings.components[subIndex].findIndex(x => typeof x == 'number')]], maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
+        class="p-0.5 flex flex-col border border-opacity-30 transition-colors duration-75 min-w-10 grow min-h-8 basis-[min-content]"
         :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!border-none': !editable}"
     >
         <DataContainer
-            v-for="(container, ind) in settings.components[subIndex].filter(x => x !== true)"
+            v-for="(container, ind) in settings.components[subIndex].filter(x => x === Object(x))"
             v-bind="CONTAINERS[container.type]"
             @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @settings-button="buttonState = [$event, ind]"
-            v-model="container.data"
+            @text-modified="container.data = $event"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"
@@ -85,7 +85,7 @@ const selectNestContainer = (e: Event) => {
             :text="container.data"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0] && editable"
         >
-            <div class="flex w-full" :style="{justifyContent: flexNames[container.align]}">
+            <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
                 <component
                     v-for="elements in CONTAINERS[container.type].additionalComponents"
                     :is="elements"
