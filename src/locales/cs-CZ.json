@@ -21,11 +21,12 @@
     "qLow": "Nízká",
     "qMed": "Výchozí",
     "qHigh": "Vysoká",
-    "clickClose": "Zavírání dialogů kliknutím mimo",
+    "clickClose": "Zavírát dialogy kliknutím",
     "viewMode": "Zobrazení levelů",
     "classic": "Klasické",
     "compact": "Kompaktní",
-    "table": "Tabulka"
+    "table": "Tabulka",
+    "devices": "Zařízení"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

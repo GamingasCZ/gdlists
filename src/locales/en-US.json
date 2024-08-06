@@ -429,11 +429,12 @@
     "qHigh": "High",
     "qLow": "Low",
     "qMed": "Default",
-    "clickClose": "Clicking outside a dialog closes it",
+    "clickClose": "Close dialogs on click",
     "classic": "Classic",
     "compact": "Compact",
     "table": "Table",
-    "viewMode": "Level Styling"
+    "viewMode": "Level Styling",
+    "devices": "Sessions"
   },
   "help": {
     "Lists": "Lists",

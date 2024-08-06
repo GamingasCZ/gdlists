@@ -17,14 +17,43 @@ if (isset($_GET["error"])) {
     die(0);
 }
 
+$mysqli = new mysqli($hostname, $username, $password, $database);
+if ($mysqli -> connect_errno) {
+    header("Location: " . $https . $local . '/gdlists/?loginerr');
+};
+
+if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
+    $acc = checkAccount();
+    if (!$acc) die("0");
+
+    $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $acc["id"]], "is");
+    if (array_key_exists("error", $res)) die("0");
+    else die("1");
+
+}
+
 if (sizeof($_GET) == 1) {
+    if (array_keys($_GET)[0] == "sessions") { // Check login validity
+        $acc = checkAccount();
+        $token = getAuthorization();
+        if (!$acc) die();
+
+        $req = doRequest($mysqli, "SELECT session_data, session_index, last_login FROM `sessions` WHERE user_id=?", [$acc["id"]], "s", true);
+        for ($s=0; $s < sizeof($req); $s++) { 
+            $req[$s]["session_data"] = json_decode($req[$s]["session_data"]);
+        }
+        $mysqli -> close();
+        die(json_encode(["sessions" => $req, "currentSession" => $token[3]]));
+    }
     if (array_keys($_GET)[0] == "check") { // Check login validity
-        if (!getAuthorization()) {echo json_encode(["status" => "logged_out"]); return false;} // Not logged in
+        $auth = getAuthorization();
+        if (!$auth) {echo json_encode(["status" => "logged_out"]); return false;} // Not logged in
 
         $accCheck = checkAccount();
+        doRequest($mysqli, "UPDATE `sessions` SET `last_login`=? WHERE `user_id`=? AND `session_index`=?", [time(), $accCheck["id"], $auth[3]], "isi");
         $profileData = ["status" => "logged_in", "account_name" => $accCheck["username"], "account_id" => $accCheck["id"] ,"pfp_hash" => $accCheck["avatar"]];
-        echo $accCheck ? json_encode($profileData) : 0;
-        return true;
+        $mysqli -> close();
+        die($accCheck ? json_encode($profileData) : 0);
     }
 
     if (!isset($_GET["code"])) die("0");
@@ -39,37 +68,54 @@ if (sizeof($_GET) == 1) {
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
     $baseURL = "https://discord.com/api/v10/oauth2/token";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 1), true);
-    if (array_key_exists("error", $accessInfo)) die(0);
+    if (array_key_exists("error", $accessInfo)) {
+        header("Location: " . $https . $local . '/gdlists/?loginerr');
+    };
 
     // Get user data
     $tokenHeaders = array('Authorization: Bearer ' . $accessInfo["access_token"]);
     $baseURL = "https://discord.com/api/v10/users/@me";
-    $ok = json_decode(post($baseURL, array(), $tokenHeaders), true);
-
-    // Encrypt and save access token into a cookie
-    setcookie("access_token", base64_encode(encrypt(($accessInfo["access_token"])."|".(time()+$accessInfo["expires_in"])."|".($ok["id"]))), time()+2678400, "/");
+    $dcApiResponse = json_decode(post($baseURL, array(), $tokenHeaders), true);
 
     // Save data to database
-    $mysqli = new mysqli($hostname, $username, $password, $database);
-    if ($mysqli -> connect_errno) die("0");
-
     $fistTimeUser = true;
     try {
-        $mysqli -> query(sprintf("INSERT INTO `users`(`username`, `avatar_hash`, `discord_id`, `refresh_token`) VALUES ('%s','%s','%s','%s')", $ok["username"], $ok["avatar"], $ok["id"], $accessInfo["refresh_token"]));
+        doRequest($mysqli, "INSERT INTO `users`(`username`, `avatar_hash`, `discord_id`) VALUES (?,?,?,?)", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
         // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
         if (strpos(mysqli_error($mysqli), "Duplicate") !== false) {
-            $mysqli -> query(sprintf("UPDATE `users` SET `username`='%s', `avatar_hash`='%s', `refresh_token`='%s' WHERE `discord_id`='%s'", $ok["username"], $ok["avatar"], $accessInfo["refresh_token"], $ok["id"]));
+            doRequest($mysqli, "UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
             $fistTimeUser = false;
         }
     } catch (mysqli_sql_exception $err) {
         if (str_contains($err, "Duplicate")) {
-            $mysqli -> query(sprintf("UPDATE `users` SET `username`='%s', `avatar_hash`='%s', `refresh_token`='%s' WHERE `discord_id`='%s'", $ok["username"], $ok["avatar"], $accessInfo["refresh_token"], $ok["id"]));
+            doRequest($mysqli, "UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
             $fistTimeUser = false;
         }
     }
 
-    $userInfo = json_encode(array($ok["username"], $ok["id"], $ok["avatar"], $fistTimeUser));
+    $sessionData = [
+        "dev" => -1,
+        "browser" => -1,
+        "mobile" => "Unknown"
+    ];
+    
+    if (isset($_SERVER['HTTP_USER_AGENT'])) {
+        $matches = [];
+        preg_match("/(Linux|Windows|Mac OS|Android|iPhone)/", $_SERVER['HTTP_USER_AGENT'], $matches);
+        if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
+        preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $_SERVER['HTTP_USER_AGENT'], $matches);
+        if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
+        $sessionData["mobile"] = in_array($sessionData["dev"], ["Android", "iPhone"]);
+    }
+
+    $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM sessions", [], "");
+    doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `refresh_token`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?,?)", [$dcApiResponse["id"], $accessInfo["refresh_token"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "sssii");
+
+    $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $dcApiResponse["avatar"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
+
+    // Encrypt and save access token into a cookie
+    saveAccessToken($accessInfo, $dcApiResponse["id"], $sesionIndex["sessionCount"]);
 
     $mysqli -> close();
 
@@ -77,6 +123,7 @@ if (sizeof($_GET) == 1) {
 }
 else {
     http_response_code(401);
+    header("Location: " . $https . $local . '/gdlists');
     die("1");
 }
 ?>

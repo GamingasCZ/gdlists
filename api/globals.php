@@ -46,7 +46,8 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = fa
     $query = $mysqli->prepare($queryTemplate);
 
     // Fill in template
-    $query->bind_param($valueTypes, ...$values);
+    if (sizeof($values) > 0)
+        $query->bind_param($valueTypes, ...$values);
 
     try {
         $query->execute();
@@ -131,14 +132,17 @@ function refreshToken($currToken) {
     if ($mysqli -> connect_errno) die("0");
     error_log("refreshing token...");
 
-    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM users WHERE discord_id=?", [$currToken[2]], "i")["refresh_token"];
+    $loginData = getAuthorization();
+    if (!$loginData) return false;
+    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `sessions` WHERE user_id=? AND session_index=?", [$currToken[2], $loginData[3]], "ii");
+    if (array_key_exists("error", $refresh_token)) return false;
 
     // Get the new token details
     $tokenUrl = array(
         "client_id" => $DISCORD_CLIENT_ID,
         "client_secret" => $DISCORD_CLIENT_SECRET,
         "grant_type" => "refresh_token",
-        "refresh_token" => $refresh_token,
+        "refresh_token" => $refresh_token["refresh_token"],
     );
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
     $baseURL = "https://discord.com/api/v10/oauth2/token";
@@ -154,14 +158,23 @@ function refreshToken($currToken) {
     $ok = json_decode(post($baseURL, array(), $tokenHeaders), true);
 
     // Encrypt and save access token into a cookie
+    
     removeCookie("access_token");
+    saveAccessToken($accessInfo, $ok["id"], $loginData[3]);
 
-    setcookie("access_token", base64_encode(encrypt(($accessInfo["access_token"])."|".(time()+$accessInfo["expires_in"])."|".($ok["id"]))), time()+2678400, "/");
-
-    $mysqli -> query(sprintf('UPDATE `users` SET `username`="%s", `avatar_hash`="%s", `refresh_token`="%s" WHERE `discord_id`="%s"', $ok["username"], $ok["avatar"], $accessInfo["refresh_token"], $ok["id"]));
+    doRequest($mysqli, 'UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?', [$ok["username"], $ok["avatar"], $ok["id"]], "sss");
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
+}
+
+function saveAccessToken($oauthResponse, $discord_id, $sessionIndex) {
+    setcookie("access_token", base64_encode(encrypt(json_encode([
+        $oauthResponse["access_token"],
+        time()+$oauthResponse["expires_in"],
+        $discord_id,
+        $sessionIndex
+    ]))), time()+2678400, "/");
 }
 
 function removeCookie($cookie) {
@@ -171,7 +184,7 @@ function removeCookie($cookie) {
 
 function getAuthorization() {
     // bro (oh, it's ok now :D)
-    if (isset($_COOKIE["access_token"])) return $_COOKIE["access_token"];
+    if (isset($_COOKIE["access_token"])) return json_decode(decrypt(base64_decode($_COOKIE["access_token"])));
     else return false;
 }
 
@@ -180,7 +193,7 @@ function getLocalUserID() {
     $auth = getAuthorization();
     if (!$auth) return false;
     
-    $token = explode("|", decrypt(base64_decode(getAuthorization())));
+    $token = getAuthorization();
     return $token[2]; // User ID
 }
 
@@ -189,7 +202,7 @@ function checkAccount($forceToken = false) {
     if (!getAuthorization()) return false;
 
     $token;
-    if (!$forceToken) $token = explode("|", decrypt(base64_decode(getAuthorization())));
+    if (!$forceToken) $token = getAuthorization();
     else $token = $forceToken;
 
     if ($token[1]-time() < 86400) {

@@ -73,7 +73,7 @@ const closeTwitterAd = () => {
   </div>
 
   <div id="loginErrorToast" v-if="!firstTimeUser && localStorg"
-    class="flex absolute top-16 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
+    class="flex absolute top-0 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
     <img src="@/images/warn.svg" alt="" class="w-8">
     <span class="text-white">{{ $t('homepage.loginFail') }}</span>
   </div>
@@ -161,10 +161,10 @@ const closeTwitterAd = () => {
 
 <style>
 @keyframes slideTop {
-  0% {@apply -translate-y-24}
-  5% {@apply translate-y-0}
-  95% {@apply translate-y-0}
-  100% {@apply -translate-y-24}
+  0% {@apply -translate-y-8}
+  5% {@apply translate-y-16}
+  95% {@apply translate-y-16}
+  100% {@apply -translate-y-8}
 }
 
 .popout {

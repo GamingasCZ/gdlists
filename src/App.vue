@@ -89,7 +89,7 @@ document.body.addEventListener("keydown", e => {
       sas
     </section>
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]"/>
-    
+
   </main>
   <Footer />
 </template>
