@@ -267,7 +267,7 @@ function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) 
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
     foreach ($levels as $l) {
         $hash = $l["levelID"];
-        if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 100000000) continue;
+        if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 200000000) continue;
 
         $isCollab = is_array($l["creator"]);
         $creator;

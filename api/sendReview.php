@@ -80,6 +80,12 @@ foreach ($rows as $row) {
 // Adds levels to database
 if (!$DATA["private"]) {
   addLevelsToDatabase($mysqli, $DATA["levels"], $listID, $user_id, true);
+
+  foreach ($DATA["levels"] as $level) {
+    doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
+        [$level["levelID"], $listID, $level["ratings"][0][0], $level["ratings"][0][1], $level["ratings"][0][2], $level["ratings"][0][3]],
+        "iiiiii");
+  }
 }
 
 $mysqli -> close();
