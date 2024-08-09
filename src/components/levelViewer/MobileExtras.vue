@@ -9,6 +9,8 @@ const emit = defineEmits<{
     (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras"): string;
 }>();
 
+const canEdit = document.querySelector("#postEditButton")
+
 </script>
 
 <template>
@@ -28,6 +30,7 @@ const emit = defineEmits<{
             {{ listPinned ? $t('level.pin') : $t('level.unpin') }}
         </button>
         <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
+            v-if="canEdit"
             @click="emit('closePopup'); emit('doListAction', 'editList')">
             <img class="w-8" src="../../images/edit.svg" alt="">{{ $t('level.edit') }}
         </button>

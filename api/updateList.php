@@ -12,7 +12,7 @@ Return codes:
 */
 
 require("globals.php");
-require("checkList.php");
+require("contentValidator.php");
 header('Content-type: application/json'); // Return as JSON
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -85,9 +85,6 @@ else {
 
 // Adding levels to database
 if ($fuckupData[3] == 0) {
-    // $object = $IS_LIST ? "listID" : "reviewID";
-    // doRequest($mysqli, "DELETE FROM `levels` WHERE `" . $object . "`=?", [$DATA["id"]], "i");
-    
     // // hope it's not an old list :D
     doRequest($mysqli, sprintf("DELETE FROM `levels_uploaders` WHERE `%s`=?", $IS_LIST ? "listID" : "reviewID"), [$DATA["id"]], "i");
     addLevelsToDatabase($mysqli, $decoded["levels"], $DATA["id"], $listData["uid"], !$IS_LIST);

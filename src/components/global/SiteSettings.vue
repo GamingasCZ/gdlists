@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import Option from '../ui/Option.vue';
 import { SETTINGS } from "@/siteSettings";
+import RadioPicker from '../ui/RadioPicker.vue';
 
 </script>
 
 <template>
     <div class="flex flex-col p-2">
         <Option
-            v-model="SETTINGS.levelViewMode"
             :name="$t('settingsMenu.viewMode')"
-            control="dropdown"
-            :control-options="[[$t('settingsMenu.classic'), 0], [$t('settingsMenu.compact'), 1], [$t('settingsMenu.table'), 2]]"
+            control="slot"
             desc="Změní zobrazení levelů v seznamech"
             >
+            <RadioPicker v-model="SETTINGS.levelViewMode" id="level" :opt-names="[$t('settingsMenu.classic'), $t('settingsMenu.compact'), $t('settingsMenu.table')]" :opt-icons="['/viewModes/classic.svg', '/viewModes/compact.svg', '/viewModes/spreadsheet.svg']" />
         </Option>
+
         <Option
             v-model="SETTINGS.homepageColumns"
             :name="$t('settingsMenu.homepage')"

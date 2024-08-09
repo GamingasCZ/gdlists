@@ -255,6 +255,7 @@ const listUploadDate = computed(() =>props.review ?
         <!-- Edit list -->
         <button
           class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2"
+          id="postEditButton"
           @click="emit('doListAction', 'editList')" v-if="userUID == uid">
           <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/edit.svg" alt="" /><label class="max-md:hidden">{{
             $t('level.edit') }}</label>

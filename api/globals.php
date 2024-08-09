@@ -126,7 +126,7 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
     return $result;
 }
 
-function refreshToken($currToken) {
+function refreshToken() {
     global $hostname, $username, $password, $database, $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) die("0");
@@ -134,8 +134,8 @@ function refreshToken($currToken) {
 
     $loginData = getAuthorization();
     if (!$loginData) return false;
-    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `sessions` WHERE user_id=? AND session_index=?", [$currToken[2], $loginData[3]], "ii");
-    if (array_key_exists("error", $refresh_token)) return false;
+    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `sessions` WHERE user_id=? AND session_index=?", [$loginData[2], $loginData[3]], "si");
+    if (!is_array($refresh_token) || array_key_exists("error", $refresh_token)) return false;
 
     // Get the new token details
     $tokenUrl = array(
@@ -162,10 +162,25 @@ function refreshToken($currToken) {
     removeCookie("access_token");
     saveAccessToken($accessInfo, $ok["id"], $loginData[3]);
 
-    doRequest($mysqli, 'UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?', [$ok["username"], $ok["avatar"], $ok["id"]], "sss");
+    doRequest($mysqli, 'UPDATE `sessions` SET `refresh_token`=?, `access_token`=? WHERE `user_id`=?', [$ok["refresh_token"], $ok["access_token"], $ok["id"]], "sss");
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
+}
+
+function revokeToken($token) {
+    global $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
+    // Revoke token
+    $tokenUrl = array(
+        "client_id" => $DISCORD_CLIENT_ID,
+        "client_secret" => $DISCORD_CLIENT_SECRET,
+        "token" => $token,
+        "token_type_hint" => 'access_token'
+    );
+    $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
+    $baseURL = "https://discord.com/api/v10/oauth2/token/revoke";
+    $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
+    return !array_key_exists("error", $accessInfo);
 }
 
 function saveAccessToken($oauthResponse, $discord_id, $sessionIndex) {
@@ -281,31 +296,29 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
 
         $res = doRequest($mysqli, "
         INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, uploaderID, hash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ",
-            [
-                $l["levelName"],
-                $creator,
-                $isCollab ? sizeof($l["creator"][2]) : 0,
-                $l["levelID"],
-                isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
-                isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
-                isset($l["platf"]) ? $l["platf"] : false,
-                $userID,
-                $hash
-            ], "ssiiiiiss");
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",[
+            $l["levelName"],
+            $creator,
+            $isCollab ? sizeof($l["creator"][2]) : 0,
+            $l["levelID"],
+            isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
+            isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
+            isset($l["platf"]) ? $l["platf"] : false,
+            $userID,
+            $hash], "ssiiiiiss");
 
         // Add list/review connections
-        doRequest($mysqli, sprintf("
-    INSERT INTO `levels_uploaders` (levelID, %s)
-    VALUES (?, ?)
-            ", $isReview ? "reviewID" : "listID"),
-        [
-            $l["levelID"],
-            $listID,
-        ], "ii");
+        doRequest($mysqli, sprintf("INSERT INTO `levels_uploaders` (levelID, %s) VALUES (?, ?)", $isReview ? "reviewID" : "listID"),
+        [$l["levelID"], $listID], "ii");
+            
+        // Add review level ratings
+        if ($isReview) {
+            doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
+            [$l["levelID"], $listID, $l["ratings"][0][0], $l["ratings"][0][1], $l["ratings"][0][2], $l["ratings"][0][3]],
+            "iiiiii");
         }
     }
+}
 
 function isnum($x) {return is_numeric($x);}
 

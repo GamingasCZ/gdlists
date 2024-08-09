@@ -476,13 +476,13 @@ const jumpSearch = ref("")
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
   </DialogVue>
 
-  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1">
+  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
     <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
   </DialogVue>
   
   <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" header-disabled>
     <ListUploadedDialog
-      :list-i-d="getURL()"
+      :link="getURL()"
       :is-updating="uploadedDialogShown == 2"
       :is-review="true"
       @do-edit="listActions('editList')"
@@ -492,7 +492,6 @@ const jumpSearch = ref("")
 
   <section class="mt-12 text-white">
     <header>
-      <div class=""></div>
       <ListDescription
         v-if="LIST_DATA.name != undefined && !nonexistentList"
         class="mb-8"
@@ -576,7 +575,7 @@ const jumpSearch = ref("")
         />      
       </div>
       
-      <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" class="flex flex-col gap-4">
+      <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" v-show="!commentsShowing" class="flex flex-col gap-4">
         <LevelCardCompact v-for="(level, index) in LIST_DATA?.data.levels"
           class="levelCard"
           :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
@@ -595,7 +594,7 @@ const jumpSearch = ref("")
         />
       </div>
 
-      <div v-else-if="SETTINGS.levelViewMode == 2 && !isReview" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
+      <div v-else-if="SETTINGS.levelViewMode == 2 && !isReview" v-show="!commentsShowing" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
         <table class="overflow-auto mx-auto w-full bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
           <th></th>
           <th>{{ $t('other.name') }}</th>

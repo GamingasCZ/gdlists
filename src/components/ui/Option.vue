@@ -26,5 +26,8 @@ defineProps<{
                 <option v-for="opt in controlOptions" :value="opt[1]">{{ opt[0] }}</option>
             </select>
         </div>
+        <div v-if="control == 'slot'">
+            <slot />
+        </div>
     </div>
 </template>

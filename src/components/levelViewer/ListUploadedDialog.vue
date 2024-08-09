@@ -4,13 +4,11 @@ import { useI18n } from 'vue-i18n';
 import { removeBackup} from '../../Editor'
 
 const props = defineProps<{
-    listID: string
+    link: string
     isUpdating: boolean
     isReview: boolean
 }>()
 const emit = defineEmits(["closePopup", "doEdit"])
-
-const sharelink = import.meta.env.VITE_ENDPOINT+"/gdlists/s/"+props.listID
 
 const closing = ref(false)
 const copied = ref(false)
@@ -21,13 +19,13 @@ const closePopup = () => {
     }, 100);
 }
 const copyLink = () => {
-    navigator.clipboard.writeText(sharelink)
+    navigator.clipboard.writeText(props.link)
     copied.value = true;
     setTimeout(() => copied.value = false, 500)
 }
 
-let text = `${useI18n().t('other.cringeAhhTextLmao')} - ${sharelink}`;
-let reviewText = `${useI18n().t('other.cringeAhhTextLmao2', [sharelink])}`;
+let text = `${useI18n().t('other.cringeAhhTextLmao')} - ${props.link}`;
+let reviewText = `${useI18n().t('other.cringeAhhTextLmao2', [props.link])}`;
 const links = ref<string[]>([
   `https://www.reddit.com/submit?url=${encodeURIComponent(props.isReview ? reviewText : text)}`,
   `https://twitter.com/intent/tweet?text=${encodeURIComponent(props.isReview ? reviewText : text)}`,
@@ -52,7 +50,7 @@ onMounted(() => {
         <h1 v-else class="mt-32 mb-5 text-3xl font-extrabold text-center">{{ $t('list.uploadFinished2', [isUpdating ? $t('list.updated2') : $t('list.uploaded2')]) }}</h1>
 
         <label>{{ $t('other.share') }}</label>
-        <input type="text" class="p-1 text-lg bg-black bg-opacity-40 rounded-md outline-none" readonly @mouseover="$event.target?.select()" :value="sharelink">
+        <input type="text" class="p-1 text-lg bg-black bg-opacity-40 rounded-md outline-none" readonly @mouseover="$event.target?.select()" :value="link">
         <div class="grid grid-cols-3 gap-1 mt-1">
             <button v-if="!copied" @click="copyLink()" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/link.svg" alt="" class="inline mr-2 w-4">{{ $t('other.link') }}</button>
             <button v-else class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/copy.svg" alt="" class="inline mr-2 w-4 animate-ping"></button>

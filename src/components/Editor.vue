@@ -247,12 +247,11 @@ function uploadList() {
     return
   }
 
-  axios.post(import.meta.env.VITE_API+"/sendList.php", {
-    listData: JSON.stringify(levelList.value),
-    lName: (document.getElementById("levelName") as HTMLInputElement).value,
-    diffGuesser: (levelList.value.diffGuesser[0] as any) | 0,
+  axios.post(import.meta.env.VITE_API+"/uploadPost.php", {
+    postData: levelList.value,
+    postName: listName.value,
     hidden: listHiddenSelected(),
-    disComments: (levelList.value.disComments as any) | 0
+    postType: 'list'
   }, {headers: {Authorization: cookier('access_token').get()}}).then((res: AxiosResponse) => {
     if (res.data[0] != -1) {
       removeBackup()

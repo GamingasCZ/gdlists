@@ -26,7 +26,10 @@
     "classic": "Klasické",
     "compact": "Kompaktní",
     "table": "Tabulka",
-    "devices": "Zařízení"
+    "devices": "Zařízení",
+    "thisDevice": "Toto zařízení",
+    "lastLogin": "Použito",
+    "logoutAll": "Odhlásit vše"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

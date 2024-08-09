@@ -6,16 +6,23 @@ import { SETTINGS } from "@/siteSettings";
 import { setLanguage } from "@/locales";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
+import axios from "axios";
 
 defineProps<{
   isLoggedIn: boolean;
   username: string;
 }>();
 
+let loggingOut = false
 function logout() {
-  cookier("access_token").remove();
-  localStorage.removeItem("account_info");
-  window.location.reload();
+  if (!loggingOut) {
+    loggingOut = true
+    axios.delete(import.meta.env.VITE_API + "/accounts.php", {params: {current: 1}}).then(() => {
+      window.location.reload();
+      cookier("access_token").remove();
+      localStorage.removeItem("account_info");
+    })
+  }
 }
 
 const dialogs = ref({
@@ -44,6 +51,7 @@ const Sessions = defineAsyncComponent({
 })
 
 const screenWidth = ref(window.innerWidth)
+const sessionsDialog = ref<HTMLDivElement>()
 </script>
 
 <template>
@@ -51,23 +59,26 @@ const screenWidth = ref(window.innerWidth)
   <div
   class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
-    <div v-if="dialogs.gallery" class="z-20">
-      <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
-        <Gallery unselectable />
-      </Dialog>
-    </div>
-
-    <div v-if="dialogs.settings" class="z-20">
-      <Dialog :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
-        <Sett />
-      </Dialog>
-    </div>
-
-    <div v-if="dialogs.sessions" class="z-20">
-      <Dialog :open="dialogs.sessions" :title="$t('settingsMenu.devices')" :width="dialog.medium" @close-popup="dialogs.sessions = false">
-        <Sessions/>
-      </Dialog>
-    </div>
+    <Teleport to="body">
+      <div v-if="dialogs.gallery" class="z-30">
+        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+          <Gallery unselectable />
+        </Dialog>
+      </div>
+  
+      <div v-if="dialogs.settings" class="z-30">
+        <Dialog :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
+          <Sett />
+        </Dialog>
+      </div>
+  
+      <div v-if="dialogs.sessions" class="z-30">
+        <Dialog :open="dialogs.sessions" :title="$t('settingsMenu.devices')" :action="sessionsDialog?.logoutAll" :side-button-text="$t('settingsMenu.logoutAll')" :width="dialog.medium" @close-popup="dialogs.sessions = false">
+          <template #icon><img src="@/images/logout.svg" class="w-4"></template>
+          <Sessions ref="sessionsDialog"/>
+        </Dialog>
+      </div>
+    </Teleport>
 
 
     <LoginButton v-if="!isLoggedIn" class="w-full" />

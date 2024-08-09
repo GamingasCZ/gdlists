@@ -4,7 +4,7 @@ import DialogVue from "./global/Dialog.vue";
 import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterRatings from "./writer/WriterRatings.vue";
-import WrtierLevels from "./writer/WriterLevels.vue";
+import WriterLevels from "./writer/WriterLevels.vue";
 import DataContainer from "./writer/DataContainer.vue"
 import FormattingBar from "./writer/FormattingBar.vue"
 import CONTAINERS from "./writer/containers";
@@ -381,7 +381,12 @@ const uploadReview = () => {
     }
     
     uploadInProgress.value = true
-    axios.post(import.meta.env.VITE_API + "/sendReview.php", reviewData.value).then(res => {
+    axios.post(import.meta.env.VITE_API + "/uploadPost.php", {
+        postData: reviewData.value,
+        postName: reviewData.value.reviewName,
+        hidden: reviewData.value.private ? 1 : 0,
+        postType: 'review'
+    }).then(res => {
         sessionStorage.setItem("uploadFinished", "1")
 
         if (res.data[0] != -1) router.replace(`/review/${res.data[0]}`)
@@ -662,7 +667,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
 
         <DialogVue :open="openDialogs.levels" :title="$t('editor.levels')" @close-popup="openDialogs.levels = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <WrtierLevels ref="levels" />
+            <WriterLevels ref="selectedLevel" />
             <CollabEditor v-if="openDialogs.collabs" :level-array="reviewData.levels" :index="0" :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
             <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')" :width="dialog.medium" :top-most="true">
                 <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />

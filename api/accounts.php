@@ -22,9 +22,40 @@ if ($mysqli -> connect_errno) {
     header("Location: " . $https . $local . '/gdlists/?loginerr');
 };
 
+function allTokens($res) {
+    return $res["access_token"];
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "PUT") {
+    refreshToken();
+    die();
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
     $acc = checkAccount();
     if (!$acc) die("0");
+
+    if (isset($_GET["all"])) {
+        $tokens = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE user_id = ?", [$acc["id"]], "s", true);
+        foreach (array_unique(array_map('allTokens', $tokens)) as $token) {
+            revokeToken($token);
+        }
+
+        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE user_id = ?", [$acc["id"]], "s");
+        die();  
+    }
+
+    if (isset($_GET["current"])) {
+        $token = getAuthorization();
+
+        revokeToken($token[0]);
+
+        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($token[3]), $acc["id"]], "is");
+        die();  
+    }
+
+    $acc = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $acc["id"]], "is");
+    $rev = revokeToken($acc["access_token"]);
 
     $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $acc["id"]], "is");
     if (array_key_exists("error", $res)) die("0");
@@ -32,7 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 
 }
 
-if (sizeof($_GET) == 1) {
+if (sizeof($_GET) > 0) {
+    $state = $_COOKIE["state"];
+    removeCookie("state");
+    if ($state != $_GET["state"])
+        die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
+
     if (array_keys($_GET)[0] == "sessions") { // Check login validity
         $acc = checkAccount();
         $token = getAuthorization();
@@ -99,17 +135,22 @@ if (sizeof($_GET) == 1) {
         "mobile" => "Unknown"
     ];
     
-    if (isset($_SERVER['HTTP_USER_AGENT'])) {
+    $userAgent = $_SERVER['HTTP_USER_AGENT'];
+    if (isset($userAgent)) {
+        $sessionData["mobile"] = (bool)strstr($userAgent, "Android") || strstr($userAgent, "iPhone");
         $matches = [];
-        preg_match("/(Linux|Windows|Mac OS|Android|iPhone)/", $_SERVER['HTTP_USER_AGENT'], $matches);
-        if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
-        preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $_SERVER['HTTP_USER_AGENT'], $matches);
+        if ($sessionData["mobile"])
+            $sessionData["dev"] = strstr($userAgent, "Android") ? "Android" : "iPhone";
+        else {
+            preg_match("/(Linux|Windows|Mac OS)/", $userAgent, $matches);
+            if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
+        }
+        preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $userAgent, $matches);
         if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
-        $sessionData["mobile"] = in_array($sessionData["dev"], ["Android", "iPhone"]);
     }
 
     $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM sessions", [], "");
-    doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `refresh_token`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?,?)", [$dcApiResponse["id"], $accessInfo["refresh_token"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "sssii");
+    doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `refresh_token`, `access_token`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?,?,?)", [$dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssssii");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $dcApiResponse["avatar"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");

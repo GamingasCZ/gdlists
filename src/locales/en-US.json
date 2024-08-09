@@ -434,7 +434,10 @@
     "compact": "Compact",
     "table": "Table",
     "viewMode": "Level Styling",
-    "devices": "Sessions"
+    "devices": "Sessions",
+    "thisDevice": "This Device",
+    "lastLogin": "Last Login",
+    "logoutAll": "Logout All"
   },
   "help": {
     "Lists": "Lists",
