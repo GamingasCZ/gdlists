@@ -127,7 +127,7 @@ if (sizeof($_GET) > 0) {
             doRequest($mysqli, "UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
             $fistTimeUser = false;
         }
-    }
+}   
 
     $sessionData = [
         "dev" => -1,
