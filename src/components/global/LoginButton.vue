@@ -18,7 +18,7 @@ const goToDiscord = () => {
   sessionStorage.setItem("loginRoute", currRoute)
 
   window.location.replace(
-    `https://discord.com/api/oauth2/authorize?client_id=989511463360139264&state=${lState}&redirect_uri=${encodeURIComponent(
+    `https://discord.com/api/oauth2/authorize?client_id=989511463360139264&state=${lState}&prompt=none&redirect_uri=${encodeURIComponent(
       import.meta.env.VITE_DC_RETURNURI + "/accounts.php"
       )}&response_type=code&scope=identify`
   );

@@ -149,6 +149,7 @@ function refreshToken() {
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
     if (array_key_exists("error", $accessInfo)) {
         removeCookie("access_token");
+        revokeToken($loginData[0], $mysqli, $loginData[2]);
         return false;
     }
 
@@ -162,13 +163,14 @@ function refreshToken() {
     removeCookie("access_token");
     saveAccessToken($accessInfo, $ok["id"], $loginData[3]);
 
-    doRequest($mysqli, 'UPDATE `sessions` SET `refresh_token`=?, `access_token`=? WHERE `user_id`=?', [$ok["refresh_token"], $ok["access_token"], $ok["id"]], "sss");
+    $res = doRequest($mysqli, 'UPDATE `sessions` SET `refresh_token`=?, `access_token`=? WHERE `user_id`=? AND `session_index` = ?', [$accessInfo["refresh_token"], $accessInfo["access_token"], $ok["id"], $loginData[3]], "sssi");
+    print_r($res);
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
 }
 
-function revokeToken($token) {
+function revokeToken($token, $mysqli, $uid, $single = false) {
     global $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
     // Revoke token
     $tokenUrl = array(
@@ -180,6 +182,15 @@ function revokeToken($token) {
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
     $baseURL = "https://discord.com/api/v10/oauth2/token/revoke";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
+
+    $res;
+    echo sprintf("DELETE FROM `sessions` WHERE `access_token`=%s AND `user_id`=%s", $token, $uid);
+    if ($single)
+        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE `access_token`=? AND `user_id`=?", [$token, $uid], "is");
+    else
+        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE `user_id`=?", [$uid], "s");
+    print_r($res);
+
     return !array_key_exists("error", $accessInfo);
 }
 

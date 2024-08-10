@@ -26,39 +26,35 @@ function allTokens($res) {
     return $res["access_token"];
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "PUT") {
+if ($_GET["refresh"]) {
     refreshToken();
     die();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-    $acc = checkAccount();
-    if (!$acc) die("0");
+    $user = checkAccount();
+    if (!$user) die("0");
 
     if (isset($_GET["all"])) {
-        $tokens = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE user_id = ?", [$acc["id"]], "s", true);
+        $tokens = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE user_id = ?", [$user["id"]], "s", true);
         foreach (array_unique(array_map('allTokens', $tokens)) as $token) {
-            revokeToken($token);
+            revokeToken($token, $mysqli, $user["id"], true);
         }
-
-        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE user_id = ?", [$acc["id"]], "s");
         die();  
     }
 
     if (isset($_GET["current"])) {
         $token = getAuthorization();
 
-        revokeToken($token[0]);
-
-        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($token[3]), $acc["id"]], "is");
+        revokeToken($token[0], $mysqli, $user["id"], true);
         die();  
     }
 
-    $acc = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $acc["id"]], "is");
-    $rev = revokeToken($acc["access_token"]);
+    $acc = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
+    print_r($acc);
+    $rev = revokeToken($acc["access_token"], $mysqli, $user["id"], true);
 
-    $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $acc["id"]], "is");
-    if (array_key_exists("error", $res)) die("0");
+    if (!is_null($res) && array_key_exists("error", $res)) die("0");
     else die("1");
 
 }
