@@ -6,11 +6,11 @@ import RadioPicker from '../ui/RadioPicker.vue';
 </script>
 
 <template>
-    <div class="flex flex-col p-2">
+    <div class="flex overflow-y-auto flex-col p-2">
         <Option
             :name="$t('settingsMenu.viewMode')"
             control="slot"
-            desc="Změní zobrazení levelů v seznamech"
+            :desc="$t('settingsMenu.levelHelp')"
             >
             <RadioPicker v-model="SETTINGS.levelViewMode" id="level" :opt-names="[$t('settingsMenu.classic'), $t('settingsMenu.compact'), $t('settingsMenu.table')]" :opt-icons="['/viewModes/classic.svg', '/viewModes/compact.svg', '/viewModes/spreadsheet.svg']" />
         </Option>
@@ -25,7 +25,7 @@ import RadioPicker from '../ui/RadioPicker.vue';
         <Option
             v-model="SETTINGS.autosave"
             :name="$t('settingsMenu.autosave')"
-            desc="Modifies how frequently your posts get backed up"
+            :desc="$t('settingsMenu.autosaveHelp')"
             control="dropdown"
             :control-options="[[$t('settingsMenu.asOff'), 0], [$t('settingsMenu.everySec', [30]), 30], [$t('settingsMenu.everySec', [60]), 60], [$t('settingsMenu.everyMin', [3]), 180]]"
             >
@@ -33,7 +33,7 @@ import RadioPicker from '../ui/RadioPicker.vue';
         <Option
             v-model="SETTINGS.iconQuality"
             :name="$t('settingsMenu.iconQuality')"
-            desc="Používá se pro ikonky členů collabu"
+            :desc="$t('settingsMenu.iconHelp')"
             control="dropdown"
             :control-options="[[$t('settingsMenu.noGenerate'), -2], [$t('settingsMenu.noColor'), -1], [$t('settingsMenu.qLow'), 6], [$t('settingsMenu.qMed'), 4], [$t('settingsMenu.qHigh'), 2]]"
         >
@@ -41,7 +41,7 @@ import RadioPicker from '../ui/RadioPicker.vue';
         <Option
             v-model="SETTINGS.dialogClickClose"
             :name="$t('settingsMenu.clickClose')"
-            desc="If clicking on the gray space around a dialog should close it."
+            :desc="$t('settingsMenu.dialogHelp')"
             control="cbox"
         >
         </Option>

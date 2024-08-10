@@ -22,7 +22,7 @@ switch ($method) {
         break;
         
     case 'POST': // No rate => rate
-        $accountCheck = checkAccount()["id"];
+        $accountCheck = checkAccount($mysqli)["id"];
         if (!$accountCheck) die("3");
 
         $DATA = json_decode(file_get_contents("php://input"), true);

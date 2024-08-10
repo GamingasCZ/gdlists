@@ -14,11 +14,11 @@ $MAX_STORAGE = 10000000;
 $MAX_FILECOUNT = 50;
 $MAX_UPLOADSIZE = 5000000;
 
-$user = checkAccount();
-if (!$user) die(-2);
-
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli -> connect_errno) die("0");
+
+$user = checkAccount($mysqli);
+if (!$user) die(-2);
 
 // Path for user content
 $userPath;

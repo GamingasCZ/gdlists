@@ -134,7 +134,7 @@ function refreshToken() {
 
     $loginData = getAuthorization();
     if (!$loginData) return false;
-    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `sessions` WHERE user_id=? AND session_index=?", [$loginData[2], $loginData[3]], "si");
+    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `users` WHERE discord_id=?", [$loginData[2]], "s");
     if (!is_array($refresh_token) || array_key_exists("error", $refresh_token)) return false;
 
     // Get the new token details
@@ -149,7 +149,7 @@ function refreshToken() {
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
     if (array_key_exists("error", $accessInfo)) {
         removeCookie("access_token");
-        revokeToken($loginData[0], $mysqli, $loginData[2]);
+        doRequest($mysqli, 'UPDATE `users` SET `access_token`=null, `refresh_token`=null WHERE `discord_id`=?', [$ok["id"]], "s");
         return false;
     }
 
@@ -163,14 +163,13 @@ function refreshToken() {
     removeCookie("access_token");
     saveAccessToken($accessInfo, $ok["id"], $loginData[3]);
 
-    $res = doRequest($mysqli, 'UPDATE `sessions` SET `refresh_token`=?, `access_token`=? WHERE `user_id`=? AND `session_index` = ?', [$accessInfo["refresh_token"], $accessInfo["access_token"], $ok["id"], $loginData[3]], "sssi");
-    print_r($res);
+    doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
 }
 
-function revokeToken($token, $mysqli, $uid, $single = false) {
+function revokeToken($token, $mysqli, $uid) {
     global $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
     // Revoke token
     $tokenUrl = array(
@@ -183,20 +182,15 @@ function revokeToken($token, $mysqli, $uid, $single = false) {
     $baseURL = "https://discord.com/api/v10/oauth2/token/revoke";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
 
-    $res;
-    echo sprintf("DELETE FROM `sessions` WHERE `access_token`=%s AND `user_id`=%s", $token, $uid);
-    if ($single)
-        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE `access_token`=? AND `user_id`=?", [$token, $uid], "is");
-    else
-        $res = doRequest($mysqli, "DELETE FROM `sessions` WHERE `user_id`=?", [$uid], "s");
-    print_r($res);
-
+    doRequest($mysqli, "DELETE FROM `sessions` WHERE `user_id`=?", [$uid], "s");
+    doRequest($mysqli, 'UPDATE `users` SET `access_token`=null, `refresh_token`=null WHERE `discord_id`=?', [$ok["id"]], "s");
+    
     return !array_key_exists("error", $accessInfo);
 }
 
 function saveAccessToken($oauthResponse, $discord_id, $sessionIndex) {
     setcookie("access_token", base64_encode(encrypt(json_encode([
-        $oauthResponse["access_token"],
+        "token",
         time()+$oauthResponse["expires_in"],
         $discord_id,
         $sessionIndex
@@ -223,7 +217,7 @@ function getLocalUserID() {
     return $token[2]; // User ID
 }
 
-function checkAccount($forceToken = false) {
+function checkAccount($mysqli, $forceToken = false) {
     global $DO_REFRESH;
     if (!getAuthorization()) return false;
 
@@ -238,7 +232,8 @@ function checkAccount($forceToken = false) {
         $token[0] = $refresh_token[0];
     }
 
-    $tokenHeaders = array('Authorization: Bearer ' . $token[0]);
+    $res = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE `discord_id`=?", [$token[2]], "s");
+    $tokenHeaders = array('Authorization: Bearer ' . $res["access_token"]);
     $baseURL = "https://discord.com/api/v10/users/@me";
     $ok = post($baseURL, array(), $tokenHeaders);
     $json = json_decode($ok, true);
@@ -247,13 +242,13 @@ function checkAccount($forceToken = false) {
         $res = refreshToken($token);
         if ($res === false) return false;
 
-        return checkAccount($res);
+        return checkAccount($mysqli, $res);
     }
     return $json;
 }
 
 function checkListOwnership($mysqli, $user_id) {
-    $client_id = checkAccount()["id"];
+    $client_id = checkAccount($mysqli)["id"];
     return $user_id == $client_id;
 }
 

@@ -26,33 +26,17 @@ function allTokens($res) {
     return $res["access_token"];
 }
 
-if ($_GET["refresh"]) {
-    refreshToken();
-    die();
-}
-
 if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-    $user = checkAccount();
+    $user = checkAccount($mysqli);
     if (!$user) die("0");
 
-    if (isset($_GET["all"])) {
-        $tokens = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE user_id = ?", [$user["id"]], "s", true);
-        foreach (array_unique(array_map('allTokens', $tokens)) as $token) {
-            revokeToken($token, $mysqli, $user["id"], true);
-        }
-        die();  
+    if ($_GET["all"]) {
+        $token = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE discord_id = ?", [$user["id"]], "s");
+        revokeToken($token["access_token"], $mysqli, $user["id"]);
+        die();
     }
 
-    if (isset($_GET["current"])) {
-        $token = getAuthorization();
-
-        revokeToken($token[0], $mysqli, $user["id"], true);
-        die();  
-    }
-
-    $acc = doRequest($mysqli, "SELECT `access_token` FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
-    print_r($acc);
-    $rev = revokeToken($acc["access_token"], $mysqli, $user["id"], true);
+    $acc = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
 
     if (!is_null($res) && array_key_exists("error", $res)) die("0");
     else die("1");
@@ -66,7 +50,7 @@ if (sizeof($_GET) > 0) {
         die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
     if (array_keys($_GET)[0] == "sessions") { // Check login validity
-        $acc = checkAccount();
+        $acc = checkAccount($mysqli);
         $token = getAuthorization();
         if (!$acc) die();
 
@@ -79,9 +63,11 @@ if (sizeof($_GET) > 0) {
     }
     if (array_keys($_GET)[0] == "check") { // Check login validity
         $auth = getAuthorization();
-        if (!$auth) {echo json_encode(["status" => "logged_out"]); return false;} // Not logged in
+        if (!$auth) die(json_encode(["status" => "logged_out"])); // Not logged in
 
-        $accCheck = checkAccount();
+        $accCheck = checkAccount($mysqli);
+        if (!$accCheck) die();
+
         doRequest($mysqli, "UPDATE `sessions` SET `last_login`=? WHERE `user_id`=? AND `session_index`=?", [time(), $accCheck["id"], $auth[3]], "isi");
         $profileData = ["status" => "logged_in", "account_name" => $accCheck["username"], "account_id" => $accCheck["id"] ,"pfp_hash" => $accCheck["avatar"]];
         $mysqli -> close();
@@ -109,22 +95,14 @@ if (sizeof($_GET) > 0) {
     $baseURL = "https://discord.com/api/v10/users/@me";
     $dcApiResponse = json_decode(post($baseURL, array(), $tokenHeaders), true);
 
-    // Save data to database
+    // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
     $fistTimeUser = true;
-    try {
-        doRequest($mysqli, "INSERT INTO `users`(`username`, `avatar_hash`, `discord_id`) VALUES (?,?,?,?)", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
-        // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
-        if (strpos(mysqli_error($mysqli), "Duplicate") !== false) {
-            doRequest($mysqli, "UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
-            $fistTimeUser = false;
-        }
-    } catch (mysqli_sql_exception $err) {
-        if (str_contains($err, "Duplicate")) {
-            doRequest($mysqli, "UPDATE `users` SET `username`=?, `avatar_hash`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"]], "ssss");
-            $fistTimeUser = false;
-        }
-}   
-
+    $res = doRequest($mysqli, "INSERT INTO `users`(`username`, `avatar_hash`, `discord_id`, `refresh_token`, `access_token`) VALUES (?,?,?,?,?)", [$dcApiResponse["username"], $dcApiResponse["avatar"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"]], "sssss");
+    if (!is_null($res) && array_key_exists("error", $res)) {
+        doRequest($mysqli, "UPDATE `users` SET `username`=?, `avatar_hash`=?, `refresh_token`=?, `access_token`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $dcApiResponse["avatar"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"]], "sssss");
+        $fistTimeUser = false;
+    }
+    
     $sessionData = [
         "dev" => -1,
         "browser" => -1,
@@ -145,8 +123,8 @@ if (sizeof($_GET) > 0) {
         if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
     }
 
-    $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM sessions", [], "");
-    doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `refresh_token`, `access_token`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?,?,?)", [$dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssssii");
+    $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM `sessions`", [], "");
+    doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?)", [$dcApiResponse["id"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssii");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $dcApiResponse["avatar"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");

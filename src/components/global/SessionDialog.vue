@@ -79,9 +79,9 @@ defineExpose({logoutAll})
                 <span v-if="session.session_index != currentSession" :title="`${getLoginDate(session.last_login).toLocaleDateString()} ${getLoginDate(session.last_login).toLocaleTimeString()}`" class="text-white text-opacity-40 cursor-help">{{ $t('settingsMenu.lastLogin') }}: {{ prettyDate((Date.now() - getLoginDate(session.last_login))/1000) }}</span>
                 <span v-else class="text-white text-opacity-80">{{ $t('settingsMenu.thisDevice') }}</span>
             </div>
-            <button v-if="session.session_index != currentSession" @click="logoutDevice(session.session_index, ind)" class="p-2 bg-red-400 rounded-md button">
+            <!-- <button v-if="session.session_index != currentSession" @click="logoutDevice(session.session_index, ind)" class="p-2 bg-red-400 rounded-md button">
                 <img src="@/images/logout.svg" alt="" class="w-5 invert">
-            </button>
+            </button> -->
         </div>
     </section>
 </template>

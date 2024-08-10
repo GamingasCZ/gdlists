@@ -28,7 +28,8 @@ function logout() {
 const dialogs = ref({
   settings: false,
   gallery: false,
-  sessions: false
+  sessions: false,
+  help: false
 })
 
 const Dialog = defineAsyncComponent({
@@ -47,6 +48,11 @@ const Sett = defineAsyncComponent({
 
 const Sessions = defineAsyncComponent({
   loader: () => import("@/components/global/SessionDialog.vue"),
+  loadingComponent: LoadingBlock
+})
+
+const Help = defineAsyncComponent({
+  loader: () => import("@/components/helpMenu/HelpMenu.vue"),
   loadingComponent: LoadingBlock
 })
 
@@ -76,6 +82,12 @@ const sessionsDialog = ref<HTMLDivElement>()
         <Dialog :open="dialogs.sessions" :title="$t('settingsMenu.devices')" :action="sessionsDialog?.logoutAll" :side-button-text="$t('settingsMenu.logoutAll')" :width="dialog.medium" @close-popup="dialogs.sessions = false">
           <template #icon><img src="@/images/logout.svg" class="w-4"></template>
           <Sessions ref="sessionsDialog"/>
+        </Dialog>
+      </div>
+      
+      <div v-if="dialogs.help" class="z-30">
+        <Dialog :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
+          <Help />
         </Dialog>
       </div>
     </Teleport>
@@ -127,6 +139,12 @@ const sessionsDialog = ref<HTMLDivElement>()
       v-if="isLoggedIn"
     >
       <img src="@/images/collab.svg" class="inline mr-3 w-5" alt="" />{{ $t('settingsMenu.devices') }}
+    </button>
+    <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="dialogs.help = true"
+    >
+      <img src="@/images/info.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.help') }}
     </button>
   </div>
 </template>

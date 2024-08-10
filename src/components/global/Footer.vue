@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { provide, ref } from "vue";
-import HelpMenu from "../helpMenu/HelpMenu.vue";
 import ContactDialog from "../global/ContactDialog.vue";
 import Dialog from "./Dialog.vue";
 import { dialog } from "../ui/sizes";
 
-const helpMenuOpen = ref<boolean>(false);
 const contactMenuOpen = ref<boolean>(false);
 const openContactPopup = () => contactMenuOpen.value = true
 provide("openContactPopup" , 'aaaa')
@@ -13,10 +11,6 @@ provide("openContactPopup" , 'aaaa')
 </script>
 
 <template>
-  <Dialog :open="helpMenuOpen" @close-popup="helpMenuOpen = false" :title="$t('other.help')">
-    <HelpMenu />
-  </Dialog>
-
   <Dialog :open="contactMenuOpen" @close-popup="contactMenuOpen = false" :title="$t('other.contact')" :width="dialog.small">
     <ContactDialog/>
   </Dialog>
@@ -39,12 +33,6 @@ provide("openContactPopup" , 'aaaa')
       </div>
     </div>
     <div class="flex gap-4 text-sm">
-      <button
-        class="p-1 underline rounded-md opacity-80"
-        @click="helpMenuOpen = true"
-      >
-        {{ $t('other.help') }}
-      </button>
       <a target="_blank" href="https://github.com/GamingasCZ/gdlists">
         <button class="p-1 underline rounded-md opacity-80">
           {{ $t('other.sourceCod') }}

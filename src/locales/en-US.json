@@ -437,7 +437,11 @@
     "devices": "Sessions",
     "thisDevice": "This Device",
     "lastLogin": "Last Login",
-    "logoutAll": "Logout All"
+    "logoutAll": "Logout All",
+    "iconHelp": "Modifies generated icon quality of a collab member.",
+    "autosaveHelp": "Modifies how frequently your draft posts get backed up.",
+    "dialogHelp": "Modifies if clicking the space around a dialog closes it.",
+    "levelHelp": "Modifies how levels are presented in a list."
   },
   "help": {
     "Lists": "Lists",

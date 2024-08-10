@@ -29,7 +29,11 @@
     "devices": "Zařízení",
     "thisDevice": "Toto zařízení",
     "lastLogin": "Použito",
-    "logoutAll": "Odhlásit vše"
+    "logoutAll": "Odhlásit vše",
+    "iconHelp": "Používá se pro ikonky členů collabu.",
+    "autosaveHelp": "Mění jak často se zálohují tvé rozepsané příspěvky.",
+    "dialogHelp": "Určuje, zda kliknutí do prostoru mimo dialog ho zavře.",
+    "levelHelp": "Změní vzhled karet levelů v seznamech."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

@@ -25,9 +25,6 @@ require("contentValidator.php");
 header('Content-type: application/json'); // Return as JSON
 
 // Check User
-$user = checkAccount();
-if (!$user) die(json_encode([-1, 7]));
-$user_id = $user["id"];
 
 
 // Connect to database
@@ -37,6 +34,9 @@ if ($mysqli -> connect_errno) {
   die(json_encode([-1, 0]));
 }
 
+$user = checkAccount($mysqli);
+if (!$user) die(json_encode([-1, 7]));
+$user_id = $user["id"];
 
 $post = json_decode(file_get_contents("php://input"), true);
 $DATA = $post["postData"];
