@@ -544,7 +544,9 @@
     "addMemberTitle": "Add a Member",
     "sortTitle": "Sort members",
     "pasteMemberTitle": "Paste member",
-    "hideSidebarTitle": "Hide sidebar"
+    "hideSidebarTitle": "Hide sidebar",
+    "removeAll": "Removing the last role will delete the collab!",
+    "removeAllHelp": "Are you sure you want to continue?"
   },
   "reviews": {
     "reviewName": "Review Title",

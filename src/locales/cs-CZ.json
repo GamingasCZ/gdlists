@@ -545,7 +545,9 @@
     "pickSocialTitle": "Vybrat sociální síť",
     "addMemberTitle": "Přidat člena",
     "sortTitle": "Roztřídit členy",
-    "pasteMemberTitle": "Vložit člena"
+    "pasteMemberTitle": "Vložit člena",
+    "removeAll": "Smazáním poslední role se smaže collab!",
+    "removeAllHelp": "Opravdu chceš pokračovat?"
   },
   "reviews": {
     "clickImgSet": "Kliknutím nastav obrázek.",

@@ -9,6 +9,7 @@ import { SETTINGS, hasLocalStorage } from '@/siteSettings';
 import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
 import { useI18n } from 'vue-i18n';
 import { i18n } from '@/locales';
+import Dialog from '../global/Dialog.vue';
 
 const props = defineProps<{
   levelArray: Level[]
@@ -252,6 +253,16 @@ const clipboardContent = ref<[number, string, CollabHumans]>(props.clipboard)
 const sortDropdownOpen = ref(false)
 const presetDropdownOpen = ref(false)
 
+const removeRole = (pos: number) => {
+  if (collab.value[1].length <= 1) {
+    confirmDeleteOpen.value = true
+    return
+  }
+  (collab.value as CollabData)[1].splice(pos, 1);
+  (collab.value as CollabData)[4].splice(pos, 1);
+  makeRoleColors()
+}
+
 /*
 =======
 Social media
@@ -458,6 +469,8 @@ const backgroundCol = computed(() => {
   return `linear-gradient(9deg, ${colorRight.value}, ${colorLeft.value})`
 })
 
+const confirmDeleteOpen = ref(false)
+
 </script>
 
 <template>
@@ -486,6 +499,19 @@ const backgroundCol = computed(() => {
       </div>
 
       <!-- Confirm remove -->
+      <Dialog :open="confirmDeleteOpen" @close-popup="confirmDeleteOpen = false" :title="$t('other.removal')" >
+        <div class="flex px-2 py-4">
+          <img src="@/images/trash.svg" class="mr-2 w-32 opacity-10" alt="">
+          <div>
+              <h2 class="text-xl">{{ $t('collabTools.removeAll') }}</h2>
+              <p class="mb-4 opacity-40">{{ $t('collabTools.removeAllHelp') }}</p>
+              <button @click="levelArray[index].creator = levelArray[index].creator[0][0].name; confirmDeleteOpen = false; emit('closePopup')" class="flex gap-2 items-center px-2 py-1 text-2xl font-bold text-black bg-red-400 rounded-md button">
+                  <img src="@/images/del.svg" class="w-6">
+                  {{ $t('editor.remove') }}
+              </button>
+          </div>
+        </div>
+      </Dialog>
 
       <!-- Header -->
       <section class="flex items-center mr-2" v-if="(typeof collab != 'string')">
@@ -695,9 +721,9 @@ const backgroundCol = computed(() => {
                 class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button"
                 @click="invisibleRole(pos)"><img src="@/images/view.svg" :class="{ 'opacity-20': collab?.[4]?.[pos] }"
                   alt=""></button>
-              <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1 || collab[1].length == 1"
+              <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1"
                 class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm group button"
-                @click="(collab as CollabData)[1].splice(pos, 1); (collab as CollabData)[4].splice(pos, 1); makeRoleColors()"><img
+                @click="removeRole(pos)"><img
                   class="group-disabled:opacity-20" src="@/images/trash.svg" alt=""></button>
           </div>
         </button>
