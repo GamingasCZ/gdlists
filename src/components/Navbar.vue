@@ -5,7 +5,7 @@ import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
-import { hasLocalStorage } from "@/siteSettings";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress } from "@/router";
 
 const props = defineProps<{
@@ -97,13 +97,36 @@ const deployPeterGriffin = async (e: Event) => {
   e.target.src = await import('../images/defaultPFP.webp').then(res => res.default)
 }
 
+var prevScroll = window.scrollY
+const hideNavbarOnScroll = () => {
+  navbarHidden.value = window.scrollY > prevScroll
+  if (settingsShown.value) {
+    settingsShown.value = false
+    settingsMenu.removeEventListener("click", closeSettings, { capture: true })
+  }
+  editorDropdownOpen.value = false
+  prevScroll = window.scrollY
+}
+const modifyNavbarScroll = () => {
+  if (SETTINGS.value.scrollNavbar)
+    window.onscroll = hideNavbarOnScroll
+  else
+    window.onscroll = null
+
+}
+modifyNavbarScroll()
+
+const navbarHidden = ref(false)
+watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
+
 </script>
 
 <template>
   <nav
     role="navigation"
     id="navbar"
-    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-drop overflow-x-clip bg-greenGradient">
+    :class="{'-translate-y-14': navbarHidden}"
+    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
     <!-- Home link -->
     <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
       <Logo class="w-10 h-10 button" />

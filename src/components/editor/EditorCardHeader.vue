@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
 import type { Level } from '@/interfaces';
+import { SETTINGS } from '@/siteSettings';
 import chroma from 'chroma-js';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
@@ -21,13 +22,19 @@ function getCreator() {
 }
 
 const tags = ref(props.data.tags.slice(0,5).map(x =>`${import.meta.env.BASE_URL}/tags/${x[0]}.svg`))
+const background = computed(() => {
+    if (SETTINGS.value.disableColors)
+        return getComputedStyle(document.documentElement).getPropertyValue("--secondaryColor")
+
+    return `linear-gradient(30deg, ${chroma.hsl(...props.data?.color!).darken(2).hex()}, ${chroma.hsl(...props.data?.color!).hex()})`
+})
 
 </script>
 
 <template>
     <!-- Closed card content -->
     <header
-    :style="{ backgroundImage: `linear-gradient(30deg, ${chroma.hsl(...data?.color!).darken(2).hex()}, ${chroma.hsl(...data?.color!).hex()})` }"
+    :style="{ background: background }"
     :data-moving="updatingPositions != -1 ? 1 : 0"
     class="flex relative gap-2 items-center overflow-clip bg-right bg-no-repeat rounded-md bg-blend-saturation cursor-pointer overflow-y-clip h-max shadow-drop cardHeader"
     @click="updatingPositions != -1 ? 0 : emit('updateOpenedCard', index!)">

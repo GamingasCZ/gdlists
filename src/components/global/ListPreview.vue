@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { makeColorFromString, parseElapsed } from "@/Editor";
 import type { ListCreatorInfo, ListPreview, selectedList } from "@/interfaces";
+import { SETTINGS } from "@/siteSettings";
 import chroma, { type Color } from "chroma-js";
 import { computed, reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
@@ -43,10 +44,15 @@ function getUsername() {
   return listCreator;
 }
 
-const getGradient = () =>
-  `linear-gradient(90deg, ${listColor.value.darken(
+const getGradient = () => {
+  if (SETTINGS.value.disableColors) {
+    return getComputedStyle(document.documentElement).getPropertyValue("--secondaryColor")
+  }
+  
+  return `linear-gradient(90deg, ${listColor.value.darken(
     2
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
+}
 
 const uploadDate = ref(new Date(parseInt(props.timestamp!)*1000));
 
@@ -82,7 +88,7 @@ const clickList = () => {
     :to="postLink"
     class="flex flex-col font-[poppins] w-full max-w-6xl cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
-      backgroundImage: getGradient(),
+      background: getGradient(),
       borderColor: listColor.darken(2).hex(),
     }"
     :class="{'!border-dotted !border-white !border-opacity-40': hidden != '0', 'border-dashed !border-black !border-opacity-70': props.url}"

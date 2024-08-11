@@ -14,7 +14,7 @@ defineProps<{
 </script>
 
 <template>
-    <div @click.stop="" class="p-2 mt-2 bg-black bg-opacity-40 rounded-md">
+    <div @click.stop="" class="p-2 bg-black bg-opacity-40 rounded-md">
         <div class="flex justify-between items-center w-full">
             <div class="mr-2">
                 <p class="text-xl leading-none">{{ name }}</p>

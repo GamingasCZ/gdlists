@@ -39,8 +39,8 @@ watch(props, () => {
     <dialog ref="main" @click="(SETTINGS.dialogClickClose && !disableTapClose) ? emit('closePopup') : ''" tabindex="0"
       @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center transition-all duration-75" v-if="open">
       <section @click.stop=""
-        :style="{width: width ?? '35rem', backgroundImage: customColor}"
-        class="flex max-h-[95vh] max-w-[95vw] flex-col relative rounded-lg text-white shadow-lg shadow-black" :class="{'bg-greenGradient': !customColor, 'backdrop-blur-md': customColor}">
+        :style="{width: width ?? '35rem', backgroundImage: SETTINGS.disableColors ? null : customColor}"
+        class="flex max-h-[95vh] max-w-[95vw] flex-col relative rounded-lg text-white shadow-lg shadow-black" :class="{'bg-greenGradient': SETTINGS.disableColors || !customColor, 'backdrop-blur-md': customColor}">
         <div v-show="!headerDisabled" class="relative z-40 m-2" :class="{'z-50': topMost}">
           <button :disabled="sideButtonDisabled!" @click="action" class="flex absolute gap-3 p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button" v-if="sideButtonText">
             <slot name="icon"></slot>

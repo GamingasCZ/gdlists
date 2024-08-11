@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { prettyDate } from '@/Editor'
+import { SETTINGS } from '@/siteSettings';
 import chroma from 'chroma-js'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 interface CommentFetchResponse {
@@ -67,6 +68,13 @@ if (emojis != null) {
 } else parsedComment.value = props.comment
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
 
+const color = computed(() => {
+  if (SETTINGS.value.disableColors)
+    return chroma.hex(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
+  else
+    return props.bgcolor
+})
+
 </script>
 
 <template>
@@ -79,6 +87,6 @@ parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
           <h5 class="text-xs opacity-50 cursor-help" :title="dateString">{{ time }}</h5>
         </div>
       </header>
-      <article class="overflow-y-auto p-1 mt-1 max-h-32 rounded-md border-4 border-solid" :style="{borderColor: bgcolor , boxShadow: `0px 0px 10px ${bgcolor}`, backgroundColor: chroma(bgcolor).darken(4).hex() }" v-html="parsedComment"></article>
+      <article class="overflow-y-auto p-1 mt-1 max-h-32 rounded-md border-4 border-solid" :style="{borderColor: color , boxShadow: `0px 0px 10px ${color}`, backgroundColor: chroma(color).darken(4).hex() }" v-html="parsedComment"></article>
     </section>
 </template>

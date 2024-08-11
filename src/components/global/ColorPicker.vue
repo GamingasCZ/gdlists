@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SETTINGS } from "@/siteSettings";
 import chroma from "chroma-js";
 import { onMounted, ref, watch } from "vue";
 
@@ -59,6 +60,13 @@ onMounted(() => {
         :value="colors[2]"
         @input="modColors(2, parseInt($event.target?.value))"
       />
+    </div>
+    <div class="flex gap-2" v-if="SETTINGS.disableColors">
+      <div :style="{background: colorsHex}" class="w-10 h-10 rounded-full"></div>
+      <div>
+        <h2 class="text-xl leading-none">{{ $t('other.colorPreview') }}</h2>
+        <span class="text-sm opacity-40">{{ $t('other.nocolorHelp') }}</span>
+      </div>
     </div>
   </section>
 </template>

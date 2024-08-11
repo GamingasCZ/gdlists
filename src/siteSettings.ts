@@ -8,7 +8,10 @@ export const SETTINGS = ref({
   autosave: 60,
   iconQuality: 4,
   dialogClickClose: true,
-  levelViewMode: 0
+  levelViewMode: 0,
+  scrollNavbar: true,
+  disableColors: false,
+  disableBGs: false
 });
 
 watch(SETTINGS, () => {

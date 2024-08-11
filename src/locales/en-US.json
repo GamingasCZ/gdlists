@@ -410,7 +410,9 @@
     "pickList": "Pick list",
     "searchLevels": "Search Levels",
     "randomLevel": "Random Level",
-    "checklist": "Checklist"
+    "checklist": "Checklist",
+    "colorPreview": "Color Preview",
+    "nocolorHelp": "Colors are disabled, but still are being set!"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -441,7 +443,13 @@
     "iconHelp": "Modifies generated icon quality of a collab member.",
     "autosaveHelp": "Modifies how frequently your draft posts get backed up.",
     "dialogHelp": "Modifies if clicking the space around a dialog closes it.",
-    "levelHelp": "Modifies how levels are presented in a list."
+    "levelHelp": "Modifies how levels are presented in a list.",
+    "navbarHelp": "Hides the navigation when scrolling down.",
+    "navbar": "Hide Navbar on Scroll",
+    "disColors": "Disable Colors",
+    "disColorHelp": "Level colors and comments will always use the default color.",
+    "disBGs": "Disable Backgrounds",
+    "disBGhelp": "Image backgrounds in posts will not show up."
   },
   "help": {
     "Lists": "Lists",

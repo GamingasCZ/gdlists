@@ -73,6 +73,7 @@ export function testIfImageExists(url: string) {
 }
 
 export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
+  if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return modifyListBG(0, true, review)
   if (reset) {
     document.documentElement.style.setProperty("--siteBackground","")
@@ -150,6 +151,10 @@ export function resetList() {
 }
 
 export const makeColorFromString = (name: string) => {
+  if (SETTINGS.value.disableColors) {
+    return chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
+  }
+
   let ok = Math.floor(
     16777215 *
       Math.sin(

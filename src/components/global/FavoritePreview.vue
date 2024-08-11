@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { makeColorFromString } from "@/Editor";
 import type { selectedList } from "@/interfaces";
+import { SETTINGS } from "@/siteSettings";
 import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
@@ -28,6 +29,9 @@ const props = defineProps<{
 }>()
 
 const listColor = ref<Color>(chroma(props.levelColor! ?? makeColorFromString(props.levelName)));
+if (SETTINGS.value.disableColors) {
+  listColor.value = chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
+}
 
 function parseElapsed(secs: number) {
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
@@ -39,10 +43,15 @@ function parseElapsed(secs: number) {
   else return Math.round(secs / 1892160000) + "y"; //y - years
 }
 
-const getGradient = () =>
-  `linear-gradient(90deg, ${listColor.value.darken(
+const getGradient = () => {
+  if (SETTINGS.value.disableColors) {
+    return getComputedStyle(document.documentElement).getPropertyValue("--secondaryColor")
+  }
+
+  return `linear-gradient(90deg, ${listColor.value.darken(
     2
   )}, ${listColor.value.darken()}, ${listColor.value.brighten()})`;
+}
 
 const uploadDate = reactive(new Date(props.timeAdded!));
 const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
@@ -56,9 +65,9 @@ const clickLevel = () => {
   <component
     :is="disableLink ? 'button' : 'RouterLink'"
     :to="`/${listID!}${goto}`"
-    class="flex text-left w-[40rem] max-w-full cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex text-left max-w-6xl w-full cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
-      backgroundImage: getGradient(),
+      background: getGradient(),
       borderColor: listColor.darken(2).hex(),
     }"
     @click="clickLevel"

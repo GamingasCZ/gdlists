@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { fixHEX } from "@/Editor";
 import type { FavoritedLevel, Level } from "@/interfaces";
+import { SETTINGS } from "@/siteSettings";
 import chroma from "chroma-js";
 
 const props = defineProps<{
@@ -13,7 +14,9 @@ const emit = defineEmits<{
 
 let col = props.data.levelColor ?? props.data.color
 
-const color = typeof col == 'string' ? fixHEX(col) : chroma.hsl(...col).hex()
+var color = typeof col == 'string' ? fixHEX(col) : chroma.hsl(...col).hex()
+if (SETTINGS.value.disableColors)
+  color = getComputedStyle(document.documentElement).getPropertyValue("--siteBackground")
 
 const isCollab = typeof props.data.creator != "string"
 </script>

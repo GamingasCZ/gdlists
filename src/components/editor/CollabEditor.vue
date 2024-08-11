@@ -63,11 +63,6 @@ if (hasLocalStorage()) {
 }
 const allLastUsedRoles = ref([...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []])
 
-watch(props, () => {
-  colorLeft.value = chroma.hsl(levelColor?.[0], 0.906, 0.167).hex()
-  colorRight.value = chroma.hsl(levelColor?.[0], 0.231, 0.102).hex()
-})
-
 const background = computed(() => `linear-gradient(9deg, ${colorRight.value}, ${colorLeft.value})`)
 
 defineExpose({
@@ -431,6 +426,17 @@ onMounted(() => {
 
   let getCurrCollabID = savedCollabs.value?.filter(saved => saved.collabID == collab.value[3])
   currentlyUsedSaved.value = savedCollabs.value?.indexOf(getCurrCollabID?.[0] ?? <any>[])!
+
+  if (SETTINGS.value.disableColors) {
+    colorLeft.value = getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
+    colorRight.value = getComputedStyle(document.documentElement).getPropertyValue("--secondaryColor")
+  }
+  else {
+    watch(props, () => {
+      colorLeft.value = chroma.hsl(levelColor?.[0], 0.906, 0.167).hex()
+      colorRight.value = chroma.hsl(levelColor?.[0], 0.231, 0.102).hex()
+    })
+  }
 })
 
 const hasSavedCollab = ref(-2)
@@ -448,6 +454,10 @@ onUnmounted(() => {
   localStorage.setItem("pinnedLastUsedRoles", JSON.stringify(pinnedLastUsedRoles.value))
 })
 
+const backgroundCol = computed(() => {
+  return `linear-gradient(9deg, ${colorRight.value}, ${colorLeft.value})`
+})
+
 </script>
 
 <template>
@@ -460,7 +470,7 @@ onUnmounted(() => {
   >
     <section
       @click.stop=""
-      :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
+      :style="{background: backgroundCol}"
       class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[40rem]"
       :class="{'max-lg:hidden': roleSidebarOpen || savedSidebarOpen}"
     >
@@ -633,7 +643,7 @@ onUnmounted(() => {
 
     <aside
       @click.stop=""
-      :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
+      :style="{background: backgroundCol}"
       class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
       v-show="roleSidebarOpen || pickingRole > -1"
       v-if="(typeof collab != 'string')"
@@ -729,7 +739,7 @@ onUnmounted(() => {
     </aside>
     <aside
       @click.stop=""
-      :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
+      :style="{background: backgroundCol}"
       class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
       v-show="savedSidebarOpen"
     >

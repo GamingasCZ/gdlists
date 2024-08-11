@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import parseText from "../global/parseEditorFormatting";
+import SectionDivider from '../ui/SectionDivider.vue'
 
 defineProps({
   question: { type: String, required: true },
@@ -13,11 +14,7 @@ const answerOpen = ref<boolean>(false);
 </script>
 
 <template>
-  <div v-if="startSection" class="flex gap-2 items-center opacity-90">
-    <hr class="w-6 h-0.5 bg-white rounded-full border-none" />
-    <h2 class="text-xl">{{ startSection }}</h2>
-    <hr class="w-full h-0.5 bg-white rounded-full border-none" />
-  </div>
+  <SectionDivider v-if="startSection" :text="startSection" />
   <section
     v-show="filterShow"
     class="px-2 py-3 text-white bg-black bg-opacity-40 rounded-md"

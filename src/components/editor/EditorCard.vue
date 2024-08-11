@@ -9,7 +9,7 @@ import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
 import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 import { useI18n } from "vue-i18n";
-import { hasLocalStorage } from "@/siteSettings";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
 
 const props = defineProps<{
@@ -234,12 +234,19 @@ const switchPlatformer = () => {
   isPlatformer.value = !isPlatformer.value
   props.levelArray.levels[props.index!].platf = isPlatformer.value
 }
+
+const background = computed(() => {
+  if (SETTINGS.value.disableColors)
+    return getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
+
+  return `linear-gradient(-90deg, ${lightCol()}, ${chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()})`
+})
 </script>
 
 <template>
   <!-- Card content -->
   <section
-    :style="{ backgroundImage: `linear-gradient(-90deg, ${lightCol()}, ${chroma.hsl(...levelArray.levels[index!].color!).hex()})` }"
+    :style="{ background: background }"
     class="flex flex-col gap-1.5 overflow-clip rounded-md">
     <div class="flex justify-between p-2 pr-1 bg-black bg-opacity-20">
       <div class="box-border inline-flex gap-2">
