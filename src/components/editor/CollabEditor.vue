@@ -485,6 +485,9 @@ const backgroundCol = computed(() => {
         />
       </div>
 
+      <!-- Confirm remove -->
+
+      <!-- Header -->
       <section class="flex items-center mr-2" v-if="(typeof collab != 'string')">
           <CollabCreator class="ml-1 grow" v-bind="collab[0][0]" :pos="999" :level-index="index" :collab-array="collab"
             :role-color="roleColors?.[collab[0][0].role]" :host="true" v-if="(typeof collab != 'string')"
@@ -725,7 +728,7 @@ const backgroundCol = computed(() => {
 
           <!-- Last used roles buttons -->
             <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md shadow-drop"
-              :style="{ backgroundColor: colorLeft }" @click="addRole(role)" v-for="role in allLastUsedRoles
+              :style="{ backgroundColor: colorLeft }" @click="addRole([role, false])" v-for="role in allLastUsedRoles
           ">
             <span class="ml-1 w-full">{{ role }}</span>
               <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="pinRole(role)"><img src="@/images/pin.svg"
