@@ -78,7 +78,12 @@ switch ($method) {
         $img = imagecreatefromstring($DATA);
         if (!$img) die("-5");
 
-        $maxsize = imagescale($img, 1920);
+        $maxsize;
+        if (imagesx($img) > 1920)
+            $maxsize = imagescale($img, 1920);
+        else
+            $maxsize = &$img; // reference
+
         imagesavealpha($maxsize, true);
         
         // Save image
