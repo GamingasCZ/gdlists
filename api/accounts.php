@@ -26,22 +26,22 @@ function allTokens($res) {
     return $res["access_token"];
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-    $user = checkAccount($mysqli);
-    if (!$user) die("0");
+// if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
+//     $user = checkAccount($mysqli);
+//     if (!$user) die("0");
 
-    if ($_GET["all"]) {
-        $token = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE discord_id = ?", [$user["id"]], "s");
-        revokeToken($token["access_token"], $mysqli, $user["id"]);
-        die();
-    }
+//     if ($_GET["all"]) {
+//         $token = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE discord_id = ?", [$user["id"]], "s");
+//         revokeToken($token["access_token"], $mysqli, $user["id"]);
+//         die();
+//     }
 
-    $acc = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
+//     $acc = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
 
-    if (!is_null($res) && array_key_exists("error", $res)) die("0");
-    else die("1");
+//     if (!is_null($res) && array_key_exists("error", $res)) die("0");
+//     else die("1");
 
-}
+// }
 
 if (sizeof($_GET) > 0) {
     $state = $_COOKIE["state"];
@@ -49,18 +49,18 @@ if (sizeof($_GET) > 0) {
     if ($state != $_GET["state"])
         die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
-    if (array_keys($_GET)[0] == "sessions") { // Check login validity
-        $acc = checkAccount($mysqli);
-        $token = getAuthorization();
-        if (!$acc) die();
+    // if (array_keys($_GET)[0] == "sessions") { // Check login validity
+    //     $acc = checkAccount($mysqli);
+    //     $token = getAuthorization();
+    //     if (!$acc) die();
 
-        $req = doRequest($mysqli, "SELECT session_data, session_index, last_login FROM `sessions` WHERE user_id=?", [$acc["id"]], "s", true);
-        for ($s=0; $s < sizeof($req); $s++) { 
-            $req[$s]["session_data"] = json_decode($req[$s]["session_data"]);
-        }
-        $mysqli -> close();
-        die(json_encode(["sessions" => $req, "currentSession" => $token[3]]));
-    }
+    //     $req = doRequest($mysqli, "SELECT session_data, session_index, last_login FROM `sessions` WHERE user_id=?", [$acc["id"]], "s", true);
+    //     for ($s=0; $s < sizeof($req); $s++) { 
+    //         $req[$s]["session_data"] = json_decode($req[$s]["session_data"]);
+    //     }
+    //     $mysqli -> close();
+    //     die(json_encode(["sessions" => $req, "currentSession" => $token[3]]));
+    // }
     if (array_keys($_GET)[0] == "check") { // Check login validity
         $auth = getAuthorization();
         if (!$auth) die(json_encode(["status" => "logged_out"])); // Not logged in
@@ -68,7 +68,7 @@ if (sizeof($_GET) > 0) {
         $accCheck = checkAccount($mysqli);
         if (!$accCheck) die();
 
-        doRequest($mysqli, "UPDATE `sessions` SET `last_login`=? WHERE `user_id`=? AND `session_index`=?", [time(), $accCheck["id"], $auth[3]], "isi");
+        // doRequest($mysqli, "UPDATE `sessions` SET `last_login`=? WHERE `user_id`=? AND `session_index`=?", [time(), $accCheck["id"], $auth[3]], "isi");
         $profileData = ["status" => "logged_in", "account_name" => $accCheck["username"], "account_id" => $accCheck["id"] ,"pfp_hash" => $accCheck["avatar"]];
         $mysqli -> close();
         die($accCheck ? json_encode($profileData) : 0);
@@ -103,34 +103,34 @@ if (sizeof($_GET) > 0) {
         $fistTimeUser = false;
     }
     
-    $sessionData = [
-        "dev" => -1,
-        "browser" => -1,
-        "mobile" => "Unknown"
-    ];
+    // $sessionData = [
+    //     "dev" => -1,
+    //     "browser" => -1,
+    //     "mobile" => "Unknown"
+    // ];
     
-    $userAgent = $_SERVER['HTTP_USER_AGENT'];
-    if (isset($userAgent)) {
-        $sessionData["mobile"] = (bool)strstr($userAgent, "Android") || strstr($userAgent, "iPhone");
-        $matches = [];
-        if ($sessionData["mobile"])
-            $sessionData["dev"] = strstr($userAgent, "Android") ? "Android" : "iPhone";
-        else {
-            preg_match("/(Linux|Windows|Mac OS)/", $userAgent, $matches);
-            if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
-        }
-        preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $userAgent, $matches);
-        if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
-    }
+    // $userAgent = $_SERVER['HTTP_USER_AGENT'];
+    // if (isset($userAgent)) {
+    //     $sessionData["mobile"] = (bool)strstr($userAgent, "Android") || strstr($userAgent, "iPhone");
+    //     $matches = [];
+    //     if ($sessionData["mobile"])
+    //         $sessionData["dev"] = strstr($userAgent, "Android") ? "Android" : "iPhone";
+    //     else {
+    //         preg_match("/(Linux|Windows|Mac OS)/", $userAgent, $matches);
+    //         if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
+    //     }
+    //     preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $userAgent, $matches);
+    //     if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
+    // }
 
-    $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM `sessions`", [], "");
-    doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?)", [$dcApiResponse["id"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssii");
+    // $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM `sessions`", [], "");
+    // doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?)", [$dcApiResponse["id"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssii");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $dcApiResponse["avatar"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
 
     // Encrypt and save access token into a cookie
-    saveAccessToken($accessInfo, $dcApiResponse["id"], $sesionIndex["sessionCount"]);
+    saveAccessToken($accessInfo, $dcApiResponse["id"]);
 
     $mysqli -> close();
 

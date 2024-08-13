@@ -161,7 +161,7 @@ function refreshToken() {
     // Encrypt and save access token into a cookie
     
     removeCookie("access_token");
-    saveAccessToken($accessInfo, $ok["id"], $loginData[3]);
+    saveAccessToken($accessInfo, $ok["id"]);
 
     doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
     $mysqli -> close();
@@ -182,18 +182,17 @@ function revokeToken($token, $mysqli, $uid) {
     $baseURL = "https://discord.com/api/v10/oauth2/token/revoke";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
 
-    doRequest($mysqli, "DELETE FROM `sessions` WHERE `user_id`=?", [$uid], "s");
+    // doRequest($mysqli, "DELETE FROM `sessions` WHERE `user_id`=?", [$uid], "s");
     doRequest($mysqli, 'UPDATE `users` SET `access_token`=null, `refresh_token`=null WHERE `discord_id`=?', [$ok["id"]], "s");
     
     return !array_key_exists("error", $accessInfo);
 }
 
-function saveAccessToken($oauthResponse, $discord_id, $sessionIndex) {
+function saveAccessToken($oauthResponse, $discord_id) {
     setcookie("access_token", base64_encode(encrypt(json_encode([
         "token",
         time()+$oauthResponse["expires_in"],
-        $discord_id,
-        $sessionIndex
+        $discord_id
     ]))), time()+2678400, "/");
 }
 
