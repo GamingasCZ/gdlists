@@ -17,6 +17,7 @@ const props = defineProps<{
     index: number
     buttonState: [string, number]
     editable: boolean
+    id: number
 }>()
 
 const image = ref<HTMLImageElement>()
@@ -73,6 +74,13 @@ const noClickWhenEditing = (e: Event) => {
     if (props.editable) e.preventDefault()
 }
 
+const preview = inject<(arg0: number) => void>("imagePreviewFullscreen", null)
+const fullscreenImage = () => {
+    if (props.editable || preview == null) return
+
+    preview(props.id)
+}
+
 </script>
 
 <template>
@@ -80,7 +88,7 @@ const noClickWhenEditing = (e: Event) => {
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
-    <figure v-show="imageLoading == 0" class="max-w-full">
+    <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
         <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: `${imageScale}px`}">
             <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
                 <img

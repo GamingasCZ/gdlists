@@ -11,13 +11,14 @@ CollabData,
 LevelList,
 ReviewList,
 ReviewDetailsResponse,
+ReviewContainer,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 // import LevelCardPC from "./global/LevelCardPC.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, provide } from "vue";
+import { ref, onMounted, watch, onUnmounted, provide, computed } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -42,6 +43,7 @@ import ViewModePicker from "./global/ViewModePicker.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
 import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
+import ImageViewer from "./global/ImageViewer.vue";
 
 const props = defineProps<{
   listID?: string
@@ -444,6 +446,26 @@ provide("idCopyTimestamp", copyID)
 
 const jumpSearch = ref("")
 
+const modPreview = (clickedImageID: number) => {
+  imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
+  console.log(clickedImageID)
+}
+provide("imagePreviewFullscreen", modPreview)
+const imagesArray = computed(() => {
+  let allImages: ReviewContainer[] = []
+  let data = (LIST_DATA.value.data as ReviewList).containers
+  data.forEach(con => {
+    if (con.type == "showImage") allImages.push(con)
+    if (con.type == "twoColumns") {
+      con.settings.components.forEach(sub => {
+        sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
+      })
+    }
+  })
+  return allImages
+})
+const imageIndex = ref(-1)
+
 </script>
 
 <template>
@@ -466,6 +488,10 @@ const jumpSearch = ref("")
       <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="(!isReview || reviewLevelsOpen) && cardGuessing == -1" v-for="level in LIST_DATA.data.levels.filter(x => x.levelName.toLowerCase().includes(jumpSearch.toLowerCase()))" :data="level" />
   </PickerPopup>
   </DialogVue>
+
+  <Transition name="fade">
+    <ImageViewer :images-array="imagesArray" v-model="imageIndex" @close-popup="imageIndex = -1" v-if="imageIndex !== -1" />
+  </Transition>
 
   <!-- Mobile options popup -->
   <DialogVue :open="mobileExtrasOpen" @close-popup="mobileExtrasOpen = false" :title="$t('other.options')">
@@ -642,6 +668,7 @@ const jumpSearch = ref("")
                       :button-state="false"
                       :settings="container.settings"
                       :index="index"
+                      :id="container.id"
                       :sub-index="subIndex"
                       :key="container.id"
                       :editable="false"

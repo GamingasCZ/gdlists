@@ -94,6 +94,7 @@ const selectNestContainer = (e: Event) => {
                     :button-state="buttonState"
                     :settings="container.settings"
                     :index="ind"
+                    :id="container.id"
                     :editable="editable"
                 />
             </div>
