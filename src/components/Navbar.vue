@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress } from "@/router";
+import ProfilePicture from "./global/ProfilePicture.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -92,10 +93,9 @@ const openEditorDropdown = () => {
 
 const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = false, 10)
 
-const deployPeterGriffin = async (e: Event) => {
-  // NANI??
-  e.target.src = await import('../images/defaultPFP.webp').then(res => res.default)
-}
+// Here lies function "deployPeterGriffin", beloved by many
+// Thank you for your service
+// - Gamingas 14.8.2024
 
 var prevScroll = window.scrollY
 const hideNavbarOnScroll = () => {
@@ -117,6 +117,7 @@ const modifyNavbarScroll = () => {
 modifyNavbarScroll()
 
 const navbarHidden = ref(false)
+provide("navbar", navbarHidden)
 watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
 </script>
@@ -188,17 +189,19 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     <div v-else-if="localStorg" @click="showSettings" id="settingsOpener"
       class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
 
-      <!-- ping background when offine -->
-      <img alt="" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
+      <ProfilePicture
+        :uid="loginInfo[1]"
         :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
         class="absolute animate-ping top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture" v-if="!isOnline" />
-      
-      <!-- profile picture -->
-      <img alt="" @error="deployPeterGriffin" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
+        id="profilePicture" v-if="!isOnline"
+      />
+
+      <ProfilePicture
+        :uid="loginInfo[1]"
         :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
         class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture" />
+        id="profilePicture"
+      />
     </div>
     <div v-else></div>
 

@@ -9,6 +9,7 @@ import cookier from 'cookier'
 import LoginButton from '../global/LoginButton.vue'
 import { useI18n } from 'vue-i18n'
 import { SETTINGS } from '@/siteSettings'
+import ProfilePicture from '../global/ProfilePicture.vue'
 
 const props = defineProps<{
     listID: string
@@ -21,13 +22,13 @@ const MAX_COMMENT_LEN = 300
 
 const loggedIn = ref<boolean>(true)
 
-const pfp = ref<string>("")
+const pfp = ref<number>()
 const username = ref<string>("")
 if (localStorage) {
     let userInfo = JSON.parse(localStorage.getItem("account_info")!)
     if (userInfo == null) loggedIn.value = false
     else {
-        pfp.value = `https://cdn.discordapp.com/avatars/${userInfo[1]}/${userInfo[2]}.png`
+        pfp.value = userInfo[1]
         username.value = userInfo[0]
     }
 }
@@ -211,7 +212,7 @@ function sendComment(com = "") {
         </Transition>
         <footer class="flex justify-between mt-2">
             <div>
-                <img :src="pfp" class="inline mr-2 w-8 rounded-full" alt="">
+                <ProfilePicture class="inline mr-2 w-8 rounded-full" :uid="pfp" />
                 <label>{{ username }}</label>
             </div>
 

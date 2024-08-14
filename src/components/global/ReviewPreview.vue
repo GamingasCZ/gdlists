@@ -9,6 +9,7 @@ import { getDominantColor } from "@/Reviews";
 import ListBackground from "./ListBackground.vue";
 import RatingContainer from "./RatingContainer.vue";
 import { SETTINGS } from "@/siteSettings";
+import ProfilePicture from "./ProfilePicture.vue";
 
 const props = defineProps<{
   rate_ratio: string;
@@ -149,7 +150,7 @@ const clickReview = () => {
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>
       <p class="flex gap-3 items-center mt-2">
-        <img class="w-10 rounded-full" :src="`https://cdn.discordapp.com/avatars/${creator.discord_id}/${creator.avatar_hash}.png`" alt="">
+        <ProfilePicture class="w-10 rounded-full" :uid="creator.discord_id" />
         <div>
           <h3 class="text-lg font-bold leading-none">{{ creator.username }}</h3>
           <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate(((new Date()).getTime() - uploadDate.getTime())/1000) }}</h4>

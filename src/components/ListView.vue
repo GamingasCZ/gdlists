@@ -448,7 +448,6 @@ const jumpSearch = ref("")
 
 const modPreview = (clickedImageID: number) => {
   imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
-  console.log(clickedImageID)
 }
 provide("imagePreviewFullscreen", modPreview)
 const imagesArray = computed(() => {

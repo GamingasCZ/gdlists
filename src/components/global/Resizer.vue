@@ -55,7 +55,7 @@ const startScale = () => {
 }
 
 const endScale = () => {
-    document.body.style.overflow = ""
+    document.body.style.overflow = "auto"
 
     document.body.removeEventListener("mousemove", trackPos)
     document.body.removeEventListener("mousedown", trackPos)

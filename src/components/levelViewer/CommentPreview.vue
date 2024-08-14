@@ -4,6 +4,7 @@ import { SETTINGS } from '@/siteSettings';
 import chroma from 'chroma-js'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ProfilePicture from '../global/ProfilePicture.vue';
 
 interface CommentFetchResponse {
   username: string
@@ -32,22 +33,18 @@ const username = ref("")
 
 // Endgame list special comment
 if (props.uid == '-2') {
-  import("@/images/among.webp").then(res => pfp.value = res.default)
+  pfp.value = -3
   username.value = props.username
 }
 // Old users
 else if (props.username != "") {
-  import("@/images/oldPFP.png").then(res => pfp.value = res.default)
+  pfp.value = -2
   username.value = props.username
 }
 
 props.userArray.forEach(user => {
   if (user.id == props.uid) {
-    let img = new Image()
-    img.src = `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar_hash}.png`
-    img.addEventListener("load", () => pfp.value = img.src)
-    img.addEventListener("error", () => import("@/images/defaultPFP.webp").then(res => pfp.value = res.default))
-
+    pfp.value = user.discord_id
     username.value = user.username
   }
 });
@@ -81,7 +78,7 @@ const color = computed(() => {
     <section class="relative mb-2 w-full break-words">
       <div v-if="uid == '-2'" class="bg-[url(@/images/flames.webp)] absolute z-10 opacity-40 mix-blend-hard-light bottom-0 left-0 w-full h-full bg-repeat-x bg-contain"></div>
       <header class="flex gap-2 items-center">
-        <img :src="pfp" class="w-11 rounded-full pointer-events-none" alt="">
+        <ProfilePicture class="w-11 rounded-full pointer-events-none" :uid="pfp" />
         <div class="inline">
           <h3 class="text-lg font-bold leading-4">{{ username }}</h3>
           <h5 class="text-xs opacity-50 cursor-help" :title="dateString">{{ time }}</h5>

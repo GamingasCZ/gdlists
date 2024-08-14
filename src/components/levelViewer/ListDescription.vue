@@ -6,6 +6,7 @@ import parseText from "../global/parseEditorFormatting";
 import { hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import Tooltip from "../ui/Tooltip.vue";
+import ProfilePicture from "../global/ProfilePicture.vue";
 
 const props = defineProps<{
   name: string;
@@ -59,7 +60,7 @@ const pfp = computed(() => {
   if (!props.creatorData)
     return `../../images/oldPFP.png`
   else
-    return `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
+    return props.creatorData.discord_id
 })
 
 
@@ -150,7 +151,7 @@ const listUploadDate = computed(() =>props.review ?
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
         <section role="none" class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
-          <img :src="pfp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" alt="" />
+          <ProfilePicture class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" :uid="pfp" />
           <h1 id="objectName" class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
 
           <!-- List information -->

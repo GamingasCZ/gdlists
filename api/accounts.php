@@ -6,6 +6,7 @@ Return codes:
 */
 header('Content-type: application/json'); // Return as JSON
 require("globals.php");
+require("images.php");
 
 $https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
 $local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
@@ -131,6 +132,11 @@ if (sizeof($_GET) > 0) {
 
     // Encrypt and save access token into a cookie
     saveAccessToken($accessInfo, $dcApiResponse["id"]);
+
+    // Save profile pic
+    $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.webp?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
+    if ($pfp !== false)
+        saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true, true);
 
     $mysqli -> close();
 

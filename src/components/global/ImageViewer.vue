@@ -44,7 +44,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
     document.body.removeEventListener("keyup", keypress)
-    document.body.style.overflow = ""
+    document.body.style.overflow = "auto"
 })
 const imageIndex = defineModel()
 
