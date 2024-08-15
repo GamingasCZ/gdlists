@@ -27,29 +27,33 @@ if (hasLocalStorage()) {
   let loadedSettingsKeys: any = Object.keys(loadedSettings);
   let settingsKeys: any = Object.keys(SETTINGS.value);
   if (loadedSettingsKeys.length < settingsKeys.length) {
-    settingsKeys.forEach(setting => {
-      if (!loadedSettingsKeys.includes(setting)) loadedSettings[setting] = SETTINGS.value[setting]
-    })
-    localStorage.setItem("settings", JSON.stringify(loadedSettings))
+    settingsKeys.forEach((setting) => {
+      if (!loadedSettingsKeys.includes(setting))
+        loadedSettings[setting] = SETTINGS.value[setting];
+    });
+    localStorage.setItem("settings", JSON.stringify(loadedSettings));
   }
-  SETTINGS.value = loadedSettings
-  let lang: 0 | 1 = SETTINGS.value.language == -1 ? (['cz', 'sk'].includes(navigator.language) | 0) : SETTINGS.value.language
-  setLanguage(lang)
-  if (SETTINGS.value.language == -1) SETTINGS.value.language = lang
+  SETTINGS.value = loadedSettings;
+  let lang: 0 | 1 =
+    SETTINGS.value.language == -1
+      ? ["cz", "sk"].includes(navigator.language) | 0
+      : SETTINGS.value.language;
+  setLanguage(lang);
+  if (SETTINGS.value.language == -1) SETTINGS.value.language = lang;
 }
 
 // Redirect to route from which login button pressed
 if (hasLocalStorage()) {
-  let loginRoute = sessionStorage.getItem("loginRoute")
+  let loginRoute = sessionStorage.getItem("loginRoute");
   if (loginRoute) {
-    sessionStorage.removeItem("loginRoute")
-    router.replace(loginRoute)
+    sessionStorage.removeItem("loginRoute");
+    router.replace(loginRoute);
   }
 }
 
 const loggedIn = ref<boolean | null>(null);
 onMounted(() => {
-  if (!hasLocalStorage()) return
+  if (!hasLocalStorage()) return;
   axios
     .get(import.meta.env.VITE_API + "/accounts.php?check", {
       headers: { Authorization: cookier("access_token").get() },
@@ -72,13 +76,13 @@ onMounted(() => {
     .catch(() => localStorage.removeItem("account_info"));
 });
 
-const tabbarOpen = ref(false)
-document.body.addEventListener("keyup", e => {
-  if (e.altKey && e.key == "Control") tabbarOpen.value = false
-})
-document.body.addEventListener("keydown", e => {
-  if (e.altKey && e.key == "Control") tabbarOpen.value = true
-})
+const tabbarOpen = ref(false);
+document.body.addEventListener("keyup", (e) => {
+  if (e.altKey && e.key == "Control") tabbarOpen.value = false;
+});
+document.body.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key == "Control") tabbarOpen.value = true;
+});
 </script>
 
 <template>
@@ -88,8 +92,7 @@ document.body.addEventListener("keydown", e => {
     <section v-if="tabbarOpen" class="absolute left-2 top-14 bg-greenGradient">
       sas
     </section>
-    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]"/>
-    
+    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
   </main>
   <Footer />
 </template>

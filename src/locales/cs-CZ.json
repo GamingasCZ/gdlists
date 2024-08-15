@@ -21,11 +21,29 @@
     "qLow": "Nízká",
     "qMed": "Výchozí",
     "qHigh": "Vysoká",
-    "clickClose": "Zavírání dialogů kliknutím mimo",
+    "clickClose": "Zavírát dialogy kliknutím",
     "viewMode": "Zobrazení levelů",
     "classic": "Klasické",
     "compact": "Kompaktní",
-    "table": "Tabulka"
+    "table": "Tabulka",
+    "devices": "Zařízení",
+    "thisDevice": "Toto zařízení",
+    "lastLogin": "Použito",
+    "logoutAll": "Odhlásit vše",
+    "iconHelp": "Používá se pro ikonky členů collabu.",
+    "autosaveHelp": "Mění jak často se zálohují tvé rozepsané příspěvky.",
+    "dialogHelp": "Určuje, zda kliknutí do prostoru mimo dialog ho zavře.",
+    "levelHelp": "Změní vzhled karet levelů v seznamech.",
+    "navbar": "Skrýt navbar při rolování",
+    "navbarHelp": "Skryje navigační lištu při rolování dolů.",
+    "disColors": "Zakázat barvy",
+    "disColorHelp": "Barvy levelů v seznamech a komentáře použijí vždy výchozí barvu.",
+    "disBGs": "Zakázat pozadí",
+    "disBGhelp": "Obrázková pozadí v příspěvcích se nezobrazí.",
+    "visual": "Vzhled",
+    "behave": "Chování",
+    "access": "Přístupnost",
+    "perf": "Výkon"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -264,7 +282,7 @@
     "reportBug": "Nahlásit bug",
     "custom": "Vlastní",
     "storage": "Místo",
-    "external": "Extérní",
+    "external": "Externí",
     "pick": "Vybrat",
     "german": "Němčina",
     "spanish": "Španělština",
@@ -348,7 +366,9 @@
     "pickReview": "Vybrat recenzi",
     "randomLevel": "Náhodný level",
     "searchLevels": "Hledat levely",
-    "checklist": "Políčko"
+    "checklist": "Políčko",
+    "colorPreview": "Náhled barvy",
+    "nocolorHelp": "Barvy jsou sice zakázány, ale pořád jsou nastavovány!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -529,7 +549,9 @@
     "pickSocialTitle": "Vybrat sociální síť",
     "addMemberTitle": "Přidat člena",
     "sortTitle": "Roztřídit členy",
-    "pasteMemberTitle": "Vložit člena"
+    "pasteMemberTitle": "Vložit člena",
+    "removeAll": "Smazáním poslední role se smaže collab!",
+    "removeAllHelp": "Opravdu chceš pokračovat?"
   },
   "reviews": {
     "clickImgSet": "Kliknutím nastav obrázek.",

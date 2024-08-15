@@ -123,8 +123,8 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
         }).then(res => {
             uploadingImage.value = 0
             if (res.data == -5) notify(7) // Bad format
-            if (res.data == -3) notify(4) // Already uploaded
-            else {
+            else if (res.data == -3) notify(4) // Already uploaded
+            else if (typeof res.data == "object") {
                 images.value.splice(0, 0, res.data.newImage)
                 delete res.data.newImage
                 storage.value = res.data

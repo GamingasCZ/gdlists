@@ -410,7 +410,9 @@
     "pickList": "Pick list",
     "searchLevels": "Search Levels",
     "randomLevel": "Random Level",
-    "checklist": "Checklist"
+    "checklist": "Checklist",
+    "colorPreview": "Color Preview",
+    "nocolorHelp": "Colors are disabled, but still are being set!"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -429,11 +431,29 @@
     "qHigh": "High",
     "qLow": "Low",
     "qMed": "Default",
-    "clickClose": "Clicking outside a dialog closes it",
+    "clickClose": "Close dialogs on click",
     "classic": "Classic",
     "compact": "Compact",
     "table": "Table",
-    "viewMode": "Level Styling"
+    "viewMode": "Level Styling",
+    "devices": "Sessions",
+    "thisDevice": "This Device",
+    "lastLogin": "Last Login",
+    "logoutAll": "Logout All",
+    "iconHelp": "Modifies generated icon quality of a collab member.",
+    "autosaveHelp": "Modifies how frequently your draft posts get backed up.",
+    "dialogHelp": "Modifies if clicking the space around a dialog closes it.",
+    "levelHelp": "Modifies how levels are presented in a list.",
+    "navbarHelp": "Hides the navigation when scrolling down.",
+    "navbar": "Hide Navbar on Scroll",
+    "disColors": "Disable Colors",
+    "disColorHelp": "Level colors and comments will always use the default color.",
+    "disBGs": "Disable Backgrounds",
+    "disBGhelp": "Image backgrounds in posts will not show up.",
+    "visual": "Visual",
+    "behave": "Behavior",
+    "access": "Accessibility",
+    "perf": "Performance"
   },
   "help": {
     "Lists": "Lists",
@@ -528,7 +548,9 @@
     "addMemberTitle": "Add a Member",
     "sortTitle": "Sort members",
     "pasteMemberTitle": "Paste member",
-    "hideSidebarTitle": "Hide sidebar"
+    "hideSidebarTitle": "Hide sidebar",
+    "removeAll": "Removing the last role will delete the collab!",
+    "removeAllHelp": "Are you sure you want to continue?"
   },
   "reviews": {
     "reviewName": "Review Title",

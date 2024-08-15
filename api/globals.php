@@ -46,7 +46,8 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = fa
     $query = $mysqli->prepare($queryTemplate);
 
     // Fill in template
-    $query->bind_param($valueTypes, ...$values);
+    if (sizeof($values) > 0)
+        $query->bind_param($valueTypes, ...$values);
 
     try {
         $query->execute();
@@ -125,26 +126,30 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
     return $result;
 }
 
-function refreshToken($currToken) {
+function refreshToken() {
     global $hostname, $username, $password, $database, $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) die("0");
     error_log("refreshing token...");
 
-    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM users WHERE discord_id=?", [$currToken[2]], "i")["refresh_token"];
+    $loginData = getAuthorization();
+    if (!$loginData) return false;
+    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `users` WHERE discord_id=?", [$loginData[2]], "s");
+    if (!is_array($refresh_token) || array_key_exists("error", $refresh_token)) return false;
 
     // Get the new token details
     $tokenUrl = array(
         "client_id" => $DISCORD_CLIENT_ID,
         "client_secret" => $DISCORD_CLIENT_SECRET,
         "grant_type" => "refresh_token",
-        "refresh_token" => $refresh_token,
+        "refresh_token" => $refresh_token["refresh_token"],
     );
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
     $baseURL = "https://discord.com/api/v10/oauth2/token";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
     if (array_key_exists("error", $accessInfo)) {
         removeCookie("access_token");
+        doRequest($mysqli, 'UPDATE `users` SET `access_token`=null, `refresh_token`=null WHERE `discord_id`=?', [$ok["id"]], "s");
         return false;
     }
 
@@ -154,14 +159,41 @@ function refreshToken($currToken) {
     $ok = json_decode(post($baseURL, array(), $tokenHeaders), true);
 
     // Encrypt and save access token into a cookie
+    
     removeCookie("access_token");
+    saveAccessToken($accessInfo, $ok["id"]);
 
-    setcookie("access_token", base64_encode(encrypt(($accessInfo["access_token"])."|".(time()+$accessInfo["expires_in"])."|".($ok["id"]))), time()+2678400, "/");
-
-    $mysqli -> query(sprintf('UPDATE `users` SET `username`="%s", `avatar_hash`="%s", `refresh_token`="%s" WHERE `discord_id`="%s"', $ok["username"], $ok["avatar"], $accessInfo["refresh_token"], $ok["id"]));
+    doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
+}
+
+function revokeToken($token, $mysqli, $uid) {
+    global $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
+    // Revoke token
+    $tokenUrl = array(
+        "client_id" => $DISCORD_CLIENT_ID,
+        "client_secret" => $DISCORD_CLIENT_SECRET,
+        "token" => $token,
+        "token_type_hint" => 'access_token'
+    );
+    $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
+    $baseURL = "https://discord.com/api/v10/oauth2/token/revoke";
+    $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
+
+    // doRequest($mysqli, "DELETE FROM `sessions` WHERE `user_id`=?", [$uid], "s");
+    doRequest($mysqli, 'UPDATE `users` SET `access_token`=null, `refresh_token`=null WHERE `discord_id`=?', [$ok["id"]], "s");
+    
+    return !array_key_exists("error", $accessInfo);
+}
+
+function saveAccessToken($oauthResponse, $discord_id) {
+    setcookie("access_token", base64_encode(encrypt(json_encode([
+        "token",
+        time()+$oauthResponse["expires_in"],
+        $discord_id
+    ]))), time()+2678400, "/");
 }
 
 function removeCookie($cookie) {
@@ -171,7 +203,7 @@ function removeCookie($cookie) {
 
 function getAuthorization() {
     // bro (oh, it's ok now :D)
-    if (isset($_COOKIE["access_token"])) return $_COOKIE["access_token"];
+    if (isset($_COOKIE["access_token"])) return json_decode(decrypt(base64_decode($_COOKIE["access_token"])));
     else return false;
 }
 
@@ -180,16 +212,16 @@ function getLocalUserID() {
     $auth = getAuthorization();
     if (!$auth) return false;
     
-    $token = explode("|", decrypt(base64_decode(getAuthorization())));
+    $token = getAuthorization();
     return $token[2]; // User ID
 }
 
-function checkAccount($forceToken = false) {
+function checkAccount($mysqli, $forceToken = false) {
     global $DO_REFRESH;
     if (!getAuthorization()) return false;
 
     $token;
-    if (!$forceToken) $token = explode("|", decrypt(base64_decode(getAuthorization())));
+    if (!$forceToken) $token = getAuthorization();
     else $token = $forceToken;
 
     if ($token[1]-time() < 86400) {
@@ -199,7 +231,8 @@ function checkAccount($forceToken = false) {
         $token[0] = $refresh_token[0];
     }
 
-    $tokenHeaders = array('Authorization: Bearer ' . $token[0]);
+    $res = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE `discord_id`=?", [$token[2]], "s");
+    $tokenHeaders = array('Authorization: Bearer ' . $res["access_token"]);
     $baseURL = "https://discord.com/api/v10/users/@me";
     $ok = post($baseURL, array(), $tokenHeaders);
     $json = json_decode($ok, true);
@@ -208,13 +241,13 @@ function checkAccount($forceToken = false) {
         $res = refreshToken($token);
         if ($res === false) return false;
 
-        return checkAccount($res);
+        return checkAccount($mysqli, $res);
     }
     return $json;
 }
 
 function checkListOwnership($mysqli, $user_id) {
-    $client_id = checkAccount()["id"];
+    $client_id = checkAccount($mysqli)["id"];
     return $user_id == $client_id;
 }
 
@@ -254,7 +287,7 @@ function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) 
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
     foreach ($levels as $l) {
         $hash = $l["levelID"];
-        if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 100000000) continue;
+        if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 200000000) continue;
 
         $isCollab = is_array($l["creator"]);
         $creator;
@@ -268,31 +301,29 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
 
         $res = doRequest($mysqli, "
         INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, uploaderID, hash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ",
-            [
-                $l["levelName"],
-                $creator,
-                $isCollab ? sizeof($l["creator"][2]) : 0,
-                $l["levelID"],
-                isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
-                isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
-                isset($l["platf"]) ? $l["platf"] : false,
-                $userID,
-                $hash
-            ], "ssiiiiiss");
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",[
+            $l["levelName"],
+            $creator,
+            $isCollab ? sizeof($l["creator"][2]) : 0,
+            $l["levelID"],
+            isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
+            isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
+            isset($l["platf"]) ? $l["platf"] : false,
+            $userID,
+            $hash], "ssiiiiiss");
 
         // Add list/review connections
-        doRequest($mysqli, sprintf("
-    INSERT INTO `levels_uploaders` (levelID, %s)
-    VALUES (?, ?)
-            ", $isReview ? "reviewID" : "listID"),
-        [
-            $l["levelID"],
-            $listID,
-        ], "ii");
+        doRequest($mysqli, sprintf("INSERT INTO `levels_uploaders` (levelID, %s) VALUES (?, ?)", $isReview ? "reviewID" : "listID"),
+        [$l["levelID"], $listID], "ii");
+            
+        // Add review level ratings
+        if ($isReview) {
+            doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
+            [$l["levelID"], $listID, $l["ratings"][0][0], $l["ratings"][0][1], $l["ratings"][0][2], $l["ratings"][0][3]],
+            "iiiiii");
         }
     }
+}
 
 function isnum($x) {return is_numeric($x);}
 

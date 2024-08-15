@@ -11,13 +11,14 @@ CollabData,
 LevelList,
 ReviewList,
 ReviewDetailsResponse,
+ReviewContainer,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 // import LevelCardPC from "./global/LevelCardPC.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, provide } from "vue";
+import { ref, onMounted, watch, onUnmounted, provide, computed } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -35,13 +36,14 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, reviewData } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import ViewModePicker from "./global/ViewModePicker.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
 import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
+import ImageViewer from "./global/ImageViewer.vue";
 
 const props = defineProps<{
   listID?: string
@@ -77,7 +79,7 @@ let recentlyViewed: ListPreview[];
 
 const LIST_DATA = ref<ListFetchResponse>({ data: { levels: [] } });
 const LIST_CREATOR = ref<string>("");
-const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash: string} | false>()
+const LIST_CREATORDATA = ref<{username: string, discord_id: string} | false>()
 const LIST_COL = ref<number[]>([0, 0, 0]);
 const LEVEL_COUNT = ref(0)
 const LIST_RATING = ref([0,0]);
@@ -444,6 +446,25 @@ provide("idCopyTimestamp", copyID)
 
 const jumpSearch = ref("")
 
+const modPreview = (clickedImageID: number) => {
+  imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
+}
+provide("imagePreviewFullscreen", modPreview)
+const imagesArray = computed(() => {
+  let allImages: ReviewContainer[] = []
+  let data = (LIST_DATA.value.data as ReviewList).containers
+  data.forEach(con => {
+    if (con.type == "showImage") allImages.push(con)
+    if (con.type == "twoColumns") {
+      con.settings.components.forEach(sub => {
+        sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
+      })
+    }
+  })
+  return allImages
+})
+const imageIndex = ref(-1)
+
 </script>
 
 <template>
@@ -467,6 +488,10 @@ const jumpSearch = ref("")
   </PickerPopup>
   </DialogVue>
 
+  <Transition name="fade">
+    <ImageViewer :images-array="imagesArray" v-model="imageIndex" @close-popup="imageIndex = -1" v-if="imageIndex !== -1" />
+  </Transition>
+
   <!-- Mobile options popup -->
   <DialogVue :open="mobileExtrasOpen" @close-popup="mobileExtrasOpen = false" :title="$t('other.options')">
     <MobileExtras @do-list-action="listActions" @close-popup="mobileExtrasOpen = false" :list-pinned="listPinned"/>
@@ -476,13 +501,13 @@ const jumpSearch = ref("")
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
   </DialogVue>
 
-  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1">
+  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
     <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
   </DialogVue>
   
   <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" header-disabled>
     <ListUploadedDialog
-      :list-i-d="getURL()"
+      :link="getURL()"
       :is-updating="uploadedDialogShown == 2"
       :is-review="true"
       @do-edit="listActions('editList')"
@@ -492,7 +517,6 @@ const jumpSearch = ref("")
 
   <section class="mt-12 text-white">
     <header>
-      <div class=""></div>
       <ListDescription
         v-if="LIST_DATA.name != undefined && !nonexistentList"
         class="mb-8"
@@ -576,7 +600,7 @@ const jumpSearch = ref("")
         />      
       </div>
       
-      <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" class="flex flex-col gap-4">
+      <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" v-show="!commentsShowing" class="flex flex-col gap-4">
         <LevelCardCompact v-for="(level, index) in LIST_DATA?.data.levels"
           class="levelCard"
           :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
@@ -595,7 +619,7 @@ const jumpSearch = ref("")
         />
       </div>
 
-      <div v-else-if="SETTINGS.levelViewMode == 2 && !isReview" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
+      <div v-else-if="SETTINGS.levelViewMode == 2 && !isReview" v-show="!commentsShowing" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
         <table class="overflow-auto mx-auto w-full bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
           <th></th>
           <th>{{ $t('other.name') }}</th>
@@ -622,7 +646,7 @@ const jumpSearch = ref("")
       
       <div v-else v-show="!commentsShowing && !reviewLevelsOpen">
         <!-- Review -->
-        <section id="reviewText" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2}">
+        <section id="reviewText" :style="{fontFamily: pickFont(LIST_DATA.data.font)}" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2, '!text-black': LIST_DATA.data.whitePage}">
           <DataContainer
               v-for="(container, index) in LIST_DATA.data.containers"
               v-bind="CONTAINERS[container.type]"
@@ -643,6 +667,7 @@ const jumpSearch = ref("")
                       :button-state="false"
                       :settings="container.settings"
                       :index="index"
+                      :id="container.id"
                       :sub-index="subIndex"
                       :key="container.id"
                       :editable="false"

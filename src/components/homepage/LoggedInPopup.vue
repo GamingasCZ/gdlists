@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue';
+import ProfilePicture from '../global/ProfilePicture.vue';
 
 const emit = defineEmits(["closePopup"]);
 const props = defineProps<{
@@ -20,11 +21,7 @@ const BASE_URL = import.meta.env.BASE_URL
   class="flex flex-col text-left"
 >
   <div class="flex gap-4 items-center m-2">
-    <img
-      :src="pfplink"
-      class="w-12 rounded-full border-2 border-white border-solid"
-      alt=""
-    />
+    <ProfilePicture class="w-12 rounded-full border-2 border-white border-solid" :uid="pfplink" />
     <h1 class="text-2xl text-yellow-200">
       <span>{{ $t('other.welcomeToGDL') }}</span> 
       <b>{{ username }}!</b>

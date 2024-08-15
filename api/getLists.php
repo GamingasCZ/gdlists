@@ -70,7 +70,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       }
 
       $qqm = makeIN($uid_array);
-      $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,avatar_hash
+      $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id
                         FROM users
                         WHERE discord_id IN %s", $qqm[0]), $uid_array, $qqm[1], true);
     }
@@ -99,7 +99,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [list_id($rows)], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"];
-    $users = doRequest($mysqli, "SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    $users = doRequest($mysqli, "SELECT username,discord_id FROM users WHERE discord_id=?", [$rows["uid"]], "s");
 
     // Fetch ratings
     $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);
@@ -153,7 +153,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
     echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC), false, -1, "", 0, $_GET["homepage"] == 2));
 
   } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
-    $account = checkAccount();
+    $account = checkAccount($mysqli);
     if (!$account) die("[]"); // Not logged in
     $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
     echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
@@ -231,12 +231,12 @@ else {
   // User/Private objects
   if (isset($_GET["user"])) {
     if (!getAuthorization()) die();
-    $user = checkAccount()["id"];
+    $user = checkAccount($mysqli)["id"];
     $addReq = "AND " . $type . ".uid=" . $user . " AND `hidden` LIKE 0";
   }
   if (isset($_GET["hidden"])) {
     if (!getAuthorization()) die();
-    $user = checkAccount()["id"];
+    $user = checkAccount($mysqli)["id"];
     $addReq = "AND " . $type . ".uid=" . $user;
     $showHidden = "";
   }

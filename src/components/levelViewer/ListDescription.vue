@@ -6,6 +6,7 @@ import parseText from "../global/parseEditorFormatting";
 import { hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import Tooltip from "../ui/Tooltip.vue";
+import ProfilePicture from "../global/ProfilePicture.vue";
 
 const props = defineProps<{
   name: string;
@@ -17,7 +18,7 @@ const props = defineProps<{
   id: string;
   commAmount: number;
   listPinned: boolean;
-  creatorData: { username: string, discord_id: string, avatar_hash: string } | false;
+  creatorData: { username: string, discord_id: string} | false;
   review: boolean;
   openDialogs: [boolean, boolean]
   ratings: [number, number, number]
@@ -59,7 +60,7 @@ const pfp = computed(() => {
   if (!props.creatorData)
     return `../../images/oldPFP.png`
   else
-    return `https://cdn.discordapp.com/avatars/${props.creatorData.discord_id}/${props.creatorData.avatar_hash}.png`
+    return props.creatorData.discord_id
 })
 
 
@@ -150,7 +151,7 @@ const listUploadDate = computed(() =>props.review ?
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
         <section role="none" class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
-          <img :src="pfp" class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" alt="" />
+          <ProfilePicture class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" :uid="pfp" />
           <h1 id="objectName" class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
 
           <!-- List information -->
@@ -255,6 +256,7 @@ const listUploadDate = computed(() =>props.review ?
         <!-- Edit list -->
         <button
           class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2"
+          id="postEditButton"
           @click="emit('doListAction', 'editList')" v-if="userUID == uid">
           <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/edit.svg" alt="" /><label class="max-md:hidden">{{
             $t('level.edit') }}</label>

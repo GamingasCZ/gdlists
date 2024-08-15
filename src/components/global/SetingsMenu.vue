@@ -6,19 +6,31 @@ import { SETTINGS } from "@/siteSettings";
 import { setLanguage } from "@/locales";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
+import axios from "axios";
 
 defineProps<{
   isLoggedIn: boolean;
   username: string;
 }>();
 
+let loggingOut = false
 function logout() {
-  cookier("access_token").remove();
-  localStorage.removeItem("account_info");
-  window.location.reload();
+  if (!loggingOut) {
+    loggingOut = true
+    axios.delete(import.meta.env.VITE_API + "/accounts.php", {params: {current: 1}}).then(() => {
+      window.location.reload();
+      cookier("access_token").remove();
+      localStorage.removeItem("account_info");
+    })
+  }
 }
 
-const galleryOpen = ref(false)
+const dialogs = ref({
+  settings: false,
+  gallery: false,
+  sessions: false,
+  help: false
+})
 
 const Dialog = defineAsyncComponent({
   loader: () => import("@/components/global/Dialog.vue"),
@@ -29,7 +41,23 @@ const Gallery = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
+const Sett = defineAsyncComponent({
+  loader: () => import("@/components/global/SiteSettings.vue"),
+  loadingComponent: LoadingBlock
+})
+
+// const Sessions = defineAsyncComponent({
+//   loader: () => import("@/components/global/SessionDialog.vue"),
+//   loadingComponent: LoadingBlock
+// })
+
+const Help = defineAsyncComponent({
+  loader: () => import("@/components/helpMenu/HelpMenu.vue"),
+  loadingComponent: LoadingBlock
+})
+
 const screenWidth = ref(window.innerWidth)
+const sessionsDialog = ref<HTMLDivElement>()
 </script>
 
 <template>
@@ -37,13 +65,34 @@ const screenWidth = ref(window.innerWidth)
   <div
   class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
-    <div v-if="galleryOpen" class="z-20">
-      <Teleport to="body">
-        <Dialog :open="galleryOpen" :title="$t('other.gallery')" :width="dialog.large" @close-popup="galleryOpen = false">
+    <Teleport to="body">
+      <div v-if="dialogs.gallery" class="z-30">
+        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
           <Gallery unselectable />
         </Dialog>
-      </Teleport>
-    </div>
+      </div>
+  
+      <div v-if="dialogs.settings" class="z-30">
+        <Dialog :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
+          <Sett />
+        </Dialog>
+      </div>
+  
+      <!-- <div v-if="dialogs.sessions" class="z-30">
+        <Dialog :open="dialogs.sessions" :title="$t('settingsMenu.devices')" :action="sessionsDialog?.logoutAll" :side-button-text="$t('settingsMenu.logoutAll')" :width="dialog.medium" @close-popup="dialogs.sessions = false">
+          <template #icon><img src="@/images/logout.svg" class="w-4"></template>
+          <Sessions ref="sessionsDialog"/>
+        </Dialog>
+      </div> -->
+      
+      <div v-if="dialogs.help" class="z-30">
+        <Dialog :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
+          <Help />
+        </Dialog>
+      </div>
+    </Teleport>
+
+
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
       class="flex flex-col gap-1 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
@@ -56,82 +105,46 @@ const screenWidth = ref(window.innerWidth)
       >
         <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />{{ $t('settingsMenu.logout') }}
       </button>
-      <!-- <button
-        class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
-        @click="logout"
-      >
-        <img src="@/images/logout.svg" class="inline mr-2 w-5" alt="" />Zařízení
-      </button> -->
+    </section>
+
+    <section
+      class="flex flex-col gap-1 py-2 w-36 bg-black bg-opacity-50 rounded-md"
+    >
+      <span class="text-center">{{ $t("settingsMenu.language") }}</span>
+      <div class="flex gap-1 items-center ml-2">
+        <span class="text-xl translate-y-0.5">{{ ["&#x1F1E8;&#x1F1FF;", "&#x1f1fa;&#x1f1f8;"][SETTINGS.language] }}</span>
+        <select name="lang" class="pr-2 pl-0 ml-2 text-sm bg-transparent border-b-white rounded-none !border-b-2 border-0" v-model="SETTINGS.language" @change="setLanguage(SETTINGS.language)">
+          <option :value="0">{{ $t("settingsMenu.czech") }}</option>
+          <option :value="1">{{ $t("settingsMenu.english") }}</option>
+        </select>
+      </div>
     </section>
 
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
-      @click="galleryOpen = true"
+      @click="dialogs.settings = true"
+    >
+      <img src="@/images/gear.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.settings') }}
+    </button>
+    <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="dialogs.gallery = true"
       v-if="isLoggedIn"
     >
       <img src="@/images/image.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.gallery') }}
     </button>
-
-    <section
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
+    <!-- <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="dialogs.sessions = true"
+      v-if="isLoggedIn"
     >
-      {{ $t("settingsMenu.language") }}
-      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.language" @change="setLanguage(SETTINGS.language)">
-        <option :value="0">{{ $t("settingsMenu.czech") }}</option>
-        <option :value="1">{{ $t("settingsMenu.english") }}</option>
-      </select>
-    </section>
-
-    <section
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
+      <img src="@/images/collab.svg" class="inline mr-3 w-5" alt="" />{{ $t('settingsMenu.devices') }}
+    </button> -->
+    <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="dialogs.help = true"
     >
-      {{ $t('settingsMenu.viewMode') }}
-      <select name="viewMode" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.levelViewMode">
-        <option :value="0">{{ $t('settingsMenu.classic') }}</option>
-        <option :value="1">{{ $t('settingsMenu.compact') }}</option>
-        <option :value="2">{{ $t('settingsMenu.table') }}</option>
-      </select>
-    </section>
-
-    <section
-      v-if="screenWidth > 900"
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
-    >
-      {{ $t('settingsMenu.homepage') }}
-      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.homepageColumns">
-        <option :value="1">{{ $t('settingsMenu.columns', 1) }}</option>
-        <option :value="2" v-if="screenWidth > 900">{{ $t('settingsMenu.columns', 2) }}</option>
-        <option :value="3" v-if="screenWidth > 1500">{{ $t('settingsMenu.columns', 3) }}</option>
-      </select>
-    </section>
-    <section
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
-    >
-      {{ $t('settingsMenu.autosave') }}
-      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.autosave">
-        <option :value="0">{{ $t('settingsMenu.asOff') }}</option>
-        <option :value="30">{{ $t('settingsMenu.everySec', [30]) }}</option>
-        <option :value="60">{{ $t('settingsMenu.everySec', [60]) }}</option>
-        <option :value="180">{{ $t('settingsMenu.everyMin', [3]) }}</option>
-      </select>
-    </section>
-    <section
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md"
-    >
-      {{ $t('settingsMenu.iconQuality') }}
-      <select name="lang" class="px-2 rounded-md bg-lof-300" v-model="SETTINGS.iconQuality">
-        <option :value="-2">{{ $t('settingsMenu.noGenerate') }}</option>
-        <option :value="-1">{{ $t('settingsMenu.noColor') }}</option>
-        <option :value="6">{{ $t('settingsMenu.qLow') }}</option>
-        <option :value="4">{{ $t('settingsMenu.qMed') }}</option>
-        <option :value="2">{{ $t('settingsMenu.qHigh') }}</option>
-      </select>
-    </section>
-    <section
-      class="flex flex-col gap-1 justify-center items-center py-2 w-36 text-center bg-black bg-opacity-50 rounded-md"
-    >
-      {{ $t('settingsMenu.clickClose') }}
-      <input type="checkbox" class="button" v-model="SETTINGS.dialogClickClose">
-    </section>
+      <img src="@/images/info.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.help') }}
+    </button>
   </div>
 </template>

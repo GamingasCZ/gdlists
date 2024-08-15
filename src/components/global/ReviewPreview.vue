@@ -8,6 +8,8 @@ import ReviewRatingBar from './ReviewRatingBar.vue'
 import { getDominantColor } from "@/Reviews";
 import ListBackground from "./ListBackground.vue";
 import RatingContainer from "./RatingContainer.vue";
+import { SETTINGS } from "@/siteSettings";
+import ProfilePicture from "./ProfilePicture.vue";
 
 const props = defineProps<{
   rate_ratio: string;
@@ -33,7 +35,7 @@ let thumb = ref()
 
 
 const modListCol = () => {
-  if (!props.thumbnail) return
+  if (!props.thumbnail || SETTINGS.value.disableColors) return
 
   let dom = getDominantColor(thumb.value).hsv()
   listColor.value = chroma.hsv(dom[0], dom[1], Math.min(dom[2], 0.5))
@@ -117,7 +119,7 @@ const clickReview = () => {
   >
     
     <div class="relative w-full h-36 bg-cover">
-      <img ref="thumb" @load="modListCol" :src="thumbLink" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': !thumbnail}">
+      <img ref="thumb" @load="modListCol" :src="thumbLink" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': !thumbnail || SETTINGS.disableColors}">
       <div :style="{background: `linear-gradient(0deg, ${listColor.darken().hex()}, transparent)`}" class="absolute bottom-0 w-full h-8 transition-colors duration-200 group-hover:brightness-50"></div>
       <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between opacity-0 transition-opacity duration-75 group-hover:opacity-100">
         <div class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
@@ -148,7 +150,7 @@ const clickReview = () => {
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>
       <p class="flex gap-3 items-center mt-2">
-        <img class="w-10 rounded-full" :src="`https://cdn.discordapp.com/avatars/${creator.discord_id}/${creator.avatar_hash}.png`" alt="">
+        <ProfilePicture class="w-10 rounded-full" :uid="creator.discord_id" />
         <div>
           <h3 class="text-lg font-bold leading-none">{{ creator.username }}</h3>
           <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate(((new Date()).getTime() - uploadDate.getTime())/1000) }}</h4>

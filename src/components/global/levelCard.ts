@@ -1,4 +1,5 @@
 import { fixHEX } from "@/Editor";
+import { SETTINGS } from "@/siteSettings";
 import chroma, { hex, type Color } from "chroma-js";
 
 export const doFavoriteLevel = (props: Object, favorited: boolean, col: Color) => {
@@ -39,6 +40,9 @@ export const doFavoriteLevel = (props: Object, favorited: boolean, col: Color) =
 
 export const fixBrokenColors = (color: string | number[]) => {
     // Old lists may have broken colors!! (damn you, old Gamingas :D)
+    if (SETTINGS.value.disableColors)
+      return chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
+
     try {
         return typeof color == 'string' ? chroma(fixHEX(color)) : chroma.hsl(...color);
       } catch (e) {

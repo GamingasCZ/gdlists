@@ -45,6 +45,7 @@ watch(props, () => { // only refresh comments once
             :online-browser="true"
             :hide-search="true"
             online-type="comments"
+            class="p-2"
             :comment-i-d="{type: commentType, objectID: listID}"
             :refreshButton="!commentsDisabled"
             @refreshed-browser="amount = $event; emit('updateCommentAmount', $event)"

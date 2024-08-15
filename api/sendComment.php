@@ -39,7 +39,7 @@ $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli->connect_errno) die("0");
 
 // TODO: check for cookie
-$discord_id = checkAccount()["id"];
+$discord_id = checkAccount($mysqli)["id"];
 if (!$discord_id) die("7");
 
 $uid_query = $mysqli -> query(sprintf("SELECT `id` FROM `users` WHERE `discord_id` = '%s'", $discord_id));

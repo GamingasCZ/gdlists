@@ -9,6 +9,7 @@ import { SETTINGS, hasLocalStorage } from '@/siteSettings';
 import { socialMedia, socialMediaImages, checkAndRemoveDomain } from './socialSites';
 import { useI18n } from 'vue-i18n';
 import { i18n } from '@/locales';
+import Dialog from '../global/Dialog.vue';
 
 const props = defineProps<{
   levelArray: Level[]
@@ -62,11 +63,6 @@ if (hasLocalStorage()) {
   pinnedLastUsedRoles.value = JSON.parse(localStorage.getItem("pinnedLastUsedRoles")!) ?? []
 }
 const allLastUsedRoles = ref([...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []])
-
-watch(props, () => {
-  colorLeft.value = chroma.hsl(levelColor?.[0], 0.906, 0.167).hex()
-  colorRight.value = chroma.hsl(levelColor?.[0], 0.231, 0.102).hex()
-})
 
 const background = computed(() => `linear-gradient(9deg, ${colorRight.value}, ${colorLeft.value})`)
 
@@ -257,6 +253,16 @@ const clipboardContent = ref<[number, string, CollabHumans]>(props.clipboard)
 const sortDropdownOpen = ref(false)
 const presetDropdownOpen = ref(false)
 
+const removeRole = (pos: number) => {
+  if (collab.value[1].length <= 1) {
+    confirmDeleteOpen.value = true
+    return
+  }
+  (collab.value as CollabData)[1].splice(pos, 1);
+  (collab.value as CollabData)[4].splice(pos, 1);
+  makeRoleColors()
+}
+
 /*
 =======
 Social media
@@ -431,6 +437,17 @@ onMounted(() => {
 
   let getCurrCollabID = savedCollabs.value?.filter(saved => saved.collabID == collab.value[3])
   currentlyUsedSaved.value = savedCollabs.value?.indexOf(getCurrCollabID?.[0] ?? <any>[])!
+
+  if (SETTINGS.value.disableColors) {
+    colorLeft.value = getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
+    colorRight.value = getComputedStyle(document.documentElement).getPropertyValue("--secondaryColor")
+  }
+  else {
+    watch(props, () => {
+      colorLeft.value = chroma.hsl(levelColor?.[0], 0.906, 0.167).hex()
+      colorRight.value = chroma.hsl(levelColor?.[0], 0.231, 0.102).hex()
+    })
+  }
 })
 
 const hasSavedCollab = ref(-2)
@@ -448,6 +465,12 @@ onUnmounted(() => {
   localStorage.setItem("pinnedLastUsedRoles", JSON.stringify(pinnedLastUsedRoles.value))
 })
 
+const backgroundCol = computed(() => {
+  return `linear-gradient(9deg, ${colorRight.value}, ${colorLeft.value})`
+})
+
+const confirmDeleteOpen = ref(false)
+
 </script>
 
 <template>
@@ -460,7 +483,7 @@ onUnmounted(() => {
   >
     <section
       @click.stop=""
-      :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
+      :style="{background: backgroundCol}"
       class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[40rem]"
       :class="{'max-lg:hidden': roleSidebarOpen || savedSidebarOpen}"
     >
@@ -475,6 +498,22 @@ onUnmounted(() => {
         />
       </div>
 
+      <!-- Confirm remove -->
+      <Dialog :open="confirmDeleteOpen" @close-popup="confirmDeleteOpen = false" :title="$t('other.removal')" >
+        <div class="flex px-2 py-4">
+          <img src="@/images/trash.svg" class="mr-2 w-32 opacity-10" alt="">
+          <div>
+              <h2 class="text-xl">{{ $t('collabTools.removeAll') }}</h2>
+              <p class="mb-4 opacity-40">{{ $t('collabTools.removeAllHelp') }}</p>
+              <button @click="levelArray[index].creator = levelArray[index].creator[0][0].name; confirmDeleteOpen = false; emit('closePopup')" class="flex gap-2 items-center px-2 py-1 text-2xl font-bold text-black bg-red-400 rounded-md button">
+                  <img src="@/images/del.svg" class="w-6">
+                  {{ $t('editor.remove') }}
+              </button>
+          </div>
+        </div>
+      </Dialog>
+
+      <!-- Header -->
       <section class="flex items-center mr-2" v-if="(typeof collab != 'string')">
           <CollabCreator class="ml-1 grow" v-bind="collab[0][0]" :pos="999" :level-index="index" :collab-array="collab"
             :role-color="roleColors?.[collab[0][0].role]" :host="true" v-if="(typeof collab != 'string')"
@@ -633,7 +672,7 @@ onUnmounted(() => {
 
     <aside
       @click.stop=""
-      :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
+      :style="{background: backgroundCol}"
       class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
       v-show="roleSidebarOpen || pickingRole > -1"
       v-if="(typeof collab != 'string')"
@@ -682,9 +721,9 @@ onUnmounted(() => {
                 class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm disabled:opacity-40 button"
                 @click="invisibleRole(pos)"><img src="@/images/view.svg" :class="{ 'opacity-20': collab?.[4]?.[pos] }"
                   alt=""></button>
-              <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1 || collab[1].length == 1"
+              <button :title="$t('collabTools.removeRoleTitle')" :disabled="pickingRole > -1"
                 class="box-border p-1 w-7 bg-black bg-opacity-40 rounded-sm group button"
-                @click="(collab as CollabData)[1].splice(pos, 1); (collab as CollabData)[4].splice(pos, 1); makeRoleColors()"><img
+                @click="removeRole(pos)"><img
                   class="group-disabled:opacity-20" src="@/images/trash.svg" alt=""></button>
           </div>
         </button>
@@ -715,7 +754,7 @@ onUnmounted(() => {
 
           <!-- Last used roles buttons -->
             <button class="flex gap-1 items-center px-1 py-0.5 mx-1 text-left rounded-md shadow-drop"
-              :style="{ backgroundColor: colorLeft }" @click="addRole(role)" v-for="role in allLastUsedRoles
+              :style="{ backgroundColor: colorLeft }" @click="addRole([role, false])" v-for="role in allLastUsedRoles
           ">
             <span class="ml-1 w-full">{{ role }}</span>
               <button class="bg-black bg-opacity-40 rounded-sm button" @click.stop="pinRole(role)"><img src="@/images/pin.svg"
@@ -729,7 +768,7 @@ onUnmounted(() => {
     </aside>
     <aside
       @click.stop=""
-      :style="{background: `linear-gradient(9deg, ${colorRight}, ${colorLeft})`}"
+      :style="{background: backgroundCol}"
       class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
       v-show="savedSidebarOpen"
     >

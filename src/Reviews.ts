@@ -194,13 +194,18 @@ export function getWordCount() {
     let count = 0
     reviewData.value.containers.forEach(c => {
         count += (c.data.match(/\w+/g) ?? []).length
+        if (c.type == "twoColumns") {
+            c.settings.components.forEach(con => {
+                con.forEach(sub => (count += (sub.data.match(/\w+/g) ?? []).length))
+            })
+        }
     })
     return count
 }
 
 export const getReviewPreview = () => {
-    let firstHeading = (reviewData.value.containers.filter(c => c.type.startsWith("heading"))?.[0]?.data ?? "").slice(0, 21)
-    let firstParagraph = (reviewData.value.containers.filter(c => c.type.startsWith("default"))?.[0]?.data ?? "").slice(0, 101)
+    let firstHeading = (document.querySelector("div[data-type*=heading] > p")?.innerText ?? "").trim()
+    let firstParagraph = (document.querySelector("div[data-type=default] > p")?.innerText ?? "").trim()
     if (firstHeading.length > 100) firstHeading = firstHeading.slice(0, 100)+"..."
     if (firstParagraph.length > 100) firstParagraph = firstParagraph.slice(0, 100)+"..."
     return [firstHeading, firstParagraph]
@@ -216,6 +221,8 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
             }
         })
     } else ids = forceIDs
+    if (ids.map(i => i.length).reduce((a, b) => a + b) < 1) return
+
     let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(',')}}).then(res => res.data)
     return postData
 }

@@ -159,7 +159,6 @@ interface HumanSocialLink {
 export interface ListCreatorInfo {
   username: string;
   discord_id: string;
-  avatar_hash: string;
 }
 
 export interface LevelBackup {

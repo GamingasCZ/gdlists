@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <clipPath id="clipath_lpe_path-effect16">
+   <path d="m8.9437 14.67a0.94371 0.94371 0 0 1-0.94371 0.94371 0.94371 0.94371 0 0 1-0.94371-0.94371 0.94371 0.94371 0 0 1 0.94371-0.94371 0.94371 0.94371 0 0 1 0.94371 0.94371z" display="none" fill="#ff0" fill-rule="evenodd"/>
+   <path class="powerclip" d="m-1.6504-5.0039h19.301v26.008h-19.301zm10.594 19.674a0.94371 0.94371 0 0 0-0.94371-0.94371 0.94371 0.94371 0 0 0-0.94371 0.94371 0.94371 0.94371 0 0 0 0.94371 0.94371 0.94371 0.94371 0 0 0 0.94371-0.94371z" fill="#ff0" fill-rule="evenodd"/>
+  </clipPath>
+ </defs>
+ <path d="m7.5578 15.504a0.94371 0.94371 0 0 1-0.50149-0.83368 0.94371 0.94371 0 0 1 0.94371-0.94371 0.94371 0.94371 0 0 1 0.94371 0.94371 0.94371 0.94371 0 0 1-0.50149 0.83368h3.7082v-15.008h-8.3008v15.008h0.099609zm-3.6828-13.088h8.25v11.168h-8.25z" clip-path="url(#clipath_lpe_path-effect16)" display="none" fill="#f00" fill-rule="evenodd" stroke="#f00" stroke-linecap="round" stroke-linejoin="round"/>
+ <g fill="#fff" fill-rule="evenodd">
+  <circle cx="12.066" cy="6.8412" r=".68501" style="paint-order:stroke markers fill"/>
+  <g stroke-linecap="round" stroke-linejoin="round">
+   <g stroke="#fff" stroke-width=".86431">
+    <path d="m10.408 8.7131h3.3158" style="paint-order:stroke markers fill"/>
+    <path d="m10.408 10.279h3.3158" style="paint-order:stroke markers fill"/>
+   </g>
+   <path d="m1.0645 0.70703c-0.23949-6.376e-5 -0.43366 0.1941-0.43359 0.43359v7.8008c-6.38e-5 0.23949 0.1941 0.43366 0.43359 0.43359h5.4023v2.1125l-1.8973 1.3113h2.6629v-4.291h-5.7344v-6.9355h13.004v1.2852h0.75195c0.03898-1e-6 0.07686 0.00309 0.11524 0.00586v-1.7227c6.4e-5 -0.23949-0.1941-0.43366-0.43359-0.43359z" color="#000000" style="-inkscape-stroke:none;paint-order:stroke markers fill"/>
+   <path d="m8.8789 3.7578a0.74607 0.74607 0 0 0-0.74609 0.74609v10.75a0.74607 0.74607 0 0 0 0.74609 0.74609h6.375a0.74607 0.74607 0 0 0 0.74609-0.74609v-10.75a0.74607 0.74607 0 0 0-0.74609-0.74609zm0.74609 1.4922h4.8828v9.2578h-4.8828z" color="#000000" stroke-width=".6" style="paint-order:stroke markers fill"/>
+  </g>
+ </g>
+</svg>

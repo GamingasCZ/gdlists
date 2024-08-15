@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { isOnline, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
-import { hasLocalStorage } from "@/siteSettings";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress } from "@/router";
+import ProfilePicture from "./global/ProfilePicture.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -92,10 +93,31 @@ const openEditorDropdown = () => {
 
 const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = false, 10)
 
-const deployPeterGriffin = async (e: Event) => {
-  // NANI??
-  e.target.src = await import('../images/defaultPFP.webp').then(res => res.default)
+// Here lies function "deployPeterGriffin", beloved by many
+// Thank you for your service
+// - Gamingas 14.8.2024
+
+var prevScroll = window.scrollY
+const hideNavbarOnScroll = () => {
+  navbarHidden.value = window.scrollY > prevScroll
+  if (settingsShown.value) {
+    settingsShown.value = false
+    settingsMenu.removeEventListener("click", closeSettings, { capture: true })
+  }
+  editorDropdownOpen.value = false
+  prevScroll = window.scrollY
 }
+const modifyNavbarScroll = () => {
+  if (SETTINGS.value.scrollNavbar)
+    window.onscroll = hideNavbarOnScroll
+  else
+    window.onscroll = null
+
+}
+modifyNavbarScroll()
+
+const navbarHidden = ref(false)
+watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
 </script>
 
@@ -103,7 +125,8 @@ const deployPeterGriffin = async (e: Event) => {
   <nav
     role="navigation"
     id="navbar"
-    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full shadow-drop overflow-x-clip bg-greenGradient">
+    :class="{'-translate-y-14': navbarHidden}"
+    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
     <!-- Home link -->
     <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
       <Logo class="w-10 h-10 button" />
@@ -165,17 +188,19 @@ const deployPeterGriffin = async (e: Event) => {
     <div v-else-if="localStorg" @click="showSettings" id="settingsOpener"
       class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
 
-      <!-- ping background when offine -->
-      <img alt="" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
+      <ProfilePicture
+        :uid="loginInfo[1]"
         :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
         class="absolute animate-ping top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture" v-if="!isOnline" />
-      
-      <!-- profile picture -->
-      <img alt="" @error="deployPeterGriffin" :src="`https://cdn.discordapp.com/avatars/${loginInfo[1]}/${loginInfo[2]}.png`"
-        :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+        id="profilePicture" v-if="!isOnline"
+      />
+
+      <ProfilePicture
+        :uid="loginInfo[1]"
+        :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
         class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture" />
+        id="profilePicture"
+      />
     </div>
     <div v-else></div>
 

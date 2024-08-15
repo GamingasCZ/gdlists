@@ -8,6 +8,8 @@ import axios, { type AxiosResponse } from 'axios'
 import cookier from 'cookier'
 import LoginButton from '../global/LoginButton.vue'
 import { useI18n } from 'vue-i18n'
+import { SETTINGS } from '@/siteSettings'
+import ProfilePicture from '../global/ProfilePicture.vue'
 
 const props = defineProps<{
     listID: string
@@ -20,13 +22,13 @@ const MAX_COMMENT_LEN = 300
 
 const loggedIn = ref<boolean>(true)
 
-const pfp = ref<string>("")
+const pfp = ref<number>()
 const username = ref<string>("")
 if (localStorage) {
     let userInfo = JSON.parse(localStorage.getItem("account_info")!)
     if (userInfo == null) loggedIn.value = false
     else {
-        pfp.value = `https://cdn.discordapp.com/avatars/${userInfo[1]}/${userInfo[2]}.png`
+        pfp.value = userInfo[1]
         username.value = userInfo[0]
     }
 }
@@ -39,14 +41,26 @@ function loadEmojis() {
 }
 loadEmojis()
 
+const commentLength = ref(0)
+
 const listColor = ref<number[]>([Math.floor(Math.random()*360), 1, 8+Math.random()*24])
 const parsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex())
 const darkParsedColor = ref<string>(chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex())
-watch(listColor, () => {
-    parsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex()
-    darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex()
-    lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`
-}, {deep: true})
+const lengthPie = ref()
+if (SETTINGS.value.disableColors) {
+    parsedColor.value = getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
+    darkParsedColor.value = getComputedStyle(document.documentElement).getPropertyValue("--siteBackground")
+    lengthPie.value = getComputedStyle(document.documentElement).getPropertyValue("--brightGreen")
+    watch(commentLength, () => lengthPie.value = `linear-gradient(90deg, ${getComputedStyle(document.documentElement).getPropertyValue("--brightGreen")} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
+}
+else {
+    watch(listColor, () => {
+        parsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).hex()
+        darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex()
+        lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`
+    }, {deep: true})
+    watch(commentLength, () => lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
+}
 
 const dropdownOpen = ref<number>(-1)
 const openDropdown = (ind: number) => dropdownOpen.value = dropdownOpen.value == ind ? -1 : ind
@@ -70,8 +84,6 @@ onMounted(() => {
         },
     })
 })
-
-const commentLength = ref(0)
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
@@ -106,8 +118,7 @@ function parseComment(comment: Array<string | {id: string}> ): string {
     });
     return parsedComment
 }
-const lengthPie = ref()
-watch(commentLength, () => lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
+
 const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.value.getValues()).length
 
 const commentError = ref(false)
@@ -201,7 +212,7 @@ function sendComment(com = "") {
         </Transition>
         <footer class="flex justify-between mt-2">
             <div>
-                <img :src="pfp" class="inline mr-2 w-8 rounded-full" alt="">
+                <ProfilePicture class="inline mr-2 w-8 rounded-full" :uid="pfp" />
                 <label>{{ username }}</label>
             </div>
 
