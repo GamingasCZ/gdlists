@@ -67,9 +67,9 @@ foreach ($comments as $row) {
     $ind += 1;
 }
 
-$query = sprintf("SELECT DISTINCT username,discord_id,id
+$query = sprintf("SELECT DISTINCT username,discord_id
                   FROM users
-                  WHERE id IN (%s)", join(",", array_unique($uid_array)), $_GET[$type]);
+                  WHERE discord_id IN (%s)", join(",", array_unique($uid_array)), $_GET[$type]);
 $result = $mysqli -> query($query) or die($mysqli -> error);
 
 $users = $result -> fetch_all(MYSQLI_ASSOC);

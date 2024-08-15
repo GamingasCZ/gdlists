@@ -42,7 +42,7 @@ else if (props.username != "") {
 }
 
 props.userArray.forEach(user => {
-  if (user.id == props.uid) {
+  if (user.discord_id == props.uid) {
     pfp.value = user.discord_id
     username.value = user.username
   }
