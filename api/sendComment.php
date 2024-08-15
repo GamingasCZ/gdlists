@@ -42,9 +42,6 @@ if ($mysqli->connect_errno) die("0");
 $discord_id = checkAccount($mysqli)["id"];
 if (!$discord_id) die("7");
 
-$uid_query = $mysqli -> query(sprintf("SELECT `id` FROM `users` WHERE `discord_id` = '%s'", $discord_id));
-$user_id = $uid_query -> fetch_all(MYSQLI_ASSOC)[0]["id"];
-
 $time = new DateTime();
 
 // Disabled comments
@@ -58,7 +55,7 @@ if ($type == "listID") {
 }
 
 $template = sprintf("INSERT INTO `comments` (`username`,`comment`,`comType`,`bgcolor`,`%s`,`verified`,`timestamp`,`uid`) VALUES ('',?, ?, ?, ?, ?, ?, ?)", $type);
-$values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], "1", $time->getTimestamp(), $user_id);
+$values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], "1", $time->getTimestamp(), $discord_id);
 $result = doRequest($mysqli, $template, $values, "sssssss");
 if (is_array($result) && array_key_exists("error", $result)) die("2");
 
