@@ -117,7 +117,6 @@ const modifyNavbarScroll = () => {
 modifyNavbarScroll()
 
 const navbarHidden = ref(false)
-provide("navbar", navbarHidden)
 watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
 </script>

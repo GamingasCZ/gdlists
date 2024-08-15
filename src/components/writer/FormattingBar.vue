@@ -5,6 +5,7 @@ import Dropdown from '../ui/Dropdown.vue';
 import Tooltip from '../ui/Tooltip.vue';
 import { addCEFormatting, addFormatting } from '../global/parseEditorFormatting';
 import { reviewData } from '@/Reviews';
+import { SETTINGS } from '@/siteSettings';
 
 const props = defineProps<{
 	selectedNest: number[]
@@ -110,18 +111,21 @@ onUnmounted(() => {
 	document.removeEventListener("selectionchange", showFormattingBar)
 })
 
-const navbarHidden = inject("navbar", false)
 const barPos = ref("2.5rem")
-// watch(navbarHidden, () => {
-	// console.log("aaa")
-	// if (navbarHidden) barPos.value = "0"
-	// else barPos.value = "2.5rem"
-// })
+const nav = (e: MutationRecord[]) => {
+	if (e[0].target.classList.contains("-translate-y-14"))
+		barPos.value = "0"
+	else
+		barPos.value = "2.5rem"
+}
+const observer = new MutationObserver(nav)
+if (SETTINGS.value.scrollNavbar)
+	observer.observe(document.querySelector("#navbar")!, {attributes: true, attributeFilter: ["class"]})
 
 </script>
 
 <template>
-	<section @click.stop="" :style="{top: barPos}" class="flex overflow-auto sticky z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
+	<section @click.stop="" :style="{top: barPos}" class="flex transition-[top] overflow-auto sticky z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
 		<div class="flex gap-3" v-show="showFormatting">
 			<button
 				v-for="(button, buttonIndex) in FORMATTING"
