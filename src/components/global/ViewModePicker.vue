@@ -15,6 +15,7 @@ const confirm = () => {
 }
 
 const shown = ref(!viewedPopups.pickedStyling)
+const base = import.meta.env.BASE_URL
 
 </script>
 
@@ -23,9 +24,15 @@ const shown = ref(!viewedPopups.pickedStyling)
         <h2 class="text-2xl">{{ $t('listViewer.pickView1') }}</h2>
         <h3>{{ $t('listViewer.pickView2') }}</h3>
         <div class="flex gap-3 justify-center p-3 bg-black bg-opacity-40 rounded-md">
-            <button class="flex flex-col p-2 bg-white bg-opacity-5 rounded-md hover:bg-opacity-10" @click="changeSelection(0)" :class="{'!bg-opacity-20': selected == 0}"><img class="w-24 opacity-60" src="../../images/viewModes/classic.svg" alt="">{{ $t('settingsMenu.classic') }}</button>
-            <button class="flex flex-col p-2 bg-white bg-opacity-5 rounded-md hover:bg-opacity-10" @click="changeSelection(1)" :class="{'!bg-opacity-20': selected == 1}"><img class="w-24 opacity-60" src="../../images/viewModes/compact.svg" alt="">{{ $t('settingsMenu.compact') }}</button>
-            <button class="flex flex-col p-2 bg-white bg-opacity-5 rounded-md hover:bg-opacity-10" @click="changeSelection(2)" :class="{'!bg-opacity-20': selected == 2}"><img class="w-24 opacity-60" src="../../images/viewModes/spreadsheet.svg" alt="">{{ $t('settingsMenu.table') }}</button>
+            <button class="flex flex-col p-2 bg-white bg-opacity-5 rounded-md hover:bg-opacity-10" @click="changeSelection(0)" :class="{'!bg-opacity-20': selected == 0}">
+                <img class="w-24 opacity-60" :src="`${base}/viewModes/classic.svg`" alt="">{{ $t('settingsMenu.classic') }}
+            </button>
+            <button class="flex flex-col p-2 bg-white bg-opacity-5 rounded-md hover:bg-opacity-10" @click="changeSelection(1)" :class="{'!bg-opacity-20': selected == 1}">
+                <img class="w-24 opacity-60" :src="`${base}/viewModes/compact.svg`" alt="">{{ $t('settingsMenu.compact') }}
+            </button>
+            <button class="flex flex-col p-2 bg-white bg-opacity-5 rounded-md hover:bg-opacity-10" @click="changeSelection(2)" :class="{'!bg-opacity-20': selected == 2}">
+                <img class="w-24 opacity-60" :src="`${base}/viewModes/spreadsheet.svg`" alt="">{{ $t('settingsMenu.table') }}
+            </button>
         </div>
         <button @click="confirm" class="flex gap-2 items-center p-1 px-2 mt-3 ml-auto text-xl font-bold text-black rounded-md bg-lof-400"><img src="../../images/check.svg" class="w-6 h-6" alt="">{{ $t('other.use') }}</button>
     </section>
