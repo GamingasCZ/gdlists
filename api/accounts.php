@@ -100,7 +100,7 @@ if (sizeof($_GET) > 0) {
     $fistTimeUser = true;
     $res = doRequest($mysqli, "INSERT INTO `users`(`username`, `discord_id`, `refresh_token`, `access_token`) VALUES (?,?,?,?)", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"]], "ssss");
     if (!is_null($res) && array_key_exists("error", $res)) {
-        doRequest($mysqli, "UPDATE `users` SET `username`=?, `refresh_token`=?, `access_token`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"]], "ssss");
+        $res = doRequest($mysqli, "UPDATE `users` SET `username`=?, `refresh_token`=?, `access_token`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"]], "ssss");
         $fistTimeUser = false;
     }
     
@@ -134,9 +134,9 @@ if (sizeof($_GET) > 0) {
     saveAccessToken($accessInfo, $dcApiResponse["id"]);
 
     // Save profile pic
-    $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.webp?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
+    $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
     if ($pfp !== false)
-        saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true, true);
+        saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
 
     $mysqli -> close();
 

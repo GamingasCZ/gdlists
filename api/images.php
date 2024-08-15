@@ -79,13 +79,11 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     // Save image
     $compressedFilesize;
-    if ($noSave) {
-        imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 60);
-        $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
-        
-        imagedestroy($img);
-        imagedestroy($maxsize);
-    }
+    imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 60);
+    $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
+    
+    imagedestroy($img);
+    imagedestroy($maxsize);
     
     // Create thumbnail
     if ($makeThumb) {
