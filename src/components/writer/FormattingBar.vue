@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { i18n } from '@/locales';
-import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import Dropdown from '../ui/Dropdown.vue';
 import Tooltip from '../ui/Tooltip.vue';
 import { addCEFormatting, addFormatting } from '../global/parseEditorFormatting';
@@ -110,10 +110,18 @@ onUnmounted(() => {
 	document.removeEventListener("selectionchange", showFormattingBar)
 })
 
+const navbarHidden = inject("navbar", false)
+const barPos = ref("2.5rem")
+// watch(navbarHidden, () => {
+	// console.log("aaa")
+	// if (navbarHidden) barPos.value = "0"
+	// else barPos.value = "2.5rem"
+// })
+
 </script>
 
 <template>
-	<section @click.stop="" class="flex overflow-auto sticky top-10 z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
+	<section @click.stop="" :style="{top: barPos}" class="flex overflow-auto sticky z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
 		<div class="flex gap-3" v-show="showFormatting">
 			<button
 				v-for="(button, buttonIndex) in FORMATTING"

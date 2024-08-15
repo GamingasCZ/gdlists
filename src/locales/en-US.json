@@ -449,7 +449,11 @@
     "disColors": "Disable Colors",
     "disColorHelp": "Level colors and comments will always use the default color.",
     "disBGs": "Disable Backgrounds",
-    "disBGhelp": "Image backgrounds in posts will not show up."
+    "disBGhelp": "Image backgrounds in posts will not show up.",
+    "visual": "Visual",
+    "behave": "Behavior",
+    "access": "Accessibility",
+    "perf": "Performance"
   },
   "help": {
     "Lists": "Lists",

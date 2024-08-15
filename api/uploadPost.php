@@ -71,7 +71,7 @@ $compressedData = base64_encode(gzcompress(json_encode($DATA)));
 $template; $values; $types;
 switch ($post["postType"]) {
   case 'list':
-    $template = "INSERT INTO `lists`(`name`,`data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`) VALUES (?,?,?,?,?,?,?)";
+    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`) VALUES (?,'',?,?,?,?,?,?)";
     $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments);
     $types = "ssssssi";
     break;
@@ -89,17 +89,17 @@ $res = doRequest($mysqli, $template, $values, $types);
 if (array_key_exists("error", $res))
   die(json_encode([-1, 8]));
 
+$listID = $DATA["hidden"] ? $hidden : doRequest($mysqli, "SELECT LAST_INSERT_ID() as id", [], "");
+
 // Adds levels to database
 if (!$DATA["hidden"]) {
   addLevelsToDatabase($mysqli, $DATA["levels"], $listID, $user_id, false);
 }
 
 // Send back post ID
-$listID = $DATA["hidden"] ? $hidden : doRequest($mysqli, "SELECT LAST_INSERT_ID() as id", [], "")["id"];
-
 switch ($post["postType"]) {
   case 'list':
-    echo json_encode([$listID]);
+    echo json_encode([$listID["id"]]);
     break;
   case 'review':
     echo json_encode([$postExtras["name"] . '-' . $listID]);

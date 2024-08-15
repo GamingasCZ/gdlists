@@ -39,7 +39,11 @@
     "disColors": "Zakázat barvy",
     "disColorHelp": "Barvy levelů v seznamech a komentáře použijí vždy výchozí barvu.",
     "disBGs": "Zakázat pozadí",
-    "disBGhelp": "Obrázková pozadí v příspěvcích se nezobrazí."
+    "disBGhelp": "Obrázková pozadí v příspěvcích se nezobrazí.",
+    "visual": "Vzhled",
+    "behave": "Chování",
+    "access": "Přístupnost",
+    "perf": "Výkon"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -278,7 +282,7 @@
     "reportBug": "Nahlásit bug",
     "custom": "Vlastní",
     "storage": "Místo",
-    "external": "Extérní",
+    "external": "Externí",
     "pick": "Vybrat",
     "german": "Němčina",
     "spanish": "Španělština",

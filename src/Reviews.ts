@@ -197,7 +197,6 @@ export function getWordCount() {
         if (c.type == "twoColumns") {
             c.settings.components.forEach(con => {
                 con.forEach(sub => (count += (sub.data.match(/\w+/g) ?? []).length))
-                console.log(con)
             })
         }
     })

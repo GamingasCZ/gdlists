@@ -18,7 +18,7 @@ const props = defineProps<{
   id: string;
   commAmount: number;
   listPinned: boolean;
-  creatorData: { username: string, discord_id: string, avatar_hash: string } | false;
+  creatorData: { username: string, discord_id: string} | false;
   review: boolean;
   openDialogs: [boolean, boolean]
   ratings: [number, number, number]

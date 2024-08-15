@@ -22,7 +22,6 @@ interface CommentFetchResponse {
 interface CommentUser {
   username: string
   discord_id: string
-  avatar_hash: string
   id: string
 }
 

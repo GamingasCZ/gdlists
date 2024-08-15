@@ -70,7 +70,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       }
 
       $qqm = makeIN($uid_array);
-      $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,avatar_hash
+      $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id
                         FROM users
                         WHERE discord_id IN %s", $qqm[0]), $uid_array, $qqm[1], true);
     }
@@ -99,7 +99,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [list_id($rows)], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"];
-    $users = doRequest($mysqli, "SELECT username,discord_id,avatar_hash FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    $users = doRequest($mysqli, "SELECT username,discord_id FROM users WHERE discord_id=?", [$rows["uid"]], "s");
 
     // Fetch ratings
     $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);

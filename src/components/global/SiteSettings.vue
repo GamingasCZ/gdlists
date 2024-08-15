@@ -8,7 +8,7 @@ import SectionDivider from '../ui/SectionDivider.vue';
 
 <template>
     <div class="flex bg-repeat-x bg-[url(@/images/fade.webp)] overflow-y-auto flex-col gap-2 p-2">
-        <SectionDivider text="Visual" />
+        <SectionDivider :text="$t('settingsMenu.visual')" />
         <Option
         :name="$t('settingsMenu.viewMode')"
             control="slot"
@@ -23,7 +23,7 @@ import SectionDivider from '../ui/SectionDivider.vue';
             :control-options="[[$t('settingsMenu.columns', 1), 1],[$t('settingsMenu.columns', 2), 2],[$t('settingsMenu.columns', 3), 3]]"
         >
         </Option>
-        <SectionDivider text="Behavior" />
+        <SectionDivider :text="$t('settingsMenu.behave')" />
         <Option
             v-model="SETTINGS.autosave"
             :name="$t('settingsMenu.autosave')"
@@ -46,7 +46,7 @@ import SectionDivider from '../ui/SectionDivider.vue';
             control="cbox"
         >
         </Option>
-        <SectionDivider text="Accessibility" />
+        <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
             v-model="SETTINGS.disableColors"
             :name="$t('settingsMenu.disColors')"
@@ -61,7 +61,7 @@ import SectionDivider from '../ui/SectionDivider.vue';
             control="cbox"
         >
         </Option>
-        <SectionDivider text="Performance" />
+        <SectionDivider :text="$t('settingsMenu.perf')" />
         <Option
             v-model="SETTINGS.iconQuality"
             :name="$t('settingsMenu.iconQuality')"

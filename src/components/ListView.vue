@@ -79,7 +79,7 @@ let recentlyViewed: ListPreview[];
 
 const LIST_DATA = ref<ListFetchResponse>({ data: { levels: [] } });
 const LIST_CREATOR = ref<string>("");
-const LIST_CREATORDATA = ref<{username: string, discord_id: string, avatar_hash: string} | false>()
+const LIST_CREATORDATA = ref<{username: string, discord_id: string} | false>()
 const LIST_COL = ref<number[]>([0, 0, 0]);
 const LEVEL_COUNT = ref(0)
 const LIST_RATING = ref([0,0]);
