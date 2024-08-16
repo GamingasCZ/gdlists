@@ -43,7 +43,9 @@
     "visual": "Vzhled",
     "behave": "Chování",
     "access": "Přístupnost",
-    "perf": "Výkon"
+    "perf": "Výkon",
+    "pfp": "Profilová fotka",
+    "cutout": "Výřez"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

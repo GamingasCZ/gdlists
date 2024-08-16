@@ -453,7 +453,9 @@
     "visual": "Visual",
     "behave": "Behavior",
     "access": "Accessibility",
-    "perf": "Performance"
+    "perf": "Performance",
+    "pfp": "Profile Picture",
+    "cutout": "Cutout"
   },
   "help": {
     "Lists": "Lists",

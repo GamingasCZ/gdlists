@@ -28,7 +28,7 @@ function logout() {
 const dialogs = ref({
   settings: false,
   gallery: false,
-  sessions: false,
+  avatar: false,
   help: false
 })
 
@@ -43,6 +43,11 @@ const Gallery = defineAsyncComponent({
 
 const Sett = defineAsyncComponent({
   loader: () => import("@/components/global/SiteSettings.vue"),
+  loadingComponent: LoadingBlock
+})
+
+const AvatarEditor = defineAsyncComponent({
+  loader: () => import("@/components/global/ProfiePicturePicker.vue"),
   loadingComponent: LoadingBlock
 })
 
@@ -90,15 +95,27 @@ const sessionsDialog = ref<HTMLDivElement>()
           <Help />
         </Dialog>
       </div>
+
+      <div v-if="dialogs.avatar" class="z-30">
+        <Dialog :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
+          <AvatarEditor />
+        </Dialog>
+      </div>
     </Teleport>
 
 
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
-      class="flex flex-col gap-1 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
+      class="flex flex-col gap-2 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
       v-else
     >
       <h1 class="font-bold">{{ username }}</h1>
+      <button
+        class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
+        @click="dialogs.avatar = true"
+      >
+        <img src="@/images/edit.svg" class="inline mr-2 w-5" alt="" />{{ $t('level.edit') }}
+      </button>
       <button
         class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
         @click="logout"
