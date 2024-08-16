@@ -27,22 +27,21 @@ function allTokens($res) {
     return $res["access_token"];
 }
 
-// if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-//     $user = checkAccount($mysqli);
-//     if (!$user) die("0");
+if ($_SERVER["REQUEST_METHOD"] == "PUT") {
+    $DATA = file_get_contents("php://input");
+    $acc = checkAccount($mysqli);
+    if (!$acc) die();
 
-//     if ($_GET["all"]) {
-//         $token = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE discord_id = ?", [$user["id"]], "s");
-//         revokeToken($token["access_token"], $mysqli, $user["id"]);
-//         die();
-//     }
-
-//     $acc = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
-
-//     if (!is_null($res) && array_key_exists("error", $res)) die("0");
-//     else die("1");
-
-// }
+    if ($DATA == -1) {
+        $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $acc["id"], $acc["avatar"]));
+        if ($pfp !== false)
+            saveImage($pfp, $acc["id"], $mysqli, "pfp", false, false, true);
+    }
+    else {
+        saveImage($DATA, $acc["id"], $mysqli, "pfp", false, false, true);
+    }
+    die();
+}
 
 if (sizeof($_GET) > 0) {
     $state = $_COOKIE["state"];

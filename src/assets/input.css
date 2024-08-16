@@ -115,10 +115,10 @@ dialog {
   @apply border-none scale-125 transition-transform duration-200 bg-[#4d6c4f] shadow-lg shadow-black
 }
 .slider::-moz-range-track {
-  @apply bg-black bg-opacity-10 h-2 rounded-full
+  @apply bg-black bg-opacity-40 h-2 rounded-full
 }
 .slider::-moz-range-progress {
-  @apply from-[#54c14b] to-[#31fda7] bg-gradient-to-l h-2 rounded-full
+  @apply from-lof-400 to-lof-300 bg-gradient-to-l h-2 rounded-full
 }
 .slider[data-customcolor="true"]::-moz-range-progress {
   background: var(--col);
@@ -134,7 +134,7 @@ dialog {
   @apply border-none scale-125 transition-transform duration-200 bg-[#4d6c4f] shadow-lg shadow-black
 }
 .slider {
-  @apply bg-none 
+  @apply bg-transparent
 }
 
 @keyframes flash {
