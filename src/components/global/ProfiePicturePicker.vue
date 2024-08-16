@@ -7,24 +7,26 @@ import { dialog } from '../ui/sizes';
 import { nextTick, ref } from 'vue';
 
 const openEditPopup = ref(false)
-var uploadData: Blob | null
+var imageElement = new Image()
 var basedData = ref<string>()
 
+
+const dragPreview = ref<HTMLImageElement>()
 const pfpPreview = ref<HTMLCanvasElement>()
 const editScale = ref(1)
 
-const openEdit = () => {
+const openEdit = (uploadData: Blob) => {
     openEditPopup.value = true
     let reader = new FileReader()
     reader.readAsDataURL(uploadData!)
     nextTick(() => {
         reader.onload = () => {
+            if (reader.result == null) return
             let ctx = pfpPreview.value?.getContext("2d")
-            let img = new Image(128,128)
+            imageElement.src = reader.result
             basedData.value = reader.result
-            img.src = basedData.value
 
-            ctx?.drawImage(img, 0, 0, 0, 0)
+            ctx?.drawImage(imageElement, 0, 0, 0, 0)
         }
     })
 }
@@ -43,17 +45,38 @@ const useDiscord = () => {
 
 let lastX = [-1, -1]
 const resizerTopLeft = ref([0, 0])
+let movingImage = false
+const startMove = () => {
+    movingImage = true
+    document.body.addEventListener("mouseup", endMove, {once: true})
+}
+const endMove = () => {
+    movingImage = false
+    lastX = [-1, -1]
+    updateSmallPreview()
+}
 const moveResizer = (e: MouseEvent) => {
+    if (!movingImage) return
+    updateSmallPreview()
     if (lastX[0] == -1) lastX = [e.x, e.y]
-    resizerTopLeft.value = [lastX[0] - e.x, lastX[1] - e.y]
+    resizerTopLeft.value = [
+        Math.max(0, resizerTopLeft.value[0] + e.x - lastX[0]),
+        Math.max(0, Math.min(resizerTopLeft.value[1] + e.y - lastX[1], 16))
+    ]
+    
     lastX = [e.x, e.y]
+}
+
+const updateSmallPreview = () => {
+    let ctx = pfpPreview.value?.getContext("2d")
+    ctx?.drawImage(imageElement, Math.abs(resizerTopLeft.value[0]), Math.abs(resizerTopLeft.value[1]))
 }
 
 </script>
 
 <template>
     <section class="flex flex-col p-4">
-        <Dialog :open="openEditPopup" @close-popup="openEditPopup = false; uploadData = null" :title="$t('settingsMenu.editPhoto')" :width="dialog.medium">
+        <Dialog :open="openEditPopup" @close-popup="openEditPopup = false" :title="$t('settingsMenu.editPhoto')" :width="dialog.medium" disable-tap-close>
             <section class="p-2">
                 <div class="flex justify-evenly items-center">
                     <div class="flex flex-col items-center">
@@ -62,8 +85,7 @@ const moveResizer = (e: MouseEvent) => {
                     </div>
         
                     <div class="relative">
-                        <div class="relative max-h-64 overflow-clip cursor-move max-w-64" @mousemove="moveResizer">
-                            <img :src="basedData" ref="dragPreview" :style="{transform: `scale(${editScale})`, left: `${resizerTopLeft[0]}px`, top: `${resizerTopLeft[1]}px`}" alt="">
+                        <div class="relative w-64 h-64 overflow-clip cursor-move" :style="{backgroundImage: `url(${basedData})`, backgroundSize: `${256*editScale}px cover`, backgroundPositionX: `${resizerTopLeft[0]}px`, backgroundPositionY: `${resizerTopLeft[1]}px`}" @mousedown="startMove" @mousemove="moveResizer">
                             <div class="absolute top-0 left-1/2 h-full border-4 -translate-x-1/2 border-lof-400 aspect-square"></div>
                         </div>
 
@@ -81,7 +103,7 @@ const moveResizer = (e: MouseEvent) => {
         </Dialog>
 
         <div class="relative p-4 mb-4 text-center rounded-xl border-4 border-white border-opacity-20 border-dashed">
-            <HiddenFileUploader @data="uploadData = $event; openEdit()" />
+            <HiddenFileUploader @data="openEdit($event)" />
 
             <img src="@/images/dropfile.svg" class="mx-auto w-32 opacity-20" alt="">
             <p class="mb-6 text-2xl opacity-20">Přetáhni nebo vyber novou fotku</p>
