@@ -90,8 +90,8 @@ const stopDrag = () => {
                     <button @click="emit('closePopup')" class="button"><img src="@/images/close.svg" class="w-8" alt=""></button>
                 </div>
                 <div class="flex absolute top-0 right-0 left-0 justify-between items-start mx-4 max-sm:hidden">
-                    <button class="h-screen" @click="prevImage()"><img src="@/images/showCommsL.svg" class="w-8 button" alt=""></button>
-                    <button class="h-screen" @click="nextImage()"><img src="@/images/showComms.svg" class="w-8 button" alt=""></button>
+                    <button class="h-screen" @click.stop="prevImage()"><img src="@/images/showCommsL.svg" class="w-8 button" alt=""></button>
+                    <button class="h-screen" @click.stop="nextImage()"><img src="@/images/showComms.svg" class="w-8 button" alt=""></button>
                 </div>
             </div>
         </Transition>
