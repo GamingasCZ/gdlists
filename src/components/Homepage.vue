@@ -29,28 +29,27 @@ onMounted(() => {
     let errorToast = document.getElementById("loginErrorToast");
     errorToast?.classList.add("popout");
   }
-})
-
-watch(props, () => {
+  
   let loginCookie = cookier("logindata").get();
-  if (props.isLoggedIn && loginCookie != null) {
+  if (loginCookie != null) {
     returnedFromLogin.value = true;
-
+  
     loginCookie = JSON.parse(loginCookie);
     returnfromLoginName.value = loginCookie[0];
-
+  
     // first-time user
-    firstTimeUser.value = loginCookie[3];
+    firstTimeUser.value = loginCookie[2];
     if (!firstTimeUser.value) {
       let loginToast = document.getElementById("loginToast");
       loginToast?.classList.add("popout");
     }
-
+  
     returnfromLoginPFP.value = loginCookie[1]
-
+  
     cookier("logindata").remove();
   }
 })
+
 
 const localStorg = ref(hasLocalStorage())
 
@@ -63,7 +62,7 @@ const closeTwitterAd = () => {
 </script>
 
 <template>
-  <DialogVue :width="dialog.large" :open="firstTimeUser && returnedFromLogin" header-disabled :close-popup="returnedFromLogin = false">
+  <DialogVue :width="dialog.large" :open="firstTimeUser" header-disabled>
     <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
   </DialogVue>
   
@@ -73,7 +72,7 @@ const closeTwitterAd = () => {
   </div>
 
   <div id="loginErrorToast" v-if="!firstTimeUser && localStorg"
-    class="flex absolute top-0 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
+    class="flex absolute top-16 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
     <img src="@/images/warn.svg" alt="" class="w-8">
     <span class="text-white">{{ $t('homepage.loginFail') }}</span>
   </div>
@@ -161,10 +160,10 @@ const closeTwitterAd = () => {
 
 <style>
 @keyframes slideTop {
-  0% {@apply -translate-y-8}
-  5% {@apply translate-y-16}
-  95% {@apply translate-y-16}
-  100% {@apply -translate-y-8}
+  0% {@apply -translate-y-24}
+  5% {@apply translate-y-0}
+  95% {@apply translate-y-0}
+  100% {@apply -translate-y-24}
 }
 
 .popout {

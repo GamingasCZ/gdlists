@@ -97,35 +97,8 @@ if (sizeof($_GET) > 0) {
     $dcApiResponse = json_decode(post($baseURL, array(), $tokenHeaders), true);
 
     // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
-    $fistTimeUser = true;
-    $res = doRequest($mysqli, "INSERT INTO `users`(`username`, `discord_id`, `refresh_token`, `access_token`) VALUES (?,?,?,?)", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"]], "ssss");
-    if (!is_null($res) && array_key_exists("error", $res)) {
-        $res = doRequest($mysqli, "UPDATE `users` SET `username`=?, `refresh_token`=?, `access_token`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"]], "ssss");
-        $fistTimeUser = false;
-    }
-    
-    // $sessionData = [
-    //     "dev" => -1,
-    //     "browser" => -1,
-    //     "mobile" => "Unknown"
-    // ];
-    
-    // $userAgent = $_SERVER['HTTP_USER_AGENT'];
-    // if (isset($userAgent)) {
-    //     $sessionData["mobile"] = (bool)strstr($userAgent, "Android") || strstr($userAgent, "iPhone");
-    //     $matches = [];
-    //     if ($sessionData["mobile"])
-    //         $sessionData["dev"] = strstr($userAgent, "Android") ? "Android" : "iPhone";
-    //     else {
-    //         preg_match("/(Linux|Windows|Mac OS)/", $userAgent, $matches);
-    //         if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
-    //     }
-    //     preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $userAgent, $matches);
-    //     if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
-    // }
-
-    // $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM `sessions`", [], "");
-    // doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?)", [$dcApiResponse["id"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssii");
+    $fistTimeUser = is_null(doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$dcApiResponse["id"]], "s"));
+    doRequest($mysqli, "INSERT INTO `users` (`username`,`discord_id`,`refresh_token`,`access_token`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `username` = ?, `discord_id` = ?, `refresh_token` = ?, `access_token` = ?", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["username"], $dcApiResponse["id"],  $accessInfo["refresh_token"], $accessInfo["access_token"]], "ssssssss");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
@@ -139,7 +112,6 @@ if (sizeof($_GET) > 0) {
         saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
 
     $mysqli -> close();
-
     header("Location: " . $https . $local . '/gdlists');
 }
 else {
