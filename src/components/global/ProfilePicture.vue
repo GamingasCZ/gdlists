@@ -34,5 +34,5 @@ load()
 </script>
 
 <template>
-    <img :src="PFP" alt="">
+    <img :src="PFP" class="profilePicture" alt="">
 </template>

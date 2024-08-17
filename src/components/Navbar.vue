@@ -99,6 +99,7 @@ const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = fal
 
 var prevScroll = window.scrollY
 const hideNavbarOnScroll = () => {
+  if (window.scrollY <= 32) return
   navbarHidden.value = window.scrollY > prevScroll
   if (settingsShown.value) {
     settingsShown.value = false

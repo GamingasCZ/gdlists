@@ -412,7 +412,8 @@
     "randomLevel": "Random Level",
     "checklist": "Checklist",
     "colorPreview": "Color Preview",
-    "nocolorHelp": "Colors are disabled, but still are being set!"
+    "nocolorHelp": "Colors are disabled, but still are being set!",
+    "or": "or"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -455,7 +456,12 @@
     "access": "Accessibility",
     "perf": "Performance",
     "pfp": "Profile Picture",
-    "cutout": "Cutout"
+    "cutout": "Cutout",
+    "cutoutHelp": "Modifies the shape of the picture",
+    "pickFromGallery": "Pick from Gallery",
+    "pickDiscord": "Use from Discord",
+    "dragPhoto": "Drag in or choose a new photo",
+    "editPhoto": "Edit Photo"
   },
   "help": {
     "Lists": "Lists",

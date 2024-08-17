@@ -71,12 +71,6 @@ const sessionsDialog = ref<HTMLDivElement>()
   class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
     <Teleport to="body">
-      <div v-if="dialogs.gallery" class="z-30">
-        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
-          <Gallery unselectable />
-        </Dialog>
-      </div>
-  
       <div v-if="dialogs.settings" class="z-30">
         <Dialog :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
           <Sett />
@@ -98,7 +92,13 @@ const sessionsDialog = ref<HTMLDivElement>()
 
       <div v-if="dialogs.avatar" class="z-30">
         <Dialog :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
-          <AvatarEditor />
+          <AvatarEditor @open-gallery="dialogs.gallery = true" />
+        </Dialog>
+      </div>
+
+      <div v-if="dialogs.gallery" class="z-30">
+        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+          <Gallery unselectable />
         </Dialog>
       </div>
     </Teleport>

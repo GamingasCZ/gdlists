@@ -46,7 +46,11 @@
     "perf": "Výkon",
     "pfp": "Profilová fotka",
     "cutout": "Výřez",
-    "editPhoto": "Úprava fotky"
+    "editPhoto": "Úprava fotky",
+    "dragPhoto": "Přetáhni nebo vyber novou fotku",
+    "pickFromGallery": "Vybrat z galerie",
+    "pickDiscord": "Použít z Discordu",
+    "cutoutHelp": "Změní tvar profilové fotky"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -371,7 +375,12 @@
     "searchLevels": "Hledat levely",
     "checklist": "Políčko",
     "colorPreview": "Náhled barvy",
-    "nocolorHelp": "Barvy jsou sice zakázány, ale pořád jsou nastavovány!"
+    "nocolorHelp": "Barvy jsou sice zakázány, ale pořád jsou nastavovány!",
+    "or": "nebo",
+    "circle": "Kruh",
+    "square": "Čtverec",
+    "star": "Hvězda",
+    "demon": "Démon"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
