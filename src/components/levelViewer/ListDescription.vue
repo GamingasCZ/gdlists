@@ -151,11 +151,11 @@ const listUploadDate = computed(() =>props.review ?
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
         <section role="none" class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
-          <ProfilePicture class="absolute bottom-1 mx-2 w-12 rounded-full border-2 border-white border-solid pointer-events-none" :uid="pfp" />
-          <h1 id="objectName" class="absolute bottom-6 ml-16 text-xl">{{ name }}</h1>
+          <ProfilePicture class="absolute bottom-1 mx-2 w-14 rounded-full pointer-events-none shadow-drop" :uid="pfp" />
+          <h1 id="objectName" class="absolute bottom-6 pl-2 ml-16 text-xl">{{ name }}</h1>
 
           <!-- List information -->
-          <div class="flex gap-2 items-center py-0.5 ml-16 text-base">
+          <div class="flex gap-2 items-center py-0.5 pl-2 ml-16 text-base">
 
             <!-- Creator -->
             <span class="font-bold">{{ creator }}</span>

@@ -29,7 +29,7 @@ const BASE_URL = import.meta.env.BASE_URL
     </h1>
   </div>
 
-  <div class="bg-[url(@/images/fade.webp)] relative bg-repeat-x flex-col flex gap-2">
+  <div class="bg-[url(@/images/fade.webp)] relative bg-repeat-x flex-col flex gap-2 max-h-64 overflow-y-auto">
     <div class="flex gap-2 items-center p-3 px-2 mx-2 mt-2 bg-black bg-opacity-20 rounded-md">
       <img src="@/images/emoji.svg" class="w-6" alt="">
       <p>{{ $t('homepage.loginHelp1') }}</p>
@@ -37,6 +37,11 @@ const BASE_URL = import.meta.env.BASE_URL
     <div class="flex gap-2 items-center p-3 px-2 mx-2 bg-black bg-opacity-10 rounded-md">
       <img src="@/images/exclaim.svg" class="w-6" alt="">
       <p>{{ $t('homepage.loginHelp2') }}</p>
+    </div>
+    <div class="flex gap-2 items-center p-3 px-2 mx-2 bg-black bg-opacity-10 rounded-md">
+      <img src="@/images/exclaim.svg" class="w-6" alt="">
+      <p>{{ $t('homepage.loginHelp5') }}</p>
+      <buttton @click="emit('closePopup')" class="flex gap-2 items-center p-2 ml-auto min-w-max bg-black bg-opacity-40 rounded-md button"><img class="w-5" src="@/images/image.svg" alt="">{{ $t('other.modify') }}</buttton>
     </div>
     <div class="flex z-10 gap-2 items-center p-3 px-2 mx-2 mb-2 bg-black bg-opacity-20 rounded-md">
       <img src="@/images/comment.svg" class="w-6" alt="">

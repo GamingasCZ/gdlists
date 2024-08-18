@@ -92,7 +92,7 @@ const sessionsDialog = ref<HTMLDivElement>()
 
       <div v-if="dialogs.avatar" class="z-30">
         <Dialog :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
-          <AvatarEditor @open-gallery="dialogs.gallery = true" />
+          <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
         </Dialog>
       </div>
 

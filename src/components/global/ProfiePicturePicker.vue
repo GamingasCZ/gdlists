@@ -6,6 +6,8 @@ import Dialog from './Dialog.vue';
 import { dialog } from '../ui/sizes';
 import { nextTick, ref } from 'vue';
 import ImageBrowser from './ImageBrowser.vue';
+import { getDominantColor } from '@/Reviews';
+import chroma from 'chroma-js';
 
 const openEditPopup = ref(false)
 var imageElement = new Image()
@@ -13,6 +15,7 @@ var basedData = ref<string>()
 
 const emit = defineEmits<{
     (e: "openGallery"): void
+    (e: "closePopup"): void
 }>()
 
 const galleryOpen = ref(false)
@@ -35,10 +38,16 @@ const openEdit = (uploadData: Blob) => {
     })
 }
 
+let uid = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? "0"
+const domColor = ref(chroma.random())
 const pickedFile = (file: Blob) => {
     axios.put(import.meta.env.VITE_API + "/accounts.php", file).then(res => {
-        let uid = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? "0"
         let time = Date.now()
+        editFinished.value = true
+        document.body.addEventListener("mousedown", () => {
+            emit('closePopup'); document.body.style.overflow = "auto"}, {once: true})
+        
+        domColor.value = getDominantColor(imageElement)
         document.querySelectorAll(".profilePicture").forEach((pfp: HTMLImageElement) => {
             if (pfp.src.includes(uid)) {
                 let imgSrc = new URL(pfp.src)
@@ -115,10 +124,12 @@ const updatePreviews = () => {
     ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*ratio*editScale.value, 256*editScale.value)
 }
 
+const editFinished = ref(false)
+
 </script>
 
 <template>
-    <section class="flex flex-col p-4">
+    <section v-show="!editFinished" class="flex flex-col p-4">
         <Dialog :open="openEditPopup" @close-popup="openEditPopup = false" :title="$t('settingsMenu.editPhoto')" :width="dialog.medium" disable-tap-close>
             <section class="p-2">
                 <div class="flex justify-evenly items-center">
@@ -173,4 +184,15 @@ const updatePreviews = () => {
         </div>
         <Option :name="$t('settingsMenu.cutout')" control="dropdown" :desc="$t('settingsMenu.cutoutHelp')" :value="0" :control-options="[[$t('other.circle'), 0], [$t('other.square'), 1], [$t('other.star'), 2], [$t('other.demon'), 3]]" />
     </section>
+
+    <Dialog header-disabled :open="editFinished" :custom-color="`linear-gradient(9deg, ${domColor}, ${domColor.darken(2)})`">
+        <div class="flex flex-col items-center px-4 py-8 overflow-clip rounded-md" :style="{boxShadow: `0px 0px 80px ${domColor.alpha(0.5).hex()}`}">
+            <div class="relative">
+                <img :src="basedData" class="absolute w-32 blur-3xl -z-10" alt="">
+                <img :src="basedData" class="z-10 w-32 shadow-drop" alt="">
+            </div>
+            <h2 class="mt-2 text-2xl">Profilová fotka byla nastavena</h2>
+            <p class="mt-6 opacity-50">Klikni pro zavření dialogu!</p>
+        </div>
+    </Dialog>
 </template>

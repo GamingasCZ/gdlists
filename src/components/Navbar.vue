@@ -187,19 +187,19 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     
     <!-- Logged in, settings -->
     <div v-else-if="localStorg" @click="showSettings" id="settingsOpener"
-      class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
-
+      class="box-border relative w-9 h-9 bg-black bg-opacity-40 rounded-full">
+      
       <ProfilePicture
         :uid="loginInfo[1]"
         :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute animate-ping top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+        class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 rounded-full shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture" v-if="!isOnline"
       />
 
       <ProfilePicture
         :uid="loginInfo[1]"
         :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+        class="absolute top-0 right-0 z-10 w-9 h-9 rounded-full shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture"
       />
     </div>

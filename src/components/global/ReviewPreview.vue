@@ -150,7 +150,7 @@ const clickReview = () => {
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>
       <p class="flex gap-3 items-center mt-2">
-        <ProfilePicture class="w-10 rounded-full" :uid="creator.discord_id" />
+        <ProfilePicture class="w-11 rounded-full" :uid="creator.discord_id" />
         <div>
           <h3 class="text-lg font-bold leading-none">{{ creator.username }}</h3>
           <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate(((new Date()).getTime() - uploadDate.getTime())/1000) }}</h4>
