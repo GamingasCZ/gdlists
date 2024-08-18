@@ -249,3 +249,5 @@ export const shortenYTLink = (link: string, disableParams = false) => {
     return <any>link.match(/(?<=youtu.be\/).+/g);
   }
 }
+
+export const lastPFPchange = ref(-1)

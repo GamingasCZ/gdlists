@@ -462,7 +462,9 @@
     "pickFromGallery": "Pick from Gallery",
     "pickDiscord": "Use from Discord",
     "dragPhoto": "Drag in or choose a new photo",
-    "editPhoto": "Edit Photo"
+    "editPhoto": "Edit Photo",
+    "pfpSet": "Profile Picture has been set!",
+    "closeDialog": "Click to close the dialog!"
   },
   "help": {
     "Lists": "Lists",

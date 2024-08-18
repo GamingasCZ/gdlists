@@ -133,7 +133,7 @@ const closeTwitterAd = () => {
     </div>
   </section>
 
-  <main id="homepageSections" class="grid" :style="{ gridTemplateColumns: columns }">
+  <main id="homepageSections" class="grid sm:mr-2" :style="{ gridTemplateColumns: columns }">
     <ListSection :style="{gridColumn: `1 / span ${SETTINGS.homepageColumns}`}" :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
       :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" content-type="/getLists.php?homepage=2" :list-type="2" />
     

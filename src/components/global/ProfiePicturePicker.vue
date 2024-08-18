@@ -8,8 +8,11 @@ import { nextTick, ref } from 'vue';
 import ImageBrowser from './ImageBrowser.vue';
 import { getDominantColor } from '@/Reviews';
 import chroma from 'chroma-js';
+import ProfilePicture from './ProfilePicture.vue';
+import { lastPFPchange } from '@/Editor';
 
 const openEditPopup = ref(false)
+const discordLoading = ref(false)
 var imageElement = new Image()
 var basedData = ref<string>()
 
@@ -29,7 +32,7 @@ const openEdit = (uploadData: Blob) => {
     reader.readAsDataURL(uploadData!)
     nextTick(() => {
         reader.onload = () => {
-            if (reader.result == null) return
+            if (typeof reader.result != 'string') return
             imageElement.src = reader.result
             basedData.value = reader.result
 
@@ -40,21 +43,24 @@ const openEdit = (uploadData: Blob) => {
 
 let uid = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? "0"
 const domColor = ref(chroma.random())
-const pickedFile = (file: Blob) => {
-    axios.put(import.meta.env.VITE_API + "/accounts.php", file).then(res => {
-        let time = Date.now()
-        editFinished.value = true
-        document.body.addEventListener("mousedown", () => {
-            emit('closePopup'); document.body.style.overflow = "auto"}, {once: true})
+
+const updatePFPs = () => {
+    editFinished.value = true
+    document.body.addEventListener("mouseup", () => {
+    emit('closePopup'); document.body.style.overflow = "auto"}, {once: true})
         
-        domColor.value = getDominantColor(imageElement)
-        document.querySelectorAll(".profilePicture").forEach((pfp: HTMLImageElement) => {
-            if (pfp.src.includes(uid)) {
-                let imgSrc = new URL(pfp.src)
-                imgSrc.search = `?v=${time}`
-                pfp.src = imgSrc.toString()
-            }
-        })
+    nextTick(() => {
+        let newPfp = document.querySelector("#finishedProfilePicture") as HTMLImageElement
+        newPfp.onload = () => {
+            domColor.value = getDominantColor(newPfp)
+        }
+    })
+    lastPFPchange.value = Date.now()
+}
+
+const pickedFile = (file: Blob) => {
+    axios.put(import.meta.env.VITE_API + "/accounts.php", file).then(_ => {
+        updatePFPs()
     })
 }
 
@@ -67,8 +73,10 @@ const pickGalleryFile = (url: string) => {
 }
 
 const useDiscord = () => {
-    axios.put(import.meta.env.VITE_API + "/accounts.php", "-1").then(res => {
-        console.log(res.data)
+    discordLoading.value = true
+    axios.put(import.meta.env.VITE_API + "/accounts.php", "-1").then(_ => {
+        discordLoading.value = false
+        updatePFPs()
     })
 }
 
@@ -162,22 +170,23 @@ const editFinished = ref(false)
         </Dialog>
 
         <div class="relative p-4 mb-4 text-center rounded-xl border-white border-opacity-20 border-dashed sm:border-4">
-            <HiddenFileUploader @data="openEdit($event)" />
+            <HiddenFileUploader :disabled="discordLoading" @data="openEdit($event)" />
 
             <img src="@/images/dropfile.svg" class="mx-auto w-32 opacity-20 max-sm:hidden" alt="">
             <p class="mb-6 text-2xl opacity-20 max-sm:hidden">{{ $t('settingsMenu.dragPhoto') }}</p>
             <span class="opacity-20 max-sm:hidden">{{ $t('other.or') }}</span>
             <div class="grid gap-4 mt-2 sm:grid-cols-2 max-sm:grid-rows-3">
-                <button @click="galleryOpen = true" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md sm:hidden button">
+                <button @click="galleryOpen = true" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 sm:hidden button">
                     <img src="@/images/copy.svg" class="w-6" alt="">
                     {{ $t('editor.upload') }}
                 </button>
-                <button @click="galleryOpen = true" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button">
+                <button @click="galleryOpen = true" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
                     <img src="@/images/image.svg" class="w-6" alt="">
                     {{ $t('settingsMenu.pickFromGallery') }}
                 </button>
-                <button @click="useDiscord" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button">
-                    <img src="@/images/discord.svg" class="w-6" alt="">
+                <button @click="useDiscord" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
+                    <img v-if="discordLoading" src="@/images/loading.webp" class="w-6 animate-spin" alt="">
+                    <img v-else src="@/images/discord.svg" class="w-6" alt="">
                     {{ $t('settingsMenu.pickDiscord') }}
                 </button>
             </div>
@@ -188,11 +197,11 @@ const editFinished = ref(false)
     <Dialog header-disabled :open="editFinished" :custom-color="`linear-gradient(9deg, ${domColor}, ${domColor.darken(2)})`">
         <div class="flex flex-col items-center px-4 py-8 overflow-clip rounded-md" :style="{boxShadow: `0px 0px 80px ${domColor.alpha(0.5).hex()}`}">
             <div class="relative">
-                <img :src="basedData" class="absolute w-32 blur-3xl -z-10" alt="">
-                <img :src="basedData" class="z-10 w-32 shadow-drop" alt="">
+                <ProfilePicture :uid="uid" class="absolute w-32 blur-3xl -z-10" />
+                <ProfilePicture :uid="uid" id="finishedProfilePicture" class="z-10 w-32 shadow-drop" />
             </div>
-            <h2 class="mt-2 text-2xl">Profilová fotka byla nastavena</h2>
-            <p class="mt-6 opacity-50">Klikni pro zavření dialogu!</p>
+            <h2 class="mt-2 text-2xl">{{ $t('settingsMenu.pfpSet') }}</h2>
+            <p class="mt-6 opacity-50">{{ $t('settingsMenu.closeDialog') }}</p>
         </div>
     </Dialog>
 </template>

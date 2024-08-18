@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+defineProps<{
+    disabled?: boolean
+    multiple?: boolean
+    fileType?: 'image'
+}>()
+
 const emit = defineEmits<{
     (e: "data", blob: Blob): void
 }>()
@@ -21,5 +27,5 @@ const pasteFile = (e: Event) => {
 </script>
 
 <template>
-    <input type="file" @drop="getFile" @input="getFile" name="" id="" class="absolute inset-0 opacity-0 appearance-none">
+    <input type="file" @drop="getFile" @input="getFile" :disabled="disabled" class="absolute inset-0 opacity-0 appearance-none">
 </template>

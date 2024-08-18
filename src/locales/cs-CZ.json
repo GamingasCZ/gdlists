@@ -50,7 +50,9 @@
     "dragPhoto": "Přetáhni nebo vyber novou fotku",
     "pickFromGallery": "Vybrat z galerie",
     "pickDiscord": "Použít z Discordu",
-    "cutoutHelp": "Změní tvar profilové fotky"
+    "cutoutHelp": "Změní tvar profilové fotky",
+    "pfpSet": "Profilová fotka byla nastavena",
+    "closeDialog": "Klikni pro zavření dialogu!"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { lastPFPchange } from '@/Editor';
+import { ref, watch } from 'vue';
 
 
 
@@ -23,7 +24,7 @@ async function load() {
 
     let l = new Promise((res, err) => {
         let img = new Image()
-        img.src = `${UC}/userContent/${props.uid}/pfp.webp`
+        img.src = `${UC}/userContent/${props.uid}/pfp.webp${lastPFPchange.value == -1 ? '' : `?v=${lastPFPchange.value}`}`
         img.onload = () => res(img.src)
         img.onerror = () => err()
     })
@@ -31,6 +32,8 @@ async function load() {
     PFP.value = await l.then(res => res).catch(err => `${base}/pfps/defaultPFP.webp`)
 }
 load()
+
+watch(lastPFPchange, load)
 </script>
 
 <template>
