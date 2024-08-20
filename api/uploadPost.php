@@ -102,7 +102,7 @@ switch ($post["postType"]) {
     echo json_encode([$listID["id"]]);
     break;
   case 'review':
-    echo $postExtras["name"] . '-' . $listID;
+    echo $listID;
     break;
 }
 

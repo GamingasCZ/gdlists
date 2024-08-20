@@ -742,7 +742,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
             </div>
 
             <!-- Editor -->
-            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2}">
+            <section ref="writer" :style="{fontFamily: pickFont(reviewData.font)}" id="reviewText" :data-white-page="reviewData.whitePage" class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full" :class="{'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2 && !SETTINGS.disableTL}">
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
                 
                 <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated" :no-ratings="reviewData.disabledRatings" @start-writing="startWriting" :inverted="reviewData.whitePage"/>

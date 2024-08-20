@@ -66,10 +66,9 @@ $retListID = [$DATA["id"]];
 
 // Private list settings
 $compressedData = base64_encode(gzcompress($fuckupData[1]));
+$hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
+$hidden = $doHide ? $hiddenID : '0';
 if ($IS_LIST) {
-    $hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
-    $hidden = $doHide ? $hiddenID : '0';
-    
     $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
     
@@ -77,10 +76,10 @@ if ($IS_LIST) {
     $retListID[0] = $doHide ? $hiddenID : $listData["id"];
 }
 else {
-    $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ?, `lang` = ? WHERE id = ?", [$compressedData, intval($fuckupData[3]), $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $decoded["language"], $DATA["id"]], "sisissss");
+    $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ?, `lang` = ? WHERE id = ?", [$compressedData, $hidden, $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $decoded["language"], $DATA["id"]], "sisissss");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
 
-    $retListID = str_replace(' ', '-', $listData["name"]) . '-' . $listData["id"];
+    $retListID = $doHide ? $hiddenID : $listData["id"];;
 }
 
 // Adding levels to database

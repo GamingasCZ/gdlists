@@ -2,23 +2,18 @@
 import axios, { type AxiosResponse } from "axios";
 import type {
   ListFetchResponse,
-  FavoritedLevel,
   ListPreview,
-  Level,
 SavedCollab,
-CollabHumans,
 CollabData,
 LevelList,
 ReviewList,
-ReviewDetailsResponse,
 ReviewContainer,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
-// import LevelCardPC from "./global/LevelCardPC.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, provide, computed } from "vue";
+import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncComponent } from "vue";
 import { modifyListBG } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
@@ -39,11 +34,11 @@ import DataContainer from "./writer/DataContainer.vue";
 import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, reviewData } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
-import ViewModePicker from "./global/ViewModePicker.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
 import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
 import ImageViewer from "./global/ImageViewer.vue";
+import LevelCardTableTable from "./global/LevelCardTableTable.vue";
 
 const props = defineProps<{
   listID?: string
@@ -64,6 +59,13 @@ const loadContent = async () => {
     randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}}).then(res => res.data)
   }
   props.isReview ? loadReview(randomData) : loadList(randomData)
+  if (SETTINGS.value.autoComments) {
+    window.addEventListener("scroll", () => {
+      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
+      if (document.documentElement.clientHeight + document.documentElement.scrollTop > document.documentElement.scrollHeight - 100)
+        scrolledToEnd.value = true
+    })
+  }
 }
 
 watch(props, loadContent)
@@ -171,8 +173,10 @@ async function loadReview(loadedData: ReviewList | null) {
 
   let res: ReviewList | number;
   if (loadedData) res = loadedData
-  else
-    res = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {review: encodeURIComponent(props.listID).match(/-(\d+)$/)[1]}}).then((res: AxiosResponse) => res.data)
+  else {
+    let params = {type: 'review', review: props.listID}
+    res = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: params}).then((res: AxiosResponse) => res.data)
+  }
     
   try {
     if (res == 2) {
@@ -317,6 +321,7 @@ const getURL = () => {
 }
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
+const scrolledToEnd = ref(false)
 const commentsShowing = ref(false)
 const mobileExtrasOpen = ref(false)
 const guessHelpOpened = ref(false)
@@ -330,6 +335,8 @@ if (hasLocalStorage()) {
     sessionStorage.removeItem("uploadFinished")
   }
 }
+
+const ViewModePicker = defineAsyncComponent({loader: () => import("./global/ViewModePicker.vue")})
 
 watch(router.currentRoute, () => {
     // load viewed review
@@ -577,76 +584,37 @@ const imageIndex = ref(-1)
       </DialogVue>
 
       <!-- List view picker -->
-      <ViewModePicker />
+      <div v-if="!viewedPopups.pickedStyling">
+        <ViewModePicker />
+      </div>
 
       <!-- List -->
-      <div v-if="(SETTINGS.levelViewMode == 0 || LIST_DATA.diffGuesser) && !isReview" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
-        <LevelCard v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
-          class="levelCard"
-          :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
-          v-bind="level"
-          :favorited="favoritedIDs?.includes(level.levelID!)"
-          :level-index="index"
-          :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-          :list-name="LIST_DATA?.name!"
-          :translucent-card="LIST_DATA?.data.translucent!" 
-          :disable-stars="cardGuessing == index"
-          :guessing-now="cardGuessing == index"
-          :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-          @vue:mounted="tryJumping(index)"
-          @next-guess="doNextGuess($event)"
-          @open-collab="openCollabTools"
-          @error="listErrorLoading = true"
-        />      
-      </div>
-      
-      <div v-else-if="SETTINGS.levelViewMode == 1 && !isReview" v-show="!commentsShowing" class="flex flex-col gap-4">
-        <LevelCardCompact v-for="(level, index) in LIST_DATA?.data.levels"
-          class="levelCard"
-          :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
-          v-bind="level"
-          :favorited="favoritedIDs?.includes(level.levelID!)"
-          :level-index="index"
-          :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
-          :list-name="LIST_DATA?.name!"
-          :translucent-card="LIST_DATA?.data.translucent!" 
-          :disable-stars="false" 
-          @vue:mounted="tryJumping(index)"
-          @next-guess="doNextGuess($event)"
-          @open-tags="tagViewerOpened = $event"
-          @open-collab="openCollabTools"
-          @error="listErrorLoading = true"
-        />
-      </div>
-
-      <div v-else-if="SETTINGS.levelViewMode == 2 && !isReview" v-show="!commentsShowing" class="max-w-[95vw] overflow-auto mx-auto w-[70rem]">
-        <table class="overflow-auto mx-auto w-full bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
-          <th></th>
-          <th>{{ $t('other.name') }}</th>
-          <th>{{ $t('level.creator') }}</th>
-          <th>ID</th>
-          <th>{{ $t('other.links') }}</th>
-          <th></th>
-          <LevelCardTable v-for="(level, index) in LIST_DATA?.data.levels"
+      <div v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
+        <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
+          <component :is="[LevelCard, LevelCardCompact, LevelCardTable][SETTINGS.levelViewMode]" v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
             class="levelCard"
+            :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
             v-bind="level"
             :favorited="favoritedIDs?.includes(level.levelID!)"
             :level-index="index"
             :list-i-d="PRIVATE_LIST ? LIST_DATA?.hidden : LIST_DATA?.id.toString()"
             :list-name="LIST_DATA?.name!"
-            :translucent-card="LIST_DATA?.data.translucent!" 
-            :disable-stars="false" 
+            :translucent-card="LIST_DATA?.data.translucent! && !SETTINGS.disableTL" 
+            :disable-stars="cardGuessing == index"
+            :guessing-now="cardGuessing == index"
+            :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
             @vue:mounted="tryJumping(index)"
-            @open-collab="openCollabTools"
+            @next-guess="doNextGuess($event)"
             @open-tags="tagViewerOpened = $event"
+            @open-collab="openCollabTools"
             @error="listErrorLoading = true"
-          />
-        </table>
+          />      
+        </LevelCardTableTable>
       </div>
       
       <div v-else v-show="!commentsShowing && !reviewLevelsOpen">
         <!-- Review -->
-        <section id="reviewText" :style="{fontFamily: pickFont(LIST_DATA.data.font)}" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2, '!text-black': LIST_DATA.data.whitePage}">
+        <section id="reviewText" :style="{fontFamily: pickFont(LIST_DATA.data.font)}" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0 || SETTINGS.disableTL, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2 && !SETTINGS.disableTL, '!text-black': LIST_DATA.data.whitePage}">
           <DataContainer
               v-for="(container, index) in LIST_DATA.data.containers"
               v-bind="CONTAINERS[container.type]"
@@ -677,23 +645,6 @@ const imageIndex = ref(-1)
         </section>
       </div>
 
-      <div v-if="reviewLevelsOpen" class="flex flex-col gap-4 items-center">
-        <LevelCard v-for="(level, index) in LIST_DATA?.data.levels"
-          class="levelCard"
-          v-bind="level"
-          :style="{animationDelay: `${index/25}s`}"
-          :favorited="favoritedIDs?.includes(level.levelID!)"
-          :level-index="index"
-          :list-i-d="LIST_DATA?.url"
-          :list-name="LIST_DATA?.name!"
-          :translucent-card="false" 
-          :disable-stars="false" 
-          @vue:mounted="tryJumping(index)"
-          @open-collab="openCollabTools"
-          @error="listErrorLoading = true"
-        />      
-      </div>
-
       <!-- Guessing bottom padding -->
       <div :style="{height: `${windowHeight}px`}" class="w-4" v-if="LIST_DATA.diffGuesser && cardGuessing != -1 && cardGuessing != LEVEL_COUNT && !commentsShowing"></div>
 
@@ -709,14 +660,15 @@ const imageIndex = ref(-1)
 
       <CommentSection
         v-if="LIST_DATA?.id != undefined"
-        v-show="commentsShowing"
+        v-show="commentsShowing || scrolledToEnd"
         @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
         :list-i-d="LIST_DATA?.id"
         :hidden-i-d="LIST_DATA.hidden"
-        :showing="commentsShowing"
+        :showing="commentsShowing || scrolledToEnd"
         :comments-disabled="LIST_DATA.data.disComments"
         :is-review="isReview"
+        :end-scroll="scrolledToEnd && !commentsShowing"
       />
     </main>
   </section>

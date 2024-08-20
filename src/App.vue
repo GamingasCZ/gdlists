@@ -8,7 +8,7 @@ import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
 import { setLanguage } from "./locales";
-import { currentUID } from "./Editor";
+import { currentCutout, currentUID } from "./Editor";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -68,6 +68,7 @@ onMounted(() => {
           JSON.stringify(Object.values(res.data))
         );
         currentUID.value = res.data.account_id
+        currentCutout.value = res.data.cutout
       } else {
         localStorage.removeItem("account_info");
       }

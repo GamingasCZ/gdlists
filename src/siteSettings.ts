@@ -10,8 +10,10 @@ export const SETTINGS = ref({
   dialogClickClose: true,
   levelViewMode: 0,
   scrollNavbar: true,
+  autoComments: true,
   disableColors: false,
-  disableBGs: false
+  disableBGs: false,
+  disableTL: false
 });
 
 watch(SETTINGS, () => {

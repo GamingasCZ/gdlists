@@ -53,7 +53,11 @@
     "cutoutHelp": "Změní tvar profilové fotky",
     "pfpSet": "Profilová fotka byla nastavena",
     "closeDialog": "Klikni pro zavření dialogu!",
-    "dragSelect": "Táhni pro výběr oblasti obrázku!"
+    "dragSelect": "Táhni pro výběr oblasti obrázku!",
+    "loadCom": "Komentáře pod příspěvkem",
+    "loadCHelp": "Změní, zda se komentáře zobrazí automaticky na konci příspěvku.",
+    "disTL": "Zakázat průsvitnost",
+    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

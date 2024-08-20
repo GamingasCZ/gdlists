@@ -11,6 +11,7 @@ const props = defineProps<{
     commAmount: number
     showing: boolean
     commentsDisabled: boolean
+    endScroll: boolean
 }>()
 
 const emit = defineEmits<{
@@ -29,6 +30,7 @@ watch(props, () => { // only refresh comments once
 
 <template>
     <main>
+        <h2 class="mt-6 max-w-[95vw] w-[70rem] text-3xl font-bold" v-if="endScroll">{{ $t('level.comments') }}</h2>
         <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
         
         <!-- Comments disabled info -->

@@ -19,7 +19,7 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
-$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, replace(concat(name,'-',reviews.id),' ','-') as url, thumbnail, tagline, thumbProps";
+$selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
 $selLevelRange = "levelName, creator, collabMemberCount, levels.levelID, difficulty, rating, platformer, ifnull(listID, concat('review/', (SELECT replace(concat(name,'-',reviews.id),' ','-') FROM reviews WHERE id=reviewID))) as listID";
 
 $listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";

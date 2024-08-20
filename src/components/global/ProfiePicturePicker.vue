@@ -24,7 +24,6 @@ const emit = defineEmits<{
 const galleryOpen = ref(false)
 const pfpPreview = ref<HTMLCanvasElement>()
 const bigPreview = ref<HTMLCanvasElement>()
-const uploader = ref<HTMLInputElement>()
 const editScale = ref(1)
 
 const openEdit = (uploadData: Blob) => {
@@ -45,10 +44,8 @@ const openEdit = (uploadData: Blob) => {
     })
 }
 
-let account_info = JSON.parse(localStorage.getItem("account_info")!)
 const domColor = ref(chroma.random())
 
-currentCutout.value = account_info?.[2] ?? 0
 const updatingCutout = ref(false)
 const updateCutout = () => {
     let prevCutout = currentCutout.value
@@ -103,6 +100,7 @@ const startMove = () => {
     movingImage = true
     dragHelp.value = false
     document.body.addEventListener("mouseup", endMove, {once: true})
+    document.body.addEventListener("touchend", endMove, {once: true})
 }
 const endMove = () => {
     movingImage = false
@@ -110,9 +108,15 @@ const endMove = () => {
     updatePreviews()
 }
 
-const moveResizer = (e: MouseEvent) => {
+const moveResizer = (e: MouseEvent | TouchEvent) => {
     if (!movingImage) return
-    if (lastX[0] == -1) lastX = [e.x, e.y]
+    let pos;
+    if (e.type == "mousemove") pos = {x: e.x, y: e.y}
+    else {
+        pos = {x: e.touches[0].clientX, y: e.touches[0].clientY}
+    }
+
+    if (lastX[0] == -1) lastX = [pos.x, pos.y]
     updatePreviews()
     let w = imageElement.naturalWidth
     let h = imageElement.naturalHeight
@@ -120,28 +124,36 @@ const moveResizer = (e: MouseEvent) => {
     let r2 = h/w
     if (r < 1) {
         resizerTopLeft.value = [
-            Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[0] + e.x - lastX[0], 0)),
-            Math.max(-(256*r2*editScale.value)+256, Math.min(resizerTopLeft.value[1] + e.y - lastX[1], 0))
+            Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[0] + pos.x - lastX[0], 0)),
+            Math.max(-(256*r2*editScale.value)+256, Math.min(resizerTopLeft.value[1] + pos.y - lastX[1], 0))
         ]
     }
     else {
         resizerTopLeft.value = [
-            Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0] + e.x - lastX[0], 0)),
-            Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1] + e.y - lastX[1], 0))
+            Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0] + pos.x - lastX[0], 0)),
+            Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1] + pos.y - lastX[1], 0))
         ]
     }
     
-    lastX = [e.x, e.y]
+    lastX = [pos.x, pos.y]
 }
 
 const updateScale = () => {
     let w = imageElement.naturalWidth
     let h = imageElement.naturalHeight
     let r = w/h
+    let r2 = h/w
     // resizerTopLeft.value[0] /= editScale.value
     // resizerTopLeft.value[1] /= editScale.value
-    resizerTopLeft.value[0] = Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0], 0)),
-    resizerTopLeft.value[1] = Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1], 0))
+    if (r < 1) {
+        resizerTopLeft.value[0] = Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[0], 0)),
+        resizerTopLeft.value[1] = Math.max(-(256*r2*editScale.value)+256, Math.min(resizerTopLeft.value[1], 0))
+    }
+    else {
+        resizerTopLeft.value[0] = Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0], 0)),
+        resizerTopLeft.value[1] = Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1], 0))
+    }
+
     updatePreviews()
 }
 
@@ -160,16 +172,21 @@ const updatePreviews = () => {
     
     ctxSmall?.reset()
     if (ratioTall < 1)
-    ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*ratioWide*editScale.value, 128*editScale.value)
-else
-ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*editScale.value, 128*ratioTall*editScale.value)
+        ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*ratioWide*editScale.value, 128*editScale.value)
+    else
+        ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*editScale.value, 128*ratioTall*editScale.value)
 
     ctxBig?.reset()
     if (ratioTall < 1)
-    ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*ratioWide*editScale.value, 256*editScale.value)
-else
-ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*editScale.value, 256*ratioTall*editScale.value)
+        ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*ratioWide*editScale.value, 256*editScale.value)
+    else
+        ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*editScale.value, 256*ratioTall*editScale.value)
 }
+
+const clickUploader = () => {
+    document.querySelector("#PFPuploader")?.click()
+}
+
 
 const editFinished = ref(false)
 
@@ -181,7 +198,7 @@ const editFinished = ref(false)
             <section class="p-2">
                 <div class="flex justify-evenly items-center max-sm:flex-col">
                     <div class="flex flex-col items-center drop-shadow-[0px_0px_5px_black]">
-                        <canvas ref="pfpPreview" class="mb-3 w-32 h-32" :style="{clipPath: profileCutouts[currentCutout]}" width="128" height="128"></canvas>
+                        <canvas ref="pfpPreview" class="mb-3 w-32 h-32 max-h-[20vh] max-w-[20vh]" :style="{clipPath: profileCutouts[currentCutout]}" width="128" height="128"></canvas>
                         <span>{{ $t('other.preview') }}</span>
                     </div>
         
@@ -211,8 +228,8 @@ const editFinished = ref(false)
           <ImageBrowser disable-external :unselectable="false" @pick-image="pickGalleryFile" @close-popup="galleryOpen = false" />
         </Dialog>
 
-        <div class="relative p-4 text-center rounded-xl border-white border-opacity-20 border-dashed cursor-pointer sm:mb-4 sm:border-4">
-            <HiddenFileUploader ref="uploader" :disabled="discordLoading" @data="openEdit($event)" />
+        <div class="relative mb-4 text-center rounded-xl border-white border-opacity-20 border-dashed cursor-pointer sm:p-4 sm:border-4">
+            <HiddenFileUploader id="PFPuploader" :disabled="discordLoading" @data="openEdit($event)" />
 
             <div class="grid grid-cols-[1fr_max-content_1fr] justify-items-center sm:mt-3 sm:mb-12">
                 <div class="pointer-events-none">
@@ -222,12 +239,12 @@ const editFinished = ref(false)
                 <hr class="w-1 h-full bg-white rounded-full border-none opacity-20 max-sm:hidden">
                 <div class="pointer-events-none">
                     <ProfilePicture class="w-24 aspect-square" :uid="currentUID" :cutout="currentCutout" />
-                    <p class="text-xl opacity-20 max-sm:hidden">Current</p>
+                    <p class="text-xl opacity-20 max-sm:mb-4">Current</p>
                 </div>
             </div>
             
             <div class="grid gap-4 mt-2 max-sm:grid-rows-3 sm:grid-cols-2">
-                <button @click="uploader?.click()" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 sm:hidden button">
+                <button @click="clickUploader" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 sm:hidden button">
                     <img src="@/images/copy.svg" class="w-6" alt="">
                     {{ $t('editor.upload') }}
                 </button>

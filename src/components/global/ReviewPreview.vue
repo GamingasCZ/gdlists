@@ -109,7 +109,7 @@ const clickReview = () => {
 
 <template>
   <component :is="disableLink ? 'button' : 'RouterLink'"
-    :to="`/review/${url.toString()}`"
+    :to="`/review/${hidden != '0' ? hidden : id}`"
     class="flex flex-col w-full text-left max-w-96 cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(listColor),

@@ -470,7 +470,11 @@
     "editPhoto": "Edit Photo",
     "pfpSet": "Profile Picture has been set!",
     "closeDialog": "Click to close the dialog!",
-    "dragSelect": "Drag to select an area of the image!"
+    "dragSelect": "Drag to select an area of the image!",
+    "disTL": "Disable translucency",
+    "disTLhelp": "Disables blurry backgrounds of reviews and level cards",
+    "loadCom": "Comments under Posts",
+    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post"
   },
   "help": {
     "Lists": "Lists",
