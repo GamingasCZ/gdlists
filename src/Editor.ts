@@ -251,3 +251,12 @@ export const shortenYTLink = (link: string, disableParams = false) => {
 }
 
 export const lastPFPchange = ref(-1)
+export const currentCutout = ref(0)
+export const currentUID = ref("0")
+export const profileCutouts = [
+  'circle()',
+  'rect(0 0 100% 100% round 10%)',
+  'polygon(50% 5%, 68% 26%, 100% 40%, 80% 63%, 79% 95%, 50% 88%, 21% 95%, 20% 63%, 0 40%, 30% 26%)',
+  'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+  'polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 25% 50%, 0% 0%)',
+]

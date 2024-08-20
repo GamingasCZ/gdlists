@@ -106,7 +106,7 @@ const sessionsDialog = ref<HTMLDivElement>()
 
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
-      class="flex flex-col gap-2 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
+      class="flex flex-col gap-2 justify-center items-center py-2 pt-9 w-36 bg-black bg-opacity-50 rounded-md"
       v-else
     >
       <h1 class="font-bold">{{ username }}</h1>

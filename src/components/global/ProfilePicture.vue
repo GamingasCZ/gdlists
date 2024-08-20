@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { lastPFPchange } from '@/Editor';
+import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
 import { ref, watch } from 'vue';
-
-
 
 const props = defineProps<{
     uid: string | -2 | -3
+    cutout: number | null
 }>()
 
-
 const PFP = ref("")
+const currCutout = ref(props.cutout)
 const UC = import.meta.env.VITE_USERCONTENT
 const base = import.meta.env.BASE_URL
 async function load() {
@@ -34,8 +33,12 @@ async function load() {
 load()
 
 watch(lastPFPchange, load)
+watch(currentCutout, () => {
+    if (props.uid == currentUID.value)
+        currCutout.value = currentCutout.value
+})
 </script>
 
 <template>
-    <img :src="PFP" class="profilePicture" alt="">
+    <img :src="PFP" class="profilePicture" :style="{clipPath: profileCutouts[currCutout ?? 0]}" alt="">
 </template>

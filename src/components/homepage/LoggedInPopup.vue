@@ -21,7 +21,7 @@ const BASE_URL = import.meta.env.BASE_URL
   class="flex flex-col text-left"
 >
   <div class="flex gap-4 items-center m-2">
-    <ProfilePicture class="w-12 rounded-full border-2 border-white border-solid" :uid="pfplink" />
+    <ProfilePicture class="w-12 border-2 border-white border-solid" :uid="pfplink" :cutout="0" />
     <h1 class="text-2xl text-yellow-200">
       <span>{{ $t('other.welcomeToGDL') }}</span> 
       <b>{{ username }}!</b>

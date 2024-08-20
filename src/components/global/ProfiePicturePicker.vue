@@ -9,7 +9,7 @@ import ImageBrowser from './ImageBrowser.vue';
 import { getDominantColor } from '@/Reviews';
 import chroma from 'chroma-js';
 import ProfilePicture from './ProfilePicture.vue';
-import { lastPFPchange } from '@/Editor';
+import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
 
 const openEditPopup = ref(false)
 const discordLoading = ref(false)
@@ -24,10 +24,14 @@ const emit = defineEmits<{
 const galleryOpen = ref(false)
 const pfpPreview = ref<HTMLCanvasElement>()
 const bigPreview = ref<HTMLCanvasElement>()
+const uploader = ref<HTMLInputElement>()
 const editScale = ref(1)
 
 const openEdit = (uploadData: Blob) => {
     openEditPopup.value = true
+    resizerTopLeft.value = [0,0]
+    lastX = [-1,-1]
+    editScale.value = 1
     let reader = new FileReader()
     reader.readAsDataURL(uploadData!)
     nextTick(() => {
@@ -41,11 +45,22 @@ const openEdit = (uploadData: Blob) => {
     })
 }
 
-let uid = JSON.parse(localStorage.getItem("account_info")!)?.[1] ?? "0"
+let account_info = JSON.parse(localStorage.getItem("account_info")!)
 const domColor = ref(chroma.random())
+
+currentCutout.value = account_info?.[2] ?? 0
+const updatingCutout = ref(false)
+const updateCutout = () => {
+    let prevCutout = currentCutout.value
+    updatingCutout.value = true
+    axios.patch(import.meta.env.VITE_API + "/accounts.php", currentCutout.value).then(_ => {
+        updatingCutout.value = false
+    }).catch(() => currentCutout.value = prevCutout)
+}
 
 const updatePFPs = () => {
     editFinished.value = true
+
     document.body.addEventListener("mouseup", () => {
     emit('closePopup'); document.body.style.overflow = "auto"}, {once: true})
         
@@ -80,11 +95,13 @@ const useDiscord = () => {
     })
 }
 
+const dragHelp = ref(true)
 let lastX = [-1, -1]
 const resizerTopLeft = ref([0, 0])
 let movingImage = false
 const startMove = () => {
     movingImage = true
+    dragHelp.value = false
     document.body.addEventListener("mouseup", endMove, {once: true})
 }
 const endMove = () => {
@@ -92,6 +109,7 @@ const endMove = () => {
     lastX = [-1, -1]
     updatePreviews()
 }
+
 const moveResizer = (e: MouseEvent) => {
     if (!movingImage) return
     if (lastX[0] == -1) lastX = [e.x, e.y]
@@ -100,17 +118,30 @@ const moveResizer = (e: MouseEvent) => {
     let h = imageElement.naturalHeight
     let r = w/h
     let r2 = h/w
-    resizerTopLeft.value = [
-        Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0] + e.x - lastX[0], 0)),
-        Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1] + e.y - lastX[1], 0))
-    ]
+    if (r < 1) {
+        resizerTopLeft.value = [
+            Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[0] + e.x - lastX[0], 0)),
+            Math.max(-(256*r2*editScale.value)+256, Math.min(resizerTopLeft.value[1] + e.y - lastX[1], 0))
+        ]
+    }
+    else {
+        resizerTopLeft.value = [
+            Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0] + e.x - lastX[0], 0)),
+            Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1] + e.y - lastX[1], 0))
+        ]
+    }
     
     lastX = [e.x, e.y]
 }
 
 const updateScale = () => {
-    resizerTopLeft.value[0] /= editScale.value
-    resizerTopLeft.value[1] /= editScale.value
+    let w = imageElement.naturalWidth
+    let h = imageElement.naturalHeight
+    let r = w/h
+    // resizerTopLeft.value[0] /= editScale.value
+    // resizerTopLeft.value[1] /= editScale.value
+    resizerTopLeft.value[0] = Math.max(-(256*r*editScale.value)+256, Math.min(resizerTopLeft.value[0], 0)),
+    resizerTopLeft.value[1] = Math.max(-(256*editScale.value)+256, Math.min(resizerTopLeft.value[1], 0))
     updatePreviews()
 }
 
@@ -124,12 +155,20 @@ const saveCrop = () => {
 const updatePreviews = () => {
     let ctxSmall = pfpPreview.value?.getContext("2d")
     let ctxBig = bigPreview.value?.getContext("2d")
-    let ratio = imageElement.naturalWidth/imageElement.naturalHeight
+    let ratioWide = imageElement.naturalWidth/imageElement.naturalHeight
+    let ratioTall = imageElement.naturalHeight/imageElement.naturalWidth
+    
     ctxSmall?.reset()
-    ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*ratio*editScale.value, 128*editScale.value)
+    if (ratioTall < 1)
+    ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*ratioWide*editScale.value, 128*editScale.value)
+else
+ctxSmall?.drawImage(imageElement, resizerTopLeft.value[0]/2, resizerTopLeft.value[1]/2, 128*editScale.value, 128*ratioTall*editScale.value)
 
     ctxBig?.reset()
-    ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*ratio*editScale.value, 256*editScale.value)
+    if (ratioTall < 1)
+    ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*ratioWide*editScale.value, 256*editScale.value)
+else
+ctxBig?.drawImage(imageElement, resizerTopLeft.value[0], resizerTopLeft.value[1], 256*editScale.value, 256*ratioTall*editScale.value)
 }
 
 const editFinished = ref(false)
@@ -140,16 +179,19 @@ const editFinished = ref(false)
     <section v-show="!editFinished" class="flex flex-col p-4">
         <Dialog :open="openEditPopup" @close-popup="openEditPopup = false" :title="$t('settingsMenu.editPhoto')" :width="dialog.medium" disable-tap-close>
             <section class="p-2">
-                <div class="flex justify-evenly items-center">
-                    <div class="flex flex-col items-center">
-                        <canvas ref="pfpPreview" class="mb-3 w-32 h-32 rounded-full border-4 border-white" width="128" height="128"></canvas>
+                <div class="flex justify-evenly items-center max-sm:flex-col">
+                    <div class="flex flex-col items-center drop-shadow-[0px_0px_5px_black]">
+                        <canvas ref="pfpPreview" class="mb-3 w-32 h-32" :style="{clipPath: profileCutouts[currentCutout]}" width="128" height="128"></canvas>
                         <span>{{ $t('other.preview') }}</span>
                     </div>
         
                     <div class="relative">
-                        <div class="relative w-64 h-64 cursor-grab active:cursor-grabbing shadow-drop" @mousedown="startMove" @mousemove="moveResizer">
+                        <div class="relative w-64 h-64 cursor-grab active:cursor-grabbing shadow-drop" @mousedown="startMove" @mousemove="moveResizer" @touchmove="moveResizer" @touchstart="startMove">
+                            <div v-show="dragHelp" class="flex absolute bottom-1 left-1/2 gap-2 items-center p-1 w-max text-sm bg-black bg-opacity-80 rounded-md -translate-x-1/2">
+                                <img src="@/images/move.svg" class="w-5" alt="">
+                                <span>{{ $t('settingsMenu.dragSelect') }}</span>
+                            </div>
                             <canvas ref="bigPreview" width="256" height="256"></canvas>
-                            <!-- <div class="absolute top-0 left-1/2 h-full border-4 -translate-x-1/2 border-lof-400 aspect-square"></div> -->
                         </div>
 
                         <div class="flex gap-2 items-center my-2">
@@ -159,8 +201,8 @@ const editFinished = ref(false)
                     </div>
                 </div>
                 <div class="flex justify-between">
-                    <button @click="openEditPopup = false">{{ $t('other.cancel') }}</button>
-                    <button @click="saveCrop" class="p-2 text-xl font-bold text-black rounded-md bg-lof-400">{{ $t('other.use') }}</button>
+                    <button @click="openEditPopup = false" class="p-2 text-lof-400">{{ $t('other.cancel') }}</button>
+                    <button @click="saveCrop" class="flex gap-2 items-center px-2 py-1 text-xl font-bold text-black rounded-md bg-lof-400"><img src="@/images/check.svg" class="w-5" alt="">{{ $t('other.use') }}</button>
                 </div>
             </section>
         </Dialog>
@@ -169,14 +211,23 @@ const editFinished = ref(false)
           <ImageBrowser disable-external :unselectable="false" @pick-image="pickGalleryFile" @close-popup="galleryOpen = false" />
         </Dialog>
 
-        <div class="relative p-4 mb-4 text-center rounded-xl border-white border-opacity-20 border-dashed sm:border-4">
-            <HiddenFileUploader :disabled="discordLoading" @data="openEdit($event)" />
+        <div class="relative p-4 text-center rounded-xl border-white border-opacity-20 border-dashed cursor-pointer sm:mb-4 sm:border-4">
+            <HiddenFileUploader ref="uploader" :disabled="discordLoading" @data="openEdit($event)" />
 
-            <img src="@/images/dropfile.svg" class="mx-auto w-32 opacity-20 max-sm:hidden" alt="">
-            <p class="mb-6 text-2xl opacity-20 max-sm:hidden">{{ $t('settingsMenu.dragPhoto') }}</p>
-            <span class="opacity-20 max-sm:hidden">{{ $t('other.or') }}</span>
-            <div class="grid gap-4 mt-2 sm:grid-cols-2 max-sm:grid-rows-3">
-                <button @click="galleryOpen = true" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 sm:hidden button">
+            <div class="grid grid-cols-[1fr_max-content_1fr] justify-items-center sm:mt-3 sm:mb-12">
+                <div class="pointer-events-none">
+                    <img src="@/images/dropfile.svg" class="mx-auto w-24 opacity-20 max-sm:hidden" alt="">
+                    <p class="text-xl opacity-20 max-sm:hidden">{{ $t('settingsMenu.dragPhoto') }}</p>
+                </div>
+                <hr class="w-1 h-full bg-white rounded-full border-none opacity-20 max-sm:hidden">
+                <div class="pointer-events-none">
+                    <ProfilePicture class="w-24 aspect-square" :uid="currentUID" :cutout="currentCutout" />
+                    <p class="text-xl opacity-20 max-sm:hidden">Current</p>
+                </div>
+            </div>
+            
+            <div class="grid gap-4 mt-2 max-sm:grid-rows-3 sm:grid-cols-2">
+                <button @click="uploader?.click()" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 sm:hidden button">
                     <img src="@/images/copy.svg" class="w-6" alt="">
                     {{ $t('editor.upload') }}
                 </button>
@@ -191,14 +242,14 @@ const editFinished = ref(false)
                 </button>
             </div>
         </div>
-        <Option :name="$t('settingsMenu.cutout')" control="dropdown" :desc="$t('settingsMenu.cutoutHelp')" :value="0" :control-options="[[$t('other.circle'), 0], [$t('other.square'), 1], [$t('other.star'), 2], [$t('other.demon'), 3]]" />
+        <Option :disabled="updatingCutout" :name="$t('settingsMenu.cutout')" control="dropdown" :desc="$t('settingsMenu.cutoutHelp')" @updated="updateCutout" v-model="currentCutout" :control-options="[[$t('other.circle'), 0], [$t('other.square'), 1], [$t('other.star'), 2], [$t('other.hexagon'), 3], [$t('other.demon'), 4]]" />
     </section>
 
     <Dialog header-disabled :open="editFinished" :custom-color="`linear-gradient(9deg, ${domColor}, ${domColor.darken(2)})`">
         <div class="flex flex-col items-center px-4 py-8 overflow-clip rounded-md" :style="{boxShadow: `0px 0px 80px ${domColor.alpha(0.5).hex()}`}">
             <div class="relative">
-                <ProfilePicture :uid="uid" class="absolute w-32 blur-3xl -z-10" />
-                <ProfilePicture :uid="uid" id="finishedProfilePicture" class="z-10 w-32 shadow-drop" />
+                <ProfilePicture :uid="currentUID" :cutout="currentCutout" class="absolute w-32 blur-3xl -z-10" />
+                <ProfilePicture :uid="currentUID" :cutout="currentCutout" id="finishedProfilePicture" class="z-10 w-32 shadow-drop" />
             </div>
             <h2 class="mt-2 text-2xl">{{ $t('settingsMenu.pfpSet') }}</h2>
             <p class="mt-6 opacity-50">{{ $t('settingsMenu.closeDialog') }}</p>

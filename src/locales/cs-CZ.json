@@ -52,7 +52,8 @@
     "pickDiscord": "Použít z Discordu",
     "cutoutHelp": "Změní tvar profilové fotky",
     "pfpSet": "Profilová fotka byla nastavena",
-    "closeDialog": "Klikni pro zavření dialogu!"
+    "closeDialog": "Klikni pro zavření dialogu!",
+    "dragSelect": "Táhni pro výběr oblasti obrázku!"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -383,7 +384,8 @@
     "circle": "Kruh",
     "square": "Čtverec",
     "star": "Hvězda",
-    "demon": "Démon"
+    "demon": "Démon",
+    "hexagon": "Šestiúhelník"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

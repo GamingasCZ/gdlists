@@ -43,24 +43,22 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
     die();
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "PATCH") {
+    $DATA = file_get_contents("php://input");
+    $acc = checkAccount($mysqli);
+    if (!$acc) die();
+
+    $newCutout = max(0, min(intval($DATA), 10));
+    doRequest($mysqli, "INSERT INTO `profiles`(`uid`, `pfp_cutout`) VALUES (?,?) ON DUPLICATE KEY UPDATE `pfp_cutout`=?", [$acc["id"], $newCutout, $newCutout], "sii");
+    die();
+}
+
 if (sizeof($_GET) > 0) {
     $state = $_COOKIE["state"];
     removeCookie("state");
     if ($state != $_GET["state"])
         die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
-    // if (array_keys($_GET)[0] == "sessions") { // Check login validity
-    //     $acc = checkAccount($mysqli);
-    //     $token = getAuthorization();
-    //     if (!$acc) die();
-
-    //     $req = doRequest($mysqli, "SELECT session_data, session_index, last_login FROM `sessions` WHERE user_id=?", [$acc["id"]], "s", true);
-    //     for ($s=0; $s < sizeof($req); $s++) { 
-    //         $req[$s]["session_data"] = json_decode($req[$s]["session_data"]);
-    //     }
-    //     $mysqli -> close();
-    //     die(json_encode(["sessions" => $req, "currentSession" => $token[3]]));
-    // }
     if (array_keys($_GET)[0] == "check") { // Check login validity
         $auth = getAuthorization();
         if (!$auth) die(json_encode(["status" => "logged_out"])); // Not logged in
@@ -68,8 +66,11 @@ if (sizeof($_GET) > 0) {
         $accCheck = checkAccount($mysqli);
         if (!$accCheck) die();
 
-        // doRequest($mysqli, "UPDATE `sessions` SET `last_login`=? WHERE `user_id`=? AND `session_index`=?", [time(), $accCheck["id"], $auth[3]], "isi");
-        $profileData = ["status" => "logged_in", "account_name" => $accCheck["username"], "account_id" => $accCheck["id"]];
+        $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
+        $profileData = ["status" => "logged_in",
+                        "account_name" => $accCheck["username"],
+                        "account_id" => $accCheck["id"],
+                        "cutout" => is_null($pfpCutout) ? 0 : $pfpCutout["pfp_cutout"]];
         $mysqli -> close();
         die($accCheck ? json_encode($profileData) : 0);
     }
@@ -102,29 +103,6 @@ if (sizeof($_GET) > 0) {
         $res = doRequest($mysqli, "UPDATE `users` SET `username`=?, `refresh_token`=?, `access_token`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"]], "ssss");
         $fistTimeUser = false;
     }
-    
-    // $sessionData = [
-    //     "dev" => -1,
-    //     "browser" => -1,
-    //     "mobile" => "Unknown"
-    // ];
-    
-    // $userAgent = $_SERVER['HTTP_USER_AGENT'];
-    // if (isset($userAgent)) {
-    //     $sessionData["mobile"] = (bool)strstr($userAgent, "Android") || strstr($userAgent, "iPhone");
-    //     $matches = [];
-    //     if ($sessionData["mobile"])
-    //         $sessionData["dev"] = strstr($userAgent, "Android") ? "Android" : "iPhone";
-    //     else {
-    //         preg_match("/(Linux|Windows|Mac OS)/", $userAgent, $matches);
-    //         if (sizeof($matches) > 0) $sessionData["dev"] = $matches[0];
-    //     }
-    //     preg_match("/(Chrome|Firefox|Brave|Vivaldi)/", $userAgent, $matches);
-    //     if (sizeof($matches) > 0) $sessionData["browser"] = $matches[0];
-    // }
-
-    // $sesionIndex = doRequest($mysqli, "SELECT COUNT(user_id) as sessionCount FROM `sessions`", [], "");
-    // doRequest($mysqli, "INSERT INTO `sessions`(`user_id`, `session_data`, `session_index`, `last_login`) VALUES (?,?,?,?)", [$dcApiResponse["id"], json_encode($sessionData),$sesionIndex["sessionCount"], time()], "ssii");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");

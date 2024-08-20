@@ -414,7 +414,12 @@
     "checklist": "Checklist",
     "colorPreview": "Color Preview",
     "nocolorHelp": "Colors are disabled, but still are being set!",
-    "or": "or"
+    "or": "or",
+    "circle": "Circle",
+    "square": "Square",
+    "star": "Star",
+    "demon": "Demon",
+    "hexagon": "Hexagon"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -464,7 +469,8 @@
     "dragPhoto": "Drag in or choose a new photo",
     "editPhoto": "Edit Photo",
     "pfpSet": "Profile Picture has been set!",
-    "closeDialog": "Click to close the dialog!"
+    "closeDialog": "Click to close the dialog!",
+    "dragSelect": "Drag to select an area of the image!"
   },
   "help": {
     "Lists": "Lists",
