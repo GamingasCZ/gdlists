@@ -105,7 +105,7 @@ const clickLevel = () => {
       <RatingContainer v-if="inReviews" class="min-w-60 max-sm:mb-2" :ratings="[round(A_gameplay), round(A_decoration), round(A_difficulty), round(A_overall)]" compact />
       <div v-else></div>
         
-      <div class="flex gap-3 place-self-end px-2 py-0.5 mb-auto w-max bg-black bg-opacity-60 rounded-md">
+      <div class="flex gap-3 items-center place-self-end px-2 py-0.5 mb-auto w-max bg-black bg-opacity-60 rounded-md">
         <div v-if="inLists > 0">
           <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-3" alt="">{{ inLists }}
         </div>
