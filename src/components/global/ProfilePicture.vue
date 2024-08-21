@@ -23,7 +23,7 @@ async function load() {
 
     let l = new Promise((res, err) => {
         let img = new Image()
-        img.src = `${UC}/userContent/${props.uid}/pfp.webp${lastPFPchange.value == -1 ? '' : `?v=${lastPFPchange.value}`}`
+        img.src = `${UC}/userContent/${props.uid}/pfp.webp?v=${lastPFPchange.value}`
         img.onload = () => res(img.src)
         img.onerror = () => err()
     })
