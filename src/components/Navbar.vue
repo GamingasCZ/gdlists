@@ -3,7 +3,7 @@ import { RouterLink } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { isOnline, resetList } from "@/Editor";
+import { currentCutout, currentUID, isOnline, profileCutouts, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress } from "@/router";
@@ -99,6 +99,7 @@ const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = fal
 
 var prevScroll = window.scrollY
 const hideNavbarOnScroll = () => {
+  if (window.scrollY <= 32) return
   navbarHidden.value = window.scrollY > prevScroll
   if (settingsShown.value) {
     settingsShown.value = false
@@ -185,20 +186,22 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       class="mr-1 w-6 animate-spin aspect-square" />
     
     <!-- Logged in, settings -->
-    <div v-else-if="localStorg" @click="showSettings" id="settingsOpener"
-      class="box-border relative w-8 h-8 bg-black bg-opacity-40 rounded-full">
-
+    <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
+      <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
+      
       <ProfilePicture
-        :uid="loginInfo[1]"
+        :uid="currentUID"
+        :cutout="currentCutout"
         :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute animate-ping top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+        class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture" v-if="!isOnline"
-      />
-
-      <ProfilePicture
-        :uid="loginInfo[1]"
+        />
+        
+        <ProfilePicture
+        :uid="currentUID"
+        :cutout="currentCutout"
         :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute top-0 right-0 z-10 w-8 h-8 rounded-full border-2 border-white border-solid motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+        class="absolute top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
         id="profilePicture"
       />
     </div>

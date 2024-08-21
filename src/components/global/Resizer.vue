@@ -6,6 +6,7 @@ const props = defineProps<{
     minSize?: number
     gizmoPos: 'corner' | 'vertical'
     editable: boolean
+    alwaysVisible: boolean
 }>()
 
 const emit = defineEmits<{
@@ -67,7 +68,7 @@ const endScale = () => {
 
 <template>
     <div ref="self" class="relative group">
-        <div :class="{'p-1 border-2 border-transparent group-hover:border-blue-400': editable}">
+        <div :class="{'p-1 border-2 border-transparent group-hover:border-blue-400': editable, 'border-blue-400': alwaysVisible}">
             <slot :width="width" />
         </div>
         <button v-if="editable" ref="gizmo" @mousedown="startScale" @touchstart="startScale" class="isolate absolute -bottom-1.5 w-4 h-4 bg-white rounded-full scale-0 group-hover:scale-100"

@@ -22,6 +22,7 @@ interface CommentFetchResponse {
 interface CommentUser {
   username: string
   discord_id: string
+  pfp_cutout: number
   id: string
 }
 
@@ -29,6 +30,7 @@ const props = defineProps<CommentFetchResponse>()
 
 const pfp = ref("")
 const username = ref("")
+const cutout = ref(0)
 
 // Endgame list special comment
 if (props.uid == '-2') {
@@ -45,6 +47,7 @@ props.userArray.forEach(user => {
   if (user.discord_id == props.uid) {
     pfp.value = user.discord_id
     username.value = user.username
+    cutout.value = user.pfp_cutout
   }
 });
 
@@ -77,7 +80,7 @@ const color = computed(() => {
     <section class="relative mb-2 w-full break-words">
       <div v-if="uid == '-2'" class="bg-[url(@/images/flames.webp)] absolute z-10 opacity-40 mix-blend-hard-light bottom-0 left-0 w-full h-full bg-repeat-x bg-contain"></div>
       <header class="flex gap-2 items-center">
-        <ProfilePicture class="w-11 rounded-full pointer-events-none" :uid="pfp" />
+        <ProfilePicture class="w-11 pointer-events-none" :uid="pfp" :cutout="cutout" />
         <div class="inline">
           <h3 class="text-lg font-bold leading-4">{{ username }}</h3>
           <h5 class="text-xs opacity-50 cursor-help" :title="dateString">{{ time }}</h5>

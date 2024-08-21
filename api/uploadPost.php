@@ -89,11 +89,11 @@ $res = doRequest($mysqli, $template, $values, $types);
 if (array_key_exists("error", $res))
   die(json_encode([-1, 8]));
 
-$listID = $DATA["hidden"] ? $hidden : doRequest($mysqli, "SELECT LAST_INSERT_ID() as id", [], "");
+$listID = $post["hidden"] ? ["id" => $hidden] : doRequest($mysqli, "SELECT LAST_INSERT_ID() as id", [], "");
 
 // Adds levels to database
-if (!$DATA["hidden"]) {
-  addLevelsToDatabase($mysqli, $DATA["levels"], $listID, $user_id, false);
+if (!$post["hidden"]) {
+  addLevelsToDatabase($mysqli, $DATA["levels"], $listID["id"], $user_id, $post["postType"] == 'review');
 }
 
 // Send back post ID
@@ -102,7 +102,7 @@ switch ($post["postType"]) {
     echo json_encode([$listID["id"]]);
     break;
   case 'review':
-    echo json_encode([$postExtras["name"] . '-' . $listID]);
+    echo json_encode([$listID["id"]]);
     break;
 }
 

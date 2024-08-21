@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
-
+import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
     uid: string | -2 | -3
+    cutout: number | null
 }>()
 
-
 const PFP = ref("")
+const currCutout = ref(props.cutout)
 const UC = import.meta.env.VITE_USERCONTENT
 const base = import.meta.env.BASE_URL
 async function load() {
@@ -23,7 +23,7 @@ async function load() {
 
     let l = new Promise((res, err) => {
         let img = new Image()
-        img.src = `${UC}/userContent/${props.uid}/pfp.webp`
+        img.src = `${UC}/userContent/${props.uid}/pfp.webp${lastPFPchange.value == -1 ? '' : `?v=${lastPFPchange.value}`}`
         img.onload = () => res(img.src)
         img.onerror = () => err()
     })
@@ -31,8 +31,14 @@ async function load() {
     PFP.value = await l.then(res => res).catch(err => `${base}/pfps/defaultPFP.webp`)
 }
 load()
+
+watch(lastPFPchange, load)
+watch(currentCutout, () => {
+    if (props.uid == currentUID.value)
+        currCutout.value = currentCutout.value
+})
 </script>
 
 <template>
-    <img :src="PFP" alt="">
+    <img :src="PFP" class="profilePicture" :style="{clipPath: profileCutouts[currCutout ?? 0]}" alt="">
 </template>

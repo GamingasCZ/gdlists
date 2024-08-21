@@ -46,6 +46,13 @@ import SectionDivider from '../ui/SectionDivider.vue';
             control="cbox"
         >
         </Option>
+        <Option
+            v-model="SETTINGS.autoComments"
+            :name="$t('settingsMenu.loadCom')"
+            :desc="$t('settingsMenu.loadCHelp')"
+            control="cbox"
+        >
+        </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
             v-model="SETTINGS.disableColors"
@@ -69,6 +76,13 @@ import SectionDivider from '../ui/SectionDivider.vue';
             control="dropdown"
             :control-options="[[$t('settingsMenu.noGenerate'), -2], [$t('settingsMenu.noColor'), -1], [$t('settingsMenu.qLow'), 6], [$t('settingsMenu.qMed'), 4], [$t('settingsMenu.qHigh'), 2]]"
             >
+        </Option>
+        <Option
+            v-model="SETTINGS.disableTL"
+            :name="$t('settingsMenu.disTL')"
+            :desc="$t('settingsMenu.disTLhelp')"
+            control="cbox"
+        >
         </Option>
 </div>
 </template>

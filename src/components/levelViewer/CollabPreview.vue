@@ -54,7 +54,7 @@ const closeHostSocials = (m: Event) => {
 </script>
 
 <template>
-  <section>
+  <section v-show="collab[2].length">
     <h2 class="z-10 mb-3 text-xl font-black text-center align-middle">
       <span>{{ collabRole }}: </span>
       <PlayerIcon v-if="collabIcon()" :icon="collabIcon()[0]" :col1="collabIcon()[1].toString()" :col2="collabIcon()[2].toString()" :glow="collabIcon()[3] | 0" class="inline mx-3 w-10 h-10" :quality="1"/>

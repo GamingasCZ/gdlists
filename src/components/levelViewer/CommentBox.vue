@@ -22,14 +22,12 @@ const MAX_COMMENT_LEN = 300
 
 const loggedIn = ref<boolean>(true)
 
-const pfp = ref<number>()
-const username = ref<string>("")
+const pfp = ref<any[]>()
 if (localStorage) {
     let userInfo = JSON.parse(localStorage.getItem("account_info")!)
     if (userInfo == null) loggedIn.value = false
     else {
-        pfp.value = userInfo[1]
-        username.value = userInfo[0]
+        pfp.value = userInfo
     }
 }
 
@@ -212,8 +210,8 @@ function sendComment(com = "") {
         </Transition>
         <footer class="flex justify-between mt-2">
             <div>
-                <ProfilePicture class="inline mr-2 w-8 rounded-full" :uid="pfp" />
-                <label>{{ username }}</label>
+                <ProfilePicture class="inline mr-2 w-8" :uid="pfp[1]" :cutout="pfp[2]" />
+                <label>{{ pfp[0] }}</label>
             </div>
 
             <div class="flex gap-2">

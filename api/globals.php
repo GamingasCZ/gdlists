@@ -14,7 +14,9 @@ error_reporting($debugMode ? -1 : 0);
 
 function privateIDGenerator($listName, $creator, $timestamp) {
     $str = $listName . $creator . $timestamp;
-    return substr(sha1($str),0,10);
+    $pid = substr(sha1($str),0,10);
+    if (is_numeric($pid)) $pid = "p" . substr($pid, 0, 9);
+    return $pid;
 }
 
 // Not secret :)

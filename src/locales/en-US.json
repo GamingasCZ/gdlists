@@ -167,7 +167,8 @@
     "loginHelp3": "If something isn't working as it should, please",
     "loginHelp4": "report the issue",
     "tAd1": "Follow",
-    "tAd2": "on Twitter!"
+    "tAd2": "on Twitter!",
+    "loginHelp5": "You can change your profile picture!"
   },
   "level": {
     "comments": "Comments",
@@ -412,7 +413,13 @@
     "randomLevel": "Random Level",
     "checklist": "Checklist",
     "colorPreview": "Color Preview",
-    "nocolorHelp": "Colors are disabled, but still are being set!"
+    "nocolorHelp": "Colors are disabled, but still are being set!",
+    "or": "or",
+    "circle": "Circle",
+    "square": "Square",
+    "star": "Star",
+    "demon": "Demon",
+    "hexagon": "Hexagon"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -425,13 +432,13 @@
     "homepage": "Homepage",
     "language": "Language",
     "logout": "Log Out",
-    "iconQuality": "Icon Quailty",
+    "iconQuality": "Icon Quality",
     "noColor": "No Colors",
     "noGenerate": "Disabled",
     "qHigh": "High",
     "qLow": "Low",
     "qMed": "Default",
-    "clickClose": "Close dialogs on click",
+    "clickClose": "Close Dialogs on Click",
     "classic": "Classic",
     "compact": "Compact",
     "table": "Table",
@@ -453,7 +460,21 @@
     "visual": "Visual",
     "behave": "Behavior",
     "access": "Accessibility",
-    "perf": "Performance"
+    "perf": "Performance",
+    "pfp": "Profile Picture",
+    "cutout": "Cutout",
+    "cutoutHelp": "Modifies the shape of the picture",
+    "pickFromGallery": "Pick from Gallery",
+    "pickDiscord": "Use from Discord",
+    "dragPhoto": "Drag in or choose a new photo",
+    "editPhoto": "Edit Photo",
+    "pfpSet": "Profile Picture has been set!",
+    "closeDialog": "Click to close the dialog!",
+    "dragSelect": "Drag to select an area of the image!",
+    "disTL": "Disable translucency",
+    "disTLhelp": "Disables blurry backgrounds of reviews and level cards",
+    "loadCom": "Comments under Posts",
+    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post"
   },
   "help": {
     "Lists": "Lists",

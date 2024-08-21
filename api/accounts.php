@@ -27,22 +27,31 @@ function allTokens($res) {
     return $res["access_token"];
 }
 
-// if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-//     $user = checkAccount($mysqli);
-//     if (!$user) die("0");
+if ($_SERVER["REQUEST_METHOD"] == "PUT") {
+    $DATA = file_get_contents("php://input");
+    $acc = checkAccount($mysqli);
+    if (!$acc) die();
 
-//     if ($_GET["all"]) {
-//         $token = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE discord_id = ?", [$user["id"]], "s");
-//         revokeToken($token["access_token"], $mysqli, $user["id"]);
-//         die();
-//     }
+    if ($DATA == -1) {
+        $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $acc["id"], $acc["avatar"]));
+        if ($pfp !== false)
+            saveImage($pfp, $acc["id"], $mysqli, "pfp", false, false, true);
+    }
+    else {
+        saveImage($DATA, $acc["id"], $mysqli, "pfp", false, false, true);
+    }
+    die();
+}
 
-//     $acc = doRequest($mysqli, "DELETE FROM `sessions` WHERE session_index = ? AND user_id = ?", [intval($_GET["index"]), $user["id"]], "is");
+if ($_SERVER["REQUEST_METHOD"] == "PATCH") {
+    $DATA = file_get_contents("php://input");
+    $acc = checkAccount($mysqli);
+    if (!$acc) die();
 
-//     if (!is_null($res) && array_key_exists("error", $res)) die("0");
-//     else die("1");
-
-// }
+    $newCutout = max(0, min(intval($DATA), 10));
+    doRequest($mysqli, "INSERT INTO `profiles`(`uid`, `pfp_cutout`) VALUES (?,?) ON DUPLICATE KEY UPDATE `pfp_cutout`=?", [$acc["id"], $newCutout, $newCutout], "sii");
+    die();
+}
 
 if (sizeof($_GET) > 0) {
     $state = $_COOKIE["state"];
@@ -50,18 +59,6 @@ if (sizeof($_GET) > 0) {
     if ($state != $_GET["state"])
         die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
-    // if (array_keys($_GET)[0] == "sessions") { // Check login validity
-    //     $acc = checkAccount($mysqli);
-    //     $token = getAuthorization();
-    //     if (!$acc) die();
-
-    //     $req = doRequest($mysqli, "SELECT session_data, session_index, last_login FROM `sessions` WHERE user_id=?", [$acc["id"]], "s", true);
-    //     for ($s=0; $s < sizeof($req); $s++) { 
-    //         $req[$s]["session_data"] = json_decode($req[$s]["session_data"]);
-    //     }
-    //     $mysqli -> close();
-    //     die(json_encode(["sessions" => $req, "currentSession" => $token[3]]));
-    // }
     if (array_keys($_GET)[0] == "check") { // Check login validity
         $auth = getAuthorization();
         if (!$auth) die(json_encode(["status" => "logged_out"])); // Not logged in
@@ -69,8 +66,11 @@ if (sizeof($_GET) > 0) {
         $accCheck = checkAccount($mysqli);
         if (!$accCheck) die();
 
-        // doRequest($mysqli, "UPDATE `sessions` SET `last_login`=? WHERE `user_id`=? AND `session_index`=?", [time(), $accCheck["id"], $auth[3]], "isi");
-        $profileData = ["status" => "logged_in", "account_name" => $accCheck["username"], "account_id" => $accCheck["id"]];
+        $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
+        $profileData = ["status" => "logged_in",
+                        "account_name" => $accCheck["username"],
+                        "account_id" => $accCheck["id"],
+                        "cutout" => is_null($pfpCutout) ? 0 : $pfpCutout["pfp_cutout"]];
         $mysqli -> close();
         die($accCheck ? json_encode($profileData) : 0);
     }

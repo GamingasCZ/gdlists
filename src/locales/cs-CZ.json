@@ -43,7 +43,21 @@
     "visual": "Vzhled",
     "behave": "Chování",
     "access": "Přístupnost",
-    "perf": "Výkon"
+    "perf": "Výkon",
+    "pfp": "Profilová fotka",
+    "cutout": "Výřez",
+    "editPhoto": "Úprava fotky",
+    "dragPhoto": "Přetáhni nebo vyber novou fotku",
+    "pickFromGallery": "Vybrat z galerie",
+    "pickDiscord": "Použít z Discordu",
+    "cutoutHelp": "Změní tvar profilové fotky",
+    "pfpSet": "Profilová fotka byla nastavena",
+    "closeDialog": "Klikni pro zavření dialogu!",
+    "dragSelect": "Táhni pro výběr oblasti obrázku!",
+    "loadCom": "Komentáře pod příspěvkem",
+    "loadCHelp": "Změní, zda se komentáře zobrazí automaticky na konci příspěvku.",
+    "disTL": "Zakázat průsvitnost",
+    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -81,7 +95,8 @@
     "loginHelp3": "Pokud něco nefuguje jak má,",
     "loginHelp4": "nahlaš mi prosím chybu",
     "tAd1": "Sleduj",
-    "tAd2": "na Twitteru!"
+    "tAd2": "na Twitteru!",
+    "loginHelp5": "Můžeš si vybrat vlastní profilovou fotku!"
   },
   "editor": {
     "tags": [
@@ -368,7 +383,13 @@
     "searchLevels": "Hledat levely",
     "checklist": "Políčko",
     "colorPreview": "Náhled barvy",
-    "nocolorHelp": "Barvy jsou sice zakázány, ale pořád jsou nastavovány!"
+    "nocolorHelp": "Barvy jsou sice zakázány, ale pořád jsou nastavovány!",
+    "or": "nebo",
+    "circle": "Kruh",
+    "square": "Čtverec",
+    "star": "Hvězda",
+    "demon": "Démon",
+    "hexagon": "Šestiúhelník"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

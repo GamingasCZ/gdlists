@@ -28,7 +28,7 @@ function logout() {
 const dialogs = ref({
   settings: false,
   gallery: false,
-  sessions: false,
+  avatar: false,
   help: false
 })
 
@@ -43,6 +43,11 @@ const Gallery = defineAsyncComponent({
 
 const Sett = defineAsyncComponent({
   loader: () => import("@/components/global/SiteSettings.vue"),
+  loadingComponent: LoadingBlock
+})
+
+const AvatarEditor = defineAsyncComponent({
+  loader: () => import("@/components/global/ProfiePicturePicker.vue"),
   loadingComponent: LoadingBlock
 })
 
@@ -66,12 +71,6 @@ const sessionsDialog = ref<HTMLDivElement>()
   class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
     <Teleport to="body">
-      <div v-if="dialogs.gallery" class="z-30">
-        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
-          <Gallery unselectable />
-        </Dialog>
-      </div>
-  
       <div v-if="dialogs.settings" class="z-30">
         <Dialog :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
           <Sett />
@@ -90,15 +89,33 @@ const sessionsDialog = ref<HTMLDivElement>()
           <Help />
         </Dialog>
       </div>
+
+      <div v-if="dialogs.avatar" class="z-30">
+        <Dialog :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
+          <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
+        </Dialog>
+      </div>
+
+      <div v-if="dialogs.gallery" class="z-30">
+        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+          <Gallery unselectable />
+        </Dialog>
+      </div>
     </Teleport>
 
 
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
-      class="flex flex-col gap-1 justify-center items-center py-2 pt-7 w-36 bg-black bg-opacity-50 rounded-md"
+      class="flex flex-col gap-2 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md max-sm:pt-6 sm:pt-9"
       v-else
     >
       <h1 class="font-bold">{{ username }}</h1>
+      <button
+        class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
+        @click="dialogs.avatar = true"
+      >
+        <img src="@/images/edit.svg" class="inline mr-2 w-5" alt="" />{{ $t('level.edit') }}
+      </button>
       <button
         class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
         @click="logout"
