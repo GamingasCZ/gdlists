@@ -82,9 +82,6 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 60);
     $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
     
-    imagedestroy($img);
-    imagedestroy($maxsize);
-    
     // Create thumbnail
     if ($makeThumb) {
         $thumbnail = imagescale($img, 128);
@@ -93,6 +90,9 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
 
         imagedestroy($thumbnail);
     }
+
+    imagedestroy($img);
+    imagedestroy($maxsize);
 
     if ($saveToDatabase)
         doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$uid, $imageHash, $compressedFilesize], "ssi");
