@@ -97,12 +97,8 @@ if (sizeof($_GET) > 0) {
     $dcApiResponse = json_decode(post($baseURL, array(), $tokenHeaders), true);
 
     // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
-    $fistTimeUser = true;
-    $res = doRequest($mysqli, "INSERT INTO `users`(`username`, `discord_id`, `refresh_token`, `access_token`) VALUES (?,?,?,?)", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"]], "ssss");
-    if (!is_null($res) && array_key_exists("error", $res)) {
-        $res = doRequest($mysqli, "UPDATE `users` SET `username`=?, `refresh_token`=?, `access_token`=? WHERE `discord_id`=?", [$dcApiResponse["username"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"]], "ssss");
-        $fistTimeUser = false;
-    }
+    $fistTimeUser = is_null(doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$dcApiResponse["id"]], "s"));
+    doRequest($mysqli, "INSERT INTO `users` (`username`,`discord_id`,`refresh_token`,`access_token`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `username` = ?, `discord_id` = ?, `refresh_token` = ?, `access_token` = ?", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["username"], $dcApiResponse["id"],  $accessInfo["refresh_token"], $accessInfo["access_token"]], "ssssssss");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
@@ -116,7 +112,6 @@ if (sizeof($_GET) > 0) {
         saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
 
     $mysqli -> close();
-
     header("Location: " . $https . $local . '/gdlists');
 }
 else {
