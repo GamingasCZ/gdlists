@@ -229,3 +229,8 @@ dialog {
 .regularParsing hr { @apply border opacity-30 rounded-full my-2}
 .regularParsing th { @apply bg-lof-300}
 
+.ratingCircle::after {
+  mask: radial-gradient(51px, #0000 96%, #000);
+  background: conic-gradient(var(--bg) var(--fill), rgb(0 0 0 / 0.4) var(--fill));
+  @apply content-[''] rounded-full absolute -inset-2;
+}

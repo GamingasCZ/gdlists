@@ -677,7 +677,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
         
         
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false" :width="dialog.large">
-            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" :only-pick-levels="openDialogs.lists[2]" @add-level="levels?.addLevel" />
+            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers" :only-pick-levels="openDialogs.lists[2]" @add-level="selectedLevel?.addLevel($event[0])" />
         </DialogVue>
         
         <DialogVue :open="openDialogs.bgPicker[0]" @close-popup="openDialogs.bgPicker[0] = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">

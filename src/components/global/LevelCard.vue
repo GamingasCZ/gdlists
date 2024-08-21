@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import type { CollabData, FavoritedLevel, Level, LevelTag } from "@/interfaces";
+import type { Level } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
-import { fixHEX, diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
-import RatingContainer from './RatingContainer.vue'
 import { DEFAULT_RATINGS } from "@/Reviews";
-import { doFavoriteLevel, fixBrokenColors, getDifficulty } from "./levelCard";
+import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 
 interface Extras {
@@ -182,13 +180,6 @@ const listData = inject("listData")
   background: v-bind(guessGradient);
   transition: opacity 150ms ease;
   opacity: v-bind(guessOpacity);
-}
-
-.ratingCircle::after {
-  mask: radial-gradient(51px, #0000 96%, #000);
-  background: conic-gradient(var(--bg) var(--fill), rgb(0 0 0 / 0.4) var(--fill));
-  @apply content-[''] rounded-full absolute -inset-2
-  ;
 }
 
 </style>

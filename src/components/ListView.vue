@@ -71,8 +71,11 @@ const loadContent = async () => {
 watch(props, loadContent)
 onMounted(loadContent)
 
-let NONPRIVATE_LIST: boolean =
-  props.randomList ? false : props?.listID?.match(/^\d+$/g)?.length == 1;
+const NONPRIVATE_LIST = computed<boolean>(() => {
+  if (props.randomList) return true
+  if (props.listID?.includes("-")) return true
+  return props?.listID?.match(/^\d+$/g)?.length == 1
+})
 
 const favoritedIDs = ref<string[] | null>();
 
@@ -91,7 +94,7 @@ const backToReview = ref()
 
 const nonexistentList = ref<boolean>(false)
 async function loadList(loadedData: LevelList | null) {
-  let listURL = `${!NONPRIVATE_LIST ? "pid" : "id"}=${props?.listID}`;
+  let listURL = `${!NONPRIVATE_LIST.value ? "pid" : "id"}=${props?.listID}`;
 
   nonexistentList.value = false
 
@@ -126,14 +129,14 @@ async function loadList(loadedData: LevelList | null) {
       recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
 
       addIntoRecentlyViewed =
-        recentlyViewed.filter((list: ListPreview) => list.id == (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
+        recentlyViewed.filter((list: ListPreview) => list.id == (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
           .length == 0; // Has not been viewed yet
     }
 
     if (addIntoRecentlyViewed) {
       recentlyViewed.push({
         creator: LIST_CREATOR.value,
-        id: (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
+        id: (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
         name: LIST_DATA.value?.name!,
         uploadDate: Date.now(),
         hidden: "0",
@@ -169,12 +172,11 @@ const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchRespon
 provide("batchEmbeds", embedsContent)
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
-  NONPRIVATE_LIST = true // damn you, old gamingsus >:(
 
   let res: ReviewList | number;
   if (loadedData) res = loadedData
   else {
-    let params = {type: 'review', review: props.listID}
+    let params = {review: props.listID?.includes("-") ? props.listID.match(/-(\d+)/)[1] : props.listID, hidden: !NONPRIVATE_LIST.value | 0}
     res = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: params}).then((res: AxiosResponse) => res.data)
   }
     
@@ -317,7 +319,7 @@ const toggleListPin = () => {
 const getURL = () => {
   let base = `${window.location.protocol}//${window.location.host}/gdlists/s/`
   if (props.isReview) return base + window.location.pathname.split("/").toReversed()[0]
-  else return base + (!NONPRIVATE_LIST ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
+  else return base + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
@@ -421,7 +423,7 @@ const saveCollab = (ind: number) => {
       memberCount: c[2].length,
       timestamp: Date.now(),
       collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
-      listID: [NONPRIVATE_LIST ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
+      listID: [NONPRIVATE_LIST.value ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)
@@ -540,40 +542,41 @@ const imageIndex = ref(-1)
         :hidden="LIST_DATA.hidden"
       />
     </header>
-    <main class="flex flex-col gap-4">
+
+    <!-- Nonexistent list -->
+    <section v-if="nonexistentList" class="flex flex-col items-center my-20 text-white">
+      <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
+      <h2 v-if="isReview" class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentReview') }}</h2>
+      <h2 v-else class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentList') }}</h2>
+      <div class="flex gap-3 mt-5 max-sm:flex-col">
+        <RouterLink to="/random">
+          <button class="p-2 w-full rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8"
+              alt="">{{ $t('listViewer.goToRandom') }}</button>
+        </RouterLink>
+        <RouterLink to="/">
+          <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
+              class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
+        </RouterLink>
+      </div>
+    </section>
+
+    <section v-if="listErrorLoading" class="flex flex-col items-center my-20 text-white">
+      <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
+      <h2 class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.failLoad') }}</h2>
+      <div class="flex gap-3 mt-5 max-sm:flex-col">
+        <RouterLink to="/">
+          <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
+              class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
+        </RouterLink>
+      </div>
+    </section>
+
+    <main v-if="!nonexistentList && !listErrorLoading" class="flex flex-col gap-4">
       <!-- Back to review from link -->
       <RouterLink v-if="backToReview" @click="$router.go(-1)" to="" class="flex gap-2 p-2 mx-auto w-max rounded-md bg-greenGradient">
         <img src="@/images/showCommsL.svg" class="w-3" alt="">
         <span>{{ $t('other.backTO') }} <b>{{ backToReview }}</b></span>
       </RouterLink>
-
-      <!-- Nonexistent list -->
-      <section v-if="nonexistentList" class="flex flex-col items-center my-20 text-white">
-        <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
-        <h2 v-if="isReview" class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentReview') }}</h2>
-        <h2 v-else class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.nonexistentList') }}</h2>
-        <div class="flex gap-3 mt-5 max-sm:flex-col">
-          <RouterLink to="/random">
-            <button class="p-2 w-full rounded-md bg-greenGradient button"><img src="@/images/dice.svg" class="inline mr-3 w-8"
-                alt="">{{ $t('listViewer.goToRandom') }}</button>
-          </RouterLink>
-          <RouterLink to="/">
-            <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
-                class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
-          </RouterLink>
-        </div>
-      </section>
-
-      <section v-if="listErrorLoading" class="flex flex-col items-center my-20 text-white">
-        <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
-        <h2 class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.failLoad') }}</h2>
-        <div class="flex gap-3 mt-5 max-sm:flex-col">
-          <RouterLink to="/">
-            <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
-                class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
-          </RouterLink>
-        </div>
-      </section>
 
       <Teleport to="#app">
         <ListBackground :image-data="LIST_DATA.data.titleImg ?? []" :list-color="LIST_COL" />

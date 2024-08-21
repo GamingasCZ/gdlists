@@ -37,8 +37,7 @@ const levelsFetched = ref([])
 const dialogs = inject("openedDialogs")
 const addToInjected = inject("addToInjected")
 const pickList = (data: selectedList) => {
-    if (props.onlyPickLevels && data[0]?.option == undefined) {
-        console.log("aaaa")
+    if (props.onlyPickLevels && data[0]?.option == undefined || tab.value == 2) {
         emit('addLevel', data)
         return emit('closePopup')
     }

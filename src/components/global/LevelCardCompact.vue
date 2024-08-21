@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import type { CollabData, LevelTag } from "@/interfaces";
+import type { Level } from "@/interfaces";
 import type { Color } from "chroma-js";
 import { inject, onErrorCaptured, ref } from "vue";
-import { doFavoriteLevel, fixBrokenColors, getDifficulty } from "./levelCard";
+import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
+import { DEFAULT_RATINGS } from "@/Reviews";
+import chroma from "chroma-js";
+import Dropdown from "../ui/Dropdown.vue";
 
-const props = defineProps<{
-  levelName: string;
-  creator: string | CollabData;
-  levelID: string | null;
-  video: string | null;
-  difficulty: [number, number];
-  color: [number, number, number] | string;
-  tags: LevelTag[];
-  platf: boolean;
+interface Extras {
   favorited: boolean | undefined;
   levelIndex: number;
   listID: string;
   listName: string;
   disableStars: boolean;
   translucentCard: boolean;
-}>();
+  hideRatings?: boolean
+  rating?: number
+  isEmbed?: boolean
+}
+
+const props = defineProps<Level & Extras>();
 
 const emit = defineEmits<{
   (e: "error"): void;
@@ -51,6 +51,11 @@ onErrorCaptured(() => {
   emit("error")
 })
 
+const listData = inject("listData")
+
+const rateDropdownButton = ref<HTMLImageElement>()
+const ratingsShowing = ref(false)
+
 </script>
 
 <template>
@@ -71,6 +76,7 @@ onErrorCaptured(() => {
               <div class="flex gap-2">
                 <span class="font-black">{{ levelName || $t('other.unnamesd') }}</span>
                 <img class="w-6" v-if="platf" title="Platformer" src="@/images/platformer.svg" alt="">
+                <img @click="ratingsShowing = true" class="w-6 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">
                 <button class="w-6 button focus-within:outline-current max-sm:hidden" v-if="tags && tags.length > 0" @click="emit('openTags', levelIndex)"><img src="@/images/levelID.svg" alt=""></button>
               </div>
               <div>
@@ -107,5 +113,21 @@ onErrorCaptured(() => {
       :class="{ disabled: isFavorited }" v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars">
       <img src="@/images/star.webp" class="w-6" alt="" />
     </button>
+
+    <!-- Level review ratings -->
+    <Dropdown v-if="ratingsShowing" @close="ratingsShowing = false" :title="$t('reviews.rating')" :options="[]" :button="rateDropdownButton">
+      <template #header>
+        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" class="flex flex-col gap-1 p-1">
+          <div class="flex justify-between text-white">
+            <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
+            <span class="text-sm font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          </div>
+          <div class="relative w-full h-1 bg-black bg-opacity-40">
+            <div :style="{background: chroma.hsl(...rating.color).hex(), width: `${10*listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]}%`}" class="absolute h-full"></div>
+          </div>
+        </div>
+      </template>
+    </Dropdown>
+
   </section>
 </template>

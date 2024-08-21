@@ -6,6 +6,8 @@ import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
+import DifficultyIcon from "./DifficultyIcon.vue";
+import RatingContainer from "./RatingContainer.vue";
 
 const emit = defineEmits<{
   (e: 'removeLevel', index: number): void
@@ -23,6 +25,13 @@ const props = defineProps<{
   hideRemove: boolean
   inReviews: number
   inLists: number
+  difficulty?: number
+  rating?: number
+
+  A_gameplay?: string | null
+  A_decoration?: string | null
+  A_difficulty?: string | null
+  A_overall?: string | null
 
   userArray: string
   disableLink?: boolean | 2
@@ -55,9 +64,10 @@ const getGradient = () => {
 
 const uploadDate = reactive(new Date(props.timeAdded!));
 const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
+const round = (x) => parseFloat(parseFloat(x).toFixed(1))
 
 const clickLevel = () => {
-  emit('clickedOption', {option: 0, postID: props.levelID, postType: 2})
+  emit('clickedOption', {levelName: props.levelName, creator: props.creator, levelID: props.levelID, difficulty: props.difficulty, rating: props.rating})
 }
 </script>
 
@@ -65,7 +75,7 @@ const clickLevel = () => {
   <component
     :is="disableLink ? 'button' : 'RouterLink'"
     :to="`/${listID!}${goto}`"
-    class="flex text-left max-w-6xl w-full cursor-pointer items-center gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex text-left max-w-6xl w-full cursor-pointer items-center flex-wrap gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       background: getGradient(),
       borderColor: listColor.darken(2).hex(),
@@ -82,22 +92,29 @@ const clickLevel = () => {
           parseElapsed(Date.now() / 1000 - timeAdded / 1000)
         }}
       </div>
+      <DifficultyIcon v-if="difficulty !== undefined && rating !== undefined" class="w-10":difficulty="difficulty" :rating="rating" />
     </section>
+
 
     <section class="flex flex-col justify-center">
       <h1 class="text-lg font-bold">{{ levelName }}</h1>
       <p class="text-xs">- {{ creator }} -</p>
     </section>
 
-    <div v-if="inLists || inReviews" class="flex gap-3 items-center p-1 ml-auto bg-black bg-opacity-40 rounded-md">
-      <div v-if="inLists > 0">
-        <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-3" alt="">{{ inLists }}
+    <section v-if="inLists || inReviews" class="grid grid-cols-[1fr_0.5fr] gap-2 ml-auto">
+      <RatingContainer v-if="inReviews" class="min-w-60 max-sm:mb-2" :ratings="[round(A_gameplay), round(A_decoration), round(A_difficulty), round(A_overall)]" compact />
+      <div v-else></div>
+        
+      <div class="flex gap-3 place-self-end px-2 py-0.5 mb-auto w-max bg-black bg-opacity-60 rounded-md">
+        <div v-if="inLists > 0">
+          <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-3" alt="">{{ inLists }}
+        </div>
+        <hr v-if="inLists > 0 && inReviews > 0" class="w-0.5 h-4 bg-white border-none opacity-40">
+        <div v-if="inReviews > 0">
+          <img src="@/images/reviews.svg" class="inline mr-2 w-3" alt="">{{ inReviews }}
+        </div>
       </div>
-      <hr v-if="inLists > 0 && inReviews > 0" class="w-0.5 h-4 bg-white border-none opacity-40">
-      <div v-if="inReviews > 0">
-        <img src="@/images/reviews.svg" class="inline mr-2 w-3" alt="">{{ inReviews }}
-      </div>
-    </div>
+    </section>
 
     <button
       v-if="!hideRemove"

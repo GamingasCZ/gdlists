@@ -28,12 +28,7 @@ $fuckupData = sanitizeInput(array($DATA["id"]));
 if ($DATA["type"] == "review")
   $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [strval($fuckupData[0])], "s");
 else {
-  if ($DATA["hidden"] == 0) {
-    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [strval($fuckupData[0])], "i");
-  }
-  else {
-    $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [strval($fuckupData[0])], "s");
-  }
+  $listData = doRequest($mysqli, "SELECT * FROM `lists` WHERE `id` = ?", [strval($fuckupData[0])], "i");
 }
 
 // This causes passwords to not work, hopefully no one minds :)
@@ -48,12 +43,7 @@ if (!$creatorCheck) {
 if ($DATA["type"] == "review")
   $res = doRequest($mysqli, "DELETE FROM `reviews` WHERE `id` = ?", [$listData["id"]], "s");
 else {
-  if ($DATA["hidden"] == 0) {
-    $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
-  }
-  else {
-    $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `hidden` = ?", [$listData["hidden"]], "s");
-  }
+  $res = doRequest($mysqli, "DELETE FROM `lists` WHERE `id` = ?", [$listData["id"]], "i");
 }
 if (array_key_exists("error", $res)) die("0");
 

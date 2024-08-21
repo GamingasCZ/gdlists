@@ -13,6 +13,7 @@ import LevelBubble from "../global/LevelBubble.vue";
 import axios from "axios";
 
 const addLevel = (levelData?: Level | FavoritedLevel) => {
+    console.log(levelData)
     if (reviewData.value.levels.length >= 10) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 

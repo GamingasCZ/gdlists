@@ -20,8 +20,8 @@ $mysqli->set_charset("utf8mb4");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
-$selLevelRange = "levelName, creator, collabMemberCount, levels.levelID, difficulty, rating, platformer, ifnull(listID, concat('review/', (SELECT replace(concat(name,'-',reviews.id),' ','-') FROM reviews WHERE id=reviewID))) as listID";
 
+$selLevelRange = "levelName, creator, collabMemberCount, levels.levelID, levels.difficulty, rating, platformer, ifnull(listID, concat('review/', (SELECT reviews.id FROM reviews WHERE id=levels_uploaders.reviewID))) as listID, avg(gameplay) as A_gameplay, avg(decoration) as A_decoration, avg(levels_ratings.difficulty) as A_difficulty, avg(overall) as A_overall";
 $listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
@@ -121,7 +121,11 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
     }
   } elseif (in_array("review", array_keys($_GET))) {
     // Reviews
-    $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [$_GET["review"]], "s");
+    $result;
+    if ($_GET["hidden"])
+      $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `hidden` = ?", [$_GET["review"]], "s");
+    else
+      $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `hidden` = 0 AND `id` = ?", [$_GET["review"]], "s");
 
     if ($result == null) echo "2";
     else echo json_encode(parseResult($result, true, -1, "", 0, true));
@@ -144,7 +148,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
 
   } elseif (in_array("randomLevel", array_keys($_GET))) {
     // Picking a random list or review
-    $result = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [1], "i");
+    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [1], "i");
     echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {
@@ -158,6 +162,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
     if (!$account) die("[]"); // Not logged in
     $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
     echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
+
   } elseif (in_array("levelsIn", array_keys($_GET))) {
     if (!intval($_GET["levelsIn"])) die("2");
     $type = $_GET["fromReviews"] ? "reviewID" : "listID";
@@ -265,12 +270,13 @@ else {
   else {
     $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders
       INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
+      LEFT JOIN levels_ratings ON levels_ratings.levelID = levels_uploaders.levelID
       WHERE levels_uploaders.id<=? AND `levelName` LIKE ?
       GROUP BY levels_uploaders.levelID
       ORDER BY levels.id DESC
       LIMIT %s
       OFFSET %s", $selLevelRange, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
-    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels_uploaders LEFT JOIN levels ON levels.levelID = levels_uploaders.levelID WHERE `levelName` LIKE '%%%s%%' AND levels.id<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
+    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels WHERE `levelName` LIKE '%%%s%%' AND levels.id<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
 
   $maxpage = ceil($maxpageQuery["amount"] / clamp(intval($_GET["fetchAmount"]), 2, 15));
