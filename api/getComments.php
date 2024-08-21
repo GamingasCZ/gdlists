@@ -69,8 +69,9 @@ foreach ($comments as $row) {
 
 $query = sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
                   FROM users
-                  JOIN profiles ON users.discord_id = profiles.uid
-                  WHERE discord_id IN (%s)", join(",", array_unique($uid_array)), $_GET[$type]);
+                  LEFT JOIN profiles ON users.discord_id = profiles.uid
+                  WHERE discord_id IN (%s)
+                  ", join(",", array_unique($uid_array)), $_GET[$type]);
 $result = $mysqli -> query($query) or die($mysqli -> error);
 
 $users = $result -> fetch_all(MYSQLI_ASSOC);
