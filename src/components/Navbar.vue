@@ -177,35 +177,43 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     }}</RouterLink>
     </section>
 
-    <!-- Logged out -->
-    <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
-      class="px-1 w-10 h-10 button" />
-
-    <!-- Loading response from accounts.php -->
-    <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
-      class="mr-1 w-6 animate-spin aspect-square" />
-    
-    <!-- Logged in, settings -->
-    <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
-      <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
+    <section class="flex gap-6 items-center">
+      <button class="relative button">
+        <img @click="showSettings" src="../images/notifs.svg" alt=""
+        class="w-5" />
+        <div class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+      </button>
+  
+      <!-- Logged out -->
+      <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
+        class="px-1 w-10 h-10 button" />
+  
+      <!-- Loading response from accounts.php -->
+      <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
+        class="mr-1 w-6 animate-spin aspect-square" />
       
-      <ProfilePicture
-        :uid="currentUID"
-        :cutout="currentCutout"
-        :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture" v-if="!isOnline"
-        />
+      <!-- Logged in, settings -->
+      <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
+        <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
         
         <ProfilePicture
-        :uid="currentUID"
-        :cutout="currentCutout"
-        :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture"
-      />
-    </div>
-    <div v-else></div>
+          :uid="currentUID"
+          :cutout="currentCutout"
+          :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          id="profilePicture" v-if="!isOnline"
+          />
+          
+          <ProfilePicture
+          :uid="currentUID"
+          :cutout="currentCutout"
+          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          class="absolute top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          id="profilePicture"
+        />
+      </div>
+      <div v-else></div>
+    </section>
 
     <Transition name="fadeSlide">
       <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"

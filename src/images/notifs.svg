@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(1.0912 .63002 -.63002 1.0912 10.609 -11.618)" fill="#fff" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+  <path d="m16 3.3296c-11.291 0-9.6582 13.151-9.6582 16.178s-2.498 3.9883-2.498 3.9883h24.312s-2.498-0.96126-2.498-3.9883 1.6331-16.178-9.6582-16.178z" stroke-width=".55553" style="paint-order:stroke markers fill"/>
+  <path d="m18.682 24.269v2.3867c0 0.554-0.446 1-1 1h-3.3634c-0.554 0-1.0017-0.446-1-1l0.0074-2.394z" stroke-width=".55554" style="paint-order:stroke markers fill"/>
+ </g>
+</svg>
