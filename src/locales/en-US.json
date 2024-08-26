@@ -147,7 +147,7 @@
     "official": "Official",
     "pinned": "Pinned",
     "savedMix": "Saved Mix",
-    "searchLists": "Search in GD Lists...",
+    "searchLists": "Search...",
     "tryLuck": "Try luck",
     "uploaded": "Uploads",
     "visited": "Visited",
@@ -248,7 +248,9 @@
   "navbar": {
     "editor": "Create",
     "lists": "Browse",
-    "saved": "Saved"
+    "saved": "Saved",
+    "home": "Home",
+    "uploads": "Uploads"
   },
   "other": {
     "alignment": "Align",
@@ -474,7 +476,8 @@
     "disTL": "Disable translucency",
     "disTLhelp": "Disables blurry backgrounds of reviews and level cards",
     "loadCom": "Comments under Posts",
-    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post"
+    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post",
+    "feed": "Feed"
   },
   "help": {
     "Lists": "Lists",

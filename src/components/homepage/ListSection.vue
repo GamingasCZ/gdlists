@@ -76,7 +76,6 @@ const clearViewed = () => {
 <template>
   <section class="mt-6 ml-4">
     <div class="flex gap-4 items-center text-white">
-      <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" />
       <span class="text-2xl font-medium sm:text-3xl">{{ headerName }}</span>
 
       <!-- Link button -->
@@ -100,10 +99,10 @@ const clearViewed = () => {
     </div>
 
     <div
-      class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs sm:ml-14"
+      class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs"
       :class="{'!flex-row max-w-7xl flex-wrap': listType == 2}"
     >
-      <p class="text-yellow-200 max-sm:ml-12" v-if="!lists?.length">
+      <p class="text-yellow-200" v-if="!lists?.length">
         - {{ emptyText }} -
       </p>
       <component

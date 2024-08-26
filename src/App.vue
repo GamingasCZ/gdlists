@@ -8,7 +8,6 @@ import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
 import { setLanguage } from "./locales";
-import { currentCutout, currentUID } from "./Editor";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -62,13 +61,14 @@ onMounted(() => {
     .then((res: AxiosResponse) => {
       loggedIn.value = res.data.status == "logged_in";
       if (res.data.status == "logged_in") {
-        delete res.data.status
         localStorage.setItem(
           "account_info",
-          JSON.stringify(Object.values(res.data))
+          JSON.stringify([
+            res.data.account_name,
+            res.data.account_id,
+            res.data.pfp_hash,
+          ])
         );
-        currentUID.value = res.data.account_id
-        currentCutout.value = res.data.cutout
       } else {
         localStorage.removeItem("account_info");
       }

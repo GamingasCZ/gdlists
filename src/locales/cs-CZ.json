@@ -2,7 +2,9 @@
   "navbar": {
     "editor": "Vytvářet",
     "lists": "Procházet",
-    "saved": "Uložené"
+    "saved": "Uložené",
+    "home": "Domov",
+    "uploads": "Nahrávky"
   },
   "settingsMenu": {
     "czech": "Čeština",
@@ -57,10 +59,11 @@
     "loadCom": "Komentáře pod příspěvkem",
     "loadCHelp": "Změní, zda se komentáře zobrazí automaticky na konci příspěvku.",
     "disTL": "Zakázat průsvitnost",
-    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů"
+    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů",
+    "feed": "Časová osa"
   },
   "homepage": {
-    "searchLists": "Hledat v GD Seznamech...",
+    "searchLists": "Hledat...",
     "createList": "Vytvořit seznam",
     "tryLuck": "Zkusit štěstí",
     "welcomeToGDL": "Vítej v GD Seznamech!",

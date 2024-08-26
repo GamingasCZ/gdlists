@@ -25,14 +25,21 @@ const router = createRouter({
       props: (route) => ({
         query: route.query.q ?? "",
         onlineType: route.query.type ?? "",
-        browserType: route
+        browserType: route,
+        cpt: 0
       }),
-      component: () => import("@/components/CommunityLists.vue"),
+      component: () => import("@/components/Homepage.vue"),
     },
     {
       path: "/saved",
       name: "savedBrowser",
-      component: () => import("@/components/SavedLists.vue"),
+      props: (route) => ({
+        query: route.query.q ?? "",
+        onlineType: route.query.type ?? "",
+        browserType: route,
+        cpt: 1
+      }),
+      component: () => import("@/components/Homepage.vue"),
     },
     {
       path: "/:id",

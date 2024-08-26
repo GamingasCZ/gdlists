@@ -284,10 +284,6 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
-            :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
-            {{ $t('other.newest') }}
-          </button>
-          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             v-show="onlineSubtype != 'levels'"
             :class="{ 'bg-lof-300': onlineType == 'user' }" @click="emit('switchBrowser', 'user')">
             {{ $t('other.myLists', [onlineSubtype == 'lists' ? $t('other.lists') : $t('other.reviews')]) }}

@@ -41,48 +41,6 @@ watch(props, () => {
   }
 })
 
-const scrollerWidth = ref(0)
-const scrollerXOff = ref(0)
-const scrollerInd = ref(0)
-
-// Modify line size on content resize (lang change)
-const locale = useI18n().locale
-watch(locale, () => {
-  nextTick(() => {
-    let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
-    scrollerXOff.value = selectedLink.offsetLeft
-    scrollerWidth.value = selectedLink.clientWidth
-    if (router.currentRoute.value.name == "home") scrollerHome()
-  })
-})
-
-onMounted(() => {
-  // Modify line size on content resize (lang change, mobile view)
-  let ro = new ResizeObserver(() => {
-    let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
-    scrollerXOff.value = selectedLink.offsetLeft
-    scrollerWidth.value = selectedLink.clientWidth
-  });
-
-  ro.observe(document.querySelectorAll(".websiteLink")[scrollerInd.value]);
-  if (router.currentRoute.value.name == "home") scrollerHome()
-
-})
-
-const modScrollerWidth = (e: Event) => {
-  let link = e.target as HTMLLinkElement
-  if (link.nodeName == "IMG")
-    link = (e.target as HTMLImageElement).parentElement as HTMLLinkElement
-
-  scrollerInd.value = parseInt(link.dataset.ind!)
-  scrollerWidth.value = link.clientWidth
-  scrollerXOff.value = link.offsetLeft
-}
-
-const scrollerHome = () => {
-  scrollerInd.value = -1
-}
-
 const localStorg = ref(hasLocalStorage())
 const editorDropdownOpen = ref(false)
 const openEditorDropdown = () => {
@@ -127,34 +85,21 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
-    <!-- Home link -->
-    <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
-      <Logo class="w-10 h-10 button" />
-    </RouterLink>
+    class="box-border flex sticky top-0 z-30 justify-between items-center p-1 w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
 
-    <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
-      :class="{ 'opacity-50 pointer-events-none': !isOnline }">
-
-      <!-- Button underline -->
-      <hr v-if="scrollerInd != 0"
-        class="absolute w-[1px] bg-white border-none h-1 z-10 bottom-0 origin-left transition-transform"
-        :style="{ transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff / scrollerWidth}px)` }">
-
-      <!-- Editor -->
-      <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
-        class="flex relative flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }">
+            <!-- Editor -->
+            <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
+        class="flex relative gap-2 items-center p-2 py-1 rounded-md transition-colors bg-lof-400 group">
         <img src="../images/editorMobHeader.svg" :class="{'rotate-[45deg]': editorDropdownOpen}"
-          alt="" class="w-6 transition-transform" />{{ $t("navbar.editor") }}
+          alt="" class="w-6 invert transition-transform" />{{ $t("navbar.editor") }}
         
         <Transition name="fadeSlide">
           <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full min-w-max text-lg max-sm:top-14 bg-greenGradient" v-if="editorDropdownOpen">
-            <RouterLink @click="modScrollerWidth" to="/make/list"  class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
+            <RouterLink to="/make/list"  class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
               <img src="@/images/browseMobHeader.svg" class="w-10 scale-[0.6]" alt="">
               <span>{{ $t('other.list') }}</span>
             </RouterLink>
-            <RouterLink @click="modScrollerWidth" to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
+            <RouterLink to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
               <img src="@/images/reviews.svg" class="w-10 scale-[0.6]" alt="">
               <span>{{ $t('other.review') }}</span>
             </RouterLink>
@@ -162,50 +107,54 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
         </Transition>
       </button>
 
-      <!-- Browse -->
-      <RouterLink to="/browse/lists" @click="modScrollerWidth" data-ind="2"
-        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
-        <img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{ $t("navbar.lists") }}
-      </RouterLink>
+    <form action="./browse/lists" method="get" class="flex relative gap-2 items-center text-white rounded-md bg-lof-100">
+      <div class="relative">
+        <input type="text" name="q"
+          class="p-1 pr-10 w-full bg-transparent outline-transparent"
+          :placeholder="$t('homepage.searchLists')" />
+      </div>
+      <button type="submit" class="p-1 w-6 rounded-full max-sm:hidden button">
+        <img src="../images/searchOpaque.svg" alt="" />
+      </button>
+    </form>
 
-      <!-- Saved -->
-      <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
-        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
-      $t("navbar.saved")
-    }}</RouterLink>
-    </section>
-
-    <!-- Logged out -->
-    <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
-      class="px-1 w-10 h-10 button" />
-
-    <!-- Loading response from accounts.php -->
-    <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
-      class="mr-1 w-6 animate-spin aspect-square" />
-    
-    <!-- Logged in, settings -->
-    <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
-      <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
+    <section class="flex gap-6 items-center">
+      <button class="relative button">
+        <img @click="showSettings" src="../images/notifs.svg" alt=""
+        class="w-5" />
+        <div class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+      </button>
+  
+      <!-- Logged out -->
+      <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
+        class="px-1 w-10 h-10 button" />
+  
+      <!-- Loading response from accounts.php -->
+      <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
+        class="mr-1 w-6 animate-spin aspect-square" />
       
-      <ProfilePicture
-        :uid="currentUID"
-        :cutout="currentCutout"
-        :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture" v-if="!isOnline"
-        />
+      <!-- Logged in, settings -->
+      <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
+        <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
         
         <ProfilePicture
-        :uid="currentUID"
-        :cutout="currentCutout"
-        :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-        class="absolute top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-        id="profilePicture"
-      />
-    </div>
-    <div v-else></div>
+          :uid="currentUID"
+          :cutout="currentCutout"
+          :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          id="profilePicture" v-if="!isOnline"
+          />
+          
+          <ProfilePicture
+          :uid="currentUID"
+          :cutout="currentCutout"
+          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          class="absolute top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          id="profilePicture"
+        />
+      </div>
+      <div v-else></div>
+    </section>
 
     <Transition name="fadeSlide">
       <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"

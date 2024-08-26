@@ -17,10 +17,10 @@ import SectionDivider from '../ui/SectionDivider.vue';
             <RadioPicker v-model="SETTINGS.levelViewMode" id="level" :opt-names="[$t('settingsMenu.classic'), $t('settingsMenu.compact'), $t('settingsMenu.table')]" :opt-icons="['/viewModes/classic.svg', '/viewModes/compact.svg', '/viewModes/spreadsheet.svg']" />
         </Option>
         <Option
-            v-model="SETTINGS.homepageColumns"
+            v-model="SETTINGS.feedTheme"
             :name="$t('settingsMenu.homepage')"
             control="dropdown"
-            :control-options="[[$t('settingsMenu.columns', 1), 1],[$t('settingsMenu.columns', 2), 2],[$t('settingsMenu.columns', 3), 3]]"
+            :control-options="[[$t('settingsMenu.feed'), 0],[$t('settingsMenu.classic'), 1]]"
         >
         </Option>
         <SectionDivider :text="$t('settingsMenu.behave')" />

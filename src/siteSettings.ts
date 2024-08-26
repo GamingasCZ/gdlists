@@ -4,7 +4,7 @@ import type { viewedPopup } from "./interfaces";
 export const SETTINGS = ref({
   scrolling: 1,
   language: -1,
-  homepageColumns: 1,
+  feedTheme: 0,
   autosave: 60,
   iconQuality: 4,
   dialogClickClose: true,

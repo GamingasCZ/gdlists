@@ -63,6 +63,7 @@ const modifyContentType = (to: Content) => {
       :online-type="userLists"
       :online-subtype="CONTENTS[contentType]"
       :is-logged-in="isLoggedIn"
+      hide-tabs
       @switch-browser="userLists = $event"
     />
   </section>
