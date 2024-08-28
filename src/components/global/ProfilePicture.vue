@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
+import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/components/global/profiles';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{

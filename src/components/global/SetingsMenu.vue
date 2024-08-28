@@ -61,8 +61,6 @@ const Help = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
-const screenWidth = ref(window.innerWidth)
-const sessionsDialog = ref<HTMLDivElement>()
 </script>
 
 <template>
@@ -124,6 +122,13 @@ const sessionsDialog = ref<HTMLDivElement>()
       </button>
     </section>
 
+    <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="dialogs.settings = true"
+    >
+      <img src="@/images/notifs.svg" class="inline mr-3 w-5" alt="" />{{ $t('navbar.notifs') }}
+    </button>
+  
     <section
       class="flex flex-col gap-1 py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >

@@ -243,12 +243,16 @@
     "failSendComm": "Failed to send the comment. Please try again later!",
     "pickView1": "Pick the look of lists!",
     "pickView2": "You can change this anytime in the settings.",
-    "noTags": "Level has no tags"
+    "noTags": "Level has no tags",
+    "highlighted": "Highlighted Comment"
   },
   "navbar": {
     "editor": "Create",
     "lists": "Browse",
-    "saved": "Saved"
+    "saved": "Saved",
+    "notifs": "Notifications",
+    "dropdown": "Dropdown",
+    "fullscreen": "Fullscreen"
   },
   "other": {
     "alignment": "Align",
@@ -474,7 +478,9 @@
     "disTL": "Disable translucency",
     "disTLhelp": "Disables blurry backgrounds of reviews and level cards",
     "loadCom": "Comments under Posts",
-    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post"
+    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post",
+    "notifBehave": "Displaying Notifications",
+    "notifBeHelp": "Modifies displaying of notifications on clicking the notification icon,"
   },
   "help": {
     "Lists": "Lists",

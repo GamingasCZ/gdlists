@@ -13,7 +13,8 @@ export const SETTINGS = ref({
   autoComments: true,
   disableColors: false,
   disableBGs: false,
-  disableTL: false
+  disableTL: false,
+  notifBehaviour: 0,
 });
 
 watch(SETTINGS, () => {

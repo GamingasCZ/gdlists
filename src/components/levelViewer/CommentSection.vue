@@ -20,6 +20,7 @@ const emit = defineEmits<{
 
 const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
+const highlight = computed(() => window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null)
 const showingOnce = ref(false)
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
 watch(props, () => { // only refresh comments once
@@ -40,6 +41,7 @@ watch(props, () => { // only refresh comments once
         </div>
 
         <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">
+
         <ListBrowser
             v-if="showingOnce && !noNoCommsIfDisabledComments"
             v-memo="[showingOnce]"
@@ -50,6 +52,7 @@ watch(props, () => { // only refresh comments once
             class="p-2"
             :comment-i-d="{type: commentType, objectID: listID}"
             :refreshButton="!commentsDisabled"
+            :highlight="highlight"
             @refreshed-browser="amount = $event; emit('updateCommentAmount', $event)"
         />
     </main>

@@ -3,22 +3,36 @@ import { RouterLink } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { currentCutout, currentUID, isOnline, profileCutouts, resetList } from "@/Editor";
+import { isOnline, resetList } from "@/Editor";
+import { currentCutout, currentUID, currentUnread, profileCutouts } from "@/components/global/profiles";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress } from "@/router";
 import ProfilePicture from "./global/ProfilePicture.vue";
+import NotificationDropdown from "./global/NotificationDropdown.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
 }>();
 
 const settingsShown = ref(false);
+const notifDropdownShown = ref(false);
 const showSettings = (e: MouseEvent) => {
-  if (e.target.id == "settingsOpener") return
+if (e.target.id == "settingsOpener") return
   settingsShown.value = true
   document.body.addEventListener("click", closeSettings, { capture: true })
 };
+const showNotifs = (e: MouseEvent) => {
+  notifDropdownShown.value = !notifDropdownShown.value
+  closeSettings2()
+};
+
+const closeSettings2 = () => {
+  let settingsMenu = document.querySelector("#settingsMenu") as HTMLDivElement
+  settingsShown.value = false
+  settingsMenu.removeEventListener("click", closeSettings, { capture: true })
+}
+
 const closeSettings = (m: MouseEvent) => {
   if (m.x == 0) return // Clicking on settings menu content fricks up mouse pos
   let settingsMenu = document.querySelector("#settingsMenu") as HTMLDivElement
@@ -27,8 +41,7 @@ const closeSettings = (m: MouseEvent) => {
   let width = settingsMenu.offsetWidth!
   let height = settingsMenu.offsetHeight!
   if (m.x < left || m.x > left + width || m.y < top || m.y > top + height) {
-    settingsShown.value = false
-    settingsMenu.removeEventListener("click", closeSettings, { capture: true })
+    closeSettings2()
   }
 }
 
@@ -102,8 +115,7 @@ const hideNavbarOnScroll = () => {
   if (window.scrollY <= 32) return
   navbarHidden.value = window.scrollY > prevScroll
   if (settingsShown.value) {
-    settingsShown.value = false
-    settingsMenu.removeEventListener("click", closeSettings, { capture: true })
+    closeSettings2()
   }
   editorDropdownOpen.value = false
   prevScroll = window.scrollY
@@ -178,10 +190,13 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     </section>
 
     <section class="flex gap-6 items-center">
-      <button class="relative button">
-        <img @click="showSettings" src="../images/notifs.svg" alt=""
+
+      <!-- Notification button -->
+      <button @click="showNotifs" class="relative button max-sm:hidden">
+        <img src="../images/notifs.svg" alt=""
         class="w-5" />
-        <div class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
+        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
       </button>
   
       <!-- Logged out -->
@@ -199,12 +214,12 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
         <ProfilePicture
           :uid="currentUID"
           :cutout="currentCutout"
-          :class="{ 'right-16': settingsShown, 'top-8': settingsShown, '!scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
           class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
           id="profilePicture" v-if="!isOnline"
           />
           
-          <ProfilePicture
+        <ProfilePicture
           :uid="currentUID"
           :cutout="currentCutout"
           :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
@@ -227,6 +242,11 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
         :class="{ 'duration-0': loadingProgress == 0, 'duration-200': loadingProgress == 100, 'duration-[10s]': loadingProgress == 99 }"
         :style="{ width: `${loadingProgress}%` }"></div>
     </div>
+
+    <!-- Notification Dropdown -->
+    <Transition name="fadeSlide">
+      <NotificationDropdown v-if="notifDropdownShown" @selected="showNotifs" />
+    </Transition>
   </nav>
 </template>
 

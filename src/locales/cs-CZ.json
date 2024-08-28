@@ -2,7 +2,10 @@
   "navbar": {
     "editor": "Vytvářet",
     "lists": "Procházet",
-    "saved": "Uložené"
+    "saved": "Uložené",
+    "notifs": "Notifikace",
+    "dropdown": "Boční panel",
+    "fullscreen": "Celá obrazovka"
   },
   "settingsMenu": {
     "czech": "Čeština",
@@ -57,7 +60,9 @@
     "loadCom": "Komentáře pod příspěvkem",
     "loadCHelp": "Změní, zda se komentáře zobrazí automaticky na konci příspěvku.",
     "disTL": "Zakázat průsvitnost",
-    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů"
+    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů",
+    "notifBehave": "Zobrazování notifikací",
+    "notifBeHelp": "Mění, jakým stylem se zobrazují všechy notikace,"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -449,7 +454,8 @@
     "failSendComm": "Nepodařilo se odeslat komentář, zkus to později!",
     "pickView1": "Vyber si vzhled seznamu!",
     "pickView2": "Vzhled lze kdykoliv změnit v nastavení.",
-    "noTags": "Level nemá žádné štítky"
+    "noTags": "Level nemá žádné štítky",
+    "highlighted": "Zvýrazněný komentář"
   },
   "level": {
     "levelID": "ID levelu",

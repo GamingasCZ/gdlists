@@ -9,7 +9,7 @@ import ImageBrowser from './ImageBrowser.vue';
 import { getDominantColor } from '@/Reviews';
 import chroma from 'chroma-js';
 import ProfilePicture from './ProfilePicture.vue';
-import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
+import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/components/global/profiles';
 
 const openEditPopup = ref(false)
 const discordLoading = ref(false)

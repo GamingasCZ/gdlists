@@ -26,7 +26,8 @@ const props = defineProps<{
   commentID: {type: 'list' | 'review', objectID: number}
   refreshButton: boolean
   component: object
-  picking: false | 1 | 2
+  picking?: false | 1 | 2
+  highlight?: number
 }>()
 
 // Page title
@@ -147,6 +148,7 @@ function refreshBrowser() {
     }
     if (props.commentID.type == "list") fetchQuery.listID = props.commentID.objectID
     else fetchQuery.reviewID = props.commentID.objectID
+    if (props.highlight) fetchQuery.highlight = props.highlight
   }
 
   axios
@@ -398,7 +400,13 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           </button>
         </div>
 
-        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
+        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
+          <h3 class="my-3 text-xl">{{ $t('listViewer.highlighted') }}</h3>
+          <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
+          <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
+        </section>
+
+        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS.slice(1)" v-bind="list"
           :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove :unrolled-options="unrolled == index"
           :disable-link="picking" @clicked-option="emit('selectedPostOption', [$event, list.name])" @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />

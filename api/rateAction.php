@@ -1,5 +1,6 @@
 <?php
 require("globals.php"); // checkAccount, getRatings, doRequest
+require("notifications.php"); // createNotification
 header('Content-type: application/json'); // Return as JSON
 /*
 Return codes:
@@ -27,6 +28,7 @@ switch ($method) {
 
         $DATA = json_decode(file_get_contents("php://input"), true);
         $type = isset($DATA["list_id"]) ? "list_id" : "review_id";
+        $type2 = isset($DATA["list_id"]) ? "lists" : "reviews";
         $objectID = intval($DATA[$type]);
         $rating = $DATA["action"] == 1 ? 1 : 0;
 
@@ -42,10 +44,14 @@ switch ($method) {
         }
 
         $checkRate = doRequest($mysqli, sprintf("SELECT rate FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
+        $creator = doRequest($mysqli, sprintf("SELECT `uid` FROM %s WHERE `id`=?", $type2), [$objectID], "i");
         if (is_null($checkRate)) { // No rating
             $rowQuery = doRequest($mysqli,sprintf("INSERT INTO `ratings`(`rate`,`uid`,`%s`) VALUES (?,?,?)", $type), [$rating, $accountCheck, $objectID], "isi");
             if (is_array($rowQuery) && array_key_exists("error", $rowQuery)) $result["result"] = "error";
-            else $result["result"] = "added";
+            else {
+                $result["result"] = "added";
+                createNotification($mysqli, $accountCheck, $creator["uid"], 2, intval(isset($DATA["review_id"]))+1, $objectID);
+            };
         }
         elseif ($checkRate["rate"] != $rating) { // Change rating
             doRequest($mysqli, sprintf("UPDATE `ratings` SET `rate`=? WHERE `uid`=? AND %s=?", $type), [$rating, $accountCheck, $objectID], "iii");
@@ -54,6 +60,7 @@ switch ($method) {
         elseif ($checkRate["rate"] == $rating) { // Remove rating
             doRequest($mysqli, sprintf("DELETE FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
             $result["result"] = "deleted";
+            deleteNotification($mysqli, $creator["uid"], 2, $objectID);
         }
         $result["ratings"] = getRatings($mysqli, $accountCheck, $type, $objectID);
         echo json_encode($result);

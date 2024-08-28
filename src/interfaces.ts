@@ -304,3 +304,15 @@ export interface ImageStorage {
   maxFilecount: number
   maxUploadSize: number
 }
+
+export interface NotificationContent {
+  to: string
+  from: string
+  to_user: string
+  type: 'comment' | 'rating' | 'other'
+  unread: boolean
+  time: string
+  postType: 'list' | 'review' | 'other'
+  objectID: number
+  otherID: number | null
+}

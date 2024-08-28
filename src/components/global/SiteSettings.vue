@@ -53,6 +53,14 @@ import SectionDivider from '../ui/SectionDivider.vue';
             control="cbox"
         >
         </Option>
+        <Option
+            v-model="SETTINGS.notifBehaviour"
+            :name="$t('settingsMenu.notifBehave')"
+            :desc="$t('settingsMenu.notifBeHelp')"
+            control="dropdown"
+            :control-options="[[$t('navbar.dropdown'), 0], [$t('navbar.fullscreen'), 1]]"
+        >
+        </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
             v-model="SETTINGS.disableColors"

@@ -58,7 +58,7 @@ const loadContent = async () => {
   if (props.randomList) {
     randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}}).then(res => res.data)
   }
-  props.isReview ? loadReview(randomData) : loadList(randomData)
+  props.isReview ? await loadReview(randomData) : await loadList(randomData)
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", () => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
@@ -66,6 +66,8 @@ const loadContent = async () => {
         scrolledToEnd.value = true
     })
   }
+
+  if (window.location.search.includes("comment")) commentsShowing.value = true
 }
 
 watch(props, loadContent)
