@@ -308,11 +308,13 @@ export interface ImageStorage {
 export interface NotificationContent {
   to: string
   from: string
-  to_user: string
+  from_user: string
   type: 'comment' | 'rating' | 'other'
   unread: boolean
   time: string
   postType: 'list' | 'review' | 'other'
   objectID: number
   otherID: number | null
+  comment: string | null
+  count: number
 }

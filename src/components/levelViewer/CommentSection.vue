@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import ListBrowser from '../global/ListBrowser.vue';
 import CommentBox from './CommentBox.vue';
 import CommentPreview from './CommentPreview.vue';
+import router from '@/router';
 
 const props = defineProps<{
     listID: number
@@ -20,11 +21,15 @@ const emit = defineEmits<{
 
 const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
-const highlight = computed(() => window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null)
+const highlight = ref(window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null)
 const showingOnce = ref(false)
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
 watch(props, () => { // only refresh comments once
     if (!showingOnce.value) showingOnce.value = true
+})
+
+watch(router.currentRoute, () => {
+    highlight.value = window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null
 })
 
 </script>

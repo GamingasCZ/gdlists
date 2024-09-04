@@ -4,7 +4,7 @@ $hostname = getenv("DB_HOSTNAME");
 $username = getenv("DB_USERNAME");
 $password = getenv("DB_PASSWORD");
 $database = getenv("DB_NAME");
-$debugMode = false;
+$debugMode = true;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
@@ -17,7 +17,7 @@ function privateIDGenerator($listName, $creator, $timestamp) {
     $pid = substr(sha1($str),0,10);
     if (is_numeric($pid)) $pid = "p" . substr($pid, 0, 9);
     return $pid;
-}
+}   
 
 // Not secret :)
 function sanitizeInput($inputArray)
@@ -43,7 +43,7 @@ function sanitizeInput($inputArray)
 function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = false)
 {
     global $debugMode;
-    if ($debugMode) error_log($queryTemplate);
+    if ($debugMode) error_log(sprintf(str_replace("?", "%s", $queryTemplate), ...$values));
 
     $query = $mysqli->prepare($queryTemplate);
 

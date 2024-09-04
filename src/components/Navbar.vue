@@ -20,11 +20,15 @@ const notifDropdownShown = ref(false);
 const showSettings = (e: MouseEvent) => {
 if (e.target.id == "settingsOpener") return
   settingsShown.value = true
+  closeNotifs2()
   document.body.addEventListener("click", closeSettings, { capture: true })
 };
-const showNotifs = (e: MouseEvent) => {
-  notifDropdownShown.value = !notifDropdownShown.value
+const showNotifs = () => {
+  if (notifDropdownShown.value) return closeNotifs2()
+
+  notifDropdownShown.value = true
   closeSettings2()
+  document.body.addEventListener("click", closeNotifs, { capture: true })
 };
 
 const closeSettings2 = () => {
@@ -33,15 +37,24 @@ const closeSettings2 = () => {
   settingsMenu.removeEventListener("click", closeSettings, { capture: true })
 }
 
-const closeSettings = (m: MouseEvent) => {
+const closeNotifs2 = () => {
+  let settingsMenu = document.querySelector("#notifMenu") as HTMLDivElement
+  notifDropdownShown.value = false
+  settingsMenu.removeEventListener("click", closeNotifs, { capture: true })
+}
+
+const closeSettings = (e: MouseEvent) => closeDialog(e, "#settingsMenu", closeSettings2)
+const closeNotifs = (e: MouseEvent) => closeDialog(e, "#notifMenu", closeNotifs2)
+
+const closeDialog = (m: MouseEvent, elementID: string, fun: any) => {
   if (m.x == 0) return // Clicking on settings menu content fricks up mouse pos
-  let settingsMenu = document.querySelector("#settingsMenu") as HTMLDivElement
+  let settingsMenu = document.querySelector(elementID) as HTMLDivElement
   let left = settingsMenu.offsetLeft!
   let top = settingsMenu.offsetTop!
   let width = settingsMenu.offsetWidth!
   let height = settingsMenu.offsetHeight!
   if (m.x < left || m.x > left + width || m.y < top || m.y > top + height) {
-    closeSettings2()
+    fun()
   }
 }
 
@@ -114,9 +127,9 @@ var prevScroll = window.scrollY
 const hideNavbarOnScroll = () => {
   if (window.scrollY <= 32) return
   navbarHidden.value = window.scrollY > prevScroll
-  if (settingsShown.value) {
-    closeSettings2()
-  }
+  if (settingsShown.value) closeSettings2()
+  if (notifDropdownShown.value) closeNotifs2()
+
   editorDropdownOpen.value = false
   prevScroll = window.scrollY
 }
@@ -189,10 +202,10 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     }}</RouterLink>
     </section>
 
-    <section class="flex gap-6 items-center">
+    <section class="flex relative gap-6 items-center">
 
       <!-- Notification button -->
-      <button @click="showNotifs" class="relative button max-sm:hidden">
+      <button @click="showNotifs" v-if="isLoggedIn" class="absolute -left-10 top-1/2 -translate-y-1/2 button max-sm:hidden">
         <img src="../images/notifs.svg" alt=""
         class="w-5" />
         <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
@@ -232,7 +245,7 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
     <Transition name="fadeSlide">
       <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"
-        v-if="localStorg" id="settingsMenu" />
+        v-if="localStorg" id="settingsMenu" @open-notifs="showNotifs()" />
     </Transition>
 
     <!-- Loading bar -->
@@ -245,7 +258,7 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
     <!-- Notification Dropdown -->
     <Transition name="fadeSlide">
-      <NotificationDropdown v-if="notifDropdownShown" @selected="showNotifs" />
+      <NotificationDropdown id="notifMenu" v-if="notifDropdownShown" @selected="showNotifs" @close="closeNotifs2()" />
     </Transition>
   </nav>
 </template>

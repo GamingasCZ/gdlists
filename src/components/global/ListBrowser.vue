@@ -406,7 +406,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
         </section>
 
-        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS.slice(1)" v-bind="list"
+        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
           :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove :unrolled-options="unrolled == index"
           :disable-link="picking" @clicked-option="emit('selectedPostOption', [$event, list.name])" @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />

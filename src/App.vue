@@ -2,7 +2,7 @@
 import axios, { type AxiosResponse } from "axios";
 import Footer from "./components/global/Footer.vue";
 import Navbar from "./components/Navbar.vue";
-import { onMounted, ref } from "vue";
+import { defineAsyncComponent, onMounted, ref } from "vue";
 import cookier from "cookier";
 import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
@@ -53,6 +53,7 @@ if (hasLocalStorage()) {
 }
 
 const loggedIn = ref<boolean | null>(null);
+const debugModeEnabled = ref(false)
 onMounted(() => {
   if (!hasLocalStorage()) return;
   axios
@@ -70,6 +71,7 @@ onMounted(() => {
         currentUID.value = res.data.account_id
         currentCutout.value = res.data.cutout
         currentUnread.value = res.data.unread_notif
+        if (res.data.debug) debugModeEnabled.value = true
       } else {
         localStorage.removeItem("account_info");
       }
@@ -84,15 +86,16 @@ document.body.addEventListener("keyup", (e) => {
 document.body.addEventListener("keydown", (e) => {
   if (e.altKey && e.key == "Control") tabbarOpen.value = true;
 });
+
+const debugMenu = defineAsyncComponent({loader: () => import('@/components/global/DebugDialog.vue')})
+const debugMenuOpen = ref(false)
 </script>
 
 <template>
   <main class="min-h-screen">
     <Navbar :is-logged-in="loggedIn" />
     <NoConnection />
-    <section v-if="tabbarOpen" class="absolute left-2 top-14 bg-greenGradient">
-      sas
-    </section>
+    <div class="fixed top-1 left-14 z-50 p-1 text-black bg-yellow-100 rounded-md" @click="debugMenuOpen = true" v-if="debugModeEnabled"><span class="opacity-40">Debug</span> <component @close-popup="debugModeOpen = false" v-if="debugMenuOpen" :is="debugMenu"></component></div>
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
   </main>
   <Footer />

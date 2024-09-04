@@ -67,12 +67,15 @@ if (sizeof($_GET) > 0) {
         if (!$accCheck) die();
 
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
-        $unread = doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=?", [$accCheck["id"]], "s");
+        $unread = doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$accCheck["id"]], "s");
         $profileData = ["status" => "logged_in",
                         "account_name" => $accCheck["username"],
                         "account_id" => $accCheck["id"],
                         "cutout" => is_null($pfpCutout) ? 0 : $pfpCutout["pfp_cutout"],
                         "unread_notif" => $unread["amount_unread"]];
+        
+        if ($debugMode) $profileData["debug"] = true;
+
         $mysqli -> close();
         die($accCheck ? json_encode($profileData) : 0);
     }

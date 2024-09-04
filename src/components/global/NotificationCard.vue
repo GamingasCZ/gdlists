@@ -2,19 +2,19 @@
 import type { NotificationContent } from '@/interfaces';
 import { computed, ref } from 'vue';
 import ProfilePicture from './ProfilePicture.vue';
-import { prettyDate } from '@/Editor';
+import { parseElapsed, prettyDate } from '@/Editor';
 import { RouterLink } from 'vue-router';
 
-const props = defineProps<NotificationContent & {postNames: any[]}>()
+const props = defineProps<NotificationContent & {postNames: any[], selected: boolean}>()
 const types = ['comment', 'rating', 'other']
 const types2 = ['list', 'review']
 
+let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
 const formText = computed(() => {
     let postIndex = (props.postType == 'review') | 0
-    let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
     let actionText = ['olajkoval', 'okomentoval'][(props.type == 'comment') | 0]
-    let postType = ['seznam', 'recenzi'][postIndex]
-    return `<b>${props.from}</b> ${actionText} ${postType} <b>${decodeURIComponent(props.postNames[postName].name).replace("+", " ")}</b>`
+    let more = props.count > 1 ? `a ${props.count - 1} dalších ` : ''
+    return `<b>${props.from}</b> ${more}${actionText}`
 })
 
 const base = import.meta.env.BASE_URL
@@ -25,16 +25,25 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.ind
 </script>
 
 <template>
-    <RouterLink :to="link">
-        <div class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md">
-            <div class="flex flex-col gap-2">
-                <div class="w-7 bg-black bg-opacity-40 rounded-md"><ProfilePicture :uid="to_user" :cutout="0" /> </div>
-                <div class="p-1 w-7 bg-black bg-opacity-40 rounded-md"><img :src="icon" alt=""></div>
+    <div :class="{'border-2 border-lof-400': selected, 'border-l-4 border-lof-400 from-lof-300 to-transparent bg-gradient-to-r': unread, 'bg-black bg-opacity-40': !unread}" class="flex relative gap-2 p-1 rounded-md">
+        <div class="flex flex-col gap-2">
+            <div class="relative w-7 bg-black bg-opacity-40 rounded-md">
+                <ProfilePicture :uid="from_user" :cutout="0" />
+                <div v-if="props.count > 1" class="absolute -right-1 -bottom-1 p-0.5 py-0 w-max text-xs bg-red-600 rounded-md">+{{ props.count - 1 }}</div>
             </div>
-            <div class="flex flex-col">
-                <p class="grow" v-html="formText"></p>
-                <p :title="`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`" class="text-sm leading-none text-white text-opacity-40 cursor-help grow">{{ prettyDate((Date.now() - date)/1000) }}</p>
-            </div>
+            <div class="p-1 w-7 bg-black bg-opacity-40 rounded-md"><img :src="icon" alt=""></div>
         </div>
-    </RouterLink>
+        <div class="flex flex-col">
+            <div class="flex pr-4">
+                <span class="pr-1" v-html="formText"></span>
+                <b><RouterLink :to="link" class="hover:underline">{{ decodeURIComponent(props.postNames[postName].name).replace("+", " ") }}</RouterLink></b>
+            </div>
+            
+            <p v-if="props.comment" class="text-sm">
+                <hr class="w-full opacity-20">
+                {{ decodeURIComponent(props.comment) }}
+            </p>
+            <p :title="`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`" class="absolute top-1 right-1 w-max text-xs leading-none text-white text-opacity-40 cursor-help grow">{{ parseElapsed((Date.now() - date)/1000) }}</p>
+        </div>
+    </div>
 </template>

@@ -65,7 +65,7 @@ const listData = inject("listData")
       <!-- Level name -->
       <h2 class="font-bold max-sm:max-w-[60vw] max-sm:text-center break-words">
         <div class="flex gap-1 items-center">
-          <DifficultyIcon class="w-6" :difficulty="difficulty[0]" :rating="difficulty[1]" />
+          <DifficultyIcon class="w-6" :difficulty="difficulty?.[0]" :rating="difficulty?.[1]" />
           <span>{{ levelName || $t('other.unnamesd') }}</span>
           <img src="@/images/platformer.svg" title="Platformer" v-if="platf" class="w-5" alt="">
           <img @click="ratingsShowing = true" class="w-5 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">

@@ -7,11 +7,16 @@ import { setLanguage } from "@/locales";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
 import axios from "axios";
+import { currentUnread } from "./profiles";
 
 defineProps<{
   isLoggedIn: boolean;
   username: string;
 }>();
+
+const emit = defineEmits<{
+  (e: "openNotifs"): void
+}>()
 
 let loggingOut = false
 function logout() {
@@ -123,9 +128,10 @@ const Help = defineAsyncComponent({
     </section>
 
     <button
-      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
-      @click="dialogs.settings = true"
+      class="relative px-2 py-1 text-left bg-black bg-opacity-40 rounded-md sm:hidden button"
+      @click="emit('openNotifs')"
     >
+    <div v-if="currentUnread > 0" class="absolute -top-1 -left-1 w-3 rounded-md bg-lof-400 aspect-square"></div>
       <img src="@/images/notifs.svg" class="inline mr-3 w-5" alt="" />{{ $t('navbar.notifs') }}
     </button>
   
