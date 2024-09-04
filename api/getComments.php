@@ -61,7 +61,7 @@ if (count($comments) == 0) {
 $uid_array = array();
 $ind = 0;
 foreach ($comments as $row) {
-    array_push($uid_array, $comments[$ind]["uid"]);
+    if ($row["uid"]) array_push($uid_array, $row["uid"]);
     
     $comments[$ind]["comment"] = htmlspecialchars_decode($row["comment"]);
     $ind += 1;
@@ -71,7 +71,8 @@ $query = sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
                   FROM users
                   LEFT JOIN profiles ON users.discord_id = profiles.uid
                   WHERE discord_id IN (%s)
-                  ", join(",", array_unique($uid_array)), $_GET[$type]);
+                  ", join(",", array_unique($uid_array)));
+
 $result = $mysqli -> query($query) or die($mysqli -> error);
 
 $users = $result -> fetch_all(MYSQLI_ASSOC);
