@@ -317,4 +317,5 @@ export interface NotificationContent {
   otherID: number | null
   comment: string | null
   count: number
+  id: number
 }

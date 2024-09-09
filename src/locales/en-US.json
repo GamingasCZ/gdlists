@@ -423,7 +423,10 @@
     "square": "Square",
     "star": "Star",
     "demon": "Demon",
-    "hexagon": "Hexagon"
+    "hexagon": "Hexagon",
+    "type": "Type",
+    "sort": "Sorting",
+    "oldUnread": "Oldest unread"
   },
   "settingsMenu": {
     "asOff": "Off",

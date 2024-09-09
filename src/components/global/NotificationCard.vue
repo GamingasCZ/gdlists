@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import ProfilePicture from './ProfilePicture.vue';
 import { parseElapsed, prettyDate } from '@/Editor';
 import { RouterLink } from 'vue-router';
+import axios from 'axios';
 
 const props = defineProps<NotificationContent & {postNames: any[], selected: boolean}>()
 const types = ['comment', 'rating', 'other']
@@ -11,11 +12,20 @@ const types2 = ['list', 'review']
 
 let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
 const formText = computed(() => {
-    let postIndex = (props.postType == 'review') | 0
-    let actionText = ['olajkoval', 'okomentoval'][(props.type == 'comment') | 0]
-    let more = props.count > 1 ? `a ${props.count - 1} dalších ` : ''
+    let actionText = [`olajkoval`, 'okomentoval'][+(props.type == 'comment')]
+    let more = props.count > 1 ? `a další ` : ''
     return `<b>${props.from}</b> ${more}${actionText}`
 })
+
+const ratingsAllShown = ref(0)
+const ratingsAllUsers = ref([])
+const getRatingUsers = () => {
+    axios.get(import.meta.env.VITE_API + "/notifications.php", {params: {ratings: 1, id: props.objectID, postType: +(props.postType == 'review') + 1, page: 0}}).then(res => {
+        ratingsAllShown.value = 1+(+res.data[1])
+        ratingsAllUsers.value.push(...res.data[0])
+    })
+
+}
 
 const base = import.meta.env.BASE_URL
 const date = computed(() => new Date(props.time))
@@ -34,11 +44,21 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.ind
             <div class="p-1 w-7 bg-black bg-opacity-40 rounded-md"><img :src="icon" alt=""></div>
         </div>
         <div class="flex flex-col">
-            <div class="flex pr-4">
-                <span class="pr-1" v-html="formText"></span>
-                <b><RouterLink :to="link" class="hover:underline">{{ decodeURIComponent(props.postNames[postName].name).replace("+", " ") }}</RouterLink></b>
+            <div>
+                <span class="inline pr-1 w-max" v-html="formText"></span>
+                <b><RouterLink :to="link" class="inline hover:underline">{{ decodeURIComponent(props.postNames[postName].name).replace("+", " ") }}</RouterLink></b>
             </div>
             
+            <button v-if="props.count > 1 && props.type == 'rating'" @click="getRatingUsers">V</button>
+
+            <section v-if="ratingsAllShown" class="flex flex-col gap-2 p-1">
+                <div v-for="user in ratingsAllUsers" class="flex gap-2 items-center">
+                    <ProfilePicture :uid="user.discord_id" :cutout="0" class="w-8" />
+                    <span>{{ user.username }}</span>
+                </div>
+                <span v-if="ratingsAllShown == 1">Zobrazit další</span>
+            </section>
+
             <p v-if="props.comment" class="text-sm">
                 <hr class="w-full opacity-20">
                 {{ decodeURIComponent(props.comment) }}

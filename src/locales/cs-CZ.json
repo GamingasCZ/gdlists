@@ -394,7 +394,11 @@
     "square": "Čtverec",
     "star": "Hvězda",
     "demon": "Démon",
-    "hexagon": "Šestiúhelník"
+    "hexagon": "Šestiúhelník",
+    "type": "Druh",
+    "sort": "Řazení",
+    "oldest": "Nejstarší",
+    "oldUnread": "Nejstarší nepřečtené"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

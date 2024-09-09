@@ -15,7 +15,6 @@ function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $o
               [$to, $from, $type, $postType, $objectID, $otherID],
               "ssiiii");
     // echo sprintf("INSERT INTO `notifications`(`to_user`, `from_user`, `type`, `postType`, `objectID`, `otherID`) VALUES (%s,%s,%s,%s,%s,%s)", $to, $from, $type, $postType, $objectID, $otherID);
-    print_r($res);
 }
 
 function deleteNotification($mysqli, $toUID, $postType, $objectID) {
@@ -37,6 +36,16 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $method = $_SERVER["REQUEST_METHOD"];
     switch ($method) {
         case 'GET':
+            if (isset($_GET["ratings"])) {
+                $notifs = doRequest($mysqli, "SELECT `username`, `discord_id`
+                FROM `notifications`
+                LEFT JOIN `users` ON notifications.from_user = users.discord_id
+                WHERE `to_user`=? AND `objectID`=? AND `postType`=?
+                LIMIT 20 OFFSET ?", [$acc["id"], intval($_GET["id"]), intval($_GET["postType"]), 1+intval($_GET["page"])*20], "siii", true);
+
+                die(json_encode([$notifs, sizeof($notifs) < 20]));
+            }
+
             $notifs = doRequest($mysqli, "SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, `id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`, COUNT(objectID) as `count`
              FROM `notifications` n
              LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
@@ -46,6 +55,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
              GROUP BY objectID
              ORDER BY `time` DESC
              LIMIT 20", [$acc["id"]], "s", true);
+
 
             $postIDs = [[0], [0]];
             foreach ($notifs as $n) {
