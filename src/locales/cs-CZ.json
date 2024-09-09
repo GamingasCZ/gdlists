@@ -740,7 +740,10 @@
     "embedded": "Vložený příspěvek",
     "embeddedHelp": "Načte se po načtení recenze",
     "vertAlign": "Umístění",
-    "back": "Vrátit se"
+    "back": "Vrátit se",
+    "makeCarousel": "Přidat karusel",
+    "carouselHelp": "Klikni pro přídání obrázků a videí",
+    "carMedia": "Média karusely"
   },
   "review": {
     "columnSetting": "{0} sloupec",

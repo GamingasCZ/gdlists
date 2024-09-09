@@ -43,6 +43,7 @@ const actions = [
 		["showImage", i18n.global.t('reviews.addImage')],
 		["addVideo", i18n.global.t('reviews.addVideo')],
 		["showRating", i18n.global.t('reviews.dispRatings')],
+		["addCarousel", i18n.global.t('reviews.makeCarousel')],
 	],
 ]
 // ["showCollab", i18n.global.t('reviews.addUsers')],

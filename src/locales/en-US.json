@@ -739,7 +739,9 @@
     "embedded": "Embedded Post",
     "embeddedHelp": "Load the review to display this post",
     "vertAlign": "Vertical Align",
-    "back": "Go Back"
+    "back": "Go Back",
+    "makeCarousel": "Add Carousel",
+    "carouselHelp": "Click to add images and videos"
   },
   "review": {
     "columnSetting": "{0} column",

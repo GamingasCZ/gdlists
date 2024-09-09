@@ -7,6 +7,7 @@ import NestContainer from "./NestContainer.vue"
 import ReviewRatings from "./ReviewRatings.vue"
 import ReviewUsers from "./ReviewUsers.vue"
 import { i18n } from "@/locales"
+import ReviewCarousel from "./ReviewCarousel.vue"
 
 const success = {success: true}
 
@@ -238,6 +239,50 @@ const containers: Containers = {
             settings.components.forEach(e => len += e.length)
             return len ? success : error(0, 2)
         }
+    },
+    addCarousel: {
+        nestable: true,
+        canEditText: false,
+        dependentOnChildren: false,
+        additionalComponents: [ReviewCarousel],
+        settings: [
+            {
+                key: "components",
+                title: 'Karusel',
+                type: [-1],
+                required: true,
+                default: []
+            },
+            {
+                key: "pick",
+                title: 'Vybrat média',
+                type: [1],
+                default: 0
+            },
+            {
+                key: "overflow",
+                title: 'Přetékat',
+                type: [2],
+                default: false
+            },
+            {
+                key: "autoHeight",
+                title: 'Automatická výška',
+                type: [2],
+                default: true
+            },
+            {
+                key: "crop",
+                title: 'Ořezat na stejnou výšku',
+                type: [2],
+                default: true
+            },
+        ],
+        errorCheck: (settings: object) => {
+            let len = 0
+            settings.components.forEach(e => len += e.length)
+            return len ? success : error(0, 2)
+        }
     }
 }
 
@@ -285,6 +330,7 @@ export type Containers = {
     showRating: Container
     twoColumns: Container
     showCollab: Container
+    addCarousel: Container
 }
 
 export type Container = {

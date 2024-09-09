@@ -34,6 +34,7 @@ import EditorBackup from "./editor/EditorBackup.vue";
 import { onMounted } from "vue";
 import { onBeforeRouteLeave, type RouteLocationNormalized } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
+import CarouselPicker from "./writer/CarouselPicker.vue";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -99,6 +100,7 @@ const openDialogs = reactive({
     ratings: false,
     bgPreview: false,
     imagePicker: [false, 0],
+    carouselPicker: [false, 0],
     removeDialog: false,
     description: false,
     editError: false,
@@ -115,7 +117,6 @@ const selectedContainer = ref<[number, HTMLDivElement | null]>([-1, null])
 provide("selectedContainer", selectedContainer)
 
 const selectedLevel = ref()
-const levels = ref()
 
 const selectedNestContainer = ref([-1, -1, -1])
 provide("selectedNestContainer", selectedNestContainer)
@@ -688,10 +689,15 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
             <template #icon><img src="@/images/info.svg" alt="" class="w-6"></template>
             <WriterRatings ref="writerRatings" />
         </DialogVue>
-
+        
+        <DialogVue :open="openDialogs.carouselPicker[0]" @close-popup="openDialogs.carouselPicker[0] = false" :title="$t('reviews.carMedia')">
+            <CarouselPicker />
+        </DialogVue>
+        
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
             <ImageBrowser :disable-external="openDialogs.imagePicker[1] == -2" :unselectable="false" @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
         </DialogVue>
+
         
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')" :width="dialog.medium">
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
