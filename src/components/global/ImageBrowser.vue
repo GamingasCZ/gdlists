@@ -182,7 +182,7 @@ const pickImage = (index: number, external: boolean) => {
     if (props.unselectable) {
         let el = document.createElement("img")
         el.src = url
-        previewImage.value = index
+        previewImage.value = url
         el.onload = () => {
             let getColor = getDominantColor(el)
             previewDominant.value = `linear-gradient(9deg, ${getColor.darken().hex()}, ${getColor.brighten().hex()})`
@@ -214,7 +214,7 @@ const refreshContent = async (data?: string) => {
 }
 
 const downloadImage = (hash: string, external: boolean) => {
-    if (external) navigator.clipboard.writeText(externaImages.value[hash])
+    if (external) navigator.clipboard.writeText(hash)
     else {
         let link = document.createElement("a")
         link.href = `${pre}/userContent/${storage.value.uid}/${images.value[hash]}.webp`
@@ -271,13 +271,14 @@ const extButton = ref()
 
 <template>
     <div class="flex gap-10 justify-between mx-2 mb-2">
-        <Dialog :custom-color="previewDominant" :title="$t('other.preview')" :width="dialog.large" :open="previewImage >= 0" @close-popup="previewImage = -1">
+        <Dialog :custom-color="previewDominant" :title="$t('other.preview')" :width="dialog.large" :open="typeof previewImage == 'string'" @close-popup="previewImage = -1">
             <div class="flex relative flex-col gap-2 items-center p-2 w-full bg-black bg-opacity-40">
-                <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="absolute inset-0 w-full max-w-full h-full text-center text-white rounded-md opacity-50 mix-blend-overlay blur-lg pointer-events-none">
-                <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="w-max pointer-events-none isolate max-w-full text-white max-h-[80vh] text-center rounded-md">
+                <img :src="previewImage" :alt="images[previewImage]" class="absolute inset-0 w-full max-w-full h-full text-center text-white rounded-md opacity-50 mix-blend-overlay blur-lg pointer-events-none">
+                <img :src="previewImage" :alt="images[previewImage]" class="w-max pointer-events-none isolate max-w-full text-white max-h-[80vh] text-center rounded-md">
                 <div class="grid grid-cols-2 gap-2 w-full">
                     <button @click="imageAction(0, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/trash.svg">{{ $t('editor.remove') }}</button>
-                    <button @click="imageAction(1, currentTab == 1, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/copy.svg">{{ $t('other.download') }}</button>
+                    <button v-show="currentTab == 0" @click="imageAction(1, false, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/copy.svg">{{ $t('other.download') }}</button>
+                    <button v-show="currentTab == 1" @click="imageAction(1, true, previewImage)" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/link.svg">{{ $t('other.link') }}</button>
                 </div>
             </div>
         </Dialog>
