@@ -1,10 +1,11 @@
-import { ref } from "vue"
+import { reactive, ref } from "vue"
 import type { LocalNotification } from "@/interfaces"
+import { useI18n } from "vue-i18n"
 import { i18n } from "@/locales"
 
 export const Stack = ref<LocalNotification[]>({})
 export const summonNotification = (title: string, text: string, icon: string) => {
-    Stack.value[Date.now()] = {
+    Stack.value[Math.floor(Date.now()*1000).toString()] = {
         title: title,
         text: text,
         icon: icon
@@ -12,20 +13,20 @@ export const summonNotification = (title: string, text: string, icon: string) =>
 }
 
 const errorMessages = [
-    i18n.global.t('reviews.imgError'),
-    i18n.global.t('other.imageBig'),
-    i18n.global.t('other.imgSmall'),
-    i18n.global.t('other.notEnoughSpace'),
-    i18n.global.t('other.sameUploaded'),
-    i18n.global.t('other.deleteFail'),
-    i18n.global.t('other.loginFuckup'),
-    i18n.global.t('other.unsupportedFormat'),
-    i18n.global.t('other.clipboardEmpty'),
-    i18n.global.t('other.imgInUse'),
+    'reviews.imgError',
+    'other.imageBig',
+    'other.imgSmall',
+    'other.notEnoughSpace',
+    'other.sameUploaded',
+    'other.deleteFail',
+    'other.loginFuckup',
+    'other.unsupportedFormat',
+    'other.clipboardEmpty',
+    'other.imgInUse',
 ]
 
 export const notifyError = (ind: number) => {
-    summonNotification(i18n.global.t('other.error'), errorMessages[ind], 'error')
+    summonNotification(i18n.global.t('other.error'), i18n.global.t(errorMessages[ind]), 'error')
 }
 
 // export const uploadImage = async (e: Event | FileList, singleFile: boolean) => {
