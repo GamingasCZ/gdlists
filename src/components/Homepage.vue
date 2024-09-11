@@ -8,10 +8,12 @@ import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import DialogVue from "./global/Dialog.vue";
 import { dialog } from "./ui/sizes";
+import { summonNotification } from "./imageUpload";
+import { i18n } from "@/locales";
 
 document.title = useI18n().t("other.websiteName");
 
-const props = defineProps({
+defineProps({
   isLoggedIn: Boolean,
 });
 
@@ -26,8 +28,7 @@ const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.
 onMounted(() => {
   let get = new URLSearchParams(location.search)
   if (get.has("loginerr")) {
-    let errorToast = document.getElementById("loginErrorToast");
-    errorToast?.classList.add("popout");
+    summonNotification(i18n.global.t('other.error'), i18n.global.t('homepage.loginFail'), 'error')
   }
   
   let loginCookie = cookier("logindata").get();
@@ -40,8 +41,7 @@ onMounted(() => {
     // first-time user
     firstTimeUser.value = loginCookie[2];
     if (!firstTimeUser.value) {
-      let loginToast = document.getElementById("loginToast");
-      loginToast?.classList.add("popout");
+      summonNotification(i18n.global.t('homepage.welcomeBack'), returnfromLoginName.value, 'check')
     }
   
     returnfromLoginPFP.value = loginCookie[1]
@@ -66,17 +66,6 @@ const closeTwitterAd = () => {
     <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
   </DialogVue>
   
-  <div id="loginToast" v-if="!firstTimeUser && localStorg"
-    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
-    {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!
-  </div>
-
-  <div id="loginErrorToast" v-if="!firstTimeUser && localStorg"
-    class="flex absolute top-16 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
-    <img src="@/images/warn.svg" alt="" class="w-8">
-    <span class="text-white">{{ $t('homepage.loginFail') }}</span>
-  </div>
-
   <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
     <!-- Twitter notif -->
     <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
@@ -157,16 +146,3 @@ const closeTwitterAd = () => {
       content-type="oldLists" />
   </main>
 </template>
-
-<style>
-@keyframes slideTop {
-  0% {@apply -translate-y-24}
-  5% {@apply translate-y-0}
-  95% {@apply translate-y-0}
-  100% {@apply -translate-y-24}
-}
-
-.popout {
-  animation: slideTop 5s ease forwards;
-}
-</style>

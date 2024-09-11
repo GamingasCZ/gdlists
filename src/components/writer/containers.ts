@@ -241,48 +241,44 @@ const containers: Containers = {
         }
     },
     addCarousel: {
-        nestable: true,
+        nestable: false,
         canEditText: false,
         dependentOnChildren: false,
         additionalComponents: [ReviewCarousel],
         settings: [
             {
                 key: "components",
-                title: 'Karusel',
+                title: i18n.global.t('reviews.carousel'),
                 type: [-1],
                 required: true,
                 default: []
             },
             {
+                key: "height",
+                title: '',
+                type: [-1],
+                required: true,
+                default: 192
+            },
+            {
                 key: "pick",
-                title: 'Vybrat média',
+                title: i18n.global.t('reviews.pickMedia'),
                 type: [1],
                 default: 0
             },
             {
                 key: "overflow",
-                title: 'Přetékat',
+                title: i18n.global.t('reviews.overflow'),
                 type: [2],
                 default: false
             },
             {
-                key: "autoHeight",
-                title: 'Automatická výška',
-                type: [2],
-                default: true
-            },
-            {
                 key: "crop",
-                title: 'Ořezat na stejnou výšku',
+                title: i18n.global.t('reviews.cropWidth'),
                 type: [2],
-                default: true
+                default: false
             },
         ],
-        errorCheck: (settings: object) => {
-            let len = 0
-            settings.components.forEach(e => len += e.length)
-            return len ? success : error(0, 2)
-        }
     }
 }
 

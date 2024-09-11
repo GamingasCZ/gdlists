@@ -14,6 +14,8 @@ import { onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { dialog } from "../ui/sizes";
 import { getDominantColor } from "@/Reviews";
+import { i18n } from "@/locales";
+import { notifyError } from "../imageUpload";
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -73,8 +75,8 @@ const removeImage = (hash: string, external: boolean) => {
         uploadingImage.value = 2
         axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash } }).then(res => {
             uploadingImage.value = 0
-            if (res.data == "-3") return notify(5)
-            if (res.data == "-5") return notify(9)
+            if (res.data == "-3") return notifyError(5)
+            if (res.data == "-5") return notifyError(9)
 
             storage.value = res.data
             images.value.splice(images.value.indexOf(hash), 1)
@@ -85,7 +87,7 @@ const removeImage = (hash: string, external: boolean) => {
         }).catch(() => {
             loadingImages.value = false
             uploadingImage.value = 0
-            notify(5)
+            notifyError(5)
         })
 
         removeConfirmationOpen.value = -1
@@ -106,9 +108,9 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
     else
         file = e[0]
 
-    if (file?.size > storage.value.maxUploadSize) return notify(1) // Too big
-    if (file?.size < 50) return notify(2) // Too small
-    else if (file?.size > storage.value.left) return notify(3) // Not enough storage
+    if (file?.size > storage.value.maxUploadSize) return notifyError(1) // Too big
+    if (file?.size < 50) return notifyError(2) // Too small
+    else if (file?.size > storage.value.left) return notifyError(3) // Not enough storage
 
     else {
         let data = await file?.arrayBuffer()
@@ -122,8 +124,8 @@ const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
             maxContentLength: Infinity
         }).then(res => {
             uploadingImage.value = 0
-            if (res.data == -5) notify(7) // Bad format
-            else if (res.data == -3) notify(4) // Already uploaded
+            if (res.data == -5) notifyError(7) // Bad format
+            else if (res.data == -3) notifyError(4) // Already uploaded
             else if (typeof res.data == "object") {
                 images.value.splice(0, 0, res.data.newImage)
                 delete res.data.newImage
@@ -150,7 +152,7 @@ const uploadExternalImage = async (link: string) => {
         })
 
         await load.catch((err) => {
-            notify(0)
+            notifyError(0)
             loadingImages.value = false
             return err;
         })
@@ -243,25 +245,6 @@ const imageAction = (id: number, external: boolean, val: string | number) => {
     }
 }
 
-const errorMessages = [
-    useI18n().t('reviews.imgError'),
-    useI18n().t('other.imageBig'),
-    useI18n().t('other.imgSmall'),
-    useI18n().t('other.notEnoughSpace'),
-    useI18n().t('other.sameUploaded'),
-    useI18n().t('other.deleteFail'),
-    useI18n().t('other.loginFuckup'),
-    useI18n().t('other.unsupportedFormat'),
-    useI18n().t('other.clipboardEmpty'),
-    useI18n().t('other.imgInUse'),
-]
-const notifStamp = ref(-1)
-const notifContent = ref("")
-const notify = (error: number) => {
-    notifContent.value = errorMessages[error]
-    notifStamp.value = Date.now()
-}
-
 const holdingShift = ref(false)
 const modShift = (e: KeyboardEvent) => holdingShift.value = e.shiftKey
 document.addEventListener("keydown", modShift)
@@ -270,7 +253,7 @@ document.addEventListener("keyup", modShift)
 const pasteImage = (e: Event) => {
     e.preventDefault()
     if (currentTab.value == 1) return // Not on external images
-    if (!e.clipboardData.files.length) return notify(8)
+    if (!e.clipboardData.files.length) return notifyError(8)
     uploadImage(e.clipboardData?.files, true)
 }
 window.addEventListener("paste", pasteImage)
@@ -288,8 +271,6 @@ const extButton = ref()
 
 <template>
     <div class="flex gap-10 justify-between mx-2 mb-2">
-        <Notification :content="notifContent" :title="$t('other.error')" icon="error" :stamp="notifStamp" />
-
         <Dialog :custom-color="previewDominant" :title="$t('other.preview')" :width="dialog.large" :open="previewImage >= 0" @close-popup="previewImage = -1">
             <div class="flex relative flex-col gap-2 items-center p-2 w-full bg-black bg-opacity-40">
                 <img :src="`${pre}/userContent/${storage.uid}/${images[previewImage]}.webp`" :alt="images[previewImage]" class="absolute inset-0 w-full max-w-full h-full text-center text-white rounded-md opacity-50 mix-blend-overlay blur-lg pointer-events-none">

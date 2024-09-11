@@ -419,7 +419,9 @@
     "square": "Square",
     "star": "Star",
     "demon": "Demon",
-    "hexagon": "Hexagon"
+    "hexagon": "Hexagon",
+    "desc": "Description",
+    "metadata": "Metadata"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -741,7 +743,15 @@
     "vertAlign": "Vertical Align",
     "back": "Go Back",
     "makeCarousel": "Add Carousel",
-    "carouselHelp": "Click to add images and videos"
+    "carouselHelp": "Click to add images and videos",
+    "noAddedYet": "You haven't added anything yet...",
+    "carHelp1": "You can drag in images and YouTube links.",
+    "carHelp2": "Images and links in the clipboard can be pasted with CTRL+V.",
+    "carMedia": "Carousel Media",
+    "carousel": "Carousel",
+    "pickMedia": "Pick Media",
+    "overflow": "Overflow",
+    "cropWidth": "Crop to fit"
   },
   "review": {
     "columnSetting": "{0} column",

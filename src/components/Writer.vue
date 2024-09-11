@@ -130,33 +130,34 @@ provide("levelHashes", {levelHashes, updateHashes})
 provide("settingsTitles", CONTAINERS)
 
 const containerLastAdded = ref(0)
-const addContainer = (key: string, addTo?: number) => {
+const addContainer = (key: string, addTo?: number, returnOnly = false) => {
     // Count of all components
     let contAm = 0
     let thisContAm = 0
-    reviewData.value.containers.forEach(c => {
-        if (c.type == "twoColumns") {
-            contAm += c.settings.components.forEach(n => {
-                contAm += n.length
-                // add check for limit in nested containers if you ever need to :)
-            });
+    if (!returnOnly) {
+        reviewData.value.containers.forEach(c => {
+            if (c.type == "twoColumns") {
+                contAm += c.settings.components.forEach(n => {
+                    contAm += n.length
+                    // add check for limit in nested containers if you ever need to :)
+                });
+            }
+            if (c.type == key) thisContAm += 1
+            contAm += 1
+        })
+    
+        if (CONTAINERS[key]?.limit && thisContAm >= CONTAINERS[key].limit) {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.thisTypeManyCont')
+            return
         }
-        if (c.type == key) thisContAm += 1
-        contAm += 1
-    })
-
-    if (CONTAINERS[key]?.limit && thisContAm >= CONTAINERS[key].limit) {
-        errorStamp.value = Date.now()
-        errorText.value = i18n.global.t('reviews.thisTypeManyCont')
-        return
+    
+        if (contAm >= 100) {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.tooManyContainers')
+            return
+        }
     }
-
-    if (contAm >= 100) {
-        errorStamp.value = Date.now()
-        errorText.value = i18n.global.t('reviews.tooManyContainers')
-        return
-    }
-
 
     let settingObject = {}
     for (let i = 0; i < CONTAINERS[key].settings.length; i++)
@@ -170,6 +171,8 @@ const addContainer = (key: string, addTo?: number) => {
         extraComponents: 0,
         id: Date.now()
     }
+
+    if (returnOnly) return containerData
 
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
@@ -202,6 +205,8 @@ const addContainer = (key: string, addTo?: number) => {
     }
     containerLastAdded.value = Date.now()
 }
+
+provide("addContainer", addContainer)
 
 const removeContainer = (index: number) => {
     reviewData.value.containers.splice(index, 1)
@@ -331,6 +336,13 @@ const modifyImageURL = (newUrl: string) => {
     // Review thumbnail
     else if (openDialogs.imagePicker[1] == -2) {
         reviewData.value.thumbnail[0] = newUrl
+    }
+    // Carousel item
+    else if (openDialogs.imagePicker[1] == -3) {
+        let img = addContainer("showImage", 0, true)
+        img.settings.url = newUrl
+        img.settings.height = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.height
+        reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
     }
     // Image container
     else if (selectedNestContainer.value[0] == -1) {

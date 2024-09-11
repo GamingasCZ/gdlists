@@ -29,7 +29,7 @@ if (props.settings.url) videoLoading.value = 0
     <figure v-else>
         <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event">
             <iframe
-                :width="settings.width" :height="settings.width/1.77"
+                :width="settings.height*1.77 || settings.width" :height="settings.height ? settings.height : settings.width/1.77"
                 :src="`https://www.youtube-nocookie.com/embed/${shortenYTLink(settings.url, true)}`"
                 title="YouTube video player" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

@@ -29,7 +29,7 @@ const BASE_URL = import.meta.env.BASE_URL
 </script>
 <template>
   <button
-    class="hover:translate-x-1 gap-2 flex items-center transition-transform duration-75 text-left focus-visible:!outline"
+    class="hover:translate-x-1 w-full gap-2 flex items-center transition-transform duration-75 text-left focus-visible:!outline"
   >
     <hr v-show="headingLevel != 0" :style="{width: `${headingLevel}rem`}" class="h-1 bg-white rounded-md border-none opacity-40">
     <div class="grid rounded-md grid-cols-[max-content,1fr] grow items-center gap-2 bg-black bg-opacity-40 px-2 py-2 leading-4">

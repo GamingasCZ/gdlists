@@ -21,7 +21,6 @@ const props = defineProps<{
 }>()
 
 const image = ref<HTMLImageElement>()
-const imageScale = ref(0)
 const imageLoading = ref(-2)
 
 onMounted(() => {
@@ -30,7 +29,7 @@ onMounted(() => {
         imageLoading.value = 0;
 
         // Default - image width, overriden by epic dasher set width :)
-        imageScale.value = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
+        props.settings.width = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
 
     })
     image.value?.addEventListener("error", () => {
@@ -48,6 +47,7 @@ const text = computed(() => {
 })
 
 watch(props, () => {
+    if (!props?.buttonState) return
     if (props.buttonState[1] != props.index) return
     
     switch (props.buttonState[0]) {
@@ -89,11 +89,14 @@ const fullscreenImage = () => {
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
-        <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: `${imageScale}px`}">
-            <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
+        <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
+            <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
-                    class="w-full text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
+                    class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
+                    loading="lazy"
+                    :class="{'min-w-max': settings?.height, 'aspect-video object-cover': settings?.crop}"
+                    :style="{height: settings?.height ? `${settings.height}px` : ''}"
                     :src="settings.url"
                     :alt="settings.alt"
                     :title="settings.alt"
