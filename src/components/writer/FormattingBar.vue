@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-	(e: "addContainer", key: string): string
+	(e: "addContainer", key: string, holdingShift: boolean): string
 	(e: "setAlignment", align: string): string
 	(e: "setFormatting", format: string): string
 	(e: "columnCommand", index: number): string
@@ -26,9 +26,10 @@ const actions = [
 		["view", i18n.global.t('reviews.preview'),, i18n.global.t('other.preview')],
 	],
 	[
+		["default", i18n.global.t('reviews.addParagraph'),, i18n.global.t('reviews.paragraph')],
 		["heading1", i18n.global.t('reviews.title', ['1'])],
 		["heading2", i18n.global.t('reviews.title', ['2'])],
-		["heading3", i18n.global.t('reviews.title', ['3'])]
+		["heading3", i18n.global.t('reviews.title', ['3'])],
 	],
 	[
 		["alignLeft", i18n.global.t('reviews.align', [i18n.global.t('reviews.aLeft')]), "left"],
@@ -63,7 +64,7 @@ const mdHelpShown = ref(false)
 const columnButton = ref()
 const buttons = ref()
 
-const doAction = (action: number, button: string) => {
+const doAction = (action: number, button: string, holdingShift = false) => {
 	switch (action) {
 		case 0:
 			if (button[0] == 'view') previewEnabled.value = !previewEnabled.value
@@ -74,12 +75,12 @@ const doAction = (action: number, button: string) => {
 			emit('setAlignment', button[2]); break;
 		case 1:
 		case 3:
-			emit('addContainer', button[0]); break;
+			emit('addContainer', button[0], holdingShift); break;
 		case 4:
 			if (props.selectedNest[0] > -1)
 				columnOptionsShown.value = !columnOptionsShown.value
 			else
-				emit('addContainer', button[0]); break;
+				emit('addContainer', button[0], holdingShift); break;
 	}
 }
 
@@ -149,7 +150,7 @@ if (SETTINGS.value.scrollNavbar)
 					ref="buttons"
 					@mouseenter="hoveringIndex = buttons[getIndex(index, buttonIndex)]"
 					:disabled="previewEnabled && button[0] != 'view'"
-					@click="doAction(index, button)"
+					@click="doAction(index, button, $event.shiftKey)"
 					@mousedown.prevent=""
 					:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view'}"
 					class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"

@@ -130,7 +130,7 @@ provide("levelHashes", {levelHashes, updateHashes})
 provide("settingsTitles", CONTAINERS)
 
 const containerLastAdded = ref(0)
-const addContainer = (key: string, addTo?: number, returnOnly = false) => {
+const addContainer = (key: string, addTo?: number, returnOnly = false, above = false) => {
     // Count of all components
     let contAm = 0
     let thisContAm = 0
@@ -182,7 +182,7 @@ const addContainer = (key: string, addTo?: number, returnOnly = false) => {
             selectedContainer.value[0] = reviewData.value.containers.length - 1
         } else {
             reviewData.value.containers
-            .splice(selectedContainer.value[0] + 1, 0, containerData)
+            .splice(selectedContainer.value[0] + +(!above), 0, containerData)
             selectedContainer.value[0] += 1
         }
     }
@@ -198,7 +198,7 @@ const addContainer = (key: string, addTo?: number, returnOnly = false) => {
                 .push(containerData)
             } else {
                 reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
-                .splice(selectedNestContainer.value[2] + 1, 0, containerData)
+                .splice(selectedNestContainer.value[2] + +(!above), 0, containerData)
         }
 
         }
@@ -748,7 +748,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 :class="{'pointer-events-none opacity-20': disableEdits}"
                 :selected-nest="selectedNestContainer"
                 @set-formatting="setFormatting"
-                @add-container="addContainer"
+                @add-container="(el, above) => addContainer(el, 0, false, above)"
                 @set-alignment="setAlignment(selectedContainer[0], $event)"
                 @column-command="columnCommand($event)"
             />
@@ -803,10 +803,6 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                         </div>
                     </DataContainer>
 
-                <button @click="addContainer('default')" v-show="previewMode && !disableEdits" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
-                    <img class="w-6" src="@/images/plus.svg" alt="">
-                    <span class="text-white">{{ $t('reviews.addParagraph') }}</span>
-                </button>
                 <div class="text-xs" v-if="!disableEdits && reviewData.containers.length">
                     <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">
                         <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>
