@@ -133,6 +133,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
         case 'DELETE':
             // Remove files
             $userPath = getUserPath($user["id"]);
+            if (!is_array($_GET["hash"]) || sizeof($_GET["hash"]) == 0 || sizeof($_GET["hash"]) > 25) die("-3");
             foreach ($_GET["hash"] as $singleHash) {
                 if (!ctype_alnum($singleHash) || strlen($singleHash) != 40) die("-3"); // check if the user is a hackerman
                 if (is_file($userPath . "/" . $singleHash . ".webp")) {

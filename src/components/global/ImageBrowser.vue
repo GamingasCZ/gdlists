@@ -197,6 +197,7 @@ const pickImage = (index: number, external: boolean) => {
 const selectedImages = ref<number[]>([])
 const selectImage = (index: number) => {
     let ind = selectedImages.value.indexOf(index)
+    if (selectedImages.value.length >= 25) return
     if (ind != -1)
         selectedImages.value.splice(ind, 1)
     else

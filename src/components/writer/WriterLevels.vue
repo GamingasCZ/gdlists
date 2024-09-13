@@ -108,7 +108,7 @@ const addRandomLevel = () => {
         </PickerPopup>
     </Dialog>
 
-    <div class="flex gap-2 mx-2 mb-2">
+    <div class="flex gap-1 mx-1 mb-1">
         <button @click="addLevel()" class="flex gap-2 p-1 mr-10 bg-black bg-opacity-60 rounded-md button max-sm:p-2 grow"><img class="w-5" src="@/images/addLevel.svg" alt="">{{ $t('other.add') }}</button>
         <button @click="dialogs.lists[0] = true; dialogs.lists[2] = 1" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button max-sm:p-2"><img class="w-5" src="@/images/searchOpaque.svg" alt=""><span class="max-sm:hidden">{{ $t('other.searchLevels') }}</span></button>
         <button @click="addRandomLevel" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button max-sm:p-2"><img class="w-5" src="@/images/dice.svg" alt=""><span class="max-sm:hidden">{{ $t('other.randomLevel') }}</span></button>

@@ -19,7 +19,7 @@ const error = (ind: number, msg = 0) => {
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
-        styling: "min-h-12",
+        styling: "min-h-12 my-1",
         nestable: true,
         canEditText: true,
         settings: [{
@@ -31,21 +31,21 @@ const containers: Containers = {
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
-        styling: "text-3xl leading-10 mb-3",
+        styling: "text-3xl leading-10 my-4",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
         placeholder: i18n.global.t('reviews.title', [2]),
-        styling: "text-2xl leading-8 mb-2",
+        styling: "text-2xl leading-8 my-3",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "text-xl leading-6 mb-1",
+        styling: "text-xl leading-6 my-2",
         nestable: true,
         canEditText: true,
         settings: []
