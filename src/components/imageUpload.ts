@@ -2,6 +2,7 @@ import { reactive, ref } from "vue"
 import type { LocalNotification } from "@/interfaces"
 import { useI18n } from "vue-i18n"
 import { i18n } from "@/locales"
+import axios from "axios"
 
 export const Stack = ref<LocalNotification[]>({})
 export const summonNotification = (title: string, text: string, icon: string) => {
@@ -29,41 +30,22 @@ export const notifyError = (ind: number) => {
     summonNotification(i18n.global.t('other.error'), i18n.global.t(errorMessages[ind]), 'error')
 }
 
-// export const uploadImage = async (e: Event | FileList, singleFile: boolean) => {
-//     if (loadingImages.value || uploadingImage.value) return
+export const uploadImages = async (e: FileList, singleFile: boolean) => {
+    let imageData = new FormData()
+    if (e.length == 0) return
 
-//     let file
-//     if (!fileList)
-//         file = imageInput.value?.files?.[0]
-//     else
-//         file = e[0]
+    if (singleFile)
+        imageData.append('image_0', e.item(0))
+    else {
+        for (let i = 0; i < e.length; i++)
+            imageData.append(`image_${i}`, e.item(i))
+    }
 
-//     if (file?.size > storage.value.maxUploadSize) return notifyError(1) // Too big
-//     if (file?.size < 50) return notifyError(2) // Too small
-//     else if (file?.size > storage.value.left) return notifyError(3) // Not enough storage
-
-//     else {
-//         let data = await file?.arrayBuffer()
-//         uploadingImage.value = true
-//         axios({
-//             method: 'post',
-//             url: import.meta.env.VITE_API + "/images.php",
-//             data: data,
-//             headers: {"Content-Type": 'image/png'},
-//             maxBodyLength: Infinity,
-//             maxContentLength: Infinity
-//         }).then(res => {
-//             uploadingImage.value = 0
-//             if (res.data == -5) notifyError(7) // Bad format
-//             else if (res.data == -3) notifyError(4) // Already uploaded
-//             else if (typeof res.data == "object") {
-//                 images.value.splice(0, 0, res.data.newImage)
-//                 delete res.data.newImage
-//                 storage.value = res.data
-//                 setImgCache(images.value)
-//                 setStorageCache(storage.value)
-//                 uploadingImage.value = false
-//             }
-//         }).catch(() => uploadingImage.value = 0)
-//     }
-// }
+    let response: any = null
+    await axios.post(import.meta.env.VITE_API + "/images.php", imageData, {
+        headers: {"Content-Type": 'multipart/form-data'},
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity
+    }).then(res => response = res.data).catch(() => response = false)
+    return response
+}

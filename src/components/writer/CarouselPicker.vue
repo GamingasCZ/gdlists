@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { inject, ref } from "vue";
+import { inject, nextTick, ref } from "vue";
 import { reviewData } from "@/Reviews";
 import { computed } from "vue";
 import Dialog from "../global/Dialog.vue";
+import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
+import { uploadImages } from "../imageUpload";
+import { currentUID } from "@/Editor";
 
 const emit = defineEmits<{
     (e: "save", duplicate: boolean): void
 }>()
 
-const carouselData = ref([])
 const base = import.meta.env.BASE_URL
 
 const openDialogs = inject("openedDialogs")
@@ -21,9 +23,11 @@ const addContainer = inject("addContainer")
 const addVideo = () => {
     textDialogOpen.value = reviewData.value.containers[index.value].settings.components.length
     let video = addContainer("addVideo", 0, true)
-    video.settings.height = reviewData.value.containers[index.value].settings.components[textDialogOpen.value].settings.height
     reviewData.value.containers[index.value].settings.components.push(video)
     dialogType.value = 2
+    nextTick(() => {
+        video.settings.height = reviewData.value.containers[index.value].settings.components[textDialogOpen.value].settings.height
+    })
 }
 
 const removeContent = (ind: number) => {
@@ -34,6 +38,18 @@ const moveContent = (ind: number, by: number) => {
     let content = reviewData.value.containers[index.value].settings.components[ind]
     reviewData.value.containers[index.value].settings.components.splice(ind, 1)
     reviewData.value.containers[index.value].settings.components.splice(Math.min(Math.max(0, ind+by), reviewData.value.containers[index.value].settings.components.length), 0, content)
+}
+
+const doUpload = async (files: FileList) => {
+    let res = await uploadImages(files, false)
+    if (res.newImage) {
+        res.newImage.forEach(i => {
+            let img = addContainer("showImage", 0, true)
+            img.settings.url = `${import.meta.env.VITE_USERCONTENT}/userContent/${currentUID.value}/${i}.webp`
+            img.settings.height = reviewData.value.containers[index.value].settings.height
+            reviewData.value.containers[index.value].settings.components.push(img)
+        })
+    }
 }
 
 const textDialogOpen = ref(-1)
@@ -70,6 +86,8 @@ const ytThumb = (ind: number) => `https://img.youtube.com/vi/${reviewData.value.
             <p class="">{{ $t('reviews.carHelp1') }}</p>
             <p class="">{{ $t('reviews.carHelp2') }}</p>
         </div>
+
+        <HiddenFileUploader @data="doUpload" multiple />
 
         <div class="w-full">
             <div class="grid grid-cols-4 gap-2 p-1">

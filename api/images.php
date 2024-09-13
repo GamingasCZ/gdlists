@@ -59,10 +59,10 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     // Image data
     $imageHash;
     if ($filename !== null) $imageHash = $filename;
-    else $imageHash = sha1($binaryData);
+    else $imageHash = sha1(substr($binaryData,0, 2048));
 
     if (!$overwrite) {
-        if (is_file($userPath . "/" . $imageHash . ".webp")) die("-3"); // No duplicate files
+        if (is_file($userPath . "/" . $imageHash . ".webp")) die("-3;".$imageHash); // No duplicate files
     }
 
     // Create image
@@ -120,9 +120,13 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
         case 'POST':
             $DATA = file_get_contents("php://input");
             
-            $newImage = saveImage($DATA, $user["id"], $mysqli);
+            $newImages = [];
+            foreach ($_FILES as $key => $image) {
+                if (!$image["tmp_name"]) die("-4"); // $image["error"] = 1 : filesize
+                array_push($newImages, saveImage(file_get_contents($image["tmp_name"]), $user["id"], $mysqli));
+            }
             
-            die(getStorage($mysqli, $user["id"], $newImage));
+            die(getStorage($mysqli, $user["id"], $newImages));
             break;
     
         case 'DELETE':

@@ -88,7 +88,7 @@ const fullscreenImage = () => {
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
-    <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
+    <figure @click="fullscreenImage" class="max-w-full">
         <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
             <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img

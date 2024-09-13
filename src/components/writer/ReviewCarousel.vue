@@ -59,15 +59,15 @@ const onResize = new ResizeObserver(() => {
 
 <template>
     <ContainerHelp v-if="!settings.components.length" @click="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
-    <section @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel($event.deltaX/200)" ref="carousel" class="overflow-x-hidden px-12 overflow-y-clip" :class="{'pb-1.5': editable}" v-else>
+    <section @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel($event.deltaX/200)" ref="carousel" class="overflow-x-hidden overflow-y-clip" :class="{'pb-1.5': editable, 'px-12': buttonsShown}" v-else>
         <button v-show="buttonsShown" @click="scrollCarousel(-1)" class="flex absolute left-2 top-1/2 z-10 justify-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
             <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
         </button>
 
 
-    <div class="absolute inset-0">
-        <Resizer @resize="modHeight" :style="{height: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="256" :editable="editable && !settings.overflow"></Resizer>
-    </div>
+        <div class="absolute inset-0">
+            <Resizer @resize="modHeight" :style="{height: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="256" :editable="editable && !settings.overflow"></Resizer>
+        </div>
 
         <section class="flex items-center" :class="{'flex-wrap': settings.overflow}">
             <component

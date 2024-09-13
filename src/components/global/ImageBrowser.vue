@@ -5,17 +5,14 @@ import { computed } from "vue";
 import axios from "axios";
 import type { ImageStorage } from "@/interfaces";
 import { hasLocalStorage } from "@/siteSettings";
-import { nextTick } from "vue";
 import { imageCache, storageCache, setImgCache, setStorageCache } from "./imageCache";
 import Dropdown from "../ui/Dropdown.vue";
-import Notification from "./Notification.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
-import { useI18n } from "vue-i18n";
 import { dialog } from "../ui/sizes";
 import { getDominantColor } from "@/Reviews";
-import { i18n } from "@/locales";
-import { notifyError } from "../imageUpload";
+import { notifyError, uploadImages } from "../imageUpload";
+import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -98,44 +95,35 @@ const removeImage = (hash: string, external: boolean) => {
     }
 }
 
-const uploadingImage = ref(0)
-const uploadImage = async (e: Event | FileList, fileList?: boolean) => {
+const uploadingImage = ref(false)
+const uploadImage = async (e: FileList, fileList?: boolean) => {
     if (loadingImages.value || uploadingImage.value) return
-
-    let file
-    if (!fileList)
-        file = imageInput.value?.files?.[0]
-    else
-        file = e[0]
-
-    if (file?.size > storage.value.maxUploadSize) return notifyError(1) // Too big
-    if (file?.size < 50) return notifyError(2) // Too small
-    else if (file?.size > storage.value.left) return notifyError(3) // Not enough storage
-
-    else {
-        let data = await file?.arrayBuffer()
-        uploadingImage.value = true
-        axios({
-            method: 'post',
-            url: import.meta.env.VITE_API + "/images.php",
-            data: data,
-            headers: {"Content-Type": 'image/png'},
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity
-        }).then(res => {
-            uploadingImage.value = 0
-            if (res.data == -5) notifyError(7) // Bad format
-            else if (res.data == -3) notifyError(4) // Already uploaded
-            else if (typeof res.data == "object") {
-                images.value.splice(0, 0, res.data.newImage)
-                delete res.data.newImage
-                storage.value = res.data
-                setImgCache(images.value)
-                setStorageCache(storage.value)
-                uploadingImage.value = false
-            }
-        }).catch(() => uploadingImage.value = 0)
+    
+    let totalFilesize = 0
+    for (let i = 0; i < e.length; i++) {
+        let file = e.item(i)
+        totalFilesize += file?.size
+        if (!file?.type.startsWith("image")) return notifyError(7) // Too big
+        if (file?.size > storage.value.maxUploadSize) return notifyError(1) // Too big
+        if (file?.size < 50) return notifyError(2) // Too small
     }
+    if (totalFilesize > storage.value.left) return notifyError(3) // Not enough storage
+    
+    uploadingImage.value = true
+    let res = await uploadImages(e)
+    if (typeof res == 'object') {
+        images.value.splice(0, 0, ...res.newImage)
+
+        delete res.newImage
+        storage.value = res
+        setImgCache(images.value)
+        setStorageCache(storage.value)
+        uploadingImage.value = false
+    }
+    else {
+        if (res == -4) notifyError(1) // Too big
+    }
+    uploadingImage.value = 0
 }
 
 const extImgInput = ref('')
@@ -250,16 +238,7 @@ const modShift = (e: KeyboardEvent) => holdingShift.value = e.shiftKey
 document.addEventListener("keydown", modShift)
 document.addEventListener("keyup", modShift)
 
-const pasteImage = (e: Event) => {
-    e.preventDefault()
-    if (currentTab.value == 1) return // Not on external images
-    if (!e.clipboardData.files.length) return notifyError(8)
-    uploadImage(e.clipboardData?.files, true)
-}
-window.addEventListener("paste", pasteImage)
-
 onBeforeUnmount(() => {
-    window.removeEventListener("paste", pasteImage)
     document.removeEventListener("keydown", modShift)
     document.removeEventListener("keyup", modShift)
 })
@@ -306,7 +285,7 @@ const extButton = ref()
         </form>
 
 
-        <button v-else @click="imageInput?.click()" :disabled="uploadingImage"
+        <button v-else @click="imageInput?.uploader?.click()" :disabled="uploadingImage"
             class="flex gap-2 items-center p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button">
             <img src="@/images/copy.svg" alt="" class="w-6">
             <span class="max-sm:hidden">{{ $t('editor.uploadFile') }}</span>
@@ -327,8 +306,7 @@ const extButton = ref()
     <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
         @dragexit="fileDrag = false" @submit.prevent=""
         class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
-        <input accept="image/*" @change="uploadImage" ref="imageInput" type="file"
-            class="absolute w-full h-full opacity-0 pointer-events-none">
+        <HiddenFileUploader v-if="currentTab == 0" @data="uploadImage" ref="imageInput" unclickable multiple :disabled="loadingImages || uploadingImage != 0" />
 
         <!-- Images -->
         <div class="grid grid-cols-4 gap-4 m-4" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
@@ -398,7 +376,7 @@ const extButton = ref()
         </div>
 
         <Transition name="fade">
-            <div v-show="uploadingImage" class="sticky inset-full w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
+            <div v-show="uploadingImage" class="sticky bottom-0 w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
                 <div class="absolute bottom-0 w-full text-3xl text-center">
                     <h2 class="opacity-60">{{ uploadingImage == 2 ? $t('other.removing') : $t('other.uploading') }}...</h2>
                     <div :class="{'invert': uploadingImage == 2}" class="relative mt-3 h-2 overflow-clip rounded-b-md border-none bg-lof-400">
