@@ -70,13 +70,19 @@ const removeImage = (hash: string, external: boolean) => {
     if (!external) {
         loadingImages.value = true
         uploadingImage.value = 2
-        axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash } }).then(res => {
+        let hashesSelected = selectedImages.value.map(h => images.value[h])
+        axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash ? [hash] : hashesSelected } }).then(res => {
             uploadingImage.value = 0
             if (res.data == "-3") return notifyError(5)
             if (res.data == "-5") return notifyError(9)
 
             storage.value = res.data
-            images.value.splice(images.value.indexOf(hash), 1)
+            if (hash)
+                images.value.splice(images.value.indexOf(hash), 1)
+            else
+                images.value = images.value.filter(x => !hashesSelected.includes(x))
+
+            selectedImages.value = []
             loadingImages.value = false
             setImgCache(images.value)
             setStorageCache(storage.value)
@@ -186,6 +192,15 @@ const pickImage = (index: number, external: boolean) => {
         }
         emit('closePopup')
     }
+}
+
+const selectedImages = ref<number[]>([])
+const selectImage = (index: number) => {
+    let ind = selectedImages.value.indexOf(index)
+    if (ind != -1)
+        selectedImages.value.splice(ind, 1)
+    else
+        selectedImages.value.push(index)
 }
 
 const refreshContent = async (data?: string) => {
@@ -309,14 +324,15 @@ const extButton = ref()
         <HiddenFileUploader v-if="currentTab == 0" @data="uploadImage" ref="imageInput" unclickable multiple :disabled="loadingImages || uploadingImage != 0" />
 
         <!-- Images -->
-        <div class="grid grid-cols-4 gap-4 m-4" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
+        <div class="grid grid-cols-4 gap-2 m-2" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
             <button v-for="(image, index) in images"
-                @click="pickImage(index, false)"
+                @click.exact="pickImage(index, false)"
+                @click.ctrl="selectImage(index)"
                 @auxclick="startRemoval(index)"
                 @mouseover="imageHovering = index"
                 @mouseout="imageHovering = -1"
-                class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
-                :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false,  }">
+                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
+                :class="{'!border-4': selectedImages.includes(index)}">
                 <!-- Image settings -->
                 <button ref="button" v-show="imageOptsShown == index || imageHovering == index" @click.stop="imageOptsShown = index"
                     class="absolute top-1 right-1 z-20 w-5 bg-white rounded-full duration-75">
@@ -325,17 +341,21 @@ const extButton = ref()
                     <Dropdown :button="button[index]" @close="imageOptsShown = -1" @picked-option="imageAction($event, false, index)" v-if="imageOptsShown == index && currentTab == 0" :options="[$t('editor.remove'), $t('other.download')]" :title="$t('other.options')" />
                 </button>
 
+                <!-- Selected check -->
+                <img v-if="selectedImages.includes(index)" src="@/images/check.svg" class="absolute top-1 left-1 p-0.5 w-6 rounded-full border-2 border-black bg-lof-400" alt="">
+
+                 <!-- Thumbnail -->
                 <img loading="lazy" :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
                     class="object-cover z-10 w-full h-full transition-transform pointer-events-none aspect-auto" :class="{'hover:scale-125': !unselectable}">
             </button>
         </div>
 
         <!-- External Image -->
-        <div class="grid grid-cols-4 gap-4 m-4" v-show="currentTab == 1">
+        <div class="grid grid-cols-4 gap-2 m-2" v-show="currentTab == 1">
             <button v-for="(image, index) in externaImages"
                 @click="pickImage(index, true)"
                 @auxclick="removeImage(externaImages[index], true)"
-                class="relative h-20 bg-center rounded-md border-2 transition-all cursor-pointer group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
+                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
                 :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false }">
                 <!-- Image settings -->
                 <button ref="extButton" @click.stop="imageOptsShown = index"
@@ -375,6 +395,18 @@ const extButton = ref()
             </div>
         </div>
 
+        <!-- Selected count -->
+        <Transition name="fade">
+            <div v-show="selectedImages.length" class="flex sticky bottom-0 z-20 justify-evenly items-center py-2 bg-black bg-opacity-50 backdrop-blur-md">
+                <h2 class="text-2xl">{{ $t('other.selImg', [selectedImages.length]) }}</h2>
+                <div class="flex gap-4">
+                    <button @click="selectedImages = []" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/close.svg" alt="">{{ $t('other.cancel') }}</button>
+                    <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- Upload progress -->
         <Transition name="fade">
             <div v-show="uploadingImage" class="sticky bottom-0 w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
                 <div class="absolute bottom-0 w-full text-3xl text-center">

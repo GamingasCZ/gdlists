@@ -391,7 +391,9 @@
     "demon": "Démon",
     "hexagon": "Šestiúhelník",
     "desc": "Popis",
-    "metadata": "Metadata"
+    "metadata": "Metadata",
+    "tooManyImg": "Naráz můžeš nahrát jen 10 obrázků!",
+    "selImg": "Vybrán {0} obrázek | Vybráno {0} obrázků"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

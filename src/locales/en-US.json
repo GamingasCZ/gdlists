@@ -421,7 +421,9 @@
     "demon": "Demon",
     "hexagon": "Hexagon",
     "desc": "Description",
-    "metadata": "Metadata"
+    "metadata": "Metadata",
+    "tooManyImg": "You can only upload 10 images at once!",
+    "selImg": "{0} image selected | {0} images selected"
   },
   "settingsMenu": {
     "asOff": "Off",

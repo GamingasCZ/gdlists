@@ -24,6 +24,7 @@ const errorMessages = [
     'other.unsupportedFormat',
     'other.clipboardEmpty',
     'other.imgInUse',
+    'other.tooManyImg',
 ]
 
 export const notifyError = (ind: number) => {
@@ -33,6 +34,7 @@ export const notifyError = (ind: number) => {
 export const uploadImages = async (e: FileList, singleFile: boolean) => {
     let imageData = new FormData()
     if (e.length == 0) return
+    if (e.length > 10) return notifyError(10)
 
     if (singleFile)
         imageData.append('image_0', e.item(0))
