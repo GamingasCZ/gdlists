@@ -39,7 +39,7 @@ $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli->connect_errno) die("0");
 
 // TODO: check for cookie
-$discord_id = checkAccount($mysqli)["id"];
+$discord_id = checkAccount($mysqli);
 if (!$discord_id) die("7");
 
 $time = new DateTime();
@@ -55,7 +55,7 @@ if ($type == "listID") {
 }
 
 $template = sprintf("INSERT INTO `comments` (`username`,`comment`,`comType`,`bgcolor`,`%s`,`verified`,`timestamp`,`uid`) VALUES ('',?, ?, ?, ?, ?, ?, ?)", $type);
-$values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], "1", $time->getTimestamp(), $discord_id);
+$values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], "1", $time->getTimestamp(), $discord_id["id"]);
 $result = doRequest($mysqli, $template, $values, "sssssss");
 if (is_array($result) && array_key_exists("error", $result)) die("2");
 
