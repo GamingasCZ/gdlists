@@ -35,6 +35,7 @@ import { onMounted } from "vue";
 import { onBeforeRouteLeave, type RouteLocationNormalized } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
+import { deleteCESelection } from "./global/parseEditorFormatting";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -60,6 +61,7 @@ if (props.editing) {
     }).catch(() => openDialogs.editError = true)
 }
 
+const writer = ref<HTMLDivElement>()
 const embedsContent = ref()
 provide("batchEmbeds", embedsContent)
 
@@ -85,9 +87,14 @@ watch(props, () => {
     }
 })
 
-document.body.addEventListener("click", () => {
-    selectedContainer.value = [-1, null]
-    selectedNestContainer.value = [-1, -1, -1]
+let mStarted = [-1, -1]
+document.body.addEventListener("mousedown", (e) => mStarted = [e.x, e.y])
+document.body.addEventListener("click", (e) => {
+    let rect = writer.value?.getBoundingClientRect()
+    if (mStarted[0] < rect.x || mStarted[1] < rect.y || mStarted[0] > rect.x+rect?.width || mStarted[1] > rect.y+rect?.height) {
+        selectedContainer.value = [-1, null]
+        selectedNestContainer.value = [-1, -1, -1]
+    }
 })
 
 const openDialogs = reactive({
@@ -210,9 +217,9 @@ provide("addContainer", addContainer)
 
 const removeContainer = (index: number) => {
     reviewData.value.containers.splice(index, 1)
-    setTimeout(() => {
-        selectedNestContainer.value = [-1, -1, -1]
-    }, 5)
+    
+    selectedContainer.value[0] = -1
+    selectedNestContainer.value = [-1, -1, -1]
 }
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
@@ -309,6 +316,14 @@ const moveContainer = (index: number, by: number) => {
         selectedNestContainer.value[0] += by
 }
 
+const splitParagraph = () => {
+    let selectedText = deleteCESelection(document.activeElement)
+    let newPos = selectedContainer.value[0]+1
+    let newParagraph = addContainer("default", 0, true)
+    newParagraph.data = selectedText
+    reviewData.value.containers.splice(newPos, 0, newParagraph)
+}
+
 const taglinePlaceholders = [
     useI18n().t('reviews.p1'),
     useI18n().t('reviews.p2'),
@@ -343,6 +358,10 @@ const modifyImageURL = (newUrl: string) => {
         img.settings.url = newUrl
         img.settings.height = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.height
         reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
+    }
+    // Carousel change
+    else if (openDialogs.imagePicker[1] == -4) {
+        reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components[openDialogs.imagePicker[2]].settings.url = newUrl
     }
     // Image container
     else if (selectedNestContainer.value[0] == -1) {
@@ -751,6 +770,7 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 @add-container="(el, above) => addContainer(el, 0, false, above)"
                 @set-alignment="setAlignment(selectedContainer[0], $event)"
                 @column-command="columnCommand($event)"
+                @split-paragraph="splitParagraph"
             />
 
             <!-- Back from draft preview -->

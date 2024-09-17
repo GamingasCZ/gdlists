@@ -13,6 +13,7 @@ import { dialog } from "../ui/sizes";
 import { getDominantColor } from "@/Reviews";
 import { notifyError, uploadImages } from "../imageUpload";
 import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
+import UploadIndicator from './UploadIndicator.vue'
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -118,7 +119,7 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
     uploadingImage.value = true
     let res = await uploadImages(e)
     if (typeof res == 'object') {
-        images.value.splice(0, 0, ...res.newImage)
+        images.value.splice(0, 0, ...res.newImage.filter(x => !images.value.includes(x)))
 
         delete res.newImage
         storage.value = res
@@ -197,11 +198,12 @@ const pickImage = (index: number, external: boolean) => {
 const selectedImages = ref<number[]>([])
 const selectImage = (index: number) => {
     let ind = selectedImages.value.indexOf(index)
-    if (selectedImages.value.length >= 25) return
     if (ind != -1)
         selectedImages.value.splice(ind, 1)
-    else
+    else {
+        if (selectedImages.value.length >= 25) return
         selectedImages.value.push(index)
+    }
 }
 
 const refreshContent = async (data?: string) => {
@@ -396,29 +398,22 @@ const extButton = ref()
             </div>
         </div>
 
-        <!-- Selected count -->
-        <Transition name="fade">
-            <div v-show="selectedImages.length" class="flex sticky bottom-0 z-20 justify-evenly items-center py-2 bg-black bg-opacity-50 backdrop-blur-md">
-                <h2 class="text-2xl">{{ $t('other.selImg', [selectedImages.length]) }}</h2>
-                <div class="flex gap-4">
-                    <button @click="selectedImages = []" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/close.svg" alt="">{{ $t('other.cancel') }}</button>
-                    <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
-                </div>
-            </div>
-        </Transition>
-
-        <!-- Upload progress -->
-        <Transition name="fade">
-            <div v-show="uploadingImage" class="sticky bottom-0 w-full h-24 bg-opacity-40 bg-gradient-to-t from-[#0005] to-transparent">
-                <div class="absolute bottom-0 w-full text-3xl text-center">
-                    <h2 class="opacity-60">{{ uploadingImage == 2 ? $t('other.removing') : $t('other.uploading') }}...</h2>
-                    <div :class="{'invert': uploadingImage == 2}" class="relative mt-3 h-2 overflow-clip rounded-b-md border-none bg-lof-400">
-                        <div id="barAnim" class="absolute w-32 h-full bg-white blur-sm"></div>
-                    </div>
-                </div>
-            </div>
-        </Transition>
+        
     </form>
+
+    <!-- Selected count -->
+    <Transition name="fade">
+        <div v-show="selectedImages.length" class="flex absolute right-0 bottom-0 left-0 z-20 justify-evenly items-center py-2 bg-black bg-opacity-50 rounded-b-md backdrop-blur-md">
+            <h2 class="text-2xl">{{ $t('other.selImg', [selectedImages.length]) }}</h2>
+            <div class="flex gap-4">
+                <button @click="selectedImages = []" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/close.svg" alt="">{{ $t('other.cancel') }}</button>
+                <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
+            </div>
+        </div>
+    </Transition>
+    
+    <!-- Upload progress -->
+    <UploadIndicator :removing="uploadingImage == 2" :visible="uploadingImage > 0" />
 </template>
 
 <style>

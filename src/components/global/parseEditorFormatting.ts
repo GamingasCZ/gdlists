@@ -93,6 +93,14 @@ export function addFormatting(type: number, textbox: HTMLTextAreaElement) {
   return textbox.value
 }
 
+export function deleteCESelection(textbox: HTMLTextAreaElement) {
+  let selection = window.getSelection()
+  let range = selection?.getRangeAt(0)
+  let textContent = range?.toString()
+  range?.deleteContents()
+  return textContent
+}
+
 export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {
   let chars = ["**", "_", "~~"][type];
   let selection = window.getSelection()

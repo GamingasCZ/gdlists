@@ -46,8 +46,23 @@ const modHeight = (newHeight: number) => {
 const openDialogs = inject("openedDialogs")
 
 const carousel = ref<HTMLDivElement>()
-const scrollCarousel = (speed: number) => {
-    carousel.value?.scrollBy({left: carousel.value.offsetWidth*speed, behavior: 'smooth'})
+const end = ref(1)
+const scrollCarousel = (speed: number, event: WheelEvent) => {
+    if (speed == 0) return
+    event.preventDefault()
+
+    let start = carousel.value?.scrollLeft!
+    let to = carousel.value.offsetWidth! * speed
+    let scrollEnd = carousel.value?.scrollWidth!
+    
+    // show/hide scroll buttons
+    if (start + to <= 0)
+        end.value = start + to <= 75 ? 1 : 0
+    else {
+        end.value = start + to >= scrollEnd/2 ? 2 : 0
+    }
+
+    carousel.value?.scrollBy({left: to, behavior: 'smooth'})
 }
 
 const buttonsShown = ref(false)
@@ -59,8 +74,8 @@ const onResize = new ResizeObserver(() => {
 
 <template>
     <ContainerHelp v-if="!settings.components.length" @click="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
-    <section @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel($event.deltaX/200)" ref="carousel" class="overflow-x-hidden overflow-y-clip" :class="{'pb-1.5': editable, 'px-12': buttonsShown}" v-else>
-        <button v-show="buttonsShown" @click="scrollCarousel(-1)" class="flex absolute left-2 top-1/2 z-10 justify-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
+    <section @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel($event.deltaX/200, $event)" ref="carousel" class="overflow-x-hidden transition-opacity group overflow-y-clip" :class="{'pb-1.5': editable}" v-else>
+        <button v-show="buttonsShown && end != 1" @click="scrollCarousel(-1, $event)" class="flex absolute left-2 top-1/2 z-10 justify-center w-10 rounded-full opacity-0 -translate-y-1/2 group-hover:opacity-100 button bg-lof-400 aspect-square">
             <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
         </button>
 
@@ -77,7 +92,7 @@ const onResize = new ResizeObserver(() => {
             :editable="false"
             />
         </section>
-        <button v-show="buttonsShown" @click="scrollCarousel(1)" class="flex absolute right-2 top-1/2 z-10 justify-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
+        <button v-show="buttonsShown && end != 2" @click="scrollCarousel(1), $event" class="flex absolute right-2 top-1/2 z-10 justify-center w-10 rounded-full opacity-0 -translate-y-1/2 group-hover:opacity-100 button bg-lof-400 aspect-square">
             <img src="@/images/showComms.svg" class="w-3 invert translate-x-0.5" alt="">
         </button>
     </section>

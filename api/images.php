@@ -62,7 +62,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     else $imageHash = sha1(substr($binaryData,0, 2048));
 
     if (!$overwrite) {
-        if (is_file($userPath . "/" . $imageHash . ".webp")) die("-3;".$imageHash); // No duplicate files
+        if (is_file($userPath . "/" . $imageHash . ".webp")) return $imageHash; // No duplicate files
     }
 
     // Create image
@@ -136,15 +136,18 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             if (!is_array($_GET["hash"]) || sizeof($_GET["hash"]) == 0 || sizeof($_GET["hash"]) > 25) die("-3");
             foreach ($_GET["hash"] as $singleHash) {
                 if (!ctype_alnum($singleHash) || strlen($singleHash) != 40) die("-3"); // check if the user is a hackerman
+            }
+            
+            // Remove from database
+            $res = doRequest($mysqli, sprintf("DELETE FROM `images` WHERE `uploaderID`=? AND `hash` IN ('%s')", implode("','", $_GET["hash"])), [$user["id"]], "s");
+            if (array_key_exists("error", $res)) die('-5'); // Image is in use
+            
+            foreach ($_GET["hash"] as $singleHash) {
                 if (is_file($userPath . "/" . $singleHash . ".webp")) {
                     unlink($userPath . "/" . $singleHash . ".webp");
                     unlink($userPath . "/" . $singleHash . "-thumb.webp");
                 }
             }
-    
-            // Remove from database
-            $res = doRequest($mysqli, sprintf("DELETE FROM `images` WHERE `uploaderID`=? AND `hash` IN ('%s')", implode("','", $_GET["hash"])), [$user["id"]], "s");
-            if (array_key_exists("error", $res)) die('-5'); // Image is in use
             
             die(getStorage($mysqli, $user["id"]));
             break;

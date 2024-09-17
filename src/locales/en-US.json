@@ -753,7 +753,9 @@
     "carousel": "Carousel",
     "pickMedia": "Pick Media",
     "overflow": "Overflow",
-    "cropWidth": "Crop to fit"
+    "cropWidth": "Crop to fit",
+    "descPlaceholder": "You can summarize basic info about the review here and add links!",
+    "splitPg": "Split into Paragraphs"
   },
   "review": {
     "columnSetting": "{0} column",

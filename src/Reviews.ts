@@ -140,10 +140,11 @@ export function checkReview() {
 export const selectedNestContainer = ref(0)
 export const flexNames = { left: "start", center: "center", right: "end", justify: "left" }
 
-export function parseReviewContainers(containers: object[]) {
+export function parseReviewContainers(containers: object[], headingLevel = "0") {
     // types: 0 - image; 1,2,3 - title 1,2,3; 4 - video
     let main: [number, number, string][] = []
     let indicies = [0,0,0]
+    let lastHeader = headingLevel
     containers.forEach(container => {
         if (container !== Object(container)) return
 
@@ -152,20 +153,21 @@ export function parseReviewContainers(containers: object[]) {
             case "heading2":
             case "heading3":
                 indicies[0] += 1
-                main.push([container.type, indicies[0], container.type.slice(-1), container.data])
+                lastHeader = container.type.slice(-1)
+                main.push([container.type, indicies[0], lastHeader, container.data])
                 break;
 
             case "showImage":
                 indicies[1] += 1
-                main.push([container.type, indicies[1], 0, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
+                main.push([container.type, indicies[1], lastHeader, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
                 break;
             case "addVideo":
                 indicies[2] += 1
-                main.push([container.type, indicies[2], 4, container.settings.description || i18n.global.t("level.video")])
+                main.push([container.type, indicies[2], lastHeader, container.settings.description || i18n.global.t("level.video")])
                 break;
 
             case "twoColumns":
-                container.settings.components.forEach(column => main.push(...parseReviewContainers(column)))
+                container.settings.components.forEach(column => main.push(...parseReviewContainers(column, lastHeader)))
                 break;
 
             default:

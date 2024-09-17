@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { shortenYTLink } from '@/Editor';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 
@@ -7,14 +8,22 @@ const props = defineProps<{
     multiple?: boolean
     fileType?: 'image'
     unclickable?: boolean
+    allowYoutubeLinks?: boolean
 }>()
 
 const emit = defineEmits<{
-    (e: "data", blob: Blob): void
+    (e: "data", blob: Blob | string): void
 }>()
 
 const getFile = async (e: DragEvent) => {
     let file
+    console.log(e)
+    e.preventDefault()
+    if (props.allowYoutubeLinks && e?.clipboardData) {
+        let validYTLink = shortenYTLink(e.clipboardData.getData("text"))
+        if (validYTLink) return emit('data', e.clipboardData.getData("text"))
+    }
+
     if (e.clipboardData) file = e.clipboardData?.files
     else if (!e.dataTransfer) file = e.target.files
     else file = e.dataTransfer?.files
@@ -22,12 +31,17 @@ const getFile = async (e: DragEvent) => {
 }
 
 const pasteFile = (e: Event) => {
-    console.log(e.clipboardData.files.length)
     getFile(e)
 }
 
-onMounted(() => document.addEventListener("paste", pasteFile))
-onUnmounted(() => document.removeEventListener("paste", pasteFile))
+onMounted(() => {
+    document.body.addEventListener("paste", pasteFile)
+    document.body.addEventListener("drop", getFile)
+})
+onUnmounted(() => {
+    document.body.removeEventListener("paste", pasteFile)
+    document.body.removeEventListener("drop", getFile)
+})
 
 const uploader = ref<HTMLInputElement>()
 defineExpose({uploader})
@@ -40,10 +54,9 @@ defineExpose({uploader})
         ref="uploader"
         accept="image/*"
         :multiple="multiple"
-        @drop="getFile"
         @input="getFile"
         :disabled="disabled"
         class="absolute inset-0 opacity-0 appearance-none"
-        :class="{'pointer-events-none': unclickable}"
+        title=""
     >
 </template>

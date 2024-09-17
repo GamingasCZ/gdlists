@@ -16,17 +16,20 @@ const emit = defineEmits<{
 	(e: "setAlignment", align: string): string
 	(e: "setFormatting", format: string): string
 	(e: "columnCommand", index: number): string
+	(e: "splitParagraph"): string
 }>()
 
 const BASE_URL = import.meta.env.BASE_URL
 
 const actions = [
 	[
-		["md", i18n.global.t('reviews.md'),, i18n.global.t('reviews.formatting')],
-		["view", i18n.global.t('reviews.preview'),, i18n.global.t('other.preview')],
+		["default", "",, i18n.global.t('reviews.addParagraph')],
 	],
 	[
-		["default", i18n.global.t('reviews.addParagraph'),, i18n.global.t('reviews.paragraph')],
+		["view", i18n.global.t('reviews.preview'),, i18n.global.t('other.preview')],
+		["md", i18n.global.t('reviews.md'),,i18n.global.t('reviews.formatting')],
+	],
+	[
 		["heading1", i18n.global.t('reviews.title', ['1'])],
 		["heading2", i18n.global.t('reviews.title', ['2'])],
 		["heading3", i18n.global.t('reviews.title', ['3'])],
@@ -67,21 +70,25 @@ const buttons = ref()
 const doAction = (action: number, button: string, holdingShift = false) => {
 	switch (action) {
 		case 0:
+			emit('addContainer', button[0], holdingShift); break;
+		case 1:
 			if (button[0] == 'view') previewEnabled.value = !previewEnabled.value
 			else if (button[0] == 'md') mdHelpShown.value = true
 			emit('setFormatting', button[0]);
 			break;
-		case 2:
-			emit('setAlignment', button[2]); break;
-		case 1:
 		case 3:
-			emit('addContainer', button[0], holdingShift); break;
+			emit('setAlignment', button[2]); break;
+		case 2:
 		case 4:
+			emit('addContainer', button[0], holdingShift); break;
+		case 5:
 			if (props.selectedNest[0] > -1)
 				columnOptionsShown.value = !columnOptionsShown.value
 			else
 				emit('addContainer', button[0], holdingShift); break;
-	}
+		case 6:
+			emit('splitParagraph'); break;
+		}
 }
 
 const doFormatting = (ind: number) => {
@@ -128,7 +135,7 @@ if (SETTINGS.value.scrollNavbar)
 
 <template>
 	<section @click.stop="" :style="{top: barPos}" class="flex transition-[top] overflow-auto sticky z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
-		<div class="flex gap-3" v-show="showFormatting">
+		<div class="flex gap-3 items-center" v-show="showFormatting">
 			<button
 				v-for="(button, buttonIndex) in FORMATTING"
 				@click="doFormatting(buttonIndex)"
@@ -139,11 +146,21 @@ if (SETTINGS.value.scrollNavbar)
 				<img :src="icons[buttonIndex]" class="w-6 pointer-events-none min-w-6">
 				<span class="text-sm pointer-events-none">{{ button }}</span>
 			</button>
+			<hr class="inline-flex mx-1 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
+			<button
+				@click="doAction(6, null)"
+				@mousedown.prevent=""
+				:class="{'!bg-opacity-60 bg-black': previewEnabled}"
+				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			>
+				<img :src="`${base}/formatting/divisor.svg`" class="w-6 pointer-events-none min-w-6">
+				<span class="text-sm pointer-events-none">{{ $t('reviews.splitPg') }}</span>
+			</button>
 		</div>
 		
 		<div class="flex gap-1 items-center grow" v-show="!showFormatting">
 			<div v-for="(action, index) in actions" class="flex gap-1 items-center">
-				<hr v-show="index > 0 && index < 4" class="inline-flex mx-2 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
+				<hr v-show="index > 0 && index < 5" class="inline-flex mx-2 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
 				<button
 					v-for="(button, buttonIndex) in action"
 					@mouseout="hoveringIndex = -1"
@@ -152,14 +169,14 @@ if (SETTINGS.value.scrollNavbar)
 					:disabled="previewEnabled && button[0] != 'view'"
 					@click="doAction(index, button, $event.shiftKey)"
 					@mousedown.prevent=""
-					:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view'}"
+					:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view', 'font-bold': button[0] == 'default'}"
 					class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
 				>
 					<img :src="`${BASE_URL}/formatting/${button[0]}.svg`" class="w-6 pointer-events-none min-w-6">
 					<span class="text-sm pointer-events-none" v-if="button[3]">{{ button[3] }}</span>
 					
 					<Transition name="fade">
-						<Tooltip v-if="hoveringIndex == buttons?.[getIndex(index, buttonIndex)]" :button="hoveringIndex" :text="button[1]" />
+						<Tooltip v-if="button[1] && hoveringIndex == buttons?.[getIndex(index, buttonIndex)]" :button="hoveringIndex" :text="button[1]" />
 					</Transition>
 				</button>
 			</div>
@@ -232,7 +249,7 @@ if (SETTINGS.value.scrollNavbar)
 			</template>
 		</Dropdown>
 
-		<Dropdown v-if="mdHelpShown" @close="mdHelpShown = false" @picked-option="doFormatting" :button="buttons[0]" :options="FORMATTING" :icons="icons">
+		<Dropdown v-if="mdHelpShown" @close="mdHelpShown = false" @picked-option="doFormatting" :button="buttons[2]" :options="FORMATTING" :icons="icons">
 			<template #footer>
 				<div class="flex gap-1 items-start p-1 m-1 text-xs text-white bg-white bg-opacity-10 rounded-sm">
 					<img src="@/images/info.svg" class="inline mt-1 w-3 opacity-20" alt="">

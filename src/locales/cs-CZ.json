@@ -754,7 +754,9 @@
     "pickMedia": "Vybrat média",
     "overflow": "Přetékat",
     "cropWidth": "Ořezat na stejnou šířku",
-    "carousel": "Karusel"
+    "carousel": "Karusel",
+    "descPlaceholder": "Můžeš sem napsat základní informace o recenzi a vložit sem různé odkazy!",
+    "splitPg": "Rozdělit do odstavce"
   },
   "review": {
     "columnSetting": "{0} sloupec",

@@ -234,20 +234,22 @@ export const removeBackup = (isReview = false) => {
 }
 
 export const shortenYTLink = (link: string, disableParams = false) => {
-  // Link is a regular YT link
-  if (link.match(/(watch\?v=)/g)) {
-    let params: RegExpMatchArray = link.match(/(?<=\?v=).+/g);
-    if (disableParams) {
-      let removeParams = params[0].match(/(.*)&/)?.[1]
-      if (!removeParams) return params[0]
-      else return removeParams
-    }
-    else return params[0]
+  let params: RegExpMatch1Array
+  let shortLink = false
+  if (link.match(/(watch\?v=)/g))  // Link is a regular YT link
+    params = link.match(/(?<=\?v=).+/g);
+  else { // Link is most likely a shortened YT link
+    params = link.match(/(?<=youtu.be\/).+/g);
+    shortLink = true
   }
-  // Link is most likely a shortened YT link
-  else {
-    return <any>link.match(/(?<=youtu.be\/).+/g);
+
+  if (!params) return false
+  if (disableParams) {
+    let removeParams = shortLink ? params[0].match(/(.*)\?/)?.[1] : params[0].match(/(.*)&/)?.[1]
+    if (!removeParams) return params[0]
+    else return removeParams
   }
+  else return params[0]
 }
 
 export const lastPFPchange = ref(Date.now())
@@ -255,7 +257,7 @@ export const currentCutout = ref(0)
 export const currentUID = ref("0")
 export const profileCutouts = [
   'circle()',
-  'rect(0 0 100% 100% round 10%)',
+  '',
   'polygon(50% 5%, 68% 26%, 100% 40%, 80% 63%, 79% 95%, 50% 88%, 21% 95%, 20% 63%, 0 40%, 30% 26%)',
   'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
   'polygon(49% 15%, 75% 25%, 90% 0%, 100% 70%, 80% 95%, 50% 100%, 19% 95%, 0% 70%, 10% 0%, 25% 25%)',

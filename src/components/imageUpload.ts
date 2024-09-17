@@ -3,6 +3,7 @@ import type { LocalNotification } from "@/interfaces"
 import { useI18n } from "vue-i18n"
 import { i18n } from "@/locales"
 import axios from "axios"
+import { setImgCache, setStorageCache } from "./global/imageCache"
 
 export const Stack = ref<LocalNotification[]>({})
 export const summonNotification = (title: string, text: string, icon: string) => {
@@ -31,7 +32,9 @@ export const notifyError = (ind: number) => {
     summonNotification(i18n.global.t('other.error'), i18n.global.t(errorMessages[ind]), 'error')
 }
 
-export const uploadImages = async (e: FileList, singleFile: boolean) => {
+export const uploadImages = async (e: FileList | string, singleFile: boolean) => {
+    if (typeof e == 'string') return e // Youtube link
+
     let imageData = new FormData()
     if (e.length == 0) return
     if (e.length > 10) return notifyError(10)
@@ -43,6 +46,8 @@ export const uploadImages = async (e: FileList, singleFile: boolean) => {
             imageData.append(`image_${i}`, e.item(i))
     }
 
+    setImgCache("")
+    setStorageCache("")
     let response: any = null
     await axios.post(import.meta.env.VITE_API + "/images.php", imageData, {
         headers: {"Content-Type": 'multipart/form-data'},
