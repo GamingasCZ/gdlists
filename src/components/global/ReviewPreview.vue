@@ -149,13 +149,13 @@ const clickReview = () => {
         <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-4" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>
-      <p class="flex gap-2 items-center mt-2">
+      <div class="flex gap-2 items-center mt-2">
         <ProfilePicture class="w-11" :uid="creator.discord_id" :cutout="creator.pfp_cutout" />
         <div>
           <h3 class="text-lg font-bold leading-tight">{{ creator.username }}</h3>
           <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate(((new Date()).getTime() - uploadDate.getTime())/1000) }}</h4>
         </div>
-      </p>
+      </div>
     </section>
   </component>
 </template>

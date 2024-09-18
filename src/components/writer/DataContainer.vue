@@ -28,6 +28,7 @@ const props = defineProps<Container & Extras>()
 
 const previewText = ref("")
 
+const fontSizes = ['normal', '8px', '10px', '12px', '14px', '16px', '20px', '24px', '32px', '48px', '64px']
 const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
 
@@ -111,7 +112,7 @@ const hasText = ref(checkHasText())
 			class="w-full dataContainer min-w-24 whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
 			:placeholder="placeholder"
 			:contenteditable="editable"
-			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word'}"
+			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word', textIndent: currentSettings?.indent ? '2rem' : '', fontSize: fontSizes[currentSettings?.size ?? 0]}"
 			:class="childStyling || []">
 		</p>
 			
@@ -143,7 +144,7 @@ const hasText = ref(checkHasText())
 
 p[data-hasText=true]::before {
 	content: attr(placeholder);
-	@apply opacity-30 absolute;
+	@apply opacity-30 absolute pointer-events-none;
 }
 
 </style>

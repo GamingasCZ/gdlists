@@ -59,10 +59,12 @@ time.value = prettyDate(datePassed)
 
 const parsedComment = ref<string>(props.comment)
 let emojis = props.comment.match(/&(\d{2})/g)
+let isEmojisOnly = (emojis ?? []).join("") == props.comment
+
 if (emojis != null) {
   emojis.forEach(async emoji => {
     let emojiLink = `${import.meta.env.BASE_URL}/emoji/${emoji.slice(1)}.webp`
-    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline w-5 pointer-events-none" src="${emojiLink}" alt="">`)
+    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline ${isEmojisOnly ? 'w-8' : 'w-5'} pointer-events-none" src="${emojiLink}" alt="">`)
   });
 } else parsedComment.value = props.comment
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")

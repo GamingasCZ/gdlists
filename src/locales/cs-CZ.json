@@ -756,7 +756,9 @@
     "cropWidth": "Ořezat na stejnou šířku",
     "carousel": "Karusel",
     "descPlaceholder": "Můžeš sem napsat základní informace o recenzi a vložit sem různé odkazy!",
-    "splitPg": "Rozdělit do odstavce"
+    "splitPg": "Rozdělit do odstavce",
+    "fontSize": "Velikost písma",
+    "indent": "Odsazení prvního řádku"
   },
   "review": {
     "columnSetting": "{0} sloupec",

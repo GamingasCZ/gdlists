@@ -14,8 +14,9 @@ const props = defineProps<{
     editable: boolean
 }>()
 
-watch(props, () => {
-    videoLoading.value = 0
+watch(() => props.settings.url, () => {
+    if (shortenYTLink(props.settings.url))
+        videoLoading.value = 0
 })
 
 const videoLoading = ref(-2)

@@ -119,16 +119,14 @@ const maxLen = computed(() => carouselComp.length >= 25)
     class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-1 overflow-y-auto  flex flex-col gap-1 overflow-x-clip">
     
         <!-- Help -->
-        <div v-if="!reviewData.containers[index].settings.components.length && !uploading" class="flex absolute top-1/2 left-1/2 z-10 flex-col items-center w-3/4 text-center -translate-x-1/2 -translate-y-1/2">
+        <div v-if="!reviewData.containers[index].settings.components.length && !uploading" class="flex absolute top-1/2 left-1/2 z-10 flex-col items-center w-3/4 text-center -translate-x-1/2 -translate-y-1/2 pointer-events-none">
             <div class="flex flex-col gap-3 items-center mb-2 opacity-20">
                 <img src="@/images/image.svg" alt="" class="w-48">
                 <h2 class="text-2xl">{{ $t('reviews.noAddedYet') }}</h2>
                 <p class="">{{ $t('reviews.carHelp1') }}</p>
                 <p class="">{{ $t('reviews.carHelp2') }}</p>
             </div>
-            <button @click="uploader?.uploader?.click()" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button"><img src="@/images/copy.svg" class="w-6" alt="">{{ $t('editor.uploadFile') }}</button>
         </div>
-
 
         <div class="z-10 w-full">
             <div class="grid grid-cols-4 gap-2 p-1">

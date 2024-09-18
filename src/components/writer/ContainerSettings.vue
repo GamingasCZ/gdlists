@@ -63,13 +63,21 @@ const closeSettings = (m: MouseEvent) => {
                 <!-- Checkbox -->
                 <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
-                    <input :name="key" :checked="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="px-2 py-0.5 bg-white bg-opacity-10 rounded-md button" type="checkbox">
+                    <input :name="key" :checked="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="py-0.5 !mr-0 bg-white bg-opacity-10 rounded-md button" type="checkbox">
                 </div>
 
                 <!-- Number selector -->
                 <div v-if="containers[type].settings[index].type[0] == 3" class="flex justify-between">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <input :name="key" :min="containers[type].settings[index].type[1]" :max="containers[type].settings[index].type[2]" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value" class="px-2 py-0.5 mr-2 w-16 bg-white bg-opacity-10 rounded-md" type="number">
+                </div>
+
+                <!-- Regular dropdown -->
+                <div v-if="containers[type].settings[index].type[0] == 6" class="flex justify-between items-center">
+                    <label :for="key">{{ containers[type].settings[index].title }}</label>
+                    <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
+                        <option v-for="(key, ind) in containers[type].settings[index].type.slice(2)" :value="ind">{{ key }}</option>
+                    </select>
                 </div>
 
                 <!-- Level dropdown -->

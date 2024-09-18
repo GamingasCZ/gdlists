@@ -27,7 +27,20 @@ const containers: Containers = {
             title: i18n.global.t('reviews.disMD'),
             type: [2],
             default: false,
-        }]
+        },
+        {
+            key: "size",
+            title: i18n.global.t('reviews.fontSize'),
+            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 10, 12, 14, 16, 20, 24, 32, 48, 64],
+            default: 0,
+        },
+        {
+            key: "indent",
+            title: i18n.global.t('reviews.indent'),
+            type: [2],
+            default: false,
+        },
+    ]
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
