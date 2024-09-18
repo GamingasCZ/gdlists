@@ -22,7 +22,7 @@ $type = isset($DATA["listID"]) ? "listID" : "reviewID";
 $fuckupData = sanitizeInput(array($DATA["comment"], $DATA["comType"], $DATA[$type], $DATA["comColor"], isset($DATA["hidden"]) ? $DATA["hidden"] : "0"));
 
 // Checking comment and user string length
-if (strlen($DATA["comment"]) > 300 || strlen($DATA["comment"]) < 10) die("2");
+if (strlen($fuckupData[1]) > 300 || strlen($fuckupData[1]) < 10) die("2");
 
 // Is ID valid?
 if ($DATA["listID"] == "-1") die("3");
