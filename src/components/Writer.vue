@@ -663,7 +663,7 @@ const removeDraft = (key: number) => {
 
 const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
 setInterval(() => burstTimer.value = Date.now(), 5000)
-const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.lastSaved)/1000))
+const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved)/1000)))
 
 </script>
 
