@@ -89,7 +89,7 @@ const doUpload = async (files: FileList) => {
 }
 
 const closePopup = () => {
-    if (!shortenYTLink(carouselComp[textDialogOpen.value].settings.url))
+    if (carouselComp[textDialogOpen.value].type == "addVideo" && !shortenYTLink(carouselComp[textDialogOpen.value].settings.url))
         removeContent(textDialogOpen.value)
     textDialogOpen.value = -1
 }
