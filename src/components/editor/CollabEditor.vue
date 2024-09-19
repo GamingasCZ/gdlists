@@ -484,7 +484,7 @@ const confirmDeleteOpen = ref(false)
     <section
       @click.stop=""
       :style="{background: backgroundCol}"
-      class=" w-[60rem] max-h-[95svh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black h-[40rem]"
+      class=" w-[60rem] max-h-[95vh] max-w-[95vw] rounded-lg pt-2 grid grid-rows-[repeat(3,max-content)] text-white shadow-lg shadow-black"
       :class="{'max-lg:hidden': roleSidebarOpen || savedSidebarOpen}"
     >
       <div class="flex relative justify-between items-center py-1 mx-2 -translate-y-0.5">
@@ -622,7 +622,7 @@ const confirmDeleteOpen = ref(false)
             
         </header>
 
-      <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col relative bg-repeat-x p-1 gap-1 max-h-full">
+      <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col relative bg-repeat-x p-1 gap-1 h-[39rem]">
             
             <!-- No roles help -->
         <div v-if="noMembers" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center text-center -translate-x-1/2 -translate-y-1/2">
@@ -660,7 +660,7 @@ const confirmDeleteOpen = ref(false)
             </div>
 
             <!-- Collab humans -->
-            <div class="flex flex-col gap-1" v-if="(typeof collab != 'string')">
+            <div class="flex overflow-y-auto flex-col gap-1 h-full" v-if="(typeof collab != 'string')">
           <CollabCreator v-for="(member, pos) in (collab as CollabData)[2]" :key="member.name" v-bind="member" :pos="pos" :collab-array="collab"
             :level-index="index" :role-color="roleColors[member.role]" :host="false" @change-role="changeRole"
             @remove-member="removeMember" @copy-member="copyMember" @add-social="addSocial"
@@ -673,7 +673,7 @@ const confirmDeleteOpen = ref(false)
     <aside
       @click.stop=""
       :style="{background: backgroundCol}"
-      class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
+      class="w-[20rem] h-[48.8rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
       v-show="roleSidebarOpen || pickingRole > -1"
       v-if="(typeof collab != 'string')"
     >
@@ -769,7 +769,7 @@ const confirmDeleteOpen = ref(false)
     <aside
       @click.stop=""
       :style="{background: backgroundCol}"
-      class=" w-[20rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
+      class=" w-[20rem] h-[48.8rem] max-h-[95svh] max-w-[95vw] rounded-lg text-white shadow-lg shadow-black"
       v-show="savedSidebarOpen"
     >
 

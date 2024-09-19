@@ -114,7 +114,7 @@ function parseComment(comment: Array<string | {id: string}> ): string {
             else parsedComment += `&${commentBit.id.padStart(2, '0')}`
         }
     });
-    return parsedComment
+    return parsedComment.trim()
 }
 
 const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.value.getValues()).length
@@ -210,8 +210,8 @@ function sendComment(com = "") {
         </Transition>
         <footer class="flex justify-between mt-2">
             <div>
-                <ProfilePicture class="inline mr-2 w-8" :uid="pfp[1]" :cutout="pfp[2]" />
-                <label>{{ pfp[0] }}</label>
+                <ProfilePicture v-show="pfp" class="inline mr-2 w-8" :uid="pfp?.[1]" :cutout="pfp?.[2]" />
+                <label>{{ pfp?.[0] }}</label>
             </div>
 
             <div class="flex gap-2">

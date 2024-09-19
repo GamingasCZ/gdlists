@@ -15,7 +15,7 @@ const emit = defineEmits(['closePopup'])
         </div>
         <div class="flex gap-6 p-3 bg-black bg-opacity-40 rounded-md">
             <img src="@/images/socials/twitter.svg" class="mr-1 w-7" alt="">
-            <span>@g4mingaz</span>
+            <span>@geodlists</span>
         </div>
         <div class="flex gap-6 p-3 underline bg-black bg-opacity-40 rounded-md">
             <img src="@/images/mail.svg" class="w-8" alt="">

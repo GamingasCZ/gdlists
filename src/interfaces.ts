@@ -304,3 +304,10 @@ export interface ImageStorage {
   maxFilecount: number
   maxUploadSize: number
 }
+
+export interface LocalNotification {
+  title: string
+  text: string
+  icon: 'save' | 'error' | 'check'
+  stamp?: any
+}

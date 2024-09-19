@@ -389,7 +389,11 @@
     "square": "Čtverec",
     "star": "Hvězda",
     "demon": "Démon",
-    "hexagon": "Šestiúhelník"
+    "hexagon": "Šestiúhelník",
+    "desc": "Popis",
+    "metadata": "Metadata",
+    "tooManyImg": "Naráz můžeš nahrát jen 10 obrázků!",
+    "selImg": "Vybrán {count} obrázek | Vybráno {count} obrázků"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -494,7 +498,7 @@
     "containers": "Prvky recenze",
     "textFormatting": "Formátování textu",
     "formatHelp": "Formátování používá GFM (GitHub Flavoured Markdown).<br><br> V nabídce formátování je odkaz na to, jak GFM používat.<br><br> Pokud nechceš Markdown používat, můžeš ho v nastavení odstavce zakázat.",
-    "containerHelp": "Prvky na přidání obrázků, videí apod. jsou vedle tlačítek na zarovnávání.<br><br> Kliknutím na přidaný prvek ho vybereš. Každý prvek má svoje vlastní nastavení, které je dostupné pod ozubeným kolem napravo od prvku.<br><br> Kliknutím kolečka myši na nastavení, můžeš prvek rychle smazat. V recenzi můžeš mít max. 100 vizuálních/textových prvků.",
+    "containerHelp": "Prvky na přidání obrázků, videí apod. jsou vedle tlačítek na zarovnávání.<br><br> Kliknutím na přidaný prvek ho vybereš. Každý prvek má svoje vlastní nastavení, které je dostupné pod ozubeným kolem napravo od prvku.<br><br> <b>Kliknutím kolečka myši</b> na nastavení, můžeš prvek rychle smazat.<br>Drž **SHIFT** při přidávání prvku, abys ho přidal **nad** vybraný prvek.<br><br>V recenzi můžeš mít max. 100 vizuálních/textových prvků.",
     "columnHelp": "Sloupce ti umožňují pokládat text a většinu dalších prvků vedle sebe.<br><br> Abys mohl do sloupce přidat obsah, musíš na něj prvně kliknout. Vybraný sloupec má silnější obrys.<br><br> Po vybrání sloupce se tlačítko na přidávání změní na upravovací, kde můžeš layout nastavovat.<br><br> Vedle sebe můžeš mít max. 10 sloupců. Sloupce přetékají, pokud na obsah není dost místa.<br><br> Ve výchozím stavu se sloupce snaží zabrat co nejvíc místa. V nastavení sloupce lze nastavit, aby se přizpůsobily šířce obsahu.<br> Tip: Pokud jsou všechy sloupce přispůsobeny na šířku, můžeš celý layout zarovnávat např. doprostřed.<br><br> Pokud ti zbývají 2 sloupce a smažeš jeden ze sloupců, obsah druhého sloupce se vytrhne zpět do recenze.",
     "diffGuessHelp": "Pokud je hádání obtížnostú zapnuté, seznam se bude postupně odemykat po tom, co hádáš obtížnosti, rating, či oboje.\n*V prohlížeči seznamů takový seznam poznáš podle otazníků v pozadí.\n*Hádání se vyruší, pokud přecházíš z uložených levelů.\n*Můžeš hrát i šipkami na klávesnicí."
   },
@@ -740,7 +744,22 @@
     "embedded": "Vložený příspěvek",
     "embeddedHelp": "Načte se po načtení recenze",
     "vertAlign": "Umístění",
-    "back": "Vrátit se"
+    "back": "Vrátit se",
+    "makeCarousel": "Přidat karusel",
+    "carouselHelp": "Klikni pro přídání obrázků a videí",
+    "carMedia": "Média karusely",
+    "noAddedYet": "Zatím jsi nic nepřidal...",
+    "carHelp1": "Můžeš sem přetáhnout obrázky nebo je kliknutím nahrát.",
+    "carHelp2": "Obrázky či odkazy ve schránce můžeš vložit pomocí CTRL+V.",
+    "pickMedia": "Vybrat média",
+    "overflow": "Přetékat",
+    "cropWidth": "Ořezat na stejnou šířku",
+    "carousel": "Karusel",
+    "descPlaceholder": "Můžeš sem napsat základní informace o recenzi a vložit sem různé odkazy!",
+    "splitPg": "Rozdělit do odstavce",
+    "fontSize": "Velikost písma",
+    "indent": "Odsazení prvního řádku",
+    "isEmpty": "%s je prázdná!"
   },
   "review": {
     "columnSetting": "{0} sloupec",

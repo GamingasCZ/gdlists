@@ -9,6 +9,7 @@ import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
 import { setLanguage } from "./locales";
 import { currentCutout, currentUID } from "./Editor";
+import NotificationStack from "./components/global/NotificationStack.vue";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -87,12 +88,15 @@ document.body.addEventListener("keydown", (e) => {
 
 <template>
   <main class="min-h-screen">
+
     <Navbar :is-logged-in="loggedIn" />
+
+    <!-- Notification when not online -->
     <NoConnection />
-    <section v-if="tabbarOpen" class="absolute left-2 top-14 bg-greenGradient">
-      sas
-    </section>
+
+    
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
   </main>
+  <NotificationStack />
   <Footer />
 </template>

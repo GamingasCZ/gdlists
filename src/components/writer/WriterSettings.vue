@@ -30,11 +30,11 @@ defineProps<{
     </div>
     
     <div class="bg-[url(@/images/fade.webp)] bg-repeat-x p-2 h-[40rem] overflow-y-scroll">
-      <p class="ml-2 text-xl">{{ $t('reviews.description') }}</p>
+      <p class="ml-1 text-xl">{{ $t('reviews.description') }}</p>
       <div class="relative">
-        <textarea v-model="reviewData.description" class="p-1 w-full h-28 bg-white bg-opacity-10 rounded-md resize-none">
+        <textarea v-model="reviewData.description" :placeholder="$t('reviews.descPlaceholder')" class="p-1 w-full h-28 bg-black bg-opacity-40 rounded-md resize-none placeholder:opacity-40">
         </textarea>
-        <button @click="openDialogs.description = true" class="absolute right-1.5 bottom-2 bg-black bg-opacity-40 rounded-sm">
+        <button @click="openDialogs.description = true" class="absolute right-1.5 bottom-2 bg-black bg-opacity-60 rounded-sm">
           <img src="@/images/fullscreen.svg" class="p-1 w-8" alt="">
         </button>
       </div>

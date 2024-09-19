@@ -34,6 +34,8 @@ import { dialog } from "./ui/sizes";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { getDominantColor } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
+import { summonNotification } from "./imageUpload";
+import { i18n } from "@/locales";
 
 
 document.title = `Editor | ${ useI18n().t('other.websiteName') }`;
@@ -47,6 +49,7 @@ const props = defineProps<{
 const doBackup = () => {
   if (levelList.value.levels.length == 0) return // Do not save without any levels
   if (router.currentRoute.value.name != "editor") return // Only when leaving editor
+  summonNotification("", i18n.global.t("editor.levelSaved"), 'check')
   notifStamp.value = saveBackup(listName.value, !!listHiddenSelected())
 }
 
@@ -158,7 +161,6 @@ const errorMessage = ref('')
 const errorStamp = ref(-1)
 const errorDblclickHelp = ref(false)
 const formShaking = ref(false)
-const notifStamp = ref(Math.random())
 const collabClipboard = ref()
 const collabBackground = ref<HTMLDivElement>()
 
@@ -625,8 +627,6 @@ const useAccentColor = () => {
         </button>
       </div>
     </header>
-
-    <Notification :title="$t('editor.levelSaved')" icon="save" :stamp="notifStamp"/>
 
     <main
       class="flex min-h-[6rem] w-full flex-col gap-1.5 bg-[url(../images/fade.webp)] bg-repeat-x px-2 py-2"

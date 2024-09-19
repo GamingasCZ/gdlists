@@ -34,6 +34,8 @@ import EditorBackup from "./editor/EditorBackup.vue";
 import { onMounted } from "vue";
 import { onBeforeRouteLeave, type RouteLocationNormalized } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
+import CarouselPicker from "./writer/CarouselPicker.vue";
+import { deleteCESelection } from "./global/parseEditorFormatting";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -59,6 +61,7 @@ if (props.editing) {
     }).catch(() => openDialogs.editError = true)
 }
 
+const writer = ref<HTMLDivElement>()
 const embedsContent = ref()
 provide("batchEmbeds", embedsContent)
 
@@ -84,11 +87,6 @@ watch(props, () => {
     }
 })
 
-document.body.addEventListener("click", () => {
-    selectedContainer.value = [-1, null]
-    selectedNestContainer.value = [-1, -1, -1]
-})
-
 const openDialogs = reactive({
     settings: false,
     levels: false,
@@ -99,6 +97,7 @@ const openDialogs = reactive({
     ratings: false,
     bgPreview: false,
     imagePicker: [false, 0],
+    carouselPicker: [false, 0],
     removeDialog: false,
     description: false,
     editError: false,
@@ -115,7 +114,6 @@ const selectedContainer = ref<[number, HTMLDivElement | null]>([-1, null])
 provide("selectedContainer", selectedContainer)
 
 const selectedLevel = ref()
-const levels = ref()
 
 const selectedNestContainer = ref([-1, -1, -1])
 provide("selectedNestContainer", selectedNestContainer)
@@ -128,34 +126,37 @@ provide("levelHashes", {levelHashes, updateHashes})
 
 provide("settingsTitles", CONTAINERS)
 
+const newID = (offset = 0) => (Date.now() + offset + JSON.stringify(reviewData.value).length) >> 1
+
 const containerLastAdded = ref(0)
-const addContainer = (key: string, addTo?: number) => {
+const addContainer = (key: string, addTo?: number, returnOnly = false, above = false) => {
     // Count of all components
     let contAm = 0
     let thisContAm = 0
-    reviewData.value.containers.forEach(c => {
-        if (c.type == "twoColumns") {
-            contAm += c.settings.components.forEach(n => {
-                contAm += n.length
-                // add check for limit in nested containers if you ever need to :)
-            });
+    if (!returnOnly) {
+        reviewData.value.containers.forEach(c => {
+            if (c.type == "twoColumns") {
+                contAm += c.settings.components.forEach(n => {
+                    contAm += n.length
+                    // add check for limit in nested containers if you ever need to :)
+                });
+            }
+            if (c.type == key) thisContAm += 1
+            contAm += 1
+        })
+    
+        if (CONTAINERS[key]?.limit && thisContAm >= CONTAINERS[key].limit) {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.thisTypeManyCont')
+            return
         }
-        if (c.type == key) thisContAm += 1
-        contAm += 1
-    })
-
-    if (CONTAINERS[key]?.limit && thisContAm >= CONTAINERS[key].limit) {
-        errorStamp.value = Date.now()
-        errorText.value = i18n.global.t('reviews.thisTypeManyCont')
-        return
+    
+        if (contAm >= 100) {
+            errorStamp.value = Date.now()
+            errorText.value = i18n.global.t('reviews.tooManyContainers')
+            return
+        }
     }
-
-    if (contAm >= 100) {
-        errorStamp.value = Date.now()
-        errorText.value = i18n.global.t('reviews.tooManyContainers')
-        return
-    }
-
 
     let settingObject = {}
     for (let i = 0; i < CONTAINERS[key].settings.length; i++)
@@ -167,8 +168,10 @@ const addContainer = (key: string, addTo?: number) => {
         align: "left",
         settings: settingObject,
         extraComponents: 0,
-        id: Date.now()
+        id: newID()
     }
+
+    if (returnOnly) return containerData
 
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
@@ -178,7 +181,7 @@ const addContainer = (key: string, addTo?: number) => {
             selectedContainer.value[0] = reviewData.value.containers.length - 1
         } else {
             reviewData.value.containers
-            .splice(selectedContainer.value[0] + 1, 0, containerData)
+            .splice(selectedContainer.value[0] + +(!above), 0, containerData)
             selectedContainer.value[0] += 1
         }
     }
@@ -194,7 +197,7 @@ const addContainer = (key: string, addTo?: number) => {
                 .push(containerData)
             } else {
                 reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
-                .splice(selectedNestContainer.value[2] + 1, 0, containerData)
+                .splice(selectedNestContainer.value[2] + +(!above), 0, containerData)
         }
 
         }
@@ -202,11 +205,13 @@ const addContainer = (key: string, addTo?: number) => {
     containerLastAdded.value = Date.now()
 }
 
+provide("addContainer", addContainer)
+
 const removeContainer = (index: number) => {
     reviewData.value.containers.splice(index, 1)
-    setTimeout(() => {
-        selectedNestContainer.value = [-1, -1, -1]
-    }, 5)
+    
+    selectedContainer.value[0] = -1
+    selectedNestContainer.value = [-1, -1, -1]
 }
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
@@ -226,7 +231,6 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 }
 
 const columnCommand = (index: number) => {
-    let nestAttay = selectedNestContainer.value.slice(0)
     let nest = reviewData.value.containers[selectedNestContainer.value[0]]
     let column = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
     switch (index) {
@@ -234,8 +238,14 @@ const columnCommand = (index: number) => {
         case 1: addContainer("twoColumns", 1); break;
         case 2:
         case 3:
+            let duplicate = JSON.parse(JSON.stringify(nest.settings.components[selectedNestContainer.value[1]]))
+            for (let i = 0; i < duplicate.length; i++) {
+                if (duplicate[i] === Object(duplicate[i]))
+                duplicate[i].id = newID(i)
+            }
+
             nest.settings.components
-                .splice(selectedNestContainer.value[1] + (index - 3), 0, JSON.parse(JSON.stringify(nest.settings.components[selectedNestContainer.value[1]])))
+                .splice(selectedNestContainer.value[1] + (index - 3), 0, duplicate)
                 nest.extraComponents += 1
             break;
         case 6: // fit width / fill space
@@ -303,6 +313,14 @@ const moveContainer = (index: number, by: number) => {
         selectedNestContainer.value[0] += by
 }
 
+const splitParagraph = () => {
+    let selectedText = deleteCESelection(document.activeElement)
+    let newPos = selectedContainer.value[0]+1
+    let newParagraph = addContainer("default", 0, true)
+    newParagraph.data = selectedText
+    reviewData.value.containers.splice(newPos, 0, newParagraph)
+}
+
 const taglinePlaceholders = [
     useI18n().t('reviews.p1'),
     useI18n().t('reviews.p2'),
@@ -330,6 +348,17 @@ const modifyImageURL = (newUrl: string) => {
     // Review thumbnail
     else if (openDialogs.imagePicker[1] == -2) {
         reviewData.value.thumbnail[0] = newUrl
+    }
+    // Carousel item
+    else if (openDialogs.imagePicker[1] == -3) {
+        let img = addContainer("showImage", 0, true)
+        img.settings.url = newUrl
+        img.settings.height = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.height
+        reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
+    }
+    // Carousel change
+    else if (openDialogs.imagePicker[1] == -4) {
+        reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components[openDialogs.imagePicker[2]].settings.url = newUrl
     }
     // Image container
     else if (selectedNestContainer.value[0] == -1) {
@@ -451,10 +480,6 @@ const updateReview = () => {
         })
 }
 
-onUnmounted(() => {
-  reviewData.value = DEFAULT_REVIEWDATA()
-})
-
 const doBackup = (from?: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
   if (reviewData.value.containers.length == 0) return false // Do not save without any content
   if (!to) { // Do not backup when redirected from editor
@@ -478,26 +503,41 @@ const loadBackup = () => {
     fetchEmbeds()
     removeBackup(true)
 }
+
+let mStarted = [-1, -1]
+const setMouseStart = (e: MouseEvent) => mStarted = [e.x, e.y]
+const unfocusContainer = (e: MouseEvent) => {
+    let rect = writer.value?.getBoundingClientRect()
+    if (!rect) return
+    if (mStarted[0] < rect.x || mStarted[1] < rect.y || mStarted[0] > rect.x+rect?.width || mStarted[1] > rect.y+rect?.height) {
+        selectedContainer.value = [-1, null]
+        selectedNestContainer.value = [-1, -1, -1]
+    }
+}
+
 let autosaveInterval: number
 onMounted(() => {
     if (SETTINGS.value.autosave) {
-        // Save when leaving the site
-    window.addEventListener("beforeunload", () => {
-        if (reviewSave.value.backupID) saveDraft(false, true)
-    })
-    onBeforeRouteLeave((from, to) => {
-        let res = doBackup(from, to)
-        if (res) saveDraft(false, true)
-    })
+            // Save when leaving the site
+        window.addEventListener("beforeunload", () => {
+            if (reviewSave.value.backupID) saveDraft(false, true)
+        })
+        onBeforeRouteLeave((from, to) => {
+            let res = doBackup(from, to)
+            if (res) saveDraft(false, true)
+        })
 
-    autosaveInterval = setInterval(() => {
-        if (!SETTINGS.value.autosave) // If setting changes, do not autosave
-            return clearInterval(autosaveInterval)
+        autosaveInterval = setInterval(() => {
+            if (!SETTINGS.value.autosave) // If setting changes, do not autosave
+                return clearInterval(autosaveInterval)
 
-        saveDraft(false, false)
-      
-    }, SETTINGS.value.autosave*1000)
-}
+            saveDraft(false, false)
+        
+        }, SETTINGS.value.autosave*1000)
+    }
+
+    document.body.addEventListener("mousedown", setMouseStart)
+    document.body.addEventListener("click", unfocusContainer)
 
   if (localStorage) {
     let backup = localStorage.getItem("reviewBackup")
@@ -509,6 +549,12 @@ onMounted(() => {
       backupData.value.backupID = backupParsed.backupID
     }
   }
+})
+
+onUnmounted(() => {
+  reviewData.value = DEFAULT_REVIEWDATA()
+  document.body.removeEventListener("click", unfocusContainer)
+  document.body.removeEventListener("mousedown", setMouseStart)
 })
 
 const preUpload = ref(false)
@@ -617,7 +663,7 @@ const removeDraft = (key: number) => {
 
 const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
 setInterval(() => burstTimer.value = Date.now(), 5000)
-const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.lastSaved)/1000))
+const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved)/1000)))
 
 </script>
 
@@ -688,10 +734,15 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
             <template #icon><img src="@/images/info.svg" alt="" class="w-6"></template>
             <WriterRatings ref="writerRatings" />
         </DialogVue>
-
+        
+        <DialogVue :open="openDialogs.carouselPicker[0]" @close-popup="openDialogs.carouselPicker[0] = false" :title="$t('reviews.carMedia')">
+            <CarouselPicker />
+        </DialogVue>
+        
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('reviews.bgImage')" :width="dialog.large">
             <ImageBrowser :disable-external="openDialogs.imagePicker[1] == -2" :unselectable="false" @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
         </DialogVue>
+
         
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')" :width="dialog.medium">
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
@@ -730,9 +781,10 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                 :class="{'pointer-events-none opacity-20': disableEdits}"
                 :selected-nest="selectedNestContainer"
                 @set-formatting="setFormatting"
-                @add-container="addContainer"
+                @add-container="(el, above) => addContainer(el, 0, false, above)"
                 @set-alignment="setAlignment(selectedContainer[0], $event)"
                 @column-command="columnCommand($event)"
+                @split-paragraph="splitParagraph"
             />
 
             <!-- Back from draft preview -->
@@ -785,10 +837,6 @@ const pretty = computed(() => prettyDate((burstTimer.value - reviewSave.value.la
                         </div>
                     </DataContainer>
 
-                <button @click="addContainer('default')" v-show="previewMode && !disableEdits" class="flex gap-2 justify-center p-2 mx-auto mt-4 w-96 max-w-[90%] rounded-md border-2 border-white border-opacity-20 border-dashed font-[poppins]" :class="{'invert': reviewData.whitePage}">
-                    <img class="w-6" src="@/images/plus.svg" alt="">
-                    <span class="text-white">{{ $t('reviews.addParagraph') }}</span>
-                </button>
                 <div class="text-xs" v-if="!disableEdits && reviewData.containers.length">
                     <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">
                         <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save') }}</span>

@@ -39,6 +39,8 @@ import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
 import ImageViewer from "./global/ImageViewer.vue";
 import LevelCardTableTable from "./global/LevelCardTableTable.vue";
+import { summonNotification } from "./imageUpload";
+import { i18n } from "@/locales";
 
 const props = defineProps<{
   listID?: string
@@ -446,10 +448,9 @@ provide("listData", LIST_DATA)
 
 const collabViewerColor = ref("")
 
-const copyStamp = ref(Date.now())
 const copyID = (id: string) => {
   navigator.clipboard.writeText(id!);
-  copyStamp.value = Date.now()
+  summonNotification(i18n.global.t("level.idCopied"), "", 'check')
 };
 provide("idCopyTimestamp", copyID)
 
@@ -469,6 +470,11 @@ const imagesArray = computed(() => {
         sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
       })
     }
+    if (con.type == "addCarousel") {
+      con.settings.components.forEach(car => {
+        if (car?.type == "showImage") allImages.push(car)
+      })
+    }
   })
   return allImages
 })
@@ -481,8 +487,6 @@ const imageIndex = ref(-1)
     backgroundImage: `linear-gradient(#00000040, transparent)`,
   }" class="absolute w-full h-full -z-20"></div>
 
-  <Notification :title="$t('level.idCopied')" content="" icon="check" :stamp="copyStamp" />
-  
   <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.medium">
     <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
@@ -587,7 +591,7 @@ const imageIndex = ref(-1)
       </DialogVue>
 
       <!-- List view picker -->
-      <div v-if="!viewedPopups.pickedStyling">
+      <div v-if="!viewedPopups.pickedStyling && !isReview">
         <ViewModePicker />
       </div>
 

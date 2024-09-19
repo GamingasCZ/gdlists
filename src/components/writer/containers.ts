@@ -7,18 +7,19 @@ import NestContainer from "./NestContainer.vue"
 import ReviewRatings from "./ReviewRatings.vue"
 import ReviewUsers from "./ReviewUsers.vue"
 import { i18n } from "@/locales"
+import ReviewCarousel from "./ReviewCarousel.vue"
 
 const success = {success: true}
 
 const error = (ind: number, msg = 0) => {
-    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty')]
+    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty'), i18n.global.t('reviews.isEmpty')]
     return {success: false, error: message[msg], index: ind}
 }
 
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
-        styling: "min-h-12",
+        styling: "min-h-12 my-1",
         nestable: true,
         canEditText: true,
         settings: [{
@@ -26,25 +27,38 @@ const containers: Containers = {
             title: i18n.global.t('reviews.disMD'),
             type: [2],
             default: false,
-        }]
+        },
+        {
+            key: "size",
+            title: i18n.global.t('reviews.fontSize'),
+            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 20, 24, 32, 36, 48, 64],
+            default: 0,
+        },
+        {
+            key: "indent",
+            title: i18n.global.t('reviews.indent'),
+            type: [2],
+            default: false,
+        },
+    ]
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
-        styling: "text-3xl leading-10 mb-3",
+        styling: "text-3xl leading-10 my-4",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
         placeholder: i18n.global.t('reviews.title', [2]),
-        styling: "text-2xl leading-8 mb-2",
+        styling: "text-2xl leading-8 my-3",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "text-xl leading-6 mb-1",
+        styling: "text-xl leading-6 my-2",
         nestable: true,
         canEditText: true,
         settings: []
@@ -238,6 +252,47 @@ const containers: Containers = {
             settings.components.forEach(e => len += e.length)
             return len ? success : error(0, 2)
         }
+    },
+    addCarousel: {
+        nestable: false,
+        canEditText: false,
+        dependentOnChildren: false,
+        additionalComponents: [ReviewCarousel],
+        settings: [
+            {
+                key: "components",
+                title: i18n.global.t('reviews.carousel'),
+                type: [-1],
+                required: true,
+                default: []
+            },
+            {
+                key: "height",
+                title: '',
+                type: [-1],
+                required: true,
+                default: 192
+            },
+            {
+                key: "pick",
+                title: i18n.global.t('reviews.pickMedia'),
+                type: [1],
+                default: 0
+            },
+            {
+                key: "overflow",
+                title: i18n.global.t('reviews.overflow'),
+                type: [2],
+                default: false
+            },
+            {
+                key: "crop",
+                title: i18n.global.t('reviews.cropWidth'),
+                type: [2],
+                default: false
+            },
+        ],
+        errorCheck: (settings: object) => settings.components.length ? success : error(0, 3)
     }
 }
 
@@ -285,6 +340,7 @@ export type Containers = {
     showRating: Container
     twoColumns: Container
     showCollab: Container
+    addCarousel: Container
 }
 
 export type Container = {

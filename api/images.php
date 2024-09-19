@@ -59,10 +59,10 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     // Image data
     $imageHash;
     if ($filename !== null) $imageHash = $filename;
-    else $imageHash = sha1($binaryData);
+    else $imageHash = sha1(substr($binaryData,0, 2048));
 
     if (!$overwrite) {
-        if (is_file($userPath . "/" . $imageHash . ".webp")) die("-3"); // No duplicate files
+        if (is_file($userPath . "/" . $imageHash . ".webp")) return $imageHash; // No duplicate files
     }
 
     // Create image
@@ -120,29 +120,36 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
         case 'POST':
             $DATA = file_get_contents("php://input");
             
-            $newImage = saveImage($DATA, $user["id"], $mysqli);
+            $newImages = [];
+            if (sizeof($_FILES) == 0 || sizeof($_FILES) > 10) die("-3");
+            foreach ($_FILES as $key => $image) {
+                if (!$image["tmp_name"]) die("-4"); // $image["error"] = 1 : filesize
+                array_push($newImages, saveImage(file_get_contents($image["tmp_name"]), $user["id"], $mysqli));
+            }
             
-            die(getStorage($mysqli, $user["id"], $newImage));
+            die(getStorage($mysqli, $user["id"], $newImages));
             break;
     
         case 'DELETE':
-            $hash = substr($_GET["hash"], 0, 40);
+            // Remove files
             $userPath = getUserPath($user["id"]);
-            if (!ctype_alnum($hash)) die("-3"); // check if the user is a hackerman
-    
-            if (is_file($userPath . "/" . $hash . ".webp")) {
-                // Remove from database
-                $res = doRequest($mysqli, "DELETE FROM `images` WHERE `uploaderID`=? AND `hash`=?", [$user["id"], $hash], "ss");
-                if (array_key_exists("error", $res)) die('-5'); // Image is in use
-    
-                // Remove files
-                unlink($userPath . "/" . $hash . ".webp");
-                unlink($userPath . "/" . $hash . "-thumb.webp");
-    
-                
-                die(getStorage($mysqli, $user["id"]));
+            if (!is_array($_GET["hash"]) || sizeof($_GET["hash"]) == 0 || sizeof($_GET["hash"]) > 25) die("-3");
+            foreach ($_GET["hash"] as $singleHash) {
+                if (!ctype_alnum($singleHash) || strlen($singleHash) != 40) die("-3"); // check if the user is a hackerman
             }
-            else die("-3");
+            
+            // Remove from database
+            $res = doRequest($mysqli, sprintf("DELETE FROM `images` WHERE `uploaderID`=? AND `hash` IN ('%s')", implode("','", $_GET["hash"])), [$user["id"]], "s");
+            if (array_key_exists("error", $res)) die('-5'); // Image is in use
+            
+            foreach ($_GET["hash"] as $singleHash) {
+                if (is_file($userPath . "/" . $singleHash . ".webp")) {
+                    unlink($userPath . "/" . $singleHash . ".webp");
+                    unlink($userPath . "/" . $singleHash . "-thumb.webp");
+                }
+            }
+            
+            die(getStorage($mysqli, $user["id"]));
             break;
         
         default:
