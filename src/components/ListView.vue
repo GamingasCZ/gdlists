@@ -470,6 +470,11 @@ const imagesArray = computed(() => {
         sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
       })
     }
+    if (con.type == "addCarousel") {
+      con.settings.components.forEach(car => {
+        if (car?.type == "showImage") allImages.push(car)
+      })
+    }
   })
   return allImages
 })
@@ -586,7 +591,7 @@ const imageIndex = ref(-1)
       </DialogVue>
 
       <!-- List view picker -->
-      <div v-if="!viewedPopups.pickedStyling">
+      <div v-if="!viewedPopups.pickedStyling && !isReview">
         <ViewModePicker />
       </div>
 

@@ -403,8 +403,8 @@ const extButton = ref()
 
     <!-- Selected count -->
     <Transition name="fade">
-        <div v-show="selectedImages.length" class="flex absolute right-0 bottom-0 left-0 z-20 justify-evenly items-center py-2 bg-black bg-opacity-50 rounded-b-md backdrop-blur-md">
-            <h2 class="text-2xl">{{ $t('other.selImg', [selectedImages.length]) }}</h2>
+        <div v-show="selectedImages.length" class="flex absolute right-0 bottom-0 left-0 z-20 justify-evenly items-center py-2 rounded-b-md backdrop-blur-md bg-lof-300">
+            <h2 class="text-2xl">{{ $t('other.selImg', selectedImages.length) }}</h2>
             <div class="flex gap-4">
                 <button @click="selectedImages = []" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/close.svg" alt="">{{ $t('other.cancel') }}</button>
                 <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>

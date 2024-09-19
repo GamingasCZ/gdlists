@@ -78,7 +78,7 @@ const doUpload = async (files: FileList) => {
             return
         }
     }
-    if (res.newImage) {
+    if (res?.newImage) {
         res.newImage.forEach(i => {
             let img = addContainer("showImage", 0, true)
             img.settings.url = `${import.meta.env.VITE_USERCONTENT}/userContent/${currentUID.value}/${i}.webp`
@@ -86,6 +86,12 @@ const doUpload = async (files: FileList) => {
             carouselComp.push(img)
         })
     }
+}
+
+const closePopup = () => {
+    if (!shortenYTLink(carouselComp[textDialogOpen.value].settings.url))
+        removeContent(textDialogOpen.value)
+    textDialogOpen.value = -1
 }
 
 const textDialogOpen = ref(-1)
@@ -98,10 +104,10 @@ const maxLen = computed(() => carouselComp.length >= 25)
 </script>
 
 <template>
-    <Dialog @close-popup="textDialogOpen = -1" :open="textDialogOpen != -1" :title="$t('other.metadata')">
+    <Dialog @close-popup="closePopup" :open="textDialogOpen != -1" :title="$t('other.metadata')">
         <div id="carp_inputs" class="flex flex-col p-2">
             <label v-show="dialogType == 2" for="car_url">{{ $t('reviews.ytLink') }}</label>
-            <input v-show="dialogType == 2" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="reviewData.containers[index].settings.components[textDialogOpen].settings.url" type="text" id="car_url">
+            <input v-show="dialogType == 2" @paste.stop="" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="reviewData.containers[index].settings.components[textDialogOpen].settings.url" type="text" id="car_url">
             <label v-show="dialogType != 2" for="car_desc">{{ $t('other.desc') }}</label>
             <input v-show="dialogType != 2" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="reviewData.containers[index].settings.components[textDialogOpen].settings.description" type="text" id="car_desc">
             <label v-show="dialogType == 1" class="mt-4" for="car_alt">{{ $t('reviews.alttext') }}</label>
@@ -154,6 +160,6 @@ const maxLen = computed(() => carouselComp.length >= 25)
             </div>
         </div>
 
-        <HiddenFileUploader ref="uploader" @data="doUpload" multiple unclickable allow-youtube-links />
+        <HiddenFileUploader ref="uploader" @data="doUpload" multiple unclickable allow-youtube-links :disabled="openDialogs?.imagePicker?.[0]" />
     </div>
 </template>

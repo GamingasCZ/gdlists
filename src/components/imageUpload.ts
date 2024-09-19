@@ -42,8 +42,10 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean) =>
     if (singleFile)
         imageData.append('image_0', e.item(0))
     else {
-        for (let i = 0; i < e.length; i++)
-            imageData.append(`image_${i}`, e.item(i))
+        for (let i = 0; i < e.length; i++) {
+            imageData.append(`image_${i}`, e?.item(i))
+            if (!e?.item(i)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(7)
+        }
     }
 
     setImgCache("")
@@ -53,6 +55,15 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean) =>
         headers: {"Content-Type": 'multipart/form-data'},
         maxBodyLength: Infinity,
         maxContentLength: Infinity
-    }).then(res => response = res.data).catch(() => response = false)
+    })
+    .then(res => {
+        if (res.data == -4) notifyError(1)
+        if (res.data == -3) notifyError(0)
+        response = res.data
+    })
+    .catch(() => {
+        notifyError(0)
+        response = false
+    })
     return response
 }

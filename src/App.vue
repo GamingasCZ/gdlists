@@ -94,9 +94,9 @@ document.body.addEventListener("keydown", (e) => {
     <!-- Notification when not online -->
     <NoConnection />
 
-    <NotificationStack />
-
+    
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
   </main>
+  <NotificationStack />
   <Footer />
 </template>

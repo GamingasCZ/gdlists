@@ -28,7 +28,7 @@ const props = defineProps<Container & Extras>()
 
 const previewText = ref("")
 
-const fontSizes = ['normal', '8px', '10px', '12px', '14px', '16px', '20px', '24px', '32px', '48px', '64px']
+const fontSizes = ['normal', '8px', '12px', '14px', '16px', '20px', '24px', '32px', '36px', '48px', '64px']
 const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
 

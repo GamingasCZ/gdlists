@@ -48,8 +48,10 @@ const openDialogs = inject("openedDialogs")
 const carousel = ref<HTMLDivElement>()
 const end = ref(1)
 const scrollCarousel = (speed: number, event: WheelEvent) => {
-    if (speed == 0) return
-    event.preventDefault()
+    if (speed == 0) {
+        carousel.value?.scrollBy({left: event.deltaX, behavior: 'instant'})
+        event.preventDefault()
+    }
 
     let start = carousel.value?.scrollLeft!
     let to = carousel.value.offsetWidth! * speed
@@ -69,19 +71,22 @@ const buttonsShown = ref(false)
 const onResize = new ResizeObserver(() => {
     buttonsShown.value = carousel.value?.scrollWidth > carousel.value?.parentElement.offsetWidth
 })
+const hovering = ref(false)
 
 </script>
 
 <template>
     <ContainerHelp v-if="!settings.components.length" @click="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
-    <section @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel($event.deltaX/200, $event)" ref="carousel" class="overflow-x-hidden transition-opacity group overflow-y-clip" :class="{'pb-1.5': editable}" v-else>
-        <button v-show="buttonsShown && end != 1" @click="scrollCarousel(-1, $event)" class="flex absolute left-2 top-1/2 z-10 justify-center w-10 rounded-full opacity-0 -translate-y-1/2 group-hover:opacity-100 button bg-lof-400 aspect-square">
-            <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
-        </button>
+    <section @mouseenter="hovering = true" @mouseleave="hovering = false" @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel(0, $event)" ref="carousel" class="overflow-x-hidden group overflow-y-clip" :class="{'pb-1.5': editable}" v-else>
+        <Transition name="fade">
+            <button v-show="hovering && buttonsShown && end != 1" @click="scrollCarousel(-0.75, $event)" class="flex absolute left-2 top-1/2 z-10 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
+                <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
+            </button>
+        </Transition>
 
 
-        <div class="absolute inset-0">
-            <Resizer @resize="modHeight" :style="{height: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="256" :editable="editable && !settings.overflow"></Resizer>
+        <div class="absolute inset-0 w-full">
+            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="260" :editable="editable"></Resizer>
         </div>
 
         <section class="flex items-center" :class="{'flex-wrap': settings.overflow}">
@@ -92,8 +97,10 @@ const onResize = new ResizeObserver(() => {
             :editable="false"
             />
         </section>
-        <button v-show="buttonsShown && end != 2" @click="scrollCarousel(1), $event" class="flex absolute right-2 top-1/2 z-10 justify-center w-10 rounded-full opacity-0 -translate-y-1/2 group-hover:opacity-100 button bg-lof-400 aspect-square">
-            <img src="@/images/showComms.svg" class="w-3 invert translate-x-0.5" alt="">
-        </button>
+        <Transition name="fade">
+            <button v-show="hovering && buttonsShown && end != 2" @click="scrollCarousel(0.75, $event)" class="flex absolute right-2 top-1/2 z-10 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
+                <img src="@/images/showComms.svg" class="w-3 invert translate-x-0.5" alt="">
+            </button>
+        </Transition>
     </section>
 </template>

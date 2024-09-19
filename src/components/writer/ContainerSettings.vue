@@ -48,7 +48,7 @@ const closeSettings = (m: MouseEvent) => {
 </script>
 
 <template>
-    <div ref="containerSettings" v-if="settingsShown" class="flex absolute -top-1 font-[poppins] -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
+    <div ref="containerSettings" v-if="settingsShown" class="flex absolute text-white -top-1 font-[poppins] -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
         <div v-for="(_, key, index) in settingsArr" class="flex flex-col" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
             <div class="flex flex-col">
                 <!-- Text input -->
@@ -76,7 +76,7 @@ const closeSettings = (m: MouseEvent) => {
                 <div v-if="containers[type].settings[index].type[0] == 6" class="flex justify-between items-center">
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
-                        <option v-for="(key, ind) in containers[type].settings[index].type.slice(2)" :value="ind">{{ key }}</option>
+                        <option v-for="(key, ind) in containers[type].settings[index].type.slice(1)" :value="ind">{{ key }}</option>
                     </select>
                 </div>
 

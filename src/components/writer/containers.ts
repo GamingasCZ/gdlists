@@ -12,7 +12,7 @@ import ReviewCarousel from "./ReviewCarousel.vue"
 const success = {success: true}
 
 const error = (ind: number, msg = 0) => {
-    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty')]
+    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty'), i18n.global.t('reviews.isEmpty')]
     return {success: false, error: message[msg], index: ind}
 }
 
@@ -31,7 +31,7 @@ const containers: Containers = {
         {
             key: "size",
             title: i18n.global.t('reviews.fontSize'),
-            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 10, 12, 14, 16, 20, 24, 32, 48, 64],
+            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 20, 24, 32, 36, 48, 64],
             default: 0,
         },
         {
@@ -292,6 +292,7 @@ const containers: Containers = {
                 default: false
             },
         ],
+        errorCheck: (settings: object) => settings.components.length ? success : error(0, 3)
     }
 }
 

@@ -17,8 +17,8 @@ const emit = defineEmits<{
 
 const getFile = async (e: DragEvent) => {
     let file
-    console.log(e)
     e.preventDefault()
+    if (props.disabled) return
     if (props.allowYoutubeLinks && e?.clipboardData) {
         let validYTLink = shortenYTLink(e.clipboardData.getData("text"))
         if (validYTLink) return emit('data', e.clipboardData.getData("text"))

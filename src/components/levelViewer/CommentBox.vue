@@ -210,8 +210,8 @@ function sendComment(com = "") {
         </Transition>
         <footer class="flex justify-between mt-2">
             <div>
-                <ProfilePicture class="inline mr-2 w-8" :uid="pfp[1]" :cutout="pfp[2]" />
-                <label>{{ pfp[0] }}</label>
+                <ProfilePicture v-show="pfp" class="inline mr-2 w-8" :uid="pfp?.[1]" :cutout="pfp?.[2]" />
+                <label>{{ pfp?.[0] }}</label>
             </div>
 
             <div class="flex gap-2">

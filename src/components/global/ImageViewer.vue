@@ -26,16 +26,31 @@ const keypress = (e: KeyboardEvent) => {
 }
 
 let uiCooldown = -1
-const uiShown = ref(false)
-const showUI = () => {
-    uiShown.value = true
-
+let hoveringOverUI = false
+const startCooldown = () => {
     if (uiCooldown != -1) clearTimeout(uiCooldown)
+    hoveringOverUI = false
     uiCooldown = setTimeout(() => {
         uiShown.value = false
         uiCooldown = -1    
     }, 1500);
 }
+const stopCooldown = () => {
+    clearTimeout(uiCooldown)
+    hoveringOverUI = true
+    uiCooldown = -1
+    uiShown.value = true
+}
+
+
+const uiShown = ref(false)
+const showUI = () => {
+    uiShown.value = true
+    if (hoveringOverUI) return
+
+    startCooldown()
+}
+
 
 document.body.addEventListener("keyup", keypress)
 
@@ -90,8 +105,8 @@ const stopDrag = () => {
                     <button @click="emit('closePopup')" class="button"><img src="@/images/close.svg" class="w-8" alt=""></button>
                 </div>
                 <div class="flex absolute top-0 right-0 left-0 justify-between items-start mx-4 max-sm:hidden">
-                    <button class="h-screen" @click.stop="prevImage()"><img src="@/images/showCommsL.svg" class="w-8 button" alt=""></button>
-                    <button class="h-screen" @click.stop="nextImage()"><img src="@/images/showComms.svg" class="w-8 button" alt=""></button>
+                    <button @mouseenter="stopCooldown" @mouseleave="startCooldown" class="h-screen" @click.stop="prevImage()"><img src="@/images/showCommsL.svg" class="w-8 button" alt=""></button>
+                    <button @mouseenter="stopCooldown" @mouseleave="startCooldown" class="h-screen" @click.stop="nextImage()"><img src="@/images/showComms.svg" class="w-8 button" alt=""></button>
                 </div>
             </div>
         </Transition>

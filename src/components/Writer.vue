@@ -87,16 +87,6 @@ watch(props, () => {
     }
 })
 
-let mStarted = [-1, -1]
-document.body.addEventListener("mousedown", (e) => mStarted = [e.x, e.y])
-document.body.addEventListener("click", (e) => {
-    let rect = writer.value?.getBoundingClientRect()
-    if (mStarted[0] < rect.x || mStarted[1] < rect.y || mStarted[0] > rect.x+rect?.width || mStarted[1] > rect.y+rect?.height) {
-        selectedContainer.value = [-1, null]
-        selectedNestContainer.value = [-1, -1, -1]
-    }
-})
-
 const openDialogs = reactive({
     settings: false,
     levels: false,
@@ -135,6 +125,8 @@ provide("levelHashes", {levelHashes, updateHashes})
 
 
 provide("settingsTitles", CONTAINERS)
+
+const newID = (offset = 0) => (Date.now() + offset + JSON.stringify(reviewData.value).length) >> 1
 
 const containerLastAdded = ref(0)
 const addContainer = (key: string, addTo?: number, returnOnly = false, above = false) => {
@@ -176,7 +168,7 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
         align: "left",
         settings: settingObject,
         extraComponents: 0,
-        id: Date.now()
+        id: newID()
     }
 
     if (returnOnly) return containerData
@@ -239,7 +231,6 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 }
 
 const columnCommand = (index: number) => {
-    let nestAttay = selectedNestContainer.value.slice(0)
     let nest = reviewData.value.containers[selectedNestContainer.value[0]]
     let column = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
     switch (index) {
@@ -247,8 +238,14 @@ const columnCommand = (index: number) => {
         case 1: addContainer("twoColumns", 1); break;
         case 2:
         case 3:
+            let duplicate = JSON.parse(JSON.stringify(nest.settings.components[selectedNestContainer.value[1]]))
+            for (let i = 0; i < duplicate.length; i++) {
+                if (duplicate[i] === Object(duplicate[i]))
+                duplicate[i].id = newID(i)
+            }
+
             nest.settings.components
-                .splice(selectedNestContainer.value[1] + (index - 3), 0, JSON.parse(JSON.stringify(nest.settings.components[selectedNestContainer.value[1]])))
+                .splice(selectedNestContainer.value[1] + (index - 3), 0, duplicate)
                 nest.extraComponents += 1
             break;
         case 6: // fit width / fill space
@@ -483,10 +480,6 @@ const updateReview = () => {
         })
 }
 
-onUnmounted(() => {
-  reviewData.value = DEFAULT_REVIEWDATA()
-})
-
 const doBackup = (from?: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
   if (reviewData.value.containers.length == 0) return false // Do not save without any content
   if (!to) { // Do not backup when redirected from editor
@@ -510,26 +503,41 @@ const loadBackup = () => {
     fetchEmbeds()
     removeBackup(true)
 }
+
+let mStarted = [-1, -1]
+const setMouseStart = (e: MouseEvent) => mStarted = [e.x, e.y]
+const unfocusContainer = (e: MouseEvent) => {
+    let rect = writer.value?.getBoundingClientRect()
+    if (!rect) return
+    if (mStarted[0] < rect.x || mStarted[1] < rect.y || mStarted[0] > rect.x+rect?.width || mStarted[1] > rect.y+rect?.height) {
+        selectedContainer.value = [-1, null]
+        selectedNestContainer.value = [-1, -1, -1]
+    }
+}
+
 let autosaveInterval: number
 onMounted(() => {
     if (SETTINGS.value.autosave) {
-        // Save when leaving the site
-    window.addEventListener("beforeunload", () => {
-        if (reviewSave.value.backupID) saveDraft(false, true)
-    })
-    onBeforeRouteLeave((from, to) => {
-        let res = doBackup(from, to)
-        if (res) saveDraft(false, true)
-    })
+            // Save when leaving the site
+        window.addEventListener("beforeunload", () => {
+            if (reviewSave.value.backupID) saveDraft(false, true)
+        })
+        onBeforeRouteLeave((from, to) => {
+            let res = doBackup(from, to)
+            if (res) saveDraft(false, true)
+        })
 
-    autosaveInterval = setInterval(() => {
-        if (!SETTINGS.value.autosave) // If setting changes, do not autosave
-            return clearInterval(autosaveInterval)
+        autosaveInterval = setInterval(() => {
+            if (!SETTINGS.value.autosave) // If setting changes, do not autosave
+                return clearInterval(autosaveInterval)
 
-        saveDraft(false, false)
-      
-    }, SETTINGS.value.autosave*1000)
-}
+            saveDraft(false, false)
+        
+        }, SETTINGS.value.autosave*1000)
+    }
+
+    document.body.addEventListener("mousedown", setMouseStart)
+    document.body.addEventListener("click", unfocusContainer)
 
   if (localStorage) {
     let backup = localStorage.getItem("reviewBackup")
@@ -541,6 +549,12 @@ onMounted(() => {
       backupData.value.backupID = backupParsed.backupID
     }
   }
+})
+
+onUnmounted(() => {
+  reviewData.value = DEFAULT_REVIEWDATA()
+  document.body.removeEventListener("click", unfocusContainer)
+  document.body.removeEventListener("mousedown", setMouseStart)
 })
 
 const preUpload = ref(false)

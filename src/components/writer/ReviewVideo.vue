@@ -27,8 +27,8 @@ if (props.settings.url) videoLoading.value = 0
     <ContainerHelp v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? $t('reviews.loadVideoFail') : $t('reviews.setVideo')">
         <input type="text" v-model="settings.url" class="p-1 bg-white bg-opacity-10 rounded-md" :placeholder="$t('reviews.ytLink')">
     </ContainerHelp>
-    <figure v-else class="m-2">
-        <Resizer :min-size="104" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event">
+    <figure v-else class="m-2 text-inherit group">
+        <Resizer :min-size="104" :max-size="720" class="h-max" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event">
             <iframe
                 :width="settings.height*1.77 || settings.width" :height="settings.height ? settings.height : settings.width/1.77"
                 :src="`https://www.youtube-nocookie.com/embed/${shortenYTLink(settings.url, true)}`"

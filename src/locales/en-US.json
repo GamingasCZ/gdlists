@@ -423,7 +423,7 @@
     "desc": "Description",
     "metadata": "Metadata",
     "tooManyImg": "You can only upload 10 images at once!",
-    "selImg": "{0} image selected | {0} images selected"
+    "selImg": "{count} image selected | {count} images selected"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -757,7 +757,8 @@
     "descPlaceholder": "You can summarize basic info about the review here and add links!",
     "splitPg": "Split into Paragraphs",
     "fontSize": "Font Size",
-    "indent": "Indent First Line"
+    "indent": "Indent First Line",
+    "isEmpty": "%s is empty!"
   },
   "review": {
     "columnSetting": "{0} column",

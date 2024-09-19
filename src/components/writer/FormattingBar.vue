@@ -185,7 +185,7 @@ if (SETTINGS.value.scrollNavbar)
 		<button
 			:disabled="previewEnabled"
 			ref="columnButton"
-			@click="doAction(4, columnData)"
+			@click="doAction(5, columnData)"
 			@mousedown.prevent=""
 			class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
 			v-show="!showFormatting"
