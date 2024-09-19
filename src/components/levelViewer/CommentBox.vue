@@ -209,10 +209,11 @@ function sendComment(com = "") {
             </div>
         </Transition>
         <footer class="flex justify-between mt-2">
-            <div>
-                <ProfilePicture v-show="pfp" class="inline mr-2 w-8" :uid="pfp?.[1]" :cutout="pfp?.[2]" />
-                <label>{{ pfp?.[0] }}</label>
+            <div v-if="pfp">
+                <ProfilePicture class="inline mr-2 w-8" :uid="pfp[1]" :cutout="pfp[2]" />
+                <label>{{ pfp[0] }}</label>
             </div>
+            <div v-else></div>
 
             <div class="flex gap-2">
                 <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 rounded-md aspect-square disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="w-6" alt=""></button>
