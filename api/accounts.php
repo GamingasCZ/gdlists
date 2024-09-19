@@ -107,9 +107,11 @@ if (sizeof($_GET) > 0) {
     saveAccessToken($accessInfo, $dcApiResponse["id"]);
 
     // Save profile pic
-    $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
-    if ($pfp !== false)
-        saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
+    if (!file_exists(getUserPath($dcApiResponse["id"]) . "/pfp.webp")) {
+        $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
+        if ($pfp !== false)
+            saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
+    }
 
     $mysqli -> close();
     header("Location: " . $https . $local . '/gdlists');
