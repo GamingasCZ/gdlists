@@ -58,7 +58,7 @@ const dateString = ref<string>(`${new Date(parseInt(props.timestamp)*1000).toLoc
 time.value = prettyDate(datePassed)
 
 const parsedComment = ref<string>(props.comment)
-let emojis = props.comment.match(/&(\d{2})/g)
+let emojis = props.comment.match(/(?:&\d{2}|[ \n])/g) // Match any emojis and spaces
 let isEmojisOnly = (emojis ?? []).join("") == props.comment
 
 if (emojis != null) {

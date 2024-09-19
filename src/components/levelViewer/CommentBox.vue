@@ -114,7 +114,7 @@ function parseComment(comment: Array<string | {id: string}> ): string {
             else parsedComment += `&${commentBit.id.padStart(2, '0')}`
         }
     });
-    return parsedComment
+    return parsedComment.trim()
 }
 
 const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.value.getValues()).length

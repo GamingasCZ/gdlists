@@ -217,9 +217,9 @@ dialog {
 .regularParsing h1 { @apply mt-2 text-2xl}
 .regularParsing h2 { @apply mt-1 text-xl}
 .regularParsing h3 { @apply text-lg}
-.regularParsing li:has(input) { @apply list-none m-[revert] my-2 pl-2}
-.regularParsing ul { @apply whitespace-normal list-disc list-inside m-[revert] pl-2}
-.regularParsing ol { @apply list-decimal list-inside m-[revert] pl-2}
+.regularParsing li:has(input) { @apply list-none my-2 pl-2}
+.regularParsing ul { @apply whitespace-normal list-disc list-inside pl-2}
+.regularParsing ol { @apply list-decimal whitespace-normal list-inside m-0 pl-2}
 .regularParsing a { @apply underline}
 .regularParsing blockquote { @apply whitespace-normal border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
 .regularParsing img { @apply max-w-48 my-1}
