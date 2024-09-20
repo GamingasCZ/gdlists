@@ -8,6 +8,7 @@ import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContaine
 import { DEFAULT_RATINGS } from "@/Reviews";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
+import CardTheme from "../levelViewer/CardTheme.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -74,11 +75,12 @@ const listData = inject("listData")
 
 <template>
   <section v-if="guessResult"
-    class="relative font-[poppins] w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
+    class="relative font-[poppins] overflow-clip w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
   >
+    <CardTheme v-if="background" v-bind="background" />
 
     <Transition name="fade">
       <div v-if="guessResult[0] > -1" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[min(30vw,60rem)] justify-center items-center -z-10 opacity-40 mix-blend-luminosity">

@@ -15,8 +15,8 @@ import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import LevelImportPopup from "./editor/LevelImportPopup.vue";
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX, getBGcolor } from "../Editor";
-import { ref, onMounted, watch } from "vue";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX, getBGcolor, newCardBG } from "../Editor";
+import { ref, onMounted, watch, provide } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
@@ -141,14 +141,35 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     levelList.value.pageBGcolor = modifyListBG(list.pageBGcolor)
 }
 
-const tagPopupOpen = ref(false);
-const BGpickerPopupOpen = ref(false);
-const bgColorPickerOpen = ref(false);
-const descriptionEditorOpen = ref(false);
-const favoriteLevelPickerOpen = ref(false);
-const removeListPopupOpen = ref(false);
-const importDialogOpen = ref(false);
-const imageBrowserOpen = ref(false);
+const openDialogs = ref({
+  tagPopup: false,
+  BGpicker: false,
+  BGcolorPicker: false,
+  descriptionEditor: false,
+  favoriteLevelPicker: false,
+  removeListPopup: false,
+  importDialog: false,
+  imagePicker: [false, 0, 0],
+  collabEditor: false
+})
+
+const modifyImage = (imgUrl: string) => {
+  if (openDialogs.value.imagePicker[1] == 0) {
+    levelList.value.titleImg[0] = imgUrl
+    useAccentColor()
+  }
+  if (openDialogs.value.imagePicker[1] == -5) {
+    let level = levelList.value.levels[openDialogs.value.imagePicker[2] as number]
+    if (!level.background)
+      level.background = newCardBG()
+
+    level.background.image[0] = imgUrl
+  }
+  console.log(openDialogs.value.imagePicker)
+}
+
+provide("openedDialogs", openDialogs)
+
 const previewBackground = ref(false);
 const collabEditorOpen = ref(false);
 const descriptionFocused = ref(false);
@@ -374,29 +395,31 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 
 }
 
-const useAccentColor = () => {
+const useAccentColor = (img) => {
   let img = document.createElement("img")
+  let col = null
   img.src = levelList.value.titleImg[0]
   img.onload = () => {
-    levelList.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
+    col = getDominantColor(img).hex()
     img.remove()
   }
+  return col
 }
 
 </script>
 
 <template>
-  <DialogVue :open="tagPopupOpen" @close-popup="tagPopupOpen = false" :title="$t('editor.tagTitle')">
+  <DialogVue :open="openDialogs.tagPopup" @close-popup="openDialogs.tagPopup = false" :title="$t('editor.tagTitle')">
     <TagPickerPopup
       @add-tag="levelList.levels[currentlyOpenedCard].tags.push($event)"
     ></TagPickerPopup>
   </DialogVue>
 
-  <DialogVue :open="BGpickerPopupOpen" @close-popup="BGpickerPopupOpen = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
+  <DialogVue :open="openDialogs.BGpicker" @close-popup="openDialogs.BGpicker = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
     <BGImagePicker :source="levelList.titleImg" />
   </DialogVue>
 
-  <DialogVue :open="descriptionEditorOpen" @close-popup="descriptionEditorOpen = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
+  <DialogVue :open="openDialogs.descriptionEditor" @close-popup="openDialogs.descriptionEditor = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
     <DescriptionEditor
       :edit-value="levelList"
     />
@@ -412,9 +435,9 @@ const useAccentColor = () => {
     @close-popup="closeCollabTools()"
   />
 
-  <DialogVue :open="favoriteLevelPickerOpen" @close-popup="favoriteLevelPickerOpen = false" :title="$t('other.savedLevels')">
+  <DialogVue :open="openDialogs.favoriteLevelPicker" @close-popup="openDialogs.favoriteLevelPicker = false" :title="$t('other.savedLevels')">
     <PickerPopup
-      v-if="favoriteLevelPickerOpen"
+      v-if="openDialogs.favoriteLevelPicker"
       v-model="favoritesSearch"
     >
       <template #error v-if="levelList.levels.length >= 50">
@@ -426,12 +449,12 @@ const useAccentColor = () => {
     </PickerPopup>
   </DialogVue>
 
-  <DialogVue :open="importDialogOpen" @close-popup="importDialogOpen = false" :title="$t('editor.importLevels')">
-    <LevelImportPopup @close-popup="importDialogOpen = false" @add-level="addLevel($event)" />
+  <DialogVue :open="openDialogs.importDialog" @close-popup="openDialogs.importDialog = false" :title="$t('editor.importLevels')">
+    <LevelImportPopup @close-popup="openDialogs.importDialog = false" @add-level="addLevel($event)" />
   </DialogVue>
 
-  <DialogVue :open="imageBrowserOpen" @close-popup="imageBrowserOpen = false" :title="$t('editor.titleImage')" :width="dialog.large">
-    <ImageBrowser :unselectable="false" @pick-image="levelList.titleImg[0] = $event; useAccentColor()" @close-popup="imageBrowserOpen = false" />
+  <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('editor.titleImage')" :width="dialog.large">
+    <ImageBrowser :unselectable="false" @pick-image="modifyImage" @close-popup="openDialogs.imagePicker[0] = false" />
   </DialogVue>
 
   <!-- Background preview -->
@@ -439,7 +462,7 @@ const useAccentColor = () => {
     <ListBackground v-if="previewBackground || previewingList" :image-data="levelList.titleImg" :list-color="levelList.pageBGcolor" />
   </Transition>
 
-  <RemoveListPopup @close-popup="removeListPopupOpen = false" @delete-list="removeList" v-if="removeListPopupOpen"/>
+  <RemoveListPopup @close-popup="openDialogs.removeListPopup = false" @delete-list="removeList" v-if="openDialogs.removeListPopup"/>
 
   <NotLoggedIn
     v-if="!isLoggedIn && hasLocalStorage()"
@@ -537,7 +560,7 @@ const useAccentColor = () => {
         class="overflow-auto overflow-y-auto px-2 h-full max-h-20 bg-black bg-opacity-20 rounded-md min-h-[72px] regularParsing grow"
         v-html="parseText(levelList.description)"
         ></div>
-        <button type="button" @click="descriptionEditorOpen = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-white bg-opacity-10 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
+        <button type="button" @click="openDialogs.descriptionEditor = true" class="absolute right-2 bottom-2 p-1.5 w-8 bg-white bg-opacity-10 rounded-md opacity-0 transition-opacity group-hover:opacity-100 button">
           <img
             class="w-8"
             src="../images/fullscreen.svg"
@@ -551,11 +574,11 @@ const useAccentColor = () => {
             <img src="@/images/color.svg" class="p-1 w-12 opacity-40" alt="">
             <span class="mb-2 text-xl">{{ $t('editor.bgColor') }}</span>
             <div class="flex gap-1">
-              <button @click="bgColorPickerOpen = !bgColorPickerOpen" :style="{backgroundColor: getBGcolor()}" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+              <button @click="openDialogs.BGcolorPicker = !openDialogs.BGcolorPicker" :style="{backgroundColor: getBGcolor()}" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
                 <img src="@/images/pippete.svg" class="box-content p-0.5 px-2 w-4 rounded-md border-2 border-white" alt="">
               </button>
               <button
-                @click="levelList.pageBGcolor = modifyListBG([0,0,0], true); bgColorPickerOpen = false"
+                @click="levelList.pageBGcolor = modifyListBG([0,0,0], true); openDialogs.BGcolorPicker = false"
                 v-show="JSON.stringify(levelList.pageBGcolor) != JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)"
                 class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button"
               >
@@ -567,10 +590,10 @@ const useAccentColor = () => {
             <img src="@/images/image.svg" class="p-1 w-12 opacity-40" alt="">
             <span class="mb-2 text-xl">{{ $t('other.bg') }}</span>
             <div class="flex gap-1">
-              <button @click="BGpickerPopupOpen = true" v-show="levelList.titleImg[0]" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+              <button @click="openDialogs.BGpicker = true" v-show="levelList.titleImg[0]" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/gear.svg" class="w-6" alt="">
               </button>
-              <button @click="imageBrowserOpen = true" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+              <button @click="openDialogs.imagePicker[0] = true; openDialogs.imagePicker[1] = 0" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
                 <img src="@/images/copy.svg" class="w-6" alt="">
                 <span>{{ levelList.titleImg[0] ? $t('other.modify') : $t('other.pick') }}</span>
               </button>
@@ -584,7 +607,7 @@ const useAccentColor = () => {
 
 
     <div
-      v-show="bgColorPickerOpen"
+      v-show="openDialogs.BGcolorPicker"
       class="px-3 py-2 my-2 w-full max-w-[54rem] bg-white bg-opacity-10 rounded-md"
     >
       <ColorPicker @colors-modified="levelList.pageBGcolor = modifyListBG($event, false, false)" :hue="levelList.pageBGcolor[0]" :saturation="0.36" :lightness="levelList.pageBGcolor[2]"/>
@@ -603,14 +626,14 @@ const useAccentColor = () => {
             alt=""
           />
         </button>
-        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s] ml-3" @click="importDialogOpen = true">
+        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s] ml-3" @click="openDialogs.importDialog = true">
           <img
             class="p-2 w-10 bg-black bg-opacity-40 rounded-l-md hover:bg-black hover:bg-opacity-60"
             src="../images/importLevels.svg"
             alt=""
           />
         </button>
-        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s]" @click="favoriteLevelPickerOpen = true">
+        <button :disabled="levelList.levels.length >= 50" type="button" class="disabled:grayscale transition-[filter_0.2s]" @click="openDialogs.favoriteLevelPicker = true">
           <img
             class="p-2 w-10 bg-black bg-opacity-40 hover:bg-black hover:bg-opacity-60"
             src="../images/addfromFaves.svg"
@@ -637,8 +660,8 @@ const useAccentColor = () => {
         <h2 class="mb-3 text-xl text-center">{{ $t('editor.startHelp') }}</h2>
         <div class="flex gap-2 items-center max-sm:flex-col">
           <button @click="addLevel()" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addLevel.svg" class="w-8" alt="">{{ $t('reviews.addLevel') }}</button>
-          <button @click="favoriteLevelPickerOpen = true" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addfromFaves.svg" class="w-8" alt="">{{ $t('editor.addFromSaves') }}</button>
-          <button @click="importDialogOpen = true" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/importLevels.svg" class="w-8" alt="">{{ $t('editor.importFromGD') }}</button>
+          <button @click="openDialogs.favoriteLevelPicker = true" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/addfromFaves.svg" class="w-8" alt="">{{ $t('editor.addFromSaves') }}</button>
+          <button @click="openDialogs.importDialog = true" class="flex gap-2 items-center p-1 w-9/12 bg-black bg-opacity-20 rounded-md hover:bg-opacity-40"><img src="../images/importLevels.svg" class="w-8" alt="">{{ $t('editor.importFromGD') }}</button>
         </div>
       </div>
 
@@ -652,7 +675,7 @@ const useAccentColor = () => {
         @do-move="startMove"
         @update-opened-card="updateOpenedCard"
         @move-controls="enableMoveControls"
-        @open-tag-popup="tagPopupOpen = true"
+        @open-tag-popup="openDialogs.tagPopup = true"
         @open-collab-tools="collabEditorOpen = true"
         @throw-error="throwError($event, false)"
         class="levelCard"
@@ -680,7 +703,7 @@ const useAccentColor = () => {
       </button>
       <button
         class="flex gap-2 items-center px-3 py-2 mt-3 font-black text-black bg-red-400 rounded-md button focus-within:outline-white"
-        @click="removeListPopupOpen = true"
+        @click="openDialogs.removeListPopup = true"
         v-if="editing"
         :disabled="!isOnline"
       >

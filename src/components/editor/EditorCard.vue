@@ -11,6 +11,7 @@ import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
+import LevelBackground from "./LevelBackground.vue";
 
 const props = defineProps<{
   levelArray: Level[]
@@ -383,6 +384,8 @@ const background = computed(() => {
         </div>
         <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
           alt="" />
+        <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 4 ? 4 : 0" src="../../images/bgPicker.svg"
+          alt="" />
         <img class="ml-4 w-10 button" :title="$t('editor.removeTitle')" @click="levelArray.levels.splice(index, 1);" src="../../images/deleteLevel.svg" alt="" />
       </div>
     </div>
@@ -411,6 +414,7 @@ const background = computed(() => {
         :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
       <DifficultyPicker v-if="openedPanel == 2" :level="index" @update="selectedDiff = $event" :level-array="levelArray" />
       <LevelTags :level-array="levelArray" :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
+      <LevelBackground :level-array="levelArray" :card-index="index" v-if="openedPanel == 4" />
     </div>
   </section>
 </template>

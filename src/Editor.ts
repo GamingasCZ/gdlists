@@ -38,6 +38,8 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
 
 export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
+export const newCardBG = () => ({image: DEFAULT_LEVELLIST.titleImg.slice(0), opacity: 1, theme: 0, tile: false})
+
 export function addLevel(values: Level | null) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
@@ -48,6 +50,7 @@ export function addLevel(values: Level | null) {
     difficulty: values?.difficulty ?? [0, 0],
     tags: values?.tags ?? [],
     platf: values?.platf ?? false,
+    background: values?.background ?? newCardBG()
   };
 
   levelList.value.levels.push(levelInfo);
