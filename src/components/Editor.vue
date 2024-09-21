@@ -395,10 +395,10 @@ const openCollabTools = (ind: number, col: [number, number, number]) => {
 
 }
 
-const useAccentColor = (img) => {
+const useAccentColor = (url: string) => {
   let img = document.createElement("img")
   let col = null
-  img.src = levelList.value.titleImg[0]
+  img.src = url
   img.onload = () => {
     col = getDominantColor(img).hex()
     img.remove()
