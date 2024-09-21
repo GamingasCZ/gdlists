@@ -1,7 +1,7 @@
 <?php
 /*
 Return codes:
-0 - Every error
+-2 - Every error
 1 - Account already created
 */
 header('Content-type: application/json'); // Return as JSON
@@ -15,7 +15,7 @@ $local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVE
 if (isset($_GET["error"])) {
     header("Authentication: false");
     header("Location: " . $https . $local . '/gdlists/?loginerr');
-    die(0);
+    die("-2");
 }
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -46,10 +46,11 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 if ($_SERVER["REQUEST_METHOD"] == "PATCH") {
     $DATA = file_get_contents("php://input");
     $acc = checkAccount($mysqli);
-    if (!$acc) die();
+    if (!$acc) die("-2");
 
     $newCutout = max(0, min(intval($DATA), 10));
-    doRequest($mysqli, "INSERT INTO `profiles`(`uid`, `pfp_cutout`) VALUES (?,?) ON DUPLICATE KEY UPDATE `pfp_cutout`=?", [$acc["id"], $newCutout, $newCutout], "sii");
+    $res = doRequest($mysqli, "INSERT INTO `profiles`(`uid`, `pfp_cutout`) VALUES (?,?) ON DUPLICATE KEY UPDATE `pfp_cutout`=?", [$acc["id"], $newCutout, $newCutout], "sii");
+    if (array_key_exists("error", $res)) die("-2");
     die();
 }
 
@@ -75,7 +76,7 @@ if (sizeof($_GET) > 0) {
         die($accCheck ? json_encode($profileData) : 0);
     }
 
-    if (!isset($_GET["code"])) die("0");
+    if (!isset($_GET["code"])) die("-2");
 
     // Get the access token from the authorization code
     $tokenUrl =  array(
@@ -89,6 +90,7 @@ if (sizeof($_GET) > 0) {
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 1), true);
     if (array_key_exists("error", $accessInfo)) {
         header("Location: " . $https . $local . '/gdlists/?loginerr');
+        die();
     };
 
     // Get user data
