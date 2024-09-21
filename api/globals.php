@@ -4,7 +4,7 @@ $hostname = getenv("DB_HOSTNAME");
 $username = getenv("DB_USERNAME");
 $password = getenv("DB_PASSWORD");
 $database = getenv("DB_NAME");
-$debugMode = false;
+$debugMode = true;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
@@ -63,9 +63,13 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = fa
         return ["success" => true];
     }
 
+    $res;
     if ($fetchAll)
-        return $result -> fetch_all(MYSQLI_ASSOC);
-    return $result -> fetch_assoc();
+        $res = $result -> fetch_all(MYSQLI_ASSOC);
+    else
+        $res = $result -> fetch_assoc();
+
+    return $res ? $res : [];
 }
 
 // thanks, random stackoverflow person (https://stackoverflow.com/a/46872528/11000740) :)
@@ -214,8 +218,7 @@ function getLocalUserID() {
     $auth = getAuthorization();
     if (!$auth) return false;
     
-    $token = getAuthorization();
-    return $token[2]; // User ID
+    return $auth[2]; // User ID
 }
 
 function checkAccount($mysqli, $forceToken = false) {
