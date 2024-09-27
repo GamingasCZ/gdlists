@@ -53,6 +53,13 @@ import SectionDivider from '../ui/SectionDivider.vue';
             control="cbox"
         >
         </Option>
+        <Option
+            v-model="SETTINGS.seasonalThemes"
+            :name="$t('settingsMenu.seasThemes')"
+            :desc="$t('settingsMenu.seasThemesHelp')"
+            control="cbox"
+        >
+        </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
             v-model="SETTINGS.disableColors"

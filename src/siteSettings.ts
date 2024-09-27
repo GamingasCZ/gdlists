@@ -13,7 +13,9 @@ export const SETTINGS = ref({
   autoComments: true,
   disableColors: false,
   disableBGs: false,
-  disableTL: false
+  disableTL: false,
+  seasonalThemes: true,
+  selectedTheme: 0
 });
 
 watch(SETTINGS, () => {

@@ -423,7 +423,8 @@
     "desc": "Description",
     "metadata": "Metadata",
     "tooManyImg": "You can only upload 10 images at once!",
-    "selImg": "{count} image selected | {count} images selected"
+    "selImg": "{count} image selected | {count} images selected",
+    "themes": "Themes"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -478,7 +479,9 @@
     "disTL": "Disable translucency",
     "disTLhelp": "Disables blurry backgrounds of reviews and level cards",
     "loadCom": "Comments under Posts",
-    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post"
+    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post",
+    "seasThemes": "Seasonal Themes",
+    "seasThemesHelp": "Themes will automatically switch, if a special one is available."
   },
   "help": {
     "Lists": "Lists",

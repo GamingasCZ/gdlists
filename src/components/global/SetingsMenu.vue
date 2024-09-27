@@ -29,7 +29,8 @@ const dialogs = ref({
   settings: false,
   gallery: false,
   avatar: false,
-  help: false
+  help: false,
+  themes: false
 })
 
 const Dialog = defineAsyncComponent({
@@ -55,6 +56,11 @@ const AvatarEditor = defineAsyncComponent({
 //   loader: () => import("@/components/global/SessionDialog.vue"),
 //   loadingComponent: LoadingBlock
 // })
+
+const Themes = defineAsyncComponent({
+  loader: () => import("@/components/global/ThemePicker.vue"),
+  loadingComponent: LoadingBlock
+})
 
 const Help = defineAsyncComponent({
   loader: () => import("@/components/helpMenu/HelpMenu.vue"),
@@ -101,6 +107,12 @@ const sessionsDialog = ref<HTMLDivElement>()
           <Gallery unselectable />
         </Dialog>
       </div>
+
+      <Transition name="fade">
+        <div v-if="dialogs.themes" class="z-30">
+            <Themes @close="dialogs.themes = false" />
+        </div>
+      </Transition>
     </Teleport>
 
 
@@ -150,13 +162,12 @@ const sessionsDialog = ref<HTMLDivElement>()
     >
       <img src="@/images/image.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.gallery') }}
     </button>
-    <!-- <button
+    <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
-      @click="dialogs.sessions = true"
-      v-if="isLoggedIn"
+      @click="dialogs.themes = true"
     >
-      <img src="@/images/collab.svg" class="inline mr-3 w-5" alt="" />{{ $t('settingsMenu.devices') }}
-    </button> -->
+      <img src="@/images/color.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.themes') }}
+    </button>
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
       @click="dialogs.help = true"

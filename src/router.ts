@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { ref } from "vue";
+import THEMES from "./themes";
+import { SETTINGS } from "./siteSettings";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -85,19 +87,17 @@ router.beforeEach(async (to, from) => {
   
   
   if (
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--primaryColor"
-    ) == document.documentElement.style.getPropertyValue("--primaryColor")
+    THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor != document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
     if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
     
-      document.documentElement.style.setProperty("--siteBackground", "");
+      document.documentElement.style.setProperty("--siteBackground", THEMES[SETTINGS.value.selectedTheme || 0].colors.siteBackground);
       document.querySelector("nav")?.classList.add("slidingNavbar");
   
       setTimeout(() => {
-        document.documentElement.style.setProperty("--primaryColor", "");
-        document.documentElement.style.setProperty("--secondaryColor", "");
-        document.documentElement.style.setProperty("--brightGreen", "");
+        document.documentElement.style.setProperty("--primaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor);
+        document.documentElement.style.setProperty("--secondaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.secondaryColor);
+        document.documentElement.style.setProperty("--brightGreen", THEMES[SETTINGS.value.selectedTheme || 0].colors.brightGreen);
       }, 150);
   
       setTimeout(() => {

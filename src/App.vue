@@ -13,7 +13,7 @@ import NotificationStack from "./components/global/NotificationStack.vue";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
-    localStorage.setItem("favoriteIDs", "[]");
+  localStorage.setItem("favoriteIDs", "[]");
   localStorage.getItem("favorites") ?? localStorage.setItem("favorites", "[]");
   localStorage.getItem("pinnedLists") ??
     localStorage.setItem("pinnedLists", "[]");
