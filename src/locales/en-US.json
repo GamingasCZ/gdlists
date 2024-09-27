@@ -423,7 +423,12 @@
     "desc": "Description",
     "metadata": "Metadata",
     "tooManyImg": "You can only upload 10 images at once!",
-    "selImg": "{count} image selected | {count} images selected"
+    "selImg": "{count} image selected | {count} images selected",
+    "none2": "None",
+    "page": "Page",
+    "levels2": "Levels",
+    "all2": "All",
+    "effects": "Effects"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -460,7 +465,7 @@
     "disColors": "Disable Colors",
     "disColorHelp": "Level colors and comments will always use the default color.",
     "disBGs": "Disable Backgrounds",
-    "disBGhelp": "Image backgrounds in posts will not show up.",
+    "disBGhelp": "Image backgrounds in posts or level cards will not show up.",
     "visual": "Visual",
     "behave": "Behavior",
     "access": "Accessibility",

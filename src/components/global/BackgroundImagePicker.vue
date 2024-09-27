@@ -10,6 +10,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   source: ListBackground;
   forceAspectHeight?: number
+  disableControls?: boolean
 }>()
 
 const imageSource = ref(props.source[0])
@@ -29,6 +30,8 @@ onMounted(async () => {
   if (props.forceAspectHeight > 0) {
     props.source[2] = Math.floor(Math.min(100, Math.max(0, dragboxImage.value?.clientWidth / props.forceAspectHeight)))
   }
+  let dragboxHeight = document.querySelector("#dragbox")?.clientHeight
+  dragBoxTopOffset.value = dragboxImage.value?.clientHeight * props.source[2]/100
 
 });
 
@@ -128,7 +131,7 @@ onUnmounted(() => {
           class="absolute -bottom-2 left-1/2 w-6 h-6 bg-white rounded-full border-4 -translate-x-1/2 translate-y-1.5 cursor-ns-resize border-lof-400"></button>
       </div>
     </section>
-    <section class="grid grid-cols-2 gap-2 mt-2 select-none max-sm:grid-rows-2 max-sm:grid-cols-1">
+    <section v-if="!disableControls" class="grid grid-cols-2 gap-2 mt-2 select-none max-sm:grid-rows-2 max-sm:grid-cols-1">
       <div class="grid gap-2 items-center px-2 py-1 bg-black bg-opacity-40 rounded-md grid-cols-optionIconDesc">
         <img src="@/images/align.svg" class="w-8" alt="">
         <div class="pt-2">

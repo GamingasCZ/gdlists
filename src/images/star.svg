@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <linearGradient id="linearGradient2" x1=".76667" x2="15.161" y1="7.3152" y2="7.3152" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#fffc40" offset="0"/>
+   <stop stop-color="#ffd634" offset="1"/>
+  </linearGradient>
+  <filter id="filter41" x="-21.797" y="-22.819" width="44.593" height="46.638" color-interpolation-filters="sRGB">
+   <feFlood flood-color="rgb(0,0,0)" flood-opacity=".26274" in="SourceGraphic" result="flood"/>
+   <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="0.324 0.451"/>
+   <feOffset dx="0.000000" dy="-0.000000" in="blur" result="offset"/>
+   <feComposite in="flood" in2="offset" operator="in" result="comp1"/>
+   <feComposite in="SourceGraphic" in2="comp1" result="fbSourceGraphic"/>
+   <feColorMatrix in="fbSourceGraphic" result="fbSourceGraphicAlpha" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"/>
+   <feFlood flood-color="rgb(0,0,0)" flood-opacity=".26274" in="fbSourceGraphic" result="flood"/>
+   <feGaussianBlur in="fbSourceGraphic" result="blur" stdDeviation="32.599998"/>
+   <feOffset dx="0.000000" dy="-0.000000" in="blur" result="offset"/>
+   <feComposite in="flood" in2="offset" operator="in" result="comp1"/>
+   <feComposite in="fbSourceGraphic" in2="comp1" result="fbSourceGraphic"/>
+   <feColorMatrix in="fbSourceGraphic" result="fbSourceGraphicAlpha" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"/>
+   <feFlood flood-color="rgb(0,0,0)" flood-opacity=".26274" in="fbSourceGraphic" result="flood"/>
+   <feGaussianBlur in="fbSourceGraphic" result="blur" stdDeviation="32.599998"/>
+   <feOffset dx="0.000000" dy="-0.000000" in="blur" result="offset"/>
+   <feComposite in="flood" in2="offset" operator="in" result="comp1"/>
+   <feComposite in="fbSourceGraphic" in2="comp1" result="fbSourceGraphic"/>
+   <feColorMatrix in="fbSourceGraphic" result="fbSourceGraphicAlpha" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"/>
+   <feFlood flood-color="rgb(0,0,0)" flood-opacity=".26274" in="fbSourceGraphic" result="flood"/>
+   <feGaussianBlur in="fbSourceGraphic" result="blur" stdDeviation="32.599998"/>
+   <feOffset dx="0.000000" dy="-0.000000" in="blur" result="offset"/>
+   <feComposite in="flood" in2="offset" operator="in" result="comp1"/>
+   <feComposite in="fbSourceGraphic" in2="comp1" result="fbSourceGraphic"/>
+   <feColorMatrix in="fbSourceGraphic" result="fbSourceGraphicAlpha" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"/>
+   <feFlood flood-color="rgb(0,0,0)" flood-opacity=".26274" in="fbSourceGraphic" result="flood"/>
+   <feGaussianBlur in="fbSourceGraphic" result="blur" stdDeviation="32.599998"/>
+   <feOffset dx="0.000000" dy="-0.000000" in="blur" result="offset"/>
+   <feComposite in="flood" in2="offset" operator="in" result="comp1"/>
+   <feComposite in="fbSourceGraphic" in2="comp1" result="comp2"/>
+  </filter>
+ </defs>
+ <path transform="translate(.036396 .68479)" d="m15.159 5.5495c0.08136 0.23771-3.4692 3.3231-3.543 3.5632-0.0739 0.24013 1.1276 4.7879 0.92671 4.9387-0.20093 0.15084-4.2325-2.2725-4.4837-2.2685-0.25122 0.003925-4.2051 2.552-4.4107 2.4075-0.20554-0.14448 0.85333-4.7276 0.77196-4.9653-0.081363-0.23771-3.7265-3.2107-3.6526-3.4508s4.7599-0.64934 4.9608-0.80018c0.20093-0.15084 1.902-4.5363 2.1532-4.5402 0.25122-0.003925 2.0884 4.3263 2.294 4.4707 0.20554 0.14449 4.902 0.40709 4.9834 0.6448z" fill="url(#linearGradient2)" fill-rule="evenodd" filter="url(#filter41)" style="paint-order:stroke markers fill"/>
+</svg>

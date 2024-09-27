@@ -39,7 +39,7 @@
     "disColors": "Zakázat barvy",
     "disColorHelp": "Barvy levelů v seznamech a komentáře použijí vždy výchozí barvu.",
     "disBGs": "Zakázat pozadí",
-    "disBGhelp": "Obrázková pozadí v příspěvcích se nezobrazí.",
+    "disBGhelp": "Obrázková pozadí v příspěvcích nebo kartách levelů se nezobrazí.",
     "visual": "Vzhled",
     "behave": "Chování",
     "access": "Přístupnost",
@@ -393,7 +393,12 @@
     "desc": "Popis",
     "metadata": "Metadata",
     "tooManyImg": "Naráz můžeš nahrát jen 10 obrázků!",
-    "selImg": "Vybrán {count} obrázek | Vybráno {count} obrázků"
+    "selImg": "Vybrán {count} obrázek | Vybráno {count} obrázků",
+    "effects": "Efekty",
+    "none2": "Žádná",
+    "page": "Stránky",
+    "levels2": "Levelů",
+    "all2": "Všechna"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

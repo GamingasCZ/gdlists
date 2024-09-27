@@ -10,7 +10,7 @@ export const EMOJI_COUNT = 18;
 
 // For demon faces
 export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
-export const diffTranslateOffsets = [0,0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
+export const diffTranslateOffsets = [0, 0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
 export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
@@ -38,7 +38,7 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
 
 export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
-export const newCardBG = () => ({image: DEFAULT_LEVELLIST.titleImg.slice(0), opacity: 1, theme: 0, tile: false})
+export const newCardBG = () => ({ image: DEFAULT_LEVELLIST.titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
 
 export function addLevel(values: Level | null) {
   let levelInfo: Level = {
@@ -50,7 +50,7 @@ export function addLevel(values: Level | null) {
     difficulty: values?.difficulty ?? [0, 0],
     tags: values?.tags ?? [],
     platf: values?.platf ?? false,
-    background: values?.background ?? newCardBG()
+    BGimage: values?.BGimage ?? newCardBG()
   };
 
   levelList.value.levels.push(levelInfo);
@@ -79,13 +79,13 @@ export const modifyListBG = (newColors: number[] | string, reset = false, review
   if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return modifyListBG(0, true, review)
   if (reset) {
-    document.documentElement.style.setProperty("--siteBackground","")
-    document.documentElement.style.setProperty("--primaryColor","")
-    document.documentElement.style.setProperty("--secondaryColor","")
-    document.documentElement.style.setProperty("--brightGreen","")
+    document.documentElement.style.setProperty("--siteBackground", "")
+    document.documentElement.style.setProperty("--primaryColor", "")
+    document.documentElement.style.setProperty("--secondaryColor", "")
+    document.documentElement.style.setProperty("--brightGreen", "")
     return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   }
-  
+
   // Default colors
   // if (newColors[1] == 0.37) return
 
@@ -127,16 +127,16 @@ export const prettyDate = (datePassed: number) => {
   if (datePassed < 0) return i18n.global.t('date.future')
   else if (datePassed < 5) return i18n.global.t('date.fewSecsAgo')
   else if (datePassed <= 60) return i18n.global.t('date.secs', Math.floor(datePassed))
-  else if (Math.floor(datePassed/60) == 1) return i18n.global.t('date.mins', Math.floor(datePassed/60))
-  else if (Math.floor(datePassed/60) <= 60) return i18n.global.t('date.mins', Math.floor(datePassed/60))
-  else if (Math.floor(datePassed/3600) == 1) return i18n.global.t('date.hours', Math.floor(datePassed/3600))
-  else if (Math.floor(datePassed/3600) <= 24) return i18n.global.t('date.hours', Math.floor(datePassed/3600))
-  else if (Math.floor(datePassed/86400) == 1) return i18n.global.t('date.days', Math.floor(datePassed/86400))
-  else if (Math.floor(datePassed/86400) <= 7) return i18n.global.t('date.days', Math.floor(datePassed/86400))
-  else if (Math.floor(datePassed/604800) == 1) return i18n.global.t('date.weeks', Math.floor(datePassed/604800))
-  else if (Math.floor(datePassed/604800) <= 4) return i18n.global.t('date.weeks', Math.floor(datePassed/604800))
-  else if (Math.floor(datePassed/2419200) <= 4) return i18n.global.t('date.months', Math.floor(datePassed/2419200))
-  else return i18n.global.t('date.months', Math.floor(datePassed/2419200))
+  else if (Math.floor(datePassed / 60) == 1) return i18n.global.t('date.mins', Math.floor(datePassed / 60))
+  else if (Math.floor(datePassed / 60) <= 60) return i18n.global.t('date.mins', Math.floor(datePassed / 60))
+  else if (Math.floor(datePassed / 3600) == 1) return i18n.global.t('date.hours', Math.floor(datePassed / 3600))
+  else if (Math.floor(datePassed / 3600) <= 24) return i18n.global.t('date.hours', Math.floor(datePassed / 3600))
+  else if (Math.floor(datePassed / 86400) == 1) return i18n.global.t('date.days', Math.floor(datePassed / 86400))
+  else if (Math.floor(datePassed / 86400) <= 7) return i18n.global.t('date.days', Math.floor(datePassed / 86400))
+  else if (Math.floor(datePassed / 604800) == 1) return i18n.global.t('date.weeks', Math.floor(datePassed / 604800))
+  else if (Math.floor(datePassed / 604800) <= 4) return i18n.global.t('date.weeks', Math.floor(datePassed / 604800))
+  else if (Math.floor(datePassed / 2419200) <= 4) return i18n.global.t('date.months', Math.floor(datePassed / 2419200))
+  else return i18n.global.t('date.months', Math.floor(datePassed / 2419200))
 }
 
 export function parseElapsed(secs: number) {
@@ -150,7 +150,7 @@ export function parseElapsed(secs: number) {
 }
 
 export function resetList() {
-  if (router.currentRoute.value.name == "editor") router.push({path: "/editor", force: true})
+  if (router.currentRoute.value.name == "editor") router.push({ path: "/editor", force: true })
 }
 
 export const makeColorFromString = (name: string) => {
@@ -160,12 +160,12 @@ export const makeColorFromString = (name: string) => {
 
   let ok = Math.floor(
     16777215 *
-      Math.sin(
-        name
-          ?.split("")
-          .map((p: string) => p.charCodeAt(0))
-          .reduce((x, y) => x + y)! % Math.PI
-      )
+    Math.sin(
+      name
+        ?.split("")
+        .map((p: string) => p.charCodeAt(0))
+        .reduce((x, y) => x + y)! % Math.PI
+    )
   )
   return chroma(isNaN(ok) ? "#0000" : ok);
 }
@@ -210,7 +210,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
 
 export function creatorToCollab(currentName: string): CollabData {
   return [
-    [{name: currentName, role: 0, color: [0,1,1], part: [0,0], socials: [], verified: 0}],
+    [{ name: currentName, role: 0, color: [0, 1, 1], part: [0, 0], socials: [], verified: 0 }],
     [],
     [],
     Math.floor(Math.random() * 1000000),
@@ -265,3 +265,14 @@ export const profileCutouts = [
   'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
   'polygon(49% 15%, 75% 25%, 90% 0%, 100% 70%, 80% 95%, 50% 100%, 19% 95%, 0% 70%, 10% 0%, 25% 25%)',
 ]
+
+export const selectedLevels = ref<Level[]>([])
+
+export const parascroll = ref(0)
+let prevScroll = -1
+export function manageParallax(e: WheelEvent) {
+  if (prevScroll == -1) prevScroll = window.scrollY
+
+  parascroll.value += Math.round((window.scrollY - prevScroll)/3)
+  prevScroll = window.scrollY
+}

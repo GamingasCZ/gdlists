@@ -184,6 +184,7 @@ export interface LevelBackground {
   theme: number
   opacity: number
   tile: boolean
+  scrolling: 0 | 1 | 2
 }
 
 export interface Level {
@@ -196,7 +197,7 @@ export interface Level {
   tags: LevelTag[];
   platf: boolean;
   ratings?: [number[], number[]]
-  background?: LevelBackground
+  BGimage?: LevelBackground
 }
 
 export interface ListBackground {

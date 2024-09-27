@@ -14,7 +14,7 @@ const props = defineProps<{
 const emit = defineEmits<{
 	(e: "addContainer", key: string, holdingShift: boolean): string
 	(e: "setAlignment", align: string): string
-	(e: "setFormatting", format: string): string
+	(e: "setFormatting", format: string, viewMode?: 0 | 1): string
 	(e: "columnCommand", index: number): string
 	(e: "splitParagraph"): string
 }>()
@@ -67,14 +67,17 @@ const mdHelpShown = ref(false)
 const columnButton = ref()
 const buttons = ref()
 
+const previewMode = ref(0)
+
 const doAction = (action: number, button: string, holdingShift = false) => {
 	switch (action) {
 		case 0:
 			emit('addContainer', button[0], holdingShift); break;
 		case 1:
 			if (button[0] == 'view') previewEnabled.value = !previewEnabled.value
+			if (button[0] == 'mode') previewMode.value = button[1]
 			else if (button[0] == 'md') mdHelpShown.value = true
-			emit('setFormatting', button[0]);
+			emit('setFormatting', button[0], previewMode.value);
 			break;
 		case 3:
 			emit('setAlignment', button[2]); break;
@@ -157,8 +160,36 @@ if (SETTINGS.value.scrollNavbar)
 				<span class="text-sm pointer-events-none">{{ $t('reviews.splitPg') }}</span>
 			</button>
 		</div>
+
+		<div class="flex gap-3 items-center" v-show="previewEnabled">
+			<hr class="inline-flex mx-1 ml-32 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
+			<button
+				@click="doAction(1, ['view'])"
+				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			>
+				<img src="@/images/close.svg" class="w-5 pointer-events-none min-w-5">
+				<span class="text-sm pointer-events-none">Ukončit náhled</span>
+			</button>
+			<hr class="inline-flex mx-1 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
+			<button
+				@click="doAction(1, ['mode', 0])"
+				:class="{'!bg-opacity-60 bg-black': previewMode == 0}"
+				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			>
+				<img src="@/images/reviews.svg" class="m-0.5 w-5 pointer-events-none min-w-5">
+				<span class="text-sm pointer-events-none">{{ $t('reviews.review') }}</span>
+			</button>
+			<button
+				@click="doAction(1, ['mode', 1])"
+				:class="{'!bg-opacity-60 bg-black': previewMode == 1}"
+				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			>
+				<img src="@/images/browseMobHeader.svg" class="w-6 pointer-events-none min-w-6">
+				<span class="text-sm pointer-events-none">{{ $t('editor.levels') }}</span>
+			</button>
+		</div>
 		
-		<div class="flex gap-1 items-center grow" v-show="!showFormatting">
+		<div class="flex gap-1 items-center grow" v-show="!showFormatting && !previewEnabled">
 			<div v-for="(action, index) in actions" class="flex gap-1 items-center">
 				<hr v-show="index > 0 && index < 5" class="inline-flex mx-2 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
 				<button
@@ -188,7 +219,7 @@ if (SETTINGS.value.scrollNavbar)
 			@click="doAction(5, columnData)"
 			@mousedown.prevent=""
 			class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			v-show="!showFormatting"
+			v-show="!showFormatting && !previewEnabled"
 		>
 			<img :src="`${BASE_URL}/formatting/twoColumns.svg`" class="w-6 pointer-events-none min-w-6">
 			<span class="w-max text-sm pointer-events-none">{{ selectedNest[0] > -1 ? $t('reviews.editColumn') : $t('reviews.addColumn') }}</span>

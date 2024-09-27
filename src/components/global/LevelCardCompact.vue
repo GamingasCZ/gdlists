@@ -7,6 +7,7 @@ import DifficultyIcon from "./DifficultyIcon.vue";
 import { DEFAULT_RATINGS } from "@/Reviews";
 import chroma from "chroma-js";
 import Dropdown from "../ui/Dropdown.vue";
+import CardTheme from "../levelViewer/CardTheme.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -62,6 +63,9 @@ const ratingsShowing = ref(false)
   <section class="relative max-sm:button mx-auto w-[70rem] max-w-[95vw] rounded-lg p-2 text-white shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{ 'backdrop-blur-md': translucentCard }" @click="openOverview">
+    
+    <CardTheme v-if="BGimage" v-bind="BGimage" />
+
     <main class="flex justify-between items-center">
       <div>
         <header class="flex items-center">

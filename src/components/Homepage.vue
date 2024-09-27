@@ -66,7 +66,7 @@ const closeTwitterAd = () => {
     <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
   </DialogVue>
   
-  <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
+  <header class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-[url(../images/introGrad2.webp)] bg-center">
     <!-- Twitter notif -->
     <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
       <img src="@/images/socials/twitter.svg" class="w-6" alt="">

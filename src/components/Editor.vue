@@ -16,7 +16,7 @@ import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import LevelImportPopup from "./editor/LevelImportPopup.vue";
 import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX, getBGcolor, newCardBG } from "../Editor";
-import { ref, onMounted, watch, provide } from "vue";
+import { ref, onMounted, watch, provide, reactive } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
 import chroma from "chroma-js";
 import LevelCard from "./global/LevelCard.vue";
@@ -141,9 +141,9 @@ function loadList(listData: LevelList, lName: string, hidden: '0'|'1') {
     levelList.value.pageBGcolor = modifyListBG(list.pageBGcolor)
 }
 
-const openDialogs = ref({
+const openDialogs = reactive({
   tagPopup: false,
-  BGpicker: false,
+  BGpicker: [false, 0, 0],
   BGcolorPicker: false,
   descriptionEditor: false,
   favoriteLevelPicker: false,
@@ -154,18 +154,17 @@ const openDialogs = ref({
 })
 
 const modifyImage = (imgUrl: string) => {
-  if (openDialogs.value.imagePicker[1] == 0) {
+  if (openDialogs.imagePicker[1] == 0) {
     levelList.value.titleImg[0] = imgUrl
     useAccentColor()
   }
-  if (openDialogs.value.imagePicker[1] == -5) {
-    let level = levelList.value.levels[openDialogs.value.imagePicker[2] as number]
-    if (!level.background)
-      level.background = newCardBG()
+  if (openDialogs.imagePicker[1] == -5) {
+    let level = levelList.value.levels[openDialogs.imagePicker[2] as number]
+    if (!level.BGimage)
+      level.BGimage = newCardBG()
 
-    level.background.image[0] = imgUrl
+    level.BGimage.image[0] = imgUrl
   }
-  console.log(openDialogs.value.imagePicker)
 }
 
 provide("openedDialogs", openDialogs)
@@ -415,8 +414,15 @@ const useAccentColor = (url: string) => {
     ></TagPickerPopup>
   </DialogVue>
 
-  <DialogVue :open="openDialogs.BGpicker" @close-popup="openDialogs.BGpicker = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
-    <BGImagePicker :source="levelList.titleImg" />
+  <DialogVue :open="openDialogs.BGpicker[0]" @close-popup="openDialogs.BGpicker[0] = false" disable-tap-close :title="$t('other.imageSettings')" :width="dialog.xl">
+    <BGImagePicker
+      :source="[
+        levelList.titleImg,
+        levelList?.levels?.[openDialogs.BGpicker[2]]?.BGimage?.image]
+        [openDialogs.BGpicker[1]]"
+      :force-aspect-height="openDialogs.BGpicker[1] ? 20 : false"
+      :disable-controls="openDialogs.BGpicker[1]"
+    />
   </DialogVue>
 
   <DialogVue :open="openDialogs.descriptionEditor" @close-popup="openDialogs.descriptionEditor = false" :title="$t('editor.descriptionEditor')" :width="dialog.xl">
@@ -454,7 +460,7 @@ const useAccentColor = (url: string) => {
   </DialogVue>
 
   <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false" :title="$t('editor.titleImage')" :width="dialog.large">
-    <ImageBrowser :unselectable="false" @pick-image="modifyImage" @close-popup="openDialogs.imagePicker[0] = false" />
+    <ImageBrowser :unselectable="false" :disable-external="openDialogs.imagePicker[1] == -5 " @pick-image="modifyImage" @close-popup="openDialogs.imagePicker[0] = false" />
   </DialogVue>
 
   <!-- Background preview -->
@@ -590,7 +596,7 @@ const useAccentColor = (url: string) => {
             <img src="@/images/image.svg" class="p-1 w-12 opacity-40" alt="">
             <span class="mb-2 text-xl">{{ $t('other.bg') }}</span>
             <div class="flex gap-1">
-              <button @click="openDialogs.BGpicker = true" v-show="levelList.titleImg[0]" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
+              <button @click="openDialogs.BGpicker[0] = true; openDialogs.BGpicker[1] = 0" v-show="levelList.titleImg[0]" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/gear.svg" class="w-6" alt="">
               </button>
               <button @click="openDialogs.imagePicker[0] = true; openDialogs.imagePicker[1] = 0" class="flex gap-1 items-center p-1 bg-black bg-opacity-40 rounded-md button">

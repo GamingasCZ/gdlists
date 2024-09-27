@@ -12,7 +12,7 @@ export const SETTINGS = ref({
   scrollNavbar: true,
   autoComments: true,
   disableColors: false,
-  disableBGs: false,
+  disableAllBGs: 0,
   disableTL: false
 });
 

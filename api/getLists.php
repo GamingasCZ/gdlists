@@ -21,7 +21,23 @@ $mysqli->set_charset("utf8mb4");
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
 
-$selLevelRange = "levelName, creator, collabMemberCount, levels.levelID, levels.difficulty, rating, platformer, ifnull(listID, concat('review/', (SELECT reviews.id FROM reviews WHERE id=levels_uploaders.reviewID))) as listID, avg(gameplay) as A_gameplay, avg(decoration) as A_decoration, avg(levels_ratings.difficulty) as A_difficulty, avg(overall) as A_overall";
+$selLevelRange = "
+      levelName,
+      creator,
+      collabMemberCount,
+      levels.levelID,
+      levels.difficulty,
+      rating,
+      platformer,
+      CONCAT('#',color) as color,
+      background,
+      uploaderID,
+      ifnull(listID, concat('review/', (SELECT reviews.id FROM reviews WHERE id=levels_uploaders.reviewID))) as listID,
+      avg(gameplay) as A_gameplay,
+      avg(decoration) as A_decoration,
+      avg(levels_ratings.difficulty) as A_difficulty,
+      avg(overall) as A_overall";
+
 $listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
@@ -168,6 +184,22 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
     $type = $_GET["fromReviews"] ? "reviewID" : "listID";
     $result = doRequest($mysqli, sprintf("SELECT levels_uploaders.id,levels.levelID,listID,reviewID,levelName,creator,difficulty,rating FROM levels_uploaders RIGHT JOIN levels ON levels_uploaders.levelID = levels.levelID  WHERE %s = ?", $type), [$_GET["levelsIn"]], "i", true);
     echo json_encode(parseResult($result));
+  } elseif (in_array("postsInLevel", array_keys($_GET))) {
+    $id = intval(substr($_GET["levelID"],0, 11));
+
+    $result = doRequest($mysqli, "SELECT lists.name, users.username, lists.uid, timestamp, 0 as type, lists.id
+    FROM levels_uploaders
+    RIGHT JOIN lists ON lists.id = levels_uploaders.listID
+    LEFT JOIN users ON lists.uid=users.discord_id
+    WHERE levels_uploaders.levelID = ?
+    UNION ALL SELECT reviews.name, users.username, reviews.uid, UNIX_TIMESTAMP(timestamp) as timestamp, 1 as type,reviews.id
+    FROM levels_uploaders
+    RIGHT JOIN reviews ON reviews.id = levels_uploaders.reviewID
+    LEFT JOIN users ON reviews.uid=users.discord_id
+    WHERE levels_uploaders.levelID = ?
+    ORDER BY timestamp DESC LIMIT 10", [$id, $id], "ii", true);
+
+    echo json_encode($result);
   }
 }
 elseif (isset($_GET["batch"])) {

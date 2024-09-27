@@ -62,11 +62,11 @@ import SectionDivider from '../ui/SectionDivider.vue';
         >
         </Option>
         <Option
-            v-model="SETTINGS.disableBGs"
             :name="$t('settingsMenu.disBGs')"
             :desc="$t('settingsMenu.disBGhelp')"
-            control="cbox"
+            control="slot"
         >
+            <RadioPicker v-model="SETTINGS.disableAllBGs" id="noBG" :opt-names="[$t('other.none2'), $t('other.page'), $t('other.levels2'), $t('other.all2')]" />
         </Option>
         <SectionDivider :text="$t('settingsMenu.perf')" />
         <Option
