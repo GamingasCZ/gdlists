@@ -10,6 +10,7 @@ import DialogVue from "./global/Dialog.vue";
 import { dialog } from "./ui/sizes";
 import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
+import THEMES, { selectedBeforeSave } from "@/themes";
 
 document.title = useI18n().t("other.websiteName");
 
@@ -59,6 +60,12 @@ const closeTwitterAd = () => {
   document.querySelector("#twitterAd")?.remove()
 }
 
+const base = import.meta.env.BASE_URL
+const headerBG = ref(`url(${base}/graphics/${THEMES[SETTINGS.value.selectedTheme].graphic}.webp)`)
+watch(selectedBeforeSave, () => {
+  headerBG.value = `url(${base}/graphics/${THEMES[selectedBeforeSave.value].graphic}.webp)`
+})
+
 </script>
 
 <template>
@@ -66,7 +73,7 @@ const closeTwitterAd = () => {
     <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
   </DialogVue>
   
-  <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
+  <header :style="{backgroundImage: headerBG}" class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-center">
     <!-- Twitter notif -->
     <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
       <img src="@/images/socials/twitter.svg" class="w-6" alt="">

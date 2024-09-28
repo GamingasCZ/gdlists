@@ -57,7 +57,11 @@
     "loadCom": "Komentáře pod příspěvkem",
     "loadCHelp": "Změní, zda se komentáře zobrazí automaticky na konci příspěvku.",
     "disTL": "Zakázat průsvitnost",
-    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů"
+    "disTLhelp": "Zakáže rozmlžená pozadí recenzí a karet levelů",
+    "seasThemes": "Sezónní motivy",
+    "seasThemesHelp": "Motiv se automaticky přepne, pokud je nějaký speciální dostupný.",
+    "seasProgress": "Právě probíhá sezónní motiv!",
+    "seasProgressHelp": "(Sezónní motivy mohou být vypnuty v nastavení)"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -393,7 +397,8 @@
     "desc": "Popis",
     "metadata": "Metadata",
     "tooManyImg": "Naráz můžeš nahrát jen 10 obrázků!",
-    "selImg": "Vybrán {count} obrázek | Vybráno {count} obrázků"
+    "selImg": "Vybrán {count} obrázek | Vybráno {count} obrázků",
+    "themes": "Motivy"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
