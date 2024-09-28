@@ -35,6 +35,22 @@ export const hasLocalStorage = () => {
 
 export var viewedPopups: viewedPopup;
 if (hasLocalStorage()) {
+  localStorage.getItem("settings") ??
+    localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
+
+  let loadedSettings: any = JSON.parse(localStorage.getItem("settings")!);
+  let loadedSettingsKeys: any = Object.keys(loadedSettings);
+  let settingsKeys: any = Object.keys(SETTINGS.value);
+  if (loadedSettingsKeys.length < settingsKeys.length) {
+    settingsKeys.forEach((setting) => {
+      if (!loadedSettingsKeys.includes(setting))
+        loadedSettings[setting] = SETTINGS.value[setting];
+    });
+    localStorage.setItem("settings", JSON.stringify(loadedSettings));
+  }
+
+  SETTINGS.value = loadedSettings;
+
   let popupsViewed: viewedPopup | null = JSON.parse(localStorage.getItem("popupsViewed")!)
   if (popupsViewed == null) {
     localStorage.setItem("popupsViewed", "{}")

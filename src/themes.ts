@@ -31,14 +31,13 @@ const base = import.meta.env.BASE_URL
 
 let selectedBeforeSave = SETTINGS.value.selectedTheme
 export const changeTheme = (to: number) => {
-    let sameTheme = SETTINGS.value.selectedTheme == to
+    console.log(to)
+    let sameTheme = selectedBeforeSave == to
     selectedBeforeSave = to
     document.body.style.backgroundImage = `url(${base}/graphics/${THEMES[to].backgroundImage}.webp)` || ''
-    setTimeout(() => {
-        for (const [varName, color] of Object.entries(THEMES[to].colors)) {
-            document.documentElement.style.setProperty(`--${varName}`, color);
-        }
-    }, 150);
+    for (const [varName, color] of Object.entries(THEMES[to].colors)) {
+        document.documentElement.style.setProperty(`--${varName}`, color);
+    }
     let navbar = document.querySelector("#navbar")
     if (navbar && !sameTheme) {
         navbar.classList.add("slidingNavbar")

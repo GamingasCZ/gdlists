@@ -22,20 +22,6 @@ if (hasLocalStorage()) {
   localStorage.getItem("recentlyViewed") ??
     localStorage.setItem("recentlyViewed", "[]");
 
-  localStorage.getItem("settings") ??
-    localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
-
-  let loadedSettings: any = JSON.parse(localStorage.getItem("settings")!);
-  let loadedSettingsKeys: any = Object.keys(loadedSettings);
-  let settingsKeys: any = Object.keys(SETTINGS.value);
-  if (loadedSettingsKeys.length < settingsKeys.length) {
-    settingsKeys.forEach((setting) => {
-      if (!loadedSettingsKeys.includes(setting))
-        loadedSettings[setting] = SETTINGS.value[setting];
-    });
-    localStorage.setItem("settings", JSON.stringify(loadedSettings));
-  }
-  SETTINGS.value = loadedSettings;
   let lang: 0 | 1 =
     SETTINGS.value.language == -1
       ? ["cz", "sk"].includes(navigator.language) | 0

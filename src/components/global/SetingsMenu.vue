@@ -108,11 +108,13 @@ const sessionsDialog = ref<HTMLDivElement>()
         </Dialog>
       </div>
 
-      <Transition name="fade">
-        <div v-if="dialogs.themes" class="z-30">
-            <Themes @close="dialogs.themes = false" />
-        </div>
-      </Transition>
+      <Transition name="fadeSlide">
+        <Teleport to="body">
+          <div v-if="dialogs.themes" class="z-30">
+              <Themes @close="dialogs.themes = false" />
+          </div>
+        </Teleport>
+        </Transition>
     </Teleport>
 
 
