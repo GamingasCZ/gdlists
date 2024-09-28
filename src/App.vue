@@ -7,7 +7,6 @@ import cookier from "cookier";
 import { SETTINGS, hasLocalStorage } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
-import { setLanguage } from "./locales";
 import { currentCutout, currentUID } from "./Editor";
 import NotificationStack from "./components/global/NotificationStack.vue";
 
@@ -21,13 +20,6 @@ if (hasLocalStorage()) {
     localStorage.setItem("pinnedLists", "[]");
   localStorage.getItem("recentlyViewed") ??
     localStorage.setItem("recentlyViewed", "[]");
-
-  let lang: 0 | 1 =
-    SETTINGS.value.language == -1
-      ? ["cz", "sk"].includes(navigator.language) | 0
-      : SETTINGS.value.language;
-  setLanguage(lang);
-  if (SETTINGS.value.language == -1) SETTINGS.value.language = lang;
 }
 
 // Redirect to route from which login button pressed

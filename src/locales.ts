@@ -1,10 +1,12 @@
 import { nextTick, ref } from "vue";
 import { createI18n } from "vue-i18n";
+import { SETTINGS } from "./siteSettings";
 
 export const locales = ['cs-CZ', 'en-US']
 
 export const i18n = createI18n({
   legacy: false,
+  locale: locales[SETTINGS.value.language],
 });
 
 export const langIndex = ref(0)
