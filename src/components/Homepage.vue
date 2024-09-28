@@ -10,7 +10,7 @@ import DialogVue from "./global/Dialog.vue";
 import { dialog } from "./ui/sizes";
 import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
-import THEMES from "@/themes";
+import THEMES, { selectedBeforeSave } from "@/themes";
 
 document.title = useI18n().t("other.websiteName");
 
@@ -61,7 +61,10 @@ const closeTwitterAd = () => {
 }
 
 const base = import.meta.env.BASE_URL
-const headerBG = computed(() => `url(${base}/graphics/${THEMES[SETTINGS.value.selectedTheme].graphic}.webp)`)
+const headerBG = ref(`url(${base}/graphics/${THEMES[SETTINGS.value.selectedTheme].graphic}.webp)`)
+watch(selectedBeforeSave, () => {
+  headerBG.value = `url(${base}/graphics/${THEMES[selectedBeforeSave.value].graphic}.webp)`
+})
 
 </script>
 

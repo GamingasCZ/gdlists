@@ -1,3 +1,4 @@
+import { ref } from "vue";
 import { SETTINGS } from "./siteSettings";
 
 const THEMES = [
@@ -23,17 +24,18 @@ const THEMES = [
             brightGreen: "#ffd841"
         },
         backgroundImage: "webs2",
-        icon: "icon1"
+        icon: "icon1",
+        begins: { day: 1, month: 10 },
+        ends: { day: 31, month: 10 },
     },
 ]
 
 const base = import.meta.env.BASE_URL
 
-let selectedBeforeSave = SETTINGS.value.selectedTheme
+export const selectedBeforeSave = ref(SETTINGS.value.selectedTheme)
 export const changeTheme = (to: number) => {
-    console.log(to)
-    let sameTheme = selectedBeforeSave == to
-    selectedBeforeSave = to
+    let sameTheme = selectedBeforeSave.value == to
+    selectedBeforeSave.value = to
     document.body.style.backgroundImage = `url(${base}/graphics/${THEMES[to].backgroundImage}.webp)` || ''
     for (const [varName, color] of Object.entries(THEMES[to].colors)) {
         document.documentElement.style.setProperty(`--${varName}`, color);
@@ -47,8 +49,30 @@ export const changeTheme = (to: number) => {
     }
 }
 
-export const saveTheme = () => {
-    SETTINGS.value.selectedTheme = selectedBeforeSave
+export const saveTheme = (seasonal = 0) => {
+    if (seasonal == 0) SETTINGS.value.selectedThemeAlways = selectedBeforeSave.value
+    SETTINGS.value.selectedTheme = selectedBeforeSave.value
+}
+
+export const checkSeasonalTheme = () => {
+    if (!SETTINGS.value.seasonalThemes) return -1
+
+    let date = new Date()
+
+    let i = -1
+    for (const theme of THEMES) {
+        i += 1
+        if (!theme?.begins) continue
+        let beginDate = new Date(); beginDate.setMonth(theme.begins.month - 1); beginDate.setDate(theme.begins.day); // months start at 0
+        let endDate = new Date(); endDate.setMonth(theme.ends.month - 1); endDate.setDate(theme.ends.day); // months start at 0
+        if (date >= beginDate && date <= endDate) {
+            return i
+        }
+        else {
+            SETTINGS.value.selectedTheme = SETTINGS.value.selectedThemeAlways
+        }
+    }
+    return -1
 }
 
 export default THEMES

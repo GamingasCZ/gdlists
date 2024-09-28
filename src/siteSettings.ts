@@ -15,7 +15,8 @@ export const SETTINGS = ref({
   disableBGs: false,
   disableTL: false,
   seasonalThemes: true,
-  selectedTheme: 0
+  selectedTheme: 0,
+  selectedThemeAlways: 0,
 });
 
 watch(SETTINGS, () => {

@@ -481,7 +481,9 @@
     "loadCom": "Comments under Posts",
     "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post",
     "seasThemes": "Seasonal Themes",
-    "seasThemesHelp": "Themes will automatically switch, if a special one is available."
+    "seasThemesHelp": "Themes will automatically switch, if a special one is available.",
+    "seasProgress": "A seasonal theme is in progress!",
+    "seasProgressHelp": "(Seasonal themes can be turned off in the settings)"
   },
   "help": {
     "Lists": "Lists",

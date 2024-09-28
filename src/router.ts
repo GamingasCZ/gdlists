@@ -3,7 +3,7 @@ import { ref } from "vue";
 import THEMES from "./themes";
 import { SETTINGS } from "./siteSettings";
 
-const router = createRouter({
+const         router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
