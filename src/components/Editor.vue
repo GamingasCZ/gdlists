@@ -15,7 +15,7 @@ import ErrorPopup from "./editor/errorPopup.vue";
 import EditorBackup from "./editor/EditorBackup.vue";
 import ListBackground from "./global/ListBackground.vue";
 import LevelImportPopup from "./editor/LevelImportPopup.vue";
-import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX, getBGcolor, newCardBG } from "../Editor";
+import { levelList, addLevel, modifyListBG, DEFAULT_LEVELLIST, removeBackup, checkList, isOnline, fixHEX, getBGcolor, newCardBG, predefinedLevelList } from "../Editor";
 import { ref, onMounted, watch, provide, reactive } from "vue";
 import type { FavoritedLevel, Level, ListUpdateFetch, LevelList, LevelBackup } from "@/interfaces";
 import chroma from "chroma-js";
@@ -58,6 +58,10 @@ const backupData = ref({backupName: "", backupDate: "0", backupData: "", choseHi
 let autosaveInterval
 onMounted(() => {
   levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
+  if (predefinedLevelList.value.length) {
+    predefinedLevelList.value.forEach(l => addLevel(l))
+    predefinedLevelList.value = []
+  }
 
   if (localStorage) {
     let backup = localStorage.getItem("listBackup")

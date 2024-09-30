@@ -23,6 +23,7 @@ export const DEFAULT_LEVELLIST: LevelList = {
 }
 
 export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
+export const predefinedLevelList = ref<Level[]>([]);
 
 export function makeColor(col?: [number, number, number] | string, hex = false): [number, number, number] | string {
   // Random color
@@ -40,7 +41,7 @@ export const getBGcolor = () => document.documentElement.style.getPropertyValue(
 
 export const newCardBG = () => ({ image: DEFAULT_LEVELLIST.titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
 
-export function addLevel(values: Level | null) {
+export function addLevel(values: Level | null, toPredefined?: boolean) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
     creator: values?.creator ?? "",
@@ -53,7 +54,10 @@ export function addLevel(values: Level | null) {
     BGimage: values?.BGimage ?? newCardBG()
   };
 
-  levelList.value.levels.push(levelInfo);
+  if (toPredefined)
+    predefinedLevelList.value.push(levelInfo);
+  else
+    levelList.value.levels.push(levelInfo);
 }
 
 export const moveLevel = (from: number, to: number) => {

@@ -14,13 +14,13 @@ import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
 import type { ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount, getEmbeds } from "@/Reviews";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { DEFAULT_LEVELLIST, modifyListBG, prettyDate, removeBackup, saveBackup } from "@/Editor";
+import { DEFAULT_LEVELLIST, modifyListBG, predefinedLevelList, prettyDate, removeBackup, saveBackup } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -526,6 +526,12 @@ const unfocusContainer = (e: MouseEvent) => {
 
 let autosaveInterval: number
 onMounted(() => {
+    reviewData.value = DEFAULT_REVIEWDATA()
+    if (predefinedLevelList.value.length) {
+        predefinedLevelList.value.forEach(l => addReviewLevel(l))
+        predefinedLevelList.value = []
+    }
+
     if (SETTINGS.value.autosave) {
         // Save when leaving the site
         window.addEventListener("beforeunload", () => {

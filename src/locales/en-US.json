@@ -243,7 +243,12 @@
     "failSendComm": "Failed to send the comment. Please try again later!",
     "pickView1": "Pick the look of lists!",
     "pickView2": "You can change this anytime in the settings.",
-    "noTags": "Level has no tags"
+    "noTags": "Level has no tags",
+    "dispOnGDB": "Display on GDBrowser",
+    "inReviews": "in {count} review | in {count} reviews",
+    "inLists": "in {count} list | in {count} lists",
+    "addToList": "Add to List",
+    "pickedLevels": "{count} level selected | {count} levels selected"
   },
   "navbar": {
     "editor": "Create",

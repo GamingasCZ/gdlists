@@ -9,6 +9,7 @@ import { hasLocalStorage } from "@/siteSettings";
 import LevelPreview from "./global/LevelPreview.vue";
 import TemporaryList from "./global/TemporaryList.vue";
 import { Teleport } from "vue";
+import { selectedLevels } from "@/Editor";
 
 document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
@@ -70,6 +71,8 @@ const modifyContentType = (to: Content) => {
   </section>
 
   <Teleport to="body">
-    <TemporaryList />
+    <Transition name="fadeSlide">
+      <TemporaryList v-if="selectedLevels.length" />
+    </Transition>
   </Teleport>
 </template>

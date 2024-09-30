@@ -4,32 +4,16 @@ import { makeColor, makeColorFromString, newCardBG } from "@/Editor";
 import LevelCard from "../editor/EditorCard.vue";
 import { inject, onBeforeUnmount, ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
-import { DEFAULT_RATINGS, reviewData } from "@/Reviews";
+import { addReviewLevel, DEFAULT_RATINGS, reviewData } from "@/Reviews";
 import LevelImportPopup from "../editor/LevelImportPopup.vue";
 import Dialog from "../global/Dialog.vue";
 import type { FavoritedLevel, Level } from "@/interfaces";
 import PickerPopup from "../global/PickerPopup.vue";
 import LevelBubble from "../global/LevelBubble.vue";
 import axios from "axios";
-import chroma from "chroma-js";
 
 const addLevel = (levelData?: Level | FavoritedLevel) => {
-    console.log(levelData)
-    if (reviewData.value.levels.length >= 10) return
-    let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
-
-    reviewData.value.levels.push({
-        levelName: levelData?.levelName ?? "",
-        creator: levelData?.creator ?? "",
-        color: levelData?.color ? chroma(levelData.color).hsl() : makeColorFromString(levelData.levelName).hsl(),
-        difficulty: diff?.[0] ? diff : [0, 0],
-        levelID: levelData?.levelID ?? "",
-        platf: false,
-        tags: [],
-        video: "",
-        ratings: [Array(DEFAULT_RATINGS.length).fill(-1), []],
-        BGimage: newCardBG()
-    })
+    addReviewLevel(levelData)
 
     openedCard.value = reviewData.value.levels.length - 1
 }

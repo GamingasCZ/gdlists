@@ -1,22 +1,51 @@
 <script setup lang="ts">
-import { selectedLevels } from '@/Editor';
+import { addLevel, levelList, predefinedLevelList, selectedLevels } from '@/Editor';
 import DifficultyIcon from './DifficultyIcon.vue';
+import router from '@/router';
+import { addReviewLevel, reviewData } from '@/Reviews';
+import { ref } from 'vue';
+
+const makeList = () => {
+    levelList.value.levels = []
+    predefinedLevelList.value = []
+    selectedLevels.value.forEach(l => addLevel(l, true))
+    router.push("/make/list")
+}
+
+const writeReview = () => {
+    reviewData.value.levels = []
+    predefinedLevelList.value = []
+    selectedLevels.value.forEach(l => addReviewLevel(l, true))
+    router.push("/make/review")
+}
+
+const unrolled = ref(true)
+const rollLevels = () => {
+    unrolled.value = !unrolled.value
+}
+
 </script>
 
 <template>
-    <section class="relative bottom-2 left-2 justify-center w-max max-w-full text-center text-white overflow-clip rounded-md shadow-drop">
+    <section class="fixed bottom-2 left-2 z-10 justify-center w-max max-w-full text-center text-white overflow-clip rounded-md shadow-drop">
         <div class="p-2 rounded-t-md bg-lof-300">
-            <button class="absolute top-3 right-3"><img src="@/images/close.svg" class="w-4" alt=""></button>
-            <span class="text-xl font-bold">Vybráno {{ selectedLevels.length }} levelů</span>
+            <button @click="selectedLevels = []" class="absolute top-3 left-3 button"><img src="@/images/trash.svg" class="w-4" alt=""></button>
+            <button @click="rollLevels" class="absolute top-3 right-3 button"><img src="@/images/arrow.svg" :class="{'-scale-x-100': !unrolled}" class="w-3 rotate-90" alt=""></button>
+            <span class="text-xl font-bold">{{ $t('listViewer.pickedLevels', selectedLevels.length) }}</span>
             <div class="flex gap-3 items-center mt-2">
-                <button class="p-2 text-sm rounded-md hover:bg-black hover:bg-opacity-40"><img class="inline mr-2 w-5" src="@/images/browseMobHeader.svg" alt="">{{ $t('homepage.createList') }}</button>
+                <button @click="makeList" class="p-2 text-sm rounded-md hover:bg-black hover:bg-opacity-40"><img class="inline mr-2 w-5" src="@/images/browseMobHeader.svg" alt="">{{ $t('homepage.createList') }}</button>
                 <hr class="w-0.5 h-3 bg-white border-none opacity-40">
-                <button class="p-2 text-sm rounded-md hover:bg-black hover:bg-opacity-40"><img class="inline mr-2 w-5" src="@/images/reviews.svg" alt="">{{ $t('homepage.writeReview') }}</button>
+                <button @click="writeReview" class="p-2 text-sm rounded-md hover:bg-black hover:bg-opacity-40"><img class="inline mr-2 w-5" src="@/images/reviews.svg" alt="">{{ $t('homepage.writeReview') }}</button>
             </div>
         </div>
-        <div class="flex flex-col bg-lof-200">
-            <div v-for="level in selectedLevels">
-                <DifficultyIcon :difficulty="level.difficulty[0]" :rating="level.difficulty[1]" />
+        <div v-show="unrolled" class="flex bg-[url(@/images/fade.webp)] bg-repeat-x flex-col max-h-44 overflow-y-auto gap-2 bg-lof-200">
+            <div v-for="(level, index) in selectedLevels" class="flex items-center text-left">
+                <DifficultyIcon class="w-12" :difficulty="level.difficulty[0]" :rating="level.difficulty[1]" />
+                <div class="flex flex-col">
+                    <span>{{ decodeURIComponent(level.levelName) }}</span>
+                    <span class="text-xs text-white text-opacity-60">{{ level.creator }}</span>
+                </div>
+                <button @click="selectedLevels.splice(index, 1)" class="mr-2 ml-auto button"><img src="@/images/trash.svg" class="w-5" alt=""></button>
             </div>
         </div>
     </section>
