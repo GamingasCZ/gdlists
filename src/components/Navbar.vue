@@ -115,6 +115,8 @@ const modifyNavbarScroll = () => {
     window.onscroll = null
 
 }
+
+router.afterEach(() => navbarHidden.value = false)
 modifyNavbarScroll()
 
 const navbarHidden = ref(false)
