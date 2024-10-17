@@ -89,7 +89,7 @@ const hovering = ref(false)
             <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="260" :editable="editable"></Resizer>
         </div>
 
-        <section class="flex items-center" :class="{'flex-wrap': settings.overflow}">
+        <section class="flex items-center w-max" :class="{'flex-wrap': settings.overflow}">
             <component
             v-for="medium in settings.components"
             :is="[ReviewImage, ReviewVideo][+(medium.type == 'addVideo')]"
