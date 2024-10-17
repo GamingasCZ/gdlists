@@ -398,6 +398,7 @@ const extButton = ref()
             </div>
         </div>
 
+        <p v-if="images.length" class="py-1 mt-auto text-center">Hold <kbd>CTRL</kbd> to select multiple images!</p>
         
     </form>
 

@@ -21,7 +21,7 @@ function getCreator() {
         return props.data.creator
 }
 
-const tags = ref(props.data.tags.slice(0,5).map(x =>`${import.meta.env.BASE_URL}/tags/${x[0]}.svg`))
+const tags = ref((props.data?.tags ?? []).slice(0,5).map(x =>`${import.meta.env.BASE_URL}/tags/${x[0]}.svg`))
 const background = computed(() => {
     if (SETTINGS.value.disableColors)
         return getComputedStyle(document.documentElement).getPropertyValue("--secondaryColor")
@@ -52,7 +52,7 @@ const background = computed(() => {
             </div>
 
             <ul class="flex gap-1.5 mr-1.5">
-                <img :src="tags[index]" :title="tag[2].toString()" alt="" class="w-6" v-for="(tag, index) in (data?.tags ?? []).slice(0, 5)">
+                <img :src="tags?.[index]" :title="tag[2].toString()" alt="" class="w-6" v-for="(tag, index) in (data?.tags ?? []).slice(0, 5)">
             </ul>
         </section>
         

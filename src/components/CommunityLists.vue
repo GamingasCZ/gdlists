@@ -6,7 +6,10 @@ import ListPreview from "./global/ListPreview.vue";
 import ReviewPreview from "./global/ReviewPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
-import FavoritePreview from "./global/FavoritePreview.vue";
+import LevelPreview from "./global/LevelPreview.vue";
+import TemporaryList from "./global/TemporaryList.vue";
+import { Teleport } from "vue";
+import { selectedLevels } from "@/Editor";
 
 document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
@@ -58,7 +61,7 @@ const modifyContentType = (to: Content) => {
   
     <ListBrowser
       online-browser
-      :component="[ListPreview, ReviewPreview, FavoritePreview][contentType]"
+      :component="[ListPreview, ReviewPreview, LevelPreview][contentType]"
       :search="query"
       :online-type="userLists"
       :online-subtype="CONTENTS[contentType]"
@@ -66,4 +69,10 @@ const modifyContentType = (to: Content) => {
       @switch-browser="userLists = $event"
     />
   </section>
+
+  <Teleport to="body">
+    <Transition name="fadeSlide">
+      <TemporaryList v-if="selectedLevels.length" />
+    </Transition>
+  </Teleport>
 </template>

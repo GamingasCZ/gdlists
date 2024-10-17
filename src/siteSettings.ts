@@ -12,7 +12,7 @@ export const SETTINGS = ref({
   scrollNavbar: true,
   autoComments: true,
   disableColors: false,
-  disableBGs: false,
+  disableAllBGs: 0,
   disableTL: false,
   seasonalThemes: true,
   selectedTheme: 0,
@@ -60,3 +60,5 @@ if (hasLocalStorage()) {
     viewedPopups = popupsViewed
   }
 }
+
+export const loggedIn = ref<boolean | null>(null); 

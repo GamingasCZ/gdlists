@@ -1,6 +1,6 @@
 import { ref } from "vue"
-import { DEFAULT_LEVELLIST } from "./Editor"
-import type { ReviewList, ReviewRating } from "./interfaces"
+import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
+import type { FavoritedLevel, Level, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -44,6 +44,29 @@ export const REVIEW_EXTRAS: ReviewList = {
     whitePage: false,
     readerMode: false,
     font: 0
+}
+
+export const addReviewLevel = (levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
+    if (reviewData.value.levels.length >= 10) return
+    let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
+
+    let levelInfo = {
+        levelName: levelData?.levelName ?? "",
+        creator: levelData?.creator ?? "",
+        color: levelData?.color ? chroma(levelData?.color).hsl() : makeColor(),
+        difficulty: diff?.[0] ? diff : [0, 0],
+        levelID: levelData?.levelID ?? "",
+        platf: false,
+        tags: [],
+        video: "",
+        ratings: [Array(DEFAULT_RATINGS.length).fill(-1), []],
+        BGimage: newCardBG()
+    }
+
+    if (toPredefined)
+        predefinedLevelList.value.push(levelInfo)
+    else
+        reviewData.value.levels.push(levelInfo)
 }
 
 export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS })

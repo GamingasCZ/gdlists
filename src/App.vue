@@ -2,13 +2,17 @@
 import axios, { type AxiosResponse } from "axios";
 import Footer from "./components/global/Footer.vue";
 import Navbar from "./components/Navbar.vue";
-import { onMounted, ref } from "vue";
+import { defineAsyncComponent, onMounted, ref } from "vue";
 import cookier from "cookier";
-import { SETTINGS, hasLocalStorage } from "./siteSettings";
+import { SETTINGS, hasLocalStorage, loggedIn } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
+import { i18n, setLanguage } from "./locales";
 import { currentCutout, currentUID } from "./Editor";
 import NotificationStack from "./components/global/NotificationStack.vue";
+import { summonNotification } from "./components/imageUpload";
+import { dialog } from "./components/ui/sizes";
+import Dialog from "./components/global/Dialog.vue";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -31,9 +35,44 @@ if (hasLocalStorage()) {
   }
 }
 
-const loggedIn = ref<boolean | null>(null);
+const returnedFromLogin = ref<boolean>(false);
+const firstTimeUser = ref<boolean>(false);
+
+const returnfromLoginPFP = ref<string>("");
+const returnfromLoginName = ref<string>("");
+
+const LoggedInPopup = defineAsyncComponent(() => import("@/components/homepage/LoggedInPopup.vue"))
+
 onMounted(() => {
   if (!hasLocalStorage()) return;
+
+  /*
+   New user popup!!
+  */
+  let get = new URLSearchParams(location.search)
+  if (get.has("loginerr")) {
+    summonNotification(i18n.global.t('other.error'), i18n.global.t('homepage.loginFail'), 'error')
+  }
+  
+  let loginCookie = cookier("logindata").get();
+  if (loginCookie != null) {
+    returnedFromLogin.value = true;
+  
+    loginCookie = JSON.parse(loginCookie);
+    returnfromLoginName.value = loginCookie[0];
+  
+    // first-time user
+    firstTimeUser.value = loginCookie[2];
+    if (!firstTimeUser.value) {
+      summonNotification(i18n.global.t('homepage.welcomeBack'), returnfromLoginName.value, 'check')
+    }
+  
+    returnfromLoginPFP.value = loginCookie[1]
+  
+    cookier("logindata").remove();
+  }
+
+  // Logging in
   axios
     .get(import.meta.env.VITE_API + "/accounts.php?check", {
       headers: { Authorization: cookier("access_token").get() },
@@ -71,6 +110,11 @@ document.body.addEventListener("keydown", (e) => {
 
     <!-- Notification when not online -->
     <NoConnection />
+
+    <!-- New user popup-->
+    <Dialog :width="dialog.large" :open="firstTimeUser" header-disabled>
+      <component :is="LoggedInPopup" @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
+    </Dialog>
 
     
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
+import type { FavoritedLevel, Level, ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
-import { SETTINGS } from "@/siteSettings";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
-import { isOnline } from "@/Editor";
+import { isOnline, makeColor } from "@/Editor";
 import { onUnmounted } from "vue";
 
 const emit = defineEmits<{
@@ -171,6 +171,14 @@ function refreshBrowser() {
         return;
       }
 
+      // load favorites             
+      if (props.onlineSubtype == 'levels') {
+        if (!favoriteLevels) {
+          favoriteLevels = JSON.parse(localStorage.getItem("favorites")!) || []
+          favoriteLevelIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!) || []
+        }
+      }
+
       maxPages.value = res.data[2].maxPage;
       pagesArray.value = listScroll();
 
@@ -201,22 +209,41 @@ const doRefresh = () => {
   refreshBrowser()
 }
 
+const favoriteLevel = (level: FavoritedLevel) => {
+  if (!hasLocalStorage()) return
+  if (favoriteLevelIDs.value.includes(level.levelID)) {
+    return removeFavoriteLevel(level.levelID)
+  }
+
+  favoriteLevelIDs.value.splice(0, 0, level.levelID)
+  favoriteLevels.splice(0, 0, level)
+
+  localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
+  localStorage.setItem("favoriteIDs", JSON.stringify(favoriteLevelIDs.value));
+}
+
 const removeFavoriteLevel = (levelID: string) => {
   let levelIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
   let position = levelIDs.indexOf(levelID);
   favoriteLevels.splice(position, 1);
+  favoriteLevelIDs.value.splice(position, 1);
   levelIDs.splice(position, 1);
-  for (let i = 0; i < LISTS.value.length; i++) {
-    if (LISTS.value[i].levelID == levelID) {
-      LISTS.value.splice(i, 1)
-      break
-    }
-  }
 
   localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
   localStorage.setItem("favoriteIDs", JSON.stringify(levelIDs));
+  
+  if (!props.onlineBrowser) {
+    for (let i = 0; i < LISTS.value.length; i++) {
+      if (LISTS.value[i].levelID == levelID) {
+        LISTS.value.splice(i, 1)
+        break
+      }
+    }
+    
+    refreshBrowser()
+  }
 
-  refreshBrowser()
+
 };
 
 const removeCollab = (obj: SavedCollab) => {
@@ -232,7 +259,8 @@ const removeCollab = (obj: SavedCollab) => {
 };
 
 
-let favoriteLevels: any;
+let favoriteLevelIDs = ref<number[]>([]);
+let favoriteLevels: FavoritedLevel[];
 let favoriteCollabs: any;
 if (!props.onlineBrowser) {
   favoriteLevels = JSON.parse(localStorage.getItem("favorites")!);
@@ -327,7 +355,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             $t('other.refresh') }}</label>
         </button>
       </header>
-      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': onlineSubtype == 'reviews', 'md:!grid-cols-2': onlineSubtype == 'reviews' && picking}">
+      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': ['reviews', 'levels'].includes(onlineSubtype), 'md:!grid-cols-2': ['reviews', 'levels'].includes(onlineSubtype) && picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
@@ -398,10 +426,29 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           </button>
         </div>
 
-        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS" v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove :unrolled-options="unrolled == index"
-          :disable-link="picking" @clicked-option="emit('selectedPostOption', [$event, list.name])" @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
-          :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
+        <component
+          :is="component"
+          v-for="(list, index) in LISTS" v-bind="list"
+          class="min-w-full listPreviews"
+          :key="PAGE"
+          :in-use="false"
+          :on-saves-page="true"
+          :coll-index="index"
+          :save="list"
+          :user-array="USERS"
+          :index="index"
+          :hide-remove="onlineBrowser"
+          :unrolled-options="unrolled == index"
+          :disable-link="picking"
+          :review-details="REVIEW_DETAILS"
+          :is-pinned="false"
+          :favorited="favoriteLevelIDs.includes(list.levelID)"
+          @clicked-option="emit('selectedPostOption', [$event, list.name])"
+          @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
+          @remove-level="removeFavoriteLevel"
+          @remove-collab="removeCollab"
+          @favorite="favoriteLevel"
+        />
 
         </main>
         <!-- Page Switcher -->

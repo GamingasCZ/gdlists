@@ -10,64 +10,65 @@ const emit = defineEmits<{
 const props = defineProps<{
   source: ListBackground;
   forceAspectHeight?: number
+  disableControls?: boolean
 }>()
 
 const imageSource = ref(props.source[0])
-const loadedImage = ref<string>("loading");
+const loadedImage = ref<string | false>("loading");
 const dragboxImage = ref<HTMLImageElement>()
 let pre = import.meta.env.VITE_USERCONTENT
+let imageHeight = 384
+const dragboxHeight = ref(0)
 onMounted(async () => {
-  if (!imageSource.value.startsWith("http") && !imageSource.value.startsWith("/gdlists/")) {
+  if (!imageSource.value.startsWith("/gdlists/")) {
     let uid = JSON.parse(localStorage.getItem("account_info")!)[1]
     imageSource.value = `${pre}/userContent/${uid}/${imageSource.value}.webp`
   }
 
-  await testIfImageExists(imageSource.value).then((exists: any) => {
-    loadedImage.value = exists
+  testIfImageExists(imageSource.value).then((exists: [string, HTMLImageElement]) => {
+    loadedImage.value = exists[0]
+
+    if (props.forceAspectHeight > 0) {
+      props.source[2] = Math.min(100, Math.floor(props.forceAspectHeight / imageHeight * 100))
+    }
+
   }
-  );
-  if (props.forceAspectHeight > 0) {
-    props.source[2] = Math.floor(Math.min(100, Math.max(0, dragboxImage.value?.clientWidth / props.forceAspectHeight)))
-  }
+  ).catch(error => console.log(error));
 
 });
 
-const dragBoxTopOffset = ref<number>(props.source[1]);
 const draggingDragBox = ref(false);
 const overResizer = ref(false)
+
+const getDragboxHeight = () => {
+  let dragbox = document.querySelector("#dragbox") as HTMLDivElement
+  dragboxHeight.value = dragbox?.offsetHeight
+}
 
 let prevDrag = -1
 const setDragboxPos = (e: MouseEvent | TouchEvent) => {
   if (!draggingDragBox.value) return;
 
-  let dragbox = document.querySelector("#dragbox") as HTMLElement;
+  let resizerRect = document.querySelector("#resizer")?.getBoundingClientRect();
+
   let yPos = e.y ?? e.touches[0].clientY
 
   if (prevDrag == -1) prevDrag = yPos
   let nowDrag = yPos - prevDrag
   prevDrag = yPos
   if (overResizer.value) {
-    let resizer = document.querySelector("#resizer").getBoundingClientRect()
-    if (resizer.bottom - resizer.height / 2 <= dragboxImage.value.getBoundingClientRect().bottom || nowDrag < 0)
-      props.source[2] = Math.floor(Math.min(100, Math.max(10, props.source[2] + nowDrag / 4)))
-    if (resizer.bottom - resizer.height / 2 > dragboxImage.value.getBoundingClientRect().bottom)
-      dragBoxTopOffset.value = 0
+    if (resizerRect.bottom - resizerRect.height / 2 <= dragboxImage.value.getBoundingClientRect().bottom || nowDrag < 0)
+      props.source[2] = (Math.min(100, Math.max(10, props.source[2] + nowDrag / imageHeight * 100)))
+    if (resizerRect.bottom - resizerRect.height / 2 > dragboxImage.value.getBoundingClientRect().bottom)
+      props.source[1] = 0
   }
-  else {
-    dragBoxTopOffset.value += nowDrag
 
-    dragBoxTopOffset.value = Math.floor(Math.max(
-      0,
-      Math.min(
-        dragBoxTopOffset.value,
-        dragboxImage.value.clientHeight - dragbox.clientHeight - 4
-      )
-    )); // 4 = dragbox border width
-
-  }
-  props.source[1] =
-    Math.floor((dragBoxTopOffset.value / (dragboxImage.value.clientHeight - dragbox.clientHeight - 4)) *
-    100); // percentage
+  // this took way too fucking long aaaaaaa
+  props.source[1] = Math.min(Math.max(0, (
+    props.source[1] // dragbox's top offset from the top of the image 
+    + (nowDrag / imageHeight * 100) // drag delta in px, converted to percentages
+    * (1 + props.source[1]/100))) // dragbox is translated while dragging; necessarry to keep speed
+  , 100)
 };
 
 const endDrag = () => {
@@ -98,7 +99,6 @@ onUnmounted(() => {
       source[3]
     ],
   }" class="absolute z-10 w-full h-full bg-no-repeat bg-cover opacity-40 blur-md"></div>
-
   <div v-if="imageSource == ''" class="flex gap-4 items-center p-3 m-2 bg-blue-600 bg-opacity-30 rounded-md">
     <img src="@/images/info.svg" alt="" class="w-8" />
     <span v-html="$t('other.imageHelp')"></span>
@@ -111,24 +111,29 @@ onUnmounted(() => {
     <img src="@/images/close.svg" alt="" class="w-8" />
     <span v-html="$t('other.imageLoadFailed')"></span>
   </div>
-
   <main v-else class="z-20 flex-col gap-6 p-2 bg-[url(@/images/fade.webp)] bg-repeat-x bg-black bg-opacity-40">
     <section class="relative mx-auto w-max max-w-full h-max">
       <img :src="imageSource" alt=""
         :class="{ 'object-left': source[3] == 0, 'object-center': source[3] == 1, 'object-right': source[3] == 2 }"
         class="object-cover max-w-full h-96 bg-black bg-opacity-40 rounded-md pointer-events-none select-none shadow-drop"
         ref="dragboxImage" />
-      <div @mousedown="draggingDragBox = true" @touchstart="draggingDragBox = true" :style="{
-        top: dragBoxTopOffset + 'px',
-        height: source[2] + '%',
-      }" id="dragbox"
-        class="absolute top-0 w-full shadow-drop border-4 border-lof-400 transition-transform duration-75 hover:scale-x-[1.02] active:scale-x-105 active:cursor-move">
+      <div
+        @vue:mounted="getDragboxHeight()"
+        @mousedown="draggingDragBox = true"
+        @touchstart="draggingDragBox = true"
+        :style="{
+          top: `calc(${Math.min(100, source[1])}% )`,
+          transform: `translateY(-${source[1]}%)`,
+          height: source[2] + '%'
+        }"
+        id="dragbox"
+        class="absolute top-0 w-full shadow-drop border-4 border-lof-400 hover:scale-x-[1.02] active:scale-x-105 active:cursor-move">
         <button id="resizer" v-if="!forceAspectHeight" @mouseover="overResizer = true"
           @mouseout="overResizer = draggingDragBox" @touchstart="overResizer = true"
           class="absolute -bottom-2 left-1/2 w-6 h-6 bg-white rounded-full border-4 -translate-x-1/2 translate-y-1.5 cursor-ns-resize border-lof-400"></button>
       </div>
     </section>
-    <section class="grid grid-cols-2 gap-2 mt-2 select-none max-sm:grid-rows-2 max-sm:grid-cols-1">
+    <section v-if="!disableControls" class="grid grid-cols-2 gap-2 mt-2 select-none max-sm:grid-rows-2 max-sm:grid-cols-1">
       <div class="grid gap-2 items-center px-2 py-1 bg-black bg-opacity-40 rounded-md grid-cols-optionIconDesc">
         <img src="@/images/align.svg" class="w-8" alt="">
         <div class="pt-2">

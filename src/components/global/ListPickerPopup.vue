@@ -8,6 +8,7 @@ import ReviewPreview from "./ReviewPreview.vue";
 import FavoritePreview from "./FavoritePreview.vue";
 import ListBrowser from "./ListBrowser.vue";
 import { getEmbeds } from "@/Reviews";
+import LevelPreview from "./LevelPreview.vue";
 
 const props = defineProps<{
     data: any[]
@@ -37,11 +38,12 @@ const levelsFetched = ref([])
 const dialogs = inject("openedDialogs")
 const addToInjected = inject("addToInjected")
 const pickList = (data: selectedList) => {
-    if (props.onlyPickLevels && data[0]?.option == undefined || tab.value == 2) {
+    if (props.onlyPickLevels && data[0]?.option == undefined && tab.value == 2) {
         emit('addLevel', data)
         return emit('closePopup')
     }
 
+    console.log(data[0])
     if (data[0].option == 0) {
         props.data[dialogs.lists[1]].settings.post = data[0].postID
         props.data[dialogs.lists[1]].settings.postType = data[0].postType
@@ -90,7 +92,7 @@ const adjustQuery = (newText: string) => {
         <div v-show="!listingLevels">
             <ListBrowser
                 online-browser
-                :component="[ListPreview, ReviewPreview, FavoritePreview][tab]"
+                :component="[ListPreview, ReviewPreview, LevelPreview][tab]"
                 :search="query"
                 :online-type="['', 'user', 'hidden'][contentType]"
                 :online-subtype="['lists', 'reviews', 'levels'][tab]"

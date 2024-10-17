@@ -86,7 +86,7 @@ defineProps<{
               <img src="@/images/copy.svg" class="w-6" alt="">
               <span>{{ reviewData?.thumbnail[0] ? $t('other.modify') : $t('other.pick') }}</span>
             </button>
-            <button @click="openDialogs.bgPicker[1] = 0; openDialogs.bgPicker[0] = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+            <button @click="openDialogs.BGpicker[1] = 2; openDialogs.BGpicker[0] = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/gear.svg" class="w-6" alt="">
             </button>
             <button v-show="reviewData?.thumbnail[0]" @click="reviewData.thumbnail[0] = ''" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
@@ -106,7 +106,7 @@ defineProps<{
               <img src="@/images/copy.svg" class="w-6" alt="">
               <span>{{ reviewData.titleImg[0] ? $t('other.modify') : $t('other.pick') }}</span>
             </button>
-            <button @click="openDialogs.bgPicker[1] = 1; openDialogs.bgPicker[0] = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+            <button @click="openDialogs.BGpicker[1] = 0; openDialogs.BGpicker[0] = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
               <img src="@/images/gear.svg" class="w-6" alt="">
             </button>
             <button @click="reviewData.titleImg[0] = ''" v-show="reviewData.titleImg[0] != ''" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">

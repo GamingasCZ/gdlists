@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { makeColorFromString } from "@/Editor";
+import { makeColorFromString, newCardBG } from "@/Editor";
 import type { selectedList } from "@/interfaces";
 import { SETTINGS } from "@/siteSettings";
 import { number } from "@intlify/core-base";
@@ -17,6 +17,7 @@ const props = defineProps<{
   levelName: string
   creator: string
   levelColor?: string
+  color?: string
   levelID: string
   listID: string
   listName: string
@@ -37,7 +38,7 @@ const props = defineProps<{
   disableLink?: boolean | 2
 }>()
 
-const listColor = ref<Color>(chroma(props.levelColor! ?? makeColorFromString(props.levelName)));
+const listColor = ref<Color>(chroma(props.color ?? props.levelColor! ?? makeColorFromString(props.levelName)));
 if (SETTINGS.value.disableColors) {
   listColor.value = chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
 }
@@ -67,7 +68,9 @@ const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
 const round = (x) => parseFloat(parseFloat(x).toFixed(1))
 
 const clickLevel = () => {
-  emit('clickedOption', {levelName: props.levelName, creator: props.creator, levelID: props.levelID, difficulty: props.difficulty, rating: props.rating})
+  let bg = newCardBG()
+  bg.image[0] = props?.background
+  emit('clickedOption', {levelName: props.levelName, creator: props.creator, levelID: props.levelID, difficulty: props.difficulty, rating: props.rating, color: props?.color, background: bg})
 }
 </script>
 

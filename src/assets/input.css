@@ -234,3 +234,7 @@ dialog {
   background: conic-gradient(var(--bg) var(--fill), rgb(0 0 0 / 0.4) var(--fill));
   @apply content-[''] rounded-full absolute -inset-2;
 }
+
+kbd {
+  @apply bg-white bg-opacity-20 rounded-md p-0.5 border-white text-xs align-middle mx-1 border-opacity-40 border-2 border-b-4
+}

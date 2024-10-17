@@ -4,7 +4,7 @@ $hostname = getenv("DB_HOSTNAME");
 $username = getenv("DB_USERNAME");
 $password = getenv("DB_PASSWORD");
 $database = getenv("DB_NAME");
-$debugMode = false;
+$debugMode = true;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
@@ -286,6 +286,26 @@ function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) 
     return $ratingArray;
 }
 
+// i think i used this in the frontend too :D: https://stackoverflow.com/a/44134328
+function f($n, $a, $h) {
+    $k = fmod(($n + $h[0] / 30), 12.0);
+    $color = $h[2] - $a * max(min($k - 3, 9 - $k, 1), -1);
+    return str_pad(dechex(round(255 * $color)), 2, '0');   // convert to Hex and prefix "0" if needed
+}
+
+function hslToHex($hslArray) {
+    // is probably hex
+    if (is_string($hslArray)) {
+        if (substr($hslArray,0,1) == '#' && strlen($hslArray) == 7) return $hslArray;
+        else return "#000000";
+    }
+        
+    $hslArray[1] *= 100;
+    $a = $hslArray[1] * min($hslArray[2], 1 - $hslArray[2]) / 100;
+    
+    return sprintf("#%s%s%s", f(0,$a,$hslArray), f(8,$a,$hslArray), f(4,$a,$hslArray));
+}
+
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
     foreach ($levels as $l) {
         $hash = $l["levelID"];
@@ -301,18 +321,30 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
                 $creator = $l["creator"][0][0];
         }
 
-        $res = doRequest($mysqli, "
-        INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, uploaderID, hash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",[
+        $collabCount = $isCollab ? sizeof($l["creator"][2]) : 0;
+        $diff = isset($l["difficulty"]) ? $l["difficulty"][0] : 0;
+        $rating = isset($l["difficulty"]) ? $l["difficulty"][1] : 0;
+        $color = isset($l["color"]) ? substr(hslToHex($l["color"]), 1) : null;
+        $bgHash = isset($l["background"]) ? $l["background"]["image"][0] : null;
+        if (strlen($bgHash) == 0) $bgHash = null;
+
+        $res = doRequest($mysqli, "INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, color, background, uploaderID, hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+        `creator` = ?, `collabMemberCount` = ?, `difficulty` = ?, `rating` = ?, `color` = ?, `background` = ?",[
             $l["levelName"],
             $creator,
-            $isCollab ? sizeof($l["creator"][2]) : 0,
+            $collabCount,
             $l["levelID"],
-            isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
-            isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
+            $diff,
+            $rating,
             isset($l["platf"]) ? $l["platf"] : false,
+            $color,
+            $bgHash,
             $userID,
-            $hash], "ssiiiiiss");
+            $hash,
+        
+            $creator, $collabCount, $diff, $rating, $color, $bgHash], "ssiiiiisssssiiiss");
 
         // Add list/review connections
         doRequest($mysqli, sprintf("INSERT INTO `levels_uploaders` (levelID, %s) VALUES (?, ?)", $isReview ? "reviewID" : "listID"),

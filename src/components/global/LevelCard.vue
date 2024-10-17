@@ -5,9 +5,10 @@ import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
-import { DEFAULT_RATINGS } from "@/Reviews";
+import { DEFAULT_RATINGS, reviewData } from "@/Reviews";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
+import CardTheme from "../levelViewer/CardTheme.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -31,7 +32,7 @@ const emit = defineEmits<{
   (e: "openCollab", index: number, col: [number, number, number]): void;
 }>();
 
-const isFavorited = ref<boolean>(props.favorited);
+const isFavorited = ref<boolean>(props?.favorited);
 const CARD_COL = ref<Color>(fixBrokenColors(props.color));
 
 const guessResult = ref([-1,-1])
@@ -68,17 +69,18 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const listData = inject("listData")
+const listData = inject("listData", {data: reviewData.value})
 
 </script>
 
 <template>
   <section v-if="guessResult"
-    class="relative font-[poppins] w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
+    class="relative font-[poppins] overflow-clip w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
     :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
   >
+    <CardTheme v-if="BGimage" v-bind="BGimage" />
 
     <Transition name="fade">
       <div v-if="guessResult[0] > -1" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[min(30vw,60rem)] justify-center items-center -z-10 opacity-40 mix-blend-luminosity">
@@ -157,7 +159,9 @@ const listData = inject("listData")
         <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
           <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
           <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
-          <span class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          
+          <span v-if="listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] > -1" class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          <span v-else class="text-3xl font-black text-red-600">!</span>
         </div>
       </div>
     </div>

@@ -29,7 +29,7 @@ watch(props, () => listCol.value = chroma.hsl(...getColorData()).hex())
 </script>
 
 <template>
-    <section v-if="imageData[0] && !SETTINGS.disableBGs" :class="{'fixed left-0 top-0 w-screen h-screen': !local}" class="bg-cover -z-50" :style="{backgroundPositionY: `${imageData[1]}%`, backgroundPositionX: positionListBackground(), height: `${imageData[2]}%`, backgroundImage: `url(${imageData[0]})`}">
+    <section v-if="imageData[0] && [0, 2].includes(SETTINGS.disableAllBGs)" :class="{'fixed left-0 top-0 w-screen h-screen': !local}" class="bg-cover -z-50" :style="{backgroundPositionY: `${imageData[1]}%`, backgroundPositionX: positionListBackground(), height: `${imageData[2]}%`, backgroundImage: `url(${imageData[0]})`}">
         <div v-if="imageData[4]" class="w-full h-full" :style="{backgroundImage: `linear-gradient(transparent, ${listCol})`}"></div>
 
     </section>

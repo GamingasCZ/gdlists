@@ -176,7 +176,15 @@ export interface LevelList {
   titleImg: ListBackground; // url, BG top offset [%], BG height, BG XAlign, gradient
   translucent: boolean;
   disComments: boolean;
-  levels: Array<Level>;
+  levels: Level[];
+}
+
+export interface LevelBackground {
+  image: ListBackground
+  theme: number
+  opacity: number
+  tile: boolean
+  scrolling: 0 | 1 | 2
 }
 
 export interface Level {
@@ -189,6 +197,7 @@ export interface Level {
   tags: LevelTag[];
   platf: boolean;
   ratings?: [number[], number[]]
+  BGimage?: LevelBackground
 }
 
 export interface ListBackground {
