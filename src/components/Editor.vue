@@ -45,6 +45,11 @@ const props = defineProps<{
   listID: string | number
 }>();
 
+levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
+  if (predefinedLevelList.value.length) {
+    predefinedLevelList.value.forEach(l => addLevel(l))
+    predefinedLevelList.value = []
+  }
 
 const doBackup = () => {
   if (levelList.value.levels.length == 0) return // Do not save without any levels
@@ -57,12 +62,6 @@ const favoriteLevels = ref<FavoritedLevel>()
 const backupData = ref({backupName: "", backupDate: "0", backupData: "", choseHidden: "0"})
 let autosaveInterval
 onMounted(() => {
-  levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
-  if (predefinedLevelList.value.length) {
-    predefinedLevelList.value.forEach(l => addLevel(l))
-    predefinedLevelList.value = []
-  }
-
   if (localStorage) {
     let backup = localStorage.getItem("listBackup")
     if (backup) {

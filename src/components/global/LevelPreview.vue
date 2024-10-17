@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { makeColor, makeColorFromString, newCardBG, selectedLevels } from "@/Editor";
 import type { FavoritedLevel, selectedList } from "@/interfaces";
-import { SETTINGS } from "@/siteSettings";
+import { loggedIn, SETTINGS } from "@/siteSettings";
 import { number } from "@intlify/core-base";
 import chroma, { type Color } from "chroma-js";
 import { reactive, ref, watch } from "vue";
@@ -87,14 +87,16 @@ const copyID = () => {
 }
 
 const favoriteLevel = () => {
-  emit('favorite', {
+  let level = {
     levelName: props.levelName,
     creator: props.creator,
     levelDiff: [props.difficulty, props.rating],
     levelColor: props.color || makeColor(),
     levelID: props.levelID,
     listID: props.listID,
-  })
+    timeAdded: Date.now()
+  }
+  emit('favorite', level)
 }
 
 </script>
@@ -134,7 +136,7 @@ const favoriteLevel = () => {
 
       <hr class="px-2 my-2 w-72 h-0.5 bg-white border-none opacity-40">
 
-      <button @click.stop="addToTemporaryList" :disabled="selectedLevels.length >= 50" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
+      <button v-if="loggedIn" @click.stop="addToTemporaryList" :disabled="selectedLevels.length >= 50" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
         <img src="@/images/addLevel.svg" class="inline mr-2 w-5" alt="">{{ $t('listViewer.addToList') }}
       </button>
       <a @click.stop="" :href="`https://gdbrowser.com/${levelID}`" target="_blank" class="p-2 py-1 m-2 text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img src="@/images/modGDB.svg" class="inline mr-2 w-8">{{ $t('listViewer.dispOnGDB') }}</a>

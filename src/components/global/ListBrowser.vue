@@ -216,15 +216,7 @@ const favoriteLevel = (level: FavoritedLevel) => {
   }
 
   favoriteLevelIDs.value.splice(0, 0, level.levelID)
-  favoriteLevels.splice(0, 0, {
-    levelName: level.levelName,
-    creator: level.creator,
-    levelDiff: level.difficulty,
-    levelColor: level.color,
-    levelID: level.levelID,
-
-    timeAdded: Date.now()
-  })
+  favoriteLevels.splice(0, 0, level)
 
   localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
   localStorage.setItem("favoriteIDs", JSON.stringify(favoriteLevelIDs.value));

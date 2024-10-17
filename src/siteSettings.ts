@@ -41,3 +41,5 @@ if (hasLocalStorage()) {
     viewedPopups = popupsViewed
   }
 }
+
+export const loggedIn = ref<boolean | null>(null); 

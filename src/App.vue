@@ -4,7 +4,7 @@ import Footer from "./components/global/Footer.vue";
 import Navbar from "./components/Navbar.vue";
 import { onMounted, ref } from "vue";
 import cookier from "cookier";
-import { SETTINGS, hasLocalStorage } from "./siteSettings";
+import { SETTINGS, hasLocalStorage, loggedIn } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
 import { setLanguage } from "./locales";
@@ -53,7 +53,6 @@ if (hasLocalStorage()) {
   }
 }
 
-const loggedIn = ref<boolean | null>(null);
 onMounted(() => {
   if (!hasLocalStorage()) return;
   axios

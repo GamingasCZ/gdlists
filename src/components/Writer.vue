@@ -46,6 +46,12 @@ const props = defineProps<{
     editing?: boolean
 }>()
 
+reviewData.value = DEFAULT_REVIEWDATA()
+    if (predefinedLevelList.value.length) {
+        predefinedLevelList.value.forEach(l => addReviewLevel(l))
+        predefinedLevelList.value = []
+    }
+
 let isNowHidden = false
 if (props.editing) {
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.reviewID, type: 'review' }).then(res => {
@@ -526,12 +532,6 @@ const unfocusContainer = (e: MouseEvent) => {
 
 let autosaveInterval: number
 onMounted(() => {
-    reviewData.value = DEFAULT_REVIEWDATA()
-    if (predefinedLevelList.value.length) {
-        predefinedLevelList.value.forEach(l => addReviewLevel(l))
-        predefinedLevelList.value = []
-    }
-
     if (SETTINGS.value.autosave) {
         // Save when leaving the site
         window.addEventListener("beforeunload", () => {
