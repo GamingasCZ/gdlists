@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
-import LoggedInPopup from "./homepage/LoggedInPopup.vue";
-import cookier from "cookier";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
-import DialogVue from "./global/Dialog.vue";
-import { dialog } from "./ui/sizes";
-import { summonNotification } from "./imageUpload";
-import { i18n } from "@/locales";
 
 document.title = useI18n().t("other.websiteName");
 
@@ -17,39 +11,7 @@ defineProps({
   isLoggedIn: Boolean,
 });
 
-const returnedFromLogin = ref<boolean>(false);
-const firstTimeUser = ref<boolean>(false);
-
-const returnfromLoginPFP = ref<string>("");
-const returnfromLoginName = ref<string>("");
-
 const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.value.homepageColumns) : '1fr')
-
-onMounted(() => {
-  let get = new URLSearchParams(location.search)
-  if (get.has("loginerr")) {
-    summonNotification(i18n.global.t('other.error'), i18n.global.t('homepage.loginFail'), 'error')
-  }
-  
-  let loginCookie = cookier("logindata").get();
-  if (loginCookie != null) {
-    returnedFromLogin.value = true;
-  
-    loginCookie = JSON.parse(loginCookie);
-    returnfromLoginName.value = loginCookie[0];
-  
-    // first-time user
-    firstTimeUser.value = loginCookie[2];
-    if (!firstTimeUser.value) {
-      summonNotification(i18n.global.t('homepage.welcomeBack'), returnfromLoginName.value, 'check')
-    }
-  
-    returnfromLoginPFP.value = loginCookie[1]
-  
-    cookier("logindata").remove();
-  }
-})
-
 
 const localStorg = ref(hasLocalStorage())
 
@@ -62,10 +24,6 @@ const closeTwitterAd = () => {
 </script>
 
 <template>
-  <DialogVue :width="dialog.large" :open="firstTimeUser" header-disabled>
-    <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
-  </DialogVue>
-  
   <header class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-[url(../images/introGrad2.webp)] bg-center">
     <!-- Twitter notif -->
     <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
