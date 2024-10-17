@@ -444,7 +444,8 @@
     "bgTheme1": "Fade",
     "bgTheme2": "Slice",
     "bgTheme3": "Morph",
-    "bgTheme4": "Colorize"
+    "bgTheme4": "Colorize",
+    "themes": "Themes"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -499,7 +500,11 @@
     "disTL": "Disable translucency",
     "disTLhelp": "Disables blurry backgrounds of reviews and level cards",
     "loadCom": "Comments under Posts",
-    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post"
+    "loadCHelp": "Auto-loads comments after scrolling to the bottom of a post",
+    "seasThemes": "Seasonal Themes",
+    "seasThemesHelp": "Themes will automatically switch, if a special one is available.",
+    "seasProgress": "A seasonal theme is in progress!",
+    "seasProgressHelp": "(Seasonal themes can be turned off in the settings)"
   },
   "help": {
     "Lists": "Lists",

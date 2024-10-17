@@ -16,7 +16,7 @@ import Dialog from "./components/global/Dialog.vue";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
-    localStorage.setItem("favoriteIDs", "[]");
+  localStorage.setItem("favoriteIDs", "[]");
   localStorage.getItem("favorites") ?? localStorage.setItem("favorites", "[]");
   localStorage.getItem("pinnedLists") ??
     localStorage.setItem("pinnedLists", "[]");
@@ -24,27 +24,6 @@ if (hasLocalStorage()) {
     localStorage.setItem("pinnedLists", "[]");
   localStorage.getItem("recentlyViewed") ??
     localStorage.setItem("recentlyViewed", "[]");
-
-  localStorage.getItem("settings") ??
-    localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
-
-  let loadedSettings: any = JSON.parse(localStorage.getItem("settings")!);
-  let loadedSettingsKeys: any = Object.keys(loadedSettings);
-  let settingsKeys: any = Object.keys(SETTINGS.value);
-  if (loadedSettingsKeys.length < settingsKeys.length) {
-    settingsKeys.forEach((setting) => {
-      if (!loadedSettingsKeys.includes(setting))
-        loadedSettings[setting] = SETTINGS.value[setting];
-    });
-    localStorage.setItem("settings", JSON.stringify(loadedSettings));
-  }
-  SETTINGS.value = loadedSettings;
-  let lang: 0 | 1 =
-    SETTINGS.value.language == -1
-      ? ["cz", "sk"].includes(navigator.language) | 0
-      : SETTINGS.value.language;
-  setLanguage(lang);
-  if (SETTINGS.value.language == -1) SETTINGS.value.language = lang;
 }
 
 // Redirect to route from which login button pressed

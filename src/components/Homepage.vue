@@ -4,6 +4,7 @@ import LoginButton from "./global/LoginButton.vue";
 import { computed, ref } from "vue";
 import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
+import THEMES, { selectedBeforeSave } from "@/themes";
 
 document.title = useI18n().t("other.websiteName");
 
@@ -21,10 +22,16 @@ const closeTwitterAd = () => {
   document.querySelector("#twitterAd")?.remove()
 }
 
+const base = import.meta.env.BASE_URL
+const headerBG = ref(`url(${base}/graphics/${THEMES[SETTINGS.value.selectedTheme].graphic}.webp)`)
+watch(selectedBeforeSave, () => {
+  headerBG.value = `url(${base}/graphics/${THEMES[selectedBeforeSave.value].graphic}.webp)`
+})
+
 </script>
 
 <template>
-  <header class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-[url(../images/introGrad2.webp)] bg-center">
+  <header :style="{backgroundImage: headerBG}" class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-center">
     <!-- Twitter notif -->
     <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
       <img src="@/images/socials/twitter.svg" class="w-6" alt="">

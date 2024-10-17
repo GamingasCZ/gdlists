@@ -56,6 +56,7 @@ const doFocusText = () => {
 const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
 
 const pasteText = (e: ClipboardEvent) => {
+	if (!props.editable) return
 	e.preventDefault()
 
 	let pasteText = e.clipboardData?.getData("Text")

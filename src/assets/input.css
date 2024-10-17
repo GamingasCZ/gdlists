@@ -25,14 +25,14 @@
 }
 
 :root {
-  --siteBackground: #08110b;
-  --primaryColor: #045124;
-  --secondaryColor: #142019;
-  --brightGreen: #71d471;
+  --siteBackground: #000;
+  --primaryColor: #0000;
+  --secondaryColor: #0000;
+  --brightGreen: #0000;
 }
 
 body {
-  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins] flex flex-col justify-between
+  @apply bg-lof-100 bg-repeat transition-[background-color] duration-300 bg-fixed font-[poppins] flex flex-col justify-between
 }
 
 @media (prefers-reduced-motion: no-preference) {

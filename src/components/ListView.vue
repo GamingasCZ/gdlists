@@ -49,7 +49,6 @@ const props = defineProps<{
 }>()
 
 onUnmounted(() => {
-  document.body.style.backgroundImage = '';
   reviewData.value = DEFAULT_REVIEWDATA()
 });
 
@@ -150,8 +149,9 @@ async function loadList(loadedData: LevelList | null) {
     document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
     // Set list colors
-    if (LIST_DATA.value?.data?.pageBGcolor)
+    if (LIST_DATA.value?.data?.pageBGcolor && !isNaN(LIST_DATA.value?.data?.pageBGcolor[0])){
       modifyListBG(LIST_DATA.value?.data?.pageBGcolor);
+    }
 
     // Check pinned status
     if (hasLocalStorage()) {
@@ -224,14 +224,11 @@ async function loadReview(loadedData: ReviewList | null) {
     document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
     // Set review colors
-    let listColors: [number, number, number] | string = LIST_DATA.value?.data.pageBGcolor!;
-    if (typeof listColors == "object") listColors[2] /= 64
-    else if (listColors) { listColors = chroma(listColors).hsl() }
-    LIST_COL.value = listColors
+    LIST_COL.value = LIST_DATA.value?.data.pageBGcolor!;
     
     // Saturation 0
     if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
-
+    
     if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
       modifyListBG(LIST_COL.value);
 

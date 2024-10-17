@@ -4,6 +4,7 @@ import type { LevelList, Level, CollabData, LevelBackup, ReviewList } from "./in
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import router from "./router";
+import { changeTheme } from "./themes";
 
 export const TAG_COUNT = 27;
 export const EMOJI_COUNT = 18;
@@ -83,10 +84,7 @@ export const modifyListBG = (newColors: number[] | string, reset = false, review
   if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return modifyListBG(0, true, review)
   if (reset) {
-    document.documentElement.style.setProperty("--siteBackground", "")
-    document.documentElement.style.setProperty("--primaryColor", "")
-    document.documentElement.style.setProperty("--secondaryColor", "")
-    document.documentElement.style.setProperty("--brightGreen", "")
+    changeTheme(SETTINGS.value.selectedTheme)
     return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
   }
 
