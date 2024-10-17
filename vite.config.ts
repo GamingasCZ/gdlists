@@ -12,6 +12,9 @@ export default defineConfig(mode => {
       vue(),
     ],
     base: '/gdlists',
+    build: {
+      target: 'esnext'
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
