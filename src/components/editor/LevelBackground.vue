@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { currentUID, newCardBG } from '@/Editor';
 import type { LevelList } from '@/interfaces';
+import { i18n } from '@/locales';
 import { computed, inject, ref } from 'vue';
 
 const props = defineProps<{
@@ -30,7 +31,7 @@ const openSettings = () => {
 const base = import.meta.env.BASE_URL
 const uc = import.meta.env.VITE_USERCONTENT
 const themeIcons = [1, 2, 3, 4].map(x => `/cardThemeIcons/theme${x}.svg`)
-const themeNames = ['Prolnutí', 'Výřez', 'Splynutí', 'Obarvení']
+const themeNames = [i18n.global.t('other.bgTheme1'), i18n.global.t('other.bgTheme2'), i18n.global.t('other.bgTheme3'), i18n.global.t('other.bgTheme4')]
 
 const bgImage = computed(() => `url(${uc}/userContent/${currentUID.value}/${bg.value?.image?.[0]}.webp)`)
 const bgImageY = computed(() => `${bg.value?.image?.[1]}%`)

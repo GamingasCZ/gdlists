@@ -440,7 +440,11 @@
     "scrolling": "Scrolling",
     "tiling": "Tiling",
     "byitself": "Always",
-    "stopPreview": "Leave Preview"
+    "stopPreview": "Leave Preview",
+    "bgTheme1": "Fade",
+    "bgTheme2": "Slice",
+    "bgTheme3": "Morph",
+    "bgTheme4": "Colorize"
   },
   "settingsMenu": {
     "asOff": "Off",

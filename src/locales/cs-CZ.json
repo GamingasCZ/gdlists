@@ -405,7 +405,11 @@
     "off": "Vypnuto",
     "byitself": "Samostatně",
     "parallax": "Parallax",
-    "stopPreview": "Ukončit náhled"
+    "stopPreview": "Ukončit náhled",
+    "bgTheme1": "Prolnutí",
+    "bgTheme2": "Výřez",
+    "bgTheme3": "Splynutí",
+    "bgTheme4": "Obarvení"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
