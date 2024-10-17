@@ -439,7 +439,8 @@
     "parallax": "Parallax",
     "scrolling": "Scrolling",
     "tiling": "Tiling",
-    "byitself": "Always"
+    "byitself": "Always",
+    "stopPreview": "Leave Preview"
   },
   "settingsMenu": {
     "asOff": "Off",

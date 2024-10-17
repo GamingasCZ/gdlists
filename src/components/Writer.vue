@@ -358,7 +358,7 @@ const modifyImageURL = (newUrl: string) => {
     }
     // Level card background
     else if (openDialogs.imagePicker[1] == -5) {
-        reviewData.value.levels[openDialogs.imagePicker[2]].background.image[0] = newUrl
+        reviewData.value.levels[openDialogs.imagePicker[2]].BGimage.image[0] = newUrl
     }
     // Review thumbnail
     else if (openDialogs.imagePicker[1] == -2) {
@@ -748,8 +748,10 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
 
         <DialogVue :open="openDialogs.BGpicker[0]" @close-popup="openDialogs.BGpicker[0] = false" disable-tap-close
             :title="$t('other.imageSettings')" :width="dialog.xl">
-            <BackgroundImagePicker :force-aspect-height="openDialogs.BGpicker[1] ? 0 : 10.8"
-                :source="openDialogs.BGpicker[1] ? reviewData.titleImg : reviewData.thumbnail" />
+            <BackgroundImagePicker
+                :disable-controls="openDialogs.BGpicker[1] == 1"
+                :force-aspect-height="[0, 100, 150][openDialogs.BGpicker[1]]"
+                :source="[reviewData.titleImg, reviewData.levels?.[openDialogs?.BGpicker?.[2]]?.BGimage?.image, reviewData.thumbnail][openDialogs.BGpicker[1]]" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.ratings" :side-button-text="$t('other.help')" :action="openRatingHelp"

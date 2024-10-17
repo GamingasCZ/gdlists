@@ -404,7 +404,8 @@
     "scrolling": "Scrollování",
     "off": "Vypnuto",
     "byitself": "Samostatně",
-    "parallax": "Parallax"
+    "parallax": "Parallax",
+    "stopPreview": "Ukončit náhled"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

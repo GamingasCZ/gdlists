@@ -423,7 +423,7 @@ const useAccentColor = (url: string) => {
         levelList.titleImg,
         levelList?.levels?.[openDialogs.BGpicker[2]]?.BGimage?.image]
         [openDialogs.BGpicker[1]]"
-      :force-aspect-height="openDialogs.BGpicker[1] ? 20 : false"
+      :force-aspect-height="openDialogs.BGpicker[1] ? 100 : false"
       :disable-controls="openDialogs.BGpicker[1]"
     />
   </DialogVue>

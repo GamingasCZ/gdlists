@@ -168,7 +168,7 @@ if (SETTINGS.value.scrollNavbar)
 				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
 			>
 				<img src="@/images/close.svg" class="w-5 pointer-events-none min-w-5">
-				<span class="text-sm pointer-events-none">Ukončit náhled</span>
+				<span class="text-sm pointer-events-none">{{ $t('other.stopPreview') }}</span>
 			</button>
 			<hr class="inline-flex mx-1 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
 			<button

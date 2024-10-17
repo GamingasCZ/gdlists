@@ -70,12 +70,12 @@ export const moveLevel = (from: number, to: number) => {
 };
 
 export function testIfImageExists(url: string) {
-  return new Promise((loaded) => {
+  return new Promise((loaded, error) => {
     let testImage = new Image();
     testImage.src = url;
 
-    testImage.addEventListener("error", () => loaded(""));
-    testImage.addEventListener("load", () => loaded(url));
+    testImage.addEventListener("error", () => error(""));
+    testImage.addEventListener("load", () => loaded([url, testImage]));
   });
 }
 
