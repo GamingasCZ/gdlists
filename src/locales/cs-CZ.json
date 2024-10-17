@@ -398,7 +398,13 @@
     "none2": "Žádná",
     "page": "Stránky",
     "levels2": "Levelů",
-    "all2": "Všechna"
+    "all2": "Všechna",
+    "opacity": "Průhlednost",
+    "tiling": "Dlaždicování",
+    "scrolling": "Scrollování",
+    "off": "Vypnuto",
+    "byitself": "Samostatně",
+    "parallax": "Parallax"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

@@ -34,20 +34,18 @@ const bgScrollY = computed(() => `calc(${props.image[1]}% - ${parascroll.value}p
 <style>
 
 @keyframes bg-scroll {
-    0% {background-position-y: 10%}
-    5% {background-position-y: 13%;}
-    50% {background-position-y: 100%}
-    95% {background-position-y: 13%;}
-    100% {background-position-y: 10%}
+    0% {background-position-y: 10%;}
+    50% {background-position-y: 100%;}
+    100% {background-position-y: 10%;}
 
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .cardBackgroundScroll {
-        animation: bg-scroll 80s linear infinite;
+        animation: bg-scroll 70s linear infinite;
     }
     .cardBackgroundParallax {
-        @apply !bg-repeat-y;
+        @apply !bg-repeat;
         background-position-y: v-bind(bgScrollY) !important;
     }
 }

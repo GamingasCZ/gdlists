@@ -433,7 +433,13 @@
     "page": "Page",
     "levels2": "Levels",
     "all2": "All",
-    "effects": "Effects"
+    "effects": "Effects",
+    "off": "Off",
+    "opacity": "Opacity",
+    "parallax": "Parallax",
+    "scrolling": "Scrolling",
+    "tiling": "Tiling",
+    "byitself": "Always"
   },
   "settingsMenu": {
     "asOff": "Off",

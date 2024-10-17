@@ -46,7 +46,7 @@ const bgImageY = computed(() => `${bg.value?.image?.[1]}%`)
         <span class="mb-1 text-lg text-center">{{ $t('other.picture') }}</span>
         <div class="">
           <button v-if="!bg?.image?.[0]" @click="openGallery"
-            class="flex items-center px-8 h-24 bg-black bg-opacity-80 rounded-md button">
+            class="flex items-center px-4 h-24 bg-black bg-opacity-80 rounded-md button">
             <img src="@/images/image.svg" class="mr-3 w-6" alt="">
             {{ $t('reviews.pick') }}
           </button>
@@ -70,23 +70,23 @@ const bgImageY = computed(() => `${bg.value?.image?.[1]}%`)
 
       <div class="flex flex-col justify-center">
         <span class="mb-1 text-lg text-center">{{ $t('other.effects') }}</span>
-        <div class="grid gap-1 sm:grid-cols-2">
-          <div class="flex gap-5 justify-between p-2 max-w-full bg-black bg-opacity-80 rounded-md">
-            <span>Průhlednost</span>
-            <input class="max-w-28 slider" type="range" v-model="bg.opacity" step="0.05" min="0" max="1">
+        <div class="grid grid-cols-3 gap-1 my-1">
+          <div class="flex flex-col gap-3 justify-between items-center p-2 max-w-full text-center bg-black bg-opacity-80 rounded-md">
+            <span>{{ $t('other.opacity') }}</span>
+            <input class="mb-1 max-w-20 slider" type="range" v-model="bg.opacity" step="0.05" min="0.05" max="1">
           </div>
           <div
-            class="flex gap-3 justify-between items-center p-2 max-w-full bg-black bg-opacity-80 rounded-md">
-            <span>Dlaždicování</span>
-            <input type="checkbox" v-model="bg.tile" class="button !m-0">
+            class="flex flex-col gap-3 justify-between items-center p-2 max-w-full text-center bg-black bg-opacity-80 rounded-md">
+            <span>{{ $t('other.tiling') }}</span>
+            <input type="checkbox" v-model="bg.tile" class="button !mr-0 mb-1">
           </div>
           <div
-            class="flex gap-3 justify-between items-center p-2 max-w-full bg-black bg-opacity-80 rounded-md">
-            <span>Scrollování</span>
+            class="flex flex-col gap-3 justify-between items-center p-2 max-w-full text-center bg-black bg-opacity-80 rounded-md">
+            <span>{{ $t('other.scrolling') }}</span>
             <select v-model="bg.scrolling">
-              <option :value="0">Vypnuto</option>
-              <option :value="1">Samostatně</option>
-              <option :value="2">Parallax</option>
+              <option :value="0">{{ $t('other.off') }}</option>
+              <option :value="1">{{ $t('other.byitself') }}</option>
+              <option :value="2">{{ $t('other.parallax') }}</option>
             </select>
           </div>
         </div>
@@ -95,7 +95,7 @@ const bgImageY = computed(() => `${bg.value?.image?.[1]}%`)
       <div class="flex flex-col justify-center">
         <span class="mb-1 text-lg text-center">{{ $t('settingsMenu.visual') }}</span>  
         <div class="grid gap-1 w-max max-sm:grid-cols-4 sm:grid-cols-2">
-          <button v-for="(button, index) in themeIcons" class="p-1 bg-black bg-opacity-80 rounded-md button"
+          <button v-for="(button, index) in themeIcons" :title="themeNames[index]" class="p-1 bg-black bg-opacity-80 rounded-md button"
             @click="bg.theme = index">
             <img :src="base + button" :class="{ 'disabled': bg.theme != index }" class="w-8" alt="">
           </button>
