@@ -55,7 +55,7 @@ const doBackup = () => {
   if (levelList.value.levels.length == 0) return // Do not save without any levels
   if (router.currentRoute.value.name != "editor") return // Only when leaving editor
   summonNotification("", i18n.global.t("editor.levelSaved"), 'check')
-  notifStamp.value = saveBackup(listName.value, !!listHiddenSelected())
+  saveBackup(listName.value, !!listHiddenSelected())
 }
 
 const favoriteLevels = ref<FavoritedLevel>()
