@@ -90,7 +90,7 @@ function rateBack() {
 </script>
 
 <template>
-    <article v-if="guessingDifficulty">
+    <article class="z-10" v-if="guessingDifficulty">
         <h2 class="mb-2 text-xl font-bold text-center drop-shadow-lg shadow-black">{{ $t('listViewer.whatDiff') }}</h2>
         <section class="flex flex-wrap gap-3 justify-center items-center py-2 bg-black bg-opacity-40 rounded-md">
             <button @click="selectFace(index)" @keydown.down="selectFace(index)" @keydown.right="moveFocus(1)" @keydown.left="moveFocus(-1)"
@@ -101,7 +101,7 @@ function rateBack() {
         </section>
     </article>
 
-    <article v-else>
+    <article class="z-10" v-else>
         <h2 class="mb-2 text-xl font-bold text-center drop-shadow-lg shadow-black">{{ $t('listViewer.whatRate') }}</h2>
         <section class="flex relative flex-wrap gap-6 justify-center items-center py-2 bg-black bg-opacity-40 rounded-md">
             <button class="absolute left-2 top-1/2 -translate-y-1/2 button" @click="rateBack()" v-if="diffGuessArray[1]">
