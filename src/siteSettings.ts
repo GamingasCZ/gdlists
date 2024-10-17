@@ -39,10 +39,10 @@ if (hasLocalStorage()) {
   localStorage.getItem("settings") ??
     localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
 
-  let loadedSettings: any = JSON.parse(localStorage.getItem("settings")!);
-  let loadedSettingsKeys: any = Object.keys(loadedSettings);
-  let settingsKeys: any = Object.keys(SETTINGS.value);
-  if (loadedSettingsKeys.length < settingsKeys.length) {
+  let loadedSettings: string[] = JSON.parse(localStorage.getItem("settings")!);
+  let loadedSettingsKeys: string[] = Object.keys(loadedSettings);
+  let settingsKeys: string[] = Object.keys(SETTINGS.value);
+  if (!settingsKeys.every(val => loadedSettingsKeys.includes(val))) {
     settingsKeys.forEach((setting) => {
       if (!loadedSettingsKeys.includes(setting))
         loadedSettings[setting] = SETTINGS.value[setting];
