@@ -4,7 +4,7 @@ $hostname = getenv("DB_HOSTNAME");
 $username = getenv("DB_USERNAME");
 $password = getenv("DB_PASSWORD");
 $database = getenv("DB_NAME");
-$debugMode = true;
+$debugMode = false;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import THEMES, { selectedBeforeSave } from "@/themes";
