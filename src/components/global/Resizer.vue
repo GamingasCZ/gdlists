@@ -22,6 +22,8 @@ const gizmo = ref<HTMLButtonElement>()
 
 const mousePos = ref([0, 0])
 const trackPos = (e: MouseEvent | TouchEvent) => {
+    if (e?.buttons == 0) return endScale()
+    
     if (e?.clientX) mousePos.value = [e.clientX, e.clientY]
     else mousePos.value = [e.touches.item(0).screenX, e.touches.item(0).screenY]
 }
@@ -71,7 +73,7 @@ const endScale = () => {
 </script>
 
 <template>
-    <div ref="self" class="relative w-max group" :class="{'p-1 border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
+    <div ref="self" class="relative group" :class="{'p-1 border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
         <slot :width="width" />
         
         <button v-if="editable" ref="gizmo" @mousedown="startScale" @touchstart="startScale" class="isolate absolute -bottom-1.5 w-4 h-4 bg-white rounded-full scale-0 group-hover:scale-100"
