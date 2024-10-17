@@ -47,7 +47,7 @@ const props = defineProps<{
 
 levelList.value = JSON.parse(JSON.stringify(DEFAULT_LEVELLIST))
   if (predefinedLevelList.value.length) {
-    predefinedLevelList.value.forEach(l => addLevel(l))
+    levelList.value.levels = predefinedLevelList.value
     predefinedLevelList.value = []
   }
 

@@ -15,6 +15,7 @@ import { i18n } from "@/locales";
 
 const emit = defineEmits<{
   (e: 'favorite', data: FavoritedLevel): void
+  (e: 'clickedOption', data: selectedList): void
 }>()
 const props = defineProps<{
   levelName: string
@@ -32,6 +33,7 @@ const props = defineProps<{
   platformer?: 0 | 1
   favorited?: boolean
   collabMemberCount: number
+  disableLink: boolean | 2
 
   A_gameplay?: string | null
   A_decoration?: string | null
@@ -56,12 +58,6 @@ const getGradient = () => {
 
 const round = (x) => parseFloat(parseFloat(x).toFixed(1))
 
-const clickLevel = () => {
-  let bg = newCardBG()
-  bg.image[0] = props?.background
-  emit('clickedOption', {levelName: props.levelName, creator: props.creator, levelID: props.levelID, difficulty: props.difficulty, rating: props.rating, color: props?.color, background: bg})
-}
-
 const addToTemporaryList = () => {
   selectedLevels.value.push({
     levelName: props.levelName, 
@@ -77,6 +73,7 @@ const uc = import.meta.env.VITE_USERCONTENT
 
 const insidePosts = ref([])
 const getContainingPosts = async() => {
+  if (props.disableLink) return
   if (insidePosts.value.length) return
   insidePosts.value = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {postsInLevel: 1, levelID: props.levelID}}).then(res => res.data)
 }
@@ -97,6 +94,25 @@ const favoriteLevel = () => {
     timeAdded: Date.now()
   }
   emit('favorite', level)
+}
+
+const selectLevel = () => {
+  let bg = newCardBG()
+  bg.image[0] = props?.background ?? ''
+  let data = {
+    levelName: props.levelName,
+    creator: props.creator,
+    levelID: props.levelID,
+    difficulty: props.difficulty,
+    rating: props.rating,
+    color: props?.color,
+    BGimage: bg,
+    postID: props.levelID,
+    postType: 2,
+  }
+  if (props.disableLink != 2) data.option = 0
+  
+  emit('clickedOption', data)
 }
 
 </script>
@@ -128,7 +144,7 @@ const favoriteLevel = () => {
 
     <div class="flex absolute inset-0 flex-col items-center py-2 opacity-0 transition-opacity duration-75 ease-out group-hover:opacity-100">
       <span @click.stop="copyID" class="text-2xl font-bold hover:underline">ID: {{ levelID }}</span>
-      <div @click="getContainingPosts" class="flex gap-2 items-center text-center hover:underline">
+      <div @click="getContainingPosts" :class="{'hover:underline': !disableLink}" class="flex gap-2 items-center text-center">
         <span v-if="inLists">{{ $t('listViewer.inLists', inLists) }}</span>
         <hr v-if="inLists && inReviews" class="w-1 h-1 bg-white rounded-full border-none opacity-40">
         <span v-if="inReviews">{{ $t('listViewer.inReviews', inReviews) }}</span>
@@ -136,9 +152,13 @@ const favoriteLevel = () => {
 
       <hr class="px-2 my-2 w-72 h-0.5 bg-white border-none opacity-40">
 
-      <button v-if="loggedIn" @click.stop="addToTemporaryList" :disabled="selectedLevels.length >= 50" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
+      <button v-if="loggedIn && !disableLink" @click.stop="addToTemporaryList" :disabled="selectedLevels.length >= 50" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
         <img src="@/images/addLevel.svg" class="inline mr-2 w-5" alt="">{{ $t('listViewer.addToList') }}
       </button>
+      <button v-else-if="disableLink" @click.stop="selectLevel()" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
+        <img src="@/images/modPick.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pick') }}
+      </button>
+
       <a @click.stop="" :href="`https://gdbrowser.com/${levelID}`" target="_blank" class="p-2 py-1 m-2 text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img src="@/images/modGDB.svg" class="inline mr-2 w-8">{{ $t('listViewer.dispOnGDB') }}</a>
     </div>
 

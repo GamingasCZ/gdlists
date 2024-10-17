@@ -16,6 +16,7 @@ const writeReview = () => {
     reviewData.value.levels = []
     predefinedLevelList.value = []
     selectedLevels.value.forEach(l => addReviewLevel(l, true))
+    console.log(predefinedLevelList.value)
     router.push("/make/review")
 }
 

@@ -45,7 +45,7 @@ export function addLevel(values: Level | null, toPredefined?: boolean) {
   let levelInfo: Level = {
     levelName: values?.levelName ?? "",
     creator: values?.creator ?? "",
-    color: makeColor(values?.color),
+    color: values?.color ? chroma(values?.color).hsl() : makeColor(),
     levelID: values?.levelID ?? "",
     video: values?.video ?? "",
     difficulty: values?.difficulty ?? [0, 0],

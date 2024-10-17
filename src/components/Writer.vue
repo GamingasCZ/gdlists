@@ -20,7 +20,7 @@ import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { DEFAULT_LEVELLIST, modifyListBG, predefinedLevelList, prettyDate, removeBackup, saveBackup } from "@/Editor";
+import { DEFAULT_LEVELLIST, modifyListBG, predefinedLevelList, prettyDate, removeBackup, saveBackup, selectedLevels } from "@/Editor";
 import { onUnmounted } from "vue";
 import router from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -47,10 +47,10 @@ const props = defineProps<{
 }>()
 
 reviewData.value = DEFAULT_REVIEWDATA()
-    if (predefinedLevelList.value.length) {
-        predefinedLevelList.value.forEach(l => addReviewLevel(l))
-        predefinedLevelList.value = []
-    }
+if (predefinedLevelList.value.length) {
+    reviewData.value.levels = predefinedLevelList.value
+    predefinedLevelList.value = []
+}
 
 let isNowHidden = false
 if (props.editing) {

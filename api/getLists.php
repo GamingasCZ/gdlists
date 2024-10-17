@@ -219,6 +219,7 @@ elseif (isset($_GET["batch"])) {
     if ($type == 2) {
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
       INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
+      LEFT JOIN levels_ratings ON levels_ratings.levelID = levels_uploaders.levelID
       WHERE levels.levelID IN %s
       GROUP BY levels_uploaders.levelID
       ", $range, $in[0]), $fetchIDs, $in[1], true);

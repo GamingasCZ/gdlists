@@ -9,6 +9,7 @@ import { useRoute, useRouter } from 'vue-router';
 import ReviewPreview from '../global/ReviewPreview.vue';
 import axios from 'axios';
 import LevelCard from '../global/LevelCard.vue';
+import { newCardBG } from '@/Editor';
 
 
 const emit = defineEmits<{
@@ -59,8 +60,9 @@ const getList = async () => {
     if (levels.value == -1) return
     
     let post;
-    if (props.settings.postType == 2)
+    if (props.settings.postType == 2) {
         post = levels.value[props.settings.postType][0].filter(x => x.levelID == props.settings.post)[0]
+    }
     else
         post = levels.value[props.settings.postType][0].filter(x => x.id == props.settings.post)[0]
     postData.value = [post, levels.value?.[props.settings.postType]?.[1], levels.value?.[props.settings.postType]?.[4]]
