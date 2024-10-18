@@ -37,10 +37,21 @@ function getStorage($mysqli, $uid, $addNewImage = null) {
     ]);
 }
 
-function getAll($uid, $mysqli) {
-    $allImages = $mysqli -> query(sprintf("SELECT `hash` FROM images WHERE `uploaderID`=%s", $uid));
+function getHashes($x) { return $x["hash"]; }
 
-    return json_encode([json_decode(getStorage($mysqli, $uid)), array_reverse(array_merge(...$allImages -> fetch_all()))]);
+function getAll($uid, $mysqli, $folder = '/') {
+    $allImages;
+    $allFolders;
+    if ($folder == '/') {
+        $allImages = doRequest($mysqli, "SELECT `hash` FROM images WHERE `uploaderID`=? AND ISNULL(`folder`)", [$uid], "s", true);
+        $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `base_path`='/' AND `uid`=?", [$uid], "s", true);
+    }
+    else {
+        $allImages = doRequest($mysqli, "SELECT `hash` FROM images RIGHT JOIN `images_folders` ON images.folder = images_folders.id WHERE `uploaderID`=? AND images_folders.name = ?", [$uid, $folder], "ss", true);
+        $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `uid`=? AND `base_path`=?", [$uid, $folder], "ss", true);
+    }
+    
+    return json_encode([json_decode(getStorage($mysqli, $uid)), array_reverse(array_map("getHashes", $allImages)), $allFolders]);
 }
 
 function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = true, $saveToDatabase = true, $overwrite = false, $noSave = false) {
@@ -114,7 +125,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 die(getStorage($mysqli, $user["id"]));
             }
     
-            die(getAll($user["id"], $mysqli));
+            die(getAll($user["id"], $mysqli, urldecode($_GET["currentFolder"])));
             break;
     
         case 'POST':
@@ -152,6 +163,42 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             die(getStorage($mysqli, $user["id"]));
             break;
         
+        case 'PUT':
+            $DATA = json_decode(file_get_contents("php://input"), true);
+            
+            if (!isset($DATA["action"])) die(http_response_code(403));
+
+            switch ($DATA["action"]) {
+                case 'createFolder':
+                    $slashPos = strpos($DATA["name"], '/');
+                    $folderName = $DATA["name"];
+                    if (strlen($folderName) > 20) die(http_response_code(403));
+        
+                    if ($slashPos === false) $folderName = '/' . $folderName;
+                    else if ($slashPos > 0) die(http_response_code(403));
+        
+                    $folderColor = substr($DATA["color"], 0, 7);
+                    if ($folderColor[0] != "#") die(http_response_code(403));
+        
+                    $currentFolder = $DATA["currentFolder"];
+                    
+                    $res = doRequest($mysqli, "INSERT INTO `images_folders`(`name`, `color`, `base_path`, `uid`) VALUES (?,?,?,?)", [$folderName, $folderColor, $currentFolder, $user["id"]], "ssss");
+                    if (!array_key_exists("error", $res)) die(http_response_code(201));
+                    
+                    break;
+                case 'moveToFolder':
+                    $imgs = makeIN($DATA["images"]);
+                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = ? WHERE `hash` IN %s", $imgs[0]), [$DATA["folderID"], ...$DATA["images"]], "s" . $imgs[1]);
+                    if (!array_key_exists("error", $res)) die(http_response_code(201));
+                    
+                    break;
+                
+                default:
+                    die(http_response_code(403));
+            }
+
+            break;
+
         default:
             die("-1");
             break;

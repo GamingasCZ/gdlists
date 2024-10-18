@@ -388,4 +388,11 @@ function ass() {
     }
 }
 
+function makeIN($arr) {
+    return [
+      "(" . substr(str_repeat("?,", sizeof($arr)), 0, sizeof($arr)*2-1) . ")",
+      str_repeat("s", sizeof($arr))
+    ];
+  }
+
 ?>

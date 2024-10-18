@@ -414,7 +414,9 @@
     "bgTheme2": "Výřez",
     "bgTheme3": "Splynutí",
     "bgTheme4": "Obarvení",
-    "themes": "Motivy"
+    "themes": "Motivy",
+    "create": "Vytvořit",
+    "newFolder": "Nová složka"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

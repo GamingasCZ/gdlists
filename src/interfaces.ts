@@ -314,6 +314,13 @@ export interface ImageStorage {
   maxUploadSize: number
 }
 
+export interface ImageFolder {
+  id: number
+  name: string
+  color: string
+}
+
+
 export interface LocalNotification {
   title: string
   text: string
