@@ -62,7 +62,7 @@ const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
-  LISTS.value = [] // Do not clear when using infinite scrolling
+  // LISTS.value = [] // Do not clear when using infinite scrolling
   PAGE.value = setPage;
   // window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
@@ -355,7 +355,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
             $t('other.refresh') }}</label>
         </button>
       </header>
-      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': ['reviews', 'levels'].includes(onlineSubtype), 'md:!grid-cols-2': ['reviews', 'levels'].includes(onlineSubtype) && picking}">
+      <main class="flex flex-col gap-3 items-center mt-4 transition-opacity duration-75" :class="{'opacity-60 pointer-events-none': loading, 'grid md:grid-cols-3': ['reviews', 'levels'].includes(onlineSubtype), 'md:!grid-cols-2': ['reviews', 'levels'].includes(onlineSubtype) && picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
@@ -401,9 +401,9 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
         </div>
 
         <!-- Loading -->
-        <div v-else-if="loading" class="flex absolute left-1/2 flex-col gap-4 items-center mt-24 -translate-x-1/2">
-          <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
-          <p class="text-xl text-opacity-40">{{ $t('other.loading') }}...</p>
+        <div v-else-if="loading" class="flex absolute left-1/2 z-10 flex-col gap-4 items-center mt-24 drop-shadow-lg -translate-x-1/2">
+          <img src="@/images/loading.webp" alt="" class="w-24 opacity-80 animate-spin">
+          <p class="text-xl text-opacity-80">{{ $t('other.loading') }}...</p>
         </div>
 
         <!-- No lists/comments BG -->
@@ -430,7 +430,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           :is="component"
           v-for="(list, index) in LISTS" v-bind="list"
           class="min-w-full listPreviews"
-          :key="PAGE"
+          :key="list?.name ?? list?.levelName ?? PAGE"
           :in-use="false"
           :on-saves-page="true"
           :coll-index="index"
