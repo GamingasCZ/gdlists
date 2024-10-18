@@ -2,7 +2,7 @@
 import { SETTINGS } from '@/siteSettings';
 import THEMES, { checkSeasonalTheme, saveTheme, selectedBeforeSave } from '@/themes';
 import themes, { changeTheme } from '@/themes';
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const emit = defineEmits(['close'])
@@ -12,11 +12,13 @@ const base = import.meta.env.BASE_URL
 let currentThemeInUse = SETTINGS.value.selectedTheme
 const hoveringOver = ref('')
 
-useRouter().beforeResolve(() => {
+let removeGuard = useRouter().beforeResolve(() => {
     changeTheme(currentThemeInUse)
     emit('close')
     return true
 })
+
+onBeforeUnmount(() => removeGuard())
 
 const isSeasonal = ref(checkSeasonalTheme() != -1)
 
