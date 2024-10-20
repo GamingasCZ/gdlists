@@ -51,6 +51,7 @@ const folders = ref<ImageFolder[]>([])
 const loadingImages = ref(true)
 const creatingNewFolder = ref(false)
 const currentFolder = ref("/")
+const currentFolderID = ref(0)
 
 if (hasLocalStorage()) {
     externaImages.value = JSON.parse(localStorage.getItem("externalImages")!) ?? []
@@ -202,6 +203,7 @@ const selectImage = (index: number) => {
     }
 }
 
+const thumbnails = ref<{[path: string]: string}>({})
 const refreshContent = async (data?: [string[], string[], ImageFolder[]]) => {
     loadingImages.value = true
     let getReq = {currentFolder: encodeURIComponent(currentFolder.value)}
@@ -213,6 +215,11 @@ const refreshContent = async (data?: [string[], string[], ImageFolder[]]) => {
     images.value = content[1]
     folders.value = content[2]
     storage.value = content[0]
+
+    thumbnails.value = {}
+    content[3].forEach(x => thumbnails.value[x.name] = [])
+    content[3].forEach(x => thumbnails.value[x.name].push(x.hash))
+
     setImgCache(images.value, folders.value)
     setStorageCache(storage.value)
     loadingImages.value = false
@@ -251,13 +258,24 @@ const imageAction = (id: number, external: boolean, val: string | number) => {
 }
 
 const holdingShift = ref(false)
-const modShift = (e: KeyboardEvent) => holdingShift.value = e.shiftKey
-document.addEventListener("keydown", modShift)
-document.addEventListener("keyup", modShift)
+const modifierHeld = (e: KeyboardEvent) => {
+    holdingShift.value = e.shiftKey
+
+    // CTRL + X = move mode
+    if (e.type == "keyup" && e.ctrlKey && e.key == 'x')
+        startMoveMode()
+
+    // CTRL + V = paste into folder
+    if (e.type == "keyup" && e.ctrlKey && e.key == 'v')
+        moveToFolder(imagesToMove.value, currentFolderID.value)
+
+}
+document.addEventListener("keydown", modifierHeld)
+document.addEventListener("keyup", modifierHeld)
 
 onBeforeUnmount(() => {
-    document.removeEventListener("keydown", modShift)
-    document.removeEventListener("keyup", modShift)
+    document.removeEventListener("keydown", modifierHeld)
+    document.removeEventListener("keyup", modifierHeld)
 })
 const previewDominant = ref()
 
@@ -297,8 +315,14 @@ const getFolderGradient = (hex: string) => {
     return `linear-gradient(0deg, ${hex}, transparent)`
 }
 
-const gotoFolder = (folderName: string) => {
+var upperFolderID = 0
+const gotoFolder = (folderName: string, folderID: number) => {
     currentFolder.value = folderName
+    upperFolderID = currentFolderID.value
+    currentFolderID.value = folderID
+    if (!folderMoveMode.value)
+        selectedImages.value = []
+    
     refreshContent()
 }
 
@@ -307,24 +331,40 @@ const goUpFolder = () => {
 
     let splitPath = currentFolder.value.split("/")
     if (splitPath.length == 2)
-        gotoFolder("/")
+        gotoFolder("/", 0)
     else
-        gotoFolder(splitPath.slice(0, splitPath.length - 1).join("/"))
+        gotoFolder(splitPath.slice(0, splitPath.length - 1).join("/"), upperFolderID)
+}
+
+const editFolder = () => {
+    folderDetails.value = {
+        name: currentFolder.value.split("/"),
+        folder
+    }
 }
 
 const folderMoveMode = ref(false)
 const imagesToMove = ref<string[]>([])
 const moveToFolder = (imgs: string[], folderID: number) => {
+    if (!imgs.length) return
+
     let data = {
         action: "moveToFolder",
         folderID: folderID,
         images: imgs
     }
     axios.put(import.meta.env.VITE_API+"/images.php", data).then(() => {
-        refreshContent()
+        images.value = imagesToMove.value.concat(images.value)
         folderMoveMode.value = false
         selectedImages.value = []
     })
+}
+
+const startMoveMode = () => {
+    if (!selectedImages.value.length) return
+
+    folderMoveMode.value = true
+    imagesToMove.value = selectedImages.value.map(x => images.value[x])
 }
 
 // Load images from cache or server
@@ -370,7 +410,7 @@ else {
         <!-- New folder Dialog -->
         <Dialog :title="$t('other.newFolder')" @close-popup="creatingNewFolder = false" :open="creatingNewFolder">
             <form @submit.prevent="createFolder()" class="p-2">
-                <label for="folderNameInput" class="text-xl font-bold">Jméno složky</label>
+                <label for="folderNameInput" class="text-xl font-bold">{{ $t('other.folderName') }}</label>
                 <input v-model="folderDetails.name" class="block px-2 py-1 w-full bg-white bg-opacity-20 rounded-md" name="folderNameInput" type="text">
                 <div>
                     <img src="@/images/info.svg" class="inline mr-2 w-4" alt="">
@@ -379,7 +419,7 @@ else {
 
                 <div class="flex gap-2 items-center mt-8 mb-2">
                     <div :style="{backgroundColor: folderColor}" class="w-8 rounded-full border-2 aspect-square"></div>
-                    <span class="text-xl font-bold">Barva složky</span>
+                    <span class="text-xl font-bold">{{ $t('other.folderColor') }}</span>
                 </div>
                 <ColorPicker :hue="folderDetails.color[0]" :saturation="folderDetails.color[1]" :lightness="folderDetails.color[1]" @colors-modified="folderDetails.color = $event"/>
                 <div class="flex justify-between">
@@ -416,35 +456,43 @@ else {
     <TabBar :tab-names="[$t('homepage.uploaded')].concat(disableExternal ? [] : [$t('other.external')])" @switched-tab="currentTab = $event" />
     
     <div class="flex items-center p-2">
-        <button @click="goUpFolder()" :disabled="currentFolder == '/'" class="p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button"><img src="@/images/plus.svg" class="inline mr-2 w-5" alt="">Up</button>
-        <span class="ml-2 text-lg">{{ currentFolder == '/' ? 'Top Folder' : currentFolder }}</span>
-        <button @click="creatingNewFolder = true" class="p-1 ml-auto bg-black bg-opacity-40 rounded-md button"><img src="@/images/plus.svg" class="inline mr-2 w-5" alt="">Create Folder</button>
+        <button @click="goUpFolder()" :disabled="currentFolder == '/'" class="p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button"><img src="@/images/goUp.svg" class="inline mr-2 w-5" alt="">{{ $t('other.up') }}</button>
+        <span class="ml-2 text-lg"><img src="@/images/image.svg" class="inline mr-1 w-4 opacity-50" alt="">{{ currentFolder == '/' ? $t('other.gallery') : currentFolder }}</span>
+        <button @click="editFolder()" class="p-1 mr-1 ml-auto w-8 bg-black bg-opacity-40 rounded-md aspect-square button"><img src="@/images/edit.svg" class="inline p-0.5" alt=""></button>
+        <button @click="creatingNewFolder = true" class="p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/plus.svg" class="inline mr-2 w-5" alt="">{{ $t('other.createFolder') }}</button>
     </div>
     
     <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
         @dragexit="fileDrag = false" @submit.prevent=""
         class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
-        <HiddenFileUploader v-if="currentTab == 0" @data="uploadImage" ref="imageInput" unclickable multiple :disabled="loadingImages || uploadingImage != 0" />
+        <HiddenFileUploader v-if="currentTab == 0" @data="uploadImage" ref="imageInput" unclickable multiple :disabled="loadingImages || uploadingImage != 0 || folderMoveMode" />
 
-        <!-- Images + folders -->
+        
         <div class="grid grid-cols-4 gap-2 m-2" v-show="currentTab == 0" :class="{'opacity-20 pointer-events-none': uploadingImage}">
-            <button v-for="(folder, index) in folders"
-                @click.exact="() => folderMoveMode ? moveToFolder(imagesToMove, folder.id) : gotoFolder(folder.name)"
+        
+            <!-- Folders -->
+            <button v-for="folder in folders"
+                @click.exact="gotoFolder(folder.name, folder.id)"
                 class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
                 :style="{borderColor: folder.color, background: chroma(folder.color).alpha(0.4).hex()}"
             >
-                
+             
+                <div class="grid absolute inset-2 grid-cols-2 gap-2">
+                    <img v-for="thumb in thumbnails[folder.name]" :class="{'col-span-2 w-full': thumbnails[folder.name].length == 1}" class="object-cover h-full" :src="`${pre}/userContent/${storage.uid}/${thumb}-thumb.webp`" alt="">
+                </div>
                 <div class="absolute inset-0" :style="{backgroundImage: getFolderGradient(folder.color)}"></div>
-                <span class="absolute bottom-1 left-1/2 text-lg -translate-x-1/2">{{ getFolderName(folder.name) }}</span>
+                <span class="absolute bottom-1 left-1/2 w-max text-lg -translate-x-1/2 text-ellipsis">{{ getFolderName(folder.name) }}</span>
             </button>
 
+            <!-- Images -->
             <button v-for="(image, index) in images"
                 @click.exact="pickImage(index, false)"
                 @click.ctrl="selectImage(index)"
                 @auxclick="startRemoval(index)"
                 @mouseover="imageHovering = index"
                 @mouseout="imageHovering = -1"
-                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
+                :key="image"
+                class="relative h-24 bg-center rounded-sm border-2 transition-all duration-75 cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
                 :class="{'opacity-20 pointer-events-none': folderMoveMode, '!border-4': selectedImages.includes(index)}">
                 <!-- Image settings -->
                 <button ref="button" v-show="imageOptsShown == index || imageHovering == index" @click.stop="imageOptsShown = index"
@@ -498,8 +546,8 @@ else {
             </div>
             <div v-else-if="currentTab == 0 && !fileDrag" class="flex flex-col items-center w-max">
                 <img src="@/images/image.svg" class="mb-2 w-48" alt="">
-                <h2 class="text-xl">Tato složka je prázdná!</h2>
-                <p>Můžes sem přetáhnout a vkládat nové obrázky, nebo je vybrat z jiné složky a vložit je sem!</p>
+                <h2 class="text-xl">{{ $t('other.folderEmptyHelp') }}</h2>
+                <p>{{ $t('other.folderHelp') }}</p>
             </div>
             <div v-else-if="currentTab == 0 && fileDrag" class="pt-2 pr-8 pb-4 pl-4 w-max bg-black rounded-xl animate-pulse">
                 <img src="@/images/dropfile.svg" class="mb-2 w-64" alt="">
@@ -513,7 +561,7 @@ else {
             </div>
         </div>
 
-        <p v-if="images.length" class="py-1 mt-auto text-center">Hold <kbd>CTRL</kbd> to select multiple images!</p>
+        <p v-if="images.length" class="py-1 mt-auto text-center opacity-40" v-html="$t('other.selectImgHelp')"> </p>
         
     </form>
 
@@ -523,9 +571,10 @@ else {
             <button @click="selectedImages = []; folderMoveMode = false" class="p-1 button"><img class="inline mr-2 w-5" src="@/images/close.svg" alt="">{{ $t('other.cancel') }}</button>
             <h2 class="text-2xl">{{ $t('other.selImg', selectedImages.length) }}</h2>
             <div v-show="!folderMoveMode" class="flex gap-2">
-                <button @click="folderMoveMode = true; imagesToMove = selectedImages.map(x => images[x])" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/move.svg" alt="">{{ $t('other.move') }}</button>
+                <button @click="startMoveMode" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/move.svg" alt="">{{ $t('other.move') }}</button>
                 <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
             </div>
+            <button v-if="folderMoveMode" @click="moveToFolder(imagesToMove, currentFolderID)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5" src="@/images/move.svg" alt="">Move here</button>
         </div>
     </Transition>
     

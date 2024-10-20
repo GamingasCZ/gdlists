@@ -10,8 +10,8 @@ require_once("globals.php");
 -1 = empty request
 0 = database error
 */
-$MAX_STORAGE = 10000000;
-$MAX_FILECOUNT = 50;
+$MAX_STORAGE = 15000000;
+$MAX_FILECOUNT = 200;
 $MAX_UPLOADSIZE = 5000000;
 
 // Path for user content
@@ -50,8 +50,12 @@ function getAll($uid, $mysqli, $folder = '/') {
         $allImages = doRequest($mysqli, "SELECT `hash` FROM images RIGHT JOIN `images_folders` ON images.folder = images_folders.id WHERE `uploaderID`=? AND images_folders.name = ?", [$uid, $folder], "ss", true);
         $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `uid`=? AND `base_path`=?", [$uid, $folder], "ss", true);
     }
+
+    // fuck off, dumbass bitch can't sort shit
+    $thumbs = doRequest($mysqli, "SELECT * FROM (SELECT hash, name, images.id FROM images, images_folders WHERE images.folder = images_folders.id AND `uploaderID`=? AND base_path=? ORDER BY images.id DESC LIMIT 18446744073709551615) t GROUP BY t.name", [$uid, $folder], "ss", true);
+    // $thumbs = doRequest($mysqli, "SELECT hash, name, floor(@row := @row + 0.5) as rank from images LEFT JOIN `images_folders` on images.folder = images_folders.id, (SELECT @row := -0.5) r WHERE `uploaderID`=? AND base_path=? GROUP BY rank", [$uid, $folder], "ss", true);
     
-    return json_encode([json_decode(getStorage($mysqli, $uid)), array_reverse(array_map("getHashes", $allImages)), $allFolders]);
+    return json_encode([json_decode(getStorage($mysqli, $uid)), array_reverse(array_map("getHashes", $allImages)), $allFolders, $thumbs]);
 }
 
 function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = true, $saveToDatabase = true, $overwrite = false, $noSave = false) {
@@ -188,7 +192,10 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     break;
                 case 'moveToFolder':
                     $imgs = makeIN($DATA["images"]);
-                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = ? WHERE `hash` IN %s", $imgs[0]), [$DATA["folderID"], ...$DATA["images"]], "s" . $imgs[1]);
+                    $addToFolder = $DATA["folderID"];
+                    if ($addToFolder == 0) $addToFolder = NULL;
+
+                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = ? WHERE `hash` IN %s", $imgs[0]), [$addToFolder, ...$DATA["images"]], "s" . $imgs[1]);
                     if (!array_key_exists("error", $res)) die(http_response_code(201));
                     
                     break;

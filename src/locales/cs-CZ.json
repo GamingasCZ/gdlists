@@ -416,7 +416,14 @@
     "bgTheme4": "Obarvení",
     "themes": "Motivy",
     "create": "Vytvořit",
-    "newFolder": "Nová složka"
+    "newFolder": "Nová složka",
+    "folderName": "Jméno složky",
+    "folderColor": "Barva složky",
+    "folderEmptyHelp": "Tato složka je prázdná!",
+    "selectImgHelp": "Drž <kbd>CTRL</kbd> pro vybrání více obrázků!",
+    "folderHelp": "Můžes sem nahrát nové obrázky, nebo je vybrat z jiné složky a vložit je sem!",
+    "createFolder": "Vytvořit složku",
+    "up": "Nahoru"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

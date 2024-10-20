@@ -445,7 +445,16 @@
     "bgTheme2": "Slice",
     "bgTheme3": "Morph",
     "bgTheme4": "Colorize",
-    "themes": "Themes"
+    "themes": "Themes",
+    "newFolder": "New Folder",
+    "create": "Create",
+    "selectImgHelp": "Hold <kbd>CTRL</kbd> to select multiple images!",
+    "folderHelp": "You can upload new images, or move some over from another folder!",
+    "createFolder": "Create Folder",
+    "folderColor": "Folder Color",
+    "folderEmptyHelp": "This folder is empty!",
+    "folderName": "Folder Name",
+    "up": "Up"
   },
   "settingsMenu": {
     "asOff": "Off",
