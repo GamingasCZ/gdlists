@@ -5,11 +5,15 @@ import { onMounted, onUnmounted, ref } from 'vue';
 
 
 const props = defineProps<{
-    imagesArray: ReviewContainer[]
+    imagesArray?: ReviewContainer[]
+    hashArray?: string[]
+    uid?: string
 }>()
 
 const emit = defineEmits<{
     (e: "closePopup"): void
+    (e: "remove"): void
+    (e: "download"): void
 }>()
 
 const clickClose = () => {
@@ -64,7 +68,7 @@ onUnmounted(() => {
 const imageIndex = defineModel()
 
 const prevImage = () => imageIndex.value = Math.max(0, imageIndex.value - 1)
-const nextImage = () => imageIndex.value = Math.min(imageIndex.value + 1, props.imagesArray.length - 1)
+const nextImage = () => imageIndex.value = Math.min(imageIndex.value + 1, (props.imagesArray ?? props.hashArray ?? []).length - 1)
 
 const imgOffset = ref(0)
 let lastDragX = -1
@@ -93,6 +97,8 @@ const stopDrag = () => {
     lastDragX = -1
 }
 
+const base = import.meta.env.VITE_USERCONTENT
+
 </script>
 
 <template>
@@ -101,8 +107,12 @@ const stopDrag = () => {
         <Transition name="fade">
             <div v-show="uiShown">
                 <div class="flex absolute top-0 right-0 left-0 z-10 justify-between items-center p-2 px-3 bg-black bg-opacity-80 backdrop-blur-sm">
-                    <h2 class="text-xl">{{ imageIndex+1 }}/{{ imagesArray.length }}</h2>
-                    <button @click="emit('closePopup')" class="button"><img src="@/images/close.svg" class="w-8" alt=""></button>
+                    <h2 class="text-xl">{{ imageIndex+1 }}/{{ (imagesArray ?? hashArray ?? []).length }}</h2>
+                    <div class="flex gap-2">
+                        <button v-if="uid" @click="emit('download')" class="button"><img src="@/images/copy.svg" class="inline mr-1 w-8" alt="">{{ $t('other.download') }}</button>
+                        <button v-if="uid" @click="emit('remove')" class="mr-3 button"><img src="@/images/trash.svg" class="inline mr-1 w-8" alt="">{{ $t('editor.remove') }}</button>
+                        <button @click="emit('closePopup')" class="button"><img src="@/images/close.svg" class="w-8" alt=""></button>
+                    </div>
                 </div>
                 <div class="flex absolute top-0 right-0 left-0 justify-between items-start mx-4 max-sm:hidden">
                     <button @mouseenter="stopCooldown" @mouseleave="startCooldown" class="h-screen" @click.stop="prevImage()"><img src="@/images/showCommsL.svg" class="w-8 button" alt=""></button>
@@ -112,8 +122,10 @@ const stopDrag = () => {
         </Transition>
 
         <figure @touchmove="swipe" @touchend="stopDrag" @touchstart="dragDisabled = false">
-            <img @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="imagesArray[imageIndex].settings.url" :alt="imagesArray[imageIndex].settings.alt">
-            <figcaption class="mt-4 text-lg text-center text-white">{{ imagesArray[imageIndex].settings.alt }}</figcaption>
+            <img v-if="imagesArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="imagesArray[imageIndex].settings.url" :alt="imagesArray[imageIndex].settings.alt">
+            <img v-else-if="hashArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="`${base}/userContent/${uid}/${hashArray[imageIndex]}.webp`" :alt="hashArray[imageIndex]">
+
+            <figcaption v-if="imagesArray" class="mt-4 text-lg text-center text-white">{{ imagesArray[imageIndex].settings.alt }}</figcaption>
         </figure>
 
     </section>

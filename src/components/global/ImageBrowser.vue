@@ -15,8 +15,9 @@ import { notifyError, uploadImages } from "../imageUpload";
 import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
 import UploadIndicator from './UploadIndicator.vue'
 import ColorPicker from "./ColorPicker.vue";
-import { makeColor } from "@/Editor";
+import { currentUID, makeColor } from "@/Editor";
 import chroma from "chroma-js";
+import ImageViewer from "./ImageViewer.vue";
 
 const toMB = (val: number) => Math.round(val / 100_00) / 100
 const currentTab = ref(0)
@@ -84,7 +85,7 @@ const removeImage = (hash: string, external: boolean) => {
             loadingImages.value = false
             setImgCache(images.value, folders.value)
             setStorageCache(storage.value)
-            previewImage.value[0] = -1
+            previewImage.value = false
         }).catch(() => {
             loadingImages.value = false
             uploadingImage.value = 0
@@ -165,7 +166,7 @@ const uploadExternalImage = async (link: string) => {
     }, 10);
 }
 
-const previewImage = ref([-1, ""])
+const previewImage = ref(false)
 const pickImage = (index: number, external: boolean) => {
     let url;
     if (external) url = externaImages.value[index]
@@ -174,7 +175,8 @@ const pickImage = (index: number, external: boolean) => {
     if (props.unselectable) {
         let el = document.createElement("img")
         el.src = url
-        previewImage.value = [index, url]
+        previewImage.value = true
+        imageIndex.value = index
         el.onload = () => {
             let getColor = getDominantColor(el)
             previewDominant.value = `linear-gradient(9deg, ${getColor.darken().hex()}, ${getColor.brighten().hex()})`
@@ -246,7 +248,7 @@ const imageHovering = ref(-1)
 const dropdown = ref()
 
 const imageAction = (id: number, external: boolean, val: string | number) => {
-    previewImage.value = [-1, ""]
+    previewImage.value = false
     switch (id) {
         case 0: // Remove
             if (external) removeImage(externaImages.value[val], true);
@@ -375,11 +377,13 @@ else {
     refreshContent([storageCache, imageCache, folderCache])
 }
 
+const imageIndex = ref(0)
+
 </script>
 
 <template>
     <div class="flex gap-10 justify-between mx-2 mb-2">
-        <Dialog :custom-color="previewDominant" :title="$t('other.preview')" :width="dialog.large" :open="previewImage[0] !== -1" @close-popup="previewImage[0] = -1">
+        <!-- <Dialog :custom-color="previewDominant" :title="$t('other.preview')" :width="dialog.large" :open="previewImage[0] !== -1" @close-popup="previewImage[0] = -1">
             <div class="flex relative flex-col gap-2 items-center p-2 w-full bg-black bg-opacity-40">
                 <img :src="previewImage[1]" :alt="previewImage[1]" class="absolute inset-0 w-full max-w-full h-full text-center text-white rounded-md opacity-50 mix-blend-overlay blur-lg pointer-events-none">
                 <img :src="previewImage[1]" :alt="previewImage[1]" class="w-max pointer-events-none isolate max-w-full text-white max-h-[80vh] text-center rounded-md">
@@ -389,7 +393,9 @@ else {
                     <button v-show="currentTab == 1" @click="imageAction(1, true, previewImage[1])" class="flex gap-2 p-2 text-xl text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img class="w-6" src="@/images/link.svg">{{ $t('other.link') }}</button>
                 </div>
             </div>
-        </Dialog>
+        </Dialog> -->
+
+        <ImageViewer v-if="previewImage" @close-popup="previewImage = false" @remove="imageAction(0, false, imageIndex)" @download="imageAction(1, false, imageIndex)" :hash-array="images" v-model="imageIndex" :uid="currentUID" />
 
         <!-- Remove confirmation -->
         <Dialog :title="$t('other.removal')" @close-popup="removeConfirmationOpen = -1" :open="removeConfirmationOpen > -1">
