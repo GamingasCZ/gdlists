@@ -103,7 +103,7 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
     }
 
     // This may cause problems. 
-    $https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
+    $https = strstr($_SERVER["HTTP_HOST"], "localhost") ? 'http://' : 'https://';
 
     if ($needsRURL) { $data["redirect_uri"] = $https . $_SERVER["HTTP_HOST"] . $_SERVER["PHP_SELF"]; }
 

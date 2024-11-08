@@ -17,6 +17,7 @@ if ($mysqli->connect_errno) {
   exit();
 }
 $mysqli->set_charset("utf8mb4");
+$mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
@@ -176,7 +177,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
   } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
     $account = checkAccount($mysqli);
     if (!$account) die("[]"); // Not logged in
-    $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
+    $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY lists.name ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
     echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
 
   } elseif (in_array("levelsIn", array_keys($_GET))) {
