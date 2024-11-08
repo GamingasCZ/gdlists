@@ -169,41 +169,16 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
     echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {
-    if ($_GET["homepage"] == 1)
-      $result = doRequest($mysqli, sprintf("SELECT %s,ifnull(t.rate_ratio, 0) AS rate_ratio
-      FROM lists
-      LEFT JOIN (SELECT list_id, ifnull(sum(rate*2-1), 0) AS rate_ratio FROM ratings GROUP BY list_id ) AS t
-      ON lists.id = t.list_id
-      WHERE hidden = '0'
-      ORDER BY lists.id DESC
-      LIMIT 3", $selRange), [], "", true);
-    else
-      $result = doRequest($mysqli, sprintf("SELECT %s,ifnull(t.rate_ratio, -1) AS rate_ratio
-      FROM reviews
-      LEFT JOIN (SELECT review_id, ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio FROM ratings GROUP BY review_id ) AS t
-      ON reviews.id = t.review_id
-      WHERE reviews.hidden = '0'
-      ORDER BY reviews.id DESC
-      LIMIT 3", $selReviewRange), [], "", true);
-
-    echo json_encode(parseResult($result, false, -1, "", 0, $_GET["homepage"] == 2));
+    if ($_GET["homepage"] == 1) $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
+    else $result = $mysqli->query(sprintf("SELECT %s,ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY reviews.id DESC LIMIT 3", $selReviewRange));
+     
+    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC), false, -1, "", 0, $_GET["homepage"] == 2));
 
   } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
     $account = checkAccount($mysqli);
     if (!$account) die("[]"); // Not logged in
-<<<<<<< HEAD
     $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY lists.name ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
     echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
-=======
-    $result = doRequest($mysqli, sprintf("SELECT %s,ifnull(t.rate_ratio, 0) AS rate_ratio
-    FROM lists
-    LEFT JOIN (SELECT list_id, ifnull(sum(rate*2-1), 0) AS rate_ratio FROM ratings GROUP BY list_id ) AS t
-    ON lists.id = t.list_id
-    WHERE hidden = '0' AND lists.uid=?
-    ORDER BY lists.id DESC
-    LIMIT 3", $selRange), [$account["id"]], "s", true);
-    echo json_encode(parseResult($result));
->>>>>>> 5c11fefadbc60709290fe09094bcc57b428672cb
 
   } elseif (in_array("levelsIn", array_keys($_GET))) {
     if (!intval($_GET["levelsIn"])) die("2");
