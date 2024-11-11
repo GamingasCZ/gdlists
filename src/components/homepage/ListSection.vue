@@ -23,7 +23,8 @@ const props = defineProps({
   contentType: { type: String },
   listType: { type: Number, default: 0 },
   randomizeContent: { type: Boolean, default: false },
-  maxItems: {type: Number, default: 3}
+  maxItems: {type: Number, default: 3},
+  forceContent: {type: Array}
 });
 
 const users = ref<ListCreatorInfo[]>();
@@ -41,31 +42,30 @@ if (props.contentType?.startsWith("/")) {
       users.value = response.data[1];
       reviewDetails.value = response.data[4]
     });
-} else if (props.contentType?.startsWith("@")) {
-  if (!hasLocalStorage()) lists.value = []
+  } else if (props.contentType?.startsWith("@")) {
+    if (!hasLocalStorage()) lists.value = []
   else {
     let data: any[] = JSON.parse(
       localStorage.getItem(props.contentType.slice(1))!
     );
     if (props?.randomizeContent)
-      data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
+    data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
   
     lists.value = data.slice(0, props.maxItems);
   }
 } else if (props.contentType == "oldLists") {
   lists.value = oldLists;
+} else if (props.forceContent) {
+  lists.value = props.forceContent[0]
+  users.value = props.forceContent[1]
+  if (props.listType == 2)
+    reviewDetails.value = props.forceContent?.[4]
 } else {
   lists.value = [];
 }
 
 const getImage = () =>
   new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString();
-
-const doFunction = (action: string) => {
-  let actionPick = ["clear"].indexOf(action);
-  let functionPick = [clearViewed][actionPick];
-  functionPick();
-};
 
 const clearViewed = () => {
   localStorage.setItem("recentlyViewed", "[]");

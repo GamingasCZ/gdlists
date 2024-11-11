@@ -116,8 +116,9 @@ document.body.addEventListener("keydown", (e) => {
       <component :is="LoggedInPopup" @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
     </Dialog>
 
-    
-    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
+    <Suspense>
+      <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
+    </Suspense>
   </main>
   <NotificationStack />
   <Footer />

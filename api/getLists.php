@@ -126,6 +126,43 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   return array($rows, $users, $dbInfo, $ratings, $reviewDetails);
 }
 
+function getHomepage($lists, $reviews, $user) {
+  global $mysqli, $selRange, $selReviewRange;
+  $home = [];
+  if ($lists) {
+    $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio
+      FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
+      WHERE `hidden` = '0'
+      GROUP BY `name`
+      ORDER BY lists.id DESC LIMIT 3", $selRange), [], "", true);
+  
+    $home["lists"] = parseResult($res, false, -1, "", 0, false);
+  }
+  if ($reviews) {
+    $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio
+      FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id
+      WHERE `hidden` = '0'
+      GROUP BY `name`
+      ORDER BY reviews.id DESC LIMIT 3", $selReviewRange), [], "", true);
+    
+    $home["reviews"] = parseResult($res, false, -1, "", 0, true);
+  }
+  if ($user) {
+    $account = getLocalUserID();
+    if ($account) {
+      $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio
+        FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
+        WHERE lists.uid=%s AND `hidden` LIKE 0
+        GROUP BY lists.name
+        ORDER BY lists.id DESC LIMIT 3", $selRange, $account), [], "", true);
+  
+      $home["user"] = parseResult($res);
+    }
+  }
+
+  echo json_encode($home);
+}
+
 if (count($_GET) <= 2 && !isset($_GET["batch"])) {
   // Loading a single list
   if (in_array("id", array_keys($_GET))) {
@@ -169,17 +206,13 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
     echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {
-    if ($_GET["homepage"] == 1) $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY lists.id DESC LIMIT 3", $selRange));
-    else $result = $mysqli->query(sprintf("SELECT %s,ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id WHERE `hidden` = '0' GROUP BY `name` ORDER BY reviews.id DESC LIMIT 3", $selReviewRange));
-     
-    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC), false, -1, "", 0, $_GET["homepage"] == 2));
+    if (isset($_GET["feeds"])) {
+      $feeds = explode(",", $_GET["feeds"]);
+      if (sizeof($feeds) != 3) die("0");
 
-  } elseif (!empty(array_intersect(["homeUser"], array_keys($_GET)))) {
-    $account = checkAccount($mysqli);
-    if (!$account) die("[]"); // Not logged in
-    $result = $mysqli->query(sprintf("SELECT %s,ifnull(sum(rate*2-1), 0) AS rate_ratio FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id WHERE lists.uid=%s AND `hidden` LIKE 0 GROUP BY lists.name ORDER BY lists.id DESC LIMIT 3", $selRange, $account["id"]));
-    echo json_encode(parseResult($result->fetch_all(MYSQLI_ASSOC)));
-
+      getHomepage((bool)$feeds[0], (bool)$feeds[1], (bool)$feeds[2]);
+    }
+    
   } elseif (in_array("levelsIn", array_keys($_GET))) {
     if (!intval($_GET["levelsIn"])) die("2");
     $type = $_GET["fromReviews"] ? "reviewID" : "listID";
