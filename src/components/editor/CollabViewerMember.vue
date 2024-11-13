@@ -23,11 +23,11 @@ getEmoji()
 
 const openLink = (ind: number, path: string) => {
     switch (ind) {
-        case 4:
+        case 3:
             if (path.startsWith("/"))
                 window.open(`https://discord.com${path}`, '_blank')
             break;
-        case 5: // Custom site
+        case 4: // Custom site
             window.open(path, '_blank'); break;
     
         default:
