@@ -445,7 +445,8 @@
     "bgTheme2": "Slice",
     "bgTheme3": "Morph",
     "bgTheme4": "Colorize",
-    "themes": "Themes"
+    "themes": "Themes",
+    "linkCopied": "Link copied!"
   },
   "settingsMenu": {
     "asOff": "Off",

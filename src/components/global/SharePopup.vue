@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { summonNotification } from "../imageUpload";
+import { i18n } from "@/locales";
 
 const props = defineProps<{
   shareText: string;
@@ -14,18 +16,34 @@ const links = ref<string[]>([
   `https://twitter.com/intent/tweet?text=${encodeURIComponent(props.review ? reviewText : text)}`,
   `https://bsky.app/intent/compose?text=${encodeURIComponent(props.review ? reviewText : text)}`,
 ]);
+
+const copyLink = () => {
+  navigator.clipboard.writeText(props.shareText)
+  summonNotification(i18n.global.t('other.linkCopied'), "", "check")
+}
+
 </script>
 
 <template>
     <h4 class="ml-2 font-bold leading-3">{{ $t('other.link') }}:</h4>
-    <div class="m-2">
+    <div class="flex gap-2 m-2">
       <input
         readonly
         @mouseover="($event.target as HTMLInputElement).select()"
         type="text"
         :value="shareText"
-        class="p-1 px-2 mt-1 w-full bg-white bg-opacity-10 rounded-full outline-none"
+        class="p-2 w-full bg-black bg-opacity-40 rounded-md outline-none grow"
       />
+      <button
+          @click="copyLink"
+          class="p-2 bg-black bg-opacity-40 rounded-md aspect-square button"
+        >
+          <img
+            class="mx-auto w-5"
+            src="@/images/link.svg"
+            alt=""
+          />
+        </button>
     </div>
 
     <h4 class="mt-5 ml-2 font-bold leading-3">{{ $t('other.shareOn') }}:</h4>

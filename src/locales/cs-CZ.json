@@ -414,7 +414,8 @@
     "bgTheme2": "Výřez",
     "bgTheme3": "Splynutí",
     "bgTheme4": "Obarvení",
-    "themes": "Motivy"
+    "themes": "Motivy",
+    "linkCopied": "Odkaz zkopírován!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
