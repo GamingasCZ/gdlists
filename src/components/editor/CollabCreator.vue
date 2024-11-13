@@ -109,7 +109,7 @@ const modifyPart = (e: Event, which: number) => {
                 <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
                     <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] bg-black bg-opacity-40 rounded-sm" :value="name" @change="writeName" :placeholder="$t('collabTools.memberName')">
-                    <section class="grid grid-cols-5 gap-1">
+                    <section class="grid grid-cols-6 gap-1">
                         <button
                             class="rounded-sm button focus-visible:-translate-y-1" :style="{backgroundColor: socialMedia[site[0]].color}"
                             type="button"
@@ -119,7 +119,7 @@ const modifyPart = (e: Event, which: number) => {
                         >
                             <img :src="socialMediaImages[socialMedia[site[0]].icon]" class="box-border p-0.5 mx-auto h-4" alt="">
                         </button>
-                        <button :title="$t('collabTools.addSocialTitle')" class="bg-gray-600 rounded-sm button focus-visible:-translate-y-1" type="button" @click="emit('addSocial', false, pos)" v-if="(socials ?? []).length < 5">
+                        <button :title="$t('collabTools.addSocialTitle')" class="bg-gray-600 rounded-sm button focus-visible:-translate-y-1" type="button" @click="emit('addSocial', false, pos)" v-if="(socials ?? []).length < 6">
                             <img src="../../images/plus.svg" class="box-border p-0.5 mx-auto h-4" alt="">
                         </button>
                     </section>

@@ -6,7 +6,8 @@ export const socialMedia = [
     {'name': i18n.global.t('collabTools.twitter'), 'icon': "twitter", 'baseUrl': "twitter.com", 'color': "#1DA1F2", 'index': 1},
     {'name': i18n.global.t('collabTools.twitch'), 'icon': "twitch", 'baseUrl': "twitch.tv", 'color': "#9146ff", 'index': 2},
     {'name': i18n.global.t('collabTools.dis'), 'icon': "discord", 'baseUrl': "Discord", 'color': "#5865F2", 'index': 3},
-    {'name': i18n.global.t('collabTools.customLink'), 'icon': "link", 'baseUrl': "Custom", 'color': "#2C2F33", 'index': 4}
+    {'name': i18n.global.t('collabTools.customLink'), 'icon': "link", 'baseUrl': "Custom", 'color': "#2C2F33", 'index': 4},
+    {'name': i18n.global.t('collabTools.bluesky'), 'icon': "bluesky", 'baseUrl': "bluesky.com", 'color': "#3982FE", 'index': 5},
   ]
   
 export const socialMediaImages = ref({})
