@@ -12,6 +12,7 @@ let reviewText = `${useI18n().t('other.cringeAhhTextLmao2', [props.shareText])}`
 const links = ref<string[]>([
   `https://www.reddit.com/submit?url=${encodeURIComponent(props.review ? reviewText : text)}`,
   `https://twitter.com/intent/tweet?text=${encodeURIComponent(props.review ? reviewText : text)}`,
+  `https://bsky.app/intent/compose?text=${encodeURIComponent(props.review ? reviewText : text)}`,
 ]);
 </script>
 
@@ -28,25 +29,36 @@ const links = ref<string[]>([
     </div>
 
     <h4 class="mt-5 ml-2 font-bold leading-3">{{ $t('other.shareOn') }}:</h4>
-    <div class="grid grid-cols-2 gap-2 p-2 mt-2">
+    <div class="grid grid-cols-3 gap-2 p-2">
       <a target="_blank" :href="links[0]">
         <button
-          class="px-2 py-1 w-full leading-3 text-left bg-white bg-opacity-10 rounded-full button"
+          class="p-2 w-full leading-3 text-left bg-black bg-opacity-40 rounded-md button"
         >
           <img
-            class="inline mr-2 w-6"
-            src="@/images/redditIcon.svg"
+            class="inline mr-2 h-5"
+            src="@/images/socials/reddit.svg"
             alt=""
           />Reddit
         </button>
       </a>
-      <a target="_blank" :href="links[1]">
+      <a target="_blank" :href="links[2]">
         <button
-          class="px-2 py-1 w-full leading-3 text-left bg-white bg-opacity-10 rounded-full button"
+          class="p-2 w-full leading-3 text-left bg-black bg-opacity-40 rounded-md button"
         >
           <img
-            class="inline mr-2 w-6"
-            src="@/images/twitterIcon.svg"
+            class="inline mr-2 h-5"
+            src="@/images/socials/bluesky.svg"
+            alt=""
+          />Bluesky
+        </button>
+      </a>
+      <a target="_blank" :href="links[1]">
+        <button
+          class="p-2 w-full leading-3 text-left bg-black bg-opacity-40 rounded-md button"
+        >
+          <img
+            class="inline mr-2 h-5"
+            src="@/images/socials/twitter.svg"
             alt=""
           />Twitter
         </button>
