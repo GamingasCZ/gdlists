@@ -17,12 +17,6 @@ const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.
 
 const localStorg = ref(hasLocalStorage())
 
-const closeTwitterAd = () => {
-  viewedPopups.twitterAd = true
-  localStorage.setItem("popupsViewed", JSON.stringify(viewedPopups))
-  document.querySelector("#twitterAd")?.remove()
-}
-
 const base = import.meta.env.BASE_URL
 const api = import.meta.env.VITE_API
 const headerBG = ref(`url(${base}/graphics/${THEMES[SETTINGS.value.selectedTheme].graphic}.webp)`)
@@ -43,13 +37,6 @@ if (fetchFeeds.status == 200)
 
 <template>
   <header :style="{backgroundImage: headerBG}" class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-center">
-    <!-- Twitter notif -->
-    <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
-      <img src="@/images/socials/twitter.svg" class="w-6" alt="">
-      <span>{{ $t('homepage.tAd1') }} <a @click="closeTwitterAd" target="_blank" href="https://twitter.com/geodlists" class="underline">@GDLists</a> {{ $t('homepage.tAd2') }}</span>
-      <button @click="closeTwitterAd" class="ml-3 text-xl text-white text-opacity-40">X</button>
-    </div>
-
     <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
       <div class="relative">
         <input type="text" name="q"
