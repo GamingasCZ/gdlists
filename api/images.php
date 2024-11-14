@@ -99,9 +99,9 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     // Create thumbnail
     if ($makeThumb) {
-        $thumbnail = imagescale($img, 128);
+        $thumbnail = imagescale($img, 420);
         imagesavealpha($thumbnail, true);
-        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 40);
+        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 60);
 
         imagedestroy($thumbnail);
     }

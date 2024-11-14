@@ -109,7 +109,6 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
         let file = e.item(i)
         totalFilesize += file?.size
         if (!file?.type.startsWith("image")) return notifyError(7) // Too big
-        if (file?.size > storage.value.maxUploadSize) return notifyError(1) // Too big
         if (file?.size < 50) return notifyError(2) // Too small
     }
     if (totalFilesize > storage.value.left) return notifyError(3) // Not enough storage
