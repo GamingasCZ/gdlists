@@ -22,10 +22,10 @@ function parseResult($rows, $isReview, $mysqli) {
   $listMaker;
   if ($rows["creator"] == "") {
     // Fetch comment amount
-    $res = doRequest($mysqli, "SELECT username,discord_id FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    $res = doRequest($mysqli, "SELECT username FROM users WHERE discord_id=?", [$rows["uid"]], "s");
     if (array_key_exists("error", $res)) die();
 
-    $listMaker = $users[0]["username"];
+    $listMaker = $res["username"];
   }
   else $listMaker = $rows["creator"];
 
