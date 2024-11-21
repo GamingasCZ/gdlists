@@ -58,7 +58,7 @@ function getAll($uid, $mysqli, $folder = '/') {
     return json_encode([json_decode(getStorage($mysqli, $uid)), array_reverse(array_map("getHashes", $allImages)), $allFolders, $thumbs]);
 }
 
-function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = true, $saveToDatabase = true, $overwrite = false, $noSave = false) {
+function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = true, $saveToDatabase = true, $overwrite = false, $noSave = false, $folder = '/') {
     global $MAX_UPLOADSIZE;
     $userPath = getUserPath($uid);
     
@@ -110,7 +110,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     imagedestroy($maxsize);
 
     if ($saveToDatabase)
-        doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`) VALUES (?,?,?)", [$uid, $imageHash, $compressedFilesize], "ssi");
+        doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`, `folder`) VALUES (?,?,?,?)", [$uid, $imageHash, $compressedFilesize, $folder], "ssis");
 
     return $imageHash;
 }
@@ -137,9 +137,14 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             
             $newImages = [];
             if (sizeof($_FILES) == 0 || sizeof($_FILES) > 10) die("-3");
+            
+            $folder = '/';
+            if ($_SERVER["HTTP_IMAGE_FOLDER"])
+                $folder = $_SERVER["HTTP_IMAGE_FOLDER"];
+
             foreach ($_FILES as $key => $image) {
                 if (!$image["tmp_name"]) die("-4"); // $image["error"] = 1 : filesize
-                array_push($newImages, saveImage(file_get_contents($image["tmp_name"]), $user["id"], $mysqli));
+                array_push($newImages, saveImage(file_get_contents($image["tmp_name"]), $user["id"], $mysqli, folder: $folder));
             }
             
             die(getStorage($mysqli, $user["id"], $newImages));
@@ -192,11 +197,14 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     break;
                 case 'moveToFolder':
                     $imgs = makeIN($DATA["images"]);
-                    $addToFolder = $DATA["folderID"];
-                    if ($addToFolder == 0) $addToFolder = NULL;
+                    $addToFolder = $DATA["folderName"];
+                    if ($addToFolder == '/') $addToFolder = NULL;
 
-                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = ? WHERE `hash` IN %s", $imgs[0]), [$addToFolder, ...$DATA["images"]], "s" . $imgs[1]);
-                    if (!array_key_exists("error", $res)) die(http_response_code(201));
+                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = IFNULL((SELECT id FROM `images_folders` WHERE `name`=?), NULL) WHERE `hash` IN %s", $imgs[0]), [$addToFolder, ...$DATA["images"]], "s" . $imgs[1]);
+                    if (!array_key_exists("error", $res)) {
+                        http_response_code(201);
+                        die(getAll($user["id"], $mysqli, $DATA["folderName"]));
+                    }
                     
                     break;
                 

@@ -195,7 +195,7 @@
     "idlist": "Ze seznamu ID",
     "idlistHelp": "Vlož ID levelů. Mohou být odděleny čímkoliv. Můžeš hledat jen rated levely.",
     "tables": "Z tabulek",
-    "uploadFile": "Nahrát soubor",
+    "uploadFile": "Přidat obrázky",
     "mdHelp": "... Můžeš použít Markdown",
     "listItems": "Odrážky",
     "citations": "Citování",
@@ -420,10 +420,12 @@
     "folderName": "Jméno složky",
     "folderColor": "Barva složky",
     "folderEmptyHelp": "Tato složka je prázdná!",
-    "selectImgHelp": "Drž <kbd>CTRL</kbd> pro vybrání více obrázků!",
     "folderHelp": "Můžes sem nahrát nové obrázky, nebo je vybrat z jiné složky a vložit je sem!",
     "createFolder": "Vytvořit složku",
-    "up": "Nahoru"
+    "up": "Nahoru",
+    "moveError": "Nepodařilo se přesunout obrázky!",
+    "cut": "Vyjmout",
+    "paste": "Vložit"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

@@ -3,7 +3,7 @@ import type { LocalNotification } from "@/interfaces"
 import { useI18n } from "vue-i18n"
 import { i18n } from "@/locales"
 import axios from "axios"
-import { setImgCache, setStorageCache } from "./global/imageCache"
+import { breakCache, setStorageCache } from "./global/imageCache"
 
 export const Stack = ref<LocalNotification[]>({})
 export const summonNotification = (title: string, text: string, icon: string) => {
@@ -26,13 +26,14 @@ const errorMessages = [
     'other.clipboardEmpty',
     'other.imgInUse',
     'other.tooManyImg',
+    'other.moveError',
 ]
 
 export const notifyError = (ind: number) => {
     summonNotification(i18n.global.t('other.error'), i18n.global.t(errorMessages[ind]), 'error')
 }
 
-export const uploadImages = async (e: FileList | string, singleFile: boolean) => {
+export const uploadImages = async (e: FileList | string, singleFile: boolean, folder = '/') => {
     if (typeof e == 'string') return e // Youtube link
 
     let imageData = new FormData()
@@ -48,11 +49,11 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean) =>
         }
     }
 
-    setImgCache("")
+    breakCache()
     setStorageCache("")
     let response: any = null
     await axios.post(import.meta.env.VITE_API + "/images.php", imageData, {
-        headers: {"Content-Type": 'multipart/form-data'},
+        headers: {"Content-Type": 'multipart/form-data', "Image-Folder": folder},
         maxBodyLength: Infinity,
         maxContentLength: Infinity
     })

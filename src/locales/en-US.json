@@ -97,7 +97,7 @@
     "moveUpTitle": "Move level up",
     "moveDownTitle": "Move level down",
     "pickVideoTitle": "Pick video",
-    "uploadFile": "Upload File",
+    "uploadFile": "Add Images",
     "idlist": "From a list of IDs",
     "tables": "From spreadsheets",
     "importLevels": "Level Import",
@@ -448,13 +448,15 @@
     "themes": "Themes",
     "newFolder": "New Folder",
     "create": "Create",
-    "selectImgHelp": "Hold <kbd>CTRL</kbd> to select multiple images!",
     "folderHelp": "You can upload new images, or move some over from another folder!",
     "createFolder": "Create Folder",
     "folderColor": "Folder Color",
     "folderEmptyHelp": "This folder is empty!",
     "folderName": "Folder Name",
-    "up": "Up"
+    "up": "Up",
+    "moveError": "Failed to move images!",
+    "cut": "Cut",
+    "paste": "Paste"
   },
   "settingsMenu": {
     "asOff": "Off",
