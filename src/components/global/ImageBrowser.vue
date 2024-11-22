@@ -22,6 +22,7 @@ import ImageViewer from "./ImageViewer.vue";
 
 import fEdit from "@/images/edit.svg?url"
 import fRemove from "@/images/trash.svg?url"
+import fLink from "@/images/link.svg?url"
 
 const MAX_SUBFOLDERS = 3
 const toMB = (val: number) => Math.round(val / 100_00) / 100
@@ -61,8 +62,11 @@ const creatingNewFolder = ref(Folder.NOT_CREATING)
 
 const currentFolder = ref<string[]>([])
 const subfolderLevel = ref(0)
+
 const folderEditButton = ref<HTMLDivElement>()
 const editDropdownOpen = ref(false)
+const imageAddButton = ref<HTMLDivElement>()
+const imgAddOptsOpen = ref(false)
 
 if (hasLocalStorage()) {
     externaImages.value = JSON.parse(localStorage.getItem("externalImages")!) ?? []
@@ -208,6 +212,11 @@ const selectImage = (index: number) => {
         if (selectedImages.value.length >= 25) return
         selectedImages.value.push(index)
     }
+
+    if (selectedImages.value.length == 0) {
+        folderMoveMode.value = false
+        imagesToMove.value = []
+    }
 }
 
 const thumbnails = ref<{ [path: string]: string }>({})
@@ -348,6 +357,8 @@ const modifyFolder = () => {
     else {
         axios.patch(import.meta.env.VITE_API + "/images.php", data).then(() => {
             currentFolder.value[subfolderLevel.value] = "/" + folderDetails.value.name
+            breakCache()
+            refreshContent(currentFolder.value[subfolderLevel.value])
         })
     }
     creatingNewFolder.value = Folder.NOT_CREATING
@@ -517,24 +528,34 @@ const removeFolder = (keepImages: boolean) => {
 
         <!-- Folder options -->
         <Dropdown v-if="editDropdownOpen" @picked-option="folderAction" @close="editDropdownOpen = false"
-            :icons="[fEdit, fRemove]" :title="$t('other.options')" :options="[$t('level.edit'), $t('editor.remove')]"
+            :icons="[fEdit, fRemove]" :options="[$t('level.edit'), $t('editor.remove')]"
             :button="folderEditButton" />
+
+        <!-- Image Add options -->
+        <Dropdown v-if="imgAddOptsOpen" @picked-option="currentTab = 1" @close="imgAddOptsOpen = false"
+            :icons="[fLink]" :options="[$t('other.addExternal')]"
+            :button="imageAddButton" />
 
         <!-- External image input -->
         <form v-if="currentTab == 1" action="." @submit.prevent="uploadExternalImage($event.target[0].value)"
-            class="mb-2 w-full">
+            class="flex w-full">
+            <button @click="currentTab = 0" class="flex gap-1 items-center pr-2 mr-2 min-w-max bg-black bg-opacity-40 rounded-md button"><img class="w-6 rotate-180" src="@/images/play.svg" alt="">{{ $t('other.back') }}</button>
             <input :placeholder="$t('other.enterURI')" :disabled="loadingImages"
                 @change="uploadExternalImage($event.target.value)"
                 @paste="uploadExternalImage($event.clipboardData?.getData('Text'))"
-                class="p-1 pl-8 w-full bg-black bg-opacity-40 rounded-md transition-opacity disabled:opacity-40">
+                class="p-1 pl-8 w-full bg-black bg-opacity-40 rounded-md transition-opacity grow disabled:opacity-40">
         </form>
 
-        <div v-else class="flex gap-2 mb-2">
-            <button @click="imageInput?.uploader?.click()" :disabled="uploadingImage"
-                class="flex gap-2 items-center p-1 px-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button">
-                <img src="@/images/upload2.svg" alt="" class="w-6">
-                <span class="">{{ $t('editor.uploadFile') }}</span>
-            </button>
+        <div v-else class="flex gap-2">
+            <div class="flex gap-2 items-center p-1 pl-2 bg-black bg-opacity-40 rounded-md">
+                <button @click="imageInput?.uploader?.click()" :disabled="uploadingImage"
+                    class="button disabled:opacity-20"><img src="@/images/upload2.svg" class="inline w-5" alt=""><span
+                        class="ml-2 max-sm:hidden">{{ $t('editor.uploadFile') }}</span></button>
+                <hr class="w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
+                <button ref="imageAddButton" @click="imgAddOptsOpen = true"
+                    class="w-3 h-full button disabled:opacity-20"><img src="@/images/levelIcon.svg"
+                        class="w-2 rotate-180" alt=""></button>
+            </div>
 
             <div class="flex gap-2 items-center p-1 pl-2 bg-black bg-opacity-40 rounded-md">
                 <button :disabled="subfolderLevel >= MAX_SUBFOLDERS" @click="creatingNewFolder = Folder.CREATING"
@@ -559,28 +580,26 @@ const removeFolder = (keepImages: boolean) => {
         </div>
     </div>
 
+    <!-- Pathbar -->
+    <div v-if="subfolderLevel > 0 || currentFolder.length > 1"
+        class="flex sticky top-1 z-20 justify-center items-center pt-4 pl-2">
+        <div class="flex items-center" v-for="(folder, subLevel) in currentFolder">
+            <span v-show="subLevel != 0" class="inline mx-2 text-xl font-bold">/</span>
+            <button @click="gotoFolder(folder, subLevel)"
+                class="inline-flex items-center px-2 py-1 bg-black bg-opacity-20 rounded-md border-b-2 border-b-lof-400 hover:bg-opacity-80">
+                <img src="@/images/folder.svg" class="mr-2 w-4 rounded-l-md" alt="">
+                {{ folder.slice(1) || $t('other.topFolder') }}</button>
+        </div>
+    </div>
 
-    <TabBar :tab-names="[$t('homepage.uploaded')].concat(disableExternal ? [] : [$t('other.external')])"
-        @switched-tab="currentTab = $event" />
+    <!-- <TabBar :tab-names="[$t('homepage.uploaded')].concat(disableExternal ? [] : [$t('other.external')])"
+        @switched-tab="currentTab = $event" /> -->
 
     <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
-        @dragexit="fileDrag = false" @submit.prevent="" :class="{ 'opacity-40 pointer-events-none': loadingImages }"
-        class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
+        @dragexit="fileDrag = false" @dragleave="fileDrag = false" @submit.prevent="" :class="{ 'opacity-40 pointer-events-none': loadingImages }"
+        class="h-[40rem] mt-2 overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
         <HiddenFileUploader v-if="currentTab == 0" @data="uploadImage" ref="imageInput" unclickable multiple
             :disabled="loadingImages || uploadingImage != 0 || folderMoveMode" />
-
-        <!-- Pathbar -->
-        <div
-            class="flex sticky top-1 z-10 items-center py-1 pl-2 m-2 bg-black bg-opacity-80 rounded-t-md border-b-2 backdrop-blur-sm border-lof-400">
-            <!-- <button @click="goUpFolder()" :disabled="currentFolder == '/'" class="p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20 button"><img src="@/images/goUp.svg" class="inline mr-2 w-5" alt="">{{ $t('other.up') }}</button> -->
-            <img src="@/images/image.svg" class="inline mr-1 w-4" alt="">
-            <div class="flex" v-for="(folder, subLevel) in currentFolder">
-                <span v-show="subLevel != 0" class="inline mx-2 text-xl font-bold">/</span>
-                <button @click="gotoFolder(folder, subLevel)"
-                    class="inline-flex items-center px-1 rounded-md hover:bg-opacity-40 hover:bg-black">{{
-                        folder.slice(1) || $t('other.gallery') }}</button>
-            </div>
-        </div>
 
         <div class="grid grid-cols-4 gap-2 m-2" v-show="currentTab == 0"
             :class="{ 'opacity-20 pointer-events-none': uploadingImage }">
@@ -590,7 +609,7 @@ const removeFolder = (keepImages: boolean) => {
                 class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
                 :style="{ borderColor: folder.color, background: chroma(folder.color).alpha(0.4).hex() }">
 
-                <div class="grid absolute inset-2 grid-cols-2 gap-2">
+                <div class="grid absolute inset-2 grid-cols-2 gap-2 overflow-clip">
                     <img v-for="thumb in thumbnails[folder.name]"
                         :class="{ 'col-span-2 w-full': thumbnails[folder.name].length == 1 }" class="object-cover h-full"
                         :src="`${pre}/userContent/${storage.uid}/${thumb}-thumb.webp`" alt="">
@@ -610,7 +629,7 @@ const removeFolder = (keepImages: boolean) => {
                 @mouseover="imageHovering = index"
                 @mouseout="imageHovering = -1" :key="image"
                 class="relative h-24 bg-center rounded-sm border-2 transition-all duration-75 cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
-                :class="{ 'opacity-20 pointer-events-none': folderMoveMode, '!border-4': selectedImages.includes(index) }"
+                :class="{ 'opacity-20 pointer-events-none': folderMoveMode && !selectedImages.includes(index), '!border-4': selectedImages.includes(index) }"
             >
                 <!-- Image settings -->
                 <button ref="button" v-show="imageOptsShown == index || imageHovering == index"
@@ -679,7 +698,7 @@ const removeFolder = (keepImages: boolean) => {
                 <p>{{ $t('other.folderHelp') }}</p>
             </div>
             <div v-else-if="currentTab == 0 && fileDrag"
-                class="pt-2 pr-8 pb-4 pl-4 w-max bg-black rounded-xl animate-pulse">
+                class="pt-2 pr-8 pb-4 pl-4 w-max rounded-xl animate-pulse">
                 <img src="@/images/dropfile.svg" class="mb-2 w-64" alt="">
                 <h2 class="text-xl">{{ $t('other.uploadHelp5') }}</h2>
             </div>

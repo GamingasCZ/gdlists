@@ -429,7 +429,9 @@
     "folderRemove2": "Ve složce jsou obrázky. Co s nimi chceš udělat?",
     "thisPic": "tento obrázek",
     "thisFolder": "tuto složku",
-    "deleteImgs": "Smazat obrázky"
+    "deleteImgs": "Smazat obrázky",
+    "addExternal": "Přidat extérní",
+    "topFolder": "Vrchol"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

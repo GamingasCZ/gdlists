@@ -460,7 +460,9 @@
     "folderRemove2": "There are still images in this folder. What would you like to do with them?",
     "thisFolder": "this folder",
     "thisPic": "this image",
-    "deleteImgs": "Remove images"
+    "deleteImgs": "Remove images",
+    "addExternal": "Add External",
+    "topFolder": "Top Folder"
   },
   "settingsMenu": {
     "asOff": "Off",

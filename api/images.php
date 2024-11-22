@@ -229,7 +229,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 
         case 'PATCH':
             $DATA = json_decode(file_get_contents("php://input"), true);
-            doRequest($mysqli, "UPDATE `images_folders` SET `name` = ?, `color` = ? WHERE `name` = ? AND `uid` = ?", [$DATA["name"], $DATA["color"], $DATA["currentFolder"], $user["id"]], "ssss");
+            doRequest($mysqli, "UPDATE `images_folders` SET `name` = ?, `color` = ? WHERE `name` = ? AND `uid` = ?", ['/' . $DATA["name"], $DATA["color"], $DATA["currentFolder"], $user["id"]], "ssss");
 
         default:
             die("-1");
