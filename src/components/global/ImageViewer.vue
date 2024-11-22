@@ -110,7 +110,8 @@ const base = import.meta.env.VITE_USERCONTENT
                     <h2 class="text-xl">{{ imageIndex+1 }}/{{ (imagesArray ?? hashArray ?? []).length }}</h2>
                     <div class="flex gap-2">
                         <button v-if="uid" @click="emit('download')" class="button"><img src="@/images/copy.svg" class="inline mr-1 w-6" alt="">{{ $t('other.download') }}</button>
-                        <button v-if="uid" @click="emit('remove')" class="mr-3 button"><img src="@/images/trash.svg" class="inline mr-1 w-6" alt="">{{ $t('editor.remove') }}</button>
+                        <button v-if="uid" @click="emit('remove')" class="button"><img src="@/images/trash.svg" class="inline mr-1 w-6" alt="">{{ $t('editor.remove') }}</button>
+                        <button v-if="uid" @click="emit('move')" class="mr-3 button"><img src="@/images/move.svg" class="inline mr-1 w-6" alt="">{{ $t('other.move') }}</button>
                         <button @click="emit('closePopup')" class="button"><img src="@/images/close.svg" class="w-8" alt=""></button>
                     </div>
                 </div>

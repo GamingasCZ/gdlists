@@ -313,7 +313,7 @@
     "unnamed2": "Bezejmenné",
     "other2": "Ostatní",
     "cringeAhhTextLmao2": "Tohle je nejvíc banger recenze - {0}",
-    "imgRemove1": "Opravdu chceš smazat tento obrázek?",
+    "imgRemove1": "Opravdu chceš smazat {0}",
     "imgRemove2": "Nepůjde vrátit a jestli jej někdě používáš, zmizí odtud!",
     "imgRemove3": "Držením SHIFT přeskočíš tento dialog",
     "removal": "Mazání",
@@ -425,7 +425,11 @@
     "up": "Nahoru",
     "moveError": "Nepodařilo se přesunout obrázky!",
     "cut": "Vyjmout",
-    "paste": "Vložit"
+    "paste": "Vložit",
+    "folderRemove2": "Ve složce jsou obrázky. Co s nimi chceš udělat?",
+    "thisPic": "tento obrázek",
+    "thisFolder": "tuto složku",
+    "deleteImgs": "Smazat obrázky"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -802,5 +806,8 @@
     "columnSetting": "{0} sloupec",
     "unsaved": "Recenze není uložená.",
     "savedLast": "Naposledy uloženo"
+  },
+  "images": {
+    "imgMoveDel": "Přesunout obrázky výše, pak smazat"
   }
 }

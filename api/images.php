@@ -151,6 +151,19 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             break;
     
         case 'DELETE':
+            // Remove folder
+            if (isset($_GET["removeFolder"])) {
+                if ($_GET["keepImages"]) {
+                    $res = doRequest($mysqli, "UPDATE `images` SET `folder` = IFNULL((SELECT id FROM `images_folders` WHERE `name`=?), NULL) WHERE `folder` = IFNULL((SELECT id FROM `images_folders` WHERE `name`=?), NULL) AND `uploaderID` = ?", [$_GET["folderAddTo"], $_GET["removeFolder"], $user["id"]], "sss");
+                    if (is_array($res) && array_key_exists("error", $res))
+                        die();
+                }
+                else
+                    doRequest($mysqli, "DELETE FROM `images` WHERE `folder` = ? AND `uploaderID` = ?", [$_GET["removeFolder"], $user["id"]], "ss");
+                doRequest($mysqli, "DELETE FROM `images_folders` WHERE `name` = ? AND `uid` = ?", [$_GET["removeFolder"], $user["id"]], "ss");
+                die(getStorage($mysqli, $user["id"]));
+            }
+
             // Remove files
             $userPath = getUserPath($user["id"]);
             if (!is_array($_GET["hash"]) || sizeof($_GET["hash"]) == 0 || sizeof($_GET["hash"]) > 25) die("-3");
@@ -213,6 +226,10 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             }
 
             break;
+
+        case 'PATCH':
+            $DATA = json_decode(file_get_contents("php://input"), true);
+            doRequest($mysqli, "UPDATE `images_folders` SET `name` = ?, `color` = ? WHERE `name` = ? AND `uid` = ?", [$DATA["name"], $DATA["color"], $DATA["currentFolder"], $user["id"]], "ssss");
 
         default:
             die("-1");

@@ -21,6 +21,7 @@ export default defineConfig(mode => {
       }
     },
     server: {
+      watch: {usePolling: false},
       proxy: {
         '/gdlists/api': {
           target: env.VITE_ENDPOINT,

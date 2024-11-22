@@ -4,7 +4,7 @@ $hostname = getenv("DB_HOSTNAME");
 $username = getenv("DB_USERNAME");
 $password = getenv("DB_PASSWORD");
 $database = getenv("DB_NAME");
-$debugMode = false;
+$debugMode = true;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
@@ -43,7 +43,9 @@ function sanitizeInput($inputArray)
 function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = false)
 {
     global $debugMode;
-    if ($debugMode) error_log($queryTemplate);
+    if ($debugMode) {
+        error_log(sprintf(str_ireplace("?", "%s", $queryTemplate), ...$values));
+    }
 
     $query = $mysqli->prepare($queryTemplate);
 

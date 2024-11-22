@@ -341,7 +341,7 @@
     "spanish": "Spanish",
     "cringeAhhTextLmao2": "This review slaps imo - {0}",
     "bg": "Background",
-    "imgRemove1": "Do you really want to remove this image?",
+    "imgRemove1": "Do you really want to remove {0}",
     "imgRemove2": "It will be lost forever and disappear from where it's used.",
     "imgRemove3": "Hold SHIFT to skip this dialog",
     "removal": "Removal",
@@ -456,7 +456,11 @@
     "up": "Up",
     "moveError": "Failed to move images!",
     "cut": "Cut",
-    "paste": "Paste"
+    "paste": "Paste",
+    "folderRemove2": "There are still images in this folder. What would you like to do with them?",
+    "thisFolder": "this folder",
+    "thisPic": "this image",
+    "deleteImgs": "Remove images"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -801,5 +805,8 @@
     "columnSetting": "{0} column",
     "unsaved": "Review not saved yet.",
     "savedLast": "Last saved"
+  },
+  "images": {
+    "imgMoveDel": "Move images up, then delete"
   }
 }

@@ -55,7 +55,10 @@ const externaImages = ref<string[]>([])
 const folders = ref<ImageFolder[]>([])
 
 const loadingImages = ref(true)
-const creatingNewFolder = ref(false)
+
+enum Folder {NOT_CREATING = 0, CREATING = 1, EDITING = 2}
+const creatingNewFolder = ref(Folder.NOT_CREATING)
+
 const currentFolder = ref<string[]>([])
 const subfolderLevel = ref(0)
 const folderEditButton = ref<HTMLDivElement>()
@@ -286,6 +289,10 @@ const imageAction = (id: number, external: boolean, val: string | number) => {
             break;
         case 1:
             downloadImage(val, external); break
+        case 2:
+            selectedImages.value = [val];
+            startMoveMode();
+            break;
     }
 }
 
@@ -325,18 +332,25 @@ const folderCreateMessages = [
     "Jméno je moc krátké!",
     "Jméno složky nemůže obsahovat lomítko",
 ]
-const createFolder = () => {
+const modifyFolder = () => {
     let data = {
         action: 'createFolder',
         name: folderDetails.value.name,
         color: folderColor.value,
         currentFolder: currentFolder.value[subfolderLevel.value]
     }
-    axios.put(import.meta.env.VITE_API + "/images.php", data).then(() => {
-        breakCache()
-        refreshContent(currentFolder.value[subfolderLevel.value])
-        creatingNewFolder.value = false
-    })
+
+    if (creatingNewFolder.value == Folder.CREATING)
+        axios.put(import.meta.env.VITE_API + "/images.php", data).then(() => {
+            breakCache()
+            refreshContent(currentFolder.value[subfolderLevel.value])
+        })
+    else {
+        axios.patch(import.meta.env.VITE_API + "/images.php", data).then(() => {
+            currentFolder.value[subfolderLevel.value] = "/" + folderDetails.value.name
+        })
+    }
+    creatingNewFolder.value = Folder.NOT_CREATING
 }
 
 const getFolderName = (path: string) => {
@@ -360,15 +374,22 @@ const gotoFolder = (folderName: string, subLevel: number) => {
 }
 
 const folderAction = (opt: number) => {
-
+    switch (opt) {
+        case 0: editFolder(); break;
+        case 1:
+            removingFolder.value = true
+            removeConfirmationOpen.value = 1
+        break;
+    }
 }
 
-// const editFolder = () => {
-//     folderDetails.value = {
-//         name: currentFolder.value.split("/"),
-//         folder
-//     }
-// }
+const editFolder = () => {
+    creatingNewFolder.value = Folder.EDITING
+    folderDetails.value = {
+        name: currentFolder.value[subfolderLevel.value].slice(1),
+        color: "#000000"
+    }
+}
 
 const folderMoveMode = ref(false)
 const imagesToMove = ref<string[]>([])
@@ -382,10 +403,10 @@ const moveToFolder = (imgs: string[], folderName: string) => {
         images: imgs
     }
     imagesToMove.value = []
+    folderMoveMode.value = false
+    selectedImages.value = []
     axios.put(import.meta.env.VITE_API + "/images.php", data).then(newCache => {
         images.value = newCache.data[1]
-        folderMoveMode.value = false
-        selectedImages.value = []
         breakCache()
 
         parseThumbs(newCache.data[3])
@@ -408,24 +429,54 @@ const startMoveMode = () => {
 refreshContent(lastVisitedPath)
 
 const imageIndex = ref(0)
+const removingFolder = ref(false)
+const removeFolder = (keepImages: boolean) => {
+    let params = {
+        removeFolder: currentFolder.value[subfolderLevel.value],
+        folderAddTo: currentFolder.value[Math.max(0, subfolderLevel.value-1)],
+        keepImages: !keepImages,
+    }
+    loadingImages.value = true
+    
+    removeConfirmationOpen.value = -1
+    removingFolder.value = false
+
+    axios.delete(import.meta.env.VITE_API + "/images.php", {params: params}).then(() => {
+        currentFolder.value.splice(subfolderLevel.value, 1)
+        subfolderLevel.value -= 1
+        breakCache()
+        refreshContent(params.folderAddTo)
+    })
+}
 
 </script>
 
 <template>
     <div class="flex gap-10 justify-between mx-2">
         <ImageViewer v-if="previewImage" @close-popup="previewImage = false" @remove="imageAction(0, false, imageIndex)"
-            @download="imageAction(1, false, imageIndex)" :hash-array="images" v-model="imageIndex" :uid="currentUID" />
+            @download="imageAction(1, false, imageIndex)" @move="imageAction(2, false, imageIndex)" :hash-array="images" v-model="imageIndex" :uid="currentUID" />
 
         <!-- Remove confirmation -->
         <Dialog :title="$t('other.removal')" @close-popup="removeConfirmationOpen = -1"
             :open="removeConfirmationOpen > -1">
-            <div class="flex px-2 py-4">
+            <div class="flex gap-2 items-center px-2 py-4 max-sm:flex-col">
                 <img src="@/images/trash.svg" class="mr-2 w-32 opacity-10" alt="">
                 <div>
-                    <h2 class="text-xl font-black">{{ $t('other.imgRemove1') }}</h2>
-                    <p>{{ $t('other.imgRemove2') }}</p>
-                    <p class="my-2 text-sm text-yellow-200">{{ $t('other.imgRemove3') }}</p>
-                    <button @click="removeImage(images[removeConfirmationOpen], false)"
+                    <h2 class="text-xl font-black">{{ $t('other.imgRemove1', [removingFolder ? $t('other.thisFolder') : $t('other.thisPic')]) }}?</h2>
+                    <p v-if="removingFolder">{{ $t('other.folderRemove2') }}</p>
+                    <p v-else>{{ $t('other.imgRemove2') }}</p>
+                    
+                    <p v-if="!removingFolder" class="my-2 text-sm text-yellow-200">{{ $t('other.imgRemove3') }}</p>
+
+                    <div v-if="removingFolder">
+                        <button @click="removeFolder(false)"
+                            class="flex gap-2 items-center px-2 py-1 my-2 text-lg font-bold text-black bg-red-400 rounded-md button">
+                            <img src="@/images/del.svg" class="w-6">{{ $t('other.deleteImgs') }}</button>
+                        <button @click="removeFolder(true)"
+                            class="flex gap-2 items-center px-2 py-1 text-lg font-bold text-black bg-yellow-400 rounded-md button">
+                            <img src="@/images/move.svg" class="w-6 invert">{{ $t('images.imgMoveDel') }}</button>
+                    </div>
+                    <button v-else @click="removeImage(images[removeConfirmationOpen], false)"
                         class="flex gap-2 items-center px-2 py-1 text-2xl font-bold text-black bg-red-400 rounded-md button">
                         <img src="@/images/del.svg" class="w-6">
                         {{ $t('editor.remove') }}
@@ -435,15 +486,15 @@ const imageIndex = ref(0)
         </Dialog>
 
         <!-- New folder Dialog -->
-        <Dialog :title="$t('other.newFolder')" @close-popup="creatingNewFolder = false" :open="creatingNewFolder">
-            <form @submit.prevent="createFolder()" class="p-2">
+        <Dialog :title="$t('other.newFolder')" @close-popup="creatingNewFolder = Folder.NOT_CREATING" :open="creatingNewFolder != Folder.NOT_CREATING">
+            <form @submit.prevent="modifyFolder()" class="p-2">
                 <label for="folderNameInput" class="text-xl font-bold">{{ $t('other.folderName') }}</label>
                 <input v-model="folderDetails.name" class="block px-2 py-1 w-full bg-white bg-opacity-20 rounded-md"
-                    name="folderNameInput" type="text">
-                <div>
+                    name="folderNameInput" type="text" maxlength="20">
+                <!-- <div>
                     <img src="@/images/info.svg" class="inline mr-2 w-4" alt="">
                     <span>Jméno je moc krátké!</span>
-                </div>
+                </div> -->
 
                 <div class="flex gap-2 items-center mt-8 mb-2">
                     <div :style="{ backgroundColor: folderColor }" class="w-8 rounded-full border-2 aspect-square"></div>
@@ -452,17 +503,21 @@ const imageIndex = ref(0)
                 <ColorPicker :hue="folderDetails.color[0]" :saturation="folderDetails.color[1]"
                     :lightness="folderDetails.color[1]" @colors-modified="folderDetails.color = $event" />
                 <div class="flex justify-between">
-                    <button type="button" @click="creatingNewFolder = false" class="font-bold text-lof-400">{{
+                    <button type="button" @click="creatingNewFolder = Folder.NOT_CREATING" class="font-bold text-lof-400">{{
                         $t('other.cancel') }}</button>
-                    <button type="submit" class="p-2 font-bold text-black rounded-md bg-lof-400"><img
+
+                    
+                    <button v-if="creatingNewFolder == Folder.CREATING" type="submit" class="p-2 font-bold text-black rounded-md bg-lof-400"><img
                             src="@/images/check.svg" class="inline mr-1 w-5" alt="">{{ $t('other.create') }}</button>
+                    <button v-else type="submit" class="p-2 font-bold text-black rounded-md bg-lof-400"><img
+                            src="@/images/symbolicSave.svg" class="inline mr-1 w-5 invert" alt="">{{ $t('other.save') }}</button>
                 </div>
             </form>
         </Dialog>
 
         <!-- Folder options -->
         <Dropdown v-if="editDropdownOpen" @picked-option="folderAction" @close="editDropdownOpen = false"
-            :icons="[fEdit, fRemove]" :title="$t('other.options')" :options="['Upravit', 'Smazat']"
+            :icons="[fEdit, fRemove]" :title="$t('other.options')" :options="[$t('level.edit'), $t('editor.remove')]"
             :button="folderEditButton" />
 
         <!-- External image input -->
@@ -482,7 +537,7 @@ const imageIndex = ref(0)
             </button>
 
             <div class="flex gap-2 items-center p-1 pl-2 bg-black bg-opacity-40 rounded-md">
-                <button :disabled="subfolderLevel >= MAX_SUBFOLDERS" @click="creatingNewFolder = true"
+                <button :disabled="subfolderLevel >= MAX_SUBFOLDERS" @click="creatingNewFolder = Folder.CREATING"
                     class="button disabled:opacity-20"><img src="@/images/folder.svg" class="inline w-5" alt=""><span
                         class="ml-2 max-sm:hidden">{{ $t('other.createFolder') }}</span></button>
                 <hr class="w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
@@ -541,7 +596,7 @@ const imageIndex = ref(0)
                         :src="`${pre}/userContent/${storage.uid}/${thumb}-thumb.webp`" alt="">
                 </div>
                 <div class="absolute inset-0" :style="{ backgroundImage: getFolderGradient(folder.color) }"></div>
-                <span class="absolute bottom-1 left-1/2 w-max text-lg -translate-x-1/2 text-ellipsis">{{
+                <span class="overflow-hidden absolute bottom-1 left-1/2 z-10 w-full text-lg rounded-sm -translate-x-1/2 hover:bg-black hover:px-2 hover:w-max text-ellipsis">{{
                     getFolderName(folder.name) }}</span>
             </button>
 
