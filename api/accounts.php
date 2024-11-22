@@ -54,14 +54,13 @@ if ($_SERVER["REQUEST_METHOD"] == "PATCH") {
 }
 
 if (sizeof($_GET) > 0) {
-    $state = $_COOKIE["state"];
-    removeCookie("state");
-    if ($state != $_GET["state"])
-        die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
     if (array_keys($_GET)[0] == "check") { // Check login validity
         $auth = getAuthorization();
         if (!$auth) die(json_encode(["status" => "logged_out"])); // Not logged in
+
+        if (isset($_COOKIE["momentToken"]))
+            removeCookie("momentToken");
 
         $accCheck = checkAccount($mysqli);
         if (!$accCheck) die();
@@ -74,6 +73,11 @@ if (sizeof($_GET) > 0) {
         $mysqli -> close();
         die($accCheck ? json_encode($profileData) : 0);
     }
+
+    $state = $_COOKIE["state"];
+    removeCookie("state");
+    if ($state != $_GET["state"])
+        die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
     if (!isset($_GET["code"])) die("0");
 
