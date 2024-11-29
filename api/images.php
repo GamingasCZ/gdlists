@@ -39,16 +39,18 @@ function getStorage($mysqli, $uid, $addNewImage = null) {
 
 function getHashes($x) { return $x["hash"]; }
 
-function getAll($uid, $mysqli, $folder = '/') {
+function getAll($uid, $mysqli, $folder = '/', $parentFolder = '/') {
     $allImages;
     $allFolders;
     if ($folder == '/') {
         $allImages = doRequest($mysqli, "SELECT `hash` FROM images WHERE `uploaderID`=? AND ISNULL(`folder`)", [$uid], "s", true);
-        $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `base_path`='/' AND `uid`=?", [$uid], "s", true);
+        $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `base_path` IS NULL AND `uid`=?", [$uid], "s", true);
     }
     else {
-        $allImages = doRequest($mysqli, "SELECT `hash` FROM images RIGHT JOIN `images_folders` ON images.folder = images_folders.id WHERE `uploaderID`=? AND images_folders.name = ?", [$uid, $folder], "ss", true);
-        $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `uid`=? AND `base_path`=?", [$uid, $folder], "ss", true);
+        $allImages = doRequest($mysqli, "SELECT `hash` FROM images
+                                         RIGHT JOIN `images_folders` ON images.folder = images_folders.id
+                                         WHERE `uploaderID`=? AND images_folders.id = ?", [$uid, $folder], "ss", true);
+        $allFolders = doRequest($mysqli, "SELECT `id`, `name`, `color` FROM `images_folders` WHERE `uid`=? AND `base_path`=?", [$uid, $parentFolder], "ss", true);
     }
 
     // fuck off, dumbass bitch can't sort shit
@@ -99,9 +101,9 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     // Create thumbnail
     if ($makeThumb) {
-        $thumbnail = imagescale($img, 420);
+        $thumbnail = imagescale($img, 240);
         imagesavealpha($thumbnail, true);
-        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 60);
+        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 50);
 
         imagedestroy($thumbnail);
     }
@@ -129,7 +131,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 die(getStorage($mysqli, $user["id"]));
             }
     
-            die(getAll($user["id"], $mysqli, urldecode($_GET["currentFolder"])));
+            die(getAll($user["id"], $mysqli, urldecode($_GET["currentFolder"]), urldecode($_GET["parentFolder"])));
             break;
     
         case 'POST':
@@ -194,15 +196,29 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 case 'createFolder':
                     $slashPos = strpos($DATA["name"], '/');
                     $folderName = $DATA["name"];
-                    if (strlen($folderName) > 20) die(http_response_code(403));
+                    $nameLength = strlen($folderName);
+
+                    // Check special characters in name
+                    if (!ctype_alnum($folderName) && !ctype_space($folderName))
+                        die(http_response_code(403));
+
+                    // Check folder name length
+                    if ($nameLength > 20 || $nameLength < 3) die(http_response_code(403));
         
+                    // Make sure no slashes are in name
                     if ($slashPos === false) $folderName = '/' . $folderName;
                     else if ($slashPos > 0) die(http_response_code(403));
         
+                    // Make sure no folder with the same name exists in the current directory
+                    $currentFolder = $DATA["currentFolder"];
+                    $checkExistence = doRequest($mysqli, "SELECT COUNT(id) as cnt FROM images_folders WHERE `base_path`=? AND `name`=?", [$currentFolder, $folderName], "ss");
+                    if ($checkExistence["cnt"] >= 1)
+                        die(http_response_code(403));
+
+                    // Check that the color isn't bogus
                     $folderColor = substr($DATA["color"], 0, 7);
                     if ($folderColor[0] != "#") die(http_response_code(403));
         
-                    $currentFolder = $DATA["currentFolder"];
                     
                     $res = doRequest($mysqli, "INSERT INTO `images_folders`(`name`, `color`, `base_path`, `uid`) VALUES (?,?,?,?)", [$folderName, $folderColor, $currentFolder, $user["id"]], "ssss");
                     if (!array_key_exists("error", $res)) die(http_response_code(201));
@@ -210,13 +226,13 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     break;
                 case 'moveToFolder':
                     $imgs = makeIN($DATA["images"]);
-                    $addToFolder = $DATA["folderName"];
+                    $addToFolder = urldecode($DATA["folderName"]);
                     if ($addToFolder == '/') $addToFolder = NULL;
 
-                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = IFNULL((SELECT id FROM `images_folders` WHERE `name`=?), NULL) WHERE `hash` IN %s", $imgs[0]), [$addToFolder, ...$DATA["images"]], "s" . $imgs[1]);
+                    $res = doRequest($mysqli, sprintf("UPDATE `images` SET `folder` = IFNULL((SELECT id FROM `images_folders` WHERE `name`=? AND `base_path`=?), NULL) WHERE `hash` IN %s", $imgs[0]), [$addToFolder, urlencode($DATA["parentFolder"]), ...$DATA["images"]], "ss" . $imgs[1]);
                     if (!array_key_exists("error", $res)) {
                         http_response_code(201);
-                        die(getAll($user["id"], $mysqli, $DATA["folderName"]));
+                        die(getAll($user["id"], $mysqli, $addToFolder, urldecode($DATA["parentFolder"])));
                     }
                     
                     break;
