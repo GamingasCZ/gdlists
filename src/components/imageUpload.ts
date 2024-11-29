@@ -33,7 +33,7 @@ export const notifyError = (ind: number) => {
     summonNotification(i18n.global.t('other.error'), i18n.global.t(errorMessages[ind]), 'error')
 }
 
-export const uploadImages = async (e: FileList | string, singleFile: boolean, folder = '/') => {
+export const uploadImages = async (e: FileList | string, singleFile: boolean, folder = -1) => {
     if (typeof e == 'string') return e // Youtube link
 
     let imageData = new FormData()

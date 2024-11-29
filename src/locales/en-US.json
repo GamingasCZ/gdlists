@@ -462,7 +462,13 @@
     "thisPic": "this image",
     "deleteImgs": "Remove images",
     "addExternal": "Add External",
-    "topFolder": "Top Folder"
+    "topFolder": "Top Folder",
+    "folderRemove3": "All subfolders will be removed! All their images will be moved to the top of the Gallery",
+    "folderRemove4": " no matter what you select",
+    "deleteFolders": "Remove folders",
+    "folderInvChar": "Name cannot contain special characters.",
+    "folderNameExists": "A folder with the same name already exists!",
+    "folderNameShort": "Folder name is too short."
   },
   "settingsMenu": {
     "asOff": "Off",

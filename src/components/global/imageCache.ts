@@ -1,19 +1,19 @@
 import type { ImageFolder, ImageStorage } from "@/interfaces"
 
-export type ImageCache = {[path: string]: {folders: ImageFolder[], images: string[], thumbnails: {[path: string]: string}, currFolderData: ImageFolder}}
+export type ImageCache = { [path: string]: { folders: ImageFolder[], images: string[], thumbnails: { [path: string]: string }, } }
 export var imageCache: ImageCache = {}
 export var lastVisitedPath = {
-    tree: ["/"],
+    tree: [["/", -1]],
     subfolder: 0
 }
 export var storageCache: ImageStorage
 
-export const setImgCache = (img: string[], fol: ImageFolder[], thumb: {[path: string]: string}, tree: string[], currSub: number) => {
+export const setImgCache = (img: string[], fol: ImageFolder[], thumb: { [path: string]: string }, currTree: [string, number][], currSub: number) => {
     lastVisitedPath = {
-        tree: tree,
+        tree: currTree,
         subfolder: currSub
     }
-    imageCache[tree[currSub]] = {
+    imageCache[currTree[currSub][1]] = {
         images: img,
         folders: fol,
         thumbnails: thumb,
