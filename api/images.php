@@ -85,7 +85,10 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     else $imageHash = sha1(substr($binaryData,0, 2048));
 
     if (!$overwrite) {
-        if (is_file($userPath . "/" . $imageHash . ".webp")) return $imageHash; // No duplicate files
+        if (is_file($userPath . "/" . $imageHash . ".webp")) {
+            http_response_code(200);
+            return $imageHash; // No duplicate files
+        }
     }
 
     // Create image
@@ -156,6 +159,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 
             foreach ($_FILES as $key => $image) {
                 if (!$image["tmp_name"]) die("-4"); // $image["error"] = 1 : filesize
+                http_response_code(201);
                 array_push($newImages, saveImage(file_get_contents($image["tmp_name"]), $user["id"], $mysqli, folder: intval($folder)));
             }
             

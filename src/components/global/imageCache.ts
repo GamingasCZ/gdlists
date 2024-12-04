@@ -6,7 +6,13 @@ export var lastVisitedPath = {
     tree: [["/", -1]],
     subfolder: 0
 }
+export var lastVisitedExternalPath = {
+    tree: [["/", -1]],
+    subfolder: 0
+}
 export var storageCache: ImageStorage
+export var lastOpenedTab = 0
+export const setLastOpenedTab = (to: number) => lastOpenedTab = to
 
 export const setImgCache = (img: string[], fol: ImageFolder[], thumb: { [path: string]: string }, currTree: [string, number][], currSub: number) => {
     lastVisitedPath = {

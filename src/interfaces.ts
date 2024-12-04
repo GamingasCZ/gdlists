@@ -318,6 +318,7 @@ export interface ImageFolder {
   id: number
   name: string
   color: string
+  base?: number
 }
 
 

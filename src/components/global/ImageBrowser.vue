@@ -6,7 +6,7 @@ import axios from "axios";
 import type { ImageFolder, ImageStorage } from "@/interfaces";
 import { hasLocalStorage } from "@/siteSettings";
 import type { ImageCache } from "./imageCache";
-import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache } from "./imageCache";
+import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath } from "./imageCache";
 import Dropdown from "../ui/Dropdown.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
@@ -27,7 +27,7 @@ import { i18n } from "@/locales";
 
 const MAX_SUBFOLDERS = 3
 const toMB = (val: number) => Math.round(val / 100_00) / 100
-const currentTab = ref(0)
+const currentTab = ref(lastOpenedTab)
 const storageInUse = computed(() => (storage.value.left / storage.value.storageMax) * 100)
 const pre = import.meta.env.VITE_USERCONTENT
 const imageInput = ref<HTMLInputElement>()
@@ -36,6 +36,7 @@ const fileDrag = ref(false)
 const props = defineProps<{
     unselectable: boolean
     disableExternal?: boolean
+    allowMultiplePicks?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -52,9 +53,15 @@ const storage = ref<ImageStorage>({
     maxFilecount: 2
 })
 
+enum Tabs { Uploaded = 0, External = 1 }
+
 const images = ref<string[]>(imageCache)
-const externaImages = ref<string[]>([])
 const folders = ref<ImageFolder[]>([])
+var allExternalImages: [[string, number][] | string[]] = []
+var allExternalFolders: ImageFolder[] = []
+const externalImages = ref<string[]>([])
+const extImgFolders = ref<ImageFolder[]>([])
+const MAX_EXT_IMAGES = 200
 
 const loadingImages = ref(true)
 
@@ -62,19 +69,36 @@ enum Folder { NOT_CREATING = 0, CREATING = 1, EDITING = 2 }
 const creatingNewFolder = ref(Folder.NOT_CREATING)
 
 const currentFolder = ref<[string, number][]>([])
+const currentExtFolder = ref<[string, number][]>([])
 const subfolderLevel = ref(0)
+const subfolderExtLevel = ref(0)
 
 const folderEditButton = ref<HTMLDivElement>()
 const editDropdownOpen = ref(false)
 const imageAddButton = ref<HTMLDivElement>()
 const imgAddOptsOpen = ref(false)
 
-if (hasLocalStorage()) {
-    externaImages.value = JSON.parse(localStorage.getItem("externalImages")!) ?? []
+const goToTab = (to: number) => {
+    setLastOpenedTab(to)
+    currentTab.value = to
+    if (to == Tabs.Uploaded)
+        gotoFolder(currentFolder.value[subfolderLevel.value], subfolderLevel.value)
+    else
+        gotoFolder(currentExtFolder.value[subfolderExtLevel.value], subfolderExtLevel.value)
+}
+
+const getImgSrc = (image: string) => {
+    if (currentTab.value == Tabs.Uploaded)
+        return `${pre}/userContent/${storage.value.uid}/${image}-thumb.webp`
+    else
+        return image
 }
 
 const removeConfirmationOpen = ref(-1)
 const startRemoval = (index: number) => {
+    if (currentTab.value == Tabs.External)
+        return removeImage(externalImages.value[index], true)
+
     if (holdingShift.value) removeImage(images.value[index], false)
     else removeConfirmationOpen.value = index
 }
@@ -107,17 +131,33 @@ const removeImage = (hash: string, external: boolean) => {
             notifyError(5)
         })
 
-        removeConfirmationOpen.value = -1
     }
     else {
-        externaImages.value.splice(externaImages.value.indexOf(hash), 1)
-        localStorage.setItem("externalImages", JSON.stringify(externaImages.value))
+        for (let i = 0; i < allExternalImages.length; i++) {
+            let img = hash?.[0] ?? hash
+            if (typeof allExternalImages[i] == 'string') {
+                if (allExternalImages[i] == img) {
+                    allExternalImages.splice(i, 1)
+                    break
+                }
+            }
+            else {
+                if (allExternalImages[i][0] == img) {
+                    allExternalImages.splice(i, 1)
+                    break
+                }
+            }
+        }
+        localStorage.setItem("externalImages", JSON.stringify(allExternalImages))
+        refreshContent(currentExtFolder.value[subfolderExtLevel.value])
     }
+    removeConfirmationOpen.value = -1
 }
 
 const uploadingImage = ref(false)
 const uploadImage = async (e: FileList, fileList?: boolean) => {
     if (loadingImages.value || uploadingImage.value || folderMoveMode.value) return
+    currentTab.value = Tabs.Uploaded
 
     let totalFilesize = 0
     for (let i = 0; i < e.length; i++) {
@@ -146,6 +186,7 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
 }
 
 const extImgInput = ref('')
+var lastAddedLink = ""
 const uploadExternalImage = async (link: string) => {
     loadingImages.value = true
 
@@ -153,7 +194,7 @@ const uploadExternalImage = async (link: string) => {
         const load = new Promise((res, err) => {
             let img = document.createElement("img")
             img.src = link
-            img.onload = () => res(true)
+            img.onload = e => res(e)
             img.onerror = () => err("Image not found :D")
             img.remove()
         })
@@ -163,27 +204,29 @@ const uploadExternalImage = async (link: string) => {
             loadingImages.value = false
             return err;
         })
-
+        
         await load.then(() => {
-            if (externaImages.value.includes(link)) {
+            if (lastAddedLink == link) {
                 emit("pickImage", link)
                 emit('closePopup')
             }
             else {
-                externaImages.value.splice(0, 0, link)
-                externaImages.value = externaImages.value.slice(0, 20)
+                allExternalImages.splice(0, 0, [link, currentExtFolder.value[subfolderExtLevel.value][1]])
             }
-            localStorage.setItem("externalImages", JSON.stringify(externaImages.value))
+            lastAddedLink = link
+            localStorage.setItem("externalImages", JSON.stringify(allExternalImages))
+
+            refreshContent(currentExtFolder.value[subfolderExtLevel.value])
             loadingImages.value = false
-            extImgInput.value = ""
         })
     }, 10);
+    extImgInput.value = ""
 }
 
 const previewImage = ref(false)
 const pickImage = (index: number, external: boolean, event?: MouseEvent) => {
     let url;
-    if (external) url = externaImages.value[index]
+    if (external) url = externalImages.value[index]
     else url = `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`
 
     if (props.unselectable) {
@@ -194,16 +237,19 @@ const pickImage = (index: number, external: boolean, event?: MouseEvent) => {
     else {
         if (props.disableExternal)
             emit('pickImage', images.value[index])
-        else {
+        else
             emit('pickImage', url)
-        }
+
         emit('closePopup')
     }
 }
 
 const selectedImages = ref<number[]>([])
 const selectImage = (index: number) => {
-    copyFromPath = currentFolder.value[subfolderLevel.value][1]
+    if (currentTab.value == Tabs.Uploaded)
+        copyFromPath = currentFolder.value[subfolderLevel.value][1]
+    else
+        copyFromPath = currentExtFolder.value[subfolderExtLevel.value][1]
 
     let ind = selectedImages.value.indexOf(index)
     if (ind != -1)
@@ -228,9 +274,50 @@ const parseThumbs = (serverResponse: object) => {
     serverResponse.forEach(x => thumbnails.value[x.folder].push(x.hash))
 }
 
-const refreshContent = async (currPath: [string, number] | object) => {
+const refreshContent = async (currPath: [string, number] | object, external = false) => {
     loadingImages.value = true
-    
+
+    if (currentTab.value == Tabs.External || external) {
+        if (currPath?.tree) {
+            currentExtFolder.value = currPath.tree
+            subfolderExtLevel.value = currPath.subfolder
+            return refreshContent(currPath.tree[currPath.subfolder], true)
+        }
+
+        // Root directory
+        if (currPath[1] == -1)
+            externalImages.value = allExternalImages.filter(x => {
+                return typeof x == "string" || x[1] == -1
+            })
+        else {
+            externalImages.value = allExternalImages.filter(x => {
+                if (typeof x != "string") {
+                    return x[1] == currPath[1]
+                }
+            })
+        }
+        extImgFolders.value = allExternalFolders.filter(x => {
+            return x.base == currPath[1]
+        })
+
+        extImgFolders.value.forEach(x => {
+            thumbnails.value[x.id] = []
+
+            let thumb = allExternalImages.find(y => y[1] == x.id)
+            if (thumb)
+                thumbnails.value[x.id].push(thumb[0])
+        });
+
+        if (!currentExtFolder.value.includes(currPath)) {
+            for (let i = subfolderExtLevel.value; i < MAX_SUBFOLDERS; i++)
+                currentExtFolder.value.splice(subfolderExtLevel.value, 1)
+        }
+        currentExtFolder.value[subfolderExtLevel.value] = currPath
+
+        loadingImages.value = false
+        return
+    }
+
     if (currPath?.tree) {
         currentFolder.value = currPath.tree
         subfolderLevel.value = currPath.subfolder
@@ -267,7 +354,6 @@ const refreshContent = async (currPath: [string, number] | object) => {
 
     setImgCache(images.value, folders.value, thumbnails.value, currentFolder.value, subfolderLevel.value)
     setStorageCache(storage.value)
-
 }
 
 const downloadImage = (hash: string, external: boolean) => {
@@ -294,7 +380,7 @@ const imageAction = (id: number, external: boolean, val: string | number) => {
     previewImage.value = false
     switch (id) {
         case 0: // Remove
-            if (external) removeImage(externaImages.value[val], true);
+            if (external) removeImage(externalImages.value[val], true);
             else startRemoval(val);
             break;
         case 1:
@@ -315,8 +401,9 @@ const modifierHeld = (e: KeyboardEvent) => {
         startMoveMode()
 
     // CTRL + V = paste into folder
-    if (e.type == "keyup" && e.ctrlKey && e.key == 'v')
-        moveToFolder(imagesToMove.value, currentFolder.value[subfolderLevel.value][1])
+    if (e.type == "keyup" && e.ctrlKey && e.key == 'v') {
+        moveToFolder(imagesToMove.value)
+    }
 
 }
 document.addEventListener("keydown", modifierHeld)
@@ -352,10 +439,12 @@ const checkFolder = () => {
         folderValid.value = [0, false]
     else if (name.length < 3)
         folderValid.value = [1, false]
-    else if (imageCache[currentFolder.value[subfolderLevel.value][1]].folders.findIndex(x => x.name == '/' + name) != -1)
-        folderValid.value = [2, false]
     else if (!checkFolderName(name))
         folderValid.value = [3, false]
+    else if (currentTab.value == Tabs.Uploaded && imageCache[currentFolder.value[subfolderLevel.value][1]].folders.findIndex(x => x.name == '/' + name) != -1)
+        folderValid.value = [2, false]
+    else if (currentTab.value == Tabs.External && currentExtFolder.value.findIndex(x => x[0] == name) != -1)
+        folderValid.value = [2, false]
     else
         folderValid.value = [0, true]
 }
@@ -367,7 +456,7 @@ const folderDetails = ref({
 watch(() => folderDetails.value.name, checkFolder)
 
 const folderColor = computed(() => {
-    return chroma.hsl(folderDetails.value.color[0], folderDetails.value.color[1], folderDetails.value.color[2] / 64).hex()
+    return chroma.hsv(folderDetails.value.color[0], folderDetails.value.color[1], folderDetails.value.color[2] / 48).hex()
 })
 
 const modifyFolder = () => {
@@ -378,24 +467,50 @@ const modifyFolder = () => {
         currentFolder: currentFolder.value[subfolderLevel.value][1]
     }
 
-    if (creatingNewFolder.value == Folder.CREATING)
-        axios.put(import.meta.env.VITE_API + "/images.php", data).then(() => {
-            breakCache()
-            refreshContent(currentFolder.value[subfolderLevel.value])
-        })
+    if (creatingNewFolder.value == Folder.CREATING) {
+        if (currentTab.value == Tabs.External) {
+            let newFolder = {
+                name: '/'+data.name,
+                id: Date.now(),
+                color: data.color,
+                base: currentExtFolder.value[subfolderExtLevel.value][1]
+            }
+            allExternalFolders.push(newFolder)
+            localStorage.setItem("extImgFolders", JSON.stringify(allExternalFolders))
+            refreshContent(currentExtFolder.value[subfolderExtLevel.value])
+        }
+        else {
+            axios.put(import.meta.env.VITE_API + "/images.php", data).then(() => {
+                breakCache()
+                refreshContent(currentFolder.value[subfolderLevel.value])
+            })
+        }
+
+    }
     else {
-        axios.patch(import.meta.env.VITE_API + "/images.php", data).then(() => {
-            currentFolder.value[subfolderLevel.value][0] = "/" + folderDetails.value.name
-            breakCache()
-            refreshContent(currentFolder.value[subfolderLevel.value])
-        })
+        modifyColors(chroma(folderColor.value))
+        if (currentTab.value == Tabs.External) {
+            let folderInd = allExternalFolders.findIndex(x => x.id == currentExtFolder.value[subfolderExtLevel.value][1])
+            currentExtFolder.value[subfolderExtLevel.value][0] = "/" + folderDetails.value.name
+            allExternalFolders[folderInd].name = '/'+data.name
+            allExternalFolders[folderInd].color = data.color
+
+            localStorage.setItem("extImgFolders", JSON.stringify(allExternalFolders))
+            refreshContent(currentExtFolder.value[subfolderExtLevel.value])
+        }
+        else {
+            axios.patch(import.meta.env.VITE_API + "/images.php", data).then(() => {
+                currentFolder.value[subfolderLevel.value][0] = "/" + folderDetails.value.name
+                breakCache()
+                refreshContent(currentFolder.value[subfolderLevel.value])
+            })
+        }
     }
     creatingNewFolder.value = Folder.NOT_CREATING
 }
 
 const getFolderName = (path: string) => {
-    let splitPath = path.split("/")
-    return splitPath[splitPath.length - 1]
+    return path.slice(1)
 }
 
 const getFolderGradient = (hex: string) => {
@@ -408,6 +523,15 @@ const gotoFolder = (folder: [string, number], subLevel: number) => {
     let searchSub = subLevel - 1
     if (searchSub < 0)
         modifyColors(null, true)
+    else if (currentTab.value == Tabs.External) {
+        let col: Color;
+        allExternalFolders.forEach(x => {
+            if (folder[1] == x.id)
+                col = chroma(x.color)
+        })
+
+        modifyColors(col!)
+    }
     else if (!imageCache?.[currentFolder.value?.[searchSub][1]])
         modifyColors(null, true)
     else {
@@ -421,11 +545,15 @@ const gotoFolder = (folder: [string, number], subLevel: number) => {
     }
 
     loadingImages.value = true
-    subfolderLevel.value = subLevel
+    if (currentTab.value == Tabs.Uploaded)
+        subfolderLevel.value = subLevel
+    else
+        subfolderExtLevel.value = subLevel
+
     if (!folderMoveMode.value)
         selectedImages.value = []
 
-    refreshContent(folder).then()
+    refreshContent(folder)
 }
 
 const folderAction = (opt: number) => {
@@ -453,8 +581,14 @@ const createNewFolder = () => {
 
 const editFolder = () => {
     creatingNewFolder.value = Folder.EDITING
+    let name;
+    if (currentTab.value == Tabs.Uploaded)
+        name = currentFolder.value[subfolderLevel.value][0].slice(1)
+    else
+        name = currentExtFolder.value[subfolderExtLevel.value][0].slice(1)
+
     folderDetails.value = {
-        name: currentFolder.value[subfolderLevel.value][0].slice(1),
+        name: name,
         color: currentColor
     }
     nextTick(() => folderNameEl.value?.focus())
@@ -463,9 +597,15 @@ const editFolder = () => {
 const folderMoveMode = ref(false)
 var copyFromPath = -1
 const imagesToMove = ref<string[]>([])
-const moveToFolder = (imgs: string[], folderID: number) => {
+const moveToFolder = (imgs: string[]) => {
     if (!imgs.length) return
     if (loadingImages.value) return
+
+    let folderID: number
+    if (currentTab.value == Tabs.Uploaded)
+        folderID = currentFolder.value[subfolderLevel.value][1]
+    else
+        folderID = currentExtFolder.value[subfolderExtLevel.value][1]
 
     let data = {
         action: "moveToFolder",
@@ -479,16 +619,30 @@ const moveToFolder = (imgs: string[], folderID: number) => {
     if (folderID == copyFromPath)
         return
 
-    axios.put(import.meta.env.VITE_API + "/images.php", data).then(newCache => {
-        breakCache()
+    if (currentTab.value == Tabs.Uploaded) {
+        axios.put(import.meta.env.VITE_API + "/images.php", data).then(newCache => {
+            breakCache()
 
-        parseThumbs(newCache.data[3])
-        setImgCache(newCache.data[1], newCache.data[2], thumbnails.value, currentFolder.value, subfolderLevel.value)
+            parseThumbs(newCache.data[3])
+            setImgCache(newCache.data[1], newCache.data[2], thumbnails.value, currentFolder.value, subfolderLevel.value)
 
-        refreshContent(currentFolder.value[subfolderLevel.value])
-    }).catch((_) => {
-        notifyError(11)
-    })
+            refreshContent(currentFolder.value[subfolderLevel.value])
+        }).catch((_) => {
+            notifyError(11)
+        })
+    }
+    else {
+        let onlyURIs = imgs.map(x => x[0])
+        allExternalImages = allExternalImages.filter(x => {
+            if (typeof x == 'string')
+                return !imgs.includes(x)
+            else
+                return !(onlyURIs.includes(x[0]) && x[1] == copyFromPath)
+        })
+        imgs.forEach(x => allExternalImages.push([typeof x == 'string' ? x : x[0], folderID]))
+        localStorage.setItem("externalImages", JSON.stringify(allExternalImages))
+        refreshContent(currentExtFolder.value[subfolderExtLevel.value])
+    }
 }
 
 const startMoveMode = () => {
@@ -496,26 +650,45 @@ const startMoveMode = () => {
     if (loadingImages.value) return
 
     folderMoveMode.value = true
-    imagesToMove.value = selectedImages.value.map(x => images.value[x])
+    if (currentTab.value == Tabs.Uploaded)
+        imagesToMove.value = selectedImages.value.map(x => images.value[x])
+    else
+        imagesToMove.value = selectedImages.value.map(x => externalImages.value[x])
 }
-
-// Load images from cache or server
-refreshContent(lastVisitedPath)
 
 const imageIndex = ref(0)
 const removingFolder = ref(false)
 const removeFolder = (keepImages: boolean) => {
+    removeConfirmationOpen.value = -1
+    removingFolder.value = false
+
+    if (currentTab.value = Tabs.External) {
+        let currFolderID = currentExtFolder.value[subfolderExtLevel.value][1]
+        let rmInd = allExternalFolders.findIndex(x => x.id == currFolderID)
+        allExternalFolders.splice(rmInd, 1)
+        if (keepImages) {
+            let keptImages = allExternalImages.filter(x => x[1] == currFolderID)
+            for (let i = 0; i < keptImages.length; i++)
+                keptImages[i][1] = currentExtFolder.value[subfolderExtLevel.value-1][1]
+            allExternalImages = allExternalImages.filter(x => x[1] != currFolderID)
+            allExternalImages.push(...keptImages)
+        }
+        else
+          allExternalImages = allExternalImages.filter(x => x[1] != currFolderID)
+
+        currentExtFolder.value.splice(subfolderExtLevel.value, 1)
+        
+        return gotoFolder(currentExtFolder.value[Math.max(0, subfolderExtLevel.value - 1)], subfolderExtLevel.value - 1)
+    }
+
     let addto = currentFolder.value[Math.max(0, subfolderLevel.value - 1)]
     let params = {
         removeFolder: currentFolder.value[subfolderLevel.value][1],
         folderAddTo: addto[1],
         keepImages: !keepImages,
     }
+
     loadingImages.value = true
-
-    removeConfirmationOpen.value = -1
-    removingFolder.value = false
-
     axios.delete(import.meta.env.VITE_API + "/images.php", { params: params }).then(() => {
         currentFolder.value.splice(subfolderLevel.value, 1)
         breakCache()
@@ -525,7 +698,12 @@ const removeFolder = (keepImages: boolean) => {
 }
 
 const isSelected = (index: number) => {
-    return copyFromPath == currentFolder.value[subfolderLevel.value][1] && selectedImages.value.includes(index)
+    let path: boolean
+    if (currentTab.value == Tabs.Uploaded)
+        path = copyFromPath == currentFolder.value?.[subfolderLevel.value]?.[1]
+    else
+        path = copyFromPath == currentExtFolder.value?.[subfolderExtLevel.value]?.[1]
+    return path && selectedImages.value.includes(index)
 }
 
 const randomAssElement = ref<HTMLDivElement>()
@@ -545,13 +723,22 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
     assParent?.style.setProperty("--brightGreen", chroma.hsl(hue, 0.53, 0.63).hex())
 }
 
+// Load images from cache or server
+refreshContent(lastVisitedPath)
+
+if (hasLocalStorage()) {
+    allExternalImages = JSON.parse(localStorage.getItem("externalImages")!) ?? []
+    allExternalFolders = JSON.parse(localStorage.getItem("extImgFolders")!) ?? []
+    refreshContent(lastVisitedExternalPath, true)
+}
+
 </script>
 
 <template>
     <div ref="randomAssElement" class="pb-2 mx-2">
-        <ImageViewer v-if="previewImage" @close-popup="previewImage = false" @remove="imageAction(0, false, imageIndex)"
-            @download="imageAction(1, false, imageIndex)" @move="imageAction(2, false, imageIndex)"
-            :url-array="currentTab ? externaImages : undefined" :hash-array="!currentTab ? images : undefined"
+        <ImageViewer v-if="previewImage" @close-popup="previewImage = false" @remove="imageAction(0, currentTab == Tabs.External, imageIndex)"
+            @download="imageAction(1, currentTab == Tabs.External, imageIndex)" @move="imageAction(2, currentTab == Tabs.External, imageIndex)"
+            :url-array="currentTab ? externalImages : undefined" :hash-array="!currentTab ? images : undefined"
             v-model="imageIndex" :uid="currentUID" />
 
         <!-- Remove confirmation -->
@@ -563,10 +750,10 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
                     <h2 class="text-xl font-black">{{ $t('other.imgRemove1', [removingFolder ? $t('other.thisFolder') :
                         $t('other.thisPic')]) }}?</h2>
                     <p v-if="removingFolder" class="flex flex-col gap-3 pr-2 text-balance">
-                        <p v-if="images.length">{{ $t('other.folderRemove2') }}</p>
-                        <p v-if="folders.length">{{ $t('other.folderRemove3') }}
-                            <span v-if="images.length && folders.length">{{ $t('other.folderRemove4') }}</span>.
-                        </p>
+                    <p v-if="images.length">{{ $t('other.folderRemove2') }}</p>
+                    <p v-if="folders.length">{{ $t('other.folderRemove3') }}
+                        <span v-if="images.length && folders.length">{{ $t('other.folderRemove4') }}</span>.
+                    </p>
                     </p>
                     <p v-else>{{ $t('other.imgRemove2') }}</p>
 
@@ -586,7 +773,7 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
                     class="flex gap-2 items-center p-2 font-bold text-black bg-yellow-400 rounded-md button">
                     <img src="@/images/move.svg" class="w-6 invert">{{ $t('images.imgMoveDel') }}</button>
             </div>
-            <button v-else @click="removeImage(images[removeConfirmationOpen], false)"
+            <button v-else @click="removeImage(images[removeConfirmationOpen], currentTab == Tabs.External)"
                 class="flex gap-2 items-center px-2 py-1 mx-auto my-2 w-max text-2xl font-bold text-black bg-red-400 rounded-md button">
                 <img src="@/images/del.svg" class="w-6">
                 {{ $t('editor.remove') }}
@@ -635,20 +822,30 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
             :icons="[fEdit, fRemove]" :options="[$t('level.edit'), $t('editor.remove')]" :button="folderEditButton" />
 
         <!-- Image Add options -->
-        <Dropdown v-if="imgAddOptsOpen" @picked-option="currentTab = 1" @close="imgAddOptsOpen = false" :icons="[fLink]"
+        <Dropdown v-if="imgAddOptsOpen" @picked-option="goToTab(1)" @close="imgAddOptsOpen = false" :icons="[fLink]"
             :options="[$t('other.addExternal')]" :button="imageAddButton" />
 
         <div class="flex gap-10 justify-between">
             <!-- External image input -->
-            <form v-if="currentTab == 1" action="." @submit.prevent="uploadExternalImage($event.target[0].value)"
-                class="flex w-full">
-                <button @click="currentTab = 0"
+            <form v-if="currentTab == Tabs.External" action="."
+                @submit.prevent="uploadExternalImage($event.target[3].value)" class="flex w-full">
+                <button @click="goToTab(0)" type="button"
                     class="flex gap-1 items-center pr-2 mr-2 min-w-max bg-black bg-opacity-40 rounded-md button"><img
                         class="w-6 rotate-180" src="@/images/play.svg" alt="">{{ $t('other.back') }}</button>
-                <input :placeholder="$t('other.enterURI')" :disabled="loadingImages"
-                    @change="uploadExternalImage($event.target.value)"
+
+                <div class="flex gap-2 items-center p-1 pl-2 mr-2 min-w-max bg-black bg-opacity-40 rounded-md">
+                    <button type="button" :disabled="subfolderExtLevel >= MAX_SUBFOLDERS" @click="createNewFolder"
+                        class="button disabled:opacity-20"><img src="@/images/folder.svg" class="inline w-5"
+                            alt=""><span class="ml-2 max-sm:hidden">{{ $t('other.createFolder') }}</span></button>
+                    <hr class="w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
+                    <button type="button" :disabled="subfolderExtLevel == 0" ref="folderEditButton"
+                        @click="editDropdownOpen = true" class="w-3 h-full button disabled:opacity-20"><img
+                            src="@/images/levelIcon.svg" class="w-2 rotate-180" alt=""></button>
+                </div>
+
+                <input v-model="extImgInput" :placeholder="$t('other.enterURI')" :disabled="loadingImages"
                     @paste="uploadExternalImage($event.clipboardData?.getData('Text'))"
-                    class="p-1 pl-8 w-full bg-black bg-opacity-40 rounded-md transition-opacity grow disabled:opacity-40">
+                    class="p-1 bg-[url(@/images/searchOpaque.svg)] bg-[size:1rem] bg-[0.5rem] bg-no-repeat pl-8 w-full bg-black bg-opacity-40 rounded-md transition-opacity grow disabled:opacity-40">
             </form>
 
             <!-- Image upload header -->
@@ -675,7 +872,7 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
             </div>
 
             <!-- Storage left -->
-            <div class="flex flex-col" v-show="currentTab == 0">
+            <div class="flex flex-col" v-show="currentTab == Tabs.Uploaded">
                 <div class="flex justify-between">
                     <label for="storageLeft">{{ $t('other.storage') }}</label>
                     <span>{{ toMB(storage.left) }}/{{ toMB(storage.storageMax) }}MB</span>
@@ -688,14 +885,14 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
 
 
         <!-- Pathbar -->
-        <div v-if="subfolderLevel > 0 || currentFolder.length > 1"
+        <div v-if="((subfolderLevel > 0 || currentFolder.length > 1) && currentTab == Tabs.Uploaded) || ((subfolderExtLevel > 0 || currentExtFolder.length > 1) && currentTab == Tabs.External)"
             class="flex overflow-auto items-center px-2 pt-4 mx-auto w-max max-w-full">
-            <div class="flex items-center" v-for="(folder, subLevel) in currentFolder">
+            <div class="flex items-center" v-for="(folder, subLevel) in (currentTab ? currentExtFolder : currentFolder)">
                 <span v-show="subLevel != 0" class="inline mx-2 text-xl font-bold">/</span>
                 <button @click="gotoFolder(folder, subLevel)"
-                    :class="{ 'bg-black bg-opacity-40': subfolderLevel == subLevel }"
+                    :class="{ 'bg-black bg-opacity-40': (subfolderLevel == subLevel && currentTab == Tabs.Uploaded) || (subfolderExtLevel == subLevel && currentTab == Tabs.External) }"
                     class="inline-flex items-center px-2 py-1 w-max rounded-md border-b-2 border-b-lof-400 hover:bg-opacity-80">
-                    <img src="@/images/folder.svg" class="mr-2 w-4 rounded-l-md" alt="">
+                    <img src="@/images/folder.svg" class="mr-2 w-4" alt="">
                     {{ folder[0].slice(1) || $t('other.topFolder') }}</button>
             </div>
         </div>
@@ -705,34 +902,33 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
         @dragexit="fileDrag = false" @dragleave="fileDrag = false" @submit.prevent=""
         :class="{ 'opacity-40 pointer-events-none': loadingImages }"
         class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
-        <HiddenFileUploader v-if="currentTab == 0" @data="uploadImage" ref="imageInput" unclickable multiple
+        <HiddenFileUploader v-if="currentTab == Tabs.Uploaded" @data="uploadImage" ref="imageInput" unclickable multiple
             :disabled="loadingImages || uploadingImage != 0 || folderMoveMode" />
 
-        <div class="grid grid-cols-4 gap-2 m-2" v-show="currentTab == 0"
-            :class="{ 'opacity-20 pointer-events-none': uploadingImage }">
+        <div class="grid grid-cols-4 gap-2 m-2" :class="{ 'opacity-20 pointer-events-none': uploadingImage }">
 
             <!-- Folders -->
-            <button v-for="folder in folders" @click.exact="gotoFolder([folder.name, folder.id], subfolderLevel + 1)"
-                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
+            <button v-for="folder in (currentTab ? extImgFolders : folders)"
+                @click.exact="gotoFolder([folder.name, folder.id], (currentTab ? subfolderExtLevel : subfolderLevel) + 1)"
+                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
                 :style="{ borderColor: folder.color, background: chroma(folder.color).alpha(0.4).hex() }">
 
                 <div class="grid absolute inset-2 grid-cols-2 gap-2 overflow-clip">
                     <img v-for="thumb in thumbnails[folder.id]"
-                        :class="{ 'col-span-2 w-full': thumbnails[folder.id].length == 1 }"
-                        class="object-cover h-full" :src="`${pre}/userContent/${storage.uid}/${thumb}-thumb.webp`"
-                        alt="">
+                        :class="{ 'col-span-2 w-full': thumbnails[folder.id].length == 1 }" class="object-cover h-full"
+                        :src="getImgSrc(thumb)" alt="">
                 </div>
                 <div class="absolute inset-0" :style="{ backgroundImage: getFolderGradient(folder.color) }"></div>
                 <span
                     class="overflow-hidden absolute bottom-1 left-1/2 z-10 w-full text-lg rounded-sm -translate-x-1/2 text-ellipsis"
-                    :class="{ 'hover:bg-black hover:bg-opacity-40 hover:px-2 hover:w-max': folder.name.length > 12 }">{{
+                    :class="{ 'group-hover:bg-black group-hover:bg-opacity-40 group-hover:px-2 group-hover:w-max': folder.name.length > 12 }">{{
                         getFolderName(folder.name) }}</span>
             </button>
 
             <!-- Images -->
-            <button v-for="(image, index) in images"
+            <button v-for="(image, index) in (currentTab ? externalImages : images)"
                 v-memo="[imageHovering == index, imageOptsShown, folderMoveMode, selectedImages.length]"
-                @click.exact="pickImage(index, false, $event)" @click.right.exact.prevent=""
+                @click.exact="pickImage(index, currentTab == Tabs.External, $event)" @click.right.exact.prevent=""
                 @click.ctrl="selectImage(index)" @click.middle.exact="startRemoval(index)"
                 @mouseenter="imageHovering = index" @mouseleave="imageHovering = -1" :key="image"
                 class="relative h-24 bg-center rounded-sm border-2 transition-all duration-75 cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
@@ -744,8 +940,7 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
                     <img src="@/images/more.svg" class="p-1 invert">
 
                     <Dropdown :button="button" @close="imageOptsShown = -1"
-                        @picked-option="imageAction($event, false, index)"
-                        v-if="imageOptsShown == index && currentTab == 0"
+                        @picked-option="imageAction($event, currentTab == Tabs.External, index)" v-if="imageOptsShown == index"
                         :options="[$t('editor.remove'), $t('other.download'), $t('other.move')]"
                         :title="$t('other.options')" />
                 </button>
@@ -755,32 +950,9 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
                     class="absolute top-1 left-1 p-0.5 w-6 rounded-full border-2 border-black bg-lof-400" alt="">
 
                 <!-- Thumbnail -->
-                <img loading="lazy" :src="`${pre}/userContent/${storage.uid}/${image}-thumb.webp`" alt=""
+                <img loading="lazy" :src="getImgSrc(image)" alt=""
                     class="object-cover z-10 w-full h-full transition-transform pointer-events-none aspect-auto"
                     :class="{ 'hover:scale-125': !unselectable }">
-            </button>
-        </div>
-
-        <!-- External Image -->
-        <div class="grid grid-cols-4 gap-2 m-2" v-show="currentTab == 1">
-            <button v-for="(image, index) in externaImages" @click="pickImage(index, true)"
-                @click.middle.exact="removeImage(externaImages[index], true)"
-                @click.right.exact.prevent="extButton = $event.target; imageOptsShown = index"
-                @click.ctrl="selectImage(index)"
-                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
-                :class="{ 'bg-white bg-opacity-20 group bg-[url(@/images/trash.svg)] bg-[length:2rem] bg-no-repeat': false }">
-                <!-- Image settings -->
-                <button @click.stop="extButton = $event.target; imageOptsShown = index"
-                    class="absolute top-1 right-1 z-20 w-5 overflow-clip bg-white rounded-full opacity-0 transition-opacity duration-75 button group-hover:opacity-100">
-                    <img src="@/images/more.svg" class="p-1 invert">
-
-                    <Dropdown :button="extButton" @close="imageOptsShown = -1"
-                        @picked-option="imageAction($event, true, index)" ref="dropdown" class="top-8"
-                        v-if="imageOptsShown && currentTab == 1"
-                        :options="[$t('editor.remove'), $t('other.link'), $t('other.move')]" />
-                </button>
-
-                <img loading="lazy" :src="image" :alt="image" class="object-cover z-10 w-full h-full aspect-auto">
             </button>
         </div>
 
@@ -791,21 +963,23 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
             <h2 class="text-xl">{{ $t('other.loading') }}...</h2>
         </div>
 
-        <div v-show="(!images.length && !folders.length) && currentTab == 0 || !externaImages.length && currentTab == 1"
+        <div v-show="(!images.length && !folders.length) && currentTab == Tabs.Uploaded || (!externalImages.length && !extImgFolders.length) && currentTab == Tabs.External"
             class="absolute top-1/2 left-1/2 text-center opacity-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-            <div v-if="currentTab == 0 && currentFolder == '/' && !fileDrag" class="flex flex-col items-center w-max">
+            <div v-if="currentTab == Tabs.Uploaded && currentFolder == '/' && !fileDrag"
+                class="flex flex-col items-center w-max">
                 <img src="@/images/image.svg" class="mb-2 w-48" alt="">
                 <h2 class="text-xl">{{ $t('other.uploadHelp1') }}</h2>
                 <p>{{ $t('other.uploadHelp2') }}</p>
                 <p>{{ $t('other.maxFilesize', [toMB(storage.maxUploadSize)]) }}</p>
                 <p>{{ $t('other.formats') }}: .jpg, .png, .webp</p>
             </div>
-            <div v-else-if="currentTab == 0 && !fileDrag" class="flex flex-col items-center w-max">
+            <div v-else-if="currentTab == Tabs.Uploaded && !fileDrag" class="flex flex-col items-center w-max">
                 <img src="@/images/folder.svg" class="mb-2 w-48" alt="">
                 <h2 class="text-xl">{{ $t('other.folderEmptyHelp') }}</h2>
                 <p>{{ $t('other.folderHelp') }}</p>
             </div>
-            <div v-else-if="currentTab == 0 && fileDrag" class="pt-2 pr-8 pb-4 pl-4 w-max rounded-xl animate-pulse">
+            <div v-else-if="currentTab == Tabs.Uploaded && fileDrag"
+                class="pt-2 pr-8 pb-4 pl-4 w-max rounded-xl animate-pulse">
                 <img src="@/images/dropfile.svg" class="mb-2 w-64" alt="">
                 <h2 class="text-xl">{{ $t('other.uploadHelp5') }}</h2>
             </div>
@@ -838,7 +1012,7 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
                 <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img
                         class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
             </div>
-            <button v-if="folderMoveMode" @click="moveToFolder(imagesToMove, currentFolder[subfolderLevel][0])"
+            <button v-if="folderMoveMode" @click="moveToFolder(imagesToMove)"
                 class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5"
                     src="@/images/move.svg" alt="">Move here</button>
         </div>
