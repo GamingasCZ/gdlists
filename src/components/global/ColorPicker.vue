@@ -23,6 +23,9 @@ const modColors = (ind: number, val: number) => {
 onMounted(() => {
   if (!props.hex) {
     colors.value = [props.hue, props.saturation, props.lightness]
+    if (colors.value[2] <= 1)
+      colors.value[2] *= 64
+    
     colorsHex.value = chroma.hsl(props.hue, props.saturation, props.lightness).hex()
   }
   else {

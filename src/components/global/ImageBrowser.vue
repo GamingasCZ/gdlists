@@ -468,7 +468,7 @@ const folderDetails = ref({
 watch(() => folderDetails.value.name, checkFolder)
 
 const folderColor = computed(() => {
-    return chroma.hsv(folderDetails.value.color[0], folderDetails.value.color[1], folderDetails.value.color[2] / 48).hex()
+    return chroma.hsl(folderDetails.value.color[0], 1, folderDetails.value.color[2] / 64).hex()
 })
 
 const modifyFolder = () => {
@@ -594,7 +594,6 @@ const createNewFolder = () => {
     folderDetails.value.name = ""
     creatingNewFolder.value = Folder.CREATING
     folderDetails.value.color = makeColor()
-    folderDetails.value.color[2] *= 32
     nextTick(() => folderNameEl.value?.focus())
 }
 
@@ -608,8 +607,9 @@ const editFolder = () => {
 
     folderDetails.value = {
         name: name,
-        color: currentColor
+        color: chroma(currentColor).hsl()
     }
+    folderDetails.value.color[2] *= 64
     nextTick(() => folderNameEl.value?.focus())
 }
 
@@ -825,8 +825,8 @@ if (hasLocalStorage()) {
                     </div>
                     <span class="text-xl font-bold">{{ $t('other.folderColor') }}</span>
                 </div>
-                <ColorPicker :hue="folderDetails.color[0]" :saturation="folderDetails.color[1]"
-                    :lightness="folderDetails.color[1]" @colors-modified="folderDetails.color = $event" />
+                <ColorPicker :hue="folderDetails.color[0]" :saturation="1"
+                    :lightness="folderDetails.color[2]" @colors-modified="folderDetails.color = $event" />
                 <div class="flex justify-between">
                     <button type="button" @click="creatingNewFolder = Folder.NOT_CREATING"
                         class="font-bold text-lof-400">{{
