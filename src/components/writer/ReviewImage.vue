@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import { inject } from 'vue';
 import { watch } from 'vue';
 import Resizer from '../global/Resizer.vue';
+import { WriterGallery } from '@/interfaces';
 
 
 const emit = defineEmits<{
@@ -52,7 +53,7 @@ watch(props, () => {
     
     switch (props.buttonState[0]) {
         case "pick":
-            dialogs.imagePicker = [true, props.index]
+            dialogs.imagePicker = [WriterGallery.ImageContainer, props.index]
             break;
         }
     emit("clearButton")
@@ -84,7 +85,7 @@ const fullscreenImage = () => {
 </script>
 
 <template>
-    <ContainerHelp @click="dialogs.imagePicker = [true, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+    <ContainerHelp @click="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 

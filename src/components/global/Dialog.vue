@@ -27,7 +27,8 @@ watch(props, () => {
   }
   else {
     main.value?.close()
-    document.body.style.overflow = "auto"
+    if (document.querySelectorAll(".modalDialog").length < 2)
+      document.body.style.overflow = "auto"
   }
 })
 
@@ -37,7 +38,7 @@ watch(props, () => {
 <template>
   <Transition name="fade">
     <dialog ref="main" @click="(SETTINGS.dialogClickClose && !disableTapClose) ? emit('closePopup') : ''" tabindex="0"
-      @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center transition-all duration-75" v-if="open">
+      @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center transition-all duration-75 modalDialog" v-if="open">
       <section @click.stop=""
         :style="{width: width ?? '35rem', backgroundImage: SETTINGS.disableColors ? null : customColor}"
         class="flex max-h-[95vh] max-w-[95vw] flex-col relative rounded-lg text-white shadow-lg shadow-black" :class="{'bg-greenGradient': SETTINGS.disableColors || !customColor, 'backdrop-blur-md': customColor}">

@@ -161,7 +161,7 @@ export function checkReview() {
 }
 
 export const selectedNestContainer = ref(0)
-export const flexNames = { left: "start", center: "center", right: "end", justify: "left" }
+export const flexNames = { left: "start", center: "center", right: "end", justify: "space-between" }
 
 export function parseReviewContainers(containers: object[], headingLevel = "0") {
     // types: 0 - image; 1,2,3 - title 1,2,3; 4 - video

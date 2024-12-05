@@ -43,7 +43,9 @@ function sanitizeInput($inputArray)
 function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = false)
 {
     global $debugMode;
-    if ($debugMode) error_log($queryTemplate);
+    if ($debugMode) {
+        error_log(sprintf(str_ireplace("?", "%s", $queryTemplate), ...$values));
+    }
 
     $query = $mysqli->prepare($queryTemplate);
 
@@ -126,6 +128,41 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
 
     curl_close($curl);
     return $result;
+}
+
+function createMomentToken($uid) {
+    $data = [
+        time(),
+        $uid
+    ];
+
+    $decodedToken = implode(";", $data);
+    $token = $decodedToken . ";" . md5($decodedToken);
+    return base64_encode(encrypt($token));
+}
+
+function verifyMomentToken($token) {
+    $decoded = decrypt(base64_decode($token));
+    if (!$decoded) // Decryption failed
+        return false;
+    
+    $token = explode(";", $decoded);
+    if (sizeof($token) != 3) // time+uid+hash
+        return false;
+    
+    // Moment tokens are valid for 30 minutes
+    if (time() - $token[0] > 1800)
+        return false;
+    
+    // validate hash
+    if (md5(implode(";", array_slice($token, 0, 2))) != $token[2])
+        return false;
+
+    $localUID = getLocalUserID();
+    if (!$localUID) return false;
+
+    // validate that access token and moment token uids are the same
+    return $localUID == $token[1];
 }
 
 function refreshToken() {
@@ -220,11 +257,18 @@ function getLocalUserID() {
 
 function checkAccount($mysqli, $forceToken = false) {
     global $DO_REFRESH;
-    if (!getAuthorization()) return false;
+    $auth = getAuthorization();
+    if (!$auth) return false;
 
     $token;
-    if (!$forceToken) $token = getAuthorization();
+    if (!$forceToken) $token = $auth;
     else $token = $forceToken;
+    
+    $getToken = $_COOKIE["momentToken"];
+    if ($getToken) {
+        $momentToken = verifyMomentToken($getToken);
+        if ($momentToken) return ["id" => $token[2]];
+    }
 
     if ($token[1]-time() < 86400) {
         $refresh_token = refreshToken($token);
@@ -245,6 +289,10 @@ function checkAccount($mysqli, $forceToken = false) {
 
         return checkAccount($mysqli, $res);
     }
+
+    $mt = createMomentToken($token[2]);
+    setcookie("momentToken", $mt, time() + 1800, "/");
+
     return $json;
 }
 
@@ -387,5 +435,12 @@ function ass() {
         addLevelsToDatabase($mysqli, $allLevels, $res[$i][1], $res[$i][2]);
     }
 }
+
+function makeIN($arr) {
+    return [
+      "(" . substr(str_repeat("?,", sizeof($arr)), 0, sizeof($arr)*2-1) . ")",
+      str_repeat("s", sizeof($arr))
+    ];
+  }
 
 ?>

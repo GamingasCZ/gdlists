@@ -5,12 +5,14 @@ import { watch } from 'vue';
 import ReviewImage from './ReviewImage.vue';
 import ReviewVideo from './ReviewVideo.vue';
 import Resizer from '../global/Resizer.vue';
+import { flexNames } from '@/Reviews';
 
 const props = defineProps<{
     index: number
     buttonState: [string, number]
     settings: object
     editable: boolean
+    align: string
 }>()
 
 const emit = defineEmits<{
@@ -89,7 +91,7 @@ const hovering = ref(false)
             <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="260" :editable="editable"></Resizer>
         </div>
 
-        <section class="flex items-center w-max" :class="{'flex-wrap': settings.overflow}">
+        <section class="flex items-center" :style="{'justify-content': flexNames[align]}" :class="{'flex-wrap': settings.overflow, 'w-max': !settings.overflow}">
             <component
             v-for="medium in settings.components"
             :is="[ReviewImage, ReviewVideo][+(medium.type == 'addVideo')]"

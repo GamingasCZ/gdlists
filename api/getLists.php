@@ -42,13 +42,6 @@ $selLevelRange = "
 $listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
-function makeIN($arr) {
-  return [
-    "(" . substr(str_repeat("?,", sizeof($arr)), 0, sizeof($arr)*2-1) . ")",
-    str_repeat("s", sizeof($arr))
-  ];
-}
-
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
   global $mysqli;
   $ind = 0;

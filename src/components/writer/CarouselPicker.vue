@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, nextTick, ref } from "vue";
+import { inject, nextTick, ref, watch } from "vue";
 import { reviewData } from "@/Reviews";
 import { computed } from "vue";
 import Dialog from "../global/Dialog.vue";
@@ -99,7 +99,6 @@ const dialogType = ref(0)
 
 const uploader = ref<HTMLInputElement>()
 const maxLen = computed(() => carouselComp.length >= 25)
-
 
 </script>
 

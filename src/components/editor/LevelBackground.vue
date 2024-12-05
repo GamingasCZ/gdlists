@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { currentUID, newCardBG } from '@/Editor';
-import type { LevelList } from '@/interfaces';
+import { WriterGallery, type LevelList } from '@/interfaces';
 import { i18n } from '@/locales';
 import { computed, inject, ref } from 'vue';
 
@@ -18,7 +18,7 @@ if (!props.levelArray.levels[props.cardIndex].BGimage) {
 
 const openGallery = () => {
   gallery.imagePicker[0] = true
-  gallery.imagePicker[1] = -5
+  gallery.imagePicker[1] = WriterGallery.LevelCardBG
   gallery.imagePicker[2] = props.cardIndex
 }
 

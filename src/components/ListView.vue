@@ -643,6 +643,7 @@ const imageIndex = ref(-1)
                       :sub-index="subIndex"
                       :key="container.id"
                       :editable="false"
+                      :align="container.align"
                   />
               </div>
           </DataContainer>
