@@ -863,7 +863,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                             :is="elements" v-bind="CONTAINERS[container.type].componentProps ?? {}"
                             @clear-button="buttonState[0] = ''" @remove-subcontainer="container.extraComponents -= 1"
                             @remove="removeContainer(index)" :button-state="buttonState" :settings="container.settings"
-                            :index="index" :sub-index="subIndex" :key="container.id" :editable="previewMode" />
+                            :index="index" :sub-index="subIndex" :key="container.id" :editable="previewMode" :align="container.align" />
                     </div>
                 </DataContainer>
 
