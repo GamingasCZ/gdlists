@@ -91,7 +91,7 @@ const getImgSrc = (image: string) => {
     if (currentTab.value == Tabs.Uploaded)
         return `${pre}/userContent/${storage.value.uid}/${image}-thumb.webp`
     else
-        return image?.[0] ?? image
+        return typeof image == 'object' ? image[0] : image
 }
 
 const removeConfirmationOpen = ref(-1)
@@ -134,7 +134,7 @@ const removeImage = (hash: string, external: boolean) => {
     }
     else {
         for (let i = 0; i < allExternalImages.length; i++) {
-            let img = hash?.[0] ?? hash
+            let img = typeof hash == 'object' ? hash[0] : hash
             if (typeof allExternalImages[i] == 'string') {
                 if (allExternalImages[i] == img) {
                     allExternalImages.splice(i, 1)
