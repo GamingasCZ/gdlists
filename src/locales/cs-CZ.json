@@ -439,7 +439,8 @@
     "folderRemove3": "Všechny podsložky budou smazány! Jejich obrázky budou přesunuty na vrchol galerie",
     "folderRemove4": "Na obrázky v podsložkách se nevztahuje následující výběr.",
     "deleteFolders": "Smazat složky",
-    "extFolderRm": "Co by se mělo stát s jejím obsahem a obsahem podsložek?"
+    "extFolderRm": "Co by se mělo stát s jejím obsahem a obsahem podsložek?",
+    "linkCopied": "Odkaz zkopírován!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -627,7 +628,8 @@
     "sortTitle": "Roztřídit členy",
     "pasteMemberTitle": "Vložit člena",
     "removeAll": "Smazáním poslední role se smaže collab!",
-    "removeAllHelp": "Opravdu chceš pokračovat?"
+    "removeAllHelp": "Opravdu chceš pokračovat?",
+    "bluesky": "Bluesky účet"
   },
   "reviews": {
     "clickImgSet": "Kliknutím nastav obrázek.",

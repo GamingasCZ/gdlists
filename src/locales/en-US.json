@@ -470,7 +470,8 @@
     "folderInvChar": "Name cannot contain special characters.",
     "folderNameExists": "A folder with the same name already exists!",
     "folderNameShort": "Folder name is too short.",
-    "extFolderRm": "What should be done with its contents of this folder and its subfolders?"
+    "extFolderRm": "What should be done with its contents of this folder and its subfolders?",
+    "linkCopied": "Link copied!"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -626,7 +627,8 @@
     "pasteMemberTitle": "Paste member",
     "hideSidebarTitle": "Hide sidebar",
     "removeAll": "Removing the last role will delete the collab!",
-    "removeAllHelp": "Are you sure you want to continue?"
+    "removeAllHelp": "Are you sure you want to continue?",
+    "bluesky": "Bluesky account"
   },
   "reviews": {
     "reviewName": "Review Title",

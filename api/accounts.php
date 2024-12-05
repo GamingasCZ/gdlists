@@ -4,12 +4,14 @@ Return codes:
 0 - Every error
 1 - Account already created
 */
+
+$https = strstr($_SERVER["HTTP_HOST"], "localhost") ? 'http://' : 'https://';
+$local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
+
 header('Content-type: application/json'); // Return as JSON
 require("globals.php");
 require("images.php");
 
-$https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
-$local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
 
 // Error can happen when cancelling
 if (isset($_GET["error"])) {
@@ -63,7 +65,7 @@ if (sizeof($_GET) > 0) {
             removeCookie("momentToken");
 
         $accCheck = checkAccount($mysqli);
-        if (!$accCheck) die();
+        if (!$accCheck) die("0");
 
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
         $profileData = ["status" => "logged_in",

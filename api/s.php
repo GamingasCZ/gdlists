@@ -10,20 +10,11 @@ Return codes:
 
 require("globals.php");
 
-$isReview = 
-$mysqli = new mysqli($hostname, $username, $password, $database);
-if ($mysqli->connect_errno) {
-  echo "0";
-  exit();
-}
-
 function mtch($val) {
     return preg_match("/\d+/", $val);
 }
 
-function parseResult($rows, $isReview) {
-  global $mysqli;
-
+function parseResult($rows, $isReview, $mysqli) {
   // Single list
   $rows["data"] = json_decode(htmlspecialchars_decode($rows["data"]));
   setcookie("lastViewed", $rows["id"], time()+300, "/");
@@ -31,10 +22,10 @@ function parseResult($rows, $isReview) {
   $listMaker;
   if ($rows["creator"] == "") {
     // Fetch comment amount
-    $res = doRequest($mysqli, "SELECT username,discord_id FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    $res = doRequest($mysqli, "SELECT username FROM users WHERE discord_id=?", [$rows["uid"]], "s");
     if (array_key_exists("error", $res)) die();
 
-    $listMaker = $users[0]["username"];
+    $listMaker = $res["username"];
   }
   else $listMaker = $rows["creator"];
 
@@ -72,28 +63,58 @@ function parseResult($rows, $isReview) {
   echo "</head><body></body></html>";
 }
 
+function printDefault() {
+  echo "<head>";
 
-if (count($_GET) == 1) {
+  echo '<meta name="twitter:card" content="summary">';
+  echo '<meta name="twitter:image" content="https://gamingas.cz/twitImg.webp">';
+  echo '<meta name="twitter:title" property="og:title" itemprop="name" content="Geometry Dash Level Lists">';
+  echo '<meta name="twitter:description" property="og:description" itemprop="description" content="Create and browse lists of GD levels!">';
+    
+  echo '<script>window.location.replace("https://gamingas.cz/gdlists")</script>';
   
+  echo "</head>";
+  
+  echo "</head><body></body></html>";
+}
 
-  // Loading a single list
-  if (in_array("id", array_keys($_GET))) {
-    $matches;
-    if (preg_match("/-(\d+)$/", $_GET["id"],$matches)) {
-      // Private lists can't be accessed by their id!
-      $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [$matches[1]], "i");
-      parseResult($result, true);
+
+if (count($_GET) == 2) {
+  
+  $isReview = false;
+  if (isset($_GET["r"]))
+    $isReview = boolval(intval($_GET["r"]));
+  else printDefault();
+
+
+  if (isset($_GET["id"])) {
+
+    $mysqli = new mysqli($hostname, $username, $password, $database);
+    if ($mysqli->connect_errno) {
+      echo "0";
+      exit();
     }
-    else {
-      // Private lists can't be accessed by their id!
-      $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = '0' AND `id` = ?", [$_GET["id"]], "i");
-      parseResult($result, false);
+
+    // Public posts
+    if (is_numeric($_GET["id"])) {
+      if ($isReview)
+        $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [intval($_GET["id"])], "i");
+      else
+        $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = '0' AND `id` = ?", [intval($_GET["id"])], "i");
     }
-  } elseif (in_array("pid", array_keys($_GET))) {
-    // Private lists
-    $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden`= ?", [$_GET["pid"]], "s");
-    parseResult($result, false);
+  
+    // Private posts
+    if (!is_numeric($_GET["id"])) {
+      if ($isReview)
+        $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `hidden` = ?", [substr($_GET["id"], 0, 10)], "s");
+      else
+        $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [substr($_GET["id"], 0, 10)], "s");
+      }
+
+    parseResult($result, $isReview, $mysqli);
   }
 }
+else printDefault();
+
 $mysqli->close();
 ?>

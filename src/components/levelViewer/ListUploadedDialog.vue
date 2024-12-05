@@ -26,10 +26,11 @@ const copyLink = () => {
 
 let text = `${useI18n().t('other.cringeAhhTextLmao')} - ${props.link}`;
 let reviewText = `${useI18n().t('other.cringeAhhTextLmao2', [props.link])}`;
-const links = ref<string[]>([
+const links = [
   `https://www.reddit.com/submit?url=${encodeURIComponent(props.isReview ? reviewText : text)}`,
   `https://twitter.com/intent/tweet?text=${encodeURIComponent(props.isReview ? reviewText : text)}`,
-]);
+  `https://bsky.app/intent/compose?text=${encodeURIComponent(props.isReview ? reviewText : text)}`,
+];
 
 const doShare = (ind: number) => window.open(links[ind], '_blank')
 
@@ -51,11 +52,12 @@ onMounted(() => {
 
         <label>{{ $t('other.share') }}</label>
         <input type="text" class="p-1 text-lg bg-black bg-opacity-40 rounded-md outline-none" readonly @mouseover="$event.target?.select()" :value="link">
-        <div class="grid grid-cols-3 gap-1 mt-1">
-            <button v-if="!copied" @click="copyLink()" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/link.svg" alt="" class="inline mr-2 w-4">{{ $t('other.link') }}</button>
-            <button v-else class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/copy.svg" alt="" class="inline mr-2 w-4 animate-ping"></button>
-            <button @click="doShare(0)" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/twitterIcon.svg" alt="" class="inline mr-2 w-4">Twitter</button>
-            <button @click="doShare(1)" class="py-1 text-white bg-black bg-opacity-40 rounded-md button"><img src="@/images/redditIcon.svg" alt="" class="inline mr-2 w-4">Reddit</button>
+        <div class="flex gap-1 mt-1">
+            <button @click="doShare(2)" class="py-1 text-white bg-black bg-opacity-40 rounded-md grow button"><img src="@/images/socials/bluesky.svg" alt="" class="inline mr-2 w-4">Bluesky</button>
+            <button @click="doShare(1)" class="py-1 text-white bg-black bg-opacity-40 rounded-md grow button"><img src="@/images/socials/twitter.svg" alt="" class="inline mr-2 w-4">Twitter</button>
+            <button @click="doShare(0)" class="py-1 text-white bg-black bg-opacity-40 rounded-md grow button"><img src="@/images/socials/reddit.svg" alt="" class="inline mr-2 w-4">Reddit</button>
+            <button v-if="!copied" @click="copyLink()" class="p-1 text-white bg-black bg-opacity-40 rounded-md aspect-square button"><img src="@/images/link.svg" alt="" class="inline w-4"></button>
+            <button v-else class="p-1 text-white bg-black bg-opacity-40 rounded-md aspect-square button"><img src="@/images/copy.svg" alt="" class="inline w-4 animate-ping"></button>
         </div>
 
         <div class="grid grid-cols-2 gap-2 mt-10">
