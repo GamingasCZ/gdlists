@@ -137,6 +137,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $user = checkAccount($mysqli);
     if (!$user) die(-2);
     
+    $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
     $method = $_SERVER["REQUEST_METHOD"];
     switch ($method) {
         case 'GET':
@@ -216,7 +217,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     $nameLength = strlen($folderName);
 
                     // Check special characters in name
-                    if (!ctype_alnum($folderName) && !ctype_space($folderName))
+                    if (!ctype_alnum(str_replace(' ', '', $folderName)))
                         die(http_response_code(403));
 
                     // Check folder name length
