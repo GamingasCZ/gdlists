@@ -468,7 +468,8 @@
     "deleteFolders": "Remove folders",
     "folderInvChar": "Name cannot contain special characters.",
     "folderNameExists": "A folder with the same name already exists!",
-    "folderNameShort": "Folder name is too short."
+    "folderNameShort": "Folder name is too short.",
+    "extFolderRm": "What should be done with its contents of this folder and its subfolders?"
   },
   "settingsMenu": {
     "asOff": "Off",

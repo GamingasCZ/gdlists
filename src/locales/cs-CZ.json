@@ -437,7 +437,8 @@
     "folderInvChar": "Jméno složky nemůže obsahovat speciální znaky!",
     "folderRemove3": "Všechny podsložky budou smazány! Jejich obrázky budou přesunuty na vrchol galerie",
     "folderRemove4": "Na obrázky v podsložkách se nevztahuje následující výběr.",
-    "deleteFolders": "Smazat složky"
+    "deleteFolders": "Smazat složky",
+    "extFolderRm": "Co by se mělo stát s jejím obsahem a obsahem podsložek?"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

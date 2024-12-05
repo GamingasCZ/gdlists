@@ -91,7 +91,7 @@ const getImgSrc = (image: string) => {
     if (currentTab.value == Tabs.Uploaded)
         return `${pre}/userContent/${storage.value.uid}/${image}-thumb.webp`
     else
-        return image
+        return image?.[0] ?? image
 }
 
 const removeConfirmationOpen = ref(-1)
@@ -185,7 +185,7 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
     uploadingImage.value = 0
 }
 
-const extImgInput = ref('')
+const extImgInput = ref<HTMLInputElement>()
 var lastAddedLink = ""
 const uploadExternalImage = async (link: string) => {
     loadingImages.value = true
@@ -202,10 +202,12 @@ const uploadExternalImage = async (link: string) => {
         await load.catch((err) => {
             notifyError(0)
             loadingImages.value = false
+            extImgInput.value.value = ''
             return err;
         })
         
         await load.then(() => {
+            extImgInput.value.value = ''
             if (lastAddedLink == link) {
                 emit("pickImage", link)
                 emit('closePopup')
@@ -220,7 +222,7 @@ const uploadExternalImage = async (link: string) => {
             loadingImages.value = false
         })
     }, 10);
-    extImgInput.value = ""
+
 }
 
 const previewImage = ref(false)
@@ -305,7 +307,7 @@ const refreshContent = async (currPath: [string, number] | object, external = fa
 
             let thumb = allExternalImages.find(y => y[1] == x.id)
             if (thumb)
-                thumbnails.value[x.id].push(thumb[0])
+                thumbnails.value[x.id].push(thumb)
         });
 
         if (!currentExtFolder.value.includes(currPath)) {
@@ -374,7 +376,6 @@ const dragInImage = (e: DragEvent) => {
 
 const imageOptsShown = ref<HTMLButtonElement | false>(false)
 const imageHovering = ref(-1)
-const dropdown = ref()
 
 const imageAction = (id: number, external: boolean, val: string | number) => {
     previewImage.value = false
@@ -415,7 +416,6 @@ onBeforeUnmount(() => {
 })
 
 const button = ref<HTMLButtonElement>()
-const extButton = ref<HTMLButtonElement>()
 
 const checkFolderName = (name: string) => {
     for (let i = 0; i < name.length; i++) {
@@ -556,12 +556,19 @@ const gotoFolder = (folder: [string, number], subLevel: number) => {
     refreshContent(folder)
 }
 
+const removeCurrentFolder = (keepImages: boolean) => {
+    if (currentTab.value == Tabs.Uploaded)
+        removeFolder(currentFolder.value[subfolderLevel.value][1], keepImages)
+    else
+        removeFolder(currentExtFolder.value[subfolderExtLevel.value][1], keepImages)
+}
+
 const folderAction = (opt: number) => {
     switch (opt) {
         case 0: editFolder(); break;
         case 1:
             if (!images.value.length && !folders.value.length)
-                removeFolder(false)
+                removeCurrentFolder(false)
             else {
                 removingFolder.value = true
                 removeConfirmationOpen.value = 1
@@ -658,39 +665,44 @@ const startMoveMode = () => {
 
 const imageIndex = ref(0)
 const removingFolder = ref(false)
-const removeFolder = (keepImages: boolean) => {
+const removeFolder = (folderID: number, keepImages: boolean, recursive = false) => {
     removeConfirmationOpen.value = -1
     removingFolder.value = false
 
-    if (currentTab.value = Tabs.External) {
-        let currFolderID = currentExtFolder.value[subfolderExtLevel.value][1]
+    if (currentTab.value == Tabs.External) {
+        let currFolderID = folderID
         let rmInd = allExternalFolders.findIndex(x => x.id == currFolderID)
         allExternalFolders.splice(rmInd, 1)
         if (keepImages) {
             let keptImages = allExternalImages.filter(x => x[1] == currFolderID)
             for (let i = 0; i < keptImages.length; i++)
                 keptImages[i][1] = currentExtFolder.value[subfolderExtLevel.value-1][1]
-            allExternalImages = allExternalImages.filter(x => x[1] != currFolderID)
-            allExternalImages.push(...keptImages)
         }
         else
           allExternalImages = allExternalImages.filter(x => x[1] != currFolderID)
 
-        currentExtFolder.value.splice(subfolderExtLevel.value, 1)
+        let subfolders = allExternalFolders.filter(x => x.base == currFolderID)
+        subfolders.forEach(x => removeFolder(x.id, keepImages, true))
+
+        if (recursive) return
+
+        currentExtFolder.value.splice(subfolderExtLevel.value, currentExtFolder.value.length - subfolderExtLevel.value)
+        localStorage.setItem("externalImages", JSON.stringify(allExternalImages))
+        localStorage.setItem("extImgFolders", JSON.stringify(allExternalFolders))
         
         return gotoFolder(currentExtFolder.value[Math.max(0, subfolderExtLevel.value - 1)], subfolderExtLevel.value - 1)
     }
 
     let addto = currentFolder.value[Math.max(0, subfolderLevel.value - 1)]
     let params = {
-        removeFolder: currentFolder.value[subfolderLevel.value][1],
+        removeFolder: folderID,
         folderAddTo: addto[1],
         keepImages: !keepImages,
     }
 
     loadingImages.value = true
     axios.delete(import.meta.env.VITE_API + "/images.php", { params: params }).then(() => {
-        currentFolder.value.splice(subfolderLevel.value, 1)
+        currentFolder.value.splice(subfolderLevel.value, currentFolder.value.length - subfolderLevel.value)
         breakCache()
         loadingImages.value = false
         gotoFolder(addto, subfolderLevel.value - 1)
@@ -749,11 +761,14 @@ if (hasLocalStorage()) {
                 <div>
                     <h2 class="text-xl font-black">{{ $t('other.imgRemove1', [removingFolder ? $t('other.thisFolder') :
                         $t('other.thisPic')]) }}?</h2>
-                    <p v-if="removingFolder" class="flex flex-col gap-3 pr-2 text-balance">
-                    <p v-if="images.length">{{ $t('other.folderRemove2') }}</p>
-                    <p v-if="folders.length">{{ $t('other.folderRemove3') }}
-                        <span v-if="images.length && folders.length">{{ $t('other.folderRemove4') }}</span>.
+                    <p v-if="currentTab == Tabs.External">
+                        {{ $t('other.extFolderRm') }}
                     </p>
+                    <p v-else-if="removingFolder" class="flex flex-col gap-3 pr-2 text-balance">
+                        <p v-if="images.length">{{ $t('other.folderRemove2') }}</p>
+                        <p v-if="folders.length">{{ $t('other.folderRemove3') }}
+                            <span v-if="images.length && folders.length">{{ $t('other.folderRemove4') }}</span>.
+                        </p>
                     </p>
                     <p v-else>{{ $t('other.imgRemove2') }}</p>
 
@@ -763,13 +778,13 @@ if (hasLocalStorage()) {
             </div>
 
             <div v-if="removingFolder" class="grid gap-2 m-2 sm:grid-cols-2">
-                <button v-if="folders.length && !images.length" @click="removeFolder(false)"
+                <button v-if="currentTab != Tabs.External && folders.length && !images.length" @click="removeCurrentFolder(false)"
                     class="flex col-span-2 gap-2 items-center p-2 text-lg font-bold text-black bg-red-400 rounded-md button">
                     <img src="@/images/del.svg" class="w-6">{{ $t('other.deleteFolders') }}</button>
-                <button v-if="images.length" @click="removeFolder(false)"
+                <button v-if="images.length || currentTab == Tabs.External" @click="removeCurrentFolder(false)"
                     class="flex gap-2 items-center p-2 font-bold text-black bg-red-400 rounded-md button">
                     <img src="@/images/del.svg" class="w-6">{{ $t('other.deleteImgs') }}</button>
-                <button v-if="images.length" @click="removeFolder(true)"
+                <button v-if="images.length || currentTab == Tabs.External" @click="removeCurrentFolder(true)"
                     class="flex gap-2 items-center p-2 font-bold text-black bg-yellow-400 rounded-md button">
                     <img src="@/images/move.svg" class="w-6 invert">{{ $t('images.imgMoveDel') }}</button>
             </div>
@@ -843,7 +858,7 @@ if (hasLocalStorage()) {
                             src="@/images/levelIcon.svg" class="w-2 rotate-180" alt=""></button>
                 </div>
 
-                <input v-model="extImgInput" :placeholder="$t('other.enterURI')" :disabled="loadingImages"
+                <input ref="extImgInput" :placeholder="$t('other.enterURI')" :disabled="loadingImages"
                     @paste="uploadExternalImage($event.clipboardData?.getData('Text'))"
                     class="p-1 bg-[url(@/images/searchOpaque.svg)] bg-[size:1rem] bg-[0.5rem] bg-no-repeat pl-8 w-full bg-black bg-opacity-40 rounded-md transition-opacity grow disabled:opacity-40">
             </form>
