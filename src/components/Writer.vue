@@ -13,7 +13,7 @@ import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
-import type { ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
+import { WriterGallery, type ReviewList, type TEXT_ALIGNMENTS } from "@/interfaces";
 import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
 import ReviewHelp from "./writer/ReviewHelp.vue"
 import ListBackground from "./global/ListBackground.vue";
@@ -37,6 +37,7 @@ import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
 import { deleteCESelection } from "./global/parseEditorFormatting";
 import LevelCard from "./global/LevelCard.vue";
+import { ImgFail, notifyError } from "./imageUpload";
 
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
@@ -347,7 +348,7 @@ const buttonState = ref([0, 0])
 const dataContainers = ref()
 const modifyImageURL = (newUrl: string) => {
     // Review background
-    if (openDialogs.imagePicker[1] == -1) {
+    if (openDialogs.imagePicker[1] == WriterGallery.ReviewBackground) {
         reviewData.value.titleImg[0] = newUrl
         let img = document.createElement("img")
         img.src = newUrl
@@ -357,26 +358,34 @@ const modifyImageURL = (newUrl: string) => {
         }
     }
     // Level card background
-    else if (openDialogs.imagePicker[1] == -5) {
+    else if (openDialogs.imagePicker[1] == WriterGallery.LevelCardBG) {
         reviewData.value.levels[openDialogs.imagePicker[2]].BGimage.image[0] = newUrl
     }
     // Review thumbnail
-    else if (openDialogs.imagePicker[1] == -2) {
+    else if (openDialogs.imagePicker[1] == WriterGallery.ReviewThumbnail) {
         reviewData.value.thumbnail[0] = newUrl
     }
     // Carousel item
-    else if (openDialogs.imagePicker[1] == -3) {
-        let img = addContainer("showImage", 0, true)
-        img.settings.url = newUrl
-        img.settings.height = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.height
-        reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
+    else if (openDialogs.imagePicker[1] == WriterGallery.CarouselItem) {
+        let imgCurrAmount = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.length
+        let maxImages = 25 - imgCurrAmount
+        if (newUrl.length > maxImages)
+            notifyError(ImgFail.CAROUSEL_FULL)
+
+        let newImgs = newUrl.slice(0, maxImages)
+        newImgs.forEach(x => {
+            let img = addContainer("showImage", 0, true)
+            img.settings.url = x
+            img.settings.height = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.height
+            reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
+        })
     }
     // Carousel change
-    else if (openDialogs.imagePicker[1] == -4) {
+    else if (openDialogs.imagePicker[1] == WriterGallery.CarouselModifyItem) {
         reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components[openDialogs.imagePicker[2]].settings.url = newUrl
     }
     // Image container
-    else if (selectedNestContainer.value[0] == -1) {
+    else if (selectedNestContainer.value[0] == WriterGallery.ImageContainerNested) {
         reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = newUrl
     }
     // Image container in nested container
@@ -767,8 +776,13 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
 
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false"
             :title="$t('reviews.bgImage')" :width="dialog.large">
-            <ImageBrowser :disable-external="[-2, -5].includes(openDialogs.imagePicker[1])" :unselectable="false"
-                @close-popup="openDialogs.imagePicker[0] = false" @pick-image="modifyImageURL" />
+            <ImageBrowser
+                :disable-external="[WriterGallery.ReviewThumbnail, WriterGallery.LevelCardBG].includes(openDialogs.imagePicker[1])"
+                :allow-multiple-picks="openDialogs.imagePicker[1] == WriterGallery.CarouselItem"
+                :unselectable="false"
+                @close-popup="openDialogs.imagePicker[0] = false"
+                @pick-image="modifyImageURL"
+            />
         </DialogVue>
 
 

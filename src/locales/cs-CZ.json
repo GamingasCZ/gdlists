@@ -397,6 +397,7 @@
     "desc": "Popis",
     "metadata": "Metadata",
     "tooManyImg": "Naráz můžeš nahrát jen 10 obrázků!",
+    "carouselFull": "V karuseli není na některé položky místo!",
     "selImg": "Vybrán {count} obrázek | Vybráno {count} obrázků",
     "effects": "Efekty",
     "none2": "Žádná",

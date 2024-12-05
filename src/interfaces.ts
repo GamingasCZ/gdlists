@@ -328,3 +328,13 @@ export interface LocalNotification {
   icon: 'save' | 'error' | 'check'
   stamp?: any
 }
+
+export enum WriterGallery {
+  ReviewBackground = -1,
+  LevelCardBG = -5,
+  ReviewThumbnail = -2,
+  CarouselItem = -3,
+  CarouselModifyItem = -4,
+  ImageContainer = 1,
+  ImageContainerNested = -1
+}

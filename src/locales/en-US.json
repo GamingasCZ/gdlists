@@ -428,6 +428,7 @@
     "desc": "Description",
     "metadata": "Metadata",
     "tooManyImg": "You can only upload 10 images at once!",
+    "carouselFull": "Not enough space in the carousel for the selected images!",
     "selImg": "{count} image selected | {count} images selected",
     "none2": "None",
     "page": "Page",

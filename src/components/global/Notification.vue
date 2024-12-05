@@ -33,7 +33,7 @@ onMounted(() => { // todo rozbitý když měníš jazyk
 
 <template>
     <Transition name="notifSlide">
-        <article v-show="shown" class="flex z-10 items-center p-2 rounded-md rounded-r-none shadow-lg min-w-[15em] gap-3 bg-lof-300 bg-opacity-50 shadow-black">
+        <article v-show="shown" class="flex z-10 max-w-xs items-center p-2 rounded-md rounded-r-none shadow-lg min-w-[15em] gap-3 bg-lof-300 bg-opacity-50 shadow-black">
             <img :src="getIcon" class="box-border p-1 w-10 h-10 bg-black bg-opacity-40 rounded-md" alt="">
             <p class="leading-none text-white">
                 <h2 class="font-bold">{{ title }}</h2>

@@ -12,7 +12,7 @@ import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
 import { dialog } from "../ui/sizes";
 import { getDominantColor } from "@/Reviews";
-import { notifyError, summonNotification, uploadImages } from "../imageUpload";
+import { ImgFail, notifyError, summonNotification, uploadImages } from "../imageUpload";
 import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
 import UploadIndicator from './UploadIndicator.vue'
 import ColorPicker from "./ColorPicker.vue";
@@ -111,8 +111,8 @@ const removeImage = (hash: string, external: boolean) => {
         let hashesSelected = selectedImages.value.map(h => images.value[h])
         axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash ? [hash] : hashesSelected } }).then(res => {
             uploadingImage.value = 0
-            if (res.data == "-3") return notifyError(5)
-            if (res.data == "-5") return notifyError(9)
+            if (res.data == "-3") return notifyError(ImgFail.DELETE_FAIL)
+            if (res.data == "-5") return notifyError(ImgFail.IMAGE_IN_USE)
 
             storage.value = res.data
             if (hash)
@@ -128,7 +128,7 @@ const removeImage = (hash: string, external: boolean) => {
         }).catch(() => {
             loadingImages.value = false
             uploadingImage.value = 0
-            notifyError(5)
+            notifyError(ImgFail.DELETE_FAIL)
         })
 
     }
@@ -163,10 +163,10 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
     for (let i = 0; i < e.length; i++) {
         let file = e.item(i)
         totalFilesize += file?.size
-        if (!file?.type.startsWith("image")) return notifyError(7) // Too big
-        if (file?.size < 50) return notifyError(2) // Too small
+        if (!file?.type.startsWith("image")) return notifyError(ImgFail.BAD_FORMAT) // Too big
+        if (file?.size < 50) return notifyError(ImgFail.TOO_SMALL) // Too small
     }
-    if (totalFilesize > storage.value.left) return notifyError(3) // Not enough storage
+    if (totalFilesize > storage.value.left) return notifyError(ImgFail.NO_FREE_SPACE) // Not enough storage
 
     uploadingImage.value = true
     let res = await uploadImages(e, false, currentFolder.value[subfolderLevel.value][1])
@@ -180,7 +180,7 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
         uploadingImage.value = false
     }
     else {
-        if (res == -4) notifyError(1) // Too big
+        if (res == -4) notifyError(ImgFail.TOO_BIG) // Too big
     }
     uploadingImage.value = 0
 }
@@ -200,7 +200,7 @@ const uploadExternalImage = async (link: string) => {
         })
 
         await load.catch((err) => {
-            notifyError(0)
+            notifyError(ImgFail.LOAD_FAILED)
             loadingImages.value = false
             extImgInput.value.value = ''
             return err;
@@ -226,10 +226,17 @@ const uploadExternalImage = async (link: string) => {
 }
 
 const previewImage = ref(false)
-const pickImage = (index: number, external: boolean, event?: MouseEvent) => {
+const pickImage = (index: number | number[], external: boolean, event?: MouseEvent) => {
     let url;
-    if (external) url = externalImages.value[index]
-    else url = `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`
+    let multiSelect = typeof index == 'number'
+    if (multiSelect) {
+        if (external) url = externalImages.value[index]
+        else url = `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`
+    }
+    else {
+        if (external) url = index.map(x => externalImages.value[x])
+        else url = index.map(x => `${pre}/userContent/${storage.value.uid}/${images.value[x]}.webp`)
+    }
 
     if (props.unselectable) {
         previewImage.value = true
@@ -237,8 +244,12 @@ const pickImage = (index: number, external: boolean, event?: MouseEvent) => {
         return
     }
     else {
-        if (props.disableExternal)
-            emit('pickImage', images.value[index])
+        if (props.disableExternal) {
+            if (multiSelect)
+                emit('pickImage', index.map(x => images.value[x]))
+            else
+                emit('pickImage', images.value[index])
+        }
         else
             emit('pickImage', url)
 
@@ -635,7 +646,7 @@ const moveToFolder = (imgs: string[]) => {
 
             refreshContent(currentFolder.value[subfolderLevel.value])
         }).catch((_) => {
-            notifyError(11)
+            notifyError(ImgFail.MOVE_ERROR)
         })
     }
     else {
@@ -1023,9 +1034,11 @@ if (hasLocalStorage()) {
             <h2 class="text-2xl">{{ $t('other.selImg', selectedImages.length) }}</h2>
             <div v-show="!folderMoveMode" class="flex gap-2">
                 <button @click="startMoveMode" class="p-1 bg-black bg-opacity-40 rounded-md button"><img
-                        class="inline mr-2 w-5" src="@/images/move.svg" alt="">{{ $t('other.move') }}</button>
-                <button @click="removeImage('', false)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img
-                        class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
+                    class="inline mr-2 w-5" src="@/images/move.svg" alt="">{{ $t('other.move') }}</button>
+                <button @click="removeImage('', currentTab == Tabs.External)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img
+                    class="inline mr-2 w-5" src="@/images/trash.svg" alt="">{{ $t('editor.remove') }}</button>
+                <button v-if="allowMultiplePicks && !unselectable" @click="pickImage(selectedImages, currentTab == Tabs.External, $event)" class="p-1 bg-black bg-opacity-40 rounded-md button"><img
+                        class="inline mr-2 w-5" src="@/images/checkThick.svg" alt="">{{ $t('other.pick') }}</button>
             </div>
             <button v-if="folderMoveMode" @click="moveToFolder(imagesToMove)"
                 class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5"
