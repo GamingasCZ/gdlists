@@ -367,6 +367,9 @@ const modifyImageURL = (newUrl: string) => {
     }
     // Carousel item
     else if (openDialogs.imagePicker[1] == WriterGallery.CarouselItem) {
+        if (typeof newUrl == 'string')
+            newUrl = [newUrl]
+
         let imgCurrAmount = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.length
         let maxImages = 25 - imgCurrAmount
         if (newUrl.length > maxImages)
@@ -847,23 +850,40 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                     :inverted="reviewData.whitePage" />
 
                 <DataContainer v-for="(container, index) in reviewData.containers"
+                    ref="dataContainers"
                     v-memo="[previewMode, containerLastAdded, selectedContainer, selectedNestContainer]"
-                    v-bind="CONTAINERS[container.type]" ref="dataContainers" @remove-container="removeContainer(index)"
+                    v-bind="CONTAINERS[container.type]"
+                    @remove-container="removeContainer(index)"
                     @move-container="moveContainer(index, $event)"
                     @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
                     @settings-button="buttonState = [$event, selectedContainer[0]]"
-                    @add-paragraph="moveToParagraph(index)" @text-modified="container.data = $event"
-                    :type="container.type" :current-settings="container.settings"
-                    :class="[CONTAINERS[container.type].styling ?? '']" :style="{ textAlign: container.align }"
-                    :key="container.id" :focused="previewMode && selectedContainer[0] == index" :editable="previewMode"
-                    :text="container.data">
+                    @add-paragraph="moveToParagraph(index)"
+                    @text-modified="container.data = $event"
+                    :type="container.type"
+                    :current-settings="container.settings"
+                    :class="[CONTAINERS[container.type].styling ?? '']"
+                    :style="{ textAlign: container.align }"
+                    :key="container.id"
+                    :focused="previewMode && selectedContainer[0] == index"
+                    :editable="previewMode"
+                    :text="container.data"
+                >
                     <div class="flex flex-wrap w-full" :style="{ justifyContent: flexNames[container.align] }">
                         <component
                             v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                            :is="elements" v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                            @clear-button="buttonState[0] = ''" @remove-subcontainer="container.extraComponents -= 1"
-                            @remove="removeContainer(index)" :button-state="buttonState" :settings="container.settings"
-                            :index="index" :sub-index="subIndex" :key="container.id" :editable="previewMode" :align="container.align" />
+                            :is="elements"
+                            :key="container.id"
+                            v-bind="CONTAINERS[container.type].componentProps ?? {}"
+                            @clear-button="buttonState[0] = ''"
+                            @remove-subcontainer="container.extraComponents -= 1"
+                            @remove="removeContainer(index)"
+                            :button-state="buttonState"
+                            :settings="container.settings"
+                            :index="index"
+                            :sub-index="subIndex"
+                            :editable="previewMode"
+                            :align="container.align"
+                        />
                     </div>
                 </DataContainer>
 

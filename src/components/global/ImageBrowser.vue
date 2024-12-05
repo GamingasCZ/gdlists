@@ -228,8 +228,9 @@ const uploadExternalImage = async (link: string) => {
 const previewImage = ref(false)
 const pickImage = (index: number | number[], external: boolean, event?: MouseEvent) => {
     let url;
-    let multiSelect = typeof index == 'number'
-    if (multiSelect) {
+    let singleSelect = typeof index == 'number'
+
+    if (singleSelect) {
         if (external) url = externalImages.value[index]
         else url = `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`
     }
@@ -245,10 +246,10 @@ const pickImage = (index: number | number[], external: boolean, event?: MouseEve
     }
     else {
         if (props.disableExternal) {
-            if (multiSelect)
-                emit('pickImage', index.map(x => images.value[x]))
-            else
+            if (singleSelect)
                 emit('pickImage', images.value[index])
+            else
+                emit('pickImage', index.map(x => images.value[x]))
         }
         else
             emit('pickImage', url)
