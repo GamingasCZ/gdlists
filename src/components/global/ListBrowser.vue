@@ -430,7 +430,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           :is="component"
           v-for="(list, index) in LISTS" v-bind="list"
           class="min-w-full listPreviews"
-          :key="list?.name ?? list?.levelName ?? PAGE"
+          :key="list?.name ?? list?.levelName ?? list?.comID ?? PAGE"
           :in-use="false"
           :on-saves-page="true"
           :coll-index="index"
