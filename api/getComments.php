@@ -67,15 +67,18 @@ foreach ($comments as $row) {
     $ind += 1;
 }
 
-$query = sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
-                  FROM users
-                  LEFT JOIN profiles ON users.discord_id = profiles.uid
-                  WHERE discord_id IN (%s)
-                  ", join(",", array_unique($uid_array)));
+$users = [];
+if (sizeof($uid_array)) {
+    $query = sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
+                    FROM users
+                    LEFT JOIN profiles ON users.discord_id = profiles.uid
+                    WHERE discord_id IN (%s)
+                    ", join(",", array_unique($uid_array)));
 
-$result = $mysqli -> query($query) or die($mysqli -> error);
+    $result = $mysqli -> query($query) or die($mysqli -> error);
 
-$users = $result -> fetch_all(MYSQLI_ASSOC);
+    $users = $result -> fetch_all(MYSQLI_ASSOC);
+}
 
 echo json_encode(array($comments, $users, $dbInfo));
 $mysqli -> close();
