@@ -42,14 +42,15 @@ else if (props.username != "") {
   pfp.value = -2
   username.value = props.username
 }
-
-props.userArray.forEach(user => {
-  if (user.discord_id == props.uid) {
-    pfp.value = user.discord_id
-    username.value = user.username
-    cutout.value = user.pfp_cutout
-  }
-});
+else {
+  props.userArray.forEach(user => {
+    if (user.discord_id == props.uid) {
+      pfp.value = user.discord_id
+      username.value = user.username
+      cutout.value = user.pfp_cutout
+    }
+  });
+}
 
 const time = ref<string>("")
 const datePassed = Math.floor(Date.now()/1000 - parseInt(props.timestamp))
