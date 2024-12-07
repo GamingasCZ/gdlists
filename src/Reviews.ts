@@ -221,7 +221,7 @@ export function getWordCount() {
         count += (c.data.match(/\w+/g) ?? []).length
         if (c.type == "twoColumns") {
             c.settings.components.forEach(con => {
-                con.forEach(sub => (count += (sub.data.match(/\w+/g) ?? []).length))
+                con.forEach(sub => (count += (sub?.data?.match(/\w+/g) ?? []).length))
             })
         }
     })
