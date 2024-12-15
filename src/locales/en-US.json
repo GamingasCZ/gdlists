@@ -530,7 +530,12 @@
     "seasThemes": "Seasonal Themes",
     "seasThemesHelp": "Themes will automatically switch, if a special one is available.",
     "seasProgress": "A seasonal theme is in progress!",
-    "seasProgressHelp": "(Seasonal themes can be turned off in the settings)"
+    "seasProgressHelp": "(Seasonal themes can be turned off in the settings)",
+    "savedData": "Saved Data",
+    "delCookies": "Delete Cookies",
+    "delData": "Delete Data Storage",
+    "delCookHelp": "Deletes login credentials. Can resolve some problems.",
+    "delDataHelp": "DELETES ALL page data. This includes draft posts; saved levels, collabs; external images etc."
   },
   "help": {
     "Lists": "Lists",

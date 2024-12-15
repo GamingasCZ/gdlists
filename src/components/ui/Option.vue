@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-type controlType = "cbox" | "dropdown" | "radio" | "slot"
+type controlType = "cbox" | "dropdown" | "radio" | "slot" | "inline-slot"
 
 const model = defineModel()
 
@@ -17,7 +17,7 @@ const emit = defineEmits(['updated'])
 </script>
 
 <template>
-    <div @click.stop="" :class="{'pointer-events-none opacity-20': disabled}" class="p-2 bg-black bg-opacity-40 rounded-md transition-opacity duration-75">
+    <div @click.stop="" :class="{'pointer-events-none opacity-20': disabled, 'flex': control == 'inline-slot'}" class="items-center p-2 bg-black bg-opacity-40 rounded-md transition-opacity duration-75">
         <div class="flex justify-between items-center w-full">
             <div class="mr-2">
                 <p class="text-xl leading-none">{{ name }}</p>
@@ -30,7 +30,7 @@ const emit = defineEmits(['updated'])
                 <option v-for="opt in controlOptions" :value="opt[1]">{{ opt[0] }}</option>
             </select>
         </div>
-        <div v-if="control == 'slot'">
+        <div v-if="['slot', 'inline-slot'].includes(control)">
             <slot />
         </div>
     </div>

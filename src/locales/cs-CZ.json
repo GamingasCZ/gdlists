@@ -61,7 +61,12 @@
     "seasThemes": "Sezónní motivy",
     "seasThemesHelp": "Motiv se automaticky přepne, pokud je nějaký speciální dostupný.",
     "seasProgress": "Právě probíhá sezónní motiv!",
-    "seasProgressHelp": "(Sezónní motivy mohou být vypnuty v nastavení)"
+    "seasProgressHelp": "(Sezónní motivy mohou být vypnuty v nastavení)",
+    "savedData": "Uložená data",
+    "delCookies": "Smazat cookies",
+    "delData": "Smazat úložiště dat",
+    "delCookHelp": "Smaže detaily o přihlašení. Může vyřešit některé problémy.",
+    "delDataHelp": "Kompletně smaže VŠECHNA data stránky. Toto zahrnuje rozepsané příspěvky; uložené levely, collaby; externí obrázky atp."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

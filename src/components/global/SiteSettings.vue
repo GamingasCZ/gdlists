@@ -1,8 +1,33 @@
 <script setup lang="ts">
 import Option from '../ui/Option.vue';
-import { SETTINGS } from "@/siteSettings";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import RadioPicker from '../ui/RadioPicker.vue';
 import SectionDivider from '../ui/SectionDivider.vue';
+import HoldButton from '../ui/HoldButton.vue';
+import { ref } from 'vue';
+import cookier from "cookier"
+
+const removeCookies = () => {
+    if (!hasLocalStorage()) return
+    let cookies = document.cookie.match(/(\w+)=/g).map(x => x.slice(0, x.length-1))
+    cookies.forEach(x => cookier(x).remove())
+    window.location.reload()
+}
+
+const removeStorage = () => {
+    if (!hasLocalStorage()) return
+    for (let i = 0; i < localStorage.length; i++)
+        localStorage.removeItem(localStorage.key(i))
+    window.location.reload()
+}
+
+const storageSize = ref(0)
+if (hasLocalStorage()) {
+    for (let i = 0; i < localStorage.length; i++)
+        storageSize.value += localStorage.getItem(localStorage.key(i)).length
+    
+    storageSize.value = (storageSize.value/1000).toFixed(2)+"kB"
+}
 
 </script>
 
@@ -89,7 +114,25 @@ import SectionDivider from '../ui/SectionDivider.vue';
             :name="$t('settingsMenu.disTL')"
             :desc="$t('settingsMenu.disTLhelp')"
             control="cbox"
+            >
+        </Option>
+        <SectionDivider :text="$t('settingsMenu.savedData')" />
+        <Option
+            :name="$t('settingsMenu.delCookies')"
+            :desc="$t('settingsMenu.delCookHelp')"
+            control="inline-slot"
         >
+            <HoldButton @pushed="removeCookies" :text="$t('editor.remove')" />
+        </Option>
+        <Option
+            :name="$t('settingsMenu.delData')"
+            :desc="$t('settingsMenu.delDataHelp')"
+            control="inline-slot"
+        >
+            <div class="flex flex-col items-center w-max">
+                <HoldButton @pushed="removeStorage" :text="$t('editor.remove')" />
+                <p class="mt-1 text-xs leading-none opacity-40">{{ storageSize }}</p>
+            </div>
         </Option>
 </div>
 </template>
