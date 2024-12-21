@@ -72,8 +72,8 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     $filesize = strlen($binaryData);
     if ($filesize > $MAX_UPLOADSIZE) die("-4");
-    if ($filesize < 50) die("-4");
-    
+    if ($filesize < 2049) die("-4");
+
     // Create directory for user
     if (!is_dir($userPath)) {
         mkdir($userPath);
@@ -82,7 +82,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     // Image data
     $imageHash;
     if ($filename !== null) $imageHash = $filename;
-    else $imageHash = sha1(substr($binaryData,0, 2048));
+    else $imageHash = sha1(substr($binaryData, 2048, 16384));
 
     if (!$overwrite) {
         if (is_file($userPath . "/" . $imageHash . ".webp")) {
