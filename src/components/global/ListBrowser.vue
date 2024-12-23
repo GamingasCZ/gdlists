@@ -66,6 +66,9 @@ function switchPage(setPage: number) {
   PAGE.value = setPage;
   // window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
+  if (!props.picking)
+    window.scrollTo({top: 0, behavior: "instant"})
+  
   pagesArray.value = listScroll();
   refreshBrowser();
 }
