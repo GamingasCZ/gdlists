@@ -389,11 +389,13 @@ const modifyImageURL = (newUrl: string) => {
     }
     // Image container
     else if (selectedNestContainer.value[0] == WriterGallery.ImageContainerNested) {
-        reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = newUrl
+        let link = typeof newUrl == 'object' ? newUrl[0] : newUrl
+        reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = link
     }
     // Image container in nested container
     else {
-        reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = newUrl
+        let link = typeof newUrl == 'object' ? newUrl[0] : newUrl
+        reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = link
     }
 }
 
