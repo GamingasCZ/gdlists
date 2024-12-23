@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import ListPreview from '../global/ListPreview.vue';
 import ContainerHelp from './ContainerHelp.vue';
 import { hasLocalStorage } from '@/siteSettings';
 import router from '@/router';
 import { nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import ReviewPreview from '../global/ReviewPreview.vue';
-import axios from 'axios';
 import LevelCard from '../global/LevelCard.vue';
-import { newCardBG } from '@/Editor';
 
 
 const emit = defineEmits<{

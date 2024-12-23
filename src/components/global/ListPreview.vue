@@ -86,7 +86,7 @@ const clickList = () => {
   <component
     :is="disableLink ? 'button' : 'RouterLink'"
     :to="postLink"
-    class="flex flex-col font-[poppins] w-full max-w-6xl cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex flex-col font-[poppins] w-full max-w-6xl min-w-64 cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       background: getGradient(),
       borderColor: listColor.darken(2).hex(),

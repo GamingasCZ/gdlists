@@ -37,16 +37,24 @@ const levelsFetched = ref([])
 
 const dialogs = inject("openedDialogs")
 const addToInjected = inject("addToInjected")
+const selNest = inject("selectedNestContainer")
 const pickList = (data: selectedList) => {
     if (props.onlyPickLevels && data[0]?.option == undefined && tab.value == 2) {
         emit('addLevel', data)
         return emit('closePopup')
     }
 
-    console.log(data[0])
+    // console.log(data[0])
     if (data[0].option == 0) {
-        props.data[dialogs.lists[1]].settings.post = data[0].postID
-        props.data[dialogs.lists[1]].settings.postType = data[0].postType
+        console.log(selNest)
+        if (props.data[dialogs.lists[1]].type == "twoColumns") {
+            props.data[dialogs.lists[1]].settings.components[selNest.value[1]][selNest.value[2]].settings.post = data[0].postID
+            props.data[dialogs.lists[1]].settings.components[selNest.value[1]][selNest.value[2]].settings.postType = data[0].postType
+        }
+        else {
+            props.data[dialogs.lists[1]].settings.post = data[0].postID
+            props.data[dialogs.lists[1]].settings.postType = data[0].postType
+        }
         
         addToInjected()
         emit('closePopup')

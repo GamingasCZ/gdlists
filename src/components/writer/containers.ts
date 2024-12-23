@@ -209,7 +209,7 @@ const containers: Containers = {
         errorCheck: (settings: object) => settings.pickedIndex != -1 ? success : error(0, 1)
     },
     showList: {
-        nestable: false,
+        nestable: true,
         canEditText: false,
         additionalComponents: [ReviewList],
         limit: 20,

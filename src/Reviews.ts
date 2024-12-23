@@ -241,8 +241,17 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
     if (forceIDs === false) {
         data.containers.forEach(container => {
             // embeds aren't nestable, no need to check for columns (phew :D)
+            // 23.12.24 : fuck off
             if (container.type == "showList") {
                 ids[container.settings.postType].push(container.settings.post)
+            }
+            if (container.type == "twoColumns") {
+                container.settings.components.forEach(con => {
+                    con.forEach(sub => {
+                        if (sub.type == "showList")
+                            ids[sub.settings.postType].push(sub.settings.post)
+                    })
+                })
             }
         })
     } else ids = forceIDs
