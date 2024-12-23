@@ -74,9 +74,9 @@ const unpinList = () => {
 const creatorName = computed(() => props.creator?.length ? props.creator : getUsername())
 
 const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? props.id : props.hidden}`
-const clickList = () => {
-  if (props.disableLink == 1) emit('selected')
-  else if (props.disableLink == 2) emit('clickedOption', {option: 1, postID: props.id, postType: 0})
+const clickList = (opt: number) => {
+  if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: 0})
+  else if (props.disableLink == 1) emit('selected')
   else emit('selectedLink', creatorName.value)
 }
 
@@ -128,11 +128,10 @@ const clickList = () => {
       <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
   </div>
   <div v-if="unrolledOptions" class="flex gap-2 justify-evenly my-2">
-    <button @click.stop="emit('clickedOption', {option: 0, postID: id, postType: 0})" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+    <button @click.stop="clickList(0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
       <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickList') }}</button>
-    <button @click.stop="emit('clickedOption', {option: 1, postID: id, postType: 0})" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+    <button @click.stop="clickList(1)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
       <img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
   </div>
   </component>
 </template>
-3

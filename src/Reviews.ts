@@ -248,7 +248,7 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
             if (container.type == "twoColumns") {
                 container.settings.components.forEach(con => {
                     con.forEach(sub => {
-                        if (sub.type == "showList")
+                        if (sub?.type == "showList")
                             ids[sub.settings.postType].push(sub.settings.post)
                     })
                 })

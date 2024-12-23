@@ -18,6 +18,7 @@ const props = defineProps<{
   name: string;
   tagline: string;
   id: string;
+  post?: string;
   index: number;
   uid: string;
   hidden: string;
@@ -99,9 +100,9 @@ else
 let background = (JSON.parse(props.thumbProps) || [])
 background.splice(0,0,thumbLink)
 let xPos = ["left", "center", "right"][background[3]]
-const clickReview = () => {
-  if (props.disableLink == 1) emit('selected')
-  else if (props.disableLink == 2) emit('clickedOption', {option: 1, postID: props.id, postType: 1})
+const clickReview = (opt: number) => {
+  if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: 1})
+  else if (props.disableLink == 1) emit('selected')
   else emit('selectedLink', creator.value)
 }
 
@@ -109,7 +110,7 @@ const clickReview = () => {
 
 <template>
   <component :is="disableLink ? 'button' : 'RouterLink'"
-    :to="`/review/${hidden != '0' ? hidden : id}`"
+    :to="`/review/${hidden != '0' ? hidden : (post ?? id)}`"
     class="flex flex-col min-w-64 w-full text-left max-w-96 cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(listColor),
@@ -138,8 +139,8 @@ const clickReview = () => {
       </div>
       
       <div v-else class="grid absolute inset-2 grid-rows-2 gap-2 text-xl">
-        <button @click.stop="emit('clickedOption', {option: 0, postID: id, postType: 1})" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/reviews.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickReview') }}</button>
-        <button @click.stop="emit('clickedOption', {option: 1, postID: id, postType: 1})" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
+        <button @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/reviews.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickReview') }}</button>
+        <button @click.stop="clickReview(1)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
       </div>
     </div>
 

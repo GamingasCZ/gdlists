@@ -156,6 +156,14 @@ function getHomepage($lists, $reviews, $user) {
   echo json_encode($home);
 }
 
+function isPrivate($x) {
+  return !is_numeric($x);
+}
+
+function isPublic($x) {
+  return !isPrivate($x);
+}
+
 if (count($_GET) <= 2 && !isset($_GET["batch"])) {
   // Loading a single list
   if (in_array("id", array_keys($_GET))) {
@@ -240,7 +248,17 @@ elseif (isset($_GET["batch"])) {
     $range = [$selRange, $selReviewRange, $selLevelRange][$type];
 
     $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
-    $in = makeIN($fetchIDs);
+
+    $where = [];
+    $fetchHidden = array_filter($fetchIDs, "isPrivate");
+    $inHidden = makeIN($fetchHidden);
+    if (strlen($inHidden[1]))
+      array_push($where, sprintf("(%s.hidden IN %s)", $types[$type], $inHidden[0]));
+    
+    $fetchPublic = array_filter($fetchIDs, "isPublic");
+    $inPublic = makeIN($fetchPublic);
+    if (strlen($inPublic[1]))
+      array_push($where, sprintf("(%s.id IN %s AND `hidden` = 0)", $types[$type], $inPublic[0]));
     $res;
 
     if ($type == 2) {
@@ -254,9 +272,9 @@ elseif (isset($_GET["batch"])) {
     else {
       $res = doRequest($mysqli, sprintf("SELECT %s, %s FROM ratings
       RIGHT JOIN %s ON %s.id = ratings.%s_id
-      WHERE %s.id IN %s AND `hidden`=0
+      WHERE %s
       GROUP BY `name`
-      ", $range, $ratings, $types[$type], $types[$type], substr($types[$type], 0, -1), $types[$type], $in[0]), $fetchIDs, $in[1], true);
+      ", $range, $ratings, $types[$type], $types[$type], substr($types[$type], 0, -1), implode(" OR ", $where)), array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
     }
     $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1);
   }

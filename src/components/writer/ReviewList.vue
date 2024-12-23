@@ -45,24 +45,25 @@ const saveScrolling = () => {
 
     if (hasLocalStorage()) {
         localStorage.setItem("reviewScroll", document.getElementById("objectName")?.innerText) // save list name
-        if (props.settings.postType == 0)
-            nextTick(() => router.push("/" + postData.value[0].id))
-        else
-            nextTick(() => router.push("/review/" + postData.value[0].url))
     }
 }
 
 const levels = inject("batchEmbeds")
+const pp = ref()
 const getList = async () => {
     if (props.settings.post === false) return
     if (levels.value == -1) return
+    if (!levels.value?.[props.settings.postType]) return
     
     let post;
     if (props.settings.postType == 2) {
         post = levels.value[props.settings.postType][0].filter(x => x.levelID == props.settings.post)[0]
     }
-    else
-        post = levels.value[props.settings.postType][0].filter(x => x.id == props.settings.post)[0]
+    else {
+        post = levels.value[props.settings.postType][0].filter(x => x.id == props.settings.post || x.hidden == props.settings.post)[0]
+
+    }
+    pp.value = post?.id
     postData.value = [post, levels.value?.[props.settings.postType]?.[1], levels.value?.[props.settings.postType]?.[4]]
 }
 watch(levels, getList)
@@ -82,5 +83,5 @@ const dialogs = inject("openedDialogs")
     <ContainerHelp v-else-if="settings.post && postData?.[0] === undefined && typeof postData?.[1] == 'object'" icon="view" :help-content="$t('reviews.deletedPost')">
     </ContainerHelp>
 
-    <component v-else-if="postData" class="m-2" :key="postData?.[0]?.id" :is="[ListPreview, ReviewPreview, LevelCard][settings.postType]" @mousedown="saveScrolling" :disable-link="editable" v-bind="postData[0]" :user-array="postData[1]" :review-details="postData[2]" hide-remove is-embed />
+    <component v-else-if="postData" class="m-2" :key="postData?.[0]?.id" :is="[ListPreview, ReviewPreview, LevelCard][settings.postType]" @mousedown="saveScrolling" :post="pp" :disable-link="false" v-bind="postData[0]" :user-array="postData[1]" :review-details="postData[2]" hide-remove is-embed />
 </template>
