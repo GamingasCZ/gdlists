@@ -276,6 +276,12 @@ export interface ReviewDraft {
   saveDate: number
   wordCount: number
   reviewData: ReviewList
+  previewTitle: string
+  previewParagraph: string
+}
+
+export enum DraftAction {
+  Remove, Preview, Load, Save, Clone, Disjoin
 }
 
 export interface ReviewContainer {
