@@ -2,16 +2,12 @@
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import { computed, ref, watch } from "vue";
-import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import THEMES, { selectedBeforeSave } from "@/themes";
 import axios from "axios";
 
 document.title = useI18n().t("other.websiteName");
-
-const props = defineProps({
-  isLoggedIn: Boolean,
-});
 
 const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.value.homepageColumns) : '1fr')
 
@@ -24,14 +20,27 @@ watch(selectedBeforeSave, () => {
   headerBG.value = `url(${base}/graphics/${THEMES[selectedBeforeSave.value].graphic}.webp)`
 })
 
-const feeds = ref({lists: [], reviews: [], user: []})
-let fetchFeeds = await axios.get(api + "/getLists.php", {
-  params: {
-    homepage: 1, feeds: [1,1, +props.isLoggedIn].join(',')}
+/*
+ * Fetching homepage feeds
+ */
+const feeds = ref()
+
+const getFeeds = async () => {
+  if (loggedIn.value == null) return {lists: [], reviews: [], user: []}
+  let f = await axios.get(api + "/getLists.php", {
+    params: {
+      homepage: 1, feeds: [1,1, +loggedIn.value].join(',')}
+    }
+  )
+  
+  if (f.status == 200) {
+    return f.data
   }
-)
-if (fetchFeeds.status == 200)
-  feeds.value = fetchFeeds.data
+  return {lists: [], reviews: [], user: []}
+}
+
+getFeeds().then(e => feeds.value = e)
+watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
 
 </script>
 
@@ -86,17 +95,17 @@ if (fetchFeeds.status == 200)
 
   <main id="homepageSections" class="grid sm:mr-2" :style="{ gridTemplateColumns: columns }">
     <ListSection :style="{gridColumn: `1 / span ${SETTINGS.homepageColumns}`}" :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
-        :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds['reviews']" :list-type="2" />
+        :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds?.['reviews']" :list-type="2" />
     
     <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
-        :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" :force-content="feeds['lists']" />
+        :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" :force-content="feeds?. ['lists']" />
 
     <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
       content-type="@pinnedLists" :max-items="5" />
 
-    <ListSection v-if="isLoggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
+    <ListSection v-if="loggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
         extra-icon="more" extra-action="/browse/lists?type=user" :empty-text="$t('homepage.noListsUploaded')"
-        :force-content="feeds['user']" />
+        :force-content="feeds?.['user']" />
 
     <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash"
       extra-action="@clear" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios, { type AxiosResponse } from "axios";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import type {
   FavoritedLevel,
   ListCreatorInfo,
@@ -31,38 +31,32 @@ const users = ref<ListCreatorInfo[]>();
 const lists = ref<ListPreview[] | FavoritedLevel[]>();
 const reviewDetails = ref<ReviewDetailsResponse>();
 
-if (props.contentType?.startsWith("/")) {
-  // link
-  axios
-    .get(import.meta.env.VITE_API + props.contentType, {
-      headers: { Authorization: cookier("access_token").get() },
-    })
-    .then((response: AxiosResponse) => {
-      lists.value = response.data[0];
-      users.value = response.data[1];
-      reviewDetails.value = response.data[4]
-    });
-  } else if (props.contentType?.startsWith("@")) {
+const refreshContent = () => {
+  if (props.contentType?.startsWith("@")) {
     if (!hasLocalStorage()) lists.value = []
-  else {
-    let data: any[] = JSON.parse(
-      localStorage.getItem(props.contentType.slice(1))!
-    );
-    if (props?.randomizeContent)
-    data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
-  
-    lists.value = data.slice(0, props.maxItems);
+    else {
+      let data: any[] = JSON.parse(
+        localStorage.getItem(props.contentType.slice(1))!
+      );
+      if (props?.randomizeContent)
+        data = data.sort(() => (Math.random() > 0.5 ? 1 : -1));
+
+      lists.value = data.slice(0, props.maxItems);
+    }
+  } else if (props.contentType == "oldLists") {
+    lists.value = oldLists;
+  } else if (props.forceContent) {
+    lists.value = props.forceContent[0]
+    users.value = props.forceContent[1]
+    if (props.listType == 2)
+      reviewDetails.value = props.forceContent?.[4]
+  } else {
+    lists.value = [];
   }
-} else if (props.contentType == "oldLists") {
-  lists.value = oldLists;
-} else if (props.forceContent) {
-  lists.value = props.forceContent[0]
-  users.value = props.forceContent[1]
-  if (props.listType == 2)
-    reviewDetails.value = props.forceContent?.[4]
-} else {
-  lists.value = [];
 }
+
+watch(props, refreshContent)
+refreshContent()
 
 const getImage = () =>
   new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString();

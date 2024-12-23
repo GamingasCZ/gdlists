@@ -42,9 +42,8 @@ const returnfromLoginPFP = ref<string>("");
 const returnfromLoginName = ref<string>("");
 
 const LoggedInPopup = defineAsyncComponent(() => import("@/components/homepage/LoggedInPopup.vue"))
-
 onMounted(() => {
-  if (!hasLocalStorage()) return;
+  if (!hasLocalStorage()) return loggedIn.value = false;
 
   /*
    New user popup!!
