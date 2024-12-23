@@ -121,7 +121,7 @@ const clickReview = () => {
     <div class="relative w-full h-36 bg-cover">
       <img ref="thumb" @load="modListCol" :src="thumbLink" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': !thumbnail || SETTINGS.disableColors}">
       <div :style="{background: `linear-gradient(0deg, ${listColor.darken().hex()}, transparent)`}" class="absolute bottom-0 w-full h-8 transition-colors duration-200 group-hover:brightness-50"></div>
-      <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between opacity-0 transition-opacity duration-75 group-hover:opacity-100">
+      <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between text-base opacity-0 transition-opacity duration-75 group-hover:opacity-100">
         <div class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
             <img src="../../images/view.svg" alt="" class="inline mr-2 w-4" />
             <span>{{ views }}</span>
