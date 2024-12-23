@@ -560,7 +560,10 @@ const gotoFolder = (folder: [string, number], subLevel: number) => {
     if (!folderMoveMode.value)
         selectedImages.value = []
 
-    refreshContent(folder)
+    if (!folder)
+        refreshContent(["/", -1])
+    else
+        refreshContent(folder)
 }
 
 const removeCurrentFolder = (keepImages: boolean) => {
