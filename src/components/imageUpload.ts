@@ -56,8 +56,10 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
     if (e.length == 0) return
     if (e.length > 10) return notifyError(ImgFail.TOO_MANY_IMG)
 
-    if (singleFile)
+    if (singleFile) {
+        if (!e?.item(0)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
         imageData.append('image_0', e.item(0))
+    }
     else {
         for (let i = 0; i < e.length; i++) {
             imageData.append(`image_${i}`, e?.item(i))
