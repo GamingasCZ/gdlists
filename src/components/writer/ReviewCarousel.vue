@@ -51,7 +51,7 @@ const carousel = ref<HTMLDivElement>()
 const end = ref(1)
 const scrollCarousel = (speed: number, event: WheelEvent) => {
     if (speed == 0) {
-        carousel.value?.scrollBy({left: event.deltaX, behavior: 'instant'})
+        carousel.value?.scrollBy({left: event.deltaX+event.deltaY})
         event.preventDefault()
     }
 
@@ -79,7 +79,15 @@ const hovering = ref(false)
 
 <template>
     <ContainerHelp v-if="!settings.components.length" @click="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
-    <section @mouseenter="hovering = true" @mouseleave="hovering = false" @vue:mounted="onResize.observe(carousel!)" @wheel="scrollCarousel(0, $event)" ref="carousel" class="overflow-x-hidden group overflow-y-clip" :class="{'pb-1.5': editable}" v-else>
+    <section
+        v-else
+        @mouseenter="hovering = true"
+        @mouseleave="hovering = false"
+        @vue:mounted="onResize.observe(carousel!)"
+        ref="carousel"
+        class="overflow-x-auto carousel touch-pan-x group overflow-y-clip"
+        :class="{'pb-1.5': editable}"
+    >
         <Transition name="fade">
             <button v-show="hovering && buttonsShown && end != 1" @click="scrollCarousel(-0.75, $event)" class="flex absolute left-2 top-1/2 z-10 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
                 <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
@@ -106,3 +114,13 @@ const hovering = ref(false)
         </Transition>
     </section>
 </template>
+
+<style>
+.carousel::-webkit-scrollbar {
+  @apply hidden;
+}
+
+.carousel {
+    scrollbar-width: none;
+}
+</style>
