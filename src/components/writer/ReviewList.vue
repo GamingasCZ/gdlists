@@ -66,6 +66,7 @@ const getList = async () => {
     postData.value = [post, levels.value?.[props.settings.postType]?.[1], levels.value?.[props.settings.postType]?.[4]]
 }
 watch(levels, getList)
+getList()
 
 const dialogs = inject("openedDialogs")
 </script>
