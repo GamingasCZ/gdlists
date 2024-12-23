@@ -644,6 +644,7 @@ const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('revi
 const drafts = ref<object>(JSON.parse(localStorage.getItem("reviewDrafts")!) ?? {})
 const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
     if (!reviewData.value.containers.length) return
+    if (disableEdits.value) return
     let now = Date.now()
     let backupID;
     let preview = getReviewPreview()
@@ -792,7 +793,8 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
 
 
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')"
-            :width="dialog.medium">
+            :width="dialog.medium" :side-button-text="$t('other.search')" :action="draftPopup?.openSearch">
+            <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup"
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
         </DialogVue>
