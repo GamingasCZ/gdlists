@@ -1,18 +1,14 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
-import TabBar from "../ui/TabBar.vue";
 import { computed } from "vue";
 import axios from "axios";
 import type { ImageFolder, ImageStorage } from "@/interfaces";
 import { hasLocalStorage } from "@/siteSettings";
-import type { ImageCache } from "./imageCache";
 import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath } from "./imageCache";
 import Dropdown from "../ui/Dropdown.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
-import { dialog } from "../ui/sizes";
-import { getDominantColor } from "@/Reviews";
-import { ImgFail, notifyError, summonNotification, uploadImages } from "../imageUpload";
+import { ImgFail, notifyError, uploadImages } from "../imageUpload";
 import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
 import UploadIndicator from './UploadIndicator.vue'
 import ColorPicker from "./ColorPicker.vue";
@@ -23,21 +19,22 @@ import ImageViewer from "./ImageViewer.vue";
 import fEdit from "@/images/edit.svg?url"
 import fRemove from "@/images/trash.svg?url"
 import fLink from "@/images/link.svg?url"
-import { i18n } from "@/locales";
-
-const MAX_SUBFOLDERS = 3
-const toMB = (val: number) => Math.round(val / 100_00) / 100
-const currentTab = ref(lastOpenedTab)
-const storageInUse = computed(() => (storage.value.left / storage.value.storageMax) * 100)
-const pre = import.meta.env.VITE_USERCONTENT
-const imageInput = ref<HTMLInputElement>()
-const fileDrag = ref(false)
 
 const props = defineProps<{
     unselectable: boolean
     disableExternal?: boolean
     allowMultiplePicks?: boolean
 }>()
+
+enum Tabs { Uploaded = 0, External = 1 }
+
+const MAX_SUBFOLDERS = 3
+const toMB = (val: number) => Math.round(val / 100_00) / 100
+const currentTab = ref(props.disableExternal ? Tabs.Uploaded : lastOpenedTab)
+const storageInUse = computed(() => (storage.value.left / storage.value.storageMax) * 100)
+const pre = import.meta.env.VITE_USERCONTENT
+const imageInput = ref<HTMLInputElement>()
+const fileDrag = ref(false)
 
 const emit = defineEmits<{
     (e: "pickImage", url: string): void
@@ -52,8 +49,6 @@ const storage = ref<ImageStorage>({
     storageMax: 2,
     maxFilecount: 2
 })
-
-enum Tabs { Uploaded = 0, External = 1 }
 
 const images = ref<string[]>(imageCache)
 const folders = ref<ImageFolder[]>([])
@@ -877,13 +872,13 @@ if (hasLocalStorage()) {
 
             <!-- Image upload header -->
             <div v-else class="flex gap-2">
-                <div class="flex gap-2 items-center p-1 pl-2 bg-black bg-opacity-40 rounded-md">
+                <div class="flex items-center p-1 px-2 bg-black bg-opacity-40 rounded-md">
                     <button @click="imageInput?.uploader?.click()" :disabled="uploadingImage"
                         class="button disabled:opacity-20"><img src="@/images/upload2.svg" class="inline w-5"
                             alt=""><span class="ml-2 max-sm:hidden">{{ $t('editor.uploadFile') }}</span></button>
-                    <hr class="w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
-                    <button ref="imageAddButton" @click="imgAddOptsOpen = true"
-                        class="w-3 h-full button disabled:opacity-20"><img src="@/images/levelIcon.svg"
+                    <hr v-if="!disableExternal" class="mx-2 w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
+                    <button v-if="!disableExternal" ref="imageAddButton" @click="imgAddOptsOpen = true"
+                        class="h-full button disabled:opacity-20"><img src="@/images/levelIcon.svg"
                             class="w-2 rotate-180" alt=""></button>
                 </div>
 
