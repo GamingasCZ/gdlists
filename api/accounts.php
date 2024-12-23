@@ -31,7 +31,7 @@ function allTokens($res) {
 
 if ($_SERVER["REQUEST_METHOD"] == "PUT") {
     $DATA = file_get_contents("php://input");
-    $acc = checkAccount($mysqli);
+    $acc = checkAccount($mysqli, false, true);
     if (!$acc) die();
 
     if ($DATA == -1) {

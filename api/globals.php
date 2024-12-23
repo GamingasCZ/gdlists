@@ -255,7 +255,7 @@ function getLocalUserID() {
     return $token[2]; // User ID
 }
 
-function checkAccount($mysqli, $forceToken = false) {
+function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     global $DO_REFRESH;
     $auth = getAuthorization();
     if (!$auth) return false;
@@ -264,10 +264,12 @@ function checkAccount($mysqli, $forceToken = false) {
     if (!$forceToken) $token = $auth;
     else $token = $forceToken;
     
-    $getToken = $_COOKIE["momentToken"];
-    if ($getToken) {
-        $momentToken = verifyMomentToken($getToken);
-        if ($momentToken) return ["id" => $token[2]];
+    if (!$skipMomentToken) {
+        $getToken = $_COOKIE["momentToken"];
+        if ($getToken) {
+            $momentToken = verifyMomentToken($getToken);
+            if ($momentToken) return ["id" => $token[2]];
+        }
     }
 
     if ($token[1]-time() < 86400) {
