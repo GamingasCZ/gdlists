@@ -226,11 +226,11 @@ const pickImage = (index: number | number[], external: boolean, event?: MouseEve
     let singleSelect = typeof index == 'number'
 
     if (singleSelect) {
-        if (external) url = externalImages.value[index]
+        if (external) url = externalImages.value[index]?.[0]
         else url = `${pre}/userContent/${storage.value.uid}/${images.value[index]}.webp`
     }
     else {
-        if (external) url = index.map(x => externalImages.value[x])
+        if (external) url = index.map(x => externalImages.value[x]?.[0])
         else url = index.map(x => `${pre}/userContent/${storage.value.uid}/${images.value[x]}.webp`)
     }
 
