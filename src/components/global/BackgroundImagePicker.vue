@@ -20,7 +20,7 @@ let pre = import.meta.env.VITE_USERCONTENT
 let imageHeight = 384
 const dragboxHeight = ref(0)
 onMounted(async () => {
-  if (!imageSource.value.startsWith("/gdlists/")) {
+  if (!imageSource.value.includes(import.meta.env.VITE_USERCONTENT)) {
     let uid = JSON.parse(localStorage.getItem("account_info")!)[1]
     imageSource.value = `${pre}/userContent/${uid}/${imageSource.value}.webp`
   }
