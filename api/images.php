@@ -213,7 +213,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             switch ($DATA["action"]) {
                 case 'createFolder':
                     $slashPos = strpos($DATA["name"], '/');
-                    $folderName = $DATA["name"];
+                    $folderName = trim($DATA["name"]);
                     $nameLength = strlen($folderName);
 
                     // Check special characters in name
