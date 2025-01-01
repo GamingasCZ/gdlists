@@ -27,7 +27,7 @@ if (props.settings.url) videoLoading.value = 0
     <ContainerHelp v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? $t('reviews.loadVideoFail') : $t('reviews.setVideo')">
         <input type="text" v-model="settings.url" class="p-1 bg-white bg-opacity-10 rounded-md" :placeholder="$t('reviews.ytLink')">
     </ContainerHelp>
-    <figure v-else class="m-2 text-inherit group">
+    <figure v-else class="m-2 mb-0.5 text-inherit group">
         <Resizer :min-size="104" :max-size="720" class="h-max" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event">
             <iframe
                 :width="settings.height*1.77 || settings.width" :height="settings.height ? settings.height : settings.width/1.77"
@@ -40,6 +40,6 @@ if (props.settings.url) videoLoading.value = 0
                 >
             </iframe>
         </Resizer>
-        <figcaption class="text-inherit">{{ settings.description }}</figcaption>
+        <figcaption class="text-[90%] text-inherit">{{ settings.description }}</figcaption>
     </figure>
 </template>

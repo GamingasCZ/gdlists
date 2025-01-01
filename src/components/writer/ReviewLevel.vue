@@ -41,8 +41,8 @@ let indPicked = ref(0)
         </form>
     </ContainerHelp>
     
-    <figure class="flex p-2 w-full" style="justify-content: inherit" v-else>
+    <figure class="flex flex-col p-2 w-full" style="justify-content: inherit" v-else>
         <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" hide-ratings v-bind="reviewData.levels[settings.pickedIndex]" :disable-stars="true"/>
-        <figcaption class="mt-2">{{ settings.description }}</figcaption>
+        <figcaption class="text-[90%] text-inherit mt-1">{{ settings.description }}</figcaption>
     </figure>
 </template>
