@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SETTINGS } from '@/siteSettings';
-import { ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 
 const props = defineProps<{
   open: boolean
@@ -20,17 +20,21 @@ const emit = defineEmits<{
 }>();
 
 const main = ref<HTMLDialogElement>()
-watch(props, () => {
-  if (props.open) {
+
+const clipBody = (closing: boolean) => {
+  if (closing) {
+    main.value?.close()
+    if (document.querySelectorAll(".modalDialog").length < 2)
+    document.body.style.overflow = "auto"
+  }
+  else {
     main.value?.showModal()
     document.body.style.overflow = "clip"
   }
-  else {
-    main.value?.close()
-    if (document.querySelectorAll(".modalDialog").length < 2)
-      document.body.style.overflow = "auto"
-  }
-})
+}
+onMounted(() => { if (props.open) clipBody(false) })
+onBeforeUnmount(() => { if (props.open) clipBody(true) })
+watch(() => props.open, () => clipBody(!props.open))
 
 </script>
 

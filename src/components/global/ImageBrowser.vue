@@ -965,7 +965,7 @@ if (hasLocalStorage()) {
                     <img src="@/images/more.svg" class="p-1 invert">
 
                     <Dropdown :button="button" @close="imageOptsShown = -1"
-                        @picked-option="imageAction($event, currentTab == Tabs.External, index)" v-if="imageOptsShown == index"
+                        @picked-option="imageAction($event, currentTab == Tabs.External, index)" v-if="imageOptsShown === index"
                         :options="[$t('editor.remove'), $t('other.download'), $t('other.move')]"
                         :title="$t('other.options')" />
                 </button>
