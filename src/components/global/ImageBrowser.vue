@@ -4,7 +4,7 @@ import { computed } from "vue";
 import axios from "axios";
 import type { ImageFolder, ImageStorage } from "@/interfaces";
 import { hasLocalStorage } from "@/siteSettings";
-import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath } from "./imageCache";
+import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath, setExtCache } from "./imageCache";
 import Dropdown from "../ui/Dropdown.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
@@ -74,6 +74,8 @@ const imageAddButton = ref<HTMLDivElement>()
 const imgAddOptsOpen = ref(false)
 
 const goToTab = (to: number) => {
+    if (currentTab.value == to) return
+    
     setLastOpenedTab(to)
     currentTab.value = to
     if (to == Tabs.Uploaded)
@@ -152,7 +154,7 @@ const removeImage = (hash: string, external: boolean) => {
 const uploadingImage = ref(false)
 const uploadImage = async (e: FileList, fileList?: boolean) => {
     if (loadingImages.value || uploadingImage.value || folderMoveMode.value) return
-    currentTab.value = Tabs.Uploaded
+    goToTab(Tabs.Uploaded)
 
     let totalFilesize = 0
     for (let i = 0; i < e.length; i++) {
@@ -283,10 +285,12 @@ const parseThumbs = (serverResponse: object) => {
     serverResponse.forEach(x => thumbnails.value[x.folder].push(x.hash))
 }
 
-const refreshContent = async (currPath: [string, number] | object, external = false) => {
+const refreshContent = async (currPath: [string, number] | object, external: boolean) => {
     loadingImages.value = true
 
-    if (currentTab.value == Tabs.External || external) {
+    if ((currentTab.value == Tabs.External || external)) {
+        if (external === false) return
+
         if (currPath?.tree) {
             currentExtFolder.value = currPath.tree
             subfolderExtLevel.value = currPath.subfolder
@@ -322,6 +326,7 @@ const refreshContent = async (currPath: [string, number] | object, external = fa
                 currentExtFolder.value.splice(subfolderExtLevel.value, 1)
         }
         currentExtFolder.value[subfolderExtLevel.value] = currPath
+        setExtCache(currentExtFolder.value, subfolderExtLevel.value)
 
         loadingImages.value = false
         return
@@ -471,7 +476,6 @@ const modifyFolder = () => {
         action: 'createFolder',
         name: folderDetails.value.name,
         color: folderColor.value,
-        currentFolder: currentFolder.value[subfolderLevel.value][1]
     }
 
     if (creatingNewFolder.value == Folder.CREATING) {
@@ -487,6 +491,7 @@ const modifyFolder = () => {
             refreshContent(currentExtFolder.value[subfolderExtLevel.value])
         }
         else {
+            data.currentFolder = currentFolder.value[subfolderLevel.value][1]
             axios.put(import.meta.env.VITE_API + "/images.php", data).then(() => {
                 breakCache()
                 refreshContent(currentFolder.value[subfolderLevel.value])
@@ -746,7 +751,7 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
 }
 
 // Load images from cache or server
-refreshContent(lastVisitedPath)
+refreshContent(lastVisitedPath, false)
 
 if (hasLocalStorage()) {
     allExternalImages = JSON.parse(localStorage.getItem("externalImages")!) ?? []
@@ -988,7 +993,7 @@ if (hasLocalStorage()) {
             <h2 class="text-xl">{{ $t('other.loading') }}...</h2>
         </div>
 
-        <div v-show="(!images.length && !folders.length) && currentTab == Tabs.Uploaded || (!externalImages.length && !extImgFolders.length) && currentTab == Tabs.External"
+        <div v-show="!loadingImages && ((!images.length && !folders.length) && currentTab == Tabs.Uploaded || (!externalImages.length && !extImgFolders.length) && currentTab == Tabs.External)"
             class="absolute top-1/2 left-1/2 text-center opacity-40 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
             <div v-if="currentTab == Tabs.Uploaded && currentFolder == '/' && !fileDrag"
                 class="flex flex-col items-center w-max">

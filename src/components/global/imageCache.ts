@@ -14,6 +14,12 @@ export var storageCache: ImageStorage
 export var lastOpenedTab = 0
 export const setLastOpenedTab = (to: number) => lastOpenedTab = to
 
+export const setExtCache = (currTree: [string, number][], currSub: number) => {
+    lastVisitedExternalPath = {
+        tree: currTree,
+        subfolder: currSub
+    }
+}
 export const setImgCache = (img: string[], fol: ImageFolder[], thumb: { [path: string]: string }, currTree: [string, number][], currSub: number) => {
     lastVisitedPath = {
         tree: currTree,

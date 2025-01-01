@@ -18,7 +18,8 @@ export default defineConfig(mode => {
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
-      }
+      },
+      extensions: ['.ts', '.json']
     },
     server: {
       watch: {usePolling: false},
