@@ -10,14 +10,14 @@ $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
 $SECRET = getenv("SECRET"); // Use a random string :)
 
-$PRIV_ID_LEN = 10;
+define('PRIV_ID_LEN', 10);
 
 error_reporting($debugMode ? -1 : 0);
 
 function privateIDGenerator($listName, $creator, $timestamp) {
     $str = $listName . $creator . $timestamp;
-    $pid = substr(sha1($str), 0, $PRIV_ID_LEN);
-    if (is_numeric($pid)) $pid = "p" . substr($pid, 0, $PRIV_ID_LEN - 1);
+    $pid = substr(sha1($str), 0, PRIV_ID_LEN);
+    if (is_numeric($pid)) $pid = "p" . substr($pid, 0, PRIV_ID_LEN - 1);
     return $pid;
 }
 
