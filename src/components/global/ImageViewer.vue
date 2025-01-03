@@ -103,8 +103,7 @@ const base = import.meta.env.VITE_USERCONTENT
 </script>
 
 <template>
-<Teleport to="body">
-    <section @keyup.esc="emit('closePopup')" @click="clickClose" @mousemove="showUI" class="flex fixed inset-0 z-30 justify-center items-center p-2 text-white bg-black bg-opacity-80 backdrop-grayscale">
+    <section @keyup.esc="emit('closePopup')" @click="clickClose" @mousemove="showUI" class="flex fixed inset-0 z-40 justify-center items-center p-2 text-white bg-black bg-opacity-80 backdrop-grayscale">
         <Transition name="fade">
             <div v-show="uiShown">
                 <div class="flex absolute top-0 right-0 left-0 z-10 justify-between items-center p-2 px-3 bg-black bg-opacity-80 backdrop-blur-sm">
@@ -133,5 +132,4 @@ const base = import.meta.env.VITE_USERCONTENT
         </figure>
 
     </section>
-</Teleport>
 </template>

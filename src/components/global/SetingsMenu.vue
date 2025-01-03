@@ -71,52 +71,36 @@ const screenWidth = ref(window.innerWidth)
 const sessionsDialog = ref<HTMLDivElement>()
 </script>
 
-<template>
-  
+<template> 
   <div
   class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
-    <Teleport to="body">
-      <div v-if="dialogs.settings" class="z-30">
-        <Dialog :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
-          <Sett />
-        </Dialog>
-      </div>
-  
-      <!-- <div v-if="dialogs.sessions" class="z-30">
-        <Dialog :open="dialogs.sessions" :title="$t('settingsMenu.devices')" :action="sessionsDialog?.logoutAll" :side-button-text="$t('settingsMenu.logoutAll')" :width="dialog.medium" @close-popup="dialogs.sessions = false">
-          <template #icon><img src="@/images/logout.svg" class="w-4"></template>
-          <Sessions ref="sessionsDialog"/>
-        </Dialog>
-      </div> -->
-      
-      <div v-if="dialogs.help" class="z-30">
-        <Dialog :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
-          <Help />
-        </Dialog>
-      </div>
 
-      <div v-if="dialogs.avatar" class="z-30">
-        <Dialog :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
-          <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
-        </Dialog>
-      </div>
+  <Teleport to="#app">
+    <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
+      <Sett />
+    </Dialog>
 
-      <div v-if="dialogs.gallery" class="z-30">
-        <Dialog :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
-          <Gallery unselectable />
-        </Dialog>
-      </div>
+    <Dialog v-if="dialogs.help" :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
+      <Help />
+    </Dialog>
 
-      <Transition name="fadeSlide">
-        <Teleport to="body">
-          <div v-if="dialogs.themes" class="z-30">
-              <Themes @close="dialogs.themes = false" />
-          </div>
-        </Teleport>
-        </Transition>
-    </Teleport>
+    <Dialog v-if="dialogs.avatar" :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
+      <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
+    </Dialog>
 
+    <Dialog v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+      <Gallery unselectable />
+    </Dialog>
+  </Teleport>
+
+    <Transition name="fadeSlide">
+      <Teleport to="body">
+        <div v-if="dialogs.themes" class="z-30">
+            <Themes @close="dialogs.themes = false" />
+        </div>
+      </Teleport>
+    </Transition>
 
     <LoginButton v-if="!isLoggedIn" class="w-full" />
     <section
