@@ -34,7 +34,9 @@ function parseResult($rows, $isReview, $mysqli) {
   echo '<meta charset="UTF-8">';
 
   if ($isReview) {
-    $desc = htmlspecialchars($rows["tagline"]) ?? "Check this review out on GD Lists!";
+    $desc = htmlspecialchars($rows["tagline"]);
+    if (!strlen($desc))
+      $desc = "Check this review out on GD Lists!";
 
     if ($rows["thumbnail"]) {
       echo '<meta name="twitter:card" content="summary_large_image">';
@@ -47,7 +49,7 @@ function parseResult($rows, $isReview, $mysqli) {
     echo '<meta name="twitter:title" property="og:title" itemprop="name" content="'. urldecode(htmlspecialchars($rows["name"])) . ' by '.$listMaker.' | GD Lists">';
     echo '<meta name="twitter:description" property="og:description" itemprop="description" content="'.$desc.'">';
     
-    echo '<script>window.location.replace("https://gamingas.cz/gdlists/review/' . $_GET["id"] . '")</script>';
+    // echo '<script>window.location.replace("https://gamingas.cz/gdlists/review/' . $_GET["id"] . '")</script>';
   }
   else {
     $desc = "Check these levels out on GD Lists!";
