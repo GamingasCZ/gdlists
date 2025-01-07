@@ -65,7 +65,7 @@ let isEmojisOnly = (emojis ?? []).join("") == props.comment
 if (emojis != null) {
   emojis.forEach(async emoji => {
     let emojiLink = `${import.meta.env.BASE_URL}/emoji/${emoji.slice(1)}.webp`
-    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline ${isEmojisOnly ? 'w-8' : 'w-5'} pointer-events-none" src="${emojiLink}" alt="">`)
+    parsedComment.value = parsedComment.value.replaceAll(emoji, `<img class="inline ${isEmojisOnly ? 'w-10' : 'w-7'} pointer-events-none" src="${emojiLink}" alt="">`)
   });
 } else parsedComment.value = props.comment
 parsedComment.value = parsedComment.value.replace(/\n/g, "<br>")
@@ -85,10 +85,10 @@ const color = computed(() => {
       <header class="flex gap-2 items-center">
         <ProfilePicture class="w-9 pointer-events-none" :uid="pfp" :cutout="cutout" />
         <div class="inline">
-          <h3 class="text-lg font-bold leading-4">{{ username }}</h3>
+          <h3 class="leading-4">{{ username }}</h3>
           <h5 class="text-xs opacity-50 cursor-help" :title="dateString">{{ time }}</h5>
         </div>
       </header>
-      <article class="overflow-y-auto mt-3 max-h-32" v-html="parsedComment"></article>
+      <article class="overflow-y-auto mt-3 max-h-32 text-lg" v-html="parsedComment"></article>
     </section>
 </template>
