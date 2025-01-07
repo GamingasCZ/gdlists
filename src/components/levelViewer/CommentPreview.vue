@@ -80,15 +80,15 @@ const color = computed(() => {
 </script>
 
 <template>
-    <section class="relative mb-2 w-full break-words">
+    <section class="relative p-2 w-full break-words rounded-sm border-l-4 border-solid" :style="{borderColor: color, backgroundColor: chroma(color).darken(4).hex() }">
       <div v-if="uid == '-2'" class="bg-[url(@/images/flames.webp)] absolute z-10 opacity-40 mix-blend-hard-light bottom-0 left-0 w-full h-full bg-repeat-x bg-contain"></div>
       <header class="flex gap-2 items-center">
-        <ProfilePicture class="w-11 pointer-events-none" :uid="pfp" :cutout="cutout" />
+        <ProfilePicture class="w-9 pointer-events-none" :uid="pfp" :cutout="cutout" />
         <div class="inline">
           <h3 class="text-lg font-bold leading-4">{{ username }}</h3>
           <h5 class="text-xs opacity-50 cursor-help" :title="dateString">{{ time }}</h5>
         </div>
       </header>
-      <article class="overflow-y-auto p-1 mt-1 max-h-32 rounded-md border-4 border-solid" :style="{borderColor: color , boxShadow: `0px 0px 10px ${color}`, backgroundColor: chroma(color).darken(4).hex() }" v-html="parsedComment"></article>
+      <article class="overflow-y-auto mt-3 max-h-32" v-html="parsedComment"></article>
     </section>
 </template>

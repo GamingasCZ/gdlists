@@ -165,7 +165,7 @@ function sendComment(com = "") {
 </script>
 
 <template>
-    <section class="relative z-20 max-w-[95vw] w-[80rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
+    <section class="relative z-20 max-w-[95vw] w-[58rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
         <pre
             @focus="placeholderActive = false"
             @blur="chatboxEmpty"

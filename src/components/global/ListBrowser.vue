@@ -310,7 +310,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-[80rem] text-white">
+  <section class="mx-auto w-full text-white" :class="{'max-w-[60rem]': onlineType == 'comments', 'max-w-[80rem]': onlineType != 'comments'}">
     <main>
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">

@@ -30,7 +30,7 @@ watch(props, () => { // only refresh comments once
 
 <template>
     <main>
-        <h2 class="mt-10 mb-2  max-w-[95vw] w-[80rem] mx-auto text-3xl font-bold" v-if="endScroll">{{ $t('level.comments') }}</h2>
+        <h2 class="mt-10 mb-2 max-w-[95vw] w-[58rem] mx-auto text-3xl font-bold" v-if="endScroll">{{ $t('level.comments') }}</h2>
         <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
         
         <!-- Comments disabled info -->
@@ -39,7 +39,7 @@ watch(props, () => { // only refresh comments once
             <span>{{ $t('listViewer.commDisableHelp', [isReview ? $t('listViewer.thisReview') : $t('listViewer.thisList')]) }}</span>
         </div>
 
-        <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">
+        <hr class="max-w-[95vw] w-[58rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">
         <ListBrowser
             v-if="showingOnce && !noNoCommsIfDisabledComments"
             v-memo="[showingOnce]"
