@@ -60,14 +60,16 @@ const LISTS = ref<ListPreview[]>([]);
 const REVIEW_DETAILS = ref<ReviewDetailsResponse[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
+const main = ref<HTMLDivElement>()
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
   // LISTS.value = [] // Do not clear when using infinite scrolling
   PAGE.value = setPage;
   // window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
-  if (!props.picking)
-    window.scrollTo({top: 0, behavior: "instant"})
+  if (!props.picking) {
+    window.scrollTo({top: main.value?.offsetTop-100, behavior: "instant"})
+  }
   
   pagesArray.value = listScroll();
   refreshBrowser();
@@ -314,7 +316,7 @@ defineExpose({
 </script>
 
 <template>
-  <section class="mx-auto w-full text-white" :class="{'max-w-[59rem]': onlineType == 'comments', 'max-w-[80rem]': onlineType != 'comments'}">
+  <section ref="main" class="mx-auto w-full text-white" :class="{'max-w-[59rem]': onlineType == 'comments', 'max-w-[80rem]': onlineType != 'comments'}">
     <main>
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
