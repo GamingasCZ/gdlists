@@ -307,10 +307,14 @@ watch(props, (newBrowser) => {
 
 onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
 
+defineExpose({
+  doRefresh
+})
+
 </script>
 
 <template>
-  <section class="mx-auto w-full text-white" :class="{'max-w-[60rem]': onlineType == 'comments', 'max-w-[80rem]': onlineType != 'comments'}">
+  <section class="mx-auto w-full text-white" :class="{'max-w-[59rem]': onlineType == 'comments', 'max-w-[80rem]': onlineType != 'comments'}">
     <main>
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
@@ -349,15 +353,6 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           </button>
         </form>
       </div>
-      <header class="flex gap-3 justify-between max-sm:flex-col max-sm:items-center" id="browserHeader">
-
-        <!-- Refresh Button -->
-        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()"
-          v-if="refreshButton && isOnline && LISTS.length > 0 && !loadFailed">
-          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{
-            $t('other.refresh') }}</label>
-        </button>
-      </header>
       <main class="flex flex-col gap-3 items-center mt-4 transition-opacity duration-75" :class="{'opacity-60 pointer-events-none': loading, 'grid md:grid-cols-3': ['reviews', 'levels'].includes(onlineSubtype), 'md:!grid-cols-2': ['reviews', 'levels'].includes(onlineSubtype) && picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"

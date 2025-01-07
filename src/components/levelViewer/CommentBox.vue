@@ -71,7 +71,7 @@ onMounted(() => {
         emoji: {
             render(emoji) {
                 const img = document.createElement('img')
-                img.classList.add('inline-block', 'w-4',)
+                img.classList.add('inline-block', 'w-6',)
                 img.src = emojis.value[emoji.id-1]
                 img.draggable = false
                 return img
@@ -175,12 +175,12 @@ function sendComment(com = "") {
             :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}"
             contenteditable="true"
             id="commentBox"
-            class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-md border-4 border-solid sm:h-24"
-            :style="{boxShadow: `0px 0px 10px ${parsedColor}`, borderColor: parsedColor, backgroundColor: darkParsedColor}">
+            class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-sm border-l-4 text-lg border-solid min-h-16 sm:h-24"
+            :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}">
         </pre>
         
         <!-- placeholder text -->
-        <p class="absolute top-2 left-3 opacity-30" v-if="placeholderActive && commentLength == 0">{{ placeholder }}</p>
+        <p class="absolute top-2 left-4 opacity-30" v-if="placeholderActive && commentLength == 0">{{ placeholder }}</p>
 
         <!-- Not logged in notification -->
         <section v-if="!loggedIn" class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
@@ -192,18 +192,18 @@ function sendComment(com = "") {
         </section>
 
         <!-- Color Picker -->
-        <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-md" v-show="dropdownOpen == 0">
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-sm" v-show="dropdownOpen == 0">
             <ColorPicker @colors-modified="listColor = $event" :hue="listColor[0]" :saturation="listColor[1]" :lightness="listColor[2]"/>
         </div>
 
         <!-- Emoji Picker -->
-        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-md" v-show="dropdownOpen == 1">
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-sm" v-show="dropdownOpen == 1">
             <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index-1]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
         </div>
 
         <!-- Comment send error -->
         <Transition name="fade">
-            <div v-if="commentError" class="flex gap-2 items-center p-1 my-2 rounded-md max-sm:text-sm" :style="{backgroundColor: parsedColor}">
+            <div v-if="commentError" class="flex gap-2 items-center p-1 my-2 rounded-sm max-sm:text-sm" :style="{backgroundColor: parsedColor}">
                 <img src="@/images/info.svg" alt="" class="w-4">
                 <p>{{ $t('listViewer.failSendComm') }}</p>
             </div>

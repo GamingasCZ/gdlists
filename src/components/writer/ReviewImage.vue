@@ -94,6 +94,7 @@ const fullscreenImage = () => {
             <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
+                    loading="lazy"
                     class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
                     :class="{'min-w-max': settings?.height, 'aspect-video object-cover': settings?.crop}"
                     :style="{height: settings?.height ? `${settings.height}px` : ''}"
