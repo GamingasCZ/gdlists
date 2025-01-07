@@ -208,21 +208,22 @@ const listUploadDate = computed(() =>props.review ?
 
         <!-- Comments button -->
         <div class="md:ml-9">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
+          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="flex relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
             <img src="@/images/comment.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{
               $t('level.comments') }}</label>
             <label
-              class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-md:absolute max-md:bottom-1 max-md:right-1">{{
+              v-show="commAmount > 0"
+              class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm md:h-full md:block aspect-square bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 commAmount }}</label>
           </button>
         </div>
 
         <!-- Review level ratings button -->
         <div class="ml-2" v-if="review && !data.disabledRatings && data.levels.length > 0">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
+          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="flex relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
             <img src="@/images/rating.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{ $t('editor.levels') }}</label>
             <label
-              class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-md:absolute max-md:bottom-1 max-md:right-1">{{
+            class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm md:h-full md:block aspect-square bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 data.levels.length }}</label>
           </button>
         </div>

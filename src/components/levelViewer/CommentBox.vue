@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { makeColor, EMOJI_COUNT, isOnline } from '@/Editor'
 import chroma from 'chroma-js'
 import ColorPicker from '../global/ColorPicker.vue'
@@ -57,7 +57,7 @@ else {
         darkParsedColor.value = chroma.hsl(listColor.value[0], 1, listColor.value[2]/64).darken(4).hex()
         lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`
     }, {deep: true})
-    watch(commentLength, () => lengthPie.value = `linear-gradient(90deg, ${chroma.hsl(listColor.value[0], 1, 0.4).hex()} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
+    watch(commentLength, () => lengthPie.value = `linear-gradient(90deg, ${parsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)}%, ${darkParsedColor.value} ${Math.ceil(commentLength.value/MAX_COMMENT_LEN*100)+2}%)`)
 }
 
 const dropdownOpen = ref<number>(-1)
@@ -143,8 +143,11 @@ function sendComment(com = "") {
     }
 
     axios.post(import.meta.env.VITE_API+"/sendComment.php", postData).then((res: AxiosResponse) => {
-        if (res.data == 6)
+        // Comment sent!
+        if (res.data == 6) {
             (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
+            placeholderActive.value = true
+        }
         else {
             document.getElementById("commentBox").innerHTML = oldComment
             modCommentLength()
@@ -162,10 +165,12 @@ function sendComment(com = "") {
         }, 5000);
     })
 }
+
+const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN || commentLength.value > MAX_COMMENT_LEN) || !loggedIn.value || !isOnline.value || commentError.value)
 </script>
 
 <template>
-    <section class="relative z-20 max-w-[95vw] w-[58rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:bg-black bg-opacity-40 max-sm:max-w-full max-sm:p-2">
+    <section class="relative z-20 max-w-[95vw] w-[58rem] mx-auto max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:p-2 max-sm:max-w-full">
         <pre
             @focus="placeholderActive = false"
             @blur="chatboxEmpty"
@@ -191,16 +196,6 @@ function sendComment(com = "") {
             <LoginButton />
         </section>
 
-        <!-- Color Picker -->
-        <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-sm" v-show="dropdownOpen == 0">
-            <ColorPicker @colors-modified="listColor = $event" :hue="listColor[0]" :saturation="listColor[1]" :lightness="listColor[2]"/>
-        </div>
-
-        <!-- Emoji Picker -->
-        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto gap-2 p-2 my-1 rounded-sm" v-show="dropdownOpen == 1">
-            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index-1]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
-        </div>
-
         <!-- Comment send error -->
         <Transition name="fade">
             <div v-if="commentError" class="flex gap-2 items-center p-1 my-2 rounded-sm max-sm:text-sm" :style="{backgroundColor: parsedColor}">
@@ -208,27 +203,40 @@ function sendComment(com = "") {
                 <p>{{ $t('listViewer.failSendComm') }}</p>
             </div>
         </Transition>
-        <footer class="flex justify-between mt-2 sm:flex-row-reverse">
+        <footer
+         :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}"
+         class="flex justify-between p-2 pl-0 rounded-b-sm sm:flex-row-reverse">
             <div v-if="pfp">
                 <ProfilePicture class="inline mr-2 w-8" :uid="pfp[1]" :cutout="pfp[2]" />
                 <label>{{ pfp[0] }}</label>
             </div>
             <div v-else></div>
 
-            <div class="flex gap-2 sm:flex-row-reverse">
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 rounded-md aspect-square disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="w-6" alt=""></button>
-                <button :style="{backgroundColor: darkParsedColor}" class="box-border p-1 rounded-md aspect-square disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="w-6" alt=""></button>
+            <div class="flex gap-4 sm:flex-row-reverse">
+                <button :style="{backgroundColor: darkParsedColor}" class="disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(0)"><img src="@/images/color.svg" class="w-5" alt=""></button>
+                <button :style="{backgroundColor: darkParsedColor}" class="disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="w-5" alt=""></button>
                 <button 
-                    :style="{backgroundColor: darkParsedColor}"
-                    class="box-border flex relative gap-2 items-center px-1 w-max rounded-md transition-opacity duration-75 disabled:opacity-50"
-                    :disabled="(commentLength < MIN_COMMENT_LEN || commentLength > MAX_COMMENT_LEN) || !loggedIn || !isOnline || commentError"
+                    :style="{backgroundColor: cannotSendComment ? darkParsedColor : parsedColor, borderColor: parsedColor}"
+                    class="box-border flex relative gap-2 items-center px-1 w-max font-bold overflow-clip rounded-sm border transition-opacity duration-75 disabled:opacity-50"
+                    :class="{'!text-black': !cannotSendComment && listColor[2] > 7}"
+                    :disabled="cannotSendComment"
                     @click="sendComment()"
                 >
-                    <div :style="{backgroundImage: lengthPie}" class="absolute bottom-0 left-0 w-full h-1 rounded-b-sm" v-show="commentLength > 1"></div>
-                    <img src="@/images/send.svg" class="w-7" alt="">
+                    <div :style="{backgroundImage: lengthPie}" class="absolute right-0 bottom-0 left-0 h-1" v-show="commentLength > 1"></div>
+                    <img src="@/images/send.svg" class="w-7" :class="{'invert': !cannotSendComment  && listColor[2] > 7}" alt="">
                     <p>{{ $t('other.send') }}</p>
                 </button>
             </div>
         </footer>
+
+        <!-- Color Picker -->
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-sm" v-show="dropdownOpen == 0">
+            <ColorPicker @colors-modified="listColor = $event" :hue="listColor[0]" :saturation="listColor[1]" :lightness="listColor[2]"/>
+        </div>
+
+        <!-- Emoji Picker -->
+        <div :style="{backgroundColor: darkParsedColor}" class="box-border flex overflow-x-auto flex-wrap gap-2 p-2 my-1 rounded-sm" v-show="dropdownOpen == 1">
+            <button v-for="index in EMOJI_COUNT" class="min-h-[2rem] bg-cover select-none min-w-[2rem] button" :style="{backgroundImage: `url(${emojis[index-1]})`}" @click="COMMENT_BOX.insertEmoji({ id: index }); commentLength = parseComment(COMMENT_BOX.getValues()).length" @drag=""></button>
+        </div>
     </section>
 </template>
