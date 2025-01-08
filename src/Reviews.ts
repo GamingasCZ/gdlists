@@ -42,7 +42,7 @@ export const REVIEW_EXTRAS: ReviewList = {
     transparentPage: 0,
     language: SETTINGS.value.language ? 'en' : 'cs',
     whitePage: false,
-    readerMode: false,
+    readerMode: true,
     font: 0
 }
 
