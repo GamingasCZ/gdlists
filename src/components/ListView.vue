@@ -54,6 +54,8 @@ onUnmounted(() => {
 
 let gdlists = useI18n().t('other.websiteName')
 
+let lastScroll = 0
+const postContent = ref<HTMLDivElement>()
 const loadContent = async () => {
   let randomData = null
   if (props.randomList) {
@@ -61,10 +63,16 @@ const loadContent = async () => {
   }
   props.isReview ? loadReview(randomData) : loadList(randomData)
   if (SETTINGS.value.autoComments) {
-    window.addEventListener("scroll", () => {
+    window.addEventListener("scroll", (e: MouseEvent) => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
-      if (document.documentElement.clientHeight + document.documentElement.scrollTop > document.documentElement.scrollHeight - 100)
+      let postBottom = postContent.value?.clientHeight+postContent.value?.clientTop
+      let currentScroll = document.documentElement.clientHeight + document.documentElement.scrollTop
+      
+      if (currentScroll < postBottom + 100 && currentScroll - lastScroll < 0 && scrolledToEnd.value)
+        scrolledToEnd.value = false
+      else if (currentScroll > postBottom + 150)
         scrolledToEnd.value = true
+      lastScroll = currentScroll
     })
   }
 }
@@ -593,7 +601,7 @@ const imageIndex = ref(-1)
       </div>
 
       <!-- List -->
-      <div v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
+      <div ref="postContent" v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
         <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
           <component :is="[LevelCard, LevelCardCompact, LevelCardTable][SETTINGS.levelViewMode]" v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
             class="levelCard"
@@ -616,7 +624,7 @@ const imageIndex = ref(-1)
         </LevelCardTableTable>
       </div>
       
-      <div v-else v-show="!commentsShowing && !reviewLevelsOpen">
+      <div ref="postContent" v-else v-show="!commentsShowing && !reviewLevelsOpen">
         <!-- Review -->
         <section id="reviewText" :style="{fontFamily: pickFont(LIST_DATA.data.font)}" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0 || SETTINGS.disableTL, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2 && !SETTINGS.disableTL, '!text-black': LIST_DATA.data.whitePage}">
           <DataContainer

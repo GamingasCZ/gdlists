@@ -266,7 +266,7 @@ function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     if (!$forceToken) $token = $auth;
     else $token = $forceToken;
     
-    if (!$skipMomentToken) {
+    if (!$skipMomentToken && isset($_COOKIE["momentToken"])) {
         $getToken = $_COOKIE["momentToken"];
         if ($getToken) {
             $momentToken = verifyMomentToken($getToken);
