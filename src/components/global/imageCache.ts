@@ -13,6 +13,8 @@ export var lastVisitedExternalPath = {
 export var storageCache: ImageStorage
 export var lastOpenedTab = 0
 export const setLastOpenedTab = (to: number) => lastOpenedTab = to
+export var lastColor = null
+export const setLastColor = (to: string | null) => lastColor = to
 
 export const setExtCache = (currTree: [string, number][], currSub: number) => {
     lastVisitedExternalPath = {

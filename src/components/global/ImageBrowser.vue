@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { computed } from "vue";
 import axios from "axios";
 import type { ImageFolder, ImageStorage } from "@/interfaces";
 import { hasLocalStorage } from "@/siteSettings";
-import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath, setExtCache } from "./imageCache";
+import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath, setExtCache, lastColor, setLastColor } from "./imageCache";
 import Dropdown from "../ui/Dropdown.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
@@ -294,6 +294,9 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
         if (currPath?.tree) {
             currentExtFolder.value = currPath.tree
             subfolderExtLevel.value = currPath.subfolder
+
+            if (lastColor)
+                modifyColors(chroma(lastColor))
             return refreshContent(currPath.tree[currPath.subfolder], true)
         }
 
@@ -335,6 +338,9 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
     if (currPath?.tree) {
         currentFolder.value = currPath.tree
         subfolderLevel.value = currPath.subfolder
+        
+        if (lastColor)
+            modifyColors(chroma(lastColor))
         return refreshContent(currPath.tree[currPath.subfolder])
     }
 
@@ -610,7 +616,7 @@ const editFolder = () => {
 
     folderDetails.value = {
         name: name,
-        color: chroma(currentColor).hsl()
+        color: chroma(folderColor.value).hsl()
     }
     folderDetails.value.color[2] *= 64
     nextTick(() => folderNameEl.value?.focus())
@@ -736,28 +742,35 @@ const isSelected = (index: number) => {
 const randomAssElement = ref<HTMLDivElement>()
 let currentColor = "#000000"
 const modifyColors = (newColor: Color | null, reset?: boolean) => {
+
+    console.log(newColor)
     let assParent = randomAssElement.value?.parentElement
     if (reset && !newColor) {
         assParent?.style.setProperty("--primaryColor", null)
         assParent?.style.setProperty("--secondaryColor", null)
         assParent?.style.setProperty("--brightGreen", null)
+        setLastColor(null)
         return
     }
-    currentColor = newColor?.hex()
+    currentColor = newColor?.hex()!
+    setLastColor(currentColor)
     let hue = newColor?.hsl()[0] ?? 0
     assParent?.style.setProperty("--primaryColor", chroma.hsl(hue, 0.9, 0.17).hex())
     assParent?.style.setProperty("--secondaryColor", chroma.hsl(hue, 0.23, 0.1).hex())
     assParent?.style.setProperty("--brightGreen", chroma.hsl(hue, 0.53, 0.63).hex())
 }
 
-// Load images from cache or server
-refreshContent(lastVisitedPath, false)
+onMounted(() => {
+    // Load images from cache or server
+    refreshContent(lastVisitedPath, false)
+    
+    if (hasLocalStorage()) {
+        allExternalImages = JSON.parse(localStorage.getItem("externalImages")!) ?? []
+        allExternalFolders = JSON.parse(localStorage.getItem("extImgFolders")!) ?? []
+        refreshContent(lastVisitedExternalPath, true)
+    }
+})
 
-if (hasLocalStorage()) {
-    allExternalImages = JSON.parse(localStorage.getItem("externalImages")!) ?? []
-    allExternalFolders = JSON.parse(localStorage.getItem("extImgFolders")!) ?? []
-    refreshContent(lastVisitedExternalPath, true)
-}
 
 </script>
 
