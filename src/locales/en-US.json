@@ -817,7 +817,8 @@
     "fontSize": "Font Size",
     "indent": "Indent First Line",
     "isEmpty": "%s is empty!",
-    "imgCount": "{count} image | {count} images"
+    "imgCount": "{count} image | {count} images",
+    "decoOnly": "Decoration Only"
   },
   "review": {
     "columnSetting": "{0} column",

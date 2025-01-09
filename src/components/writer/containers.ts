@@ -127,7 +127,7 @@ const containers: Containers = {
             },
             {
                 key: "onlyDeco",
-                title: 'Pouze dekorativní',
+                title: i18n.global.t('reviews.decoOnly'),
                 type: [2],
                 default: false
             },

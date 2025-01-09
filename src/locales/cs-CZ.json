@@ -818,7 +818,8 @@
     "fontSize": "Velikost písma",
     "indent": "Odsazení prvního řádku",
     "isEmpty": "%s je prázdná!",
-    "imgCount": "{count} obrázek | {count} obrázků"
+    "imgCount": "{count} obrázek | {count} obrázků",
+    "decoOnly": "Pouze dekorativní"
   },
   "review": {
     "columnSetting": "{0} sloupec",
