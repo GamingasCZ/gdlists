@@ -249,7 +249,8 @@
     "inLists": "in {count} list | in {count} lists",
     "addToList": "Add to List",
     "pickedLevels": "{count} level selected | {count} levels selected",
-    "noContents": "No contents available!"
+    "noContents": "No contents available!",
+    "contents": "Contents"
   },
   "navbar": {
     "editor": "Create",

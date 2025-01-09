@@ -496,7 +496,7 @@ const imageIndex = ref(-1)
     <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
   
-  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.jumpTo')">
+  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.contents')">
     <PickerPopup v-model="jumpSearch">
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
         <span>{{ $t('listViewer.noGuessJumping') }}</span>
@@ -552,6 +552,7 @@ const imageIndex = ref(-1)
         :open-dialogs="[commentsShowing, reviewLevelsOpen]"
         :ratings="LIST_RATING"
         :hidden="LIST_DATA.hidden"
+        :color="LIST_COL"
       />
     </header>
 

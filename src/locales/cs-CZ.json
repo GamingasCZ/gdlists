@@ -511,7 +511,8 @@
     "inLists": "v {count} seznamu | v {count} seznamech",
     "addToList": "Přidat do seznamu",
     "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely",
-    "noContents": "Obsah není dostupný!"
+    "noContents": "Obsah není dostupný!",
+    "contents": "Obsah"
   },
   "level": {
     "levelID": "ID levelu",
