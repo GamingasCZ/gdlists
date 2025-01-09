@@ -8,6 +8,7 @@ const props = defineProps<{
     options: string[]
     icons?: string[]
     button: HTMLElement
+    noTeleport?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -37,7 +38,7 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 
 <template>
     <Transition name="fade" >
-        <Teleport to="body">
+        <Teleport to="body" :disabled="noTeleport">
             <div ref="dropdown" @mousedown.prevent="" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
                 <div
                 class="flex flex-col bg-opacity-90 rounded-md max-w-60 min-w-40 bg-lof-200" id="tooltip">
