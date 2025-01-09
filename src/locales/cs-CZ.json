@@ -510,7 +510,8 @@
     "inReviews": "v {count} recenzi | v {count} recenzích",
     "inLists": "v {count} seznamu | v {count} seznamech",
     "addToList": "Přidat do seznamu",
-    "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely"
+    "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely",
+    "noContents": "Obsah není dostupný!"
   },
   "level": {
     "levelID": "ID levelu",

@@ -248,7 +248,8 @@
     "inReviews": "in {count} review | in {count} reviews",
     "inLists": "in {count} list | in {count} lists",
     "addToList": "Add to List",
-    "pickedLevels": "{count} level selected | {count} levels selected"
+    "pickedLevels": "{count} level selected | {count} levels selected",
+    "noContents": "No contents available!"
   },
   "navbar": {
     "editor": "Create",
