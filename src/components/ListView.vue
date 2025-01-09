@@ -501,7 +501,7 @@ const imageIndex = ref(-1)
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
         <span>{{ $t('listViewer.noGuessJumping') }}</span>
       </template>
-      <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS.filter(x => x[3].toLowerCase().includes(jumpSearch.toLowerCase()))" :text="link[3]" :icon-index="link[2]" />
+      <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS.filter(x => x[3].toLowerCase().includes(jumpSearch.toLowerCase()))" :text="link[3]" :icon-index="link[0]" :heading-level="link[2]-1" />
       <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="(!isReview || reviewLevelsOpen) && cardGuessing == -1" v-for="level in LIST_DATA.data.levels.filter(x => x.levelName.toLowerCase().includes(jumpSearch.toLowerCase()))" :data="level" />
   </PickerPopup>
   </DialogVue>

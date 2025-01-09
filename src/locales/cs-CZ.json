@@ -817,7 +817,8 @@
     "splitPg": "Rozdělit do odstavce",
     "fontSize": "Velikost písma",
     "indent": "Odsazení prvního řádku",
-    "isEmpty": "%s je prázdná!"
+    "isEmpty": "%s je prázdná!",
+    "imgCount": "{count} obrázek | {count} obrázků"
   },
   "review": {
     "columnSetting": "{0} sloupec",

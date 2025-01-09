@@ -816,7 +816,8 @@
     "splitPg": "Split into Paragraphs",
     "fontSize": "Font Size",
     "indent": "Indent First Line",
-    "isEmpty": "%s is empty!"
+    "isEmpty": "%s is empty!",
+    "imgCount": "{count} image | {count} images"
   },
   "review": {
     "columnSetting": "{0} column",
