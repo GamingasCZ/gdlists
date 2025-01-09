@@ -27,27 +27,27 @@ const actions = [
 	],
 	[
 		["view", i18n.global.t('reviews.preview'),, i18n.global.t('other.preview')],
-		["md", i18n.global.t('reviews.md'),,i18n.global.t('reviews.formatting')],
+		// ["md", i18n.global.t('reviews.md'),,i18n.global.t('reviews.formatting')],
 	],
 	[
-		["heading1", i18n.global.t('reviews.title', ['1'])],
-		["heading2", i18n.global.t('reviews.title', ['2'])],
-		["heading3", i18n.global.t('reviews.title', ['3'])],
+		["heading1", i18n.global.t('reviews.title', ['1']),, 'Nadpisy'],
+		// ["heading2", i18n.global.t('reviews.title', ['2'])],
+		// ["heading3", i18n.global.t('reviews.title', ['3'])],
 	],
 	[
-		["alignLeft", i18n.global.t('reviews.align', [i18n.global.t('reviews.aLeft')]), "left"],
-		["alignCenter", i18n.global.t('reviews.align', [i18n.global.t('reviews.aCenter')]), "center"],
-		["alignRight", i18n.global.t('reviews.align', [i18n.global.t('reviews.aRight')]), "right"],
-		["alignJustify", i18n.global.t('reviews.align', [i18n.global.t('reviews.aJustify')]), "justify"]
+		["alignLeft", i18n.global.t('reviews.align', [i18n.global.t('reviews.aLeft')]), "left", 'Zarovnání'],
+		// ["alignCenter", i18n.global.t('reviews.align', [i18n.global.t('reviews.aCenter')]), "center"],
+		// ["alignRight", i18n.global.t('reviews.align', [i18n.global.t('reviews.aRight')]), "right"],
+		// ["alignJustify", i18n.global.t('reviews.align', [i18n.global.t('reviews.aJustify')]), "justify"]
 	],
 	[
-		["divisor", i18n.global.t('reviews.addDivisor')],
-		["showList", i18n.global.t('reviews.listLink')],
-		["showLevel", i18n.global.t('reviews.showLevel')],
 		["showImage", i18n.global.t('reviews.addImage')],
 		["addVideo", i18n.global.t('reviews.addVideo')],
-		["showRating", i18n.global.t('reviews.dispRatings')],
 		["addCarousel", i18n.global.t('reviews.makeCarousel')],
+		["divisor", i18n.global.t('reviews.addDivisor')],
+		["showLevel", i18n.global.t('reviews.showLevel')],
+		["showRating", i18n.global.t('reviews.dispRatings')],
+		["showList", i18n.global.t('reviews.listLink')],
 	],
 ]
 // ["showCollab", i18n.global.t('reviews.addUsers')],
@@ -137,14 +137,14 @@ if (SETTINGS.value.scrollNavbar)
 </script>
 
 <template>
-	<section @click.stop="" :style="{top: barPos}" class="flex transition-[top] overflow-auto sticky z-20 items-center p-1 mt-6 mb-2 text-3xl text-white rounded-md bg-greenGradient">
+	<section @click.stop="" :style="{top: barPos}" class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center p-1 mb-2 text-3xl text-white">
 		<div class="flex gap-3 items-center" v-show="showFormatting">
 			<button
 				v-for="(button, buttonIndex) in FORMATTING"
 				@click="doFormatting(buttonIndex)"
 				@mousedown.prevent=""
 				:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view'}"
-				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+				class="flex flex-col items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
 			>
 				<img :src="icons[buttonIndex]" class="w-6 pointer-events-none min-w-6">
 				<span class="text-sm pointer-events-none">{{ button }}</span>
@@ -201,7 +201,7 @@ if (SETTINGS.value.scrollNavbar)
 					@click="doAction(index, button, $event.shiftKey)"
 					@mousedown.prevent=""
 					:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view', 'font-bold': button[0] == 'default'}"
-					class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+					class="flex flex-col items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
 				>
 					<img :src="`${BASE_URL}/formatting/${button[0]}.svg`" class="w-6 pointer-events-none min-w-6">
 					<span class="text-sm pointer-events-none" v-if="button[3]">{{ button[3] }}</span>
@@ -218,11 +218,12 @@ if (SETTINGS.value.scrollNavbar)
 			ref="columnButton"
 			@click="doAction(5, columnData)"
 			@mousedown.prevent=""
-			class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+			class="flex flex-col items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
 			v-show="!showFormatting && !previewEnabled"
 		>
-			<img :src="`${BASE_URL}/formatting/twoColumns.svg`" class="w-6 pointer-events-none min-w-6">
-			<span class="w-max text-sm pointer-events-none">{{ selectedNest[0] > -1 ? $t('reviews.editColumn') : $t('reviews.addColumn') }}</span>
+			<img v-if="selectedNest[0] == -1" :src="`${BASE_URL}/formatting/twoColumns.svg`" class="w-6 pointer-events-none min-w-6">
+			<img v-else src="@/images/gear.svg" class="w-6 pointer-events-none min-w-6">
+			<span class="w-max text-sm pointer-events-none">{{ $t('reviews.addColumn') }}</span>
 		</button>
 
 		<Dropdown v-if="columnOptionsShown && selectedNest[0] != -1" @picked-option="emit('columnCommand', $event)" :button="columnButton" @close="columnOptionsShown = false">

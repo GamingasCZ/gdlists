@@ -49,7 +49,7 @@ const FONTS = [["Poppins", 0],
     </div>
     
     <div class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 h-[40rem] overflow-y-scroll">
-      <SectionDivider text="Základní" />
+      <SectionDivider :text="$t('other.general')" />
 
       <!-- <p class="ml-1 text-xl">{{ $t('reviews.description') }}</p>
       <div class="relative">
@@ -65,7 +65,7 @@ const FONTS = [["Poppins", 0],
       <Option :name="$t('other.disableComments')" v-model="reviewData.disComments" control="cbox" />
       <Option :name="$t('reviews.language')" v-model="reviewData.language" control="dropdown" :control-options="LANGUAGES" />
 
-      <SectionDivider text="Vzhled" />
+      <SectionDivider :text="$t('settingsMenu.visual')" />
 
       <Option :name="$t('reviews.thumbnail')" :desc="$t('reviews.thumbnailHelp')" control="inline-slot" :style="{backgroundImage: `url(${pre}/userContent/${uid}/${reviewData.thumbnail[0]}.webp)`}">
         <div class="flex gap-2 w-max">
@@ -120,7 +120,7 @@ const FONTS = [["Poppins", 0],
 
       <Option v-model="reviewData.font" :name="$t('reviews.font')" control="dropdown" :control-options="FONTS" />
 
-      <SectionDivider text="Přístupnost" />
+      <SectionDivider :text="$t('settingsMenu.access')" />
 
       <Option :name="$t('reviews.readerMode')" :desc="$t('reviews.readerModeHelp')" v-model="reviewData.readerMode" control="cbox" />
       <Option :name="$t('reviews.whitePage')" :desc="$t('reviews.whitePageHelp')" v-model="reviewData.whitePage" control="cbox" />

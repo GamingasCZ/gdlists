@@ -445,7 +445,8 @@
     "folderRemove4": "Na obrázky v podsložkách se nevztahuje následující výběr.",
     "deleteFolders": "Smazat složky",
     "extFolderRm": "Co by se mělo stát s jejím obsahem a obsahem podsložek?",
-    "linkCopied": "Odkaz zkopírován!"
+    "linkCopied": "Odkaz zkopírován!",
+    "general": "Základní"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -752,7 +753,7 @@
     "noLevelsAddedYet": "Zatím jsi nepřidal žádné levely!",
     "listShowcase": "Klikni pro výběr příspěvku",
     "editColumn": "Upravit sloupec",
-    "addColumn": "Přidat sloupec",
+    "addColumn": "Sloupec",
     "pickUsers": "Klikni pro přidání uživatelů",
     "editMembers": "Upravit členy",
     "displayColumns": "Zobrazení sloupců",

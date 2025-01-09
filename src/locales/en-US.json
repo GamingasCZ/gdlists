@@ -471,7 +471,8 @@
     "folderNameExists": "A folder with the same name already exists!",
     "folderNameShort": "Folder name is too short.",
     "extFolderRm": "What should be done with its contents of this folder and its subfolders?",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "general": "General"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -745,7 +746,7 @@
     "pickShowcase": "Pick a level to showcase.",
     "listShowcase": "Click to pick a post",
     "editColumn": "Edit Column",
-    "addColumn": "Add Column",
+    "addColumn": "Column",
     "levelNo": "Level {0} is missing a {1}!",
     "nameToo": "The name of the review is too {0}!",
     "noLevels": "No levels to review have been added!",

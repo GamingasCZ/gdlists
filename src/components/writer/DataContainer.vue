@@ -118,8 +118,11 @@ const hasText = ref(checkHasText())
 		</p>
 			
 		<slot></slot>
-		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] right-[-30px] box-border max-sm:right-0">
-			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="p-0.5 opacity-0 bg-lof-400"><img src="@/images/gear.svg" class="w-6 invert"></button>
+		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-16 box-border max-sm:right-0">
+			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="flex flex-col items-center p-0.5 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
+				<img src="@/images/gear.svg" class="w-6 invert">
+				<p class="max-sm:hidden">{{ $t('other.settings') }}</p>
+			</button>
 		</div>
 
 		<ContainerSettings

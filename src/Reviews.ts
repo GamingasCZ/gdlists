@@ -102,8 +102,6 @@ export function checkReview() {
     if (reviewData.value.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
     if (reviewData.value.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
 
-    if (!reviewData.value.levels.length && !reviewData.value.disabledRatings) return err(i18n.global.t('reviews.noLevels'))
-
     reviewData.value.ratings.forEach(customRating => {
         if (!customRating.name.length) {
             error.mess = i18n.global.t('reviews.ratingMissingName')

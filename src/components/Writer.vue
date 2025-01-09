@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, provide, reactive, ref, watch } from "vue";
 import DialogVue from "./global/Dialog.vue";
-import Header from "./writer/WriterHeader.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterRatings from "./writer/WriterRatings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
@@ -799,25 +798,25 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
         </DialogVue>
 
-        <Header :class="{ 'pointer-events-none opacity-20': disableEdits }" :editing="editing" :has-levels="hasLevels"
+        <!-- <Header :class="{ 'pointer-events-none opacity-20': disableEdits }" :editing="editing" :has-levels="hasLevels"
             :has-unrated="hasUnrated" :uploading="uploadInProgress" @update="updateReview"
-            @remove="openDialogs.removeDialog = true" @upload="startUpload" @open-dialog="openDialogs[$event] = true" />
+            @remove="openDialogs.removeDialog = true" @upload="startUpload" @open-dialog="openDialogs[$event] = true" /> -->
 
         <section class="max-w-[90rem] mx-auto">
             <!-- Hero -->
-            <div class="pb-16 pl-2 bg-opacity-10 bg-gradient-to-t to-transparent rounded-b-md sm:pl-10 from-slate-400"
+            <div class="flex flex-col items-center my-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
                 <input v-model="reviewData.reviewName" type="text" :maxlength="40" :disabled="editing"
                     :placeholder="$t('reviews.reviewName')"
-                    class="text-5xl disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
+                    class="text-6xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true"
-                    class="flex gap-2 items-center mt-3 font-bold text-white">
+                    class="flex gap-2 justify-center items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
                     <input type="text" v-once :maxlength="60" v-model="reviewData.tagline" autofocus
-                        class="text-lg italic bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400"
+                        class="text-lg italic text-center bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400"
                         :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
                     <button @click="reviewData.tagline = ''; tagline = false">
                         <img src="@/images/trash.svg" alt=""
@@ -825,13 +824,6 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                     </button>
                 </div>
             </div>
-
-            <!-- Formatting -->
-            <FormattingBar :class="{ 'pointer-events-none opacity-20': disableEdits }"
-                :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
-                @add-container="(el, above) => addContainer(el, 0, false, above)"
-                @set-alignment="setAlignment(selectedContainer[0], $event)" @column-command="columnCommand($event)"
-                @split-paragraph="splitParagraph" />
 
             <!-- Back from draft preview -->
             <div v-if="disableEdits" @click="exitPreview"
@@ -846,6 +838,14 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 :style="{ fontFamily: pickFont(reviewData.font) }" id="reviewText" :data-white-page="reviewData.whitePage"
                 class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full"
                 :class="{ 'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2 && !SETTINGS.disableTL }">
+                
+                <!-- Formatting -->
+                <FormattingBar :class="{ 'pointer-events-none opacity-20': disableEdits }"
+                    :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
+                    @add-container="(el, above) => addContainer(el, 0, false, above)"
+                    @set-alignment="setAlignment(selectedContainer[0], $event)" @column-command="columnCommand($event)"
+                    @split-paragraph="splitParagraph" />
+                
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review
                     @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
 
@@ -910,6 +910,35 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 <LevelCard v-for="(l, index) in reviewData.levels" v-bind="l" :disable-stars="true"
                     :level-index="index" />
             </section>
+
+            <!-- Footer buttons (upload, settings...) -->
+            <div class="flex gap-3 justify-center items-center mt-8 text-xl">
+
+                <button @click="openDialogs.settings = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
+                    <span >{{ $t('other.settings') }}</span>
+                </button>
+
+                <button :disabled="uploadInProgress" v-if="!editing" @click="uploadReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                    <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
+                    <img v-else src="@/images/upload.svg" alt="" class="w-7">
+                    <span class="max-sm:hidden">{{ $t('editor.upload') }}</span>
+                </button>
+                <div class="flex gap-2" v-else>
+                    <button :disabled="uploadInProgress" @click="updateReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                        <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
+                        <img v-else src="@/images/upload.svg" alt="" class="w-7">
+                        <span class="max-sm:hidden">{{ $t('editor.update') }}</span>
+                    </button>
+                    <button :disabled="uploadInProgress" @click="removeReview()" class="flex gap-4 px-3 py-2 text-black bg-red-400 rounded-md button">
+                        <img src="@/images/del.svg" alt="" class="w-7">
+                    </button>
+                </div>
+
+                <button @click="openDialogs.drafts = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
+                    <span >{{ $t('reviews.drafts') }}</span>
+                </button>
+
+            </div>
         </section>
 
     </main>
