@@ -200,7 +200,9 @@ async function loadReview(loadedData: ReviewList | null) {
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
     reviewData.value.levels = LIST_DATA.value.data.levels;
     reviewData.value.ratings = LIST_DATA.value.data.ratings;
-    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
+
+    let indicies = [0,0,0,0,0,0]
+    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers, indicies)
     LIST_RATING.value = res[3]
 
     LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
