@@ -77,7 +77,7 @@ const noClickWhenEditing = (e: Event) => {
 
 const preview = inject<(arg0: number) => void>("imagePreviewFullscreen", null)
 const fullscreenImage = () => {
-    if (props.editable || preview == null) return
+    if (props.editable || preview == null || props.settings?.onlyDeco) return
 
     preview(props.id)
 }

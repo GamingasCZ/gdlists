@@ -181,6 +181,9 @@ export function parseReviewContainers(containers: object[]) {
                 break;
 
             case "showImage":
+                // Decorative only image
+                if (container.settings?.onlyDeco) return
+
                 indicies[1] += 1
                 main.push([container.type, indicies[1], lastHeader+1, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
                 break;

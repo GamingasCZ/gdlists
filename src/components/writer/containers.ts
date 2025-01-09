@@ -125,6 +125,12 @@ const containers: Containers = {
                 type: [0],
                 default: ""
             },
+            {
+                key: "onlyDeco",
+                title: 'Pouze dekorativní',
+                type: [2],
+                default: false
+            },
         ],
         errorCheck: (settings: object) => settings.url.length ? success : error(0)
     },

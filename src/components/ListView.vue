@@ -469,10 +469,10 @@ const imagesArray = computed(() => {
   let allImages: ReviewContainer[] = []
   let data = (LIST_DATA.value.data as ReviewList).containers
   data.forEach(con => {
-    if (con.type == "showImage") allImages.push(con)
+    if (con.type == "showImage" && !con.settings?.onlyDeco) allImages.push(con)
     if (con.type == "twoColumns") {
       con.settings.components.forEach(sub => {
-        sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
+        sub.forEach(subc => {if (subc?.type == "showImage" && !subc.settings?.onlyDeco) allImages.push(subc)})
       })
     }
     if (con.type == "addCarousel") {
