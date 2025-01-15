@@ -59,11 +59,12 @@ const postContent = ref<HTMLDivElement>()
 const loadContent = async () => {
   let randomData = null
   if (props.randomList) {
-    randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}}).then(res => res.data)
+    randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})
   }
-  props.isReview ? loadReview(randomData) : loadList(randomData)
+  props.isReview ? await loadReview(randomData) : await loadList(randomData)
+
   if (SETTINGS.value.autoComments) {
-    window.addEventListener("scroll", (e: MouseEvent) => {
+    window.addEventListener("scroll", () => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
       let postBottom = postContent.value?.clientHeight+postContent.value?.clientTop
       let currentScroll = document.documentElement.clientHeight + document.documentElement.scrollTop
