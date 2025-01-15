@@ -36,7 +36,7 @@ watch(props, () => { // only refresh comments once
         <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
         
         <!-- Comments disabled info -->
-        <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-full max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">
+        <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">
             <img src="../../images/noComments.svg" class="w-12 opacity-60" alt="">
             <span>{{ $t('listViewer.commDisableHelp', [isReview ? $t('listViewer.thisReview') : $t('listViewer.thisList')]) }}</span>
         </div>

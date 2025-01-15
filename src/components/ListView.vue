@@ -266,6 +266,9 @@ const tryJumping = (ind: number, forceJump = false) => {
     jumpToPopupOpen.value = false;
     cardGuessing.value = -1
   }
+
+  commentsShowing.value = false
+  scrolledToEnd.value = false
   
   if (isJumpingFromFaves && parseInt(isJumpingFromFaves) == ind) {
     cardGuessing.value = -1
@@ -444,6 +447,8 @@ const saveCollab = (ind: number) => {
 
 const jumpToContent = (type: string, index: number) => {
   // let get = document.querySelector(`p[data-type=${type}]:nth-of-type(${index+1})`)
+  commentsShowing.value = false
+  scrolledToEnd.value = false
   let get = document.querySelectorAll(`div[data-type=${type}]`).item(index-1)
   get?.scrollIntoView({'behavior': "smooth"})
   jumpToPopupOpen.value = false
@@ -503,7 +508,7 @@ const imageIndex = ref(-1)
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
         <span>{{ $t('listViewer.noGuessJumping') }}</span>
       </template>
-      <template v-if="!REVIEW_CONTENTS.length && !jumpSearch.length" #error>
+      <template v-if="isReview && !REVIEW_CONTENTS.length && !jumpSearch.length" #error>
         <span>{{ $t('listViewer.noContents') }}</span>
       </template>
       <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS.filter(x => x[3].toLowerCase().includes(jumpSearch.toLowerCase()))" :text="link[3]" :icon-index="link[0]" :heading-level="link[2]-1" />
