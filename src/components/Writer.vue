@@ -12,9 +12,8 @@ import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import { useI18n } from "vue-i18n";
-import { WriterGallery, type ReviewList, type TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, checkReview, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
-import ReviewHelp from "./writer/ReviewHelp.vue"
+import { DataContainerAction, WriterGallery, type ReviewList, type TEXT_ALIGNMENTS } from "@/interfaces";
+import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -37,7 +36,9 @@ import CarouselPicker from "./writer/CarouselPicker.vue";
 import { deleteCESelection } from "./global/parseEditorFormatting";
 import LevelCard from "./global/LevelCard.vue";
 import { ImgFail, notifyError } from "./imageUpload";
-
+import REVIEW from "@/writers/Writer";
+import WriterViewer from "./writer/WriterViewer.vue";
+import WriterVisuals from "./writer/WriterVisuals.vue";
 document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
 
 const props = defineProps<{
@@ -237,6 +238,20 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 
 }
 
+const dataContainerCommand = (command: DataContainerAction, data: any[]) => {
+    switch (command) {
+        case DataContainerAction.Move:
+            moveContainer(...data)
+            break;
+        case DataContainerAction.Remove:
+            removeContainer(...data)
+            break;
+        case DataContainerAction.MakeParagraph:
+            moveToParagraph(...data)
+            break;
+    }
+}
+
 const columnCommand = (index: number) => {
     let nest = reviewData.value.containers[selectedNestContainer.value[0]]
     let column = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
@@ -342,8 +357,6 @@ const taglinePlaceholders = [
 ]
 const tagline = ref(reviewData.value.tagline)
 
-const buttonState = ref([0, 0])
-
 const dataContainers = ref()
 const modifyImageURL = (newUrl: string) => {
     // Review background
@@ -401,7 +414,7 @@ const modifyImageURL = (newUrl: string) => {
 const errorStamp = ref(Date.now())
 const errorText = ref("")
 const checkForErrors = () => {
-    let check = checkReview()
+    let check = REVIEW.general.clientPostValidation()
     if (!check?.success) {
         errorStamp.value = Date.now()
         errorText.value = check?.error
@@ -743,7 +756,6 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
         <DialogVue :open="openDialogs.levels" :title="$t('editor.levels')" @close-popup="openDialogs.levels = false"
             :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <WriterLevels ref="selectedLevel" />
             <CollabEditor v-if="openDialogs.collabs" :level-array="reviewData.levels" :index="0"
                 :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
             <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')"
@@ -807,7 +819,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
             <div class="flex flex-col items-center my-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
                 <input v-model="reviewData.reviewName" type="text" :maxlength="40" :disabled="editing"
-                    :placeholder="$t('reviews.reviewName')"
+                    :placeholder="REVIEW.general.titlePlaceholder"
                     class="text-6xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true"
                     class="flex gap-2 justify-center items-center mt-3 font-bold text-white">
@@ -817,7 +829,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
                     <input type="text" v-once :maxlength="60" v-model="reviewData.tagline" autofocus
                         class="text-lg italic text-center bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400"
-                        :placeholder="taglinePlaceholders[Math.floor(Math.random() * taglinePlaceholders.length)]">
+                        :placeholder="REVIEW.general.placeholderTaglines[Math.floor(Math.random() * taglinePlaceholders.length)]">
                     <button @click="reviewData.tagline = ''; tagline = false">
                         <img src="@/images/trash.svg" alt=""
                             class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md min-w-6 group-focus-within:block button">
@@ -832,6 +844,12 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 <button class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg"
                         class="w-6" alt=""> {{ $t('reviews.back') }}</button>
             </div>
+
+            <!-- Levels -->
+            <WriterLevels />
+
+            <!-- Decoration -->
+            <WriterVisuals :review-data="reviewData" />
 
             <!-- Editor -->
             <section v-show="previewContent == 0 || previewMode" ref="writer"
@@ -849,47 +867,20 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review
                     @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
 
-                <ReviewHelp v-if="!reviewData.containers.length" :has-levels="hasLevels" :has-ratings="hasUnrated"
-                    :no-ratings="reviewData.disabledRatings" @start-writing="startWriting"
-                    :inverted="reviewData.whitePage" />
+                <!-- Help when no components in writer -->
+                <component
+                    :is="REVIEW.general.writerHelp"
+                    v-if="!reviewData.containers.length"
+                    @start-writing="startWriting"
+                    :inverted="reviewData.whitePage"
+                />
 
-                <DataContainer v-for="(container, index) in reviewData.containers"
-                    ref="dataContainers"
-                    v-memo="[previewMode, containerLastAdded, selectedContainer, selectedNestContainer]"
-                    v-bind="CONTAINERS[container.type]"
-                    @remove-container="removeContainer(index)"
-                    @move-container="moveContainer(index, $event)"
-                    @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
-                    @settings-button="buttonState = [$event, selectedContainer[0]]"
-                    @add-paragraph="moveToParagraph(index)"
-                    @text-modified="container.data = $event"
-                    :type="container.type"
-                    :current-settings="container.settings"
-                    :class="[CONTAINERS[container.type].styling ?? '']"
-                    :style="{ textAlign: container.align }"
-                    :key="container.id"
-                    :focused="previewMode && selectedContainer[0] == index"
+                <WriterViewer
+                    @call-command="dataContainerCommand($event.command, $event.data)"
+                    :review-data="reviewData"
                     :editable="previewMode"
-                    :text="container.data"
-                >
-                    <div class="flex flex-wrap w-full" :style="{ justifyContent: flexNames[container.align] }">
-                        <component
-                            v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                            :is="elements"
-                            :key="container.id"
-                            v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                            @clear-button="buttonState[0] = ''"
-                            @remove-subcontainer="container.extraComponents -= 1"
-                            @remove="removeContainer(index)"
-                            :button-state="buttonState"
-                            :settings="container.settings"
-                            :index="index"
-                            :sub-index="subIndex"
-                            :editable="previewMode"
-                            :align="container.align"
-                        />
-                    </div>
-                </DataContainer>
+                    :container-last-added="containerLastAdded"
+                />
 
                 <div class="text-xs" v-if="!disableEdits && reviewData.containers.length">
                     <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">

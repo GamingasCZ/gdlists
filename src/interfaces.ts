@@ -284,6 +284,10 @@ export enum DraftAction {
   Remove, Preview, Load, Save, Clone, Disjoin
 }
 
+export enum DataContainerAction {
+  Move, Remove, MakeParagraph
+}
+
 export interface ReviewContainer {
   align: 'left' | 'center' | 'right' | 'justify'
   data: string

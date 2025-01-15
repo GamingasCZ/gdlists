@@ -11,6 +11,7 @@ import type { FavoritedLevel, Level } from "@/interfaces";
 import PickerPopup from "../global/PickerPopup.vue";
 import LevelBubble from "../global/LevelBubble.vue";
 import axios from "axios";
+import Dropdown from "../ui/Dropdown.vue";
 
 const addLevel = (levelData?: Level | FavoritedLevel) => {
     addReviewLevel(levelData)
@@ -18,6 +19,7 @@ const addLevel = (levelData?: Level | FavoritedLevel) => {
     openedCard.value = reviewData.value.levels.length - 1
 }
 
+const mainRolledOut = ref(true)
 const openedCard = ref(0)
 const updatingPosition = ref(-1)
 const dialogs = inject("openedDialogs")
@@ -81,6 +83,28 @@ const addRandomLevel = () => {
     })
 }
 
+const moreLevOpts = ref<HTMLButtonElement>()
+const moreLevOptOpen = ref(false)
+
+const openMoreDialog = (opt: number) => {
+    switch (opt) {
+        case 0:
+            dialogs.lists[0] = true
+            dialogs.lists[2] = 1
+            break;
+        case 1:
+            addRandomLevel()
+            break;
+        case 2:
+            levelDialogs.value.saved = true
+            break;
+        case 3:
+            levelDialogs.value.import = true
+            break;
+    }
+    moreLevOptOpen.value = false
+}
+
 </script>
 
 <template>
@@ -94,40 +118,62 @@ const addRandomLevel = () => {
         </PickerPopup>
     </Dialog>
 
-    <div class="flex gap-1 mx-1 mb-1">
-        <button @click="addLevel()"
-            class="flex gap-2 p-1 mr-10 bg-black bg-opacity-60 rounded-md button max-sm:p-2 grow"><img class="w-5"
-                src="@/images/addLevel.svg" alt="">{{ $t('other.add') }}</button>
-        <button @click="dialogs.lists[0] = true; dialogs.lists[2] = 1"
-            class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button max-sm:p-2"><img class="w-5"
-                src="@/images/searchOpaque.svg" alt=""><span class="max-sm:hidden">{{ $t('other.searchLevels')
-                }}</span></button>
-        <button @click="addRandomLevel" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button max-sm:p-2"><img
-                class="w-5" src="@/images/dice.svg" alt=""><span class="max-sm:hidden">{{ $t('other.randomLevel')
-                }}</span></button>
-        <button @click="levelDialogs.saved = true"
-            class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button max-sm:p-2"><img class="w-5"
-                src="@/images/savedMobHeader.svg" alt=""><span class="max-sm:hidden">{{ $t('navbar.saved')
-                }}</span></button>
-        <button @click="levelDialogs.import = true"
-            class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button max-sm:p-2"><img class="w-5"
-                src="@/images/filePreview.svg" alt=""><span class="max-sm:hidden">{{ $t('reviews.import')
-                }}</span></button>
-    </div>
-    <div class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 overflow-y-auto flex flex-col gap-2">
-        <div v-if="!reviewData.levels.length"
-            class="flex absolute top-1/2 left-1/2 flex-col items-center w-full text-center opacity-40 -translate-x-1/2 -translate-y-1/2">
-            <img src="@/images/reviews/help1.svg" alt="" class="w-96">
-            <h2 class="text-2xl">{{ $t('reviews.noLevelsYet') }}</h2>
-            <p>{{ $t('reviews.upToTen') }}</p>
-        </div>
+    <section class="mx-auto my-8 mb-4 !text-base text-lof-400 rounded-md bg-lof-200 shadow-drop w-[58rem]">
+        <header class="flex p-2 text-white cursor-pointer" @click="mainRolledOut = !mainRolledOut">
+            <img src="@/images/browseMobHeader.svg" class="mr-3 ml-2 w-8" alt="">
+            <h2 class="text-2xl font-bold grow">{{ $t('editor.levels') }}</h2>
+            <button class="button">
+                <img src="@/images/dropdown.svg" :class="{'rotate-180': mainRolledOut}" class="w-6" alt="">
+            </button>
+        </header>
 
-        <div v-for="(level, index) in reviewData.levels">
-            <EditorCardHeader v-if="openedCard != index" :data="level" :updating-positions="updatingPosition"
-                :index="index" @update-opened-card="openedCard = index" @do-move="moveLevel" />
-            <LevelCard v-else @open-collab-tools="dialogs.collabs = true" @open-tag-popup="dialogs.tags = true"
-                @do-move="moveLevel" @move-controls="enableMoveControls" :updating-positions="updatingPosition"
-                :level-array="reviewData" :data="level" :index="index" />
-        </div>
-    </div>
+        <main v-show="mainRolledOut">
+            <div class="bg-[url(@/images/fade.webp)] bg-repeat-x relative p-2 overflow-y-auto flex flex-col gap-2">
+                <div v-if="!reviewData.levels.length"
+                    class="flex flex-col items-center w-full text-center opacity-40">
+                    <h2 class="text-2xl">Jaké levely budeš hodnotit?</h2>
+                    <section class="flex gap-3 items-center px-2 mt-8 w-full">
+                        <button @click="openMoreDialog(0)" class="flex flex-col gap-3 items-center py-3 text-lg bg-opacity-40 rounded-lg grow hover:bg-black">
+                            <img src="@/images/searchOpaque.svg" class="w-10" alt="">
+                            <p>Procházet levely</p>
+                        </button>
+                        <hr class="w-0.5 h-20 bg-white bg-opacity-20 border-none">
+                        <button class="flex flex-col gap-3 items-center py-3 text-lg bg-opacity-40 rounded-lg grow hover:bg-black">
+                            <img src="@/images/dice.svg" class="w-10" alt="">
+                            <p>Překvap mě!</p>
+                        </button>
+                        <hr class="w-0.5 h-20 bg-white bg-opacity-20 border-none">
+                        <button @click="openMoreDialog(3)" class="flex flex-col gap-3 items-center py-3 text-lg bg-opacity-40 rounded-lg grow hover:bg-black">
+                            <img src="@/images/filePreview.svg" class="w-10" alt="">
+                            <p>Importovat z GD</p>
+                        </button>
+                    </section>
+                </div>
+        
+                <div v-for="(level, index) in reviewData.levels">
+                    <EditorCardHeader v-if="openedCard != index" :data="level" :updating-positions="updatingPosition"
+                        :index="index" @update-opened-card="openedCard = index" @do-move="moveLevel" />
+                    <LevelCard v-else @open-collab-tools="dialogs.collabs = true" @open-tag-popup="dialogs.tags = true"
+                        @do-move="moveLevel" @move-controls="enableMoveControls" :updating-positions="updatingPosition"
+                        :level-array="reviewData" :data="level" :index="index" />
+                </div>
+            </div>
+            <div class="flex gap-2 justify-center items-center">
+                <button @click="addLevel()"
+                    class="flex gap-2 px-2 py-3 text-xl font-bold text-lof-400"><img class="w-7"
+                    src="@/images/addLevel.svg" alt="">{{ 'Přidat level' }}</button>
+                <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
+                <button @click="moreLevOptOpen = true" ref="moreLevOpts" class="p-2 button">
+                    <img src="@/images/levelIcon.svg" class="w-2 rotate-180" alt="">
+                </button>
+            </div>
+            <Dropdown
+                v-if="moreLevOptOpen"
+                @close="moreLevOptOpen = false"
+                @picked-option="openMoreDialog"
+                :button="moreLevOpts"
+                :options="[$t('other.searchLevels'), $t('other.randomLevel'), $t('navbar.saved'), $t('reviews.import')]"
+            />
+        </main>
+    </section>
 </template>

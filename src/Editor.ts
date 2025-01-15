@@ -17,7 +17,7 @@ export const DEFAULT_LEVELLIST: LevelList = {
   description: "",
   pageBGcolor: [140, 0.37, 3],
   diffGuesser: [false, false, false],
-  titleImg: ["", 0, 33, 1, true],
+  titleImg: ["", 0, 100, 1, true],
   translucent: false,
   disComments: false,
   levels: [],
