@@ -31,7 +31,7 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, resetIndentation, reviewData } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
@@ -374,6 +374,7 @@ const listActions = (action: string) => {
       sharePopupOpen.value = true;
       break;
     case "jumpPopup":
+      resetIndentation()
       jumpToPopupOpen.value = true;
       break;
     case "pinList":

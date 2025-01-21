@@ -164,6 +164,7 @@ export const selectedNestContainer = ref(0)
 export const flexNames = { left: "start", center: "center", right: "end", justify: "space-between" }
 
 let lastHeader = 0
+export const resetIndentation = () => lastHeader = 0
 export function parseReviewContainers(containers: object[], indicies: number[]) {
     // types: 0 - image; 1,2,3 - title 1,2,3; 4 - video
     let main: [number, number, number, string][] = []
