@@ -1,6 +1,6 @@
 import { ref } from "vue"
 import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
-import type { FavoritedLevel, Level, ReviewList, ReviewRating } from "./interfaces"
+import type { FavoritedLevel, Level, LevelList, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -30,10 +30,8 @@ export const DEFAULT_RATINGS: ReviewRating[] = [
     },
 ]
 
-export const REVIEW_EXTRAS: ReviewList = {
+export const REVIEW_EXTRAS: () => ReviewList = () => ({
     reviewName: "",
-    thumbnail: ["", 0, 33, 1, true],
-    tagline: "",
     containers: [],
     ratings: [],
     settings: [],
@@ -44,10 +42,10 @@ export const REVIEW_EXTRAS: ReviewList = {
     whitePage: false,
     readerMode: true,
     font: 0
-}
+})
 
-export const addReviewLevel = (levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
-    if (reviewData.value.levels.length >= 10) return
+export const addReviewLevel = (postData: LevelList, levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
+    if (postData.value.levels.length >= 10) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 
     let levelInfo = {
@@ -66,10 +64,10 @@ export const addReviewLevel = (levelData?: Level | FavoritedLevel, toPredefined?
     if (toPredefined)
         predefinedLevelList.value.push(levelInfo)
     else
-        reviewData.value.levels.push(levelInfo)
+        postData.value.levels.push(levelInfo)
 }
 
-export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS })
+export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXTRAS() })
 export const reviewData = ref(DEFAULT_REVIEWDATA())
 
 const funnyErrorMessages = [
@@ -236,6 +234,7 @@ export const getReviewPreview = () => {
 
 export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | false = false) => {
     let ids: number[][] = [[], [], []]
+    if (!data?.containers) return ids
     if (forceIDs === false) {
         data.containers.forEach(container => {
             // embeds aren't nestable, no need to check for columns (phew :D)

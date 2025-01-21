@@ -13,7 +13,7 @@ export const EMOJI_COUNT = 18;
 export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
 export const diffTranslateOffsets = [0, 0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
-export const DEFAULT_LEVELLIST: LevelList = {
+export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   description: "",
   pageBGcolor: [140, 0.37, 3],
   diffGuesser: [false, false, false],
@@ -21,9 +21,11 @@ export const DEFAULT_LEVELLIST: LevelList = {
   translucent: false,
   disComments: false,
   levels: [],
-}
+  tagline: "",
+  thumbnail: ["", 0, 33, 1, true],
+}}
 
-export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
+export const levelList = ref<LevelList>(DEFAULT_LEVELLIST());
 export const predefinedLevelList = ref<Level[]>([]);
 
 export function makeColor(col?: [number, number, number] | string, hex = false): [number, number, number] | string {
@@ -40,7 +42,7 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
 
 export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
-export const newCardBG = () => ({ image: DEFAULT_LEVELLIST.titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
+export const newCardBG = () => ({ image: DEFAULT_LEVELLIST().titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
 
 export function addLevel(values: Level | null, toPredefined?: boolean) {
   let levelInfo: Level = {
@@ -81,11 +83,11 @@ export function testIfImageExists(url: string) {
 }
 
 export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
-  if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
-  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return modifyListBG(0, true, review)
+  if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor))
+  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor)) return modifyListBG(0, true, review)
   if (reset) {
     changeTheme(SETTINGS.value.selectedTheme)
-    return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
+    return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor))
   }
 
   // Default colors

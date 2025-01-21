@@ -1,0 +1,76 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import Tooltip from '../ui/Tooltip.vue';
+import Dropdown from '../ui/Dropdown.vue';
+
+const props = defineProps<{
+    button: object
+}>()
+
+const emit = defineEmits<{
+    (e: 'clicked', action: string): void
+}>()
+
+const base = import.meta.env.BASE_URL
+const but = ref<HTMLButtonElement>()
+const hovering = ref(false)
+const lastSelected = ref(0)
+const iconPath = (x: string | string[]) => {
+    return `${base}/formatting/${typeof x == 'string' ? x : x[lastSelected.value]}.svg`
+}
+
+const dropdownOpen = ref(false)
+const getAction = () => {
+    return typeof props.button.action[1] == 'object'
+        ? props.button?.action[1]?.[lastSelected.value] : props.button?.action?.[1]
+}
+
+
+</script>
+
+<template>
+    <div
+        @click.right.prevent.exact="dropdownOpen = true"
+        @mouseover="hovering = true"
+        @mouseleave="hovering = false"
+        :class="{'!bg-opacity-60 bg-black': false}"
+        ref="but"
+        class="flex relative flex-col items-center w-max rounded-md transition-colors duration-75 group disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
+    >
+        <button
+            @mousedown.prevent=""
+            class="p-1"
+            @click="emit('clicked', getAction())"
+        >
+            <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
+        </button>
+
+        <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title" class="flex relative px-2 w-full rounded-b-md" :class="{'hover:bg-black': button?.dropdownText}">
+            <span v-show="button.title" :class="{'font-bold': button.bold, 'group-hover:opacity-0': button?.dropdownText}" class="text-sm transition-opacity duration-75">{{ button.title }}</span>
+            <img
+                v-if="button?.dropdownText"
+                src="@/images/dropdown.svg"
+                class="absolute top-1/2 left-1/2 w-4 opacity-0 transition-opacity duration-75 -translate-x-1/2 -translate-y-1/2 button group-hover:opacity-100"
+                alt="">
+        </button>
+
+        <Tooltip v-if="button?.tooltip && hovering" :button="but" :text="button?.tooltip" />
+
+        <Dropdown v-if="button?.dropdownText && dropdownOpen" @close="dropdownOpen = false" :button="but">
+            <template #header>
+                <div class="flex gap-2 p-2 text-white">
+                    <button
+                        v-for="(opt, ind) in button.dropdownText"
+                        @click="lastSelected = ind; dropdownOpen = false; emit('clicked', getAction())"
+                        class="flex flex-col gap-2 items-center p-1 px-4 text-sm bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 hover:bg-black"
+                    >
+                        <img class="w-6" :src="iconPath(button.icon[ind])" alt="">
+                        <span>{{ opt }}</span>
+                    </button>
+                </div>
+            </template>
+        </Dropdown>
+        
+    </div>
+    <hr v-if="button?.splitAfter" class="inline-flex mx-2 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
+</template>

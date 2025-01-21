@@ -1,16 +1,10 @@
 <script setup lang="ts">
+import type { Setting } from '@/interfaces';
 
-type controlType = "cbox" | "dropdown" | "radio" | "slot" | "inline-slot"
 
 const model = defineModel()
 
-defineProps<{
-    name: string
-    desc?: string
-    control: controlType
-    controlOptions?: [string, number][] | number
-    disabled?: boolean
-}>()
+defineProps<Setting>()
 
 const emit = defineEmits(['updated'])
 
@@ -33,5 +27,6 @@ const emit = defineEmits(['updated'])
         <div v-if="['slot', 'inline-slot'].includes(control)">
             <slot />
         </div>
+        <component v-if="control == 'component'" :is="controlOptions" />
     </div>
 </template>

@@ -50,7 +50,10 @@ const makeNextParagraph = (e: KeyboardEvent) => {
 }
 
 const doFocusText = () => {
+	if (!props.editable) return
+
 	mainText.value?.focus()
+	emit('hasFocus', mainText.value)
 }
 
 const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
@@ -95,6 +98,8 @@ const startObserving = () => observer.observe(mainText.value!, {attributes: true
 const focus = ref(false)
 const hasText = ref(checkHasText())
 
+onMounted(doFocusText)
+
 </script>
 
 <template>
@@ -110,7 +115,7 @@ const hasText = ref(checkHasText())
 			v-html="previewText"
 			data-modf="0"
 			:data-hastext="!hasText && editable"
-			class="w-full dataContainer min-w-24 whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
+			class="w-full selection:bg-lof-400 selection:text-black dataContainer min-w-24 whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
 			:placeholder="placeholder"
 			:contenteditable="editable"
 			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word', textIndent: currentSettings?.indent ? '2rem' : '', fontSize: fontSizes[currentSettings?.size ?? 0]}"
@@ -118,10 +123,9 @@ const hasText = ref(checkHasText())
 		</p>
 			
 		<slot></slot>
-		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-16 box-border max-sm:right-0">
-			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="flex flex-col items-center p-0.5 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
-				<img src="@/images/gear.svg" class="w-6 invert">
-				<p class="max-sm:hidden">{{ $t('other.settings') }}</p>
+		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-[38px] box-border max-sm:right-0">
+			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
+				<img src="@/images/gear.svg" class="w-7 invert">
 			</button>
 		</div>
 

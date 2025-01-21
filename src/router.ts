@@ -3,7 +3,7 @@ import { ref } from "vue";
 import THEMES from "./themes";
 import { SETTINGS } from "./siteSettings";
 
-const         router = createRouter({
+const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
@@ -14,12 +14,14 @@ const         router = createRouter({
     {
       path: "/make/list",
       name: "editor",
-      component: () => import("@/components/Editor.vue"),
+      component: () => import("@/components/Writer.vue"),
+      props: {type: 0}
     },
     {
       path: "/make/review",
       name: "writer",
       component: () => import("@/components/Writer.vue"),
+      props: {type: 1}
     },
     {
       path: "/browse/:type",
@@ -51,13 +53,13 @@ const         router = createRouter({
     {
       path: "/edit/list/:id",
       name: "editing",
-      props: (route) => ({ listID: route.params.id, editing: true }),
-      component: () => import("@/components/Editor.vue")
+      props: (route) => ({ type: 0, postID: route.params.id, editing: true }),
+      component: () => import("@/components/Writer.vue")
     },
     {
       path: "/edit/review/:id",
       name: "editingReview",
-      props: (route) => ({ reviewID: route.params.id, editing: true }),
+      props: (route) => ({ type: 1, postID: route.params.id, editing: true }),
       component: () => import("@/components/Writer.vue")
     },
     {
@@ -72,7 +74,11 @@ const         router = createRouter({
   ],
 });
 
-router.afterEach(() => window.scrollTo(0,0))
+export const timeLastRouteChange = ref(Date.now())
+router.afterEach(() => {
+  window.scrollTo(0,0)
+  timeLastRouteChange.value = Date.now()
+})
 
 
 export const loadingProgress = ref(0)

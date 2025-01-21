@@ -176,7 +176,7 @@
     "edit": "Edit",
     "idCopied": "ID copied!",
     "levelID": "Level ID",
-    "levelName": "Normal Level Name",
+    "levelName": "Level Name",
     "noDescription": "No description provided",
     "pin": "Pin",
     "unpin": "Unpin",
@@ -472,7 +472,8 @@
     "folderNameShort": "Folder name is too short.",
     "extFolderRm": "What should be done with its contents of this folder and its subfolders?",
     "linkCopied": "Link copied!",
-    "general": "General"
+    "general": "General",
+    "noImage": "Discard Pick"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -510,7 +511,7 @@
     "disColorHelp": "Level colors and comments will always use the default color.",
     "disBGs": "Disable Backgrounds",
     "disBGhelp": "Image backgrounds in posts or level cards will not show up.",
-    "visual": "Visual",
+    "visual": "Visuals",
     "behave": "Behavior",
     "access": "Accessibility",
     "perf": "Performance",
@@ -713,7 +714,7 @@
     "setVideo": "Please paste a YouTube link.",
     "loadVideoFail": "Failed to load the video!",
     "paragraph": "Paragraph",
-    "thumbnail": "Review Thumbnail",
+    "thumbnail": "Thumbnail",
     "font": "Review Font",
     "ratingName": "Rating name",
     "moreFeaturesHelp1": "You can rate more features of the levels!",
@@ -817,7 +818,11 @@
     "splitPg": "Split into Paragraphs",
     "fontSize": "Font Size",
     "indent": "Indent First Line",
-    "isEmpty": "%s is empty!"
+    "isEmpty": "%s is empty!",
+    "browseLevels": "Browse Levels",
+    "surprise": "Surprise Me!",
+    "impGD": "Import from GD",
+    "page": "Page"
   },
   "review": {
     "columnSetting": "{0} column",

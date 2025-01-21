@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { i18n } from '@/locales';
-import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import Dropdown from '../ui/Dropdown.vue';
-import Tooltip from '../ui/Tooltip.vue';
-import { addCEFormatting, addFormatting } from '../global/parseEditorFormatting';
-import { reviewData } from '@/Reviews';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { addCEFormatting } from '../global/parseEditorFormatting';
 import { SETTINGS } from '@/siteSettings';
+import { Key, type Writer } from '@/writers/Writer';
+import FormattingButton from './FormattingButton.vue';
 
 const props = defineProps<{
 	selectedNest: number[]
+	writer: Writer
 }>()
 
 const emit = defineEmits<{
@@ -19,79 +18,53 @@ const emit = defineEmits<{
 	(e: "splitParagraph"): string
 }>()
 
-const BASE_URL = import.meta.env.BASE_URL
-
-const actions = [
-	[
-		["default", "",, i18n.global.t('reviews.addParagraph')],
-	],
-	[
-		["view", i18n.global.t('reviews.preview'),, i18n.global.t('other.preview')],
-		// ["md", i18n.global.t('reviews.md'),,i18n.global.t('reviews.formatting')],
-	],
-	[
-		["heading1", i18n.global.t('reviews.title', ['1']),, 'Nadpisy'],
-		// ["heading2", i18n.global.t('reviews.title', ['2'])],
-		// ["heading3", i18n.global.t('reviews.title', ['3'])],
-	],
-	[
-		["alignLeft", i18n.global.t('reviews.align', [i18n.global.t('reviews.aLeft')]), "left", 'Zarovnání'],
-		// ["alignCenter", i18n.global.t('reviews.align', [i18n.global.t('reviews.aCenter')]), "center"],
-		// ["alignRight", i18n.global.t('reviews.align', [i18n.global.t('reviews.aRight')]), "right"],
-		// ["alignJustify", i18n.global.t('reviews.align', [i18n.global.t('reviews.aJustify')]), "justify"]
-	],
-	[
-		["showImage", i18n.global.t('reviews.addImage')],
-		["addVideo", i18n.global.t('reviews.addVideo')],
-		["addCarousel", i18n.global.t('reviews.makeCarousel')],
-		["divisor", i18n.global.t('reviews.addDivisor')],
-		["showLevel", i18n.global.t('reviews.showLevel')],
-		["showRating", i18n.global.t('reviews.dispRatings')],
-		["showList", i18n.global.t('reviews.listLink')],
-	],
-]
-// ["showCollab", i18n.global.t('reviews.addUsers')],
-
-const columnData = ["twoColumns", i18n.global.t('reviews.multicolumn'),, "Přidat sloupec"]
-
-
 const columnOptionsShown = ref(false)
-
-const base = import.meta.env.BASE_URL
-const FORMATTING = [i18n.global.t('reviews.bold'), i18n.global.t('reviews.italics'), i18n.global.t('reviews.strike'), i18n.global.t('other.points'), i18n.global.t('other.blockquote'), i18n.global.t('other.checklist'), i18n.global.t('other.link')]
-const icons = ["bold", "cursive", "strike", "list", "quotes", "check", "link"].map(x => `${base}/formatting/${x}.svg`)
-const formatIndicies = [0,1,2,4,5,6, 12]
-
+const formatIndicies = [0, 1, 2, 4, 5, 6, 12]
 const previewEnabled = ref(false)
-const mdHelpShown = ref(false)
-const columnButton = ref()
-const buttons = ref()
-
 const previewMode = ref(0)
 
-const doAction = (action: number, button: string, holdingShift = false) => {
+type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph'
+
+interface FormattingButton {
+	title: string
+	icon: string | string[]
+	action: [FormattingAction, string | string[]]
+	dropdownText?: string[]
+	tooltip?: string
+	splitAfter?: boolean
+	bold?: boolean
+}
+
+const doAction = (action: FormattingAction, param: any, holdingShift = false) => {
 	switch (action) {
-		case 0:
-			emit('addContainer', button[0], holdingShift); break;
-		case 1:
-			if (button[0] == 'view') previewEnabled.value = !previewEnabled.value
-			if (button[0] == 'mode') previewMode.value = button[1]
-			else if (button[0] == 'md') mdHelpShown.value = true
-			emit('setFormatting', button[0], previewMode.value);
+		case 'add':
+			emit('addContainer', param, holdingShift);
 			break;
-		case 3:
-			emit('setAlignment', button[2]); break;
-		case 2:
-		case 4:
-			emit('addContainer', button[0], holdingShift); break;
-		case 5:
+		case 'preview':
+			previewEnabled.value = param !== 0
+			previewMode.value = param
+			
+			if (previewEnabled.value)
+				swapToolbar('previewing')
+			else
+				swapToolbar('main')
+			emit('setFormatting', 'view', previewMode.value);
+			break;
+		case 'align':
+			emit('setAlignment', param);
+			break;
+		case 'column':
 			if (props.selectedNest[0] > -1)
 				columnOptionsShown.value = !columnOptionsShown.value
 			else
-				emit('addContainer', button[0], holdingShift); break;
-		case 6:
+				emit('addContainer', 'twoColumns', holdingShift);
+			break;
+		case 'format':
+			doFormatting(param)
+			break;
+		case 'splitParagraph':
 			emit('splitParagraph'); break;
-		}
+	}
 }
 
 const doFormatting = (ind: number) => {
@@ -102,17 +75,17 @@ const doFormatting = (ind: number) => {
 	addCEFormatting(formatIndicies[ind], el, false)
 }
 
-const hoveringIndex = ref(-1)
-
-const getIndex = (sectIndex: number, butIndex: number) => {
-	// WHY DID THIS TAKE SO LONG TO COME UP WITH AAAAAAAAA
-	return actions.slice(0, sectIndex).map(a => a.length).reduce((b,c) => b+c, 0)+butIndex
-}
-
 const showFormatting = ref(false)
 const showFormattingBar = (e) => {
 	let sel = document.getSelection()
 	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing") && sel.anchorNode?.parentElement?.contentEditable === "true"
+
+	if (currentToolbar.value == 'previewing') return
+	
+	if (showFormatting.value)
+		swapToolbar('formatting')
+	else
+		swapToolbar('main')
 }
 
 onMounted(() => {
@@ -132,163 +105,69 @@ const nav = (e: MutationRecord[]) => {
 }
 const observer = new MutationObserver(nav)
 if (SETTINGS.value.scrollNavbar)
-	observer.observe(document.querySelector("#navbar")!, {attributes: true, attributeFilter: ["class"]})
+	observer.observe(document.querySelector("#navbar")!, { attributes: true, attributeFilter: ["class"] })
+
+const currentToolbar = ref("main")
+const swapToolbar = (to: string) => {
+	currentToolbar.value = to
+	keyShortcuts = getShortcuts()
+}
+
+const getShortcuts = () => {
+	let shortcuts = []
+	for (const key in props.writer.toolbar) {
+		for (const key2 in props.writer.toolbar[key]) {
+			for (const button of props.writer.toolbar[key][key2]) {
+				if (button?.shortcut)
+					shortcuts.push([button?.shortcut, button?.action])
+
+				// Fixed shortcuts apply only if a given toolbar is active
+				if (button?.shortcutFixed && key == currentToolbar.value)
+					shortcuts.push([button?.shortcutFixed, button?.action])
+			}
+		}
+	}
+	return shortcuts
+}
+var keyShortcuts = getShortcuts()
+const isValidShortcut = (combo: number, key: string) => {
+	for (let i = 0; i < keyShortcuts.length; i++) {
+		if (keyShortcuts[i][0][0] == combo && keyShortcuts[i][0][1] == key)
+			return keyShortcuts[i][1]
+	}
+	return false
+}
+
+var heldModifiers = ref(Key.None)
+
+
+
+document.documentElement.addEventListener("keydown", e => {
+	let combo = +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
+	heldModifiers.value = combo
+
+	// Mainly for text selection to keep working
+	// Disables browser shortcuts
+	if (combo != Key.None && e.key.length == 1 && isValidShortcut(combo, e.key.toUpperCase()))
+		e.preventDefault()
+})
+
+window.addEventListener("keyup", e => {
+	let currCombo = +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
+
+	let f: string[] | boolean;
+	if (currCombo != Key.None && e.key.length == 1 && (f = isValidShortcut(currCombo, e.key.toUpperCase())))
+		doAction(...f)
+})
 
 </script>
 
 <template>
-	<section @click.stop="" :style="{top: barPos}" class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center p-1 mb-2 text-3xl text-white">
-		<div class="flex gap-3 items-center" v-show="showFormatting">
-			<button
-				v-for="(button, buttonIndex) in FORMATTING"
-				@click="doFormatting(buttonIndex)"
-				@mousedown.prevent=""
-				:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view'}"
-				class="flex flex-col items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			>
-				<img :src="icons[buttonIndex]" class="w-6 pointer-events-none min-w-6">
-				<span class="text-sm pointer-events-none">{{ button }}</span>
-			</button>
-			<hr class="inline-flex mx-1 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
-			<button
-				@click="doAction(6, null)"
-				@mousedown.prevent=""
-				:class="{'!bg-opacity-60 bg-black': previewEnabled}"
-				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			>
-				<img :src="`${base}/formatting/divisor.svg`" class="w-6 pointer-events-none min-w-6">
-				<span class="text-sm pointer-events-none">{{ $t('reviews.splitPg') }}</span>
-			</button>
+	<section @click.stop="" :style="{ top: barPos }"
+		class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
+		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center">
+			<FormattingButton v-for="button in writer.toolbar[currentToolbar]?.[side]" :button="button"
+				@clicked="doAction(button.action[0], $event, false)" />
 		</div>
-
-		<div class="flex gap-3 items-center" v-show="previewEnabled">
-			<hr class="inline-flex mx-1 ml-32 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
-			<button
-				@click="doAction(1, ['view'])"
-				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			>
-				<img src="@/images/close.svg" class="w-5 pointer-events-none min-w-5">
-				<span class="text-sm pointer-events-none">{{ $t('other.stopPreview') }}</span>
-			</button>
-			<hr class="inline-flex mx-1 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
-			<button
-				@click="doAction(1, ['mode', 0])"
-				:class="{'!bg-opacity-60 bg-black': previewMode == 0}"
-				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			>
-				<img src="@/images/reviews.svg" class="m-0.5 w-5 pointer-events-none min-w-5">
-				<span class="text-sm pointer-events-none">{{ $t('reviews.review') }}</span>
-			</button>
-			<button
-				@click="doAction(1, ['mode', 1])"
-				:class="{'!bg-opacity-60 bg-black': previewMode == 1}"
-				class="flex gap-2 items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			>
-				<img src="@/images/browseMobHeader.svg" class="w-6 pointer-events-none min-w-6">
-				<span class="text-sm pointer-events-none">{{ $t('editor.levels') }}</span>
-			</button>
-		</div>
-		
-		<div class="flex gap-1 items-center grow" v-show="!showFormatting && !previewEnabled">
-			<div v-for="(action, index) in actions" class="flex gap-1 items-center">
-				<hr v-show="index > 0 && index < 5" class="inline-flex mx-2 w-0.5 h-4 bg-white border-none opacity-10 aspect-square">
-				<button
-					v-for="(button, buttonIndex) in action"
-					@mouseout="hoveringIndex = -1"
-					ref="buttons"
-					@mouseenter="hoveringIndex = buttons[getIndex(index, buttonIndex)]"
-					:disabled="previewEnabled && button[0] != 'view'"
-					@click="doAction(index, button, $event.shiftKey)"
-					@mousedown.prevent=""
-					:class="{'!bg-opacity-60 bg-black': previewEnabled && button[0] == 'view', 'font-bold': button[0] == 'default'}"
-					class="flex flex-col items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-				>
-					<img :src="`${BASE_URL}/formatting/${button[0]}.svg`" class="w-6 pointer-events-none min-w-6">
-					<span class="text-sm pointer-events-none" v-if="button[3]">{{ button[3] }}</span>
-					
-					<Transition name="fade">
-						<Tooltip v-if="button[1] && hoveringIndex == buttons?.[getIndex(index, buttonIndex)]" :button="hoveringIndex" :text="button[1]" />
-					</Transition>
-				</button>
-			</div>
-		</div>
-
-		<button
-			:disabled="previewEnabled"
-			ref="columnButton"
-			@click="doAction(5, columnData)"
-			@mousedown.prevent=""
-			class="flex flex-col items-center p-1 w-max rounded-md transition-colors duration-75 disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
-			v-show="!showFormatting && !previewEnabled"
-		>
-			<img v-if="selectedNest[0] == -1" :src="`${BASE_URL}/formatting/twoColumns.svg`" class="w-6 pointer-events-none min-w-6">
-			<img v-else src="@/images/gear.svg" class="w-6 pointer-events-none min-w-6">
-			<span class="w-max text-sm pointer-events-none">{{ $t('reviews.addColumn') }}</span>
-		</button>
-
-		<Dropdown v-if="columnOptionsShown && selectedNest[0] != -1" @picked-option="emit('columnCommand', $event)" :button="columnButton" @close="columnOptionsShown = false">
-			<template #header>
-				<div class="m-2">
-					<div class="flex flex-col gap-3 justify-center mb-5 text-xl text-center text-white">
-						<div v-for="(setting, index) in [$t('other.add'), $t('other.duplicate')]">
-							<h2>{{ $t('review.columnSetting', [setting]) }}</h2>
-							<div>
-								<button :disabled="reviewData.containers[selectedNest[0]].settings.components.length > 9" @click="emit('columnCommand', index*2)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md disabled:opacity-40 hover:bg-opacity-60 aspect-square">
-									<img src="@/images/moveUp.svg" class="mx-auto w-5 -rotate-90 button" alt="">
-								</button>
-								<button :disabled="reviewData.containers[selectedNest[0]].settings.components.length > 9" @click="emit('columnCommand', index*2+1)" class="box-border p-1 ml-2 w-9 bg-black bg-opacity-40 rounded-md disabled:opacity-40 hover:bg-opacity-60 aspect-square">
-									<img src="@/images/moveUp.svg" class="mx-auto w-5 rotate-90 button" alt="">
-								</button>
-							</div>
-						</div>
-						<div>
-							<h2>{{ $t('reviews.vertAlign') }}</h2>
-							<div>
-								<button @click="emit('columnCommand', 11)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
-									<img src="@/images/moveUp.svg" :class="{'opacity-40': reviewData.containers[selectedNest[0]].settings.components[selectedNest[1]][11]}" class="mx-auto w-5 button" alt="">
-								</button>
-								<button @click="emit('columnCommand', 12)" class="box-border p-1 ml-2 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
-									<img src="@/images/moveMiddle.svg" :class="{'opacity-40': !reviewData.containers[selectedNest[0]].settings.components[selectedNest[1]].includes(1)}" class="mx-auto w-5 rotate-180 button" alt="">
-								</button>
-								<button @click="emit('columnCommand', 13)" class="box-border p-1 ml-2 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
-									<img src="@/images/moveUp.svg" :class="{'opacity-40': !reviewData.containers[selectedNest[0]].settings.components[selectedNest[1]].includes(2)}" class="mx-auto w-5 rotate-180 button" alt="">
-								</button>
-							</div>
-						</div>
-						<button @click="emit('columnCommand', 7); columnOptionsShown = false" class="flex gap-1 items-center p-1 text-base font-bold text-black bg-red-400 rounded-md">
-							<img src="@/images/del.svg" alt="" class="w-5">
-							<span>{{ $t('reviews.removeColumn') }}</span>
-						</button>
-						<button @click="emit('columnCommand', 6)" class="flex gap-1 items-center p-1 text-base font-bold text-black rounded-md bg-lof-400">
-							<img src="@/images/grow.svg" alt="" class="w-5">
-							<span v-if="!reviewData.containers?.[selectedNest[0]]?.settings?.components?.[selectedNest[1]]?.[10] == true">{{ $t('reviews.cMaxContent') }}</span>
-							<span v-else>{{ $t('reviews.cFillSpace') }}</span>
-						</button>
-					</div>
-					<div class="flex gap-1 justify-between">
-						<button @click="emit('columnCommand', 8)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
-							<img src="@/images/moveUp.svg" class="mx-auto w-5 button" alt="">
-						</button>
-						<button @click="emit('columnCommand', 9)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
-							<img src="@/images/moveDown.svg" class="mx-auto w-5 button" alt="">
-						</button>
-						<button @click="emit('columnCommand', 10); columnOptionsShown = false" class="flex gap-1 items-center p-1 ml-6 text-xl font-bold text-black bg-red-400 rounded-md">
-							<img src="@/images/del.svg" alt="" class="w-6">
-							<span>{{ $t('editor.remove') }}</span>
-						</button>
-					</div>
-				</div>
-			</template>
-		</Dropdown>
-
-		<Dropdown v-if="mdHelpShown" @close="mdHelpShown = false" @picked-option="doFormatting" :button="buttons[2]" :options="FORMATTING" :icons="icons">
-			<template #footer>
-				<div class="flex gap-1 items-start p-1 m-1 text-xs text-white bg-white bg-opacity-10 rounded-sm">
-					<img src="@/images/info.svg" class="inline mt-1 w-3 opacity-20" alt="">
-					<div>{{ $t('reviews.formattingHelp1') }}<br><a class="underline" target="_blank" href="https://gist.github.com/roshith-balendran/d50b32f8f7d900c34a7dc00766bcfb9c">{{ $t('reviews.formattingHelp2') }}</a><br>{{ $t('reviews.formattingHelp3') }}</div>
-
-				</div>
-			</template>
-		</Dropdown>
 	</section>
 </template>

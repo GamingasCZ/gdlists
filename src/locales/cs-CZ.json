@@ -446,7 +446,8 @@
     "deleteFolders": "Smazat složky",
     "extFolderRm": "Co by se mělo stát s jejím obsahem a obsahem podsložek?",
     "linkCopied": "Odkaz zkopírován!",
-    "general": "Základní"
+    "general": "Základní",
+    "noImage": "Zrušit výběr"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -515,7 +516,7 @@
   },
   "level": {
     "levelID": "ID levelu",
-    "levelName": "Jméno normálního levelu",
+    "levelName": "Jméno levelu",
     "creator": "Tvůrce",
     "video": "Video",
     "idCopied": "ID zkopírováno!",
@@ -717,7 +718,7 @@
     "loadVideoFail": "Nepodařilo se načíst video!",
     "setVideo": "Vlož prosím YouTube odkaz.",
     "font": "Písmo recenze",
-    "thumbnail": "Náhled recenze",
+    "thumbnail": "Miniatura",
     "ratingName": "Název hodnocení",
     "moreFeaturesHelp1": "Můžeš hodnotit víc vlastností levelu!",
     "moreFeaturesHelp2": "Jen základní se ale počítají do statistik.",
@@ -818,7 +819,11 @@
     "splitPg": "Rozdělit do odstavce",
     "fontSize": "Velikost písma",
     "indent": "Odsazení prvního řádku",
-    "isEmpty": "%s je prázdná!"
+    "isEmpty": "%s je prázdná!",
+    "surprise": "Překvap mě!",
+    "impGD": "Importovat z GD",
+    "browseLevels": "Procházet levely",
+    "page": "Stránka"
   },
   "review": {
     "columnSetting": "{0} sloupec",

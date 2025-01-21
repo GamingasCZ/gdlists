@@ -5,8 +5,8 @@ import { flexNames } from '@/Reviews';
 import { inject, ref } from 'vue';
 import DataContainer from './DataContainer.vue';
 
-const props = defineProps<{
-    reviewData: ReviewList
+defineProps<{
+    writerData: ReviewList
     editable: boolean
     containerLastAdded?: number
 }>()
@@ -22,7 +22,7 @@ const buttonState = ref([0, 0])
 </script>
 
 <template>
-    <DataContainer v-for="(container, index) in reviewData.containers"
+    <DataContainer v-for="(container, index) in writerData.containers"
         ref="dataContainers"
         v-memo="[editable, containerLastAdded, selectedContainer, selectedNestContainer]"
         v-bind="CONTAINERS[container.type]"

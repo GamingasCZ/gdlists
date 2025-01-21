@@ -6,7 +6,7 @@ import SetingsMenu from "./global/SetingsMenu.vue";
 import { currentCutout, currentUID, isOnline, profileCutouts, resetList } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
-import router, { loadingProgress } from "@/router";
+import router, { loadingProgress, timeLastRouteChange } from "@/router";
 import ProfilePicture from "./global/ProfilePicture.vue";
 
 const props = defineProps<{
@@ -77,6 +77,7 @@ const modScrollerWidth = (e: Event) => {
   scrollerInd.value = parseInt(link.dataset.ind!)
   scrollerWidth.value = link.clientWidth
   scrollerXOff.value = link.offsetLeft
+  timeLastRouteChange.value = Date.now()
 }
 
 const scrollerHome = () => {

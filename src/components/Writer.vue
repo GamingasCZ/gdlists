@@ -4,23 +4,21 @@ import DialogVue from "./global/Dialog.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterRatings from "./writer/WriterRatings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
-import DataContainer from "./writer/DataContainer.vue"
 import FormattingBar from "./writer/FormattingBar.vue"
 import CONTAINERS from "./writer/containers";
 import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
-import { useI18n } from "vue-i18n";
 import { DataContainerAction, WriterGallery, type ReviewList, type TEXT_ALIGNMENTS } from "@/interfaces";
-import { reviewData, flexNames, DEFAULT_REVIEWDATA, pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
+import { pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { DEFAULT_LEVELLIST, modifyListBG, predefinedLevelList, prettyDate, removeBackup, saveBackup, selectedLevels } from "@/Editor";
+import { modifyListBG, predefinedLevelList, prettyDate } from "@/Editor";
 import { onUnmounted } from "vue";
-import router from "@/router";
+import router, { timeLastRouteChange } from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
 import RemoveListPopup from "./editor/RemoveListPopup.vue";
 import TextEditor from "./global/TextEditor.vue";
@@ -28,39 +26,48 @@ import UserDialog from "./writer/UserDialog.vue";
 import { i18n } from "@/locales";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
-import EditorBackup from "./editor/EditorBackup.vue";
 import { onMounted } from "vue";
-import { onBeforeRouteLeave, type RouteLocationNormalized } from "vue-router";
+import { onBeforeRouteLeave } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
 import { deleteCESelection } from "./global/parseEditorFormatting";
 import LevelCard from "./global/LevelCard.vue";
 import { ImgFail, notifyError } from "./imageUpload";
-import REVIEW from "@/writers/Writer";
 import WriterViewer from "./writer/WriterViewer.vue";
 import WriterVisuals from "./writer/WriterVisuals.vue";
-document.title = `${useI18n().t('reviews.reviewEditor')} | ${useI18n().t('other.websiteName')}`
+import { LIST, REVIEW, type Writer } from "@/writers/Writer";
 
 const props = defineProps<{
-    reviewID?: string
+    type: number
+    postID?: string
     isLoggedIn: boolean
     editing?: boolean
 }>()
 
-reviewData.value = DEFAULT_REVIEWDATA()
+const POST_DATA = ref<ReviewList>()
+const WRITER = ref([LIST, REVIEW][props.type])
+watch(() => props.type, () => {
+    WRITER.value = [LIST, REVIEW][props.type]
+    resetPost()
+})
+watch(timeLastRouteChange, () => resetPost())
+
+document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
+
+provide("postData", POST_DATA)
 if (predefinedLevelList.value.length) {
-    reviewData.value.levels = predefinedLevelList.value
+    POST_DATA.value.levels = predefinedLevelList.value
     predefinedLevelList.value = []
 }
 
 let isNowHidden = false
 if (props.editing) {
-    axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.reviewID, type: 'review' }).then(res => {
+    axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
-            reviewData.value = res.data.data
+            POST_DATA.value = res.data.data
             fetchEmbeds()
-            modifyListBG(reviewData.value.pageBGcolor, false, true)
+            modifyListBG(POST_DATA.value.pageBGcolor, false, true)
             containerLastAdded.value = Date.now()
         }
         else {
@@ -76,7 +83,7 @@ provide("batchEmbeds", embedsContent)
 const fetchEmbeds = async (fake = false) => {
     if (fake) { embedsContent.value = -1; return }
 
-    embedsContent.value = await getEmbeds(reviewData.value)
+    embedsContent.value = await getEmbeds(POST_DATA.value)
 }
 
 const addToInjected = () => {
@@ -84,16 +91,16 @@ const addToInjected = () => {
 }
 provide("addToInjected", addToInjected)
 
-watch(props, () => {
-    if (!props.editing) {
-        reviewData.value = DEFAULT_REVIEWDATA()
-        modifyListBG(reviewData.value.pageBGcolor, true, true)
-        setPreviewMode(true)
-        selectedContainer.value[0] = -1
-        disableEdits.value = false
-        reviewSave.value = { backupID: 0, lastSaved: 0 }
-    }
-})
+const resetPost = () => {
+    document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
+    POST_DATA.value = WRITER.value.general.postObject()
+    containerLastAdded.value = Date.now()
+    modifyListBG(POST_DATA.value.pageBGcolor, true, true)
+    setPreviewMode(true)
+    selectedContainer.value[0] = -1
+    disableEdits.value = false
+    reviewSave.value = { backupID: 0, lastSaved: 0 }
+}
 
 const openDialogs = reactive({
     settings: false,
@@ -134,7 +141,7 @@ provide("levelHashes", { levelHashes, updateHashes })
 
 provide("settingsTitles", CONTAINERS)
 
-const newID = (offset = 0) => (Date.now() + offset + JSON.stringify(reviewData.value).length) >> 1
+const newID = (offset = 0) => (Date.now() + offset + JSON.stringify(POST_DATA.value).length) >> 1
 
 const containerLastAdded = ref(0)
 const addContainer = (key: string, addTo?: number, returnOnly = false, above = false) => {
@@ -142,7 +149,7 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
     let contAm = 0
     let thisContAm = 0
     if (!returnOnly) {
-        reviewData.value.containers.forEach(c => {
+        POST_DATA.value.containers.forEach(c => {
             if (c.type == "twoColumns") {
                 contAm += c.settings.components.forEach(n => {
                     contAm += n.length
@@ -184,11 +191,11 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
         if (selectedContainer.value[0] == -1) {
-            reviewData.value.containers
+            POST_DATA.value.containers
                 .push(containerData)
-            selectedContainer.value[0] = reviewData.value.containers.length - 1
+            selectedContainer.value[0] = POST_DATA.value.containers.length - 1
         } else {
-            reviewData.value.containers
+            POST_DATA.value.containers
                 .splice(selectedContainer.value[0] + +(!above), 0, containerData)
             selectedContainer.value[0] += 1
         }
@@ -196,15 +203,15 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
     // Adding into a nested container
     else {
         if (key == "twoColumns") { // Adding a column to a nest container
-            reviewData.value.containers[selectedNestContainer.value[0]].extraComponents += 1
-            reviewData.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
+            POST_DATA.value.containers[selectedNestContainer.value[0]].extraComponents += 1
+            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
         }
         else {
             if (selectedContainer.value[2] == -1) {
-                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
+                POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
                     .push(containerData)
             } else {
-                reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
+                POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
                     .splice(selectedNestContainer.value[2] + +(!above), 0, containerData)
             }
 
@@ -216,7 +223,7 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
 provide("addContainer", addContainer)
 
 const removeContainer = (index: number) => {
-    reviewData.value.containers.splice(index, 1)
+    POST_DATA.value.containers.splice(index, 1)
 
     selectedContainer.value[0] = -1
     selectedNestContainer.value = [-1, -1, -1]
@@ -227,11 +234,11 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
 
     if (selectedNestContainer.value[0] == -1) {
         if (index < 0) return
-        reviewData.value.containers[index].align = alignment
+        POST_DATA.value.containers[index].align = alignment
         selectedContainer.value[1]?.focus()
     }
     else {
-        reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
+        POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
     }
 
     containerLastAdded.value = Date.now()
@@ -253,8 +260,8 @@ const dataContainerCommand = (command: DataContainerAction, data: any[]) => {
 }
 
 const columnCommand = (index: number) => {
-    let nest = reviewData.value.containers[selectedNestContainer.value[0]]
-    let column = reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
+    let nest = POST_DATA.value.containers[selectedNestContainer.value[0]]
+    let column = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
     switch (index) {
         case 0: addContainer("twoColumns", 0); break;
         case 1: addContainer("twoColumns", 1); break;
@@ -277,7 +284,7 @@ const columnCommand = (index: number) => {
             if (nest.settings.components.length == 2) {
                 let columnData = JSON.parse(JSON.stringify(nest.settings.components[1 - selectedNestContainer.value[1]]))
                 removeContainer(selectedNestContainer.value[0])
-                reviewData.value.containers.splice(selectedNestContainer.value[0], 0, ...columnData.filter(x => x === Object(x)))
+                POST_DATA.value.containers.splice(selectedNestContainer.value[0], 0, ...columnData.filter(x => x === Object(x)))
             }
             else {
                 nest.extraComponents -= 1
@@ -313,7 +320,7 @@ const setFormatting = (format: string, ind: number) => {
 }
 
 const moveToParagraph = (currentContainerIndex: number) => {
-    if (reviewData.value.containers?.[currentContainerIndex + 1]?.type == "default") {
+    if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type == "default") {
         selectedContainer.value[0] += 1
         dataContainers.value[selectedContainer.value[0]].doFocusText()
     }
@@ -331,9 +338,9 @@ const startWriting = () => {
 }
 
 const moveContainer = (index: number, by: number) => {
-    let data = reviewData.value.containers[index]
-    reviewData.value.containers.splice(index, 1)
-    reviewData.value.containers.splice(index + by, 0, data)
+    let data = POST_DATA.value.containers[index]
+    POST_DATA.value.containers.splice(index, 1)
+    POST_DATA.value.containers.splice(index + by, 0, data)
     selectedContainer.value[0] += by
     if (selectedNestContainer.value[0] != -1)
         selectedNestContainer.value[0] += by
@@ -344,45 +351,37 @@ const splitParagraph = () => {
     let newPos = selectedContainer.value[0] + 1
     let newParagraph = addContainer("default", 0, true)
     newParagraph.data = selectedText
-    reviewData.value.containers.splice(newPos, 0, newParagraph)
+    POST_DATA.value.containers.splice(newPos, 0, newParagraph)
 }
 
-const taglinePlaceholders = [
-    useI18n().t('reviews.p1'),
-    useI18n().t('reviews.p2'),
-    useI18n().t('reviews.p3'),
-    useI18n().t('reviews.p4'),
-    useI18n().t('reviews.p5'),
-    useI18n().t('reviews.p6'),
-]
-const tagline = ref(reviewData.value.tagline)
+const tagline = ref(false)
 
 const dataContainers = ref()
 const modifyImageURL = (newUrl: string) => {
     // Review background
     if (openDialogs.imagePicker[1] == WriterGallery.ReviewBackground) {
-        reviewData.value.titleImg[0] = newUrl
+        POST_DATA.value.titleImg[0] = newUrl
         let img = document.createElement("img")
         img.src = newUrl
         img.onload = () => {
-            reviewData.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
+            POST_DATA.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
             img.remove()
         }
     }
     // Level card background
     else if (openDialogs.imagePicker[1] == WriterGallery.LevelCardBG) {
-        reviewData.value.levels[openDialogs.imagePicker[2]].BGimage.image[0] = newUrl
+        POST_DATA.value.levels[openDialogs.imagePicker[2]].BGimage.image[0] = newUrl
     }
     // Review thumbnail
     else if (openDialogs.imagePicker[1] == WriterGallery.ReviewThumbnail) {
-        reviewData.value.thumbnail[0] = newUrl
+        POST_DATA.value.thumbnail[0] = newUrl
     }
     // Carousel item
     else if (openDialogs.imagePicker[1] == WriterGallery.CarouselItem) {
         if (typeof newUrl == 'string')
             newUrl = [newUrl]
 
-        let imgCurrAmount = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.length
+        let imgCurrAmount = POST_DATA.value.containers[openDialogs.carouselPicker[1]].settings.components.length
         let maxImages = 25 - imgCurrAmount
         if (newUrl.length > maxImages)
             notifyError(ImgFail.CAROUSEL_FULL)
@@ -391,30 +390,30 @@ const modifyImageURL = (newUrl: string) => {
         newImgs.forEach(x => {
             let img = addContainer("showImage", 0, true)
             img.settings.url = x
-            img.settings.height = reviewData.value.containers[openDialogs.carouselPicker[1]].settings.height
-            reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
+            img.settings.height = POST_DATA.value.containers[openDialogs.carouselPicker[1]].settings.height
+            POST_DATA.value.containers[openDialogs.carouselPicker[1]].settings.components.push(img)
         })
     }
     // Carousel change
     else if (openDialogs.imagePicker[1] == WriterGallery.CarouselModifyItem) {
-        reviewData.value.containers[openDialogs.carouselPicker[1]].settings.components[openDialogs.imagePicker[2]].settings.url = newUrl
+        POST_DATA.value.containers[openDialogs.carouselPicker[1]].settings.components[openDialogs.imagePicker[2]].settings.url = newUrl
     }
     // Image container
     else if (selectedNestContainer.value[0] == WriterGallery.ImageContainerNested) {
         let link = typeof newUrl == 'object' ? newUrl[0] : newUrl
-        reviewData.value.containers[openDialogs.imagePicker[1]].settings.url = link
+        POST_DATA.value.containers[openDialogs.imagePicker[1]].settings.url = link
     }
     // Image container in nested container
     else {
         let link = typeof newUrl == 'object' ? newUrl[0] : newUrl
-        reviewData.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = link
+        POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = link
     }
 }
 
 const errorStamp = ref(Date.now())
 const errorText = ref("")
 const checkForErrors = () => {
-    let check = REVIEW.general.clientPostValidation()
+    let check = WRITER.value.general.clientPostValidation()
     if (!check?.success) {
         errorStamp.value = Date.now()
         errorText.value = check?.error
@@ -452,10 +451,10 @@ const uploadReview = () => {
 
     uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/uploadPost.php", {
-        postData: reviewData.value,
-        postName: reviewData.value.reviewName,
-        hidden: reviewData.value.private ? 1 : 0,
-        postType: 'review'
+        postData: POST_DATA.value,
+        postName: POST_DATA.value.reviewName,
+        hidden: POST_DATA.value.private ? 1 : 0,
+        postType: WRITER.value.general.postType
     }).then(res => {
         sessionStorage.setItem("uploadFinished", "1")
 
@@ -476,7 +475,10 @@ const removeReview = () => {
     if (uploadInProgress.value) return
 
     uploadInProgress.value = true
-    axios.post(import.meta.env.VITE_API + "/removeList.php", { id: props.reviewID, type: 'review' }).then(res => {
+    axios.post(import.meta.env.VITE_API + "/removeList.php", {
+        id: props.postID,
+        type: WRITER.value.general.postType
+    }).then(res => {
         if (res.data == 3) router.replace("/browse/reviews")
         else {
             errorStamp.value = Date.now()
@@ -497,13 +499,13 @@ const updateReview = () => {
 
     uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/updateList.php", {
-        id: props.reviewID,
-        type: 'review',
-        listData: JSON.stringify(reviewData.value),
-        tagline: reviewData.value.tagline,
-        hidden: reviewData.value.private | 0,
+        id: props.postID,
+        type: WRITER.value.general.postType,
+        listData: JSON.stringify(POST_DATA.value),
+        tagline: POST_DATA.value.tagline,
+        hidden: POST_DATA.value.private | 0,
         isNowHidden: isNowHidden ? "true" : "false",
-        disComments: reviewData.value.disComments | 0
+        disComments: POST_DATA.value.disComments | 0
     })
         .then(res => {
             sessionStorage.setItem("uploadFinished", "2")
@@ -521,30 +523,6 @@ const updateReview = () => {
         })
 }
 
-const doBackup = (from?: RouteLocationNormalized | Event, to?: RouteLocationNormalized) => {
-    if (reviewData.value.containers.length == 0) return false // Do not save without any content
-    if (!to) { // Do not backup when redirected from editor
-        saveBackup(reviewData.value.reviewName, reviewData.value.private, reviewData.value, reviewSave.value.backupID)
-        return true
-    }
-    return false
-}
-const backupData = ref({ backupName: "", backupDate: 0, backupData: "", choseHidden: "0", backupID: 0 })
-const loadBackup = () => {
-    reviewSave.value.backupID = backupData.value.backupID
-    if (!drafts.value[reviewSave.value.backupID]) {
-        errorStamp.value = Date.now()
-        errorText.value = i18n.global.t('reviews.draftNoLoad')
-        reviewSave.value.backupID = 0
-    }
-
-    reviewSave.value.lastSaved = drafts.value[backupData.value.backupID].saveDate
-    reviewData.value = drafts.value[backupData.value.backupID].reviewData
-    modifyListBG(reviewData.value.pageBGcolor, false, true)
-    fetchEmbeds()
-    removeBackup(true)
-}
-
 let mStarted = [-1, -1]
 const setMouseStart = (e: MouseEvent) => mStarted = [e.x, e.y]
 const unfocusContainer = (e: MouseEvent) => {
@@ -558,6 +536,8 @@ const unfocusContainer = (e: MouseEvent) => {
 
 let autosaveInterval: number
 onMounted(() => {
+    POST_DATA.value = WRITER.value.general.postObject()
+
     if (SETTINGS.value.autosave) {
         // Save when leaving the site
         window.addEventListener("beforeunload", () => {
@@ -579,21 +559,9 @@ onMounted(() => {
 
     document.body.addEventListener("mousedown", setMouseStart)
     document.body.addEventListener("click", unfocusContainer)
-
-    if (localStorage) {
-        let backup = localStorage.getItem("reviewBackup")
-        if (backup) {
-            let backupParsed: LevelBackup = JSON.parse(backup)
-            if (!backupParsed?.backupID) return
-            backupData.value.backupName = backupParsed.listName
-            backupData.value.backupDate = new Date(backupParsed.listDate).toLocaleDateString()
-            backupData.value.backupID = backupParsed.backupID
-        }
-    }
 })
 
 onUnmounted(() => {
-    reviewData.value = DEFAULT_REVIEWDATA()
     document.body.removeEventListener("click", unfocusContainer)
     document.body.removeEventListener("mousedown", setMouseStart)
 })
@@ -606,20 +574,20 @@ const openRatingHelp = () => {
 }
 
 const hasUnrated = computed(() => {
-    if (!reviewData.value.levels.length) return true
+    if (!POST_DATA.value.levels.length) return true
 
     let unrated = false
-    reviewData.value.levels.forEach(l => {
+    POST_DATA.value.levels.forEach(l => {
         if (l.ratings[0].concat(l.ratings[1]).includes(-1)) unrated = true
     })
     return unrated
 })
 
-const hasLevels = computed(() => !reviewData.value.levels.length && !reviewData.value.disabledRatings)
+const hasLevels = computed(() => !POST_DATA.value.levels.length && !POST_DATA.value.disabledRatings)
 const reviewSave = ref({ backupID: 0, lastSaved: 0 })
 const draftPopup = ref<HTMLDivElement>()
 const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => {
-    reviewData.value = newData.data
+    POST_DATA.value = newData.data
     reviewSave.value.backupID = newData.id
     reviewSave.value.lastSaved = newData.saved
     fetchEmbeds()
@@ -630,8 +598,8 @@ const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => 
 let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
 const previewDraft = (previewData: ReviewList) => {
-    previewHold = [reviewData.value, embedsContent.value]
-    reviewData.value = previewData
+    previewHold = [POST_DATA.value, embedsContent.value]
+    POST_DATA.value = previewData
     fetchEmbeds(true)
     modifyListBG(previewData.pageBGcolor, false, true)
     setPreviewMode(false)
@@ -641,7 +609,7 @@ const previewDraft = (previewData: ReviewList) => {
 const exitPreview = () => {
     if (!previewHold) return
 
-    reviewData.value = previewHold[0]
+    POST_DATA.value = previewHold[0]
     embedsContent.value = previewHold[1]
     modifyListBG(previewHold[0].pageBGcolor, false, true)
     previewHold = null
@@ -655,13 +623,13 @@ const exitPreview = () => {
 const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
 const drafts = ref<object>(JSON.parse(localStorage.getItem("reviewDrafts")!) ?? {})
 const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
-    if (!reviewData.value.containers.length) return
+    if (!POST_DATA.value.containers.length) return
     if (disableEdits.value) return
     let now = Date.now()
     let backupID;
     let preview = getReviewPreview()
     if (reviewSave.value.backupID == 0 || saveAs) {
-        let saveAsName = reviewData.value.reviewName || i18n.global.t('editor.unnamedReview')
+        let saveAsName = POST_DATA.value.reviewName || i18n.global.t('editor.unnamedReview')
         if (saveAs && reviewSave.value.backupID != 0) {
             let i = 1
             funnySaveAsMessages.forEach(x => {
@@ -672,7 +640,7 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
         }
 
         drafts.value[now] = {
-            reviewData: reviewData.value,
+            reviewData: POST_DATA.value,
             name: saveAsName,
             createDate: now,
             saveDate: now,
@@ -683,8 +651,8 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
         backupID = now
     }
     else {
-        drafts.value[reviewSave.value.backupID].reviewData = reviewData.value,
-            drafts.value[reviewSave.value.backupID].saveDate = now
+        drafts.value[reviewSave.value.backupID].reviewData = POST_DATA.value,
+        drafts.value[reviewSave.value.backupID].saveDate = now
         drafts.value[reviewSave.value.backupID].wordCount = getWordCount()
         drafts.value[reviewSave.value.backupID].previewTitle = preview[0]
         drafts.value[reviewSave.value.backupID].previewParagraph = preview[1]
@@ -692,7 +660,6 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
     }
     localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
     reviewSave.value = { backupID: backupID, lastSaved: now }
-    if (leavingPage) doBackup()
 }
 
 const removeDraft = (key: number) => {
@@ -725,7 +692,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
         <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
     </div>
 
-    <main v-else class="p-2">
+    <main v-else-if="POST_DATA" class="p-2">
         <ErrorPopup :error-text="errorText" :previewing="false" :stamp="errorStamp" />
 
         <Transition name="fade">
@@ -733,34 +700,34 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 @close-popup="openDialogs.removeDialog = false" />
         </Transition>
 
-        <ListBackground v-if="openDialogs.bgPreview" :image-data="reviewData.titleImg"
-            :list-color="reviewData.pageBGcolor" />
+        <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
+            :list-color="POST_DATA.pageBGcolor" />
 
         <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false"
             :title="$t('other.settings')" :width="dialog.medium">
-            <WriterSettings :uploading="preUpload" @upload="uploadReview" />
+            <WriterSettings :uploading="preUpload" :writer="WRITER" @upload="uploadReview" />
             <DialogVue :open="openDialogs.description" @close-popup="openDialogs.description = false"
                 :title="$t('editor.descriptionEditor')" :width="dialog.xl">
-                <TextEditor :edit-value="reviewData" />
+                <TextEditor :edit-value="POST_DATA" />
             </DialogVue>
         </DialogVue>
 
         <DialogVue :open="openDialogs.userAdder[0]" :title="$t('editor.levels')" :action="userDialog?.addUser"
             :side-button-text="$t('other.add')"
-            :side-button-disabled="reviewData.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10"
+            :side-button-disabled="POST_DATA.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10"
             @close-popup="openDialogs.userAdder[0] = false" :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <UserDialog ref="userDialog" :user-array="reviewData.containers[selectedContainer[0]].settings.users" />
+            <UserDialog ref="userDialog" :user-array="POST_DATA.containers[selectedContainer[0]].settings.users" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.levels" :title="$t('editor.levels')" @close-popup="openDialogs.levels = false"
             :width="dialog.large">
             <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <CollabEditor v-if="openDialogs.collabs" :level-array="reviewData.levels" :index="0"
+            <CollabEditor v-if="openDialogs.collabs" :level-array="POST_DATA.levels" :index="0"
                 :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
             <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')"
                 :width="dialog.medium" :top-most="true">
-                <TagPickerPopup @add-tag="reviewData.levels[selectedLevel.openedCard].tags.push($event)" />
+                <TagPickerPopup @add-tag="POST_DATA.levels[selectedLevel.openedCard].tags.push($event)" />
             </DialogVue>
         </DialogVue>
 
@@ -768,7 +735,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
 
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false"
             :width="dialog.large">
-            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="reviewData.containers"
+            <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="POST_DATA.containers"
                 :only-pick-levels="openDialogs.lists[2]" @add-level="selectedLevel?.addLevel($event[0])" />
         </DialogVue>
 
@@ -777,7 +744,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
             <BackgroundImagePicker
                 :disable-controls="openDialogs.BGpicker[1] == 1"
                 :force-aspect-height="[0, 100, 150][openDialogs.BGpicker[1]]"
-                :source="[reviewData.titleImg, reviewData.levels?.[openDialogs?.BGpicker?.[2]]?.BGimage?.image, reviewData.thumbnail][openDialogs.BGpicker[1]]" />
+                :source="[POST_DATA.titleImg, POST_DATA.levels?.[openDialogs?.BGpicker?.[2]]?.BGimage?.image, POST_DATA.thumbnail][openDialogs.BGpicker[1]]" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.ratings" :side-button-text="$t('other.help')" :action="openRatingHelp"
@@ -814,23 +781,23 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
             :has-unrated="hasUnrated" :uploading="uploadInProgress" @update="updateReview"
             @remove="openDialogs.removeDialog = true" @upload="startUpload" @open-dialog="openDialogs[$event] = true" /> -->
 
-        <section class="max-w-[90rem] mx-auto">
+        <section class="max-w-[90rem] flex flex-col gap-y-8 mx-auto">
             <!-- Hero -->
-            <div class="flex flex-col items-center my-8 text-center"
+            <div class="flex flex-col items-center mt-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
-                <input v-model="reviewData.reviewName" type="text" :maxlength="40" :disabled="editing"
-                    :placeholder="REVIEW.general.titlePlaceholder"
+                <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing"
+                    :placeholder="WRITER.general.titlePlaceholder"
                     class="text-6xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
-                <button v-if="!reviewData.tagline.length && !tagline" @click="tagline = true"
+                <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" @click="tagline = true"
                     class="flex gap-2 justify-center items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
-                    <input type="text" v-once :maxlength="60" v-model="reviewData.tagline" autofocus
+                    <input type="text" v-once :maxlength="60" v-model="POST_DATA.tagline" autofocus
                         class="text-lg italic text-center bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400"
-                        :placeholder="REVIEW.general.placeholderTaglines[Math.floor(Math.random() * taglinePlaceholders.length)]">
-                    <button @click="reviewData.tagline = ''; tagline = false">
+                        :placeholder="WRITER.general.placeholderTaglines[Math.floor(Math.random() * WRITER.general.placeholderTaglines.length)]">
+                    <button @click="POST_DATA.tagline = ''; tagline = false">
                         <img src="@/images/trash.svg" alt=""
                             class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md min-w-6 group-focus-within:block button">
                     </button>
@@ -846,43 +813,38 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
             </div>
 
             <!-- Levels -->
-            <WriterLevels />
-
-            <!-- Decoration -->
-            <WriterVisuals :review-data="reviewData" />
+            <WriterLevels :subtext="WRITER.general.levelsSubtext" />
 
             <!-- Editor -->
-            <section v-show="previewContent == 0 || previewMode" ref="writer"
-                :style="{ fontFamily: pickFont(reviewData.font) }" id="reviewText" :data-white-page="reviewData.whitePage"
+            <section v-show="previewContent == 0 || previewMode" ref="writer" v-if="WRITER.general.allowWriter"
+                :style="{ fontFamily: pickFont(POST_DATA.font) }" id="reviewText" :data-white-page="POST_DATA.whitePage"
                 class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full"
-                :class="{ 'readabilityMode': reviewData.readerMode, '!text-black': reviewData.whitePage, 'shadow-drop bg-lof-200 shadow-black': reviewData.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': reviewData.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': reviewData.transparentPage == 2 && !SETTINGS.disableTL }">
+                :class="{ 'readabilityMode': POST_DATA.readerMode, '!text-black': POST_DATA.whitePage, 'shadow-drop bg-lof-200 shadow-black': POST_DATA.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': POST_DATA.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': POST_DATA.transparentPage == 2 && !SETTINGS.disableTL }">
                 
                 <!-- Formatting -->
                 <FormattingBar :class="{ 'pointer-events-none opacity-20': disableEdits }"
                     :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
                     @add-container="(el, above) => addContainer(el, 0, false, above)"
                     @set-alignment="setAlignment(selectedContainer[0], $event)" @column-command="columnCommand($event)"
-                    @split-paragraph="splitParagraph" />
+                    @split-paragraph="splitParagraph" :writer="WRITER" />
                 
-                <EditorBackup v-if="!reviewData.containers.length" :backup-data="backupData" is-review
-                    @load-backup="loadBackup()" @remove-backup="removeBackup(true); backupData.backupDate = 0" />
-
                 <!-- Help when no components in writer -->
                 <component
-                    :is="REVIEW.general.writerHelp"
-                    v-if="!reviewData.containers.length"
+                    :is="WRITER.general.writerHelp"
+                    v-if="!POST_DATA.containers.length"
                     @start-writing="startWriting"
-                    :inverted="reviewData.whitePage"
+                    :inverted="POST_DATA.whitePage"
+                    :writer="WRITER"
                 />
 
                 <WriterViewer
                     @call-command="dataContainerCommand($event.command, $event.data)"
-                    :review-data="reviewData"
+                    :writer-data="POST_DATA"
                     :editable="previewMode"
                     :container-last-added="containerLastAdded"
                 />
 
-                <div class="text-xs" v-if="!disableEdits && reviewData.containers.length">
+                <div class="text-xs" v-if="!disableEdits && POST_DATA.containers.length">
                     <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">
                         <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span
                             @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save')
@@ -895,12 +857,15 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                     </p>
                 </div>
             </section>
-
+            
             <!-- Level Preview -->
             <section v-if="previewContent == 1 && !previewMode" class="flex flex-col gap-2 items-center">
-                <LevelCard v-for="(l, index) in reviewData.levels" v-bind="l" :disable-stars="true"
+                <LevelCard v-for="(l, index) in POST_DATA.levels" v-bind="l" :disable-stars="true"
                     :level-index="index" />
-            </section>
+                </section>
+                
+            <!-- Decoration -->
+            <WriterVisuals :review-data="POST_DATA" />
 
             <!-- Footer buttons (upload, settings...) -->
             <div class="flex gap-3 justify-center items-center mt-8 text-xl">

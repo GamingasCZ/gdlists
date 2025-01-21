@@ -348,3 +348,12 @@ export enum WriterGallery {
   ImageContainer = 1,
   ImageContainerNested = -1
 }
+
+type controlType = "cbox" | "dropdown" | "radio" | "slot" | "inline-slot" | "component"
+export interface Setting {
+  name: string
+  desc?: string
+  control: controlType
+  controlOptions?: [string, number][] | string[][] | number
+  disabled?: boolean
+}

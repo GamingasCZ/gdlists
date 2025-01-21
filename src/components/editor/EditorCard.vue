@@ -157,52 +157,52 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   else {
     if (searchingFromUser) {
       // Find level by specific creator
-        request = `userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
-      } else request = `levelName=${levelName}`; // Find level
+      request = `userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
+    } else request = `levelName=${levelName}`; // Find level
+  }
+  searching.value = true
+  axios
+    .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
+    .then(async (response: AxiosResponse) => {
+      let level: LevelSearchResponse = response.data;
+
+      // Couldn't find level
+      if (typeof response.data != "object") {
+        searching.value = false; return;
       }
-      searching.value = true
-      axios
-        .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
-        .then(async (response: AxiosResponse) => {
-          let level: LevelSearchResponse = response.data;
 
-          // Couldn't find level
-          if (typeof response.data != "object") {
-            searching.value = false; return;
-          }
+      // Try next page
+      if (searchingFromUser && userSearchPage < 5) {
+        searchLevel(searchingByID, userSearchPage + 1)
+      }
 
-          // Try next page
-          if (searchingFromUser && userSearchPage < 5) {
-            searchLevel(searchingByID, userSearchPage + 1 )
-          }
-          
-          props.levelArray.levels[props.index!].levelID = level.id;
-          props.levelArray.levels[props.index!].levelName = level.name;
-          props.levelArray.levels[props.index!].platf = level.platf;
-          isPlatformer.value = level.platf
-    
-          modifyCreator(level.author)
-    
-          if (hasLocalStorage()) {
-            let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
-            collabFlash.value = saveIDs.indexOf(parseInt(props.levelArray.levels[props.index].levelID)) > -1
-            setTimeout(() => {
-              collabFlash.value = false
-            }, 5000);
-          }
-    
-          if (level.difficulty == -1) level.difficulty = 11 // Auto levels
-          props.levelArray.levels[props.index!].difficulty = [
-            level.difficulty,
-            level.cp,
-          ];
-          selectedDiff.value = props.levelArray.levels[props.index!].difficulty
-    
-          ytVideoData.value = await videoSearch()
-          searching.value = false;
-          (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
-        }).catch(() => searching.value = false);
-    }
+      props.levelArray.levels[props.index!].levelID = level.id;
+      props.levelArray.levels[props.index!].levelName = level.name;
+      props.levelArray.levels[props.index!].platf = level.platf;
+      isPlatformer.value = level.platf
+
+      modifyCreator(level.author)
+
+      if (hasLocalStorage()) {
+        let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
+        collabFlash.value = saveIDs.indexOf(parseInt(props.levelArray.levels[props.index].levelID)) > -1
+        setTimeout(() => {
+          collabFlash.value = false
+        }, 5000);
+      }
+
+      if (level.difficulty == -1) level.difficulty = 11 // Auto levels
+      props.levelArray.levels[props.index!].difficulty = [
+        level.difficulty,
+        level.cp,
+      ];
+      selectedDiff.value = props.levelArray.levels[props.index!].difficulty
+
+      ytVideoData.value = await videoSearch()
+      searching.value = false;
+      (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
+    }).catch(() => searching.value = false);
+}
 
 
 const isOldCollab = computed(() => typeof props.levelArray.levels[props.index!].creator == 'object' && !props.levelArray.levels[props.index!].creator[3])
@@ -240,154 +240,94 @@ const background = computed(() => {
   if (SETTINGS.value.disableColors)
     return getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
 
-  return `linear-gradient(-90deg, ${lightCol()}, ${chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()})`
+  return chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()
 })
 </script>
 
 <template>
   <!-- Card content -->
-  <section
-    :style="{ background: background }"
-    class="flex flex-col gap-1.5 overflow-clip rounded-md">
-    <div class="flex justify-between p-2 pr-1 bg-black bg-opacity-20">
-      <div class="box-border inline-flex gap-2">
-        <!-- Level ID input -->
-        <img class="w-10 aspect-square" src="../../images/levelID.svg" alt="" />
-        <input autocomplete="off" @keyup.enter="searchLevel(true)"
-          class="max-w-[20vw] box-border rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
-          type="text" name="levelID" v-model="levelArray.levels[index!].levelID" :placeholder="$t('level.levelID')" />
-        <button :disabled="!searchAvailableID" type="button" class="box-border relative" :title="$t('editor.searchTitle')"
-          :style="{ opacity: searchAvailableID ? 1 : 0.5 }" @click="searchLevel(true)">
-          <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
-          <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt="" />
-        </button>
-      </div>
+  <section :style="{ background: background }" class="flex gap-1.5 overflow-clip rounded-md">
 
-      <div class="flex max-sm:hidden">
-        <!-- Level position -->
-        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveUp.svg" alt="" :title="$t('editor.moveUpTitle')"
-          @click="emit('doMove', index!, index! - 1); openedPanel = 0;" />
+    <div class="flex flex-col items-center bg-black bg-opacity-40">
+      <!-- Level position -->
+      <div class="flex flex-col items-center grow">
+        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveUp.svg" alt=""
+          :title="$t('editor.moveUpTitle')" @click="emit('doMove', index!, index! - 1); openedPanel = 0;" />
         <input autocomplete="off" readonly
-          class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
+          class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-40 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
           :value="index! + 1" @mousedown="mobileMoveLevel()" />
-        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveDown.svg" alt="" :title="$t('editor.moveDownTitle')"
-          @click="emit('doMove', index!, index! + 1); openedPanel = 0;" />
+        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveDown.svg" alt=""
+          :title="$t('editor.moveDownTitle')" @click="emit('doMove', index!, index! + 1); openedPanel = 0;" />
       </div>
 
-      <!-- Mobile move button -->
-      <button type="button" @click="mobileMoveLevel()" class="mr-1 sm:hidden" v-if="levelArray.levels.length > 1">
-        <img class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button"
-          src="../../images/move.svg" alt="" />
-      </button>
-    </div>
-    <div class="flex gap-2 items-center px-2 max-sm:flex-col">
-      <!-- Level name input -->
-      <div class="flex gap-2 max-sm:w-full">
-        <img
-          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
-          src="../../images/level.svg"
-          alt=""
-          :title="$t('editor.switchTypeTitle')"
-          v-if="!isPlatformer"
-          @click="switchPlatformer"
-        />
-        <img
-          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
-          src="../../images/levelPlat.svg"
-          alt=""
-          :title="$t('editor.switchTypeTitle')"
-          v-else
-          @click="switchPlatformer"
-        />
-        <button
-          :disabled="!(levelArray.levels[index!].levelName != '' || levelArray.levels[index!].creator != '')"
-          type="button"
-          :title="$t('editor.searchTitle')"
-          @click="searchLevel(false)"
-          class="sm:hidden"
-        >
-          <img
-            class="p-2 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt=""
-            :style="{ opacity: (levelArray.levels[index!].levelName || levelArray.levels[index!].creator) ? 1 : 0.5 }" />
+      <!-- Other level controls -->
+      <div class="flex flex-col">
+        <button @click="openedPanel = openedPanel != 1 ? 1 : 0" :title="$t('editor.levelColorTitle')" class="button">
+          <img class="w-6" src="../../images/color.svg" alt="" />
         </button>
-        <input autocomplete="off"
-          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text"
-          name="levelName"
-          maxlength="20"
-          v-model="levelArray.levels[index!].levelName"
-          :placeholder="isPlatformer ? $t('level.levelNamePlat') : $t('level.levelName')"
-        />
-      </div>
 
-      <!-- Level search -->
-      <div class="flex gap-2 items-center max-sm:hidden">
-        <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
-          :style="{ opacity: levelArray.levels[index!].levelName ? 1 : 0.5 }" />
-        
-        <button :disabled="!searchAvailableCreator" type="button" class="box-border relative" :title="$t('editor.searchTitle')"
-          :style="{ opacity: searchAvailableCreator ? 1 : 0.5 }" @click="searchLevel(false)"
-        >
-          <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
-          <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt="" />
+        <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="button">
+          <img class="w-7" src="../../images/trash.svg" alt="" />
         </button>
-        
-        <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
-          :style="{ opacity: creatorFilledIn ? 1 : 0.5 }" />
-      </div>
 
-      <!-- Creator input -->
-      <div class="flex gap-2 max-sm:flex-row-reverse max-sm:w-full">
-        <input autocomplete="off"
-          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full disabled:opacity-20"
-          type="text" name="creator" maxlength="15" :disabled="isOldCollab" :value="levelCreator" @change="modifyCreator"
-          :placeholder="$t('level.creator')" @keyup.enter="searchLevel(false)"/>
-        <button class="relative bg-black bg-opacity-30 rounded-md focus-within:!outline-current button"
-          @click="openCollabTools()"
-          :title="$t('editor.collabTitle')"
-          :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
-          <img class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square" src="../../images/collabMen.svg" alt=""
-            v-if="collabFlash" />
-          <img class="p-1 w-12 sm:w-10 aspect-square" src="../../images/collabMen.svg" alt="" />
-        </button>
       </div>
     </div>
-    <div class="flex justify-between items-center px-2 pb-2 max-sm:flex-col">
-      <!-- Video input -->
-      <div class="flex gap-2 max-sm:w-full">
-        <img class="min-w-[2.5rem] aspect-square" src="../../images/video.svg" alt="" />
-        <input autocomplete="off"
-          class="sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text" name="video" maxlength="50" @change="modifyVideo" :value="levelArray.levels[index!].video"
-          :placeholder="$t('level.video')" />
-      </div>
 
-      <!-- Extras buttons -->
-      <div class="flex gap-2 items-start max-sm:mt-3">
-        <img
-          class="w-10 button"
-          @click="openedPanel = openedPanel != 1 ? 1 : 0"
-          :title="$t('editor.levelColorTitle')"
-          src="../../images/colorPicker.svg"
-          alt=""
-        />
-        <div class="flex relative justify-center items-center button" :title="$t('editor.diffTitle')" @click="openedPanel = openedPanel != 2 ? 2 : 0">
-          <img
-            class="w-10"
-            alt=""
-            src="../../images/difficultyBG.svg"
-          />
-          <DifficultyIcon class="absolute inset-0 top-1/2 left-1/2 w-8 -translate-x-1/2 -translate-y-1/2" :difficulty="selectedDiff[0]" :rating="selectedDiff[1]" />
+    <div>
+      <div class="flex justify-between p-2 pr-1">
+        <!-- Mobile move button -->
+        <button type="button" @click="mobileMoveLevel()" class="mr-1 sm:hidden" v-if="levelArray.levels.length > 1">
+          <img class="p-1 w-10 bg-black bg-opacity-40 rounded-md transition-opacity duration-100 button"
+            src="../../images/move.svg" alt="" />
+        </button>
+      </div>
+      <div class="flex gap-2 items-center">
+        <!-- Level name input -->
+        <div class="flex gap-2 max-sm:w-full">
+          <button class="bg-black bg-opacity-40 rounded-md button" :title="$t('editor.diffTitle')"
+            @click="openedPanel = openedPanel != 2 ? 2 : 0">
+            <DifficultyIcon class="w-10" :difficulty="selectedDiff[0]" :rating="selectedDiff[1]" />
+          </button>
+          <input autocomplete="off"
+            class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-40 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
+            type="text" name="levelName" maxlength="20" v-model="levelArray.levels[index!].levelName"
+            :placeholder="$t('level.levelName')" />
         </div>
-        <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
-          alt="" />
-        <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 4 ? 4 : 0" src="../../images/bgPicker.svg"
-          alt="" />
-        <img class="ml-4 w-10 button" :title="$t('editor.removeTitle')" @click="levelArray.levels.splice(index, 1);" src="../../images/deleteLevel.svg" alt="" />
+
+        <!-- Level search -->
+        <div class="flex relative gap-2 items-center">
+          <button :disabled="!searchAvailableCreator" type="button" class="absolute right-1 top-1/2 z-10 button"
+            :title="$t('editor.searchTitle')" :style="{ opacity: searchAvailableCreator ? 1 : 0.5 }"
+            @click="searchLevel(false)">
+            <img src="../../images/loading.webp" alt="" class="p-0.5 w-full animate-spin" v-if="searching">
+            <img class="w-6 transition-opacity duration-100" src="../../images/searchOpaque.svg" alt="" />
+          </button>
+        </div>
+
+        <div class="box-border inline-flex gap-2">
+          <!-- Level ID input -->
+          <input autocomplete="off" @keyup.enter="searchLevel(true)"
+            class="max-w-[20vw] py-2 box-border rounded-md bg-black bg-opacity-40 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
+            type="text" name="levelID" v-model="levelArray.levels[index!].levelID" :placeholder="$t('level.levelID')" />
+        </div>
       </div>
+      <div class="">
+        <!-- Creator input -->
+        <div class="flex gap-2 max-sm:flex-row-reverse max-sm:w-full">
+          <button class="relative bg-black bg-opacity-40 rounded-md focus-within:!outline-current button"
+            @click="openCollabTools()" :title="$t('editor.collabTitle')"
+            :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
+            <img class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square" src="../../images/collabMen.svg"
+              alt="" v-if="collabFlash" />
+            <img class="p-1 w-12 sm:w-10 aspect-square" src="../../images/collabMen.svg" alt="" />
+          </button>
+          <input autocomplete="off"
+            class="px-2 bg-black bg-opacity-40 rounded-md placeholder:text-white placeholder:text-opacity-80 max-sm:w-full disabled:opacity-20"
+            type="text" name="creator" maxlength="15" :disabled="isOldCollab" :value="levelCreator"
+            @change="modifyCreator" :placeholder="$t('level.creator')" @keyup.enter="searchLevel(false)" />
+        </div>
+      </div>
+
     </div>
 
     <section class="relative bg-black bg-opacity-20" v-if="ytPanelOpen">
@@ -412,8 +352,10 @@ const background = computed(() => {
 
       <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
         :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
-      <DifficultyPicker v-if="openedPanel == 2" :level="index" @update="selectedDiff = $event" :level-array="levelArray" />
-      <LevelTags :level-array="levelArray" :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
+      <DifficultyPicker v-if="openedPanel == 2" :level="index" @update="selectedDiff = $event"
+        :level-array="levelArray" />
+      <LevelTags :level-array="levelArray" :card-index="index" v-if="openedPanel == 3"
+        @open-popup="emit('openTagPopup')" />
       <LevelBackground :level-array="levelArray" :card-index="index" v-if="openedPanel == 4" />
     </div>
   </section>
