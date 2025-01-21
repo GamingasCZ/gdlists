@@ -377,7 +377,7 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
 }
 
 const downloadImage = (hash: string, external: boolean) => {
-    if (external) navigator.clipboard.writeText(hash)
+    if (external) navigator.clipboard.writeText(externalImages.value.filter(x => x[1] == currentExtFolder.value[subfolderExtLevel.value][1])?.[hash]?.[0] ?? 'none')
     else {
         let link = document.createElement("a")
         link.href = `${pre}/userContent/${storage.value.uid}/${images.value[hash]}.webp`
@@ -742,8 +742,6 @@ const isSelected = (index: number) => {
 const randomAssElement = ref<HTMLDivElement>()
 let currentColor = "#000000"
 const modifyColors = (newColor: Color | null, reset?: boolean) => {
-
-    console.log(newColor)
     let assParent = randomAssElement.value?.parentElement
     if (reset && !newColor) {
         assParent?.style.setProperty("--primaryColor", null)
