@@ -10,6 +10,30 @@ Return codes:
 
 require("globals.php");
 
+const ENDPOINTS = [
+  "/": [
+    'title' => 'GD Lists',
+    'desc' => 'Create and browse lists and reviews of Geometry Dash Levels!'
+  ],
+  "/make/list": [
+    'title' => 'List Editor | GD Lists',
+    'desc' => 'Create lists of Geometry Dash Levels!'  
+  ],
+  "/make/review": [
+    'title' => 'Review Editor | GD Lists',
+    'desc' => 'Write reviews for Geometry Dash Levels!'  
+  ],
+  "/browse": [
+    'title' => 'Community Posts | GD Lists',
+    'desc' => 'Browse through lists, reviews and levels from Geometry Dash!'  
+  ],
+  "/saved": [
+    'title' => 'Saved | GD Lists',
+    'desc' => 'Browse through your saved levels and collabs!'  
+  ]
+]
+
+
 function mtch($val) {
     return preg_match("/\d+/", $val);
 }
