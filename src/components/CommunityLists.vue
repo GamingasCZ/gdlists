@@ -61,7 +61,7 @@ const modifyContentType = (to: Content) => {
   
     <ListBrowser
       online-browser
-      :component="[ListPreview, ReviewPreview, LevelPreview][contentType]"
+      :component="[ReviewPreview, ReviewPreview, LevelPreview][contentType]"
       :search="query"
       :online-type="userLists"
       :online-subtype="CONTENTS[contentType]"

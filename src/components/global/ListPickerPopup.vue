@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { inject, ref, watch } from "vue";
+import { inject, ref } from "vue";
 import type { Ref } from "vue";
 import TabBar from "../ui/TabBar.vue";
 import axios from "axios";
 import ListPreview from "./ListPreview.vue";
-import type { Level, ListFetchResponse, selectedList } from "@/interfaces";
+import type { Level, selectedList } from "@/interfaces";
 import ReviewPreview from "./ReviewPreview.vue";
 import FavoritePreview from "./FavoritePreview.vue";
 import ListBrowser from "./ListBrowser.vue";
-import { getEmbeds } from "@/Reviews";
 import LevelPreview from "./LevelPreview.vue";
 
 const props = defineProps<{
@@ -36,12 +35,11 @@ const contentType = ref(0)
 const listingLevels = ref<boolean | 2>(false)
 const levelsFetched = ref([])
 
-const dialogs = inject("openedDialogs")
 const addToInjected = inject<() => void>("addToInjected")!
 const selNest = inject<Ref<[number, number, number]>>("selectedNestContainer")!
 const selCont = inject<Ref<[number, HTMLDivElement | null]>>("selectedContainer")!
 const pickList = (data: selectedList) => {
-    if (props.onlyPickLevels && data[0]?.option == undefined && tab.value == 2) {
+    if (props.onlyPickLevels && (tab.value == 2 || listingLevels.value)) {
         emit('addLevel', data)
         return emit('closePopup')
     }

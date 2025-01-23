@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import { inject, type Ref, ref, watch } from 'vue';
 import type { ContainerSettings } from './containers';
-import { DEFAULT_RATINGS, reviewData } from '@/Reviews';
+import { DEFAULT_RATINGS } from '@/Reviews';
+import type { PostData } from '@/interfaces';
 
 const emit = defineEmits<{
     (e: "remove"): void
@@ -10,6 +11,7 @@ const emit = defineEmits<{
     (e: "hidSettings"): void
 }>()
 
+const postData = inject<Ref<PostData>>("postData")!
 const containers = inject<Containers>("settingsTitles")
 
 const props = defineProps<{
@@ -85,7 +87,7 @@ const closeSettings = (m: MouseEvent) => {
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
                         <option :value="-1">{{ $t('other.all') }}</option>
-                        <option v-for="(level, index) in reviewData.levels" :value="index">{{ level.levelName || $t('other.unnamesd') }}</option>
+                        <option v-for="(level, index) in postData.levels" :value="index">{{ level.levelName || $t('other.unnamesd') }}</option>
                     </select>
                 </div>
 
@@ -94,7 +96,7 @@ const closeSettings = (m: MouseEvent) => {
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
                         <option :value="-1">{{ $t('other.all') }}</option>
-                        <option v-for="(rating, index) in DEFAULT_RATINGS.concat(reviewData.ratings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
+                        <option v-for="(rating, index) in DEFAULT_RATINGS.concat(postData.ratings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
                     </select>
                 </div>
             </div>

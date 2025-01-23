@@ -357,3 +357,5 @@ export interface Setting {
   controlOptions?: [string, number][] | string[][] | number
   disabled?: boolean
 }
+
+export type PostData = ReviewList & LevelList

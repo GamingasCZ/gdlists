@@ -1,13 +1,12 @@
 <script setup lang="ts">
 const emit = defineEmits(["closePopup"]);
-import { makeColor, makeColorFromString, newCardBG } from "@/Editor";
 import LevelCard from "../editor/EditorCard.vue";
-import { inject, onBeforeUnmount, ref } from "vue";
+import { inject, onBeforeUnmount, ref, type Ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
-import { addReviewLevel, DEFAULT_RATINGS } from "@/Reviews";
+import { addReviewLevel } from "@/Reviews";
 import LevelImportPopup from "../editor/LevelImportPopup.vue";
 import Dialog from "../global/Dialog.vue";
-import type { FavoritedLevel, Level, ReviewList } from "@/interfaces";
+import type { FavoritedLevel, Level, LevelList, ReviewList } from "@/interfaces";
 import PickerPopup from "../global/PickerPopup.vue";
 import LevelBubble from "../global/LevelBubble.vue";
 import axios from "axios";
@@ -16,9 +15,10 @@ import Plus from "@/svgs/Plus.vue";
 
 defineProps<{
     subtext: string
+    maxLevels: number
 }>()
 
-const POST_DATA = inject<ReviewList>("postData")
+const POST_DATA = inject<Ref<ReviewList & LevelList>>("postData")!
 const addLevel = (levelData?: Level | FavoritedLevel) => {
     addReviewLevel(POST_DATA, levelData)
 
@@ -96,7 +96,7 @@ const openMoreDialog = (opt: number) => {
     switch (opt) {
         case 0:
             dialogs.lists[0] = true
-            dialogs.lists[2] = 1
+            dialogs.lists[2] = true
             break;
         case 1:
             addRandomLevel()
@@ -165,13 +165,13 @@ const openMoreDialog = (opt: number) => {
                 </div>
             </div>
             <div class="flex gap-2 justify-center items-center">
-                <button @click="addLevel()" :disabled="true"
+                <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels"
                     class="flex gap-2 px-2 py-3 text-xl font-bold disabled:opacity-40 disabled:grayscale text-lof-400">
                     <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
                     {{ $t('reviews.addLevel') }}</button>
                 <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
-                <button @click="moreLevOptOpen = true" ref="moreLevOpts" class="p-2 button">
-                    <img src="@/images/levelIcon.svg" class="w-2 rotate-180" alt="">
+                <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels" ref="moreLevOpts" class="p-2 button">
+                    <img src="@/images/levelIcon.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
                 </button>
             </div>
             <Dropdown

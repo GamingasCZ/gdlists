@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import { inject, type Ref, watch } from 'vue';
 import ContainerHelp from './ContainerHelp.vue';
 import { computed } from 'vue';
-import { DEFAULT_RATINGS, reviewData } from '@/Reviews';
+import { DEFAULT_RATINGS } from '@/Reviews';
 import chroma from 'chroma-js';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
+import type { PostData } from '@/interfaces';
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
@@ -18,6 +19,8 @@ const props = defineProps<{
     buttonState: string
 }>()
 
+const postData = inject<Ref<PostData>>("postData")
+
 watch(props, () => {
     switch (props.buttonState) {
         case "pick": props.settings.level = false; break;
@@ -27,19 +30,19 @@ watch(props, () => {
     selectedLevel.value = props.settings.level == -1 ? 0 : props.settings.level
 })
 
-const available = computed(() => reviewData.value.levels.length && !reviewData.value.disabledRatings)
+const available = computed(() => postData.value.levels.length && !postData.value.disabledRatings)
 const getCol = (col: number[]) => {
     return chroma.hsl(...col).css()
 }
 
 
-const allRatings = computed(() => DEFAULT_RATINGS.concat(reviewData.value.ratings))
+const allRatings = computed(() => DEFAULT_RATINGS.concat(postData.value.ratings))
 const levelRatings = computed(() => {
-    if (available.value) return reviewData.value.levels?.[selectedLevel.value!]?.ratings
+    if (available.value) return postData.value.levels?.[selectedLevel.value!]?.ratings
 })
 const errMessage = computed(() => {
-    if (reviewData.value.disabledRatings) return i18n.global.t('reviews.rateoff')
-    if (!reviewData.value.levels.length) return i18n.global.t('reviews.noLevelsYet')
+    if (postData.value.disabledRatings) return i18n.global.t('reviews.rateoff')
+    if (!postData.value.levels.length) return i18n.global.t('reviews.noLevelsYet')
 })
 const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
 </script>
@@ -54,9 +57,9 @@ const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
         
         <!-- Tabbar -->
         <div v-if="settings.level == -1" class="flex absolute top-1 left-1/2 gap-4 justify-between w-max text-xl text-center border-b-2 -translate-x-1/2 bg-lof-200 border-lof-400">
-            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == 0}" class="text-right text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-l from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.max(0, selectedLevel - 1)">{{ reviewData.levels?.[selectedLevel - 1]?.levelName || $t('other.unnamesd') }}</button>
-            <button class="my-1 whitespace-nowrap rounded-md bg-lof-300 min-w-36">{{ reviewData.levels[selectedLevel].levelName || $t('other.unnamesd') }}</button>
-            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == reviewData.levels.length - 1}" class="text-left text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-r from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.min(selectedLevel + 1, reviewData.levels.length - 1)">{{ reviewData.levels?.[selectedLevel + 1]?.levelName || $t('other.unnamesd')}}</button>
+            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == 0}" class="text-right text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-l from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.max(0, selectedLevel - 1)">{{ postData.levels?.[selectedLevel - 1]?.levelName || $t('other.unnamesd') }}</button>
+            <button class="my-1 whitespace-nowrap rounded-md bg-lof-300 min-w-36">{{ postData.levels[selectedLevel].levelName || $t('other.unnamesd') }}</button>
+            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == postData.levels.length - 1}" class="text-left text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-r from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.min(selectedLevel + 1, postData.levels.length - 1)">{{ postData.levels?.[selectedLevel + 1]?.levelName || $t('other.unnamesd')}}</button>
         </div>
 
         <!-- Single rating -->
@@ -73,7 +76,7 @@ const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
 
         <div v-else>
             <!-- All ratings -->
-            <div v-if="!reviewData.disabledRatings" class="grid grid-rows-4 grid-flow-col gap-x-4">
+            <div v-if="!postData.disabledRatings" class="grid grid-rows-4 grid-flow-col gap-x-4">
                 <div v-for="(rating, index) in levelRatings[0].concat(levelRatings[1])" class="min-w-[min(30vw,_10rem)] grid grid-cols-2 grid-rows-2 text-left">
                     <span>{{ allRatings[index].name || $t('other.unnamesd') }}</span>
                     <span v-if="rating > -1" class="text-xl font-bold text-right">{{ rating }}/10</span>

@@ -39,7 +39,7 @@ $selLevelRange = "
       avg(levels_ratings.difficulty) as A_difficulty,
       avg(overall) as A_overall";
 
-$listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
+$listRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
@@ -113,7 +113,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $users = doRequest($mysqli, "SELECT username,discord_id,pfp_cutout FROM users LEFT JOIN profiles ON users.discord_id = profiles.uid WHERE discord_id=?", [$rows["uid"]], "s");
 
     // Fetch ratings
-    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);
+    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], true);
   }
 
   return array($rows, $users, $dbInfo, $ratings, $reviewDetails);

@@ -1,4 +1,4 @@
-import { ref } from "vue"
+import { type Ref, ref } from "vue"
 import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
 import type { FavoritedLevel, Level, LevelList, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
@@ -44,7 +44,7 @@ export const REVIEW_EXTRAS: () => ReviewList = () => ({
     font: 0
 })
 
-export const addReviewLevel = (postData: LevelList, levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
+export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
     if (postData.value.levels.length >= 10) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 

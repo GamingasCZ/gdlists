@@ -30,6 +30,8 @@ const props = defineProps<{
   userArray: ListCreatorInfo[];
   disableLink?: boolean | 2
   unrolledOptions: boolean
+
+  isList: boolean
 }>();
 
 let thumb = ref()
@@ -97,7 +99,7 @@ if (props.thumbnail) {
 else
   thumbLink = `${base}/defaultThumbnails/${getDefaultThumb()}.png`
 
-let background = (JSON.parse(props.thumbProps) || [])
+let background = JSON.parse(props.thumbProps || '[]')
 background.splice(0,0,thumbLink)
 let xPos = ["left", "center", "right"][background[3]]
 const clickReview = (opt: number) => {
@@ -106,12 +108,18 @@ const clickReview = (opt: number) => {
   else emit('selectedLink', creator.value)
 }
 
+const link = () => {
+  let pre = props.isList ? "/" : "/review/"
+  let id = props.hidden != '0' ? props.hidden : (props.post ?? props.id)
+  return pre + id
+}
+
 </script>
 
 <template>
   <component :is="disableLink ? 'button' : 'RouterLink'"
-    :to="`/review/${hidden != '0' ? hidden : (post ?? id)}`"
-    class="flex flex-col min-w-64 w-full text-left max-w-96 cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
+    :to="link()"
+    class="flex flex-col min-w-64 w-full text-left max-w-96 cursor-pointer relative rounded-lg overflow-clip border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(listColor),
       borderColor: listColor.darken(2).hex(),

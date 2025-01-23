@@ -10,7 +10,7 @@ import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
-import { DataContainerAction, WriterGallery, type ReviewList, type TEXT_ALIGNMENTS } from "@/interfaces";
+import type { DataContainerAction, Level, PostData, WriterGallery, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
@@ -36,6 +36,8 @@ import { ImgFail, notifyError } from "./imageUpload";
 import WriterViewer from "./writer/WriterViewer.vue";
 import WriterVisuals from "./writer/WriterVisuals.vue";
 import { LIST, REVIEW, type Writer } from "@/writers/Writer";
+import Dropdown from "./ui/Dropdown.vue";
+import ColumnPreview from "./writer/ColumnPreview.vue";
 
 const props = defineProps<{
     type: number
@@ -44,7 +46,7 @@ const props = defineProps<{
     editing?: boolean
 }>()
 
-const POST_DATA = ref<ReviewList>()
+const POST_DATA = ref<PostData>()
 const WRITER = ref([LIST, REVIEW][props.type])
 watch(() => props.type, () => {
     WRITER.value = [LIST, REVIEW][props.type]
@@ -674,6 +676,13 @@ const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
 setInterval(() => burstTimer.value = Date.now(), 5000)
 const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved) / 1000)))
 
+const listPickerPick = (level: Level) => {
+    console.log(level)
+    addReviewLevel(POST_DATA!, level)
+}
+
+const highlightedCreateColumns = ref(-1)
+
 </script>
 
 <template>
@@ -736,7 +745,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false"
             :width="dialog.large">
             <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="POST_DATA.containers"
-                :only-pick-levels="openDialogs.lists[2]" @add-level="selectedLevel?.addLevel($event[0])" />
+                :only-pick-levels="openDialogs.lists[2]" @add-level="listPickerPick" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.BGpicker[0]" @close-popup="openDialogs.BGpicker[0] = false" disable-tap-close
@@ -755,7 +764,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
 
         <DialogVue :open="openDialogs.carouselPicker[0]" @close-popup="openDialogs.carouselPicker[0] = false"
             :title="$t('reviews.carMedia')">
-            <CarouselPicker />
+            <CarouselPicker :post-data="POST_DATA" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false"
@@ -813,7 +822,7 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
             </div>
 
             <!-- Levels -->
-            <WriterLevels :subtext="WRITER.general.levelsSubtext" />
+            <WriterLevels :subtext="WRITER.general.levelsSubtext" :max-levels="WRITER.general.maxLevels" />
 
             <!-- Editor -->
             <section v-show="previewContent == 0 || previewMode" ref="writer" v-if="WRITER.general.allowWriter"
@@ -821,6 +830,17 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                 class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full"
                 :class="{ 'readabilityMode': POST_DATA.readerMode, '!text-black': POST_DATA.whitePage, 'shadow-drop bg-lof-200 shadow-black': POST_DATA.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': POST_DATA.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': POST_DATA.transparentPage == 2 && !SETTINGS.disableTL }">
                 
+            <Dropdown v-if="writer" :button="writer">
+                <template #header>
+                    <section class="p-4 text-center text-white min-w-64">
+                        <ColumnPreview v-model="highlightedCreateColumns" :col-amount="10" />
+                        <p v-show="highlightedCreateColumns == -1" class="mt-2 text-lg text-white text-opacity-40">Vyber počet sloupců</p>
+                        <p v-show="highlightedCreateColumns == 1" class="mt-2 text-lg text-white text-opacity-40">Vyber více než jeden</p>
+                        <p v-show="highlightedCreateColumns > 1" class="mt-2 text-lg text-white">{{ highlightedCreateColumns }} sloupců</p>
+                    </section>
+                </template>
+            </Dropdown>
+
                 <!-- Formatting -->
                 <FormattingBar :class="{ 'pointer-events-none opacity-20': disableEdits }"
                     :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
@@ -844,18 +864,33 @@ const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewS
                     :container-last-added="containerLastAdded"
                 />
 
-                <div class="text-xs" v-if="!disableEdits && POST_DATA.containers.length">
-                    <p v-if="reviewSave.backupID == 0" class="mt-2 text-center">
+                <section v-if="!disableEdits && POST_DATA.containers.length" class="grid grid-cols-3 mt-4">
+                    <button @click="saveDraft(false)" class="text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                        <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
+                        <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
+                        <span v-else>{{ pretty }}</span>
+                    </button>
+                    <button class="text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                        <img src="@/images/key.svg" class="inline mr-4 w-6" alt="">
+                        <span>Klávesové zkratky</span>
+                    </button>
+                    <button class="text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                        <img src="@/images/zen.svg" class="inline mr-4 w-6" alt="">
+                        <span>Mód Zen</span>
+                    </button>
+                </section>
+                <!-- <div class="text-xs" >
+                    <p  class="mt-2 text-center">
                         <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span
-                            @click="saveDraft(false)" class="underline opacity-60 cursor-pointer">{{ $t('other.save')
+                            @click="" class="underline opacity-60 cursor-pointer">{{ $t('other.save')
                             }}</span>
                     </p>
                     <p v-else class="mt-2 italic text-center">
-                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: {{ pretty }}</span> <span
+                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: </span> <span
                             @click="saveDraft(false)" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{
                             $t('other.save') }}</span>
                     </p>
-                </div>
+                </div> -->
             </section>
             
             <!-- Level Preview -->

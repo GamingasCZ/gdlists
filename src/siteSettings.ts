@@ -17,6 +17,9 @@ export const SETTINGS = ref({
   seasonalThemes: true,
   selectedTheme: 0,
   selectedThemeAlways: 0,
+  compactToolbar: false,
+  draftNoRemove: false,
+  draftNoEdit: false
 });
 
 watch(SETTINGS, () => {

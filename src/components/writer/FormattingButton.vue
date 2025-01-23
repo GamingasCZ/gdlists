@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import Tooltip from '../ui/Tooltip.vue';
 import Dropdown from '../ui/Dropdown.vue';
+import { SETTINGS } from '@/siteSettings';
 
 const props = defineProps<{
     button: object
@@ -45,7 +46,7 @@ const getAction = () => {
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
         </button>
 
-        <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title" class="flex relative px-2 w-full rounded-b-md" :class="{'hover:bg-black': button?.dropdownText}">
+        <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title && !SETTINGS.compactToolbar" class="flex relative px-2 w-full rounded-b-md" :class="{'hover:bg-black': button?.dropdownText}">
             <span v-show="button.title" :class="{'font-bold': button.bold, 'group-hover:opacity-0': button?.dropdownText}" class="text-sm transition-opacity duration-75">{{ button.title }}</span>
             <img
                 v-if="button?.dropdownText"
@@ -54,7 +55,11 @@ const getAction = () => {
                 alt="">
         </button>
 
-        <Tooltip v-if="button?.tooltip && hovering" :button="but" :text="button?.tooltip" />
+        <Tooltip
+            v-if="(button?.tooltip || (SETTINGS.compactToolbar && button?.title)) && hovering"
+            :text="button?.tooltip || (SETTINGS.compactToolbar ? button?.title : '')"
+            :button="but"
+        />
 
         <Dropdown v-if="button?.dropdownText && dropdownOpen" @close="dropdownOpen = false" :button="but">
             <template #header>

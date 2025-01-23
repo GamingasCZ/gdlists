@@ -355,7 +355,7 @@ defineExpose({
           </button>
         </form>
       </div>
-      <main class="flex flex-col gap-3 items-center mt-4 transition-opacity duration-75" :class="{'opacity-60 pointer-events-none': loading, 'grid md:grid-cols-3': ['reviews', 'levels'].includes(onlineSubtype), 'md:!grid-cols-2': ['reviews', 'levels'].includes(onlineSubtype) && picking}">
+      <main class="grid gap-3 items-center mt-4 transition-opacity duration-75 md:grid-cols-3" :class="{'opacity-60 pointer-events-none': loading, 'md:!grid-cols-2': picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
@@ -443,6 +443,7 @@ defineExpose({
           :review-details="REVIEW_DETAILS"
           :is-pinned="false"
           :favorited="favoriteLevelIDs.includes(list.levelID)"
+          :is-list="onlineSubtype == 'lists'"
           @clicked-option="emit('selectedPostOption', [$event, list.name])"
           @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           @remove-level="removeFavoriteLevel"

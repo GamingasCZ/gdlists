@@ -50,14 +50,6 @@ if (hasLocalStorage()) {
         </Option>
         <SectionDivider :text="$t('settingsMenu.behave')" />
         <Option
-            v-model="SETTINGS.autosave"
-            :name="$t('settingsMenu.autosave')"
-            :desc="$t('settingsMenu.autosaveHelp')"
-            control="dropdown"
-            :control-options="[[$t('settingsMenu.asOff'), 0], [$t('settingsMenu.everySec', [30]), 30], [$t('settingsMenu.everySec', [60]), 60], [$t('settingsMenu.everyMin', [3]), 180]]"
-            >
-        </Option>
-        <Option
             v-model="SETTINGS.dialogClickClose"
             :name="$t('settingsMenu.clickClose')"
             :desc="$t('settingsMenu.dialogHelp')"
@@ -84,6 +76,34 @@ if (hasLocalStorage()) {
             :desc="$t('settingsMenu.seasThemesHelp')"
             control="cbox"
         >
+        </Option>
+        <SectionDivider :text="$t('editor.editor')" />
+        <Option
+            v-model="SETTINGS.compactToolbar"
+            name="Zmenšená lišta nástrojů"
+            desc="Skryje názvy nástrojů v editoru."
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-model="SETTINGS.draftNoRemove"
+            name="Nemazat koncepty při nahrání"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-model="SETTINGS.draftNoEdit"
+            name="Neukládat koncepty při upravování"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-model="SETTINGS.autosave"
+            :name="$t('settingsMenu.autosave')"
+            :desc="$t('settingsMenu.autosaveHelp')"
+            control="dropdown"
+            :control-options="[[$t('settingsMenu.asOff'), 0], [$t('settingsMenu.everySec', [30]), 30], [$t('settingsMenu.everySec', [60]), 60], [$t('settingsMenu.everyMin', [3]), 180]]"
+            >
         </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
