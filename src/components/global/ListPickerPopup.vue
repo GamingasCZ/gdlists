@@ -98,7 +98,7 @@ const adjustQuery = (newText: string) => {
         <div v-show="!listingLevels">
             <ListBrowser
                 online-browser
-                :component="[ListPreview, ReviewPreview, LevelPreview][tab]"
+                :component="[ReviewPreview, ReviewPreview, LevelPreview][tab]"
                 :search="query"
                 :online-type="['', 'user', 'hidden'][contentType]"
                 :online-subtype="['lists', 'reviews', 'levels'][tab]"

@@ -83,5 +83,19 @@ const dialogs = inject("openedDialogs")
     <ContainerHelp v-else-if="settings.post && postData?.[0] === undefined && typeof postData?.[1] == 'object'" icon="view" :help-content="$t('reviews.deletedPost')">
     </ContainerHelp>
 
-    <component v-else-if="postData" class="m-2" :key="postData?.[0]?.id" :is="[ListPreview, ReviewPreview, LevelCard][settings.postType]" @mousedown="saveScrolling" :post="pp" :disable-link="false" v-bind="postData[0]" :user-array="postData[1]" :review-details="postData[2]" hide-remove is-embed />
+    <component
+        v-else-if="postData"
+        :is="[ReviewPreview, ReviewPreview, LevelCard][settings.postType]"
+        :key="postData?.[0]?.id"
+        class="m-2"
+        @mousedown="saveScrolling"
+        v-bind="postData[0]"
+        :post="pp"
+        :is-list="settings.postType == 0"
+        :disable-link="false"
+        :user-array="postData[1]"
+        :review-details="postData[2]"
+        hide-remove
+        is-embed
+    />
 </template>

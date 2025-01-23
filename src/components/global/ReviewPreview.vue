@@ -103,7 +103,7 @@ let background = JSON.parse(props.thumbProps || '[]')
 background.splice(0,0,thumbLink)
 let xPos = ["left", "center", "right"][background[3]]
 const clickReview = (opt: number) => {
-  if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: 1})
+  if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: +(!props.isList)})
   else if (props.disableLink == 1) emit('selected')
   else emit('selectedLink', creator.value)
 }
@@ -147,7 +147,8 @@ const link = () => {
       </div>
       
       <div v-else class="grid absolute inset-2 grid-rows-2 gap-2 text-xl">
-        <button @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/reviews.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickReview') }}</button>
+        <button v-if="isList" @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickList') }}</button>
+        <button v-else @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/reviews.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickReview') }}</button>
         <button @click.stop="clickReview(1)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
       </div>
     </div>
