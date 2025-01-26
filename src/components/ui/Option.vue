@@ -27,6 +27,6 @@ const emit = defineEmits(['updated'])
         <div v-if="['slot', 'inline-slot'].includes(control)">
             <slot />
         </div>
-        <component v-if="control == 'component'" :is="controlOptions" />
+        <component v-model="model" v-if="control == 'component'" :is="controlOptions" />
     </div>
 </template>

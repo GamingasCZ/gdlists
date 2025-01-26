@@ -31,7 +31,7 @@ type Post = 'list' | 'review'
 type PostKeys = keyof (ReviewList & LevelList)
 type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph'
 
-interface ToolbarButton {
+export interface ToolbarButton {
     /**
      * Text under the icno
     */
@@ -68,6 +68,12 @@ interface ToolbarButton {
      * Makes the title font bold
      */
     bold?: boolean
+    /**
+     * Array of 2 numbers that add a left margin to the button
+     * Index 0 - Left margin in regular toolbar
+     * Index 1 - Left margin in COMPACT toolbar
+     */
+    leftOffset?: [number, number]
 }
 
 /**
@@ -355,6 +361,8 @@ export const REVIEW: Writer = {
                     icon: "bold",
                     shortcutFixed: [Key.Alt, 'J'],
                     action: ["preview", 0],
+                    leftOffset: [9, 3.5],
+                    splitAfter: true
                 },
                 {
                     title: "Recenze",

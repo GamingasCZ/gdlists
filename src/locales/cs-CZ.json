@@ -823,7 +823,9 @@
     "surprise": "Překvap mě!",
     "impGD": "Importovat z GD",
     "browseLevels": "Procházet levely",
-    "page": "Stránka"
+    "page": "Stránka",
+    "zenMode": "Mód Zen",
+    "keysh": "Klávesové zkratky"
   },
   "review": {
     "columnSetting": "{0} sloupec",

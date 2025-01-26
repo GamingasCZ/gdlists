@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { levelList, creatorToCollab, makeColor } from '@/Editor';
+import { creatorToCollab, makeColor } from '@/Editor';
 import chroma from 'chroma-js';
-import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, useAttrs, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import type { CollabData, CollabHumans, Level, SavedCollab } from '@/interfaces'
 import CollabCreator from './CollabCreator.vue';
 import SavedCollabVue from './SavedCollab.vue';

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { levelList } from '@/Editor';
 import ColorPicker from '../global/ColorPicker.vue';
 import chroma from 'chroma-js';
 import { computed, nextTick, ref } from 'vue';

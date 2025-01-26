@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import { type Ref, ref } from 'vue';
 import { inject } from 'vue';
 import DataContainer from './DataContainer.vue';
-import { flexNames, reviewData } from '@/Reviews';
+import { flexNames } from '@/Reviews';
 import { computed } from 'vue';
 import chroma from 'chroma-js';
 import { watch } from 'vue';
+import type { PostData } from '@/interfaces';
 
 const props = defineProps<{
     settings: {components: any[]}
@@ -51,7 +52,8 @@ const removeNestContainer = () => {
     }
 }
 
-const borderColor = computed(() => chroma.css(chroma.hsl([reviewData.value.pageBGcolor[0]+90, 0.94, 0.68])))
+const postData = inject<Ref<PostData>>("postData")!
+const borderColor = computed(() => chroma.css(chroma.hsl([postData.value.pageBGcolor[0]+90, 0.94, 0.68])))
 
 const selectNestContainer = (e: Event) => {
     if (!props.editable) return

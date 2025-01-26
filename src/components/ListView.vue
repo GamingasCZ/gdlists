@@ -31,7 +31,7 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
@@ -47,10 +47,6 @@ const props = defineProps<{
   isReview: boolean
   randomList: boolean
 }>()
-
-onUnmounted(() => {
-  reviewData.value = DEFAULT_REVIEWDATA()
-});
 
 let gdlists = useI18n().t('other.websiteName')
 
@@ -198,8 +194,6 @@ async function loadReview(loadedData: ReviewList | null) {
 
     LIST_DATA.value = res[0];
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
-    reviewData.value.levels = LIST_DATA.value.data.levels;
-    reviewData.value.ratings = LIST_DATA.value.data.ratings;
     REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
     LIST_RATING.value = res[3]
 

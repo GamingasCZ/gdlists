@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const emit = defineEmits(["closePopup"]);
 import { ref } from "vue";
-import { reviewData } from "@/Reviews";
 import type { CollabHumans } from "@/interfaces";
 import MobileCollabCreator from "../global/MobileCollabCreator.vue";
 
@@ -30,7 +29,7 @@ defineExpose({
 
 <template>
     <div class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 overflow-y-auto flex flex-col gap-2">
-        <div v-if="!reviewData.levels.length"
+        <div
             class="flex absolute top-1/2 left-1/2 flex-col items-center w-full text-center -translate-x-1/2 -translate-y-1/2">
             <img src="@/images/collabDudes.svg" alt="" class="w-64 opacity-40">
             <h2 class="text-2xl opacity-40">{{ $t('reviews.noUsersYet') }}</h2>

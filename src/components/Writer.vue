@@ -10,7 +10,8 @@ import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
-import type { DataContainerAction, Level, PostData, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
+import type {Level, PostData, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
+import { DataContainerAction } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
 import { pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
@@ -58,10 +59,6 @@ watch(timeLastRouteChange, () => resetPost())
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
 
 provide("postData", POST_DATA)
-if (predefinedLevelList.value.length) {
-    POST_DATA.value.levels = predefinedLevelList.value
-    predefinedLevelList.value = []
-}
 
 let isNowHidden = false
 if (props.editing) {
@@ -109,7 +106,7 @@ const openDialogs = reactive({
     settings: false,
     levels: false,
     tags: false,
-    collabs: false,
+    collabs: [false, 0],
     lists: [false, 0, 0],
     BGpicker: [false, 0, 0],
     ratings: false,
@@ -416,7 +413,7 @@ const modifyImageURL = (newUrl: string) => {
 const errorStamp = ref(Date.now())
 const errorText = ref("")
 const checkForErrors = () => {
-    let check = WRITER.value.general.clientPostValidation()
+    let check = WRITER.value.general.clientPostValidation(POST_DATA.value)
     if (!check?.success) {
         errorStamp.value = Date.now()
         errorText.value = check?.error
@@ -541,6 +538,12 @@ let autosaveInterval: number
 onMounted(() => {
     POST_DATA.value = WRITER.value.general.postObject()
 
+    // Add lavels from saved
+    if (predefinedLevelList.value.length) {
+        predefinedLevelList.value.forEach(l => addReviewLevel(POST_DATA, l))
+        predefinedLevelList.value = []
+    }
+
     if (SETTINGS.value.autosave) {
         // Save when leaving the site
         window.addEventListener("beforeunload", () => {
@@ -647,7 +650,7 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
             name: saveAsName,
             createDate: now,
             saveDate: now,
-            wordCount: getWordCount(),
+            wordCount: getWordCount(POST_DATA.value),
             previewTitle: preview[0],
             previewParagraph: preview[1]
         }
@@ -656,7 +659,7 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
     else {
         drafts.value[reviewSave.value.backupID].reviewData = POST_DATA.value,
         drafts.value[reviewSave.value.backupID].saveDate = now
-        drafts.value[reviewSave.value.backupID].wordCount = getWordCount()
+        drafts.value[reviewSave.value.backupID].wordCount = getWordCount(POST_DATA.value)
         drafts.value[reviewSave.value.backupID].previewTitle = preview[0]
         drafts.value[reviewSave.value.backupID].previewParagraph = preview[1]
         backupID = reviewSave.value.backupID
@@ -674,7 +677,7 @@ const removeDraft = (key: number) => {
 }
 
 const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
-setInterval(() => burstTimer.value = Date.now(), 5000)
+setInterval(() => burstTimer.value = Date.now(), 10000)
 const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved) / 1000)))
 
 const listPickerPick = (level: Level) => {
@@ -683,6 +686,30 @@ const listPickerPick = (level: Level) => {
 }
 
 const highlightedCreateColumns = ref(-1)
+
+const zenMode = ref(false)
+const toggleZenMode = () => {
+    zenMode.value = !zenMode.value
+    let navbar = document.querySelector("#navbar") as HTMLDivElement
+    let footer = document.querySelector("#footer") as HTMLDivElement
+    if (zenMode.value) {
+        document.documentElement.requestFullscreen({navigationUI: "hide"})
+        navbar.style.display = "none"
+        footer.style.display = "none"
+
+        document.documentElement.style.setProperty("--siteBackground", "#060606");
+        document.documentElement.style.setProperty("--primaryColor", "#1c1c1c");
+        document.documentElement.style.setProperty("--secondaryColor", "#1c1c1c");
+        document.documentElement.style.setProperty("--brightGreen", "#b7b7b7");
+        (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute("theme-color", "#1c1c1c");
+    }
+    else {
+        modifyListBG(POST_DATA.value?.pageBGcolor)
+        document.exitFullscreen()
+        navbar.style.display = null
+        footer.style.display = null
+    }
+}
 
 </script>
 
@@ -721,27 +748,6 @@ const highlightedCreateColumns = ref(-1)
                 <TextEditor :edit-value="POST_DATA" />
             </DialogVue>
         </DialogVue>
-
-        <DialogVue :open="openDialogs.userAdder[0]" :title="$t('editor.levels')" :action="userDialog?.addUser"
-            :side-button-text="$t('other.add')"
-            :side-button-disabled="POST_DATA.containers?.[openDialogs.userAdder[1]]?.settings?.users?.length >= 10"
-            @close-popup="openDialogs.userAdder[0] = false" :width="dialog.large">
-            <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <UserDialog ref="userDialog" :user-array="POST_DATA.containers[selectedContainer[0]].settings.users" />
-        </DialogVue>
-
-        <DialogVue :open="openDialogs.levels" :title="$t('editor.levels')" @close-popup="openDialogs.levels = false"
-            :width="dialog.large">
-            <template #icon><img src="@/images/plus.svg" alt="" class="w-6"></template>
-            <CollabEditor v-if="openDialogs.collabs" :level-array="POST_DATA.levels" :index="0"
-                :clipboard="collabClipboard" @close-popup="openDialogs.collabs = false" />
-            <DialogVue :open="openDialogs.tags" @close-popup="openDialogs.tags = false" :title="$t('editor.tagTitle')"
-                :width="dialog.medium" :top-most="true">
-                <TagPickerPopup @add-tag="POST_DATA.levels[selectedLevel.openedCard].tags.push($event)" />
-            </DialogVue>
-        </DialogVue>
-
-
 
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false"
             :width="dialog.large">
@@ -787,13 +793,16 @@ const highlightedCreateColumns = ref(-1)
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
         </DialogVue>
 
+        <CollabEditor v-if="openDialogs.collabs[0]" :level-array="POST_DATA.levels" :index="openDialogs.collabs[1]"
+        :clipboard="collabClipboard" @close-popup="openDialogs.collabs[0] = false" />
+
         <!-- <Header :class="{ 'pointer-events-none opacity-20': disableEdits }" :editing="editing" :has-levels="hasLevels"
             :has-unrated="hasUnrated" :uploading="uploadInProgress" @update="updateReview"
             @remove="openDialogs.removeDialog = true" @upload="startUpload" @open-dialog="openDialogs[$event] = true" /> -->
 
-        <section class="max-w-[90rem] flex flex-col gap-y-8 mx-auto">
+        <section class="max-w-[90rem] flex flex-col gap-y-16 mx-auto">
             <!-- Hero -->
-            <div class="flex flex-col items-center mt-8 text-center"
+            <div v-show="!zenMode" class="flex flex-col items-center mt-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
                 <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing"
                     :placeholder="WRITER.general.titlePlaceholder"
@@ -823,15 +832,15 @@ const highlightedCreateColumns = ref(-1)
             </div>
 
             <!-- Levels -->
-            <WriterLevels :subtext="WRITER.general.levelsSubtext" :max-levels="WRITER.general.maxLevels" />
+            <WriterLevels v-if="!zenMode" :subtext="WRITER.general.levelsSubtext" :max-levels="WRITER.general.maxLevels" />
 
             <!-- Editor -->
             <section v-show="previewContent == 0 || previewMode" ref="writer" v-if="WRITER.general.allowWriter"
                 :style="{ fontFamily: pickFont(POST_DATA.font) }" id="reviewText" :data-white-page="POST_DATA.whitePage"
                 class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full"
-                :class="{ 'readabilityMode': POST_DATA.readerMode, '!text-black': POST_DATA.whitePage, 'shadow-drop bg-lof-200 shadow-black': POST_DATA.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': POST_DATA.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': POST_DATA.transparentPage == 2 && !SETTINGS.disableTL }">
+                :class="{ 'readabilityMode': POST_DATA.readerMode, 'bg-transparent my-16 border-none shadow-none': zenMode, '!text-black': POST_DATA.whitePage, 'shadow-drop bg-lof-200 shadow-black': POST_DATA.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': POST_DATA.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': POST_DATA.transparentPage == 2 && !SETTINGS.disableTL }">
                 
-            <Dropdown v-if="writer" :button="writer">
+            <!-- <Dropdown v-if="writer" :button="writer">
                 <template #header>
                     <section class="p-4 text-center text-white min-w-64">
                         <ColumnPreview v-model="highlightedCreateColumns" :col-amount="10" />
@@ -840,10 +849,10 @@ const highlightedCreateColumns = ref(-1)
                         <p v-show="highlightedCreateColumns > 1" class="mt-2 text-lg text-white">{{ highlightedCreateColumns }} sloupců</p>
                     </section>
                 </template>
-            </Dropdown>
+            </Dropdown> -->
 
                 <!-- Formatting -->
-                <FormattingBar :class="{ 'pointer-events-none opacity-20': disableEdits }"
+                <FormattingBar v-show="!zenMode" :class="{ 'pointer-events-none opacity-20': disableEdits }"
                     :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
                     @add-container="(el, above) => addContainer(el, 0, false, above)"
                     @set-alignment="setAlignment(selectedContainer[0], $event)" @column-command="columnCommand($event)"
@@ -860,24 +869,25 @@ const highlightedCreateColumns = ref(-1)
 
                 <WriterViewer
                     @call-command="dataContainerCommand($event.command, $event.data)"
+                    :zen-mode="zenMode"
                     :writer-data="POST_DATA"
                     :editable="previewMode"
                     :container-last-added="containerLastAdded"
                 />
 
-                <section v-if="!disableEdits && POST_DATA.containers.length" class="grid grid-cols-3 mt-4">
-                    <button @click="saveDraft(false)" class="text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                <section v-if="!disableEdits && POST_DATA.containers.length" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
+                    <button @click="saveDraft(false)" class="py-2 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
                         <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
                         <span v-else>{{ pretty }}</span>
                     </button>
-                    <button class="text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <button class="py-2 text-white rounded-md opacity-40 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/key.svg" class="inline mr-4 w-6" alt="">
-                        <span>Klávesové zkratky</span>
+                        <span>{{ $t('reviews.keysh') }}</span>
                     </button>
-                    <button class="text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <button @click="toggleZenMode()" class="py-2 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/zen.svg" class="inline mr-4 w-6" alt="">
-                        <span>Mód Zen</span>
+                        <span>{{ $t('reviews.zenMode') }}</span>
                     </button>
                 </section>
                 <!-- <div class="text-xs" >
@@ -901,10 +911,10 @@ const highlightedCreateColumns = ref(-1)
                 </section>
                 
             <!-- Decoration -->
-            <WriterVisuals :review-data="POST_DATA" />
+            <WriterVisuals v-show="!zenMode" :review-data="POST_DATA" />
 
             <!-- Footer buttons (upload, settings...) -->
-            <div class="flex gap-3 justify-center items-center mt-8 text-xl">
+            <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">
 
                 <button @click="openDialogs.settings = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
                     <span >{{ $t('other.settings') }}</span>

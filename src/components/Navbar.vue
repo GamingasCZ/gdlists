@@ -3,7 +3,7 @@ import { RouterLink } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { currentCutout, currentUID, isOnline, profileCutouts, resetList } from "@/Editor";
+import { currentCutout, currentUID, isOnline, profileCutouts } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress, timeLastRouteChange } from "@/router";

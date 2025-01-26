@@ -33,7 +33,7 @@ if (hasLocalStorage()) {
 
 <template>
     <div class="flex bg-repeat-x bg-[url(@/images/fade.webp)] overflow-y-auto flex-col gap-2 p-2">
-        <SectionDivider :text="$t('settingsMenu.visual')" />
+        <SectionDivider :text="$t('settingsMenu.behave')" />
         <Option
         :name="$t('settingsMenu.viewMode')"
             control="slot"
@@ -41,14 +41,6 @@ if (hasLocalStorage()) {
             >
             <RadioPicker v-model="SETTINGS.levelViewMode" id="level" :opt-names="[$t('settingsMenu.classic'), $t('settingsMenu.compact'), $t('settingsMenu.table')]" :opt-icons="['/viewModes/classic.svg', '/viewModes/compact.svg', '/viewModes/spreadsheet.svg']" />
         </Option>
-        <Option
-            v-model="SETTINGS.homepageColumns"
-            :name="$t('settingsMenu.homepage')"
-            control="dropdown"
-            :control-options="[[$t('settingsMenu.columns', 1), 1],[$t('settingsMenu.columns', 2), 2],[$t('settingsMenu.columns', 3), 3]]"
-        >
-        </Option>
-        <SectionDivider :text="$t('settingsMenu.behave')" />
         <Option
             v-model="SETTINGS.dialogClickClose"
             :name="$t('settingsMenu.clickClose')"

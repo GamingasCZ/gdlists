@@ -54,6 +54,8 @@ const emit = defineEmits<{
 }>()
 
 function getUser() {
+  if (!props.userArray) return ""
+  
   let listCreator: ListCreatorInfo = [];
   props.userArray.forEach((user) => {
     if (props.uid == user.discord_id) listCreator = user;
@@ -64,7 +66,7 @@ function getUser() {
 var levelCount: number
 var levelRatings: number[] = []
 function getRating() {
-  let details = props.reviewDetails.find(x => x.reviewID == props.id.toString())
+  let details = (props?.reviewDetails ?? []).find(x => x.reviewID == props.id.toString())
   if (!details) return
 
   Object.keys(details).forEach(key => {
@@ -97,7 +99,7 @@ if (props.thumbnail) {
   thumbLink = `${pre}/userContent/${props.uid}/${props.thumbnail}.webp`
 }
 else
-  thumbLink = `${base}/defaultThumbnails/${getDefaultThumb()}.png`
+  thumbLink = `${base}/defaultThumbnails/${getDefaultThumb()}.webp`
 
 let background = JSON.parse(props.thumbProps || '[]')
 background.splice(0,0,thumbLink)

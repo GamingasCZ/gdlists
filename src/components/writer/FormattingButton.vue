@@ -3,9 +3,10 @@ import { ref } from 'vue';
 import Tooltip from '../ui/Tooltip.vue';
 import Dropdown from '../ui/Dropdown.vue';
 import { SETTINGS } from '@/siteSettings';
+import type { ToolbarButton } from '@/writers/Writer';
 
 const props = defineProps<{
-    button: object
+    button: ToolbarButton
 }>()
 
 const emit = defineEmits<{
@@ -35,6 +36,7 @@ const getAction = () => {
         @mouseover="hovering = true"
         @mouseleave="hovering = false"
         :class="{'!bg-opacity-60 bg-black': false}"
+        :style="{marginLeft: button?.leftOffset ? `${button.leftOffset[+SETTINGS.compactToolbar]}rem` : null}"
         ref="but"
         class="flex relative flex-col items-center w-max rounded-md transition-colors duration-75 group disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
     >

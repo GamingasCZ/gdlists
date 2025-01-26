@@ -95,7 +95,7 @@ const listData = inject("listData")
     <!-- Favorite star -->
     <td class="pr-1 w-5">
       <button @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)" :class="{ disabled: isFavorited }" class="flex justify-center items-center w-max"
-        v-if="isFavorited != undefined && levelID?.match(/^\d+$/) && !disableStars"><img class="w-5" src="../../images/star.webp">
+        v-if="isFavorited != undefined && levelID?.match(/^\d+$/) && !disableStars"><img class="w-5" src="../../images/star.svg">
       </button>
     </td>
   </tr>

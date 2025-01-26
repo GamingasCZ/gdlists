@@ -103,7 +103,7 @@ onMounted(doFocusText)
 </script>
 
 <template>
-	<div :data-type="type" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer outline-[2px] min-h-4 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
+	<div :data-type="type" @click.right.exact.prevent="editable ? (doShowSettings = true) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer outline-[2px] min-h-4 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
 		<p
 			v-if="canEditText"
 			ref="mainText"

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios, { type AxiosResponse } from "axios";
 import { ref, watch } from "vue";
 import type {
   FavoritedLevel,
@@ -7,12 +6,10 @@ import type {
   ListPreview,
   ReviewDetailsResponse,
 } from "../../interfaces";
-import FavoritePreview from "../global/FavoritePreview.vue";
-import ListPreviewElement from "../global/ListPreview.vue";
-import cookier from "cookier";
 import { oldLists } from "./officialLists";
 import { hasLocalStorage } from "@/siteSettings";
 import ReviewPreview from "../global/ReviewPreview.vue";
+import LevelPreview from "../global/LevelPreview.vue"
 
 const props = defineProps({
   headerName: { type: String, required: true },
@@ -23,7 +20,7 @@ const props = defineProps({
   contentType: { type: String },
   listType: { type: Number, default: 0 },
   randomizeContent: { type: Boolean, default: false },
-  maxItems: {type: Number, default: 3},
+  maxItems: {type: Number, default: 4},
   forceContent: {type: Array}
 });
 
@@ -68,46 +65,46 @@ const clearViewed = () => {
 </script>
 
 <template>
-  <section class="mt-6 ml-4">
-    <div class="flex gap-4 items-center text-white">
-      <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" />
-      <span class="text-2xl font-medium sm:text-3xl">{{ headerName }}</span>
+  <section v-if="lists?.length" class="mt-6">
+    <div class="flex gap-4 justify-center items-center text-white">
+      <!-- <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" /> -->
+      <span class="mt-4 w-full text-3xl font-bold">{{ headerName }}</span>
 
       <!-- Link button -->
 
-      <RouterLink
+      <!-- <RouterLink
         v-if="extraText?.length! > 0 && extraAction?.startsWith('/')"
         :to="extraAction"
         class="flex gap-2 px-2 py-0.5 rounded-md button bg-lof-300 selectOutline"
         >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
-      </RouterLink>
+      </RouterLink> -->
 
       <!-- Action button -->
-      <button
+      <!-- <button
         v-if="extraText?.length! > 0 && extraAction?.startsWith('@')"
         class="flex gap-2 px-2 py-0.5 rounded-md button bg-lof-300 selectOutline"
         @click="clearViewed()"
       >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
-      </button>
+      </button> -->
     </div>
 
     <div
-      class="mt-2 flex flex-col gap-3 max-sm:w-[95%] max-sm:text-xs sm:ml-14"
-      :class="{'!flex-row max-w-7xl flex-wrap': listType == 2}"
+      class="grid overflow-x-auto grid-cols-4 gap-3 mt-2 max-w-8xl max-sm:text-xs"
     >
-      <p class="text-yellow-200 max-sm:ml-12" v-if="!lists?.length">
+      <p class="text-yellow-200" v-if="!lists?.length">
         - {{ emptyText }} -
       </p>
       <component
         v-else
         v-for="level in lists"
         v-bind="level"
+        :is-list="listType == 0"
         :user-array="users"
         :hide-remove="true"
         :review-details="reviewDetails"
-        :is="[ListPreviewElement, FavoritePreview, ReviewPreview][listType]"
+        :is="[ReviewPreview, LevelPreview, ReviewPreview][listType]"
         @unpin-list="lists.splice($event, 1)"
       />
     </div>

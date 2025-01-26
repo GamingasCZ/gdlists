@@ -9,6 +9,7 @@ defineProps<{
     writerData: ReviewList
     editable: boolean
     containerLastAdded?: number
+    zenMode: boolean
 }>()
 
 const emit = defineEmits<{
@@ -37,7 +38,7 @@ const buttonState = ref([0, 0])
         :class="[CONTAINERS[container.type].styling ?? '']"
         :style="{ textAlign: container.align }"
         :key="container.id"
-        :focused="editable && selectedContainer[0] == index"
+        :focused="!zenMode && (editable && selectedContainer[0] == index)"
         :editable="editable"
         :text="container.data"
     >

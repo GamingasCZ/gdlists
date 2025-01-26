@@ -2,10 +2,12 @@
 import { provide, ref } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
 import SavedCollabVue from "./editor/SavedCollab.vue";
-import FavoritePreview from "./global/FavoritePreview.vue";
+import LevelPreview from "./global/LevelPreview.vue";
 import DialogVue from "./global/Dialog.vue";
+import TemporaryList from "./global/TemporaryList.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import type { SavedCollab } from "@/interfaces";
+import { selectedLevels } from "@/Editor";
 import { dialog } from "./ui/sizes";
 
 const browser = ref<'' | 'collabs'>('')
@@ -36,6 +38,12 @@ const customColor = ref("")
     <CollabViewer @custom-color="customColor = $event" :editor="true" :translucent="false" v-bind="collabData" />
   </DialogVue>
   <section class="mx-2 mt-3">
-    <ListBrowser :component="browser == 'collabs' ? SavedCollabVue : FavoritePreview" :online-browser="false" :online-type="browser" @switch-browser="browser = $event" :browser-name="$t('other.savedLevels')" />
+    <ListBrowser :component="browser == 'collabs' ? SavedCollabVue : LevelPreview" :online-browser="false" :online-type="browser" @switch-browser="browser = $event" :browser-name="$t('other.savedLevels')" />
   </section>
+
+  <Teleport to="body">
+    <Transition name="fadeSlide">
+      <TemporaryList v-if="selectedLevels.length" />
+    </Transition>
+  </Teleport>
 </template>

@@ -113,9 +113,9 @@ const ratingsShowing = ref(false)
     </button>
 
     <!-- Favorite star -->
-    <button class="absolute top-1 right-1 button max-sm:hidden" @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
+    <button class="absolute top-1 right-1 drop-shadow-md button max-sm:hidden" @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
       :class="{ disabled: isFavorited }" v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars">
-      <img src="@/images/star.webp" class="w-6" alt="" />
+      <img src="@/images/star.svg" class="w-6" alt="" />
     </button>
 
     <!-- Level review ratings -->

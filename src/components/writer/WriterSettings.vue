@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { reviewData } from '@/Reviews';
 import SectionDivider from '../ui/SectionDivider.vue';
 import Option from '../ui/Option.vue';
 import type { Writer } from '@/writers/Writer';
+import { inject, type Ref } from 'vue';
+import type { PostData } from '@/interfaces';
 
 const emit = defineEmits<{ (e: "upload"): void }>()
 defineProps<{
   uploading: boolean;
   writer: Writer
 }>()
+
+const postData = inject<Ref<PostData>>("postData")!
 
 </script>
 
@@ -23,7 +26,7 @@ defineProps<{
     
     <div class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 h-[40rem] overflow-y-scroll">
       <template v-for="setting in writer.settings">
-        <Option v-if="typeof setting == 'object'" v-model="reviewData[setting.affects]" v-bind="setting" />
+        <Option v-if="typeof setting == 'object'" v-model="postData[setting.affects]" v-bind="setting" />
         <SectionDivider :text="setting" v-else />
       </template>
     </div>

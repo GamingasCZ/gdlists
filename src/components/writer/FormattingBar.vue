@@ -160,13 +160,40 @@ window.addEventListener("keyup", e => {
 		doAction(...f)
 })
 
+const getToolbarButtons = (side: 'left' | 'right') => {
+	if (SETTINGS.value.compactToolbar) {
+		let buts = props.writer.toolbar[currentToolbar.value]?.[side]!.slice(0)
+		let newButs = props.writer.toolbar[currentToolbar.value]?.[side]!.slice(0).filter(x => !x?.dropdownText)
+		let b = 0
+		for (let i = 0; i < buts.length; i++) {
+			if (buts[i]?.dropdownText) {
+				let j = buts[i].dropdownText.length-1
+				buts[i].dropdownText.forEach(x => {
+					let newArr = JSON.parse(JSON.stringify(buts[i]))
+					newArr.tooltip = buts[i].dropdownText[j]
+					delete newArr.dropdownText
+					newArr.icon = buts[i].icon[j]
+					newArr.splitAfter = j == buts[i].dropdownText?.length-1
+					newArr.action = [buts[i].action[0], buts[i].action[1][j]]
+					newButs?.splice(i+b, 0, newArr)
+					j--
+				})
+				b += buts[i].dropdownText?.length-1
+			}
+		}
+		return newButs
+	}
+	else
+		return props.writer.toolbar[currentToolbar.value]?.[side]
+}
+
 </script>
 
 <template>
 	<section @click.stop="" :style="{ top: barPos }"
 		class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
 		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center">
-			<FormattingButton v-for="button in writer.toolbar[currentToolbar]?.[side]" :button="button"
+			<FormattingButton v-for="button in getToolbarButtons(side)" :button="button"
 				@clicked="doAction(button.action[0], $event, false)" />
 		</div>
 	</section>

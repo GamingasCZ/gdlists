@@ -822,7 +822,9 @@
     "browseLevels": "Browse Levels",
     "surprise": "Surprise Me!",
     "impGD": "Import from GD",
-    "page": "Page"
+    "page": "Page",
+    "keysh": "Keyboard Shortcuts",
+    "zenMode": "Zen Mode"
   },
   "review": {
     "columnSetting": "{0} column",

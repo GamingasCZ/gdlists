@@ -51,7 +51,7 @@ const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
 const unrolled = ref<boolean>(-1)
 
-const LISTS_ON_PAGE = 8;
+const LISTS_ON_PAGE = 9;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());

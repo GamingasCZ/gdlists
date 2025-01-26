@@ -133,12 +133,12 @@ const listData = inject("listData", {data: reviewData.value})
 
     <!-- Favorite star -->
     <button
-      class="absolute top-1 right-1 button"
+      class="absolute top-1 right-1 drop-shadow-md button"
       @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
       :class="{ disabled: isFavorited }"
       v-if="favorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars"
     >
-      <img src="@/images/star.webp" class="w-8" alt="" />
+      <img src="@/images/star.svg" class="w-8" alt="" />
     </button>
 
     <!-- Level creator -->

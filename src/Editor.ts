@@ -1,9 +1,8 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, LevelBackup, ReviewList } from "./interfaces";
+import type { LevelList, Level, CollabData, PostData } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
-import router from "./router";
 import { changeTheme } from "./themes";
 
 export const TAG_COUNT = 27;
@@ -25,7 +24,6 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   thumbnail: ["", 0, 33, 1, true],
 }}
 
-export const levelList = ref<LevelList>(DEFAULT_LEVELLIST());
 export const predefinedLevelList = ref<Level[]>([]);
 
 export function makeColor(col?: [number, number, number] | string, hex = false): [number, number, number] | string {
@@ -43,34 +41,6 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
 export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
 export const newCardBG = () => ({ image: DEFAULT_LEVELLIST().titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
-
-export function addLevel(values: Level | null, toPredefined?: boolean) {
-  let levelInfo: Level = {
-    levelName: values?.levelName ?? "",
-    creator: values?.creator ?? "",
-    color: values?.color ? chroma(values?.color).hsl() : makeColor(),
-    levelID: values?.levelID ?? "",
-    video: values?.video ?? "",
-    difficulty: values?.difficulty ?? [0, 0],
-    tags: values?.tags ?? [],
-    platf: values?.platf ?? false,
-    BGimage: values?.BGimage ?? newCardBG()
-  };
-
-  if (toPredefined)
-    predefinedLevelList.value.push(levelInfo);
-  else
-    levelList.value.levels.push(levelInfo);
-}
-
-export const moveLevel = (from: number, to: number) => {
-  if (to < 0 || to >= levelList.value.levels.length) return from;
-
-  let currentCard = levelList.value.levels[from];
-  levelList.value.levels.splice(from, 1);
-  levelList.value.levels.splice(to, 0, currentCard);
-  return to;
-};
 
 export function testIfImageExists(url: string) {
   return new Promise((loaded, error) => {
@@ -153,10 +123,6 @@ export function parseElapsed(secs: number) {
   else return Math.round(secs / 1892160000) + "y"; //y - years
 }
 
-export function resetList() {
-  if (router.currentRoute.value.name == "editor") router.push({ path: "/editor", force: true })
-}
-
 export const makeColorFromString = (name: string) => {
   if (SETTINGS.value.disableColors) {
     return chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
@@ -184,18 +150,18 @@ export function fixHEX(hexColor: string) {
   else return fixed;
 }
 
-export function checkList(listName: string): { valid: boolean, error?: string, listPos?: number, stamp?: number } {
+export function checkList(postData: PostData): { valid: boolean, error?: string, listPos?: number, stamp?: number } {
   let error = (errorText: string, errorPos?: number) => { return { valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }
 
   if (!isOnline.value) return error(i18n.global.t('other.disconnected'))
 
-  if (listName.length <= 3) return error(i18n.global.t('editor.nameShort'))
+  if (postData.reviewName.length <= 3) return error(i18n.global.t('editor.nameShort'))
 
-  if (levelList.value.levels.length == 0) return error(i18n.global.t('editor.emptyListSend'))
+  if (postData.levels.length == 0) return error(i18n.global.t('editor.emptyListSend'))
 
   let i = 0
   let listError: object | undefined
-  levelList.value.levels.forEach(level => {
+  postData.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
     if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name) {
       if (typeof level.creator[0][0] == 'string') return // Old collabs
@@ -206,7 +172,7 @@ export function checkList(listName: string): { valid: boolean, error?: string, l
   })
   if (listError != undefined) return <any>listError
 
-  let listSize = JSON.stringify(levelList.value).length
+  let listSize = JSON.stringify(postData).length
   if (listSize > 25000) return error(i18n.global.t('editor.overLimit', [(listSize / 25000).toFixed(2)]))
 
   return { valid: true }
@@ -225,16 +191,6 @@ export function creatorToCollab(currentName: string): CollabData {
 export const isOnline = ref(true)
 window.addEventListener("offline", () => isOnline.value = false)
 window.addEventListener("online", () => isOnline.value = true)
-
-export function saveBackup(listName: string, hidden: boolean, review: boolean | ReviewList = false, draftID: number) {
-  if (localStorage && SETTINGS.value.autosave) {
-    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(review !== false ? review : levelList.value), listHidden: hidden, listDate: Date.now() }
-    if (review) backup.backupID = draftID
-
-    localStorage.setItem(`${review ? 'review' : 'list'}Backup`, JSON.stringify(backup))
-  }
-  return Math.random()
-}
 
 export const removeBackup = (isReview = false) => {
   localStorage.removeItem(`${isReview ? 'review' : 'list'}Backup`)

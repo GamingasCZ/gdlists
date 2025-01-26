@@ -1,22 +1,18 @@
 <script setup lang="ts">
-import { addLevel, levelList, predefinedLevelList, selectedLevels } from '@/Editor';
+import { predefinedLevelList, selectedLevels } from '@/Editor';
 import DifficultyIcon from './DifficultyIcon.vue';
 import router from '@/router';
-import { addReviewLevel, reviewData } from '@/Reviews';
 import { ref } from 'vue';
 
 const makeList = () => {
-    levelList.value.levels = []
-    predefinedLevelList.value = []
-    selectedLevels.value.forEach(l => addLevel(l, true))
+    predefinedLevelList.value = selectedLevels.value.slice(0)
+    selectedLevels.value = []
     router.push("/make/list")
 }
 
 const writeReview = () => {
-    reviewData.value.levels = []
-    predefinedLevelList.value = []
-    selectedLevels.value.forEach(l => addReviewLevel(l, true))
-    console.log(predefinedLevelList.value)
+    predefinedLevelList.value = selectedLevels.value.slice(0)
+    selectedLevels.value = []
     router.push("/make/review")
 }
 

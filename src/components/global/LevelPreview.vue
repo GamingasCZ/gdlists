@@ -129,7 +129,7 @@ const selectLevel = () => {
     <img v-if="background" :style="{mask: 'linear-gradient(90deg,transparent,black)'}" class="isolate absolute inset-0 opacity-40 mix-blend-luminosity" :src="`${uc}/userContent/${uploaderID}/${background}.webp`" alt="">
     
     <div class="flex flex-col justify-center items-center opacity-100 transition-opacity duration-75 ease-out group-hover:opacity-0">
-      <DifficultyIcon v-once v-if="difficulty !== undefined && rating !== undefined" class="z-10 mt-4 w-18":difficulty="difficulty" :rating="rating" />
+      <DifficultyIcon v-once class="z-10 mt-4 w-18":difficulty="difficulty ?? 0" :rating="rating ?? 0" />
   
       <section class="flex z-10 flex-col justify-center">
         <h1 class="text-3xl font-extrabold"><img src="@/images/collab.svg" v-if="collabMemberCount > 0" class="inline mr-2 w-4 -translate-y-1">{{ levelName }}</h1>
@@ -140,6 +140,7 @@ const selectLevel = () => {
         <RatingContainer v-if="inReviews" class="absolute bottom-2 left-1/2 w-64 -translate-x-1/2" :ratings="[round(A_gameplay), round(A_decoration), round(A_difficulty), round(A_overall)]" compact />
         <div v-else></div>
       </section>
+      <div v-else class="my-4"></div>
     </div>
 
     <div class="flex absolute inset-0 flex-col items-center py-2 opacity-0 transition-opacity duration-75 ease-out group-hover:opacity-100">

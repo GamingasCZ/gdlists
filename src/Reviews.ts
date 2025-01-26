@@ -44,7 +44,7 @@ export const REVIEW_EXTRAS: () => ReviewList = () => ({
     font: 0
 })
 
-export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
+export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel) => {
     if (postData.value.levels.length >= 10) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 
@@ -61,10 +61,7 @@ export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | Fav
         BGimage: newCardBG()
     }
 
-    if (toPredefined)
-        predefinedLevelList.value.push(levelInfo)
-    else
-        postData.value.levels.push(levelInfo)
+    postData.value.levels.push(levelInfo)
 }
 
 export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXTRAS() })
@@ -79,7 +76,7 @@ const funnyErrorMessages = [
 ]
 
 let uploadTries = 0
-export function checkReview() {
+export function checkReview(post: ReviewList) {
     const err = (err: string) => {
         let fancyErr = err
         switch (uploadTries) {
@@ -96,11 +93,11 @@ export function checkReview() {
         return { success: false, error: err }
     }
     let error = { success: true, mess: '' }
-    if (!reviewData.value.containers.length) return err(i18n.global.t('reviews.bro'))
-    if (reviewData.value.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
-    if (reviewData.value.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
+    if (!post.containers.length) return err(i18n.global.t('reviews.bro'))
+    if (post.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
+    if (post.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
 
-    reviewData.value.ratings.forEach(customRating => {
+    post.ratings.forEach(customRating => {
         if (!customRating.name.length) {
             error.mess = i18n.global.t('reviews.ratingMissingName')
             error.success = false
@@ -108,17 +105,17 @@ export function checkReview() {
     })
 
     let i = 0
-    reviewData.value.levels.forEach(level => {
+    post.levels.forEach(level => {
         i += 1
         if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
-        if (level.ratings?.[0].concat(level.ratings[1]).includes(-1) && !reviewData.value.disabledRatings) error.mess = i18n.global.t('reviews.notRatedYet', [i])
+        if (level.ratings?.[0].concat(level.ratings[1]).includes(-1) && !post.disabledRatings) error.mess = i18n.global.t('reviews.notRatedYet', [i])
         
         if (error.mess) error.success = false
     })
 
-    reviewData.value.containers.forEach(container => {
+    post.containers.forEach(container => {
         if (containers[container.type].canEditText) {
             if (!container.data) {
                 error.mess = i18n.global.t('reviews.notFilledIn', [containers[container.type].placeholder])
@@ -132,7 +129,7 @@ export function checkReview() {
             error.success = false
         }
     })
-    reviewData.value.containers.filter(c => c.type == "twoColumns").forEach(nest => {
+    post.containers.filter(c => c.type == "twoColumns").forEach(nest => {
         nest.settings.components.forEach(column => {
             column.filter(x => x === Object(x)).forEach(container => { // filter out maxWidth
                 if (containers[container.type].canEditText) {
@@ -211,9 +208,9 @@ export function getDominantColor(image: HTMLImageElement) {
     return dominantColor
 }
 
-export function getWordCount() {
+export function getWordCount(post: ReviewList) {
     let count = 0
-    reviewData.value.containers.forEach(c => {
+    post.containers.forEach(c => {
         count += (c.data.match(/\w+/g) ?? []).length
         if (c.type == "twoColumns") {
             c.settings.components.forEach(con => {

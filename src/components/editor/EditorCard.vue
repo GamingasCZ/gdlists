@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { diffScaleOffsets, diffTranslateOffsets, shortenYTLink } from "@/Editor";
+import { shortenYTLink } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { computed, onMounted, ref } from "vue";
+import { computed, inject, onMounted, type Ref, ref } from "vue";
 import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
@@ -29,19 +29,6 @@ const emit = defineEmits<{
   (e: "doMove", levelIndex: number, toIndex: number): void;
   (e: "throwError", errorText: string): void;
 }>();
-
-// Colors
-const lightCol = () =>
-  chroma
-    .hsl(...props.levelArray.levels[props.index!].color!)
-    .brighten(0.5)
-    .css();
-const changeCardColors = (newColors: [number, number, number]) =>
-(props.levelArray.levels[props.index!].color = [
-  newColors[0],
-  0.5,
-  parseFloat((newColors[2] / 64).toFixed(2)),
-]);
 
 // Difficulty Picker
 const changeRate = async (newRating: number) => {
@@ -210,13 +197,15 @@ const mess = [
   useI18n().t('collabTools.noEditOldCollab'),
   useI18n().t('editor.collabNoPhones')
 ]
+
+const openDialogs = inject<Ref<object>>("openedDialogs")
 const openCollabTools = () => {
   if (isOldCollab.value)
     emit('throwError', mess[0])
   else if (/iPhone|Android/i.test(navigator.userAgent))
     emit('throwError', mess[1])
   else
-    emit('openCollabTools', props.index!)
+    openDialogs.collabs = [true, props.index]
 }
 
 const creatorFilledIn = computed(() => {
