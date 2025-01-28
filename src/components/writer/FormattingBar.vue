@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { inject, onMounted, onUnmounted, ref } from 'vue';
 import { addCEFormatting } from '../global/parseEditorFormatting';
 import { SETTINGS } from '@/siteSettings';
 import { Key, type Writer } from '@/writers/Writer';
@@ -187,12 +187,15 @@ const getToolbarButtons = (side: 'left' | 'right') => {
 		return props.writer.toolbar[currentToolbar.value]?.[side]
 }
 
+const postData = inject("postData")
+
 </script>
 
 <template>
 	<section @click.stop="" :style="{ top: barPos }"
+		:class="{'bg-[#ECE6D9]': postData.whitePage, 'bg-lof-200': !postData.whitePage}"
 		class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
-		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center">
+		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center" :class="{'invert-[0.9]': postData.whitePage}">
 			<FormattingButton v-for="button in getToolbarButtons(side)" :button="button"
 				@clicked="doAction(button.action[0], $event, false)" />
 		</div>

@@ -12,6 +12,7 @@ import LevelBubble from "../global/LevelBubble.vue";
 import axios from "axios";
 import Dropdown from "../ui/Dropdown.vue";
 import Plus from "@/svgs/Plus.vue";
+import LevelRoulette from "./LevelRoulette.vue";
 
 defineProps<{
     subtext: string
@@ -111,6 +112,8 @@ const openMoreDialog = (opt: number) => {
     moreLevOptOpen.value = false
 }
 
+const rouletteActive = ref(false)
+
 </script>
 
 <template>
@@ -135,7 +138,7 @@ const openMoreDialog = (opt: number) => {
 
         <main v-show="mainRolledOut">
             <div class="bg-[url(@/images/fade.webp)] bg-repeat-x relative p-2 overflow-y-auto flex flex-col gap-2">
-                <div v-if="!POST_DATA.levels.length"
+                <div v-if="!POST_DATA.levels.length && !rouletteActive"
                     class="flex flex-col items-center w-full text-center opacity-40">
                     <h2 class="text-2xl">{{ subtext }}</h2>
                     <section class="flex gap-3 px-2 mt-8 w-full sm:items-center max-sm:flex-col">
@@ -144,7 +147,7 @@ const openMoreDialog = (opt: number) => {
                             <p>{{ $t('reviews.browseLevels') }}</p>
                         </button>
                         <hr class="w-0.5 h-20 bg-white bg-opacity-20 border-none max-sm:hidden">
-                        <button class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
+                        <button @click="rouletteActive = true" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
                             <img src="@/images/dice.svg" class="w-10" alt="">
                             <p>{{ $t('reviews.surprise') }}</p>
                         </button>
@@ -155,6 +158,7 @@ const openMoreDialog = (opt: number) => {
                         </button>
                     </section>
                 </div>
+                <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
                 <div v-for="(level, index) in POST_DATA.levels">
                     <EditorCardHeader v-if="openedCard != index" :data="level" :updating-positions="updatingPosition"

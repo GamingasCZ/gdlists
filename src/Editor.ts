@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, PostData } from "./interfaces";
+import type { LevelList, Level, CollabData, PostData, ListFetchResponse } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
@@ -23,6 +23,25 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   tagline: "",
   thumbnail: ["", 0, 33, 1, true],
 }}
+
+export const modernizeList = (serverResponse: ListFetchResponse) => {
+  serverResponse.data.reviewName ??= serverResponse.name
+  if (serverResponse.data.pageBGcolor == "#020202")
+    serverResponse.data.pageBGcolor = DEFAULT_LEVELLIST().pageBGcolor
+  else
+    serverResponse.data.pageBGcolor = makeColor(serverResponse.data.pageBGcolor)
+  let levelKeys = Object.keys(serverResponse.data).filter(x => !isNaN(parseInt(x)))
+  if (levelKeys.length) {
+    serverResponse.data.levels = []
+    levelKeys.forEach(x => {
+      let level = serverResponse.data[x]
+      level.color = makeColor(level.color)
+      serverResponse.data.levels.push(level)
+      }
+    )
+  }
+  return serverResponse.data
+}
 
 export const predefinedLevelList = ref<Level[]>([]);
 

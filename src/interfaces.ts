@@ -32,7 +32,7 @@ export interface ListFetchResponse {
   name: string;
   creator: string;
   id: number;
-  data: LevelList | ReviewList;
+  data: PostData;
   views: number;
   rate_ratio: number;
   commAmount: number;

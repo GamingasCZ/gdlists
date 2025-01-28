@@ -203,7 +203,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
 
   } elseif (in_array("randomLevel", array_keys($_GET))) {
     // Picking a random list or review
-    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [1], "i");
+    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [intval($_GET["randomLevel"])], "i", true);
     echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {

@@ -53,7 +53,12 @@ const removeNestContainer = () => {
 }
 
 const postData = inject<Ref<PostData>>("postData")!
-const borderColor = computed(() => chroma.css(chroma.hsl([postData.value.pageBGcolor[0]+90, 0.94, 0.68])))
+const borderColor = computed(() => {
+    if (props.editable)
+        return chroma.css(chroma.hsl([postData.value.pageBGcolor[0]+90, 0.94, 0.68]))
+    else
+        return "#000"
+})
 
 const selectNestContainer = (e: Event) => {
     if (!props.editable) return

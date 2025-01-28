@@ -4,10 +4,12 @@ import { DraftAction } from "@/interfaces";
 import { computed, ref } from "vue";
 import DraftCard from "./DraftCard.vue";
 import { reviewData } from "@/Reviews";
+import type { Writer } from "@/writers/Writer";
 
 const props = defineProps<{
     inUseID: number
     drafts: {[draft: string]: ReviewDraft}
+    writer: Writer
 }>()
 
 const emit = defineEmits<{
@@ -22,7 +24,7 @@ const searchBoxShown = ref(false)
 const editName = (newName: string, key: string) => {
     props.drafts[key].name = newName
     editingName.value = -1
-    localStorage.setItem("reviewDrafts", JSON.stringify(props.drafts))
+    localStorage.setItem(props.writer.drafts.storageKey, JSON.stringify(props.drafts))
 }
 
 const optionsOpen = ref(-1)

@@ -86,17 +86,6 @@ const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
                     </div>
                 </div>
             </div>
-            
-            <div v-else>
-                <div v-for="(rating, index) in levelRatings[0].concat(levelRatings[1])" class="flex justify-between my-2 text-left">
-                    <span>{{ allRatings[index].name || $t('other.unnamesd') }}</span>
-                    <div class="flex gap-1">
-                        <img class="w-4" src="@/images/reviews/star1.svg" v-for="filled in Math.floor(rating/2)" alt="">
-                        <img class="w-4" src="@/images/reviews/star12.svg" v-if="rating/2 % 1 > 0" alt="">
-                        <img class="w-4" src="@/images/reviews/star0.svg" v-for="filled in Math.max(0, 5 - Math.round(rating/2 % 1) - Math.floor(rating.rating/2))" alt="">
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 </template>

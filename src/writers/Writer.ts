@@ -143,6 +143,12 @@ export interface Writer {
             right?: ToolbarButton[]
         }
     }
+    drafts: {
+        /**
+         * Local storage key, under which the drafts are stored
+         */
+        storageKey: string
+    }
 
 }
 
@@ -224,12 +230,6 @@ export const REVIEW: Writer = {
     },
     settings: [
         i18n.global.t('other.general'),
-        {
-            name: i18n.global.t('reviews.description'),
-            control: "component",
-            controlOptions: SettingsDescription,
-            affects: "description",
-        },
         {
             name: i18n.global.t('reviews.private'),
             control: "cbox",

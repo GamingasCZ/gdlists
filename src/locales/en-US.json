@@ -124,7 +124,7 @@
     "serverBOOM": "As we speak, the GD servers may be on fire.",
     "sepList": "Enter a seperated list of level IDs (ex. 96000699, 29107242, 128)",
     "cookDisabled": "Cookies are disabled. You can only browse posts!",
-    "loginToCreateReviews": "Please login to make reviews!",
+    "loginToCreateReviews": "Please login to make posts!",
     "reviewInProgress": "Would you like to load the last draft?",
     "unnamedReview": "Unnamed Review",
     "difficulties": "Difficulties",
@@ -148,7 +148,6 @@
     "pinned": "Pinned",
     "savedMix": "Saved Mix",
     "searchLists": "Search in GD Lists...",
-    "tryLuck": "Try luck",
     "uploaded": "Uploads",
     "visited": "Visited",
     "welcomeBack": "Welcome back,",
@@ -166,8 +165,6 @@
     "loginHelp2": "Use common sense and keep all your posts civil.",
     "loginHelp3": "If something isn't working as it should, please",
     "loginHelp4": "report the issue",
-    "tAd1": "Follow",
-    "tAd2": "on Twitter!",
     "loginHelp5": "You can change your profile picture!"
   },
   "level": {
@@ -473,7 +470,8 @@
     "extFolderRm": "What should be done with its contents of this folder and its subfolders?",
     "linkCopied": "Link copied!",
     "general": "General",
-    "noImage": "Discard Pick"
+    "noImage": "Discard Pick",
+    "previous": "Previous"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -740,7 +738,7 @@
     "formattingHelp3": "For headings and images, use their respective buttons.",
     "formatting": "Formatting",
     "bro": "Brother, you have not written a thing!",
-    "editError": "Review cannot be edited!",
+    "editError": "Post cannot be edited!",
     "listLink": "Display Post",
     "pick": "Pick Image",
     "noLevelsAddedYet": "You haven't added any levels yet!",

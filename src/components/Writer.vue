@@ -2,7 +2,6 @@
 import { computed, nextTick, provide, reactive, ref, watch } from "vue";
 import DialogVue from "./global/Dialog.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
-import WriterRatings from "./writer/WriterRatings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
 import FormattingBar from "./writer/FormattingBar.vue"
 import CONTAINERS from "./writer/containers";
@@ -18,7 +17,7 @@ import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { modifyListBG, predefinedLevelList, prettyDate } from "@/Editor";
+import { modernizeList, modifyListBG, predefinedLevelList, prettyDate } from "@/Editor";
 import { onUnmounted } from "vue";
 import router, { timeLastRouteChange } from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -65,7 +64,10 @@ if (props.editing) {
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
-            POST_DATA.value = res.data.data
+            if (props.type == 0)
+                POST_DATA.value = modernizeList(res.data)
+            else
+                POST_DATA.value = res.data.data
             fetchEmbeds()
             modifyListBG(POST_DATA.value.pageBGcolor, false, true)
             containerLastAdded.value = Date.now()

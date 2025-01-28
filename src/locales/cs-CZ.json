@@ -71,7 +71,6 @@
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
     "createList": "Vytvořit seznam",
-    "tryLuck": "Zkusit štěstí",
     "welcomeToGDL": "Vítej v GD Seznamech!",
     "connectDiscord": " Připoj svůj Discord účet pro vytváření seznamů, hodnocení a komentování!",
     "logIn": "Přihlásit se",
@@ -103,8 +102,6 @@
     "loginHelp2": "Používej selský rozum a udržuj své příspěvky slušné.",
     "loginHelp3": "Pokud něco nefuguje jak má,",
     "loginHelp4": "nahlaš mi prosím chybu",
-    "tAd1": "Sleduj",
-    "tAd2": "na Twitteru!",
     "loginHelp5": "Můžeš si vybrat vlastní profilovou fotku!"
   },
   "editor": {
@@ -221,7 +218,7 @@
     "importFail": "Importování se nezdařilo!",
     "serverBOOM": "Je možné, že GD servery explodovaly.",
     "sepList": "Zadej oddělená ID levelů (např. 96000699, 29107242, 128)",
-    "loginToCreateReviews": "Pro vytvoření recenze se prosím přihlaš!",
+    "loginToCreateReviews": "Pro vytvoření příspěvku se prosím přihlaš!",
     "cookDisabled": "Nemáš povolené cookies, můžeš jen procházet seznamy!",
     "reviewInProgress": "Chcete načíst poslední rozepsaný koncept?",
     "unnamedReview": "Bezejmenná recenze",
@@ -447,7 +444,8 @@
     "extFolderRm": "Co by se mělo stát s jejím obsahem a obsahem podsložek?",
     "linkCopied": "Odkaz zkopírován!",
     "general": "Základní",
-    "noImage": "Zrušit výběr"
+    "noImage": "Zrušit výběr",
+    "previous": "Předchozí"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -748,7 +746,7 @@
     "formattingHelp2": "Jak používat Markdown?",
     "formattingHelp3": "Na nadpisy a obrázky používej tlačítka vedle.",
     "formatting": "Formátování",
-    "editError": "Nelze upravovat tuto recenzi!",
+    "editError": "Nelze upravovat tento příspěvek!",
     "pick": "Vybrat obrázek",
     "pickShowcase": "Vyber level, který chceš zobrazit.",
     "noLevelsAddedYet": "Zatím jsi nepřidal žádné levely!",
