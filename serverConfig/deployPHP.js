@@ -6,7 +6,6 @@ readFile('dist/index.html', (e, res) => {
     let style = dom.querySelector("link[rel='stylesheet']").toString()
     let script = dom.querySelector("script").toString()
 
-    console.log(script)
     copyFile('serverConfig/index.php', 'dist/index.php', (res) => null)
     readFile('dist/index.php', (e, data) => {
         let text = data.toString()
@@ -16,4 +15,4 @@ readFile('dist/index.html', (e, res) => {
     })
 })
 
-// unlink('dist/index.html', (res) => null)
+unlink('dist/index.html', (res) => null)
