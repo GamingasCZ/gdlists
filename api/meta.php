@@ -52,7 +52,11 @@ function getEndpoint() {
         $post = getPost(intval($IDmatches[0]), $isReview);
         if (!$post) break;
 
-        $desc = isset($post["tagline"]) ? $post["tagline"] : DEFAULT_POST_DESC;
+        $desc;
+        if (isset($post["tagline"]) && $post["tagline"])
+          $desc = $post["tagline"];
+        else
+          $desc = DEFAULT_POST_DESC;
 
         // will not work for old posts
         $decodedData = base64_decode($post["data"], true);
@@ -61,14 +65,12 @@ function getEndpoint() {
 
         $lang = isset($post["lang"]) ? $post["lang"] : 'en';
 
-        $postData = gzuncompress($decodedData);
-
         if ($post["thumbnail"]) {
           $thumb = 'https://gamingas.cz/userContent/' . $post["uid"] . '/' . $post["thumbnail"] . '.webp';
-          return makeTags(urldecode(htmlspecialchars_decode($post["name"])) . ' by ' . $post["creator"] . ' | GD Lists', $desc, $thumb, true, $postData, $lang);
+          return makeTags(urldecode(htmlspecialchars_decode($post["name"])) . ' by ' . $post["creator"] . ' | GD Lists', $desc, $thumb, true, $lang);
         }
         else
-          return makeTags(urldecode(htmlspecialchars_decode($post["name"])) . ' by ' . $post["creator"] . ' | GD Lists', $desc, content: $postData, lang: $lang);
+          return makeTags(urldecode(htmlspecialchars_decode($post["name"])) . ' by ' . $post["creator"] . ' | GD Lists', $desc, lang: $lang);
       }
       else
         return makeTags($value['title'], $value['desc']);
@@ -78,7 +80,7 @@ function getEndpoint() {
   return makeTags(ENDPOINTS['/']["title"], ENDPOINTS['/']["desc"]);
 }
 
-function makeTags($title, $desc, $image = "twitImg.webp", $large_image = false, $content = false, $lang = 'en') {
+function makeTags($title, $desc, $image = "https://gamingas.cz/gdlists/twitImg.webp", $large_image = false, $content = false, $lang = 'en') {
   $tags = [];
 
   array_push($tags, $lang);
@@ -100,8 +102,8 @@ function makeTags($title, $desc, $image = "twitImg.webp", $large_image = false, 
   array_push($tags, '<title>' . $title . '</title>');
   array_push($tags, '<meta name="description" content="' . $desc . '">');
   
-  if ($content)
-    array_push($tags, '<meta name="post" content="' . $content . '">');
+  // if ($content)
+  //   array_push($tags, '<meta name="post" content="' . $content . '">');
   
   return $tags;
 }

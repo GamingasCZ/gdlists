@@ -335,8 +335,8 @@ const toggleListPin = () => {
 
 const getURL = () => {
   let base = `${window.location.protocol}//${window.location.host}/gdlists/`
-  if (props.isReview) return base + 'r/' + window.location.pathname.split("/").toReversed()[0]
-  else return base + 'l/' + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
+  if (props.isReview) return base + 'review/' + window.location.pathname.split("/").toReversed()[0]
+  else return base + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
