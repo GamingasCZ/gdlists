@@ -10,138 +10,143 @@ Return codes:
 
 require("globals.php");
 
+define('DEFAULT_POST_DESC', 'Check out this post on GD Lists!');
+
 const ENDPOINTS = [
-  "/": [
-    'title' => 'GD Lists',
-    'desc' => 'Create and browse lists and reviews of Geometry Dash Levels!'
-  ],
-  "/make/list": [
+  "/make/list" => [
     'title' => 'List Editor | GD Lists',
     'desc' => 'Create lists of Geometry Dash Levels!'  
   ],
-  "/make/review": [
+  "/make/review" => [
     'title' => 'Review Editor | GD Lists',
     'desc' => 'Write reviews for Geometry Dash Levels!'  
   ],
-  "/browse": [
+  "/browse" => [
     'title' => 'Community Posts | GD Lists',
     'desc' => 'Browse through lists, reviews and levels from Geometry Dash!'  
   ],
-  "/saved": [
+  "/saved" => [
     'title' => 'Saved | GD Lists',
     'desc' => 'Browse through your saved levels and collabs!'  
+  ],
+  "/review" => [
+  ],
+  "/" => [
+    'title' => 'Geometry Dash Lists',
+    'desc' => 'Create and browse lists and reviews of Geometry Dash Levels!'
   ]
-]
+];
 
+function getEndpoint() {
+  global $debugMode;
+  $reqURI = $_SERVER["REQUEST_URI"];
+  if ($debugMode && isset($_GET["debug"]))
+    $reqURI = $_GET["debug"];
 
-function mtch($val) {
-    return preg_match("/\d+/", $val);
+  foreach (ENDPOINTS as $key => $value) {
+    if (strstr($reqURI, $key)) {
+      $postID = preg_match("/\d+$/", $reqURI, $IDmatches);
+      if ($IDmatches) {
+        $isReview = $key == '/review';
+
+        $post = getPost(intval($IDmatches[0]), $isReview);
+        if (!$post) break;
+
+        $desc = isset($post["tagline"]) ? $post["tagline"] : DEFAULT_POST_DESC;
+
+        // will not work for old posts
+        $decodedData = base64_decode($post["data"], true);
+        if (!$decodedData)
+          break;
+
+        $lang = isset($post["lang"]) ? $post["lang"] : 'en';
+
+        $postData = gzuncompress($decodedData);
+
+        if ($post["thumbnail"]) {
+          $thumb = 'https://gamingas.cz/userContent/' . $post["uid"] . '/' . $post["thumbnail"] . '.webp';
+          return makeTags(urldecode(htmlspecialchars_decode($post["name"])) . ' by ' . $post["creator"] . ' | GD Lists', $desc, $thumb, true, $postData, $lang);
+        }
+        else
+          return makeTags(urldecode(htmlspecialchars_decode($post["name"])) . ' by ' . $post["creator"] . ' | GD Lists', $desc, content: $postData, lang: $lang);
+      }
+      else
+        return makeTags($value['title'], $value['desc']);
+
+    }
+  }
+  return makeTags(ENDPOINTS['/']["title"], ENDPOINTS['/']["desc"]);
 }
 
-function parseResult($rows, $isReview, $mysqli) {
-  // Single list
-  $rows["data"] = json_decode(htmlspecialchars_decode($rows["data"]));
-  setcookie("lastViewed", $rows["id"], time()+300, "/");
+function makeTags($title, $desc, $image = "twitImg.webp", $large_image = false, $content = false, $lang = 'en') {
+  $tags = [];
 
-  $listMaker;
-  if ($rows["creator"] == "") {
+  array_push($tags, $lang);
+
+  if ($large_image)
+    array_push($tags, '<meta name="twitter:card" content="summary_large_image">');
+  else
+    array_push($tags, '<meta name="twitter:card" content="summary">');
+
+  array_push($tags, '<meta name="twitter:title" content="' . $title . '">');
+  array_push($tags, '<meta name="twitter:description" content="' . $desc . '">');
+  array_push($tags, '<meta name="twitter:image" content="' . $image . '">');
+
+  array_push($tags, '<meta name="og:title" content="' . $title . '">');
+  array_push($tags, '<meta name="og:description" content="' . $desc . '">');
+  array_push($tags, '<meta name="og:image" content="' . $image . '">');
+  array_push($tags, '<meta name="og:url" content="' . $_SERVER["REQUEST_URI"] . '">');
+  
+  array_push($tags, '<title>' . $title . '</title>');
+  array_push($tags, '<meta name="description" content="' . $desc . '">');
+  
+  if ($content)
+    array_push($tags, '<meta name="post" content="' . $content . '">');
+  
+  return $tags;
+}
+
+function getPost($id, $isReview) {
+  global $hostname, $username, $password, $database;
+  $mysqli = new mysqli($hostname, $username, $password, $database);
+  if ($mysqli->connect_errno) {
+    echo "0";
+    exit();
+  }
+
+  // Public posts
+  if (is_numeric($id)) {
+    if ($isReview)
+      $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [$id], "i");
+    else
+      $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = '0' AND `id` = ?", [$id], "i");
+  }
+
+  // Private posts
+  if (!is_numeric($id)) {
+    if ($isReview)
+      $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `hidden` = ?", [substr($id, 0, 10)], "s");
+    else
+      $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [substr($id, 0, 10)], "s");
+    }
+
+  if (!$result) {
+    return false;
+  }
+
+  if ($result["creator"] == "") {
     // Fetch comment amount
-    $res = doRequest($mysqli, "SELECT username FROM users WHERE discord_id=?", [$rows["uid"]], "s");
+    $res = doRequest($mysqli, "SELECT username FROM users WHERE discord_id=?", [$result["uid"]], "s");
     if (array_key_exists("error", $res)) die();
 
-    $listMaker = $res["username"];
+    $result["creator"] = $res["username"];
   }
-  else $listMaker = $rows["creator"];
+  else $result["creator"] = $result["creator"];
 
-  echo "<head>";
-
-  echo '<meta charset="UTF-8">';
-
-  if ($isReview) {
-    $desc = htmlspecialchars($rows["tagline"]);
-    if (!strlen($desc))
-      $desc = "Check this review out on GD Lists!";
-
-    if ($rows["thumbnail"]) {
-      echo '<meta name="twitter:card" content="summary_large_image">';
-      echo '<meta name="twitter:image" content="https://gamingas.cz/userContent/' . $rows["uid"] . '/' . $rows["thumbnail"] . '.webp">';
-    }
-    else {
-      echo '<meta name="twitter:card" content="summary">';
-      echo '<meta name="twitter:image" content="https://gamingas.cz/twitImg.webp">';
-    }
-    echo '<meta name="twitter:title" property="og:title" itemprop="name" content="'. urldecode(htmlspecialchars($rows["name"])) . ' by '.$listMaker.' | GD Lists">';
-    echo '<meta name="twitter:description" property="og:description" itemprop="description" content="'.$desc.'">';
-    
-    // echo '<script>window.location.replace("https://gamingas.cz/gdlists/review/' . $_GET["id"] . '")</script>';
-  }
-  else {
-    $desc = "Check these levels out on GD Lists!";
-
-    echo '<meta name="twitter:card" content="summary">';
-    echo '<meta name="twitter:image" content="https://gamingas.cz/twitImg.webp">';
-    echo '<meta name="twitter:title" property="og:title" itemprop="name" content="'.$rows["name"].' by '.$listMaker.' | GD Lists">';
-    echo '<meta name="twitter:description" property="og:description" itemprop="description" content="'.$desc.'">';
-    
-    echo '<script>window.location.replace("https://gamingas.cz/gdlists/' . $rows["id"] . '")</script>';
-  }
-  
-  echo "</head>";
-  
-  echo "</head><body></body></html>";
+  $mysqli->close();
+  return $result;
 }
 
-function printDefault() {
-  echo "<head>";
+getEndpoint();
 
-  echo '<meta name="twitter:card" content="summary">';
-  echo '<meta name="twitter:image" content="https://gamingas.cz/twitImg.webp">';
-  echo '<meta name="twitter:title" property="og:title" itemprop="name" content="Geometry Dash Level Lists">';
-  echo '<meta name="twitter:description" property="og:description" itemprop="description" content="Create and browse lists of GD levels!">';
-    
-  echo '<script>window.location.replace("https://gamingas.cz/gdlists")</script>';
-  
-  echo "</head>";
-  
-  echo "</head><body></body></html>";
-}
-
-
-if (count($_GET) == 2) {
-  $isReview = false;
-  if (isset($_GET["r"]))
-    $isReview = boolval(intval($_GET["r"]));
-  else printDefault();
-
-
-  if (isset($_GET["id"])) {
-
-    $mysqli = new mysqli($hostname, $username, $password, $database);
-    if ($mysqli->connect_errno) {
-      echo "0";
-      exit();
-    }
-
-    // Public posts
-    if (is_numeric($_GET["id"])) {
-      if ($isReview)
-        $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `id` = ?", [intval($_GET["id"])], "i");
-      else
-        $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = '0' AND `id` = ?", [intval($_GET["id"])], "i");
-    }
-  
-    // Private posts
-    if (!is_numeric($_GET["id"])) {
-      if ($isReview)
-        $result = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `hidden` = ?", [substr($_GET["id"], 0, 10)], "s");
-      else
-        $result = doRequest($mysqli, "SELECT * FROM `lists` WHERE `hidden` = ?", [substr($_GET["id"], 0, 10)], "s");
-      }
-
-    parseResult($result, $isReview, $mysqli);
-  }
-}
-else printDefault();
-
-$mysqli->close();
 ?>
