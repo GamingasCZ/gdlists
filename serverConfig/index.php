@@ -1,5 +1,5 @@
 <?php
-require('../api/meta.php');
+require('api/meta.php');
 
 $endpoint = getEndpoint();
 
