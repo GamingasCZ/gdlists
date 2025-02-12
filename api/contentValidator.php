@@ -114,8 +114,6 @@ function checkList($name, $list) {
 function checkReview($name, $review) {
     commonChecks($name, $review);
 
-    $reviewName = sanitizeInput([trim(urlencode($name))])[0];
-
     // Valid thumbnail
     if ($review["thumbnail"][0] != "" && strlen($review["thumbnail"][0]) != 40) return doError(-1, -1, 4);
 
@@ -124,7 +122,7 @@ function checkReview($name, $review) {
     $thumb = $review["thumbnail"][0];
     if (!strlen($thumb)) $thumb = null;
 
-    return ["name" => $reviewName, "thumb" => $thumb, "thumbProps" => $thumbProps]; 
+    return ["thumb" => $thumb, "thumbProps" => $thumbProps]; 
 }
 
 function doError($section, $index, $lengthCheck) {

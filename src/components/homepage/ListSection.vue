@@ -9,7 +9,8 @@ import type {
 import { oldLists } from "./officialLists";
 import { hasLocalStorage } from "@/siteSettings";
 import ReviewPreview from "../global/ReviewPreview.vue";
-import LevelPreview from "../global/LevelPreview.vue"
+import List from "../global/ListPreview.vue";
+import FavoritePreview from "../global/FavoritePreview.vue";
 
 const props = defineProps({
   headerName: { type: String, required: true },
@@ -20,7 +21,7 @@ const props = defineProps({
   contentType: { type: String },
   listType: { type: Number, default: 0 },
   randomizeContent: { type: Boolean, default: false },
-  maxItems: {type: Number, default: 4},
+  maxItems: {type: Number, default: 3},
   forceContent: {type: Array}
 });
 
@@ -104,7 +105,7 @@ const clearViewed = () => {
         :user-array="users"
         :hide-remove="true"
         :review-details="reviewDetails"
-        :is="[ReviewPreview, LevelPreview, ReviewPreview][listType]"
+        :is="[ReviewPreview, FavoritePreview, ReviewPreview, List][listType]"
         @unpin-list="lists.splice($event, 1)"
       />
     </div>

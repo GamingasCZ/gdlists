@@ -19,7 +19,7 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 
-$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
+$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser, tagline";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
 
 $selLevelRange = "
@@ -127,7 +127,7 @@ function getHomepage($lists, $reviews, $user) {
       FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY lists.id DESC LIMIT 4", $selRange), [], "", true);
+      ORDER BY lists.id DESC LIMIT 3", $selRange), [], "", true);
   
     $home["lists"] = parseResult($res, false, -1, "", 0, false);
   }
@@ -136,7 +136,7 @@ function getHomepage($lists, $reviews, $user) {
       FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY reviews.id DESC LIMIT 4", $selReviewRange), [], "", true);
+      ORDER BY reviews.id DESC LIMIT 3", $selReviewRange), [], "", true);
     
     $home["reviews"] = parseResult($res, false, -1, "", 0, true);
   }
@@ -147,7 +147,7 @@ function getHomepage($lists, $reviews, $user) {
         FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
         WHERE lists.uid=%s AND `hidden` LIKE 0
         GROUP BY lists.name
-        ORDER BY lists.id DESC LIMIT 4", $selRange, $account), [], "", true);
+        ORDER BY lists.id DESC LIMIT 3", $selRange, $account), [], "", true);
   
       $home["user"] = parseResult($res);
     }

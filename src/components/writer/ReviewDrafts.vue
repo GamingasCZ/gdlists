@@ -3,7 +3,6 @@ import type { ReviewDraft, ReviewList } from "@/interfaces";
 import { DraftAction } from "@/interfaces";
 import { computed, ref } from "vue";
 import DraftCard from "./DraftCard.vue";
-import { reviewData } from "@/Reviews";
 import type { Writer } from "@/writers/Writer";
 
 const props = defineProps<{
@@ -86,7 +85,7 @@ defineExpose({
 
         <!-- Help -->
         <div v-if="!Object.keys(drafts).length" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-3/4 text-center opacity-20 -translate-x-1/2 -translate-y-1/2">
-            <img src="@/images/reviews.svg" alt="" class="w-48">
+            <img src="@/images/edit.svg" alt="" class="w-48">
             <h2 class="text-2xl">{{ $t('reviews.draftHelp1') }}</h2>
             <p class="">{{ $t('reviews.draftHelp2') }}</p>
         </div>
@@ -96,7 +95,7 @@ defineExpose({
             <h2 class="text-2xl">{{ $t('editor.nothingFound') }}</h2>
         </div>
 
-        <button v-if="!inUseID && reviewData.containers.length" @click="doAction(DraftAction.Save)" class="flex gap-3 justify-center items-center py-2 w-full text-xl font-bold bg-black bg-opacity-40 rounded-md button">
+        <button v-if="!inUseID" @click="doAction(DraftAction.Save)" class="flex gap-3 justify-center items-center py-2 w-full text-xl font-bold bg-black bg-opacity-40 rounded-md button">
             <img src="@/images/symbolicSave.svg" class="w-6" alt="">
             <span>{{ $t('other.save') }}</span>
         </button>
@@ -111,6 +110,7 @@ defineExpose({
             :draft="drafts[inUseID]"
             :editing-name="editingName == inUseID"
             :key="inUseID"
+            :counter-key="writer.drafts.counterLangKey"
         />
 
         <!-- Show drafts sorted by newest -->
@@ -127,6 +127,7 @@ defineExpose({
                 :editing-name="editingName == key"
                 :draft="draft"
                 :key="draft.createDate"
+                :counter-key="writer.drafts.counterLangKey"
             />
         </div>
     </div>

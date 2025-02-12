@@ -13,6 +13,7 @@ export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
 export const diffTranslateOffsets = [0, 0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
 export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
+  reviewName: "",
   description: "",
   pageBGcolor: [140, 0.37, 3],
   diffGuesser: [false, false, false],
@@ -25,11 +26,28 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
 }}
 
 export const modernizeList = (serverResponse: ListFetchResponse) => {
+  // List Name
   serverResponse.data.reviewName ??= serverResponse.name
+
+  // Convert hex colors
   if (serverResponse.data.pageBGcolor == "#020202")
     serverResponse.data.pageBGcolor = DEFAULT_LEVELLIST().pageBGcolor
   else
     serverResponse.data.pageBGcolor = makeColor(serverResponse.data.pageBGcolor)
+
+  // Add missing keys
+  let listKeys = Object.keys(serverResponse.data)
+  let newList = DEFAULT_LEVELLIST()
+  Object.keys(newList).forEach(k => {
+    if (!listKeys.includes(k))
+      serverResponse.data[k] = newList[k]
+  })
+
+  // Convert thumbnail
+  if (typeof serverResponse.data.titleImg == 'string')
+    serverResponse.data.titleImg = newList.titleImg
+
+  // Add scattered levels into level array
   let levelKeys = Object.keys(serverResponse.data).filter(x => !isNaN(parseInt(x)))
   if (levelKeys.length) {
     serverResponse.data.levels = []
@@ -37,9 +55,11 @@ export const modernizeList = (serverResponse: ListFetchResponse) => {
       let level = serverResponse.data[x]
       level.color = makeColor(level.color)
       serverResponse.data.levels.push(level)
+      delete serverResponse.data[x]
       }
     )
   }
+
   return serverResponse.data
 }
 
@@ -71,9 +91,9 @@ export function testIfImageExists(url: string) {
   });
 }
 
-export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
+export const modifyListBG = (newColors: number[] | string, reset = false) => {
   if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor))
-  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor)) return modifyListBG(0, true, review)
+  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor)) return modifyListBG(0, true)
   if (reset) {
     changeTheme(SETTINGS.value.selectedTheme)
     return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor))
@@ -169,8 +189,8 @@ export function fixHEX(hexColor: string) {
   else return fixed;
 }
 
-export function checkList(postData: PostData): { valid: boolean, error?: string, listPos?: number, stamp?: number } {
-  let error = (errorText: string, errorPos?: number) => { return { valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }
+export function checkList(postData: PostData): { success: boolean, error?: string, listPos?: number, stamp?: number } {
+  let error = (errorText: string, errorPos?: number) => { return { success: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }
 
   if (!isOnline.value) return error(i18n.global.t('other.disconnected'))
 
@@ -186,15 +206,17 @@ export function checkList(postData: PostData): { valid: boolean, error?: string,
       if (typeof level.creator[0][0] == 'string') return // Old collabs
       listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
     }
-    if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
+    if (!level.levelID?.toString().match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.insuccessID', [i + 1]), i)
     i++
+    if (level.ratings)
+      delete level.ratings
   })
   if (listError != undefined) return <any>listError
 
   let listSize = JSON.stringify(postData).length
   if (listSize > 25000) return error(i18n.global.t('editor.overLimit', [(listSize / 25000).toFixed(2)]))
 
-  return { valid: true }
+  return { success: true }
 }
 
 export function creatorToCollab(currentName: string): CollabData {
@@ -254,4 +276,14 @@ export function manageParallax(e: WheelEvent) {
 
   parascroll.value += Math.round((window.scrollY - prevScroll)/3)
   prevScroll = window.scrollY
+}
+
+export const getListPreview = (postData: PostData) => {
+  let i = 0
+  let levels = postData.levels.slice(0, 3).map(l => {
+    let name = l.levelName || i18n.global.t('other.unnamesd')
+    let creator = typeof l.creator == 'string' ? (l.creator || i18n.global.t('other.unnamesd')) : l.creator[0][0].name
+    return `- #${++i}: ${name} - ${creator}`
+  })
+  return {title: '', preview: levels.join("\n"), counter: i}
 }

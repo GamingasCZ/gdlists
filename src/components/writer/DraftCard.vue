@@ -3,6 +3,7 @@ import { prettyDate } from '@/Editor';
 import type { ReviewDraft } from '@/interfaces';
 import { DraftAction } from '@/interfaces';
 import { ref } from 'vue';
+import parseText from '../global/parseEditorFormatting';
 
 const props = defineProps<{
     draft: ReviewDraft
@@ -11,6 +12,7 @@ const props = defineProps<{
     isOpen: boolean
     hide: boolean
     editingName: boolean
+    counterKey: string
 }>()
 
 const emit = defineEmits<{
@@ -21,7 +23,6 @@ const emit = defineEmits<{
 }>()
 
 const justSaved = ref(false)
-
 </script>
 
 <template>
@@ -33,14 +34,14 @@ const justSaved = ref(false)
 
                 <ul class="flex gap-2 text-sm list-disc list-inside text-white text-opacity-40">
                     <p :title="`${$t('reviews.created')}: ${prettyDate((Date.now() - draft.createDate)/1000)}`">{{ $t('reviews.saved') }}: {{ prettyDate((Date.now() - draft.saveDate)/1000) }}</p>
-                    <li>{{ $t('other.word\s', draft.wordCount) }}</li>
+                    <li>{{ $t(counterKey, draft.wordCount) }}</li>
                 </ul>
             </div>
             <hr class="my-2 opacity-20">
             <div>
                 <h2 v-if="!draft.previewTitle && !draft.previewParagraph" class="opacity-20">{{ $t('reviews.draftNoPrev') }}</h2>
                 <h2>{{ draft.previewTitle }}</h2>
-                <p class="text-xs text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent">{{ draft.previewParagraph }}</p>
+                <p class="text-xs text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent regularParsing" v-html="parseText(draft.previewParagraph)"></p>
             </div>
             <div v-if="inUse" class="grid grid-cols-2 gap-2 p-1">
                 <button :disabled="justSaved" @click.stop="emit('action', DraftAction.Save); justSaved = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img class="w-6" src="@/images/symbolicSave.svg">{{ $t('other.save') }}</button>

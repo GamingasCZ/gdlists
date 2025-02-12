@@ -12,7 +12,6 @@ const props = defineProps<{
     commAmount: number
     showing: boolean
     commentsDisabled: boolean
-    endScroll: boolean
 }>()
 
 const emit = defineEmits<{
@@ -42,7 +41,7 @@ watch(props, () => { // only refresh comments once
         </div>
 
         <section class="flex mx-auto mt-8 mb-3 items-center gap-4 max-w-[95vw] w-[58rem]" :class="{'hidden': amount == 0 || commentsDisabled}">
-            <h2 class="text-3xl font-bold" v-if="endScroll">{{ $t('level.comments') }}</h2>
+            <h2 class="text-3xl font-bold">{{ $t('level.comments') }}</h2>
             <hr class="h-0.5 bg-white bg-opacity-10 border-none grow">
             <button id="listRefreshButton" @click="browser?.doRefresh()" class="box-border text-lg rounded-md button">
                 <img src="@/images/replay.svg" class="inline p-1 mr-3 w-8" alt="">{{ $t('other.refresh') }}
@@ -54,6 +53,7 @@ watch(props, () => { // only refresh comments once
             ref="browser"
             v-memo="[showingOnce]"
             :component="CommentPreview"
+            :display-in-rows="true"
             :online-browser="true"
             :hide-search="true"
             online-type="comments"

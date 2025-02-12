@@ -108,7 +108,7 @@ const adjustQuery = (newText: string) => {
             />
         </div>
         <div v-show="listingLevels" class="relative mt-2 h-full">
-            <div class="flex gap-2 items-center" v-show="listingLevels != 2">
+            <div cqlass="flex gap-2 items-center" v-show="listingLevels != 2">
             <button @click="listingLevels = false" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/showCommsL.svg" class="w-2" alt="">{{ $t('other.back') }}</button>
                 <span class="opacity-40">{{ listingLevels }}</span>
             </div>

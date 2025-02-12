@@ -1,9 +1,10 @@
+import GuesserSetting from "@/components/editor/GuesserSetting.vue"
 import ReviewHelp from "@/components/writer/ReviewHelp.vue"
 import SettingsDescription from "@/components/writer/SettingsDescription.vue"
-import { checkList, DEFAULT_LEVELLIST } from "@/Editor"
-import type { LevelList, ReviewList, Setting } from "@/interfaces"
+import { checkList, DEFAULT_LEVELLIST, getListPreview } from "@/Editor"
+import type { LevelList, PostData, ReviewList, Setting } from "@/interfaces"
 import { i18n } from "@/locales"
-import { checkReview, DEFAULT_REVIEWDATA } from "@/Reviews"
+import { checkReview, DEFAULT_REVIEWDATA, getReviewPreview } from "@/Reviews"
 import type { Component } from "vue"
 
 export enum Key {
@@ -90,6 +91,11 @@ export interface Writer {
         */
         postType: Post
         /**
+         * The route the user is redirected to, after uploading/updating a post.
+         * A dollar sign is used as a placeholder for the post ID.
+         */        
+        redirectBase: string
+        /**
         * A function that returns a new instance of a post
         */
         postObject: () => ReviewList | LevelList
@@ -118,6 +124,10 @@ export interface Writer {
          */
         maxLevels: number
         /**
+         * Decides if a level can be given a rating
+         */
+        levelRating: boolean
+        /**
          * Text which appears as help, in the Levels section
          */
         levelsSubtext: string
@@ -131,10 +141,10 @@ export interface Writer {
         writerHelp: Component
         /**
          * A function that gets called before uploading, that checks if a post is valid
-         * @param {Object} postObject - The post
-         * @return {Object} success - s
+         * @param {Object} postObject The post
+         * @returns {Object} success - s
          */
-        clientPostValidation: (postObject: ReviewList | LevelList) => {success: boolean, error: string}
+        clientPostValidation: (postObject: PostData) => {success: boolean, error: string}
     },
     settings: {[setting: string]: (Setting & {affects: PostKeys}) | string},
     toolbar: {
@@ -148,6 +158,21 @@ export interface Writer {
          * Local storage key, under which the drafts are stored
          */
         storageKey: string
+        /**
+         * Function for parsing the post that returns a draft preview.
+         * @param postObject The post
+         * @returns {Object} Title, description and extras of the post draft
+         */
+        parsePreview: (postObject: PostData) => {title: string, preview: string, counter: number}
+        /**
+         * Translation key for the preview counter
+         */
+        counterLangKey: string
+        /**
+         * Function that checks if a draft can be saved
+         * @param postObject The post
+         */
+        draftabilityConstraint: (postObject: PostData) => boolean
     }
 
 }
@@ -155,19 +180,23 @@ export interface Writer {
 export const LIST: Writer = {
     general: {
         postType: "list",
+        redirectBase: "/$",
         postObject: DEFAULT_LEVELLIST,
-        tabTitle: 'Editor seznamu',
+        tabTitle: i18n.global.t('editor.title'),
         titlePlaceholder: i18n.global.t('editor.levelName'),
         allowTagline: true,
         placeholderTaglines: [
-            'Tihle creatoři extrémně peakli!',
-            'Tyhle Levely od Fanoušků budou spicy!',
-            'Z mého map packu ti oči nevykrvácí!',
-            ''
+            i18n.global.t('editor.tagl1'),
+            i18n.global.t('editor.tagl2'),
+            i18n.global.t('editor.tagl3'),
+            i18n.global.t('editor.tagl4'),
+            i18n.global.t('editor.tagl5'),
+            i18n.global.t('editor.tagl6')
         ],
         allowLevels: true,
         maxLevels: 50,
-        levelsSubtext: 'Jaké levely chceš přidat?',
+        levelRating: false,
+        levelsSubtext: i18n.global.t('editor.levToAdd'),
         allowWriter: false,
         clientPostValidation: checkList
     },
@@ -192,22 +221,32 @@ export const LIST: Writer = {
         i18n.global.t('other.list'),
         {
             name: i18n.global.t('help.listGuessing'),
-            desc: 'Ze seznamu se stane hádací minihra.',
-            control: "cbox",
+            desc: i18n.global.t('editor.diffGuessHelp'),
+            control: "component",
+            controlOptions: GuesserSetting,
             affects: "diffGuesser",
         },
         {
             name: i18n.global.t('editor.translucentCards'),
-            desc: 'Karty levelů v seznamu budou průsvitné.',
+            desc: i18n.global.t('editor.translHelp'),
             control: "cbox",
             affects: "translucent",
         },
-    ]
+    ],
+    drafts: {
+        storageKey: "listDrafts",
+        draftabilityConstraint(postObject: PostData) {
+            return postObject.levels.length > 0
+        },
+        parsePreview: getListPreview,
+        counterLangKey: 'other.levels'
+    }
 }
 
 export const REVIEW: Writer = {
     general: {
         postType: "review",
+        redirectBase: "/review/$",
         postObject: DEFAULT_REVIEWDATA,
         titlePlaceholder: i18n.global.t('reviews.reviewName'),
         tabTitle: i18n.global.t('reviews.reviewEditor'),
@@ -222,7 +261,8 @@ export const REVIEW: Writer = {
         ],
         allowLevels: true,
         maxLevels: 10,
-        levelsSubtext: 'Jaké levely budeš recenzovat?',
+        levelRating: false,
+        levelsSubtext: i18n.global.t('reviews.levtoRev'),
         allowWriter: true,
         writerHelp: ReviewHelp,
         clientPostValidation: checkReview,
@@ -434,6 +474,11 @@ export const REVIEW: Writer = {
         }
     },
     drafts: {
-        storageKey: "reviewDrafts"
+        storageKey: "reviewDrafts",
+        draftabilityConstraint(postObject: PostData) {
+            return postObject.containers.length > 0
+        },
+        parsePreview: getReviewPreview,
+        counterLangKey: 'other.words'
     }
 }

@@ -1,6 +1,6 @@
 import { type Ref, ref } from "vue"
 import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
-import type { FavoritedLevel, Level, LevelList, ReviewList, ReviewRating } from "./interfaces"
+import type { FavoritedLevel, Level, LevelList, PostData, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -31,7 +31,6 @@ export const DEFAULT_RATINGS: ReviewRating[] = [
 ]
 
 export const REVIEW_EXTRAS: () => ReviewList = () => ({
-    reviewName: "",
     containers: [],
     ratings: [],
     settings: [],
@@ -65,7 +64,6 @@ export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | Fav
 }
 
 export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXTRAS() })
-export const reviewData = ref(DEFAULT_REVIEWDATA())
 
 const funnyErrorMessages = [
     "",
@@ -221,12 +219,12 @@ export function getWordCount(post: ReviewList) {
     return count
 }
 
-export const getReviewPreview = () => {
+export const getReviewPreview = (postData: PostData) => {
     let firstHeading = (document.querySelector("div[data-type*=heading] > p")?.innerText ?? "").trim()
     let firstParagraph = (document.querySelector("div[data-type=default] > p")?.innerText ?? "").trim()
     if (firstHeading.length > 100) firstHeading = firstHeading.slice(0, 100)+"..."
     if (firstParagraph.length > 100) firstParagraph = firstParagraph.slice(0, 100)+"..."
-    return [firstHeading, firstParagraph]
+    return {title: firstHeading, preview: firstParagraph, counter: getWordCount(postData)}
 }
 
 export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | false = false) => {

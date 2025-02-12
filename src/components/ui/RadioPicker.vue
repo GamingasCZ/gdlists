@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL
 </script>
 
 <template>
-    <fieldset class="flex gap-2 justify-center mt-2">
+    <fieldset class="flex gap-2 justify-center my-2">
         <label v-for="(button, index) in optNames" class="flex flex-col items-center p-2 w-full text-center bg-black bg-opacity-20 rounded-md max-w-24">
             <img v-if="optIcons" :src="base + optIcons[index]" :style="{width: imgWidth ? `${imgWidth}px` : ''}" class="mx-auto opacity-40 max-w-16" alt="">
             <span>{{ button }}</span>

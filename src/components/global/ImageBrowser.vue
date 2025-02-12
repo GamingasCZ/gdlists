@@ -954,7 +954,7 @@ onMounted(() => {
         <div class="grid grid-cols-4 gap-2 m-2" :class="{ 'opacity-20 pointer-events-none': uploadingImage }">
 
             <!-- Images -->
-            <button @click.exact="pickImage(-1, currentTab == Tabs.External, $event)"
+            <!-- <button @click.exact="pickImage(-1, currentTab == Tabs.External, $event)"
                 class="relative h-24 bg-black bg-opacity-40 bg-center rounded-sm border-2 border-white border-dashed transition-all duration-75 cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
                 :class="{ 'opacity-20 pointer-events-none': folderMoveMode }">
 
@@ -963,7 +963,7 @@ onMounted(() => {
                     :class="{ 'hover:scale-125': !unselectable }">
 
                 <span>{{ $t('other.noImage') }}</span>
-            </button>
+            </button> -->
 
             <!-- Folders -->
             <button v-for="folder in (currentTab ? extImgFolders : folders)"

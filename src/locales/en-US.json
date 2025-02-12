@@ -126,10 +126,21 @@
     "cookDisabled": "Cookies are disabled. You can only browse posts!",
     "loginToCreateReviews": "Please login to make posts!",
     "reviewInProgress": "Would you like to load the last draft?",
-    "unnamedReview": "Unnamed Review",
+    "unnamedReview": "Unnamed Post",
     "difficulties": "Difficulties",
     "ratings": "Ratings",
-    "diffGuessHelp": "Enabling guessing will turn your list into a minigame, where levels uncover as you guess their difficulty and rating."
+    "diffGuessHelp": "Turns the list into a minigame where you guess difficulties and ratings.",
+    "levelTags": "Level Tags",
+    "rating": "Rating",
+    "levToAdd": "What levels would you like to add?",
+    "title": "List Editor",
+    "tagl2": "These Level Requests will be spicy!",
+    "tagl3": "My Map Pack won't make your eyes bleed!",
+    "tagl6": "The Demon List is cooked!",
+    "tagl5": "You wouldn't believe what's number one :O!",
+    "tagl4": "I'd be down for some Wasabi paste!",
+    "tagl1": "These creators have truly peaked!",
+    "translHelp": "Level cards in the list will be translucent."
   },
   "homepage": {
     "clear": "Clear",
@@ -253,6 +264,7 @@
     "saved": "Saved"
   },
   "other": {
+    "404": "This path sadly doesn't lead anywhere...",
     "alignment": "Align",
     "coverage": "Coverage",
     "cringeAhhTextLmao": "Check out my GD list",
@@ -378,7 +390,7 @@
     "right": "Right",
     "positioningHelp": "Positioning on narrow screen sizes",
     "dissolveHelp": "Gradually fades out image",
-    "levels": "{n} level | {n} levels",
+    "levels": "No levels | {n} level | {n} levels",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "picture": "Image",
@@ -471,7 +483,8 @@
     "linkCopied": "Link copied!",
     "general": "General",
     "noImage": "Discard Pick",
-    "previous": "Previous"
+    "previous": "Previous",
+    "reset": "Reset"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -778,7 +791,7 @@
     "diffHelp": "Rate difficulty relative to it's actual one in-game.<br><br>It's totally fine rating the hardest Easy level with a 10 and the most free Extreme with a 0.",
     "overallHelp": "The overall score incorporates everything the level tried to go for.<br><br>You're free to make it higher than the other ratings, if the level's objectively bad, but you like it.",
     "drafts": "Drafts",
-    "draftNoPrev": "Review has no text.",
+    "draftNoPrev": "Post has no preview.",
     "saved": "Saved",
     "created": "Created",
     "copy1": "(copy)",
@@ -788,9 +801,9 @@
     "copy5": "(god damnit!!)",
     "copy6": "(how many do you need)",
     "justSaved": "Saved",
-    "draftHelp1": "Here are your unfinished reviews!",
+    "draftHelp1": "Here are your unfinished posts!",
     "draftHelp4": "The draft will remove itself after posting.",
-    "draftHelp2": "You can save and come back to these reviews anytime.",
+    "draftHelp2": "You can save and come back to these posts anytime.",
     "draftHelp3": "Drafts are used to store your unfinished reviews.\\\n\\\nReviews save by themselves depending on your set autosave interval, or when you leave the page.\\\n\\\nDrafts are saved locally. Any saves you make are on this device only and they'll get deleted when clearing cookies. You can save even if the servers or your internet is down.\\\n\\\nThe draft is removed once you upload your review.",
     "writeOn": "Load",
     "draftNoLoad": "Failed to load draft!",
@@ -822,7 +835,11 @@
     "impGD": "Import from GD",
     "page": "Page",
     "keysh": "Keyboard Shortcuts",
-    "zenMode": "Zen Mode"
+    "zenMode": "Zen Mode",
+    "selFromBG": "Select from Background",
+    "otherDrafts": "More Drafts",
+    "drafts2": "Drafted",
+    "levtoRev": "What levels will you be reviewing?"
   },
   "review": {
     "columnSetting": "{0} column",

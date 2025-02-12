@@ -26,8 +26,9 @@ const CONTENTS = ['lists', 'reviews', 'levels']
 const defaultContentType = () => {
   if (hasLocalStorage()) { 
     let lastTabSelected = sessionStorage.getItem("browserTab")
+    let route = CONTENTS.indexOf(useRouter().currentRoute.value.path.split("/")[2])
     if (lastTabSelected != null) return parseInt(lastTabSelected)
-    else return CONTENTS.indexOf(useRouter().currentRoute.value.path.split("/")[2])
+    else return route == -1 ? 0 : route
   } else return 0
 }
 

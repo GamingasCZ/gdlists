@@ -107,13 +107,13 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
         :force-content="feeds?.['user']" />
 
     <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash"
-      extra-action="@clear" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
+      extra-action="@clear" :list-type="3" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
 
     <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more"
       :empty-text="$t('homepage.noLevelsSaved')" content-type="@favorites" extra-action="/saved" :randomize-content="true"
       :list-type="1" />
 
     <ListSection :header-name="$t('homepage.official')" :empty-text="$t('homepage.listsNonexistent')"
-      content-type="oldLists" />
+      content-type="oldLists" :list-type="3" />
   </main>
 </template>

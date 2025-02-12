@@ -73,14 +73,14 @@ const dialogs = inject("openedDialogs")
 </script>
 
 <template>
-    <ContainerHelp v-if="levels === -1" icon="showList" :help-content="$t('reviews.embedded')">
+    <ContainerHelp unclickable v-if="levels === -1" icon="showList" :help-content="$t('reviews.embedded')">
         <span class="text-sm leading-none opacity-50">{{ $t('reviews.embeddedHelp') }}</span>
     </ContainerHelp>
 
     <ContainerHelp @click="dialogs.lists = [true, index, 0]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
     </ContainerHelp>
 
-    <ContainerHelp v-else-if="settings.post && postData?.[0] === undefined && typeof postData?.[1] == 'object'" icon="view" :help-content="$t('reviews.deletedPost')">
+    <ContainerHelp unclickable v-else-if="settings.post && postData?.[0] === undefined && typeof postData?.[1] == 'object'" icon="view" :help-content="$t('reviews.deletedPost')">
     </ContainerHelp>
 
     <component

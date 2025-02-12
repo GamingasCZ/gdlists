@@ -213,7 +213,7 @@ const listUploadDate = computed(() =>props.review ?
               $t('level.comments') }}</label>
             <label
               v-show="commAmount > 0"
-              class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm md:h-full md:block aspect-square bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
+              class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm md:h-full md:block bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 commAmount }}</label>
           </button>
         </div>

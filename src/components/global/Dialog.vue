@@ -41,7 +41,7 @@ watch(() => props.open, () => clipBody(!props.open))
 
 <template>
   <Transition name="fade">
-    <dialog ref="main" @click="(SETTINGS.dialogClickClose && !disableTapClose) ? emit('closePopup') : ''" tabindex="0"
+    <dialog ref="main" role="dialog" aria-modal="true" @click="(SETTINGS.dialogClickClose && !disableTapClose) ? emit('closePopup') : ''"
       @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center transition-all duration-75 modalDialog" v-if="open">
       <section @click.stop=""
         :style="{width: width ?? '35rem', backgroundImage: SETTINGS.disableColors ? null : customColor}"

@@ -31,7 +31,7 @@ const containers: Containers = {
         {
             key: "size",
             title: i18n.global.t('reviews.fontSize'),
-            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 20, 24, 32, 36, 48, 64],
+            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 18, 20, 22, 24, 32, 36, 48, 64],
             default: 0,
         },
         {

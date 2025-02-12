@@ -158,7 +158,7 @@ const link = () => {
     <section class="flex overflow-hidden flex-col items-start m-1">
       <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
       <div class="overflow-hidden w-full text-ellipsis">
-        <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-4" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
+        <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-5" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
         <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>
       <div class="flex gap-2 items-center mt-2">

@@ -71,6 +71,11 @@ const router = createRouter({
       },
       component: () => import("@/components/ListView.vue"),
     },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "404",
+      component: () => import("@/components/404.vue"),
+    },
   ],
 });
 
@@ -95,6 +100,10 @@ router.beforeEach(async (to, from) => {
   if (
     THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor != document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
+    // Do not reset color when editing a post
+    if (["editing", "editingReview"].includes(to.name) && ["listViewer", "reviewViewer"].includes(from.name)) return
+    
+    // Do not reset color when updating a post
     if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
     
       document.documentElement.style.setProperty("--siteBackground", THEMES[SETTINGS.value.selectedTheme || 0].colors.siteBackground);

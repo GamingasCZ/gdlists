@@ -28,7 +28,7 @@ const props = defineProps<Container & Extras>()
 
 const previewText = ref("")
 
-const fontSizes = ['normal', '8px', '12px', '14px', '16px', '20px', '24px', '32px', '36px', '48px', '64px']
+const fontSizes = ['', '8px', '12px', '14px', '16px', '18px', '20px', '22px', '24px', '32px', '36px', '48px', '64px']
 const doShowSettings = ref(false)
 const mainText = ref<HTMLTextAreaElement>()
 
@@ -100,10 +100,17 @@ const hasText = ref(checkHasText())
 
 onMounted(doFocusText)
 
+const mousePos = ref([0,0])
+const rmbSettingOpen = (mPos: MouseEvent) => {
+	mousePos.value = [mPos.pageX, mPos.pageY]
+	doShowSettings.value = 2
+}
+
 </script>
 
 <template>
-	<div :data-type="type" @click.right.exact.prevent="editable ? (doShowSettings = true) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer outline-[2px] min-h-4 outline-lof-400" :class="{'!outline-none': dependentOnChildren, 'outline': focus && focused}">
+	<div :data-type="type" @click.right.exact.prevent="editable ? (rmbSettingOpen($event)) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer min-h-4">
+		<hr class="absolute right-[-6px] border-lof-400 h-full border-r-4" :class="{'!border-none': dependentOnChildren || !(focus && focused)}">
 		<p
 			v-if="canEditText"
 			ref="mainText"
@@ -124,7 +131,7 @@ onMounted(doFocusText)
 			
 		<slot></slot>
 		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-[38px] box-border max-sm:right-0">
-			<button @click="doShowSettings = true" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
+			<button @click="doShowSettings = 1" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
 				<img src="@/images/gear.svg" class="w-7 invert">
 			</button>
 		</div>
@@ -135,6 +142,7 @@ onMounted(doFocusText)
 			:type="type"
 			:settings-arr="currentSettings"
 			:shown="doShowSettings"
+			:mouse-pos="mousePos"
 			@pressed-button="emit('settingsButton', $event)"
 			@hid-settings="doShowSettings = false"
 			@remove="emit('removeContainer')"
@@ -152,7 +160,8 @@ onMounted(doFocusText)
 
 p[data-hasText=true]::before {
 	content: attr(placeholder);
-	@apply opacity-30 absolute pointer-events-none;
+	text-align: inherit;
+	@apply opacity-30 pointer-events-none;
 }
 
 </style>

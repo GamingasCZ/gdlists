@@ -67,17 +67,16 @@ $hidden = $post["hidden"] ? privateIDGenerator($post["postName"], $user_id, $tim
 $compressedData = base64_encode(gzcompress(json_encode($DATA)));
 
 // Send to database
-
 $template; $values; $types;
 switch ($post["postType"]) {
   case 'list':
-    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`) VALUES (?,'',?,?,?,?,?,?)";
-    $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments);
-    $types = "ssssssi";
+    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`,`tagline`) VALUES (?,'',?,?,?,?,?,?,?)";
+    $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments, $DATA["tagline"]);
+    $types = "sssssssi";
     break;
   case 'review':
     $template = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`) VALUES (?,?,?,?,?,?,?,?,?)";
-    $values = array($postExtras["name"], $user_id, $compressedData, $DATA["tagline"], $hidden, $disableComments, $postExtras["thumb"], $postExtras["thumbProps"], $DATA["language"]);
+    $values = array($post["postName"], $user_id, $compressedData, $DATA["tagline"], $hidden, $disableComments, $postExtras["thumb"], $postExtras["thumbProps"], $DATA["language"]);
     $types = "sisssisss";
     break;
   

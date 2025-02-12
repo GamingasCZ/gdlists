@@ -41,13 +41,9 @@ const doAction = (action: FormattingAction, param: any, holdingShift = false) =>
 			emit('addContainer', param, holdingShift);
 			break;
 		case 'preview':
-			previewEnabled.value = param !== 0
-			previewMode.value = param
+			previewEnabled.value = !previewEnabled.value
+			previewMode.value = 1
 			
-			if (previewEnabled.value)
-				swapToolbar('previewing')
-			else
-				swapToolbar('main')
 			emit('setFormatting', 'view', previewMode.value);
 			break;
 		case 'align':
@@ -193,11 +189,11 @@ const postData = inject("postData")
 
 <template>
 	<section @click.stop="" :style="{ top: barPos }"
-		:class="{'bg-[#ECE6D9]': postData.whitePage, 'bg-lof-200': !postData.whitePage}"
+		:class="{'!bg-[#ECE6D9]': postData.whitePage, 'bg-lof-200': !postData.whitePage}"
 		class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
 		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center" :class="{'invert-[0.9]': postData.whitePage}">
 			<FormattingButton v-for="button in getToolbarButtons(side)" :button="button"
-				@clicked="doAction(button.action[0], $event, false)" />
+				@clicked="doAction(button.action[0], $event.action, $event.shift)" />
 		</div>
 	</section>
 </template>

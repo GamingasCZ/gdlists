@@ -233,100 +233,111 @@ const background = computed(() => {
   return chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()
 })
 
-const tagPlaceholder = ref('Tagy levelu')
+const tagPlaceholder = ref(`'${i18n.global.t('editor.levelTags')}'`)
+const start = ref("#951b99")
+const editingRating = ref(false)
 </script>
 
-
 <template>
-  <section :style="{background: background}" class="flex rounded-md max-sm:flex-col">
-    <div class="flex flex-col justify-between items-center px-0.5 bg-black bg-opacity-20">
+  <section :style="{background: background}" class="rounded-md">
 
-      <!-- Move level -->
-      <div class="flex flex-col items-center">
-        <button class="p-1.5 button"
-            :title="$t('editor.moveUpTitle')" @click="emit('doMove', index!, index! - 1); openedPanel = 0;">
-            <img class="w-6" src="../../images/moveUp.svg" alt="">
-        </button>
-        <input autocomplete="off" readonly
-          class="w-10 mx-1 max-w-[20vw] cursor-move outline-none font-black text-xl rounded-md bg-black bg-opacity-40 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
-          :value="index! + 1" @mousedown="mobileMoveLevel()" />
-        <button class="p-1.5 button"
-            :title="$t('editor.moveDownTitle')" @click="emit('doMove', index!, index! + 1); openedPanel = 0;">
-            <img class="w-6" src="../../images/moveDown.svg" alt="">
-        </button>
+    <div v-show="!editingRating" class="flex max-sm:flex-col">
+      <div class="flex flex-col justify-between items-center px-0.5 bg-black bg-opacity-20">
+  
+        <!-- Move level -->
+        <div class="flex flex-col items-center">
+          <button class="p-1.5 button"
+              :title="$t('editor.moveUpTitle')" @click="emit('doMove', index!, index! - 1); openedPanel = 0;">
+              <img class="w-6" src="../../images/moveUp.svg" alt="">
+          </button>
+          <input autocomplete="off" readonly
+            class="w-10 mx-1 max-w-[20vw] cursor-move outline-none font-black text-xl rounded-md bg-black bg-opacity-40 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
+            :value="index! + 1" @mousedown="mobileMoveLevel()" />
+          <button class="p-1.5 button"
+              :title="$t('editor.moveDownTitle')" @click="emit('doMove', index!, index! + 1); openedPanel = 0;">
+              <img class="w-6" src="../../images/moveDown.svg" alt="">
+          </button>
+        </div>
+  
+        <div class="flex flex-col gap-2 items-center pb-2">
+  
+          <button @click="openedPanel = openedPanel != 1 ? 1 : 0" :title="$t('editor.levelColorTitle')" class="opacity-60 button">
+            <img class="w-6" src="../../images/color.svg" alt="" />
+          </button>
+          
+          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="opacity-60 button">
+            <img class="w-7" src="../../images/trash.svg" alt="" />
+          </button>
+        </div>
+  
       </div>
-
-      <div class="flex flex-col gap-2 items-center pb-2">
-
-        <button @click="openedPanel = openedPanel != 1 ? 1 : 0" :title="$t('editor.levelColorTitle')" class="button">
-          <img class="w-5" src="../../images/color.svg" alt="" />
-        </button>
+  
+      <div class="flex flex-col gap-2 pr-2 mt-2 w-full overflow-clip">
+  
+        <div class="flex gap-2">
+          <div class="grid grid-cols-2 max-w-[50%] gap-2">
+            <!-- Level name -->
+            <form @submit.prevent="searchLevel(false)" class="flex col-span-2 gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+              <button type="button" class="button">
+                <DifficultyIcon class="w-12" :difficulty="selectedDiff?.[0] ?? 0" :rating="selectedDiff?.[1] ?? 0" />
+              </button>
+              <input v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
+              <button type="submit" tabindex="-1" class="p-2">
+                <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
+              </button>
+            </form>
+    
+            <!-- Creator -->
+            <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+              <button @click="openCollabTools()" type="button" tabindex="-1" class="p-2 button">
+                <img src="@/images/collabMen.svg" alt="" class="min-w-8" />
+              </button>
+              <input :value="levelCreator" @change="modifyCreator" maxlength="20" type="text" class="w-36 text-lg bg-transparent border-none outline-none" :placeholder="$t('level.creator')">
+            </div>
+    
+            <!-- Level ID -->
+            <form @submit.prevent="searchLevel(false)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+              <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-full text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
+              <button type="submit" tabindex="-1" class="p-2">
+                <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
+              </button>
+            </form>
+          </div>
+  
+          <!-- Level rating -->
+          <button
+            class="h-full grow button bg-[url(@/images/reviews/noRating.webp)] relative scrollRating"
+          >
+            
+          </button>
+        </div>
+  
+        <!-- Level tags -->
+        <div class="flex gap-3 items-center ml-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+          <button type="button" class="p-2 button">
+            <img src="@/images/levelID.svg" alt="" class="w-8" />
+          </button>
+          <div id="tagbox" class="relative w-full" contenteditable="true">
+          </div>
+        </div>
+  
         
-        <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="button">
-          <img class="w-6" src="../../images/trash.svg" alt="" />
-        </button>
-      </div>
-
-    </div>
-
-    <div class="flex flex-col gap-2 pr-2 mt-2 w-full">
-
-      <div class="flex justify-between">
-        <!-- Level name -->
-        <form @submit.prevent="searchLevel(false)" class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-          <button type="button" class="button">
-            <DifficultyIcon class="w-12" :difficulty="selectedDiff[0]" :rating="selectedDiff[1]" />
+        <div class="flex overflow-scroll gap-2 p-2 w-full bg-black bg-opacity-20">
+          <button class="flex flex-col gap-3 items-center p-3 px-6 text-white text-opacity-20 rounded-md border-2 border-white border-opacity-20 border-dashed button">
+            <img src="@/images/image.svg" class="w-8 opacity-20" alt="">
+            Přidat náhled
           </button>
-          <input v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
-          <button type="submit" tabindex="-1" class="p-2">
-            <img src="@/images/searchOpaque.svg" class="w-6" alt="">
+          <button class="flex flex-col gap-3 items-center p-3 px-6 text-white text-opacity-20 rounded-md border-2 border-white border-opacity-20 border-dashed button">
+            <img src="@/images/image.svg" class="w-8 opacity-20" alt="">
+            Přidat média
           </button>
-        </form>
-
-      </div>
-
-      <div class="flex">
-
-      <!-- Creator -->
-      <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-        <button type="button" tabindex="-1" class="p-2 button">
-          <img src="@/images/collabMen.svg" alt="" class="min-w-8" />
-        </button>
-        <input :value="levelCreator" @change="modifyCreator" maxlength="20" type="text" class="w-36 text-lg bg-transparent border-none outline-none" :placeholder="$t('level.creator')">
-      </div>
-
-              <!-- Level ID -->
-              <form @submit.prevent="searchLevel(false)" class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-          <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-32 text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
-          <button type="submit" tabindex="-1" class="p-2">
-            <img src="@/images/searchOpaque.svg" class="w-6" alt="">
-          </button>
-        </form>
-
-    </div>
-
-      <!-- Level tags -->
-      <div class="flex gap-3 items-center ml-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-        <button type="button" class="p-2 button">
-          <img src="@/images/levelID.svg" alt="" class="w-8" />
-        </button>
-        <div id="tagbox" class="relative w-full" contenteditable="true">
         </div>
       </div>
-
-      
-      <div class="flex overflow-scroll gap-2 p-2 w-full bg-black bg-opacity-20">
-        <button class="flex flex-col gap-3 items-center p-3 px-6 text-white text-opacity-20 rounded-md border-2 border-white border-opacity-20 border-dashed button">
-          <img src="@/images/image.svg" class="w-8 opacity-20" alt="">
-          Přidat náhled
-        </button>
-        <button class="flex flex-col gap-3 items-center p-3 px-6 text-white text-opacity-20 rounded-md border-2 border-white border-opacity-20 border-dashed button">
-          <img src="@/images/image.svg" class="w-8 opacity-20" alt="">
-          Přidat média
-        </button>
-      </div>
     </div>
 
+    <div v-show="editingRating">
+
+    </div>
 
   </section>
 </template>
@@ -353,4 +364,27 @@ const tagPlaceholder = ref('Tagy levelu')
   content: v-bind(tagPlaceholder);
   @apply w-max absolute opacity-40
 }
+
+@keyframes scroll {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 64px -64px;
+    }
+}
+
+@media (prefers-reduced-motion) {
+    .scrollRating { animation: none; }
+}
+
+.scrollRating {
+    @apply relative overflow-clip transition-colors;
+    animation: scroll 5s infinite linear;
+    mask: radial-gradient(black, transparent 80%);
+}
+.scrollRating:hover {
+    @apply bg-[#6f1a4921] brightness-150;
+}
+
 </style>

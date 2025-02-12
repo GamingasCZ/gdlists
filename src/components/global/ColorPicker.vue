@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SETTINGS } from "@/siteSettings";
 import chroma from "chroma-js";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 const props = defineProps<{
   hue?: number;
@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(["colorsModified"]);
-const colors = ref([props.hue ?? 0, props.saturation ?? 1, props.lightness ?? 0]);
+const colors = computed(() => [props.hue ?? 0, props.saturation ?? 1, props.lightness ?? 0]);
 const colorsHex = ref(props.hex ?? chroma.hsl(props.hue, props.saturation, props.lightness).hex())
 
 const modColors = (ind: number, val: number) => {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const emit = defineEmits(["closePopup"]);
 import LevelCard from "../editor/EditorCard.vue";
 import { inject, onBeforeUnmount, ref, type Ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
@@ -17,6 +16,11 @@ import LevelRoulette from "./LevelRoulette.vue";
 defineProps<{
     subtext: string
     maxLevels: number
+}>()
+
+const emit = defineEmits<{
+    (e: "togglePreview"): void
+    (e: "closePopup"): void
 }>()
 
 const POST_DATA = inject<Ref<ReviewList & LevelList>>("postData")!
@@ -128,11 +132,17 @@ const rouletteActive = ref(false)
     </Dialog>
 
     <section class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
-        <header class="flex p-2 text-white cursor-pointer" @click="mainRolledOut = !mainRolledOut">
+        <header class="flex p-2 text-white cursor-pointer">
             <img src="@/images/browseMobHeader.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('editor.levels') }}</h2>
-            <button class="button">
+            <!-- <button class="button">
                 <img src="@/images/dropdown.svg" :class="{'rotate-180': mainRolledOut}" class="w-6" alt="">
+            </button> -->
+            <button v-if="POST_DATA.levels.length" @click="mainRolledOut = !mainRolledOut; emit('togglePreview')" :class="{'!bg-lof-400': !mainRolledOut}" class="px-2 rounded-md button hover:bg-black hover:bg-opacity-40">
+                <div class="flex gap-2 items-center" :class="{'invert': !mainRolledOut}">
+                    <img src="@/images/view.svg" class="w-6" alt="">
+                    <span class="">{{ $t('other.preview') }}</span>
+                </div>
             </button>
         </header>
 
@@ -168,7 +178,7 @@ const rouletteActive = ref(false)
                         :level-array="POST_DATA" :data="level" :index="index" />
                 </div>
             </div>
-            <div class="flex gap-2 justify-center items-center">
+            <div class="flex relative gap-2 justify-center items-center">
                 <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels"
                     class="flex gap-2 px-2 py-3 text-xl font-bold disabled:opacity-40 disabled:grayscale text-lof-400">
                     <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />

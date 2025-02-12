@@ -9,7 +9,7 @@ import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
-import type {Level, PostData, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
+import type {Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
 import { pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
@@ -21,9 +21,7 @@ import { modernizeList, modifyListBG, predefinedLevelList, prettyDate } from "@/
 import { onUnmounted } from "vue";
 import router, { timeLastRouteChange } from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
-import RemoveListPopup from "./editor/RemoveListPopup.vue";
 import TextEditor from "./global/TextEditor.vue";
-import UserDialog from "./writer/UserDialog.vue";
 import { i18n } from "@/locales";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
@@ -39,6 +37,7 @@ import WriterVisuals from "./writer/WriterVisuals.vue";
 import { LIST, REVIEW, type Writer } from "@/writers/Writer";
 import Dropdown from "./ui/Dropdown.vue";
 import ColumnPreview from "./writer/ColumnPreview.vue";
+import HoldButton from "./ui/HoldButton.vue";
 
 const props = defineProps<{
     type: number
@@ -51,32 +50,22 @@ const POST_DATA = ref<PostData>()
 const WRITER = ref([LIST, REVIEW][props.type])
 watch(() => props.type, () => {
     WRITER.value = [LIST, REVIEW][props.type]
+    drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
     resetPost()
 })
-watch(timeLastRouteChange, () => resetPost())
+// watch(timeLastRouteChange, () => resetPost())
 
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
 
 provide("postData", POST_DATA)
 
-let isNowHidden = false
-if (props.editing) {
-    axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
-        if (res.data?.data) {
-            isNowHidden = res.data.hidden != 0
-            if (props.type == 0)
-                POST_DATA.value = modernizeList(res.data)
-            else
-                POST_DATA.value = res.data.data
-            fetchEmbeds()
-            modifyListBG(POST_DATA.value.pageBGcolor, false, true)
-            containerLastAdded.value = Date.now()
-        }
-        else {
-            openDialogs.editError = true
-        }
-    }).catch(() => openDialogs.editError = true)
+const getLevelsRatings = () => {
+  return [POST_DATA.value?.levels, POST_DATA.value?.ratings]
 }
+provide("levelsRatingsData", getLevelsRatings)
+
+
+let isNowHidden = false
 
 const writer = ref<HTMLDivElement>()
 const embedsContent = ref()
@@ -97,7 +86,7 @@ const resetPost = () => {
     document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
     POST_DATA.value = WRITER.value.general.postObject()
     containerLastAdded.value = Date.now()
-    modifyListBG(POST_DATA.value.pageBGcolor, true, true)
+    modifyListBG(POST_DATA.value.pageBGcolor, true)
     setPreviewMode(true)
     selectedContainer.value[0] = -1
     disableEdits.value = false
@@ -308,6 +297,11 @@ const setPreviewMode = (preview: boolean) => {
     // nextTick(() => dataContainers.value.forEach(c => c.togglePreview()))
 }
 
+const previewingLevels = ref(false)
+const toggleLevelPreview = () => {
+    previewingLevels.value = !previewingLevels.value
+}
+
 const previewContent = ref(0)
 const setFormatting = (format: string, ind: number) => {
     switch (format) {
@@ -363,12 +357,7 @@ const modifyImageURL = (newUrl: string) => {
     // Review background
     if (openDialogs.imagePicker[1] == WriterGallery.ReviewBackground) {
         POST_DATA.value.titleImg[0] = newUrl
-        let img = document.createElement("img")
-        img.src = newUrl
-        img.onload = () => {
-            POST_DATA.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
-            img.remove()
-        }
+        openDialogs.bgPreview = true
     }
     // Level card background
     else if (openDialogs.imagePicker[1] == WriterGallery.LevelCardBG) {
@@ -460,7 +449,7 @@ const uploadReview = () => {
     }).then(res => {
         sessionStorage.setItem("uploadFinished", "1")
 
-        if (res.data[0] != -1) router.replace(`/review/${res.data[0]}`)
+        if (res.data[0] != -1) router.replace(WRITER.value.general.redirectBase.replace('$', res.data[0]))
         else reviewUploadErrors(res.data[1])
 
         uploadInProgress.value = false
@@ -512,7 +501,7 @@ const updateReview = () => {
         .then(res => {
             sessionStorage.setItem("uploadFinished", "2")
 
-            if (res.data[0] != -1) router.replace(`/review/${res.data[0]}`)
+            if (res.data[0] != -1) router.replace(WRITER.value.general.redirectBase.replace('$', res.data[0]))
             else reviewUploadErrors(res.data[1])
 
             uploadInProgress.value = false
@@ -538,7 +527,25 @@ const unfocusContainer = (e: MouseEvent) => {
 
 let autosaveInterval: number
 onMounted(() => {
-    POST_DATA.value = WRITER.value.general.postObject()
+    if (props.editing) {
+        axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
+            if (res.data?.data) {
+                isNowHidden = res.data.hidden != 0
+                if (props.type == 0)
+                    POST_DATA.value = modernizeList(res.data)
+                else
+                    POST_DATA.value = res.data.data
+                fetchEmbeds()
+                modifyListBG(POST_DATA.value.pageBGcolor, false)
+                containerLastAdded.value = Date.now()
+            }
+            else {
+                openDialogs.editError = true
+            }
+        }).catch(() => openDialogs.editError = true)
+    }
+    else 
+        POST_DATA.value = WRITER.value.general.postObject()
 
     // Add lavels from saved
     if (predefinedLevelList.value.length) {
@@ -599,43 +606,49 @@ const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => 
     reviewSave.value.backupID = newData.id
     reviewSave.value.lastSaved = newData.saved
     fetchEmbeds()
-    modifyListBG(newData.data.pageBGcolor, false, true)
+    modifyListBG(newData.data.pageBGcolor, false)
     containerLastAdded.value = Date.now()
 }
 
 let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
-const previewDraft = (previewData: ReviewList) => {
+var outsideDrafts = false
+const previewDraft = (previewData: ReviewList, previewingOutsideDrafts = false) => {
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = previewData
     fetchEmbeds(true)
-    modifyListBG(previewData.pageBGcolor, false, true)
+    modifyListBG(previewData.pageBGcolor, false)
     setPreviewMode(false)
     disableEdits.value = true
     openDialogs.drafts = false
+    if (previewingOutsideDrafts)
+        outsideDrafts = true
 }
 const exitPreview = () => {
     if (!previewHold) return
 
     POST_DATA.value = previewHold[0]
     embedsContent.value = previewHold[1]
-    modifyListBG(previewHold[0].pageBGcolor, false, true)
+    modifyListBG(previewHold[0].pageBGcolor, false)
     previewHold = null
 
     setPreviewMode(true)
     disableEdits.value = false
-    openDialogs.drafts = true
+    if (!outsideDrafts)
+        openDialogs.drafts = true
+
+    outsideDrafts = false
 
 }
 
 const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
-const drafts = ref<object>(JSON.parse(localStorage.getItem("reviewDrafts")!) ?? {})
+const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
 const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
-    if (!POST_DATA.value.containers.length) return
+    if (!WRITER.value.drafts.draftabilityConstraint(POST_DATA.value)) return
     if (disableEdits.value) return
     let now = Date.now()
     let backupID;
-    let preview = getReviewPreview()
+    let preview = WRITER.value.drafts.parsePreview(POST_DATA.value)
     if (reviewSave.value.backupID == 0 || saveAs) {
         let saveAsName = POST_DATA.value.reviewName || i18n.global.t('editor.unnamedReview')
         if (saveAs && reviewSave.value.backupID != 0) {
@@ -652,21 +665,21 @@ const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
             name: saveAsName,
             createDate: now,
             saveDate: now,
-            wordCount: getWordCount(POST_DATA.value),
-            previewTitle: preview[0],
-            previewParagraph: preview[1]
+            wordCount: preview.counter,
+            previewTitle: preview.title,
+            previewParagraph: preview.preview
         }
         backupID = now
     }
     else {
         drafts.value[reviewSave.value.backupID].reviewData = POST_DATA.value,
         drafts.value[reviewSave.value.backupID].saveDate = now
-        drafts.value[reviewSave.value.backupID].wordCount = getWordCount(POST_DATA.value)
-        drafts.value[reviewSave.value.backupID].previewTitle = preview[0]
-        drafts.value[reviewSave.value.backupID].previewParagraph = preview[1]
+        drafts.value[reviewSave.value.backupID].wordCount = preview.counter
+        drafts.value[reviewSave.value.backupID].previewTitle = preview.title
+        drafts.value[reviewSave.value.backupID].previewParagraph = preview.preview
         backupID = reviewSave.value.backupID
     }
-    localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
+    localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
     reviewSave.value = { backupID: backupID, lastSaved: now }
 }
 
@@ -675,7 +688,7 @@ const removeDraft = (key: number) => {
 
     if (key == reviewSave.value.backupID) reviewSave.value = { backupID: 0, lastSaved: 0 }
     delete drafts.value[key]
-    localStorage.setItem("reviewDrafts", JSON.stringify(drafts.value))
+    localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
 }
 
 const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
@@ -734,11 +747,6 @@ const toggleZenMode = () => {
     <main v-else-if="POST_DATA" class="p-2">
         <ErrorPopup :error-text="errorText" :previewing="false" :stamp="errorStamp" />
 
-        <Transition name="fade">
-            <RemoveListPopup v-if="openDialogs.removeDialog" is-review @delete-list="removeReview"
-                @close-popup="openDialogs.removeDialog = false" />
-        </Transition>
-
         <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
             :list-color="POST_DATA.pageBGcolor" />
 
@@ -791,7 +799,7 @@ const toggleZenMode = () => {
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')"
             :width="dialog.medium" :side-button-text="$t('other.search')" :action="draftPopup?.openSearch">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
-            <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup"
+            <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
         </DialogVue>
 
@@ -834,7 +842,18 @@ const toggleZenMode = () => {
             </div>
 
             <!-- Levels -->
-            <WriterLevels v-if="!zenMode" :subtext="WRITER.general.levelsSubtext" :max-levels="WRITER.general.maxLevels" />
+            <WriterLevels
+                v-if="!zenMode"
+                @toggle-preview="toggleLevelPreview()"
+                :subtext="WRITER.general.levelsSubtext"
+                :max-levels="WRITER.general.maxLevels"
+            />
+
+            <!-- Level Preview -->
+            <section v-if="previewingLevels" class="flex flex-col gap-2 items-center">
+                <LevelCard v-for="(l, index) in POST_DATA.levels" v-bind="l" :disable-stars="true"
+                    :level-index="index" :hide-ratings="!WRITER.general.levelRating" />
+            </section>
 
             <!-- Editor -->
             <section v-show="previewContent == 0 || previewMode" ref="writer" v-if="WRITER.general.allowWriter"
@@ -865,8 +884,13 @@ const toggleZenMode = () => {
                     :is="WRITER.general.writerHelp"
                     v-if="!POST_DATA.containers.length"
                     @start-writing="startWriting"
+                    
+                    @preview-draft="previewDraft(drafts[$event].reviewData, true)"
+                    @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
+
                     :inverted="POST_DATA.whitePage"
                     :writer="WRITER"
+                    :drafts="drafts"
                 />
 
                 <WriterViewer
@@ -877,7 +901,7 @@ const toggleZenMode = () => {
                     :container-last-added="containerLastAdded"
                 />
 
-                <section v-if="!disableEdits && POST_DATA.containers.length" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
+                <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
                     <button @click="saveDraft(false)" class="py-2 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
                         <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
@@ -905,24 +929,18 @@ const toggleZenMode = () => {
                     </p>
                 </div> -->
             </section>
-            
-            <!-- Level Preview -->
-            <section v-if="previewContent == 1 && !previewMode" class="flex flex-col gap-2 items-center">
-                <LevelCard v-for="(l, index) in POST_DATA.levels" v-bind="l" :disable-stars="true"
-                    :level-index="index" />
-                </section>
                 
             <!-- Decoration -->
-            <WriterVisuals v-show="!zenMode" :review-data="POST_DATA" />
+            <WriterVisuals v-show="!zenMode" :postData="POST_DATA" />
 
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">
 
                 <button @click="openDialogs.settings = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
-                    <span >{{ $t('other.settings') }}</span>
+                    <span>{{ $t('other.settings') }}</span>
                 </button>
 
-                <button :disabled="uploadInProgress" v-if="!editing" @click="uploadReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                <button :disabled="uploadInProgress" v-if="!editing" @click="startUpload()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
                     <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                     <img v-else src="@/images/upload.svg" alt="" class="w-7">
                     <span class="max-sm:hidden">{{ $t('editor.upload') }}</span>
@@ -933,9 +951,9 @@ const toggleZenMode = () => {
                         <img v-else src="@/images/upload.svg" alt="" class="w-7">
                         <span class="max-sm:hidden">{{ $t('editor.update') }}</span>
                     </button>
-                    <button :disabled="uploadInProgress" @click="removeReview()" class="flex gap-4 px-3 py-2 text-black bg-red-400 rounded-md button">
-                        <img src="@/images/del.svg" alt="" class="w-7">
-                    </button>
+                    <HoldButton @pushed="removeReview()" :hold-time="0.8" :disabled="uploadInProgress">
+                        <img src="@/images/del2.svg" alt="" class="relative z-10 w-7">
+                    </HoldButton>
                 </div>
 
                 <button @click="openDialogs.drafts = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">

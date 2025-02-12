@@ -275,7 +275,7 @@ export interface ReviewDraft {
   createDate: number
   saveDate: number
   wordCount: number
-  reviewData: ReviewList
+  reviewData: PostData
   previewTitle: string
   previewParagraph: string
 }

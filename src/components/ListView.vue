@@ -57,7 +57,7 @@ const loadContent = async () => {
   if (props.randomList) {
     randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}}).then(res => res.data)
   }
-  props.isReview ? loadReview(randomData) : loadList(randomData)
+  props.isReview ? await loadReview(randomData) : await loadList(randomData)
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", (e: MouseEvent) => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
@@ -441,9 +441,13 @@ const jumpToContent = (type: string, index: number) => {
   jumpToPopupOpen.value = false
 }
 
+const getLevelsRatings = () => {
+  return [LIST_DATA.value?.data.levels, LIST_DATA.value?.data.ratings]
+}
+
 provide("settingsTitles", CONTAINERS)
 provide("saveCollab", saveCollab)
-provide("listData", LIST_DATA)
+provide("levelsRatingsData", getLevelsRatings)
 
 const collabViewerColor = ref("")
 
@@ -521,7 +525,7 @@ const imageIndex = ref(-1)
     <ListUploadedDialog
       :link="getURL()"
       :is-updating="uploadedDialogShown == 2"
-      :is-review="true"
+      :is-review="isReview"
       @do-edit="listActions('editList')"
       @close-popup="uploadedDialogShown = 0"
     />
@@ -675,7 +679,6 @@ const imageIndex = ref(-1)
         :showing="commentsShowing || scrolledToEnd"
         :comments-disabled="LIST_DATA.data.disComments"
         :is-review="isReview"
-        :end-scroll="scrolledToEnd && !commentsShowing"
       />
     </main>
   </section>

@@ -5,10 +5,11 @@ import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
-import { DEFAULT_RATINGS, reviewData } from "@/Reviews";
+import { DEFAULT_RATINGS, DEFAULT_REVIEWDATA } from "@/Reviews";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 import CardTheme from "../levelViewer/CardTheme.vue";
+import { computed } from "vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -33,7 +34,7 @@ const emit = defineEmits<{
 }>();
 
 const isFavorited = ref<boolean>(props?.favorited);
-const CARD_COL = ref<Color>(fixBrokenColors(props.color));
+const CARD_COL = computed<Color>(() => fixBrokenColors(props.color));
 
 const guessResult = ref([-1,-1])
 const guessGradient = ref("")
@@ -69,7 +70,7 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const listData = inject("listData", {data: reviewData.value})
+const listData = inject("levelsRatingsData")()
 
 </script>
 
@@ -156,11 +157,11 @@ const listData = inject("listData", {data: reviewData.value})
       
       <!-- Level review ratings -->
       <div v-if="ratings && !hideRatings" class="flex z-10 flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
-        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
+        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
           <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
           <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
           
-          <span v-if="listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] > -1" class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          <span v-if="listData[0][levelIndex]?.ratings?.[Math.floor(index / 4)]?.[index % 4] > -1" class="text-2xl font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
           <span v-else class="text-3xl font-black text-red-600">!</span>
         </div>
       </div>

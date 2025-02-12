@@ -27,6 +27,7 @@ const props = defineProps<{
   refreshButton: boolean
   component: object
   picking: false | 1 | 2
+  displayInRows: boolean
 }>()
 
 // Page title
@@ -355,7 +356,9 @@ defineExpose({
           </button>
         </form>
       </div>
-      <main class="grid gap-3 items-center mt-4 transition-opacity duration-75 md:grid-cols-3" :class="{'opacity-60 pointer-events-none': loading, 'md:!grid-cols-2': picking}">
+      <main
+        class="flex relative flex-col gap-3 items-center mt-4 transition-opacity duration-75 min-h-72"
+        :class="{'!grid md:grid-cols-3': !displayInRows, 'opacity-60 pointer-events-none': loading, 'md:!grid-cols-2': picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
@@ -386,13 +389,13 @@ defineExpose({
 
         <!-- No results BG -->
         <div v-else-if="searchNoResults && LISTS.length == 0 && !loading"
-          class="flex flex-col gap-3 justify-center items-center">
+          class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
         </div>
 
         <!-- Loading error BG -->
-        <div v-else-if="loadFailed && !loading" class="flex flex-col gap-3 justify-center items-center">
+        <div v-else-if="loadFailed && !loading" class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
           <p class="text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
           <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
@@ -408,7 +411,7 @@ defineExpose({
 
         <!-- No lists/comments BG -->
         <div v-else-if="LISTS.length == 0 && !searchNoResults && !loading"
-          class="flex flex-col gap-3 justify-center items-center">
+          class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
 
           <div class="flex flex-col gap-6 items-center" v-if="onlineType != 'comments'">
             <img src="@/images/listEmpty.svg" alt="" class="w-48 opacity-25" />

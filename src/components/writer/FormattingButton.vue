@@ -6,7 +6,7 @@ import { SETTINGS } from '@/siteSettings';
 import type { ToolbarButton } from '@/writers/Writer';
 
 const props = defineProps<{
-    button: ToolbarButton
+    button: {action: ToolbarButton, shift: boolean}
 }>()
 
 const emit = defineEmits<{
@@ -22,9 +22,13 @@ const iconPath = (x: string | string[]) => {
 }
 
 const dropdownOpen = ref(false)
-const getAction = () => {
-    return typeof props.button.action[1] == 'object'
-        ? props.button?.action[1]?.[lastSelected.value] : props.button?.action?.[1]
+const getAction = (holdingShift: boolean) => {
+    let obj = {action: null, shift: false}
+    obj.action = typeof props.button.action[1] == 'object'
+    ? props.button?.action[1]?.[lastSelected.value] : props.button?.action?.[1]
+    obj.shift = holdingShift
+
+    return obj
 }
 
 
@@ -43,7 +47,7 @@ const getAction = () => {
         <button
             @mousedown.prevent=""
             class="p-1"
-            @click="emit('clicked', getAction())"
+            @click="emit('clicked', getAction($event.shiftKey))"
         >
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
         </button>
@@ -68,7 +72,7 @@ const getAction = () => {
                 <div class="flex gap-2 p-2 text-white">
                     <button
                         v-for="(opt, ind) in button.dropdownText"
-                        @click="lastSelected = ind; dropdownOpen = false; emit('clicked', getAction())"
+                        @click="lastSelected = ind; dropdownOpen = false; emit('clicked', getAction($event.shiftKey))"
                         class="flex flex-col gap-2 items-center p-1 px-4 text-sm bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 hover:bg-black"
                     >
                         <img class="w-6" :src="iconPath(button.icon[ind])" alt="">

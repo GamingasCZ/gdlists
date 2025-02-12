@@ -69,7 +69,7 @@ $compressedData = base64_encode(gzcompress($fuckupData[1]));
 $hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
 $hidden = $doHide ? $hiddenID : '0';
 if ($IS_LIST) {
-    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
+    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ?, `tagline` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $decoded["tagline"], $DATA["id"]], "sssssi");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
 }
 else {
