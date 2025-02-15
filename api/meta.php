@@ -30,6 +30,8 @@ const ENDPOINTS = [
     'desc' => 'Browse through your saved levels and collabs!'  
   ],
   "/review" => [
+    'title' => 'Geometry Dash Lists',
+    'desc' => 'Create and browse lists and reviews of Geometry Dash Levels!'
   ],
   "/" => [
     'title' => 'Geometry Dash Lists',
@@ -46,10 +48,16 @@ function getEndpoint() {
   foreach (ENDPOINTS as $key => $value) {
     if (strstr($reqURI, $key)) {
       $postID = preg_match("/\d+$/", $reqURI, $IDmatches);
-      if ($IDmatches) {
+
+      $privpostID = explode("/", $reqURI);
+      $privpostID = array_pop($privpostID);
+      // WILL NOT WORK FOR CUSTOM URIs
+      $isPrivatePost = strlen($privpostID) == 10;
+      
+      if ($IDmatches || $isPrivatePost) {
         $isReview = $key == '/review';
 
-        $post = getPost(intval($IDmatches[0]), $isReview);
+        $post = getPost($isPrivatePost ? $privpostID : intval($IDmatches[0]), $isReview);
         if (!$post) break;
 
         $desc;

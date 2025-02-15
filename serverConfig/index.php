@@ -1,5 +1,8 @@
 <?php
-require('api/meta.php');
+if ($_SERVER["SERVER_NAME"] == "localhost")
+  require('../api/meta.php');
+else
+  require('api/meta.php');
 
 $endpoint = getEndpoint();
 
