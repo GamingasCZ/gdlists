@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { arrow, createPopper, offset } from '@popperjs/core';
-import { onMounted, ref } from 'vue';
+import { createPopper } from '@popperjs/core';
+import type { Instance } from '@popperjs/core';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 
 const props = defineProps<{
@@ -9,12 +10,15 @@ const props = defineProps<{
 }>()
 
 const dropdown = ref<HTMLElement>()
+var popper: Instance
 onMounted(() => {
-    createPopper(props.button, dropdown.value, {
+    popper = createPopper(props.button, dropdown.value, {
         placement: 'bottom',
         modifiers: [{name: 'arrow'}, {name:'offset', options: {offset: [0, 12]}}]
     })
 })
+
+onBeforeUnmount(() => popper.destroy())
 
 </script>
 
@@ -22,7 +26,7 @@ onMounted(() => {
     <Teleport to="body">
         <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
             <div
-            class="p-1 text-sm text-white rounded-md shadow-drop max-w-52 bg-lof-200" id="tooltip">
+            class="p-2 text-sm text-white rounded-md shadow-drop max-w-52 bg-lof-200" id="tooltip">
                 <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
                 <p>{{ text }}</p>
             </div>

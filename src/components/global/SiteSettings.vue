@@ -90,6 +90,13 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
+            v-model="SETTINGS.colorization"
+            name="Automatické obarvování"
+            desc="Po vybrání pozadí se barva příspěvku automaticky změní."
+            control="cbox"
+        >
+        </Option>
+        <Option
             v-model="SETTINGS.autosave"
             :name="$t('settingsMenu.autosave')"
             :desc="$t('settingsMenu.autosaveHelp')"

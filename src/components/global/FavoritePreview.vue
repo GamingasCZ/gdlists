@@ -101,7 +101,7 @@ const clickLevel = () => {
 
     <section class="flex flex-col justify-center">
       <h1 class="text-lg font-bold">{{ levelName }}</h1>
-      <p class="text-xs">- {{ creator }} -</p>
+      <p class="text-xs">{{ creator }}</p>
     </section>
 
     <section v-if="inLists || inReviews" class="grid grid-cols-[1fr_0.5fr] gap-2 ml-auto">

@@ -22,6 +22,7 @@ const columnOptionsShown = ref(false)
 const formatIndicies = [0, 1, 2, 4, 5, 6, 12]
 const previewEnabled = ref(false)
 const previewMode = ref(0)
+const barDisabled = ref(false)
 
 type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph'
 
@@ -42,6 +43,7 @@ const doAction = (action: FormattingAction, param: any, holdingShift = false) =>
 			break;
 		case 'preview':
 			previewEnabled.value = !previewEnabled.value
+			barDisabled.value = previewEnabled.value
 			previewMode.value = 1
 			
 			emit('setFormatting', 'view', previewMode.value);
@@ -193,7 +195,7 @@ const postData = inject("postData")
 		class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
 		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center" :class="{'invert-[0.9]': postData.whitePage}">
 			<FormattingButton v-for="button in getToolbarButtons(side)" :button="button"
-				@clicked="doAction(button.action[0], $event.action, $event.shift)" />
+				@clicked="doAction(button.action[0], $event.action, $event.shift)" :disabled="barDisabled && button?.action?.[0] != 'preview'" />
 		</div>
 	</section>
 </template>

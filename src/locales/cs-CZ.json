@@ -700,7 +700,8 @@
     "selFromBG": "Vybrat podle pozadí",
     "otherDrafts": "Další koncepty",
     "drafts2": "Rozepsané",
-    "levtoRev": "Jaké levely budeš recenzovat?"
+    "levtoRev": "Jaké levely budeš recenzovat?",
+    "levSelected": "Vybrán {count} level | Vybráno {count} levelů"
   },
   "review": {
     "columnSetting": "{0} sloupec",

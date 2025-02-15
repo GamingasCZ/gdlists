@@ -1,4 +1,5 @@
 import GuesserSetting from "@/components/editor/GuesserSetting.vue"
+import ColumnSettingsButton from "@/components/writer/ColumnSettingsButton.vue"
 import ReviewHelp from "@/components/writer/ReviewHelp.vue"
 import SettingsDescription from "@/components/writer/SettingsDescription.vue"
 import { checkList, DEFAULT_LEVELLIST, getListPreview } from "@/Editor"
@@ -22,7 +23,7 @@ const LANGUAGES = [[i18n.global.t('settingsMenu.czech'), "cs"],
                    [i18n.global.t('other.russian'), "ru"],
                    [i18n.global.t('other.other'), "ot"]]
 
-const FONTS: [string, number][] = [["Poppins", 0],
+export const FONTS: [string, number][] = [["Poppins", 0],
                ["Serif", 1],
                ["Sans-Serif", 2],
                ["Monospace", 3],
@@ -30,7 +31,7 @@ const FONTS: [string, number][] = [["Poppins", 0],
                ["Pusab", 5]]
 type Post = 'list' | 'review'
 type PostKeys = keyof (ReviewList & LevelList)
-type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph'
+export type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph'
 
 export interface ToolbarButton {
     /**
@@ -52,7 +53,7 @@ export interface ToolbarButton {
     /**
      * The action the button will cause on press
      */
-    action: [ToolbarAction, any],
+    action?: [ToolbarAction, any],
     /**
      * Global shortcut that get's called no mater the toolbar
      */
@@ -75,6 +76,10 @@ export interface ToolbarButton {
      * Index 1 - Left margin in COMPACT toolbar
      */
     leftOffset?: [number, number]
+    /**
+     * Vue component used as icon
+     */
+    component?: Component
 }
 
 /**
@@ -293,19 +298,6 @@ export const REVIEW: Writer = {
             controlOptions: FONTS,
             affects: "font",
         },
-        {
-            name: i18n.global.t('reviews.readerMode'),
-            desc: i18n.global.t('reviews.readerModeHelp'),
-            control: "cbox",
-            affects: "readerMode",
-        },
-        {
-            name: i18n.global.t('reviews.whitePage'),
-            desc: i18n.global.t('reviews.whitePageHelp'),
-            control: "cbox",
-            affects: "whitePage",
-        },
-
     ],
     dialogs: [
 
@@ -390,7 +382,7 @@ export const REVIEW: Writer = {
                 {
                     title: "Přidat sloupec",
                     icon: "twoColumns",
-                    action: ["column"]
+                    component: ColumnSettingsButton
                 },
             ]
         },

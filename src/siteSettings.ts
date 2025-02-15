@@ -19,7 +19,8 @@ export const SETTINGS = ref({
   selectedThemeAlways: 0,
   compactToolbar: false,
   draftNoRemove: false,
-  draftNoEdit: false
+  draftNoEdit: false,
+  colorization: true
 });
 
 watch(SETTINGS, () => {

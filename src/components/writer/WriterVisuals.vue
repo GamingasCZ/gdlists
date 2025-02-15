@@ -4,6 +4,7 @@ import { inject, ref } from 'vue';
 import ColorPicker from '../global/ColorPicker.vue';
 import { modifyListBG } from '@/Editor';
 import { getDominantColor } from '@/Reviews';
+import { FONTS } from '@/writers/Writer';
 
 const props = defineProps<{
     postData: PostData
@@ -14,6 +15,7 @@ const pre = import.meta.env.VITE_USERCONTENT
 const uid = JSON.parse(localStorage.getItem("account_info") ?? ["0"])[1]
 const mainRolledOut = ref(true)
 const colorPickerOpen = ref(false)
+const pageDetailsOpen = ref(false)
 
 const modifyColor = (newColor: number[]) => {
     props.postData.pageBGcolor = newColor
@@ -45,7 +47,7 @@ const resetColor = () => {
             </button> -->
         </header>
 
-        <div v-show="mainRolledOut && !colorPickerOpen" class="flex overflow-x-auto gap-4 py-4 mx-4 max-w-full">
+        <div v-show="mainRolledOut && !(colorPickerOpen || pageDetailsOpen)" class="flex overflow-x-auto gap-4 py-4 mx-4 max-w-full">
             <button @click="openDialogs.imagePicker = [true, -1]" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
                 <button class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/image.svg" alt="" class="w-10 opacity-40">
@@ -78,7 +80,7 @@ const resetColor = () => {
                 </button>
             </button>
             
-            <button @click="openDialogs.imagePicker = [true, -2]" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
+            <button @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
                 <button class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
@@ -91,6 +93,51 @@ const resetColor = () => {
                     <p class="text-xl text-white text-opacity-40">{{ $t('editor.bgColor') }}</p>
                 </button>
             </button>
+        </div>
+
+        <div v-show="mainRolledOut && pageDetailsOpen" class="flex flex-col gap-2 p-4 text-xl">
+            <section class="flex justify-between items-center">
+                <div class="flex gap-2">
+                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                        <span>{{ $t('other.opacity') }}</span>
+                        <div class="flex gap-2">
+                            <button :title="'Neprůhledná'" class="w-9 h-9 rounded-md border button bg-lof-100 border-lof-400"></button>
+                            <button :title="'Průsvitná'" id="pageTranslucent" class="w-9 h-9 rounded-md border button bg-lof-100 border-lof-400"></button>
+                            <button :title="'Průhledná'" class="w-9 h-9 rounded-md border button border-lof-400"></button>
+                        </div>
+                    </label>
+                    <label class="flex flex-col gap-1 items-center p-2 mr-4 bg-black bg-opacity-40 rounded-md">
+                        <span>Barva</span>
+                        <div class="flex gap-2">
+                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-lof-200">A</button>
+                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-[#ECE6D9]"></button>
+                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-lof-100"></button>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="flex gap-2">
+                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                        <p class="text-5xl opacity-20 pointer-events-none">Aa</p>
+                        <span>Písmo</span>
+                        <select class="text-base" name="" id="">
+                            <option v-for="font in FONTS" :value="font[1]">{{ font[0] }}</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1 items-center p-2 mr-4 bg-black bg-opacity-40 rounded-md">
+                        <span>Font Color</span>
+                    </label>
+                </div>
+                
+                <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                    <span>Wide page</span>
+                    <input type="checkbox" name="" id="">
+                </label>
+            </section>
+
+            <div class="flex gap-2 items-center ml-auto">
+                <button class="p-2 bg-black bg-opacity-40 rounded-md button" @click="pageDetailsOpen = false"><img src="@/images/checkThick.svg" alt="" class="inline mr-2 w-5">{{ $t('other.accept') }}</button>
+            </div>
         </div>
 
         <div v-show="mainRolledOut && colorPickerOpen" class="flex flex-col p-4">
@@ -109,3 +156,11 @@ const resetColor = () => {
         </div>
     </section>
 </template>
+
+<style>
+
+#pageTranslucent {
+    mask-image: linear-gradient(135deg, black 50%, transparent 51%);
+}
+
+</style>

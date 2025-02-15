@@ -9,7 +9,6 @@ function parseLevelList($response, $morePages = false) {
         http_response_code(400);
         die(-1);
     }
-    error_log($response);
     $allLevels = [];
     $fetchData = explode("#",$response);
     $levelData = explode("|", $fetchData[0]);

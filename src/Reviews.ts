@@ -43,8 +43,8 @@ export const REVIEW_EXTRAS: () => ReviewList = () => ({
     font: 0
 })
 
-export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel) => {
-    if (postData.value.levels.length >= 10) return
+export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel, maxLevels = 10) => {
+    if (postData.value.levels.length >= maxLevels) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 
     let levelInfo = {

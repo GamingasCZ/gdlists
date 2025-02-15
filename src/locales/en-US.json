@@ -699,7 +699,8 @@
     "selFromBG": "Select from Background",
     "otherDrafts": "More Drafts",
     "drafts2": "Drafted",
-    "levtoRev": "What levels will you be reviewing?"
+    "levtoRev": "What levels will you be reviewing?",
+    "levSelected": "{count} level selected | {count} levels selected"
   },
   "review": {
     "columnSetting": "{0} column",

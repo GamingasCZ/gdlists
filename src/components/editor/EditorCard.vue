@@ -7,12 +7,12 @@ import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfac
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
-import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
 import LevelBackground from "./LevelBackground.vue";
 import { i18n } from "@/locales";
+import Dropdown from "../ui/Dropdown.vue";
 
 const props = defineProps<{
   levelArray: Level[]
@@ -31,14 +31,28 @@ const emit = defineEmits<{
   (e: "throwError", errorText: string): void;
 }>();
 
+var modDiff = [false, false]
+
 // Difficulty Picker
 const changeRate = async (newRating: number) => {
+  modDiff[1] = true
+  if (modDiff[0] && modDiff[1]) {
+    modDiff = [false, false]
+    diffPickerOpen.value = false
+  }
+
   if (props.levelArray.levels[props.index!].difficulty[0] != 0) { // N/A cannot be rated
     props.levelArray.levels[props.index!].difficulty[1] = newRating;
   }
   rateImagePath.value = await getRateImage()
 }
 const changeFace = async (newFace: number) => {
+  modDiff[0] = true
+  if (modDiff[0] && modDiff[1]) {
+    modDiff = [false, false]
+    diffPickerOpen.value = false
+  }
+
   if (newFace == 0) {
     props.levelArray.levels[props.index!].difficulty[1] = 0 // Unrate N/A levels
     rateImagePath.value = await getRateImage()
@@ -49,12 +63,13 @@ const changeFace = async (newFace: number) => {
 }
 
 const BASE_URL = import.meta.env.BASE_URL
+const ratings = ["error", "star", "featured", "epic", "legendary", "mythic"]
 const rateImagePath = ref("")
 const getRateImage = () => {
   let rate = props.levelArray.levels[props.index!].difficulty?.[1] ?? 0;
   if (rate == 0) rateImagePath.value = ""; // Unrated level
   else {
-    rateImagePath.value = `${BASE_URL}/faces/${["star", "featured", "epic", "legendary", "mythic"][rate - 1]}.webp`
+    rateImagePath.value = `${BASE_URL}/faces/${ratings[rate - 1]}.webp`
   }
 };
 getRateImage()
@@ -75,52 +90,6 @@ const modifyCreator = (e: Event | string) => {
 }
 
 const selectedDiff = ref(props.levelArray.levels[props.index!].difficulty)
-
-const modifyVideo = (e: Event) => {
-  let videoInput = (e.target as HTMLInputElement)
-
-  videoInput.value = shortenYTLink(videoInput.value)
-  props.levelArray.levels[props.index!].video = videoInput.value
-}
-
-const ytPanelOpen = ref(false)
-const ytVideoData = ref<ytSearchDetails>({ videoCount: 0 })
-async function videoSearch() {
-  let data: ytSearchDetails = {
-    success: false,
-    videoCount: 0,
-    titles: [],
-    creators: [],
-    thumbnails: [],
-    links: [],
-    publishTime: []
-  }
-
-  await axios.get(`https://youtube.googleapis.com/youtube/v3/search`, {
-    params: { part: "snippet", "maxResults": 10, q: `Geometry Dash ${props.levelArray.levels[props.index!].levelName}`, key: import.meta.env.VITE_YTAPIKEY }
-  }).then(res => {
-    data.success = true
-    data.videoCount = res.data.pageInfo.resultsPerPage
-    res.data.items.forEach(video => {
-      data.titles.push(video.snippet.title)
-      data.creators.push(video.snippet.channelTitle)
-      data.links.push(video.id.videoId)
-      data.thumbnails.push(video.snippet.thumbnails.default.url)
-      data.publishTime.push(video.snippet.publishTime)
-    })
-    ytPanelOpen.value = true
-  })
-
-  return data
-}
-
-const vidScrollBox = ref(0)
-const scroll = (by: number) => {
-  let ele = document.querySelector("#youtubeScroll") as HTMLDivElement
-  vidScrollBox.value = ele.scrollLeft + by
-  ele.scrollLeft += by
-  vidScrollBox.value = vidScrollBox.value >= (ele.scrollWidth - by) ? -1 : vidScrollBox.value
-}
 
 const openedPanel = ref<number>(0);
 
@@ -236,10 +205,40 @@ const background = computed(() => {
 const tagPlaceholder = ref(`'${i18n.global.t('editor.levelTags')}'`)
 const start = ref("#951b99")
 const editingRating = ref(false)
+
+const difficultyButton = ref<HTMLButtonElement>()
+const diffPickerOpen = ref(false)
+const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
 </script>
 
 <template>
   <section :style="{background: background}" class="rounded-md">
+
+    <Dropdown v-if="diffPickerOpen" @close="diffPickerOpen = false" :button="difficultyButton">
+      <template #header>
+        <section class="flex gap-2 p-2 text-white">
+          <div class="">
+            <div class="flex flex-wrap gap-1 gap-y-3 w-60">
+              <button @click="changeFace(diff)" v-for="diff in difficulties" :class="{'!border-lof-400 !bg-lof-300': levelArray.levels[index].difficulty[0] == diff}" class="p-0.5 bg-black bg-opacity-20 rounded-md border border-transparent grow button hover:bg-opacity-60">
+                <img :src="`${BASE_URL}/faces/${diff}.webp`" class="mx-auto w-9" alt="">
+              </button>
+            </div>
+            <p class="mt-2 text-2xl text-center text-white/40">{{ $t('reviews.difficulty') }}</p>
+          </div>
+
+          <hr class="mx-4 my-auto w-0.5 h-40 bg-white bg-opacity-10 rounded-md border-none opacity-50">
+          
+          <div class="">
+            <div class="grid grid-cols-2 gap-1 mb-5">
+              <button @click="changeRate(i)" v-for="(rate, i) in ratings" :class="{'!border-lof-400 !bg-lof-300': levelArray.levels[index].difficulty[1] == i}" class="p-0.5 bg-black bg-opacity-20 rounded-md border border-transparent grow button hover:bg-opacity-60">
+                <img :src="`${BASE_URL}/faces/${rate}.webp`" class="mx-auto w-9" alt="">
+              </button>
+            </div>
+            <p class="mt-2 text-2xl text-center text-white/40">{{ $t('editor.rating') }}</p>
+          </div>
+        </section>
+      </template>
+    </Dropdown>
 
     <div v-show="!editingRating" class="flex max-sm:flex-col">
       <div class="flex flex-col justify-between items-center px-0.5 bg-black bg-opacity-20">
@@ -278,7 +277,7 @@ const editingRating = ref(false)
           <div class="grid grid-cols-2 max-w-[50%] gap-2">
             <!-- Level name -->
             <form @submit.prevent="searchLevel(false)" class="flex col-span-2 gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-              <button type="button" class="button">
+              <button ref="difficultyButton" @click="diffPickerOpen = true" type="button" class="button">
                 <DifficultyIcon class="w-12" :difficulty="selectedDiff?.[0] ?? 0" :rating="selectedDiff?.[1] ?? 0" />
               </button>
               <input v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">

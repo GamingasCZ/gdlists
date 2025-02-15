@@ -358,6 +358,14 @@ const modifyImageURL = (newUrl: string) => {
     if (openDialogs.imagePicker[1] == WriterGallery.ReviewBackground) {
         POST_DATA.value.titleImg[0] = newUrl
         openDialogs.bgPreview = true
+        if (SETTINGS.value.colorization) {
+            let img = document.createElement("img")
+            img.src = POST_DATA.value.titleImg[0]
+            img.onload = () => {
+                POST_DATA.value.pageBGcolor = modifyListBG(getDominantColor(img).hex())
+                img.remove()
+            }
+        }
     }
     // Level card background
     else if (openDialogs.imagePicker[1] == WriterGallery.LevelCardBG) {
@@ -549,7 +557,7 @@ onMounted(() => {
 
     // Add lavels from saved
     if (predefinedLevelList.value.length) {
-        predefinedLevelList.value.forEach(l => addReviewLevel(POST_DATA, l))
+        predefinedLevelList.value.forEach(l => addReviewLevel(POST_DATA!, l, WRITER.value.general.maxLevels))
         predefinedLevelList.value = []
     }
 
@@ -695,9 +703,11 @@ const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
 setInterval(() => burstTimer.value = Date.now(), 10000)
 const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved) / 1000)))
 
-const listPickerPick = (level: Level) => {
-    console.log(level)
-    addReviewLevel(POST_DATA!, level)
+const listPickerPick = (level: Level | Level[]) => {
+    if (level?.length)
+        level.forEach(l => addReviewLevel(POST_DATA!, l, WRITER.value.general.maxLevels))
+    else
+        addReviewLevel(POST_DATA!, level, WRITER.value.general.maxLevels)
 }
 
 const highlightedCreateColumns = ref(-1)
@@ -861,17 +871,6 @@ const toggleZenMode = () => {
                 class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full"
                 :class="{ 'readabilityMode': POST_DATA.readerMode, 'bg-transparent my-16 border-none shadow-none': zenMode, '!text-black': POST_DATA.whitePage, 'shadow-drop bg-lof-200 shadow-black': POST_DATA.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': POST_DATA.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': POST_DATA.transparentPage == 2 && !SETTINGS.disableTL }">
                 
-            <!-- <Dropdown v-if="writer" :button="writer">
-                <template #header>
-                    <section class="p-4 text-center text-white min-w-64">
-                        <ColumnPreview v-model="highlightedCreateColumns" :col-amount="10" />
-                        <p v-show="highlightedCreateColumns == -1" class="mt-2 text-lg text-white text-opacity-40">Vyber počet sloupců</p>
-                        <p v-show="highlightedCreateColumns == 1" class="mt-2 text-lg text-white text-opacity-40">Vyber více než jeden</p>
-                        <p v-show="highlightedCreateColumns > 1" class="mt-2 text-lg text-white">{{ highlightedCreateColumns }} sloupců</p>
-                    </section>
-                </template>
-            </Dropdown> -->
-
                 <!-- Formatting -->
                 <FormattingBar v-show="!zenMode" :class="{ 'pointer-events-none opacity-20': disableEdits }"
                     :selected-nest="selectedNestContainer" @set-formatting="setFormatting"

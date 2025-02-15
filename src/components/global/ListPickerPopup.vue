@@ -17,7 +17,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'closePopup'): void
-    (e: 'addLevel', data: Level): void
+    (e: 'addLevel', data: Level | Level[]): void
 }>();
 
 const query = ref("")
@@ -78,11 +78,25 @@ const adjustQuery = (newText: string) => {
     }, 150);
 }
 
+const levSelected = ref<number[]>([])
+const selectLevel = (ind: number) => {
+    let i = levSelected.value.indexOf(ind)
+    if (i > -1)
+        levSelected.value.splice(i, 1)
+    else
+        levSelected.value.push(ind)
+}
+
+const closeLevels = () => {
+    listingLevels.value = false
+    levSelected.value = []
+}
+
 </script>
 
 <template>
     <div class="flex gap-2 items-center mx-2">
-        <input autofocus type="text" @input="adjustQuery($event.target.value)" :placeholder="$t('other.search')" class="px-2 py-1 my-3 bg-white bg-opacity-10 rounded-md grow">
+        <input autofocus type="text" @input="adjustQuery($event.target.value)" :placeholder="$t('other.search')" class="px-2 py-1 my-3 bg-black bg-opacity-40 rounded-md grow">
         <select v-show="tab != 2" v-model="contentType">
             <option :value="0">{{ $t('other.all') }}</option>
             <option :value="1">{{ $t('other.mine') }}</option>
@@ -108,19 +122,43 @@ const adjustQuery = (newText: string) => {
             />
         </div>
         <div v-show="listingLevels" class="relative mt-2 h-full">
-            <div cqlass="flex gap-2 items-center" v-show="listingLevels != 2">
-            <button @click="listingLevels = false" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/showCommsL.svg" class="w-2" alt="">{{ $t('other.back') }}</button>
+            <div class="flex gap-2 items-center" v-show="listingLevels != 2">
+                <button @click="closeLevels()" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md button">
+                    <img src="@/images/showCommsL.svg" class="w-2" alt="">{{ $t('other.back') }}
+                </button>
                 <span class="opacity-40">{{ listingLevels }}</span>
             </div>
             
             <div class="flex absolute top-1/2 left-1/2 flex-col gap-3 text-xl text-center -translate-x-1/2 -translate-y-1/2" v-if="listingLevels == 2">
                 <img src="@/images/listEmpty.svg" class="w-80 opacity-20" alt="">
                 <h2 class="opacity-20">{{ $t('reviews.noLevelsShow') }}</h2>
-                <button @click="listingLevels = false" class="flex gap-2 p-2 mx-auto w-max text-2xl bg-black bg-opacity-40 rounded-md button"><img src="@/images/showCommsL.svg" class="w-3" alt="">{{ $t('other.back') }}</button>
+                <button @click="closeLevels()" class="flex gap-2 p-2 mx-auto w-max text-2xl bg-black bg-opacity-40 rounded-md button"><img src="@/images/showCommsL.svg" class="w-3" alt="">{{ $t('other.back') }}</button>
             </div>
-            <div class="flex flex-col gap-2 py-2" v-else>
-                <FavoritePreview v-for="level in levelsFetched" hide-remove :disable-link="2" @clicked-option="pickList(onlyPickLevels ? level : [$event, ''])" class="w-full" v-bind="level" />
+            <div class="grid gap-2 py-2 sm:grid-cols-2" v-else>
+                <LevelPreview
+                    v-for="(level, ind) in levelsFetched"
+                    :class="{'border-4 border-lof-400': levSelected.includes(ind)}"
+                    @click.left.exact.ctrl.stop="selectLevel(ind)"
+                    class="w-full"
+                    :disable-link="2"
+                    @clicked-option="pickList(onlyPickLevels ? level : [$event, ''])"
+                    v-bind="level"
+                />
             </div>
+
         </div>
+        <Transition name="fade">
+            <section v-if="levSelected.length" class="flex sticky -bottom-2 -left-2 z-10 justify-between items-center p-2 w-full rounded-md bg-lof-300">
+                <button @click="levSelected = []" class="rounded-md button">
+                    <img src="@/images/close.svg" class="inline mr-2 w-5" alt="">
+                    {{ $t('other.cancel') }}
+                </button>
+                <span class="text-2xl">{{ $t('reviews.levSelected', levSelected.length) }}</span>
+                <button @click="pickList(onlyPickLevels ? levSelected.map(x => levelsFetched[x]) : [$event, ''])" class="px-2 py-1 bg-black bg-opacity-40 rounded-md button">
+                    <img src="@/images/checkThick.svg" class="inline mr-2 w-5" alt="">
+                    {{ $t('other.pick') }}
+                </button>
+            </section>
+        </Transition>
     </div>
 </template>

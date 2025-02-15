@@ -90,7 +90,7 @@ const fullscreenImage = () => {
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
-        <div class="flex relative group min-h-[48px] max-w-fit m-2 mb-0.5" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
+        <div class="flex relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
             <Resizer :min-size="64" :max-size="960" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, type Ref, ref, watch } from 'vue';
+import { inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import type { ContainerSettings } from './containers';
 import { DEFAULT_RATINGS } from '@/Reviews';
 import type { PostData } from '@/interfaces';
@@ -9,6 +9,7 @@ const emit = defineEmits<{
     (e: "move", by: number): void
     (e: "pressedButton", key: string): void
     (e: "hidSettings"): void
+    (e: "resetPos"): void
 }>()
 
 const postData = inject<Ref<PostData>>("postData")!
@@ -23,6 +24,12 @@ const props = defineProps<{
 
 watch(props, () => {
     if (props.shown) showSettings()
+    if (props.mousePos[0]) {
+        nextTick(() => {
+            window.addEventListener("resize", positionFloating)
+            positionFloating()
+        })
+    }
 })
 
 const containerSettings = ref<HTMLDivElement>()
@@ -45,14 +52,30 @@ const closeSettings = (m: MouseEvent) => {
     settingsShown.value = false
     document.body.removeEventListener("click", closeSettings, { capture: true })
     emit('hidSettings')
-    }
 }
+}
+
+const float = ref([0, 0])
+const positionFloating = () => {
+    if (!containerSettings.value)
+        return window.removeEventListener("resize", positionFloating)
+
+    let bodyWidth = document.body.clientWidth
+    let elPos = containerSettings.value?.getBoundingClientRect()!
+    float.value = [Math.max(0, Math.min(props.mousePos[0], bodyWidth)-elPos.width), props.mousePos[1]]
+}
+
+onBeforeUnmount(() => {
+    window.removeEventListener("resize", positionFloating)
+    emit('hidSettings')
+    emit('resetPos')
+})
 
 </script>
 
 <template>
     <Teleport :disabled="shown != 2" to="body">
-        <div ref="containerSettings" v-if="settingsShown" :style="{left: shown == 2 ? `${mousePos[0]}px` : '', top: shown == 2 ? `${mousePos[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
+        <div ref="containerSettings" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
             <div v-for="(_, key, index) in settingsArr" class="flex flex-col" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
                 <div class="flex flex-col">
                     <!-- Text input -->
@@ -62,7 +85,7 @@ const closeSettings = (m: MouseEvent) => {
                     </div>
                     
                     <!-- Button -->
-                    <button v-if="containers[type].settings[index].type[0] == 1" @click="emit('pressedButton', key)" class="p-2 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
+                    <button v-if="containers[type].settings[index].type[0] == 1" @click.stop="emit('pressedButton', key)" class="p-2 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
                     
                     <!-- Checkbox -->
                     <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">

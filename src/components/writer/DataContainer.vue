@@ -29,7 +29,7 @@ const props = defineProps<Container & Extras>()
 const previewText = ref("")
 
 const fontSizes = ['', '8px', '12px', '14px', '16px', '18px', '20px', '22px', '24px', '32px', '36px', '48px', '64px']
-const doShowSettings = ref(false)
+const doShowSettings = ref<boolean | number>(false)
 const mainText = ref<HTMLTextAreaElement>()
 
 const togglePreview = () => {
@@ -109,7 +109,7 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 </script>
 
 <template>
-	<div :data-type="type" @click.right.exact.prevent="editable ? (rmbSettingOpen($event)) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer min-h-4">
+	<div :data-type="type" @click.right.exact.prevent="emit('hasFocus', mainText!); focus = true; editable ? (rmbSettingOpen($event)) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer min-h-4">
 		<hr class="absolute right-[-6px] border-lof-400 h-full border-r-4" :class="{'!border-none': dependentOnChildren || !(focus && focused)}">
 		<p
 			v-if="canEditText"
@@ -136,8 +136,9 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 			</button>
 		</div>
 
+		{{ doShowSettings }}
 		<ContainerSettings
-			v-if="!dependentOnChildren && editable"
+			v-if="!dependentOnChildren && editable && (doShowSettings == 1 || focused)"
 			class="containerSettings"
 			:type="type"
 			:settings-arr="currentSettings"
@@ -147,6 +148,7 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 			@hid-settings="doShowSettings = false"
 			@remove="emit('removeContainer')"
 			@move="emit('moveContainer', $event)"
+			@reset-pos="mousePos = [0, 0]"
 		/>
 	</div>
 </template>

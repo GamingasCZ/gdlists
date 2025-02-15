@@ -13,7 +13,7 @@ import Dropdown from "../ui/Dropdown.vue";
 import Plus from "@/svgs/Plus.vue";
 import LevelRoulette from "./LevelRoulette.vue";
 
-defineProps<{
+const props = defineProps<{
     subtext: string
     maxLevels: number
 }>()
@@ -25,7 +25,7 @@ const emit = defineEmits<{
 
 const POST_DATA = inject<Ref<ReviewList & LevelList>>("postData")!
 const addLevel = (levelData?: Level | FavoritedLevel) => {
-    addReviewLevel(POST_DATA, levelData)
+    addReviewLevel(POST_DATA, levelData, props.maxLevels)
 
     openedCard.value = POST_DATA.value.levels.length - 1
 }
@@ -147,7 +147,7 @@ const rouletteActive = ref(false)
         </header>
 
         <main v-show="mainRolledOut">
-            <div class="bg-[url(@/images/fade.webp)] bg-repeat-x relative p-2 overflow-y-auto flex flex-col gap-2">
+            <div class="flex overflow-y-auto relative flex-col gap-2 p-2">
                 <div v-if="!POST_DATA.levels.length && !rouletteActive"
                     class="flex flex-col items-center w-full text-center opacity-40">
                     <h2 class="text-2xl">{{ subtext }}</h2>

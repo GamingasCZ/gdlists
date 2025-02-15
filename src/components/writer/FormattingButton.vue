@@ -3,14 +3,15 @@ import { ref } from 'vue';
 import Tooltip from '../ui/Tooltip.vue';
 import Dropdown from '../ui/Dropdown.vue';
 import { SETTINGS } from '@/siteSettings';
-import type { ToolbarButton } from '@/writers/Writer';
+import type { ToolbarButton, ToolbarAction } from '@/writers/Writer';
 
 const props = defineProps<{
-    button: {action: ToolbarButton, shift: boolean}
+    button: ToolbarButton
+    disabled: boolean
 }>()
 
 const emit = defineEmits<{
-    (e: 'clicked', action: string): void
+    (e: 'clicked', action: ToolbarAction): void
 }>()
 
 const base = import.meta.env.BASE_URL
@@ -44,15 +45,18 @@ const getAction = (holdingShift: boolean) => {
         ref="but"
         class="flex relative flex-col items-center w-max rounded-md transition-colors duration-75 group disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
     >
+        <component v-if="button.component" :is="button.component" :disabled="disabled" />
         <button
+            v-else
             @mousedown.prevent=""
-            class="p-1"
+            class="p-1 disabled:opacity-40"
             @click="emit('clicked', getAction($event.shiftKey))"
+            :disabled="disabled"
         >
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
         </button>
 
-        <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title && !SETTINGS.compactToolbar" class="flex relative px-2 w-full rounded-b-md" :class="{'hover:bg-black': button?.dropdownText}">
+        <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title && !SETTINGS.compactToolbar" :disabled="disabled" class="flex relative px-2 w-full rounded-b-md disabled:opacity-40" :class="{'hover:bg-black': button?.dropdownText}">
             <span v-show="button.title" :class="{'font-bold': button.bold, 'group-hover:opacity-0': button?.dropdownText}" class="text-sm transition-opacity duration-75">{{ button.title }}</span>
             <img
                 v-if="button?.dropdownText"

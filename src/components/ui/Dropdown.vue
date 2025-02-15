@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { arrow, createPopper, offset } from '@popperjs/core';
-import { onMounted, ref } from 'vue';
+import { createPopper } from '@popperjs/core';
+import type { Instance } from '@popperjs/core';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 
 const props = defineProps<{
@@ -16,8 +17,9 @@ const emit = defineEmits<{
 }>()
 
 const dropdown = ref<HTMLElement>()
+var popper: Instance
 onMounted(() => {
-    createPopper(props.button, dropdown.value, {
+    popper = createPopper(props.button, dropdown.value, {
         placement: 'bottom',
         modifiers: [{name: 'arrow'}, {name:'offset', options: {offset: [0, 12]}}]
     })
@@ -31,6 +33,8 @@ const closeDropdown = e => {
     }
 }
 
+onBeforeUnmount(() => popper.destroy())
+
 document.body.addEventListener("click", closeDropdown, {capture: true})
 
 </script>
@@ -40,7 +44,7 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
         <Teleport to="body">
             <div ref="dropdown" @mousedown.prevent="" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
                 <div
-                class="flex flex-col bg-opacity-90 rounded-md max-w-96 min-w-40 bg-lof-200" id="tooltip">
+                class="flex flex-col max-w-max bg-opacity-90 rounded-md min-w-40 bg-lof-200" id="tooltip">
                     <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
                     <slot name="header" />
                     <button
