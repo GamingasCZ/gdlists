@@ -1,8 +1,9 @@
 import { fixHEX } from "@/Editor";
+import type { Level } from "@/interfaces";
 import { SETTINGS } from "@/siteSettings";
 import chroma, { hex, type Color } from "chroma-js";
 
-export const doFavoriteLevel = (props: Object, favorited: boolean, col: Color) => {
+export const doFavoriteLevel = (props: Level, favorited: boolean, col: Color) => {
     let faves: FavoritedLevel[] = JSON.parse(localStorage.getItem("favorites")!);
     let favesIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
   
@@ -26,6 +27,7 @@ export const doFavoriteLevel = (props: Object, favorited: boolean, col: Color) =
         levelColor: col.hex(),
         levelID: props.levelID!,
         levelDiff: props.difficulty,
+        levelRating: props.rating,
         listID: props.listID,
         listName: props.listName,
         listPosition: props.levelIndex,

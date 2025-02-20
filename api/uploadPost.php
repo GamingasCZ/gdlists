@@ -70,9 +70,9 @@ $compressedData = base64_encode(gzcompress(json_encode($DATA)));
 $template; $values; $types;
 switch ($post["postType"]) {
   case 'list':
-    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`,`tagline`) VALUES (?,'',?,?,?,?,?,?,?)";
-    $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments, $DATA["tagline"]);
-    $types = "sssssssi";
+    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`,`tagline`, `thumbnail`, `thumbProps`) VALUES (?,'',?,?,?,?,?,?,?,?,?)";
+    $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments, $DATA["tagline"], $postExtras["thumb"], $postExtras["thumbProps"]);
+    $types = "ssssssisss";
     break;
   case 'review':
     $template = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`) VALUES (?,?,?,?,?,?,?,?,?)";

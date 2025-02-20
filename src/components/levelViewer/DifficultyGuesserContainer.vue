@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue';
 import { diffScaleOffsets, diffTranslateOffsets } from "@/Editor";
+import DifficultyIcon from '../global/DifficultyIcon.vue';
 
 const props = defineProps<{
     difficulty: [number, number];
@@ -11,24 +12,7 @@ const emit = defineEmits<{
   (e: "guessed", result: number): void;
 }>();
 
-const difficultyFaces = ref<string[]>([])
-const ratings = ref<string[]>([""])
-const ratingClasses = ref([
-    "",
-    "w-6 translate-x-0.5 -bottom-1",
-    "top-0 left-0 scale-[1.4] -z-10 -translate-y-1/2",
-    "-translate-y-6 left-0 scale-[1.5] -z-10"
-])
-
 async function getFaces() {
-    for (let i = 0; i <= 11; i++) {
-        difficultyFaces.value.push(import.meta.env.BASE_URL + `/faces/${i}.webp`)
-    }
-
-    ratings.value?.push(import.meta.env.BASE_URL + `/faces/star.webp`)
-    ratings.value?.push(import.meta.env.BASE_URL + `/faces/featured.webp`)
-    ratings.value?.push(import.meta.env.BASE_URL + `/faces/epic.webp`)
-
     nextTick(() => {
         (document.querySelector(".guessFace") as HTMLButtonElement).focus()
     })
@@ -78,7 +62,7 @@ function moveFocus(by: number) {
     focusedFace = Math.min(Math.max(focusedFace + by, 0), document.querySelectorAll(".guessFace").length-idk)
 
     let selectElement = document.querySelector(`.guessFace:nth-child(${focusedFace+1})`) as HTMLButtonElement
-    selectElement.focus()
+    selectElement?.focus()
 }
 
 function rateBack() {
@@ -93,10 +77,10 @@ function rateBack() {
     <article class="z-10" v-if="guessingDifficulty">
         <h2 class="mb-2 text-xl font-bold text-center drop-shadow-lg shadow-black">{{ $t('listViewer.whatDiff') }}</h2>
         <section class="flex flex-wrap gap-3 justify-center items-center py-2 bg-black bg-opacity-40 rounded-md">
-            <button @click="selectFace(index)" @keydown.down="selectFace(index)" @keydown.right="moveFocus(1)" @keydown.left="moveFocus(-1)"
+            <button @click="selectFace(index-1)" @keydown.down.prevent="selectFace(index-1)" @keydown.right="moveFocus(1)" @keydown.left="moveFocus(-1)"
                 class="button focus-visible:drop-shadow-lg shadow-black focus-visible:scale-125 guessFace"
-                v-for="(face, index) in difficultyFaces">
-                <img :src="face" alt="" class="w-10">
+                v-for="index in 12">
+                <DifficultyIcon class="w-14" :difficulty="index-1" :rating="0" />
             </button>
         </section>
     </article>
@@ -107,11 +91,10 @@ function rateBack() {
             <button class="absolute left-2 top-1/2 -translate-y-1/2 button" @click="rateBack()" v-if="diffGuessArray[1]">
                 <img src="@/images/showCommsL.svg" class="w-5" alt="">
             </button>
-            <button @click="selectedRate = index; checkResult()" @keydown.down="selectedRate = index; checkResult()" @keydown.right="moveFocus(1)" @keyup.up="rateBack()" @keydown.left="moveFocus(-1)"
+            <button @click="selectedRate = i; checkResult()" @keydown.down.prevent="selectedRate = i; checkResult()" @keydown.right="moveFocus(1)" @keyup.up.prevent="rateBack()" @keydown.left="moveFocus(-1)"
                 class="relative button focus-visible:drop-shadow-lg shadow-black focus-visible:scale-125 guessFace"
-                v-for="(face, index) in ratings">
-                <img :src="difficultyFaces[selectedFace]" alt="" class="top-1/2 left-1/2 w-10" :style="{scale: diffScaleOffsets[selectedFace-6], translate: diffTranslateOffsets[selectedFace-6]}">
-                <img :src="face" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2" :class="ratingClasses[index]">
+                v-for="i in 6">
+                <DifficultyIcon class="w-14" :difficulty="selectedFace-1" :rating="i" />
             </button>
         </section>
     </article>

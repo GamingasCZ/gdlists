@@ -29,7 +29,9 @@ const props = defineProps<{
   inReviews: number
   inLists: number
   difficulty?: number
+  levelDiff?: number
   rating?: number
+  levelRating?: number
   platformer?: 0 | 1
   favorited?: boolean
   collabMemberCount: number
@@ -59,11 +61,12 @@ const getGradient = () => {
 const round = (x) => parseFloat(parseFloat(x).toFixed(1))
 
 const addToTemporaryList = () => {
+  console.log(props)
   selectedLevels.value.push({
     levelName: props.levelName, 
     creator: props.creator,
     levelID: props.levelID,
-    difficulty: [props.difficulty, props.rating],
+    difficulty: [props.difficulty || props.levelDiff || 0, props.rating || props.levelRating || 0],
     color: listColor.value,
     platf: props.platformer
   })
@@ -121,7 +124,7 @@ const selectLevel = () => {
   <component
     :is="disableLink ? 'button' : 'button'"
     :to="`/${listID!}${goto}`"
-    class="flex relative flex-col items-center px-2 w-full max-w-4xl text-center text-white overflow-clip rounded-md cursor-pointer group"
+    class="flex relative flex-col items-center px-2 w-full max-w-xs text-center text-white overflow-clip rounded-md cursor-pointer min-w-64 group"
     :style="{
       background: getGradient(),
     }"
@@ -129,7 +132,7 @@ const selectLevel = () => {
     <img v-if="background" :style="{mask: 'linear-gradient(90deg,transparent,black)'}" class="isolate absolute inset-0 opacity-40 mix-blend-luminosity" :src="`${uc}/userContent/${uploaderID}/${background}.webp`" alt="">
     
     <div class="flex flex-col justify-center items-center opacity-100 transition-opacity duration-75 ease-out group-hover:opacity-0">
-      <DifficultyIcon v-once class="z-10 mt-4 w-18":difficulty="difficulty ?? 0" :rating="rating ?? 0" />
+      <DifficultyIcon v-once class="z-10 mt-4 w-18":difficulty="difficulty ?? levelDiff ?? 0" :rating="rating ?? levelRating ?? 0" />
   
       <section class="flex z-10 flex-col justify-center">
         <h1 class="text-3xl font-extrabold"><img src="@/images/collab.svg" v-if="collabMemberCount > 0" class="inline mr-2 w-4 -translate-y-1">{{ levelName }}</h1>
@@ -143,7 +146,7 @@ const selectLevel = () => {
       <div v-else class="my-4"></div>
     </div>
 
-    <div class="flex absolute inset-0 flex-col items-center py-2 opacity-0 transition-opacity duration-75 ease-out group-hover:opacity-100">
+    <div class="flex absolute inset-0 flex-col items-center py-2 text-base opacity-0 transition-opacity duration-75 ease-out group-hover:opacity-100">
       <span @click.stop="copyID" class="text-2xl font-bold hover:underline">ID: {{ levelID }}</span>
       <div @click="getContainingPosts" :class="{'hover:underline': !disableLink}" class="flex gap-2 items-center text-center">
         <span v-if="inLists">{{ $t('listViewer.inLists', inLists) }}</span>
@@ -168,7 +171,7 @@ const selectLevel = () => {
     </button>
 
     <Transition name="fade">
-      <section v-if="insidePosts.length" class="absolute inset-2 z-20">
+      <section v-if="insidePosts.length" class="absolute inset-2 z-20 text-base">
         <button @click.stop="insidePosts = []" :style="{border: `${listColor.css()} 2px solid`, background: listColor.darken(3).css()}" class="absolute -top-2 -right-2 z-10 p-1 rounded-full border-2 button border-lof-400"><img src="@/images/close.svg" class="w-4" alt=""></button>
         <div class="flex overflow-y-auto flex-col gap-2 p-1 h-full text-left rounded-md backdrop-blur-sm shadow-drop"
         :style="{background: listColor.darken(4).alpha(0.95).css(), border: `${listColor.hex()} 3px solid`}">

@@ -4,10 +4,12 @@ import { addCEFormatting } from '../global/parseEditorFormatting';
 import { SETTINGS } from '@/siteSettings';
 import { Key, type Writer } from '@/writers/Writer';
 import FormattingButton from './FormattingButton.vue';
+import type { FormattingAction } from '@/interfaces';
 
 const props = defineProps<{
 	selectedNest: number[]
 	writer: Writer
+	barDisabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -18,65 +20,13 @@ const emit = defineEmits<{
 	(e: "splitParagraph"): string
 }>()
 
-const columnOptionsShown = ref(false)
-const formatIndicies = [0, 1, 2, 4, 5, 6, 12]
-const previewEnabled = ref(false)
-const previewMode = ref(0)
-const barDisabled = ref(false)
-
-type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph'
-
-interface FormattingButton {
-	title: string
-	icon: string | string[]
-	action: [FormattingAction, string | string[]]
-	dropdownText?: string[]
-	tooltip?: string
-	splitAfter?: boolean
-	bold?: boolean
-}
-
-const doAction = (action: FormattingAction, param: any, holdingShift = false) => {
-	switch (action) {
-		case 'add':
-			emit('addContainer', param, holdingShift);
-			break;
-		case 'preview':
-			previewEnabled.value = !previewEnabled.value
-			barDisabled.value = previewEnabled.value
-			previewMode.value = 1
-			
-			emit('setFormatting', 'view', previewMode.value);
-			break;
-		case 'align':
-			emit('setAlignment', param);
-			break;
-		case 'column':
-			if (props.selectedNest[0] > -1)
-				columnOptionsShown.value = !columnOptionsShown.value
-			else
-				emit('addContainer', 'twoColumns', holdingShift);
-			break;
-		case 'format':
-			doFormatting(param)
-			break;
-		case 'splitParagraph':
-			emit('splitParagraph'); break;
-	}
-}
-
-const doFormatting = (ind: number) => {
-	let el = document.activeElement
-	if (!el || !el.classList.contains("dataContainer")) return
-	el.dataset.modf = 1
-
-	addCEFormatting(formatIndicies[ind], el, false)
-}
+const doAction = inject<(a: FormattingAction, p: any, s: boolean) => void>("writerAction")!
 
 const showFormatting = ref(false)
 const showFormattingBar = (e) => {
 	let sel = document.getSelection()
-	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing") && sel.anchorNode?.parentElement?.contentEditable === "true"
+	console.log(sel)
+	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing") && ["true", "inherit"].includes(sel.anchorNode?.parentElement?.contentEditable)
 
 	if (currentToolbar.value == 'previewing') return
 	
@@ -108,55 +58,8 @@ if (SETTINGS.value.scrollNavbar)
 const currentToolbar = ref("main")
 const swapToolbar = (to: string) => {
 	currentToolbar.value = to
-	keyShortcuts = getShortcuts()
+	// keyShortcuts = getShortcuts()
 }
-
-const getShortcuts = () => {
-	let shortcuts = []
-	for (const key in props.writer.toolbar) {
-		for (const key2 in props.writer.toolbar[key]) {
-			for (const button of props.writer.toolbar[key][key2]) {
-				if (button?.shortcut)
-					shortcuts.push([button?.shortcut, button?.action])
-
-				// Fixed shortcuts apply only if a given toolbar is active
-				if (button?.shortcutFixed && key == currentToolbar.value)
-					shortcuts.push([button?.shortcutFixed, button?.action])
-			}
-		}
-	}
-	return shortcuts
-}
-var keyShortcuts = getShortcuts()
-const isValidShortcut = (combo: number, key: string) => {
-	for (let i = 0; i < keyShortcuts.length; i++) {
-		if (keyShortcuts[i][0][0] == combo && keyShortcuts[i][0][1] == key)
-			return keyShortcuts[i][1]
-	}
-	return false
-}
-
-var heldModifiers = ref(Key.None)
-
-
-
-document.documentElement.addEventListener("keydown", e => {
-	let combo = +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
-	heldModifiers.value = combo
-
-	// Mainly for text selection to keep working
-	// Disables browser shortcuts
-	if (combo != Key.None && e.key.length == 1 && isValidShortcut(combo, e.key.toUpperCase()))
-		e.preventDefault()
-})
-
-window.addEventListener("keyup", e => {
-	let currCombo = +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
-
-	let f: string[] | boolean;
-	if (currCombo != Key.None && e.key.length == 1 && (f = isValidShortcut(currCombo, e.key.toUpperCase())))
-		doAction(...f)
-})
 
 const getToolbarButtons = (side: 'left' | 'right') => {
 	if (SETTINGS.value.compactToolbar) {
@@ -173,6 +76,7 @@ const getToolbarButtons = (side: 'left' | 'right') => {
 					newArr.icon = buts[i].icon[j]
 					newArr.splitAfter = j == buts[i].dropdownText?.length-1
 					newArr.action = [buts[i].action[0], buts[i].action[1][j]]
+					newArr.shortcut = buts[i].shortcut[j]
 					newButs?.splice(i+b, 0, newArr)
 					j--
 				})
@@ -192,7 +96,7 @@ const postData = inject("postData")
 <template>
 	<section @click.stop="" :style="{ top: barPos }"
 		:class="{'!bg-[#ECE6D9]': postData.whitePage, 'bg-lof-200': !postData.whitePage}"
-		class="flex transition-[top] bg-lof-200 overflow-auto sticky z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
+		class="flex rounded-md thinScrollbar transition-[top] bg-lof-200 sticky max-md:overflow-x-auto z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
 		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center" :class="{'invert-[0.9]': postData.whitePage}">
 			<FormattingButton v-for="button in getToolbarButtons(side)" :button="button"
 				@clicked="doAction(button.action[0], $event.action, $event.shift)" :disabled="barDisabled && button?.action?.[0] != 'preview'" />

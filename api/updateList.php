@@ -59,8 +59,7 @@ if (!$checkUser) {
 
 $disableComments = intval($DATA["disComments"]);
 $doHide = intval($DATA["hidden"]) == 1;
-$thumbdata;
-if (!$IS_LIST) $thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
+$thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $retListID = $DATA["id"];
 
@@ -69,7 +68,7 @@ $compressedData = base64_encode(gzcompress($fuckupData[1]));
 $hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
 $hidden = $doHide ? $hiddenID : '0';
 if ($IS_LIST) {
-    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ?, `tagline` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $decoded["tagline"], $DATA["id"]], "sssssi");
+    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ?, `tagline` = ?, `thumbnail` = ?, `thumbProps` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $decoded["tagline"], $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $DATA["id"]], "sssssssi");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
 }
 else {

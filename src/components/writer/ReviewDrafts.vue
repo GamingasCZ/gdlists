@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "save", duplicate: boolean): void
-    (e: "preview", data: ReviewList): void
+    (e: "preview", data: ReviewList, id_saved: [number, number]): void
     (e: "load", data: {data: ReviewList, id: number, saved: number}): void
     (e: "remove", id: number): void
 }>()
@@ -53,7 +53,7 @@ const doAction = (action: DraftAction, key: string, draft: ReviewDraft) => {
             emit("remove", key)
             break;
         case DraftAction.Preview:
-            emit("preview", draft.reviewData)
+            emit("preview", draft.reviewData, [draft.createDate, draft.saveDate])
             break;
         case DraftAction.Load:
             emit("load", {data: draft.reviewData, id: draft.createDate, saved: draft.saveDate})

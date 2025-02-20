@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SETTINGS } from '@/siteSettings';
-import { onBeforeUnmount, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, onUnmounted, onUpdated, ref, watch } from 'vue';
 
 const props = defineProps<{
   open: boolean
@@ -24,12 +24,13 @@ const main = ref<HTMLDialogElement>()
 const clipBody = (closing: boolean) => {
   if (closing) {
     main.value?.close()
-    if (document.querySelectorAll(".modalDialog").length < 2)
+    if (document.querySelectorAll(".modalDialog").length < 1)
     document.body.style.overflow = "auto"
   }
   else {
     main.value?.showModal()
     document.body.style.overflow = "clip"
+    nextTick(() => main.value?.focus())
   }
 }
 onMounted(() => { if (props.open) clipBody(false) })

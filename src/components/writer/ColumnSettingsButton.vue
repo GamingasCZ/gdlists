@@ -22,7 +22,7 @@ const columnButton = ref<HTMLButtonElement>()
         @close="columnOptionsShown = false"
     >
         <template #header>
-            <ColumnEdit />
+            <ColumnEdit @close="columnOptionsShown = false" />
         </template>
     </Dropdown>
     <Dropdown
@@ -31,7 +31,7 @@ const columnButton = ref<HTMLButtonElement>()
         @close="columnOptionsShown = false"
     >
         <template #header>
-            <ColumnCreator />
+            <ColumnCreator @close="columnOptionsShown = false" />
         </template>
     </Dropdown>
 

@@ -57,11 +57,11 @@ export interface ToolbarButton {
     /**
      * Global shortcut that get's called no mater the toolbar
      */
-    shortcut?: [Key, string],
+    shortcut?: [Key, string] | [Key, string][],
     /**
      * Shortcuts that gets called only, if its button is in the current toolbar
      */
-    shortcutFixed?: [Key, string],
+    shortcutFixed?: [Key, string] | [Key, string][],
     /**
      * Creates a vertical splitter after the button
      */
@@ -274,7 +274,6 @@ export const REVIEW: Writer = {
 
     },
     settings: [
-        i18n.global.t('other.general'),
         {
             name: i18n.global.t('reviews.private'),
             control: "cbox",
@@ -290,13 +289,6 @@ export const REVIEW: Writer = {
             control: "dropdown",
             controlOptions: LANGUAGES,
             affects: "language",
-        },
-        i18n.global.t('settingsMenu.visual'),
-        {
-            name: i18n.global.t('reviews.font'),
-            control: "dropdown",
-            controlOptions: FONTS,
-            affects: "font",
         },
     ],
     dialogs: [
@@ -332,6 +324,7 @@ export const REVIEW: Writer = {
                     title: "Zarovnání",
                     icon: ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
                     dropdownText: ["Vlevo", "Doprostřed", "Vpravo", "Do bloku"],
+                    shortcut: [[Key.Ctrl, 'L'], [Key.Ctrl, 'E'], [Key.Ctrl, 'R'], [Key.Ctrl, 'J']],
                     action: ["align", ["left", "center", "right", "justify"]],
                     splitAfter: true,
                 },
@@ -383,30 +376,6 @@ export const REVIEW: Writer = {
                     title: "Přidat sloupec",
                     icon: "twoColumns",
                     component: ColumnSettingsButton
-                },
-            ]
-        },
-        previewing: {
-            left: [
-                {
-                    title: "Zpět",
-                    icon: "bold",
-                    shortcutFixed: [Key.Alt, 'J'],
-                    action: ["preview", 0],
-                    leftOffset: [9, 3.5],
-                    splitAfter: true
-                },
-                {
-                    title: "Recenze",
-                    icon: "bold",
-                    shortcutFixed: [Key.Alt, 'K'],
-                    action: ["preview", 1],
-                },
-                {
-                    title: "Levely",
-                    icon: "bold",
-                    shortcutFixed: [Key.Alt, 'L'],
-                    action: ["preview", 2],
                 },
             ]
         },

@@ -26,36 +26,39 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 </script>
 
 <template>
-	<div class="grid text-base font-[poppins] py-4 w-full gap-y-5">
+	<div class="grid text-base thinScrollbar font-[poppins] py-4 w-full gap-y-5">
 
 		<section v-if="drafts">
 			<h2 class="ml-2 text-3xl font-black text-lof-400">{{ $t('reviews.drafts2') }}</h2>
-			<section class="flex overflow-x-auto gap-4 px-2 mt-2 w-full">
-				<button
-					v-for="(draft, ind) in draftsValues.slice(0,3)"
-					@click="emit('loadDraft', draftsKeys[ind])"
-					class="flex relative flex-col p-2 h-32 text-left rounded-md border group aspect-video border-lof-400"
-				>
-					<h4 class="text-xl font-bold leading-tight">{{ draft.name }}</h4>
-					<p class="text-sm text-white text-opacity-40">{{ prettyDate((Date.now() - draft.saveDate) / 1000) }}</p>
-					<hr class="opacity-20">
-					<p :style="{mask: 'linear-gradient(white, #FFFFFF20)'}">
-						<p class="text-sm font-bold">{{ draft.previewTitle }}</p>
-						<p class="text-xs">{{ draft.previewParagraph }}</p>
-					</p>
-					<button class="absolute bottom-2 left-1/2 p-2 w-max bg-black bg-opacity-60 rounded-sm opacity-0 transition-opacity duration-75 -translate-x-1/2 button group-hover:opacity-100" @click.stop="emit('previewDraft', draftsKeys[ind])">
-						<img src="@/images/view.svg" class="w-5" alt="">
+			<div class="grid">
+				<section class="flex overflow-auto gap-4 px-2 mt-2">
+					<button
+						v-for="(draft, ind) in draftsValues.slice(0,3)"
+						@click="emit('loadDraft', draftsKeys[ind])"
+						class="flex relative flex-col p-2 h-32 text-left rounded-md border group aspect-video border-lof-400"
+					>
+						<h4 class="text-xl font-bold leading-tight">{{ draft.name }}</h4>
+						<p class="text-sm text-white text-opacity-40">{{ prettyDate((Date.now() - draft.saveDate) / 1000) }}</p>
+						<hr class="opacity-20">
+						<p :style="{mask: 'linear-gradient(white, #FFFFFF20)'}">
+							<p class="text-sm font-bold">{{ draft.previewTitle }}</p>
+							<p v-if="draft.previewParagraph.length" class="text-xs">{{ draft.previewParagraph }}</p>
+							<p v-else class="text-xs text-white text-opacity-40">{{ $t('reviews.draftNoPrev') }}</p>
+						</p>
+						<button class="absolute bottom-2 left-1/2 p-2 w-max bg-black bg-opacity-60 rounded-sm opacity-0 transition-opacity duration-75 -translate-x-1/2 button group-hover:opacity-100" @click.stop="emit('previewDraft', draftsKeys[ind])">
+							<img src="@/images/view.svg" class="w-5" alt="">
+						</button>
 					</button>
-				</button>
+	
+					<button v-if="draftsValues.length > 3" class="flex flex-col justify-center items-center rounded-md min-w-32 hover:bg-opacity-20 hover:bg-black grow" @click="openedDialogs.drafts = true">
+						<img class="w-8" src="@/images/more.svg" alt="">
+						<p>{{ $t('reviews.otherDrafts') }}</p>
+					</button>
+	
+				</section>
+			</div>
 
-				<button v-if="draftsValues.length > 3" class="flex flex-col justify-center items-center rounded-md hover:bg-opacity-20 hover:bg-black grow" @click="openedDialogs.drafts = true">
-					<img class="w-8" src="@/images/more.svg" alt="">
-					<p>{{ $t('reviews.otherDrafts') }}</p>
-				</button>
-
-			</section>
-
-			<div class="flex gap-4 items-center my-8">
+			<!-- <div class="flex gap-4 items-center my-8">
 				<hr class="h-0.5 bg-opacity-10 bg-gradient-to-l from-white to-transparent rounded-md border-none opacity-20 grow">
 				<span class="text-xl opacity-20">Nebo začni něco nového...</span>
 				<hr class="h-0.5 bg-opacity-10 bg-gradient-to-r from-white to-transparent rounded-md border-none opacity-20 grow">
@@ -76,7 +79,7 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 					<img src="@/images/filePreview.svg" class="w-10" alt="">
 					<p>Výstava hodnocení</p>
 				</button>
-			</section>
+			</section> -->
 
 		</section>
 

@@ -5,14 +5,13 @@ import WriterSettings from "./writer/WriterSettings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
 import FormattingBar from "./writer/FormattingBar.vue"
 import CONTAINERS from "./writer/containers";
-import TagPickerPopup from "./editor/TagPickerPopup.vue";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
-import type {Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
+import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
-import { pickFont, getDominantColor, getReviewPreview, getWordCount, getEmbeds, addReviewLevel } from "@/Reviews";
+import { pickFont, getDominantColor, getEmbeds, addReviewLevel } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -29,15 +28,15 @@ import { onMounted } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
-import { deleteCESelection } from "./global/parseEditorFormatting";
+import { addCEFormatting, deleteCESelection } from "./global/parseEditorFormatting";
 import LevelCard from "./global/LevelCard.vue";
 import { ImgFail, notifyError } from "./imageUpload";
 import WriterViewer from "./writer/WriterViewer.vue";
 import WriterVisuals from "./writer/WriterVisuals.vue";
-import { LIST, REVIEW, type Writer } from "@/writers/Writer";
-import Dropdown from "./ui/Dropdown.vue";
-import ColumnPreview from "./writer/ColumnPreview.vue";
+import { LIST, REVIEW } from "@/writers/Writer";
 import HoldButton from "./ui/HoldButton.vue";
+import { shortcutListen, shortcutUnload } from "@/writers/shortcuts";
+import ShortcutsPopup from "./writer/ShortcutsPopup.vue";
 
 const props = defineProps<{
     type: number
@@ -53,7 +52,7 @@ watch(() => props.type, () => {
     drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
     resetPost()
 })
-// watch(timeLastRouteChange, () => resetPost())
+watch(timeLastRouteChange, () => resetPost())
 
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
 
@@ -109,6 +108,7 @@ const openDialogs = reactive({
     editError: false,
     userAdder: [false, 0],
     drafts: false,
+    shortcuts: false
 })
 
 const previewMode = ref(true)
@@ -254,8 +254,13 @@ const columnCommand = (index: number) => {
     let nest = POST_DATA.value.containers[selectedNestContainer.value[0]]
     let column = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
     switch (index) {
-        case 0: addContainer("twoColumns", 0); break;
-        case 1: addContainer("twoColumns", 1); break;
+        case 0:
+            addContainer("twoColumns", 0);
+            break;
+        case 1:
+            addContainer("twoColumns", 1);
+            selectedNestContainer.value[1]++;
+            break;
         case 2:
         case 3:
             let duplicate = JSON.parse(JSON.stringify(nest.settings.components[selectedNestContainer.value[1]]))
@@ -291,6 +296,56 @@ const columnCommand = (index: number) => {
     }
     // setTimeout(() => selectedNestContainer.value = nestAttay, 5); // great coding, gamingaaaas (body click event unselects containers, need to offset this)
 }
+provide("columnCommand", columnCommand)
+
+const formatIndicies = [0, 1, 2, 4, 5, 6, 12]
+const doFormatting = (ind: number) => {
+	let el = document.activeElement
+	if (!el || !el.classList.contains("dataContainer")) return
+	el.dataset.modf = 1
+
+	addCEFormatting(formatIndicies[ind], el, false)
+}
+
+const containerSettingsShown = ref(0)
+provide("containerSettingsShown", containerSettingsShown)
+
+function doAction(action: FormattingAction | EditorAction, param: any, holdingShift = false) {
+	switch (action) {
+		case 'add':
+            addContainer(param, 0, false, holdingShift);
+			break;
+		case 'preview':
+            setFormatting()
+			break;
+		case 'align':
+            setAlignment(selectedContainer.value[0], param)
+			break;
+		case 'format':
+			doFormatting(param)
+			break;
+		case 'splitParagraph':
+			splitParagraph()
+            break;
+
+        case 'save':
+            saveDraft(false, false);
+            break;
+        case 'containerDelete':
+            removeContainer(selectedContainer.value[0]);
+            break;
+        case 'drafts':
+            openDialogs.drafts = true
+            break;
+        case 'containerOptions':
+            containerSettingsShown.value = 1
+            break;
+        case 'shortcutsMenu':
+            openDialogs.shortcuts = true
+            break;
+	}
+}
+provide("writerAction", doAction)
 
 const setPreviewMode = (preview: boolean) => {
     previewMode.value = preview
@@ -303,16 +358,9 @@ const toggleLevelPreview = () => {
 }
 
 const previewContent = ref(0)
-const setFormatting = (format: string, ind: number) => {
-    switch (format) {
-        case "view":
-            document.activeElement?.blur()
-            setPreviewMode(!previewMode.value)
-            break;
-        case "mode":
-            previewContent.value = ind
-            break;
-    }
+const setFormatting = () => {
+    document.activeElement?.blur()
+    setPreviewMode(!previewMode.value)
 }
 
 const moveToParagraph = (currentContainerIndex: number) => {
@@ -582,11 +630,17 @@ onMounted(() => {
 
     document.body.addEventListener("mousedown", setMouseStart)
     document.body.addEventListener("click", unfocusContainer)
+
+    shortcutListen(WRITER.value.toolbar, doAction)
+
+    document.documentElement.addEventListener("fullscreenchange", toggleZenMode)
 })
 
 onUnmounted(() => {
     document.body.removeEventListener("click", unfocusContainer)
     document.body.removeEventListener("mousedown", setMouseStart)
+    document.documentElement.removeEventListener("fullscreenchange", toggleZenMode)
+    shortcutUnload()
 })
 
 const preUpload = ref(false)
@@ -621,9 +675,11 @@ const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => 
 let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
 var outsideDrafts = false
-const previewDraft = (previewData: ReviewList, previewingOutsideDrafts = false) => {
+var previewID = [0, 0]
+const previewDraft = (previewData: ReviewList, previewIDSaved: [number, number], previewingOutsideDrafts = false) => {
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = previewData
+    previewID = previewIDSaved
     fetchEmbeds(true)
     modifyListBG(previewData.pageBGcolor, false)
     setPreviewMode(false)
@@ -635,6 +691,7 @@ const previewDraft = (previewData: ReviewList, previewingOutsideDrafts = false) 
 const exitPreview = () => {
     if (!previewHold) return
 
+    previewID = [0, 0]
     POST_DATA.value = previewHold[0]
     embedsContent.value = previewHold[1]
     modifyListBG(previewHold[0].pageBGcolor, false)
@@ -646,7 +703,14 @@ const exitPreview = () => {
         openDialogs.drafts = true
 
     outsideDrafts = false
+}
 
+const previewApply = () => {
+    disableEdits.value = false
+    setPreviewMode(true)
+    previewHold = null
+    loadDraft({data: POST_DATA.value, id: previewID[0], saved: previewID[1]})
+    previewID = [0, 0]
 }
 
 const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
@@ -712,13 +776,20 @@ const listPickerPick = (level: Level | Level[]) => {
 
 const highlightedCreateColumns = ref(-1)
 
+const goFullscreen = () => {
+    if (document.fullscreenElement)
+        document.exitFullscreen()
+    else
+        document.documentElement.requestFullscreen({navigationUI: "hide"})
+}
+
 const zenMode = ref(false)
 const toggleZenMode = () => {
+    if (WRITER.value.general.postType != 'review') return
     zenMode.value = !zenMode.value
     let navbar = document.querySelector("#navbar") as HTMLDivElement
     let footer = document.querySelector("#footer") as HTMLDivElement
     if (zenMode.value) {
-        document.documentElement.requestFullscreen({navigationUI: "hide"})
         navbar.style.display = "none"
         footer.style.display = "none"
 
@@ -805,12 +876,16 @@ const toggleZenMode = () => {
             />
         </DialogVue>
 
-
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')"
             :width="dialog.medium" :side-button-text="$t('other.search')" :action="draftPopup?.openSearch">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.shortcuts" @close-popup="openDialogs.shortcuts = false" :title="$t('reviews.keysh')"
+            :width="dialog.medium">
+            <ShortcutsPopup />
         </DialogVue>
 
         <CollabEditor v-if="openDialogs.collabs[0]" :level-array="POST_DATA.levels" :index="openDialogs.collabs[1]"
@@ -844,11 +919,15 @@ const toggleZenMode = () => {
             </div>
 
             <!-- Back from draft preview -->
-            <div v-if="disableEdits" @click="exitPreview"
-                class="flex fixed top-14 left-1/2 z-40 justify-between items-center p-2 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
-                <span class="text-xl">{{ $t('reviews.preview') }}</span>
-                <button class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg"
-                        class="w-6" alt=""> {{ $t('reviews.back') }}</button>
+            <div v-if="disableEdits"
+                class="flex fixed top-14 left-1/2 z-40 flex-col p-1 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
+                <span class="mb-2 text-xl text-center">{{ $t('reviews.preview') }}</span>
+                <div class="grid grid-cols-2 gap-1">
+                    <button @click="exitPreview" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/close.svg"
+                            class="w-5" alt="">{{ $t('other.close') }}</button>
+                    <button @click="previewApply" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg"
+                            class="w-5" alt="">{{ $t('other.use') }}</button>
+                </div>
             </div>
 
             <!-- Levels -->
@@ -874,8 +953,9 @@ const toggleZenMode = () => {
                 <!-- Formatting -->
                 <FormattingBar v-show="!zenMode" :class="{ 'pointer-events-none opacity-20': disableEdits }"
                     :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
+                    :bar-disabled="!previewMode"
                     @add-container="(el, above) => addContainer(el, 0, false, above)"
-                    @set-alignment="setAlignment(selectedContainer[0], $event)" @column-command="columnCommand($event)"
+                    @set-alignment="setAlignment(selectedContainer[0], $event)"
                     @split-paragraph="splitParagraph" :writer="WRITER" />
                 
                 <!-- Help when no components in writer -->
@@ -884,7 +964,7 @@ const toggleZenMode = () => {
                     v-if="!POST_DATA.containers.length"
                     @start-writing="startWriting"
                     
-                    @preview-draft="previewDraft(drafts[$event].reviewData, true)"
+                    @preview-draft="previewDraft(drafts[$event].reviewData, [drafts[$event].createDate, drafts[$event].saveDate], true)"
                     @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
 
                     :inverted="POST_DATA.whitePage"
@@ -901,16 +981,16 @@ const toggleZenMode = () => {
                 />
 
                 <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
-                    <button @click="saveDraft(false)" class="py-2 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <button @click="saveDraft(false)" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
                         <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
                         <span v-else>{{ pretty }}</span>
                     </button>
-                    <button class="py-2 text-white rounded-md opacity-40 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <button @click="openDialogs.shortcuts = true" class="py-1 text-white rounded-md opacity-40 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/key.svg" class="inline mr-4 w-6" alt="">
                         <span>{{ $t('reviews.keysh') }}</span>
                     </button>
-                    <button @click="toggleZenMode()" class="py-2 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <button @click="goFullscreen()" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                         <img src="@/images/zen.svg" class="inline mr-4 w-6" alt="">
                         <span>{{ $t('reviews.zenMode') }}</span>
                     </button>

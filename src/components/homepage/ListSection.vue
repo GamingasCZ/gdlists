@@ -56,9 +56,6 @@ const refreshContent = () => {
 watch(props, refreshContent)
 refreshContent()
 
-const getImage = () =>
-  new URL(`../../images/${props.extraIcon}.svg`, import.meta.url).toString();
-
 const clearViewed = () => {
   localStorage.setItem("recentlyViewed", "[]");
   lists.value = [];
@@ -66,10 +63,14 @@ const clearViewed = () => {
 </script>
 
 <template>
-  <section v-if="lists?.length" class="mt-6">
-    <div class="flex gap-4 justify-center items-center text-white">
+  <section v-if="lists?.length" class="mt-6 max-w-8xl">
+    <component :is="extraAction ? (extraAction?.startsWith('@') ? 'button' : 'RouterLink') : 'div'" :to="extraAction" @click="extraAction?.startsWith('@') ? clearViewed() : null" class="flex gap-4 justify-between items-center px-1 py-2 my-2 w-full text-left text-white rounded-md" :class="{'hover:bg-white hover:bg-opacity-10': extraAction}">
       <!-- <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" /> -->
-      <span class="mt-4 w-full text-3xl font-bold">{{ headerName }}</span>
+      <span class="w-full text-3xl font-bold">{{ headerName }}</span>
+      <component v-if="extraAction">
+        <img v-if="extraAction?.startsWith('@')" src="@/images/del.svg" class="w-7 invert" alt="">
+        <img v-else src="@/images/arrow.svg" class="w-4" alt="">
+      </component>
 
       <!-- Link button -->
 
@@ -89,10 +90,10 @@ const clearViewed = () => {
       >
         <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
       </button> -->
-    </div>
+    </component>
 
     <div
-      class="grid overflow-x-auto grid-cols-4 gap-3 mt-2 max-w-8xl max-sm:text-xs"
+      class="overflow-auto flex-wrap grid-cols-3 gap-3 ml-4 md:grid max-md:flex max-sm:text-xs"
     >
       <p class="text-yellow-200" v-if="!lists?.length">
         - {{ emptyText }} -

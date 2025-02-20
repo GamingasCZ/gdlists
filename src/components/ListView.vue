@@ -60,7 +60,7 @@ const loadContent = async () => {
   props.isReview ? await loadReview(randomData) : await loadList(randomData)
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", (e: MouseEvent) => {
-      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
+      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1) return
       let postBottom = postContent.value?.clientHeight+postContent.value?.clientTop
       let currentScroll = document.documentElement.clientHeight + document.documentElement.scrollTop
       
@@ -298,7 +298,7 @@ const toggleListPin = () => {
     }
     else {
       let pinData = {
-        name: encodeURIComponent(LIST_DATA.value.name),
+        name: LIST_DATA.value.name,
         creator: LIST_CREATOR.value,
         uploadDate: Date.now(),
         hidden: LIST_DATA.value.hidden,

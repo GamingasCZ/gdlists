@@ -383,7 +383,8 @@
     "general": "Základní",
     "noImage": "Zrušit výběr",
     "previous": "Předchozí",
-    "reset": "Resetovat"
+    "reset": "Resetovat",
+    "auto": "Automatická"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

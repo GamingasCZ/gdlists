@@ -108,7 +108,7 @@ function checkList($name, $list) {
 
     // checkLevels();
 
-    return ["postName" => $name];
+    return checkReview($name, $list);
 }
 
 function checkReview($name, $review) {

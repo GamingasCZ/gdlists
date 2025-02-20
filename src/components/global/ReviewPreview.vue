@@ -83,7 +83,7 @@ const getGradient = (col) =>
     2
   )}, ${col.darken()}, ${col.brighten()})`;
 
-const uploadDate = new Date(props.timestamp);
+const uploadDate = new Date(isNaN(+props.timestamp) ? props.timestamp : props.timestamp*1000);
 
 const creator = getUser()
 
@@ -91,7 +91,9 @@ const pre = import.meta.env.VITE_USERCONTENT
 const base = import.meta.env.BASE_URL
 
 const getDefaultThumb = () => {
-  return props.name.split("").map(x => x.charCodeAt(0)).reduce((x,y) => x+y) % 3
+  let t = props.name.split("").map(x => x.charCodeAt(0)).reduce((x,y) => x+y) % 3
+  if (props.isList) t += 10
+  return t
 }
 
 let thumbLink
@@ -155,11 +157,11 @@ const link = () => {
       </div>
     </div>
 
-    <section class="flex overflow-hidden flex-col items-start m-1">
+    <section class="flex overflow-hidden flex-col justify-between items-start m-1 h-full">
       <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
       <div class="overflow-hidden w-full text-ellipsis">
         <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-5" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
-        <ReviewRatingBar :class="{'bg-black bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
+        <ReviewRatingBar :class="{'bg-black p-3 bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
       </div>
       <div class="flex gap-2 items-center mt-2">
         <ProfilePicture class="w-11" :uid="creator.discord_id" :cutout="creator.pfp_cutout" />

@@ -288,6 +288,7 @@ const parseThumbs = (serverResponse: object) => {
     serverResponse.forEach(x => thumbnails.value[x.folder].push(x.hash))
 }
 
+const mediaContent = ref<HTMLDivElement>()
 const refreshContent = async (currPath: [string, number] | object, external: boolean) => {
     loadingImages.value = true
 
@@ -359,10 +360,12 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
     let content;
     if (hasCache) {
         content = [storageCache, imageCache]
+        nextTick(() => mediaContent.value?.children?.[0]?.focus())
         loadingImages.value = false
     }
     else content = await axios.get(import.meta.env.VITE_API + "/images.php", { params: getReq }).then(res => {
         loadingImages.value = false
+        nextTick(() => mediaContent.value?.children?.[0]?.focus())
         return res.data
     })
 
@@ -418,12 +421,39 @@ const holdingShift = ref(false)
 const modifierHeld = (e: KeyboardEvent) => {
     holdingShift.value = e.shiftKey
 
+    switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+            e.preventDefault()
+            break;
+    }
+
+    if (e.type != "keyup") return
+
+    // Up folder
+    let currSelected = +(document?.activeElement?.dataset?.ind)
+    if (e.key == 'ArrowDown')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected+4, images.value.length+folders.value.length))].focus()
+    if (e.key == 'ArrowUp')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected-4, images.value.length+folders.value.length))].focus()
+    if (e.key == 'ArrowLeft')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected-1, images.value.length+folders.value.length))].focus()
+    if (e.key == 'ArrowRight')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected+1, images.value.length+folders.value.length))].focus()
+        
+
+    // Up folder
+    if (e.key == 'Backspace')
+        gotoFolder(currentFolder.value[subfolderLevel.value-1] , subfolderLevel.value-1)
+
     // CTRL + X = move mode
-    if (e.type == "keyup" && e.ctrlKey && e.key == 'x')
+    if (e.ctrlKey && e.key == 'x')
         startMoveMode()
 
     // CTRL + V = paste into folder
-    if (e.type == "keyup" && e.ctrlKey && e.key == 'v') {
+    if (e.ctrlKey && e.key == 'v') {
         moveToFolder(imagesToMove.value)
     }
 
@@ -540,6 +570,7 @@ const getFolderGradient = (hex: string) => {
 
 const gotoFolder = (folder: [string, number], subLevel: number) => {
     if (loadingImages.value) return
+    if (subLevel < 0) return
 
     let searchSub = subLevel - 1
     if (searchSub < 0)
@@ -951,25 +982,13 @@ onMounted(() => {
         <HiddenFileUploader v-if="currentTab == Tabs.Uploaded" @data="uploadImage" ref="imageInput" unclickable multiple
             :disabled="loadingImages || uploadingImage != 0 || folderMoveMode" />
 
-        <div class="grid grid-cols-4 gap-2 m-2" :class="{ 'opacity-20 pointer-events-none': uploadingImage }">
-
-            <!-- Images -->
-            <!-- <button @click.exact="pickImage(-1, currentTab == Tabs.External, $event)"
-                class="relative h-24 bg-black bg-opacity-40 bg-center rounded-sm border-2 border-white border-dashed transition-all duration-75 cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
-                :class="{ 'opacity-20 pointer-events-none': folderMoveMode }">
-
-                <img loading="lazy" src="@/images/trash.svg" alt=""
-                    class="p-2 mx-auto w-12 bg-black bg-opacity-40 rounded-md pointer-events-none"
-                    :class="{ 'hover:scale-125': !unselectable }">
-
-                <span>{{ $t('other.noImage') }}</span>
-            </button> -->
+        <div ref="mediaContent" class="grid grid-cols-4 gap-2 m-2" :class="{ 'opacity-20 pointer-events-none': uploadingImage }">
 
             <!-- Folders -->
-            <button v-for="folder in (currentTab ? extImgFolders : folders)"
+            <button v-for="(folder, ind) in (currentTab ? extImgFolders : folders)"
                 @click.exact="gotoFolder([folder.name, folder.id], (currentTab ? subfolderExtLevel : subfolderLevel) + 1)"
-                class="relative h-24 bg-center rounded-sm border-2 transition-all cursor-pointer group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
-                :style="{ borderColor: folder.color, background: chroma(folder.color).alpha(0.4).hex() }">
+                class="relative h-24 bg-center rounded-sm transition-all cursor-pointer focus-within:outline-4 focus-within:outline focus-within:outline-lof-400 group shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
+                :style="{ borderColor: folder.color, background: chroma(folder.color).alpha(0.4).hex() }" :data-ind="ind">
 
                 <div class="grid absolute inset-2 grid-cols-2 gap-2 overflow-clip">
                     <img v-for="thumb in thumbnails[folder.id]"
@@ -978,7 +997,7 @@ onMounted(() => {
                 </div>
                 <div class="absolute inset-0" :style="{ backgroundImage: getFolderGradient(folder.color) }"></div>
                 <span
-                    class="overflow-hidden absolute bottom-1 left-1/2 z-10 w-full text-lg rounded-sm -translate-x-1/2 text-ellipsis"
+                    class="overflow-hidden absolute bottom-1 z-10 w-full text-lg rounded-sm -translate-x-1/2 left-1/ 2 text-ellipsis"
                     :class="{ 'group-hover:bg-black group-hover:bg-opacity-40 group-hover:px-2 group-hover:w-max': folder.name.length > 12 }">{{
                         getFolderName(folder.name) }}</span>
             </button>
@@ -989,10 +1008,10 @@ onMounted(() => {
                 @click.exact="pickImage(index, currentTab == Tabs.External, $event)" @click.right.exact.prevent=""
                 @click.ctrl="selectImage(index)" @click.middle.exact="startRemoval(index)"
                 @mouseenter="imageHovering = index" @mouseleave="imageHovering = -1" :key="image"
-                class="relative h-24 bg-center rounded-sm border-2 transition-all duration-75 cursor-pointer shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10 border-lof-400"
-                :class="{ 'opacity-20 pointer-events-none': folderMoveMode && !isSelected(index), '!border-4': isSelected(index) }">
+                class="relative h-24 bg-center rounded-sm transition-all duration-75 cursor-pointer border-lof-400 focus-within:outline-4 focus-within:outline focus-within:outline-lof-400 shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
+                :class="{ 'opacity-20 pointer-events-none': folderMoveMode && !isSelected(index), '!border-4': isSelected(index) }" :data-ind="index + folders.length">
                 <!-- Image settings -->
-                <button :key="image" v-show="imageOptsShown == index || imageHovering == index"
+                <button :key="image" tabindex="-1" v-show="imageOptsShown == index || imageHovering == index"
                     @click.stop="button = $event.target; imageOptsShown = index"
                     class="absolute top-1 right-1 z-20 w-5 bg-white rounded-full duration-75">
                     <img src="@/images/more.svg" class="p-1 invert">

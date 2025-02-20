@@ -359,3 +359,16 @@ export interface Setting {
 }
 
 export type PostData = ReviewList & LevelList
+
+export type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph'
+export type EditorAction = 'save' | 'containerDelete' | 'drafts' | 'containerOptions' | 'shortcutsMenu'
+
+export interface FormattingButton {
+	title: string
+	icon: string | string[]
+	action: [FormattingAction, string | string[]]
+	dropdownText?: string[]
+	tooltip?: string
+	splitAfter?: boolean
+	bold?: boolean
+}

@@ -411,7 +411,8 @@
     "general": "General",
     "noImage": "Discard Pick",
     "previous": "Previous",
-    "reset": "Reset"
+    "reset": "Reset",
+    "auto": "Automatic"
   },
   "settingsMenu": {
     "asOff": "Off",

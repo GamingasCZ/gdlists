@@ -238,3 +238,8 @@ dialog {
 kbd {
   @apply bg-white bg-opacity-20 rounded-md p-0.5 border-white text-xs align-middle mx-1 min-w-16 border-opacity-40 border-2 border-b-4
 }
+
+.thinScrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primaryColor) transparent;
+}

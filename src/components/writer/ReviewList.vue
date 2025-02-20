@@ -8,6 +8,7 @@ import { nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import ReviewPreview from '../global/ReviewPreview.vue';
 import LevelCard from '../global/LevelCard.vue';
+import LevelPreview from '../global/LevelPreview.vue';
 
 
 const emit = defineEmits<{
@@ -31,8 +32,7 @@ watch(props, async () => {
 
     switch (props.buttonState[0]) {
         case "pick":
-            props.settings.post = false;
-            postData.value = undefined
+            dialogs.lists = [true, props.index, 0]
             break;
     }
     emit("clearButton")
@@ -85,14 +85,14 @@ const dialogs = inject("openedDialogs")
 
     <component
         v-else-if="postData"
-        :is="[ReviewPreview, ReviewPreview, LevelCard][settings.postType]"
+        :is="[ReviewPreview, ReviewPreview, LevelPreview][settings.postType]"
         :key="postData?.[0]?.id"
         class="m-2"
         @mousedown="saveScrolling"
         v-bind="postData[0]"
         :post="pp"
         :is-list="settings.postType == 0"
-        :disable-link="false"
+        :disable-link="editable"
         :user-array="postData[1]"
         :review-details="postData[2]"
         hide-remove

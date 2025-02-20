@@ -38,7 +38,7 @@ const resetColor = () => {
 </script>
 
 <template>
-    <section class="bg-lof-200 mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
+    <section class="bg-lof-200 thinScrollbar mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
         <header class="flex p-2 cursor-pointer" @click="mainRolledOut = !mainRolledOut">
             <img src="@/images/sparkles.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('settingsMenu.visual') }}</h2>
@@ -99,24 +99,25 @@ const resetColor = () => {
             <section class="flex justify-between items-center">
                 <div class="flex gap-2">
                     <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
-                        <span>{{ $t('other.opacity') }}</span>
-                        <div class="flex gap-2">
-                            <button :title="'Neprůhledná'" class="w-9 h-9 rounded-md border button bg-lof-100 border-lof-400"></button>
-                            <button :title="'Průsvitná'" id="pageTranslucent" class="w-9 h-9 rounded-md border button bg-lof-100 border-lof-400"></button>
-                            <button :title="'Průhledná'" class="w-9 h-9 rounded-md border button border-lof-400"></button>
-                        </div>
-                    </label>
-                    <label class="flex flex-col gap-1 items-center p-2 mr-4 bg-black bg-opacity-40 rounded-md">
+                        <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>Barva</span>
                         <div class="flex gap-2">
-                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-lof-200">A</button>
-                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-[#ECE6D9]"></button>
-                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-lof-100"></button>
+                            <button @click="postData.whitePage = false" :title="$t('other.auto')" class="w-9 h-9 rounded-full bg-lof-200">A</button>
+                            <button @click="postData.whitePage = true" class="w-9 h-9 rounded-full bg-[#ECE6D9]"></button>
+                            <button class="w-9 h-9 rounded-full bg-lof-100">
+                                <img src="@/images/color.svg" class="mx-auto w-5" alt="">
+                            </button>
                         </div>
                     </label>
-                </div>
-
-                <div class="flex gap-2">
+                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                        <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <span>{{ $t('other.opacity') }}</span>
+                        <div class="flex gap-2">
+                            <button @click="postData.transparentPage = 0" :title="'Neprůhledná'" class="w-9 h-9 rounded-md button bg-lof-300 border-lof-400"></button>
+                            <button @click="postData.transparentPage = 2" :title="'Průsvitná'" id="pageTranslucent" class="w-9 h-9 rounded-md button bg-lof-300 border-lof-400"></button>
+                            <button @click="postData.transparentPage = 1" :title="'Průhledná'" class="w-9 h-9 rounded-md border border-lof-300 button"></button>
+                        </div>
+                    </label>
                     <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
                         <p class="text-5xl opacity-20 pointer-events-none">Aa</p>
                         <span>Písmo</span>
@@ -124,15 +125,28 @@ const resetColor = () => {
                             <option v-for="font in FONTS" :value="font[1]">{{ font[0] }}</option>
                         </select>
                     </label>
-                    <label class="flex flex-col gap-1 items-center p-2 mr-4 bg-black bg-opacity-40 rounded-md">
-                        <span>Font Color</span>
+                    
+                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                        <img src="@/images/move.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <span>Wide page</span>
+                        <input :value="!postData.readerMode" @change="postData.readerMode = $event.target.value" type="checkbox" class="!m-0 button" name="" id="">
                     </label>
                 </div>
+
+                <div class="flex gap-2">
+                    <!-- <label class="flex flex-col gap-1 items-center p-2 mr-4 bg-black bg-opacity-40 rounded-md">
+                        <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <span>Font Color</span>
+                        <div class="flex gap-2">
+                            <button @click="postData.whitePage = false" class="w-9 h-9 rounded-full border border-lof-400 bg-lof-200">A</button>
+                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-lof-100">
+                                <img src="@/images/color.svg" class="mx-auto w-5" alt="">
+                            </button>
+                        </div>
+                    </label> -->
+                </div>
                 
-                <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
-                    <span>Wide page</span>
-                    <input type="checkbox" name="" id="">
-                </label>
+                
             </section>
 
             <div class="flex gap-2 items-center ml-auto">

@@ -97,9 +97,8 @@ const useLevel = () => {
         
         <Transition name="fade">
             <div v-if="levelShowing" class="max-md:flex">
-                <button class="flex top-5 left-10 gap-3 items-center p-3 text-2xl rounded-md opacity-50 transition-colors -translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
+                <button @click="emit('exit')" class="flex top-5 left-1/2 gap-3 items-center p-3 text-2xl rounded-md opacity-50 transition-colors translate-x-24 -translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/close.svg" class="w-5 -scale-100" alt="">
-                    {{ $t('other.close') }}
                 </button>
 
                 <button class="flex left-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors -translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">

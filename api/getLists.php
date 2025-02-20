@@ -19,7 +19,7 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 
-$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser, tagline";
+$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser, tagline, thumbnail, thumbProps";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
 
 $selLevelRange = "
@@ -248,20 +248,11 @@ elseif (isset($_GET["batch"])) {
     $range = [$selRange, $selReviewRange, $selLevelRange][$type];
 
     $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
-
-    $where = [];
-    $fetchHidden = array_filter($fetchIDs, "isPrivate");
-    $inHidden = makeIN($fetchHidden);
-    if (strlen($inHidden[1]))
-      array_push($where, sprintf("(%s.hidden IN %s)", $types[$type], $inHidden[0]));
     
-    $fetchPublic = array_filter($fetchIDs, "isPublic");
-    $inPublic = makeIN($fetchPublic);
-    if (strlen($inPublic[1]))
-      array_push($where, sprintf("(%s.id IN %s AND `hidden` = 0)", $types[$type], $inPublic[0]));
     $res;
-
     if ($type == 2) {
+      $in = makeIN(array_map("intval", $fetchIDs));
+
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
       INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
       LEFT JOIN levels_ratings ON levels_ratings.levelID = levels_uploaders.levelID
@@ -270,6 +261,17 @@ elseif (isset($_GET["batch"])) {
       ", $range, $in[0]), $fetchIDs, $in[1], true);
     }
     else {
+      $where = [];
+      $fetchHidden = array_filter($fetchIDs, "isPrivate");
+      $inHidden = makeIN($fetchHidden);
+      if (strlen($inHidden[1]))
+        array_push($where, sprintf("(%s.hidden IN %s)", $types[$type], $inHidden[0]));
+      
+      $fetchPublic = array_filter($fetchIDs, "isPublic");
+      $inPublic = makeIN($fetchPublic);
+      if (strlen($inPublic[1]))
+        array_push($where, sprintf("(%s.id IN %s AND `hidden` = 0)", $types[$type], $inPublic[0]));
+
       $res = doRequest($mysqli, sprintf("SELECT %s, %s FROM ratings
       RIGHT JOIN %s ON %s.id = ratings.%s_id
       WHERE %s
