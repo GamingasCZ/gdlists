@@ -36,7 +36,12 @@ export const selectedBeforeSave = ref(SETTINGS.value.selectedTheme)
 export const changeTheme = (to: number) => {
     let sameTheme = selectedBeforeSave.value == to
     selectedBeforeSave.value = to
-    document.body.style.backgroundImage = `url(${base}/graphics/${THEMES[to].backgroundImage}.webp)` || ''
+
+    if (THEMES[to].backgroundImage)
+        document.body.style.backgroundImage = `url(${base}/graphics/${THEMES[to].backgroundImage}.webp)`
+    else
+        document.body.style.backgroundImage = ''
+    
     for (const [varName, color] of Object.entries(THEMES[to].colors)) {
         document.documentElement.style.setProperty(`--${varName}`, color);
     }

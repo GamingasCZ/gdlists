@@ -315,7 +315,7 @@ export const REVIEW: Writer = {
                 {
                     title: "Nadpisy",
                     icon: ["heading1", "heading2", "heading3"],
-                    dropdownText: ["Nadpis 1", "Nadpis 2", "Nadpis 3"],
+                    dropdownText: [i18n.global.t('reviews.title', [1]), i18n.global.t('reviews.title', [2]), i18n.global.t('reviews.title', [3])],
                     action: ["add", ["heading1", "heading2", "heading3"]],
                     shortcut: [[Key.Ctrl, '1'], [Key.Ctrl, '2'], [Key.Ctrl, '3']],
                     splitAfter: true,

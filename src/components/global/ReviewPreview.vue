@@ -139,7 +139,7 @@ const link = () => {
             <img src="../../images/view.svg" alt="" class="inline mr-2 w-4" />
             <span>{{ views }}</span>
         </div>
-        <div v-if="tagline && rate_ratio != -1" class="flex items-center px-2 py-1 bg-black bg-opacity-80 rounded-md backdrop-blur-sm grow">
+        <div v-if="rate_ratio != -1" class="flex items-center px-2 py-1 bg-black bg-opacity-80 rounded-md backdrop-blur-sm grow">
             <ReviewRatingBar :rate="rate_ratio" />
         </div>
         <div v-if="levelCount" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
@@ -159,9 +159,8 @@ const link = () => {
 
     <section class="flex overflow-hidden flex-col justify-between items-start m-1 h-full">
       <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
-      <div class="overflow-hidden w-full text-ellipsis">
-        <q v-if="tagline" class="text-sm leading-none opacity-80 min-h-5" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
-        <ReviewRatingBar :class="{'bg-black p-3 bg-opacity-40 rounded-md': rate_ratio != -1}" v-else :rate="rate_ratio" />
+      <div class="overflow-hidden w-full text-ellipsis min-h-5">
+        <q class="text-sm leading-none opacity-80" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
       </div>
       <div class="flex gap-2 items-center mt-2">
         <ProfilePicture class="w-11" :uid="creator.discord_id" :cutout="creator.pfp_cutout" />

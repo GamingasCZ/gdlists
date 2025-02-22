@@ -335,6 +335,7 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
         currentExtFolder.value[subfolderExtLevel.value] = currPath
         setExtCache(currentExtFolder.value, subfolderExtLevel.value)
 
+        nextTick(() => mediaContent.value?.children?.[0]?.focus())
         loadingImages.value = false
         return
     }
@@ -360,19 +361,18 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
     let content;
     if (hasCache) {
         content = [storageCache, imageCache]
-        nextTick(() => mediaContent.value?.children?.[0]?.focus())
         loadingImages.value = false
     }
     else content = await axios.get(import.meta.env.VITE_API + "/images.php", { params: getReq }).then(res => {
         loadingImages.value = false
-        nextTick(() => mediaContent.value?.children?.[0]?.focus())
         return res.data
     })
-
+    
     images.value = hasCache ? content[1][currPath[1]].images : content[1]
     folders.value = hasCache ? content[1][currPath[1]].folders : content[2]
     storage.value = content[0]
-
+    nextTick(() => mediaContent.value?.children?.[0]?.focus())
+    
     if (hasCache)
         thumbnails.value = content[1][currPath[1]].thumbnails
     else
@@ -420,33 +420,19 @@ const imageAction = (id: number, external: boolean, val: string | number) => {
 const holdingShift = ref(false)
 const modifierHeld = (e: KeyboardEvent) => {
     holdingShift.value = e.shiftKey
-
-    switch (e.key) {
-        case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-            e.preventDefault()
-            break;
-    }
-
     if (e.type != "keyup") return
 
     // Up folder
-    let currSelected = +(document?.activeElement?.dataset?.ind)
-    if (e.key == 'ArrowDown')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected+4, images.value.length+folders.value.length))].focus()
-    if (e.key == 'ArrowUp')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected-4, images.value.length+folders.value.length))].focus()
-    if (e.key == 'ArrowLeft')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected-1, images.value.length+folders.value.length))].focus()
-    if (e.key == 'ArrowRight')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected+1, images.value.length+folders.value.length))].focus()
-        
+    if (e.key == 'Backspace') {
+        if (currentTab.value == Tabs.Uploaded)
+            gotoFolder(currentFolder.value[subfolderLevel.value-1], subfolderLevel.value-1)
+        else
+            gotoFolder(currentExtFolder.value[subfolderExtLevel.value-1], subfolderExtLevel.value-1)
+    }
 
-    // Up folder
-    if (e.key == 'Backspace')
-        gotoFolder(currentFolder.value[subfolderLevel.value-1] , subfolderLevel.value-1)
+    // Switch Tabs
+    if (e.ctrlKey && e.altKey && e.key == 'e')
+        goToTab(!currentTab.value)
 
     // CTRL + X = move mode
     if (e.ctrlKey && e.key == 'x')
@@ -457,6 +443,33 @@ const modifierHeld = (e: KeyboardEvent) => {
         moveToFolder(imagesToMove.value)
     }
 
+    switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+            e.preventDefault()
+            break;
+        default: return
+    }
+
+    // Up folder
+    let contentLength
+    if (currentTab.value == Tabs.Uploaded)
+        contentLength = images.value.length+folders.value.length
+    else
+        contentLength = externalImages.value.length+extImgFolders.value.length
+
+    let currSelected = +(document?.activeElement?.dataset?.ind)
+    if (e.key == 'ArrowDown')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected+4, contentLength))].focus()
+    if (e.key == 'ArrowUp')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected-4, contentLength))].focus()
+    if (e.key == 'ArrowLeft')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected-1, contentLength))].focus()
+    if (e.key == 'ArrowRight')
+        mediaContent.value?.children[Math.max(0, Math.min(currSelected+1, contentLength))].focus()
+        
 }
 document.addEventListener("keydown", modifierHeld)
 document.addEventListener("keyup", modifierHeld)
@@ -776,8 +789,6 @@ const isSelected = (index: number) => {
 const randomAssElement = ref<HTMLDivElement>()
 let currentColor = "#000000"
 const modifyColors = (newColor: Color | null, reset?: boolean) => {
-
-    console.log(newColor)
     let assParent = randomAssElement.value?.parentElement
     if (reset && !newColor) {
         assParent?.style.setProperty("--primaryColor", null)
@@ -1009,7 +1020,7 @@ onMounted(() => {
                 @click.ctrl="selectImage(index)" @click.middle.exact="startRemoval(index)"
                 @mouseenter="imageHovering = index" @mouseleave="imageHovering = -1" :key="image"
                 class="relative h-24 bg-center rounded-sm transition-all duration-75 cursor-pointer border-lof-400 focus-within:outline-4 focus-within:outline focus-within:outline-lof-400 shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
-                :class="{ 'opacity-20 pointer-events-none': folderMoveMode && !isSelected(index), '!border-4': isSelected(index) }" :data-ind="index + folders.length">
+                :class="{ 'opacity-20 pointer-events-none': folderMoveMode && !isSelected(index), '!border-4': isSelected(index) }" :data-ind="index + (currentTab == Tabs.External ? extImgFolders.length : folders.length)">
                 <!-- Image settings -->
                 <button :key="image" tabindex="-1" v-show="imageOptsShown == index || imageHovering == index"
                     @click.stop="button = $event.target; imageOptsShown = index"

@@ -38,7 +38,7 @@ const settingsShown = ref(false)
 const showSettings = () => {
 	settingsShown.value = true
 	document.body.addEventListener("click", closeSettings, { capture: true })
-    nextTick(() => console.log(containerSettings.value?.[0]?.focus()))
+    nextTick(() => containerSettings.value?.[0]?.focus())
 }
 
 const forceHide = () => {

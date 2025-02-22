@@ -3,7 +3,7 @@ import { shortenYTLink } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, inject, onMounted, type Ref, ref } from "vue";
-import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
+import type { Level, LevelSearchResponse, PostData, ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
@@ -13,9 +13,10 @@ import DifficultyIcon from "../global/DifficultyIcon.vue";
 import LevelBackground from "./LevelBackground.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
+import RatingPicker from "../writer/RatingPicker.vue";
 
 const props = defineProps<{
-  levelArray: Level[]
+  levelArray: PostData
   index?: number;
   opened?: boolean;
   data?: Level;
@@ -241,24 +242,24 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
     </Dropdown>
 
     <div v-show="!editingRating" class="flex max-sm:flex-col">
-      <div class="flex flex-col justify-between items-center px-0.5 bg-black bg-opacity-20">
+      <div class="flex justify-between items-center px-0.5 py-2 bg-black bg-opacity-20 sm:flex-col">
   
         <!-- Move level -->
-        <div class="flex flex-col items-center">
-          <button class="p-1.5 button"
+        <div class="flex items-center sm:gap-2 sm:flex-col">
+          <button class="px-1.5 button"
               :title="$t('editor.moveUpTitle')" @click="emit('doMove', index!, index! - 1); openedPanel = 0;">
               <img class="w-6" src="../../images/moveUp.svg" alt="">
           </button>
           <input autocomplete="off" readonly
             class="w-10 mx-1 max-w-[20vw] cursor-move outline-none font-black text-xl rounded-md bg-black bg-opacity-40 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
             :value="index! + 1" @mousedown="mobileMoveLevel()" />
-          <button class="p-1.5 button"
+          <button class="px-1.5 button"
               :title="$t('editor.moveDownTitle')" @click="emit('doMove', index!, index! + 1); openedPanel = 0;">
               <img class="w-6" src="../../images/moveDown.svg" alt="">
           </button>
         </div>
   
-        <div class="flex flex-col gap-2 items-center pb-2">
+        <div class="flex gap-4 items-center max-sm:pr-2 sm:flex-col">
   
           <button @click="openedPanel = openedPanel != 1 ? 1 : 0" :title="$t('editor.levelColorTitle')" class="opacity-60 button">
             <img class="w-6" src="../../images/color.svg" alt="" />
@@ -271,17 +272,17 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
   
       </div>
   
-      <div class="flex flex-col gap-2 pr-2 mt-2 w-full overflow-clip">
+      <div class="flex flex-col gap-2 mt-2 w-full overflow-clip">
   
-        <div class="flex gap-2">
-          <div class="grid grid-cols-2 max-w-[50%] gap-2">
+        <div class="flex gap-2 max-sm:flex-col">
+          <div class="grid grid-cols-2 max-sm:mr-2 sm:max-w-[50%] gap-2">
             <!-- Level name -->
             <form @submit.prevent="searchLevel(false)" class="flex col-span-2 gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <button ref="difficultyButton" @click="diffPickerOpen = true" type="button" class="button">
                 <DifficultyIcon class="w-12" :difficulty="selectedDiff?.[0] ?? 0" :rating="selectedDiff?.[1] ?? 0" />
               </button>
               <input v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
-              <button type="submit" tabindex="-1" class="p-2">
+              <button :disabled="!levelArray.levels[index].levelName.length" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
                 <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
               </button>
             </form>
@@ -297,7 +298,7 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
             <!-- Level ID -->
             <form @submit.prevent="searchLevel(false)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-full text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
-              <button type="submit" tabindex="-1" class="p-2">
+              <button :disabled="!levelArray.levels[index].levelID.length" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
                 <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
               </button>
             </form>
@@ -305,14 +306,15 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
   
           <!-- Level rating -->
           <button
-            class="h-full grow button bg-[url(@/images/reviews/noRating.webp)] relative scrollRating"
+            @click="editingRating = true"
+            class="h-full min-h-16 grow button bg-[url(@/images/reviews/noRating.webp)] relative scrollRating"
           >
             
           </button>
         </div>
   
         <!-- Level tags -->
-        <div class="flex gap-3 items-center ml-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+        <div class="flex gap-3 items-center mx-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
           <button type="button" class="p-2 button">
             <img src="@/images/levelID.svg" alt="" class="w-8" />
           </button>
@@ -335,7 +337,17 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
     </div>
 
     <div v-show="editingRating">
-
+      <header @click="editingRating = false" class="flex gap-2 items-center p-1 pl-5 bg-black bg-opacity-40 transition-colors duration-75 cursor-pointer group hover:bg-opacity-60">
+        <img src="@/images/hideSidebar.svg" class="w-6 transition-transform duration-75 group-hover:-translate-x-2 group-active:translate-x-1" alt="">
+        <DifficultyIcon class="ml-2 w-12" :difficulty="levelArray.levels[index].difficulty[0]" :rating="levelArray.levels[index].difficulty[1]" />
+        <div>
+          <p class="text-2xl font-bold leading-tight">{{ levelArray.levels[index].levelName }}</p>
+          <p class="text-sm leading-none">{{ levelCreator }}</p>
+        </div>
+      </header>
+      <section>
+        <RatingPicker :value="levelArray.levels[index!]?.ratings?.[0]?.[0]" />
+      </section>
     </div>
 
   </section>

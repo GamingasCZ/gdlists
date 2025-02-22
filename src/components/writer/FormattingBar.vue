@@ -25,7 +25,6 @@ const doAction = inject<(a: FormattingAction, p: any, s: boolean) => void>("writ
 const showFormatting = ref(false)
 const showFormattingBar = (e) => {
 	let sel = document.getSelection()
-	console.log(sel)
 	showFormatting.value = sel && sel.type == 'Range' && sel.anchorNode?.parentElement?.classList.contains("regularParsing") && ["true", "inherit"].includes(sel.anchorNode?.parentElement?.contentEditable)
 
 	if (currentToolbar.value == 'previewing') return
