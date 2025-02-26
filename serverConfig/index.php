@@ -12,7 +12,7 @@ $endpoint = getEndpoint();
 <html lang="<?php echo $endpoint[0] ?>">
   <head>
     <meta charset="utf-8">
-    <link rel="icon" href="favicon.svg">
+    <link rel="icon" href="/gdlists/favicon.webp">
     <meta name="theme-color" content="#142019" id="siteTheme" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
