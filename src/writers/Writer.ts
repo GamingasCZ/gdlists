@@ -309,11 +309,11 @@ export const REVIEW: Writer = {
                     title: i18n.global.t('other.preview'),
                     icon: "view",
                     action: ["preview", 1],
-                    shortcutFixed: [Key.Alt, 'J'],
+                    shortcut: [Key.Alt, 'J'],
                     splitAfter: true,
                 },
                 {
-                    title: "Nadpisy",
+                    title: i18n.global.t('reviews.headings'),
                     icon: ["heading1", "heading2", "heading3"],
                     dropdownText: [i18n.global.t('reviews.title', [1]), i18n.global.t('reviews.title', [2]), i18n.global.t('reviews.title', [3])],
                     action: ["add", ["heading1", "heading2", "heading3"]],
@@ -321,9 +321,9 @@ export const REVIEW: Writer = {
                     splitAfter: true,
                 },
                 {
-                    title: "Zarovnání",
+                    title: i18n.global.t('other.alignment'),
                     icon: ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
-                    dropdownText: ["Vlevo", "Doprostřed", "Vpravo", "Do bloku"],
+                    dropdownText: [i18n.global.t('reviews.left'), i18n.global.t('reviews.center'), i18n.global.t('reviews.right'), i18n.global.t('reviews.justify')],
                     shortcut: [[Key.Ctrl, 'L'], [Key.Ctrl, 'E'], [Key.Ctrl, 'R'], [Key.Ctrl, 'J']],
                     action: ["align", ["left", "center", "right", "justify"]],
                     splitAfter: true,
@@ -373,7 +373,7 @@ export const REVIEW: Writer = {
             ],
             right: [
                 {
-                    title: "Přidat sloupec",
+                    title: i18n.global.t('reviews.addColumn'),
                     icon: "twoColumns",
                     component: ColumnSettingsButton
                 },
@@ -396,7 +396,7 @@ export const REVIEW: Writer = {
                 {
                     title: i18n.global.t('reviews.strike'),
                     icon: "strike",
-                    shortcut: [Key.Ctrl, 'T'],
+                    shortcut: [Key.Ctrl | Key.Alt, 'S'],
                     action: ["format", 2],
                 },
                 {

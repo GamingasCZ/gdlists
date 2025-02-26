@@ -96,17 +96,17 @@ const useLevel = () => {
         </div>
         
         <Transition name="fade">
-            <div v-if="levelShowing" class="max-md:flex">
-                <button @click="emit('exit')" class="flex top-5 left-1/2 gap-3 items-center p-3 text-2xl rounded-md opacity-50 transition-colors translate-x-24 -translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
+            <div v-if="levelShowing" class="justify-between max-md:flex">
+                <button @click="emit('exit')" class="flex top-5 left-1/2 gap-3 items-center p-3 text-2xl rounded-md opacity-50 transition-colors md:translate-x-24 md:-translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/close.svg" class="w-5 -scale-100" alt="">
                 </button>
 
-                <button class="flex left-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors -translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
+                <button class="flex left-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors md:-translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/play.svg" class="-scale-100" alt="">
                     {{ $t('other.previous') }}
                 </button>
 
-                <button @click="doScroll(true)" class="flex right-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors -translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
+                <button @click="doScroll(true)" class="flex right-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors md:-translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
                     {{ $t('other.next') }}
                     <img src="@/images/play.svg" alt="">
                 </button>
@@ -114,7 +114,7 @@ const useLevel = () => {
         </Transition>
         
         <Transition name="fade">
-            <button v-if="levelShowing" @click="useLevel()" class="flex absolute top-1/2 left-1/2 flex-col items-center -translate-x-1/2 -translate-y-1/2 group">
+            <button v-if="levelShowing" @click="useLevel()" class="flex absolute top-1/2 left-1/2 flex-col items-center -translate-x-1/2 -translate-y-1/2 max-md:pb-12 group">
                 <DifficultyIcon class="w-16 pointer-events-none" :difficulty="levelQueue[queuePos].difficulty" :rating="levelQueue[queuePos].rating" />
                 <h3 @click.stop="copyLevelID" class="text-2xl font-black leading-5 cursor-pointer group-hover:underline">{{ levelQueue[queuePos].levelName}}</h3>
                 <p class="font-bold">{{ levelQueue[queuePos].creator }}</p>

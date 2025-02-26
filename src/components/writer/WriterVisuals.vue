@@ -96,17 +96,17 @@ const resetColor = () => {
         </div>
 
         <div v-show="mainRolledOut && pageDetailsOpen" class="flex flex-col gap-2 p-4 text-xl">
-            <section class="flex justify-between items-center">
+            <section class="flex overflow-auto gap-8 justify-between items-center">
                 <div class="flex gap-2">
-                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                    <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
                         <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
-                        <span>Barva</span>
+                        <span>{{ $t('reviews.bgColor') }}</span>
                         <div class="flex gap-2">
                             <button @click="postData.whitePage = false" :title="$t('other.auto')" class="w-9 h-9 rounded-full bg-lof-200">A</button>
                             <button @click="postData.whitePage = true" class="w-9 h-9 rounded-full bg-[#ECE6D9]"></button>
-                            <button class="w-9 h-9 rounded-full bg-lof-100">
+                            <!-- <button class="w-9 h-9 rounded-full bg-lof-100">
                                 <img src="@/images/color.svg" class="mx-auto w-5" alt="">
-                            </button>
+                            </button> -->
                         </div>
                     </label>
                     <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
@@ -118,32 +118,30 @@ const resetColor = () => {
                             <button @click="postData.transparentPage = 1" :title="'Průhledná'" class="w-9 h-9 rounded-md border border-lof-300 button"></button>
                         </div>
                     </label>
+                </div>
+
+                <div class="flex gap-2">
                     <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
                         <p class="text-5xl opacity-20 pointer-events-none">Aa</p>
-                        <span>Písmo</span>
-                        <select class="text-base" name="" id="">
+                        <span>{{ $t('reviews.font') }}</span>
+                        <select class="text-base" v-model="postData.font" name="" id="">
                             <option v-for="font in FONTS" :value="font[1]">{{ font[0] }}</option>
                         </select>
                     </label>
                     
-                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                    <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
                         <img src="@/images/move.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
-                        <span>Wide page</span>
-                        <input :value="!postData.readerMode" @change="postData.readerMode = $event.target.value" type="checkbox" class="!m-0 button" name="" id="">
+                        <span>{{ $t('reviews.tintFont') }}</span>
+                        <input v-model="postData.fontTint" type="checkbox" class="!m-0 button" name="" id="">
                     </label>
                 </div>
 
-                <div class="flex gap-2">
-                    <!-- <label class="flex flex-col gap-1 items-center p-2 mr-4 bg-black bg-opacity-40 rounded-md">
-                        <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
-                        <span>Font Color</span>
-                        <div class="flex gap-2">
-                            <button @click="postData.whitePage = false" class="w-9 h-9 rounded-full border border-lof-400 bg-lof-200">A</button>
-                            <button class="w-9 h-9 rounded-full border border-lof-400 bg-lof-100">
-                                <img src="@/images/color.svg" class="mx-auto w-5" alt="">
-                            </button>
-                        </div>
-                    </label> -->
+                <div class="flex gap-2">                 
+                    <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
+                        <img src="@/images/move.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <span>{{ $t('reviews.wide') }}</span>
+                        <input :value="!postData.readerMode" @change="postData.readerMode = !postData.readerMode" type="checkbox" class="!m-0 button" name="" id="">
+                    </label>
                 </div>
                 
                 

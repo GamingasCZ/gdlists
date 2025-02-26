@@ -23,7 +23,7 @@ import { useI18n } from "vue-i18n";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
-import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import TagViewerPopup from "./levelViewer/TagViewerPopup.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
@@ -41,6 +41,7 @@ import ImageViewer from "./global/ImageViewer.vue";
 import LevelCardTableTable from "./global/LevelCardTableTable.vue";
 import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
+import WriterViewer from "./writer/WriterViewer.vue";
 
 const props = defineProps<{
   listID?: string
@@ -60,7 +61,7 @@ const loadContent = async () => {
   props.isReview ? await loadReview(randomData) : await loadList(randomData)
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", (e: MouseEvent) => {
-      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1) return
+      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1 || !loggedIn.value) return
       let postBottom = postContent.value?.clientHeight+postContent.value?.clientTop
       let currentScroll = document.documentElement.clientHeight + document.documentElement.scrollTop
       
@@ -623,37 +624,7 @@ const imageIndex = ref(-1)
       </div>
       
       <div ref="postContent" v-else v-show="!commentsShowing && !reviewLevelsOpen">
-        <!-- Review -->
-        <section id="reviewText" :style="{fontFamily: pickFont(LIST_DATA.data.font)}" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0 || SETTINGS.disableTL, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2 && !SETTINGS.disableTL, '!text-black': LIST_DATA.data.whitePage}">
-          <DataContainer
-              v-for="(container, index) in LIST_DATA.data.containers"
-              v-bind="CONTAINERS[container.type]"
-              :type="container.type"
-              :current-settings="container.settings"
-              :class="[CONTAINERS[container.type].styling ?? '']"
-              :style="{textAlign: container.align}"
-              :key="container.id"
-              :focused="false"
-              :text="container.data"
-              :editable="false"
-          >
-              <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
-                  <component
-                      v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                      :is="elements"
-                      v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                      :button-state="false"
-                      :settings="container.settings"
-                      :index="index"
-                      :id="container.id"
-                      :sub-index="subIndex"
-                      :key="container.id"
-                      :editable="false"
-                      :align="container.align"
-                  />
-              </div>
-          </DataContainer>
-        </section>
+        <WriterViewer :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
       </div>
 
       <!-- Guessing bottom padding -->

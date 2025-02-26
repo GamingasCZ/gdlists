@@ -582,7 +582,8 @@
     "pasteMemberTitle": "Vložit člena",
     "removeAll": "Smazáním poslední role se smaže collab!",
     "removeAllHelp": "Opravdu chceš pokračovat?",
-    "bluesky": "Bluesky účet"
+    "bluesky": "Bluesky účet",
+    "removeCollab": "Smazat collab"
   },
   "reviews": {
     "imgError": "Nepodařilo se načíst obrázek!",
@@ -631,7 +632,7 @@
     "paragraph": "Odstavec",
     "loadVideoFail": "Nepodařilo se načíst video!",
     "setVideo": "Vlož prosím YouTube odkaz.",
-    "font": "Písmo recenze",
+    "font": "Písmo",
     "thumbnail": "Miniatura",
     "ratingName": "Název hodnocení",
     "levelNo": "{0}\\. level nemá {1}!",
@@ -716,7 +717,19 @@
     "otherDrafts": "Další koncepty",
     "drafts2": "Rozepsané",
     "levtoRev": "Jaké levely budeš recenzovat?",
-    "levSelected": "Vybrán {count} level | Vybráno {count} levelů"
+    "levSelected": "Vybrán {count} level | Vybráno {count} levelů",
+    "headings": "Nadpisy",
+    "left": "Doleva",
+    "center": "Doprostřed",
+    "right": "Doprava",
+    "justify": "Do bloku",
+    "addColumn": "Přidat sloupec",
+    "rmElem": "Smazat prvek",
+    "elemSettings": "Možnosti prvku",
+    "wide": "Široká stránka",
+    "tintFont": "Obarvení písma",
+    "bgColor": "Barva pozadí",
+    "between": "Rozprostřít"
   },
   "review": {
     "columnSetting": "{0} sloupec",

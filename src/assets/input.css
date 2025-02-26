@@ -29,6 +29,8 @@
   --primaryColor: #0000;
   --secondaryColor: #0000;
   --brightGreen: #0000;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primaryColor) var(--siteBackground);
 }
 
 body {
@@ -198,7 +200,7 @@ dialog {
 }
 #reviewText[data-white-page=true] {
   transition: background 0.25s;
-  background: #ece6d9 !important;
+  background: #ece6d9;
 }
 
 @media print {

@@ -93,7 +93,7 @@ const clearViewed = () => {
     </component>
 
     <div
-      class="flex overflow-auto grid-cols-3 gap-3 ml-4 max-w-full"
+      class="flex overflow-auto grid-cols-3 gap-3 max-w-full sm:ml-4"
     >
       <p class="text-yellow-200" v-if="!lists?.length">
         - {{ emptyText }} -

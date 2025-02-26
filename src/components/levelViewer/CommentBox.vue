@@ -185,7 +185,7 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
         </pre>
         
         <!-- placeholder text -->
-        <p class="absolute top-2 left-4 opacity-30" v-if="placeholderActive && commentLength == 0">{{ placeholder }}</p>
+        <p class="absolute top-2 left-4 opacity-30" v-if="placeholderActive && commentLength == 0 && loggedIn">{{ placeholder }}</p>
 
         <!-- Not logged in notification -->
         <section v-if="!loggedIn" class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">

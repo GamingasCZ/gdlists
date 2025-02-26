@@ -268,6 +268,7 @@ export interface ReviewList {
   whitePage: boolean
   readerMode: boolean
   font: number
+  fontTint: boolean
 }
 
 export interface ReviewDraft {

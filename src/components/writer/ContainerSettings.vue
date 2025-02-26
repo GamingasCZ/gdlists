@@ -80,7 +80,7 @@ onBeforeUnmount(() => {
 
 <template>
     <Teleport :disabled="shown != 2" to="body">
-        <form ref="containerSettings" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] gap-2 -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
+        <form ref="containerSettings" @keyup.esc="forceHide()" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] gap-2 -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
             <template v-for="(_, key, index) in settingsArr" class="flex flex-col" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
                 <div v-if="containers[type].settings[index].type[0] == 0">
                     <label :for="key">{{ containers[type].settings[index].title }}</label><br>

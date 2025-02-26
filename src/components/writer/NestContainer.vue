@@ -71,9 +71,9 @@ const selectNestContainer = (e: Event) => {
 <template>
     <article
         @click.stop="selectNestContainer"
-        :style="{borderColor: borderColor, justifyContent: ['start', 'center', 'end'][settings.components[subIndex][settings.components[subIndex].findIndex(x => typeof x == 'number')]], maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
-        class="p-0.5 flex flex-col border border-opacity-30 transition-colors duration-75 min-w-10 grow min-h-8 basis-[min-content]"
-        :class="{'border-2 !border-opacity-100': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!border-none': !editable}"
+        :style="{outlineColor: borderColor, justifyContent: ['start', 'center', 'end'][settings.components[subIndex][settings.components[subIndex].findIndex(x => typeof x == 'number')]], maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
+        class="p-0.5 flex flex-col outline outline-1 transition-colors duration-75 min-w-10 grow min-h-8 basis-[min-content]"
+        :class="{'!outline-2': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!outline-none': !editable}"
     >
         <DataContainer
             v-for="(container, ind) in settings.components[subIndex].filter(x => x === Object(x))"

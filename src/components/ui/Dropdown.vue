@@ -42,7 +42,7 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 <template>
     <Transition name="fade" >
         <Teleport to="body">
-            <div ref="dropdown" @mousedown.prevent="" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
+            <div ref="dropdown" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
                 <div
                 class="flex flex-col max-w-max bg-opacity-90 rounded-md min-w-40 bg-lof-200" id="tooltip">
                     <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    

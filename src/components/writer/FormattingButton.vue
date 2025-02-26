@@ -55,7 +55,7 @@ const getAction = (holdingShift: boolean) => {
             :disabled="disabled"
         >
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
-            <div v-if="comboHeld & button?.shortcut?.[0]" class="absolute -bottom-4 left-1/2 z-10 px-2 py-1 text-sm rounded-sm -translate-x-1/2 bg-lof-100">{{ button.shortcut[1] }}</div>
+            <div v-if="comboHeld == button?.shortcut?.[0]" class="absolute -bottom-4 left-1/2 z-10 px-2 py-1 text-sm rounded-sm -translate-x-1/2 bg-lof-100">{{ button.shortcut[1] }}</div>
         </button>
 
         <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title && !SETTINGS.compactToolbar" :disabled="disabled" class="flex relative px-2 w-full rounded-b-md disabled:opacity-40" :class="{'hover:bg-black': button?.dropdownText}">

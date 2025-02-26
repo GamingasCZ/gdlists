@@ -137,7 +137,7 @@ const closeLevels = () => {
             <div class="grid gap-2 py-2 sm:grid-cols-2" v-else>
                 <LevelPreview
                     v-for="(level, ind) in levelsFetched"
-                    :class="{'border-4 border-lof-400': levSelected.includes(ind)}"
+                    :class="{'outline outline-4 outline-lof-400': levSelected.includes(ind)}"
                     @click.left.exact.ctrl.stop="selectLevel(ind)"
                     class="w-full"
                     :disable-link="2"

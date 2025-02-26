@@ -93,7 +93,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
     </div>
   </section>
 
-  <main id="homepageSections" class="flex flex-col overflow-clip items-start px-2 mx-auto max-w-[95rem]">
+  <main id="homepageSections" class="flex flex-col overflow-clip items-start sm:px-2 mx-auto max-w-[95rem]">
     <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
       content-type="@pinnedLists" :max-items="5" :list-type="3" />
     <ListSection class :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"

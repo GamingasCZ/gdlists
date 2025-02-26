@@ -25,7 +25,7 @@ import { i18n } from "@/locales";
 import { SETTINGS, hasLocalStorage } from "@/siteSettings";
 import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
 import { onMounted } from "vue";
-import { onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave, type RouteLocationAsPathGeneric } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
 import { addCEFormatting, deleteCESelection } from "./global/parseEditorFormatting";
@@ -181,6 +181,15 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
 
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
+        if (key == "twoColumns") {
+            containerData.extraComponents = parseInt(addTo[0])-3
+            
+            containerData.settings.components = Array(containerData.extraComponents+1).fill([])
+
+            containerData.align = addTo[2]
+            console.log(containerData)
+        }
+
         if (selectedContainer.value[0] == -1) {
             POST_DATA.value.containers
                 .push(containerData)
@@ -614,9 +623,8 @@ onMounted(() => {
         window.addEventListener("beforeunload", () => {
             if (reviewSave.value.backupID) saveDraft(false, true)
         })
-        onBeforeRouteLeave((from, to) => {
-            let res = doBackup(from, to)
-            if (res) saveDraft(false, true)
+        onBeforeRouteLeave((_, to) => {
+            saveDraft(false, to)
         })
 
         autosaveInterval = setInterval(() => {
@@ -644,7 +652,6 @@ onUnmounted(() => {
 })
 
 const preUpload = ref(false)
-const userDialog = ref()
 const writerRatings = ref<HTMLDivElement>()
 const openRatingHelp = () => {
     if (writerRatings) writerRatings.value.helpOpen = !writerRatings.value.helpOpen
@@ -715,9 +722,11 @@ const previewApply = () => {
 
 const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
 const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
-const saveDraft = (saveAs: boolean, leavingPage?: boolean) => {
+const saveDraft = (saveAs: boolean, leavingPage?: RouteLocationAsPathGeneric | boolean) => {
     if (!WRITER.value.drafts.draftabilityConstraint(POST_DATA.value)) return
     if (disableEdits.value) return
+    if (typeof leavingPage != "boolean")
+        console.log(leavingPage.path)
     let now = Date.now()
     let backupID;
     let preview = WRITER.value.drafts.parsePreview(POST_DATA.value)
@@ -774,8 +783,6 @@ const listPickerPick = (level: Level | Level[]) => {
         addReviewLevel(POST_DATA!, level, WRITER.value.general.maxLevels)
 }
 
-const highlightedCreateColumns = ref(-1)
-
 const goFullscreen = () => {
     if (document.fullscreenElement)
         document.exitFullscreen()
@@ -806,6 +813,8 @@ const toggleZenMode = () => {
         footer.style.display = null
     }
 }
+
+const collabEditor = ref<HTMLDivElement>()
 
 </script>
 
@@ -888,8 +897,18 @@ const toggleZenMode = () => {
             <ShortcutsPopup />
         </DialogVue>
 
-        <CollabEditor v-if="openDialogs.collabs[0]" :level-array="POST_DATA.levels" :index="openDialogs.collabs[1]"
-        :clipboard="collabClipboard" @close-popup="openDialogs.collabs[0] = false" />
+        <DialogVue :open="openDialogs.collabs[0]" @close-popup="openDialogs.collabs[0] = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :side-button-text="$t('navbar.saved')" :action="collabEditor?.openSaved">
+            <template #icon>
+                <img src="@/images/savedMobHeader.svg" alt="" class="-mr-1 w-4">
+            </template>
+            <CollabEditor
+                @close-popup="openDialogs.collabs[0] = false"
+                ref="collabEditor"
+                :level-array="POST_DATA.levels"
+                :index="openDialogs.collabs[1]"
+                :clipboard="collabClipboard"
+            />
+        </DialogVue>
 
         <!-- <Header :class="{ 'pointer-events-none opacity-20': disableEdits }" :editing="editing" :has-levels="hasLevels"
             :has-unrated="hasUnrated" :uploading="uploadInProgress" @update="updateReview"
@@ -901,7 +920,7 @@ const toggleZenMode = () => {
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
                 <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing"
                     :placeholder="WRITER.general.titlePlaceholder"
-                    class="text-6xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
+                    class="text-6xl max-sm:text-5xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" @click="tagline = true"
                     class="flex gap-2 justify-center items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
@@ -945,69 +964,55 @@ const toggleZenMode = () => {
             </section>
 
             <!-- Editor -->
-            <section v-show="previewContent == 0 || previewMode" ref="writer" v-if="WRITER.general.allowWriter"
-                :style="{ fontFamily: pickFont(POST_DATA.font) }" id="reviewText" :data-white-page="POST_DATA.whitePage"
-                class="p-2 mx-auto text-white rounded-md max-w-[90rem] w-full"
-                :class="{ 'readabilityMode': POST_DATA.readerMode, 'bg-transparent my-16 border-none shadow-none': zenMode, '!text-black': POST_DATA.whitePage, 'shadow-drop bg-lof-200 shadow-black': POST_DATA.transparentPage == 0 || SETTINGS.disableTL, 'outline-4 outline outline-lof-200': POST_DATA.transparentPage == 1, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': POST_DATA.transparentPage == 2 && !SETTINGS.disableTL }">
-                
-                <!-- Formatting -->
-                <FormattingBar v-show="!zenMode" :class="{ 'pointer-events-none opacity-20': disableEdits }"
-                    :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
-                    :bar-disabled="!previewMode"
-                    @add-container="(el, above) => addContainer(el, 0, false, above)"
-                    @set-alignment="setAlignment(selectedContainer[0], $event)"
-                    @split-paragraph="splitParagraph" :writer="WRITER" />
-                
-                <!-- Help when no components in writer -->
-                <component
-                    :is="WRITER.general.writerHelp"
-                    v-if="!POST_DATA.containers.length"
-                    @start-writing="startWriting"
+            <WriterViewer
+                v-if="WRITER.general.allowWriter"
+                @call-command="dataContainerCommand($event.command, $event.data)"
+                :zen-mode="zenMode"
+                :writer-data="POST_DATA"
+                :editable="previewMode"
+                :container-last-added="containerLastAdded"
+            >
+                <template #header>
+                    <!-- Formatting -->
+                    <FormattingBar v-show="!zenMode" :class="{ 'pointer-events-none opacity-20': disableEdits }"
+                        :selected-nest="selectedNestContainer" @set-formatting="setFormatting"
+                        :bar-disabled="!previewMode"
+                        @add-container="(el, above) => addContainer(el, 0, false, above)"
+                        @set-alignment="setAlignment(selectedContainer[0], $event)"
+                        @split-paragraph="splitParagraph" :writer="WRITER" />
                     
-                    @preview-draft="previewDraft(drafts[$event].reviewData, [drafts[$event].createDate, drafts[$event].saveDate], true)"
-                    @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
+                    <!-- Help when no components in writer -->
+                    <component
+                        :is="WRITER.general.writerHelp"
+                        v-if="!POST_DATA.containers.length"
+                        @start-writing="startWriting"
+                        
+                        @preview-draft="previewDraft(drafts[$event].reviewData, [drafts[$event].createDate, drafts[$event].saveDate], true)"
+                        @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
 
-                    :inverted="POST_DATA.whitePage"
-                    :writer="WRITER"
-                    :drafts="drafts"
-                />
-
-                <WriterViewer
-                    @call-command="dataContainerCommand($event.command, $event.data)"
-                    :zen-mode="zenMode"
-                    :writer-data="POST_DATA"
-                    :editable="previewMode"
-                    :container-last-added="containerLastAdded"
-                />
-
-                <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
-                    <button @click="saveDraft(false)" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
-                        <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
-                        <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
-                        <span v-else>{{ pretty }}</span>
-                    </button>
-                    <button @click="openDialogs.shortcuts = true" class="py-1 text-white rounded-md opacity-40 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
-                        <img src="@/images/key.svg" class="inline mr-4 w-6" alt="">
-                        <span>{{ $t('reviews.keysh') }}</span>
-                    </button>
-                    <button @click="goFullscreen()" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
-                        <img src="@/images/zen.svg" class="inline mr-4 w-6" alt="">
-                        <span>{{ $t('reviews.zenMode') }}</span>
-                    </button>
-                </section>
-                <!-- <div class="text-xs" >
-                    <p  class="mt-2 text-center">
-                        <span class="opacity-30 text-inherit">{{ $t('review.unsaved') }}</span> <span
-                            @click="" class="underline opacity-60 cursor-pointer">{{ $t('other.save')
-                            }}</span>
-                    </p>
-                    <p v-else class="mt-2 italic text-center">
-                        <span class="opacity-30 text-inherit">{{ $t('review.savedLast') }}: </span> <span
-                            @click="saveDraft(false)" class="ml-3 not-italic underline opacity-60 cursor-pointer">{{
-                            $t('other.save') }}</span>
-                    </p>
-                </div> -->
-            </section>
+                        :inverted="POST_DATA.whitePage"
+                        :writer="WRITER"
+                        :drafts="drafts"
+                    />
+                </template>
+                <template #footer>
+                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
+                        <button @click="saveDraft(false)" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                            <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
+                            <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
+                            <span v-else>{{ pretty }}</span>
+                        </button>
+                        <button @click="openDialogs.shortcuts = true" class="py-1 text-white rounded-md opacity-40 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                            <img src="@/images/key.svg" class="inline mr-4 w-6" alt="">
+                            <span>{{ $t('reviews.keysh') }}</span>
+                        </button>
+                        <button @click="goFullscreen()" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                            <img src="@/images/zen.svg" class="inline mr-4 w-6" alt="">
+                            <span>{{ $t('reviews.zenMode') }}</span>
+                        </button>
+                    </section>
+                </template>
+            </WriterViewer>
                 
             <!-- Decoration -->
             <WriterVisuals v-show="!zenMode" :postData="POST_DATA" />

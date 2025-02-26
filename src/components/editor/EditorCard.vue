@@ -173,8 +173,6 @@ const openDialogs = inject<Ref<object>>("openedDialogs")
 const openCollabTools = () => {
   if (isOldCollab.value)
     emit('throwError', mess[0])
-  else if (/iPhone|Android/i.test(navigator.userAgent))
-    emit('throwError', mess[1])
   else
     openDialogs.collabs = [true, props.index]
 }
@@ -282,7 +280,7 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
                 <DifficultyIcon class="w-12" :difficulty="selectedDiff?.[0] ?? 0" :rating="selectedDiff?.[1] ?? 0" />
               </button>
               <input v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
-              <button :disabled="!levelArray.levels[index].levelName.length" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
+              <button :disabled="!levelArray.levels?.[index]?.levelName" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
                 <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
               </button>
             </form>
@@ -298,7 +296,7 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
             <!-- Level ID -->
             <form @submit.prevent="searchLevel(false)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-full text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
-              <button :disabled="!levelArray.levels[index].levelID.length" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
+              <button :disabled="!levelArray.levels?.[index]?.levelID" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
                 <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
               </button>
             </form>

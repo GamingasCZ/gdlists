@@ -17,13 +17,13 @@ const writerShortcuts = [
     {
         shortcut: [Key.Alt | Key.Shift, 'P'],
         action: ["containerOptions"],
-        title: "Možnosti prvku",
+        title: i18n.global.t('reviews.elemSettings'),
         icon: GearIcon
     },
     {
         shortcut: [Key.Alt | Key.Shift, 'Q'],
         action: ["containerDelete"],
-        title: "Smazat prvek",
+        title: i18n.global.t('reviews.rmElem'),
         icon: TrashIcon
     },
     {
@@ -65,15 +65,24 @@ const getShortcuts = (toolbar) => {
     for (const key in toolbar) {
         for (const key2 in toolbar[key]) {
             for (const button of toolbar[key][key2]) {
-                let icon = `${BASE}/formatting/${typeof button?.icon == 'object' ? button.icon[0] : button.icon}.svg`
 
-                if (button?.shortcut)
-                    keyShortcuts.push([button?.shortcut, button?.action, button?.title || button?.tooltip, icon])
+                if (button?.shortcut) {
+                    if (typeof button.shortcut?.[0] == 'object') {
+                        for (let i = 0; i < button.shortcut.length; i++) {
+                            let icon = `${BASE}/formatting/${button.icon[i]}.svg`
+                            keyShortcuts.push([button.shortcut[i], [button.action[0], button.action[1][i]], button?.dropdownText?.[i], icon])
+                        }
+                    }
+                    else {
+                        let icon = `${BASE}/formatting/${typeof button?.icon == 'object' ? button.icon[0] : button.icon}.svg`
+                        keyShortcuts.push([button.shortcut, button.action, button?.title || button?.tooltip, icon])
+                    }
+                }
     
                 // Fixed shortcuts apply only if a given toolbar is active
                 // TODO
-                if (button?.shortcutFixed && true)
-                    keyShortcuts.push([button?.shortcutFixed, button?.action, button.title || button?.tooltip, icon])
+                // if (button?.shortcutFixed && true)
+                //     keyShortcuts.push([button?.shortcutFixed, button?.action, button.title || button?.tooltip, icon])
             }
         }
     }

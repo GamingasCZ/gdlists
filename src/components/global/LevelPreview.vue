@@ -132,7 +132,7 @@ const selectLevel = () => {
     <img v-if="background" :style="{mask: 'linear-gradient(90deg,transparent,black)'}" class="isolate absolute inset-0 opacity-40 mix-blend-luminosity" :src="`${uc}/userContent/${uploaderID}/${background}.webp`" alt="">
     
     <div class="flex flex-col justify-center items-center opacity-100 transition-opacity duration-75 ease-out group-hover:opacity-0">
-      <DifficultyIcon v-once class="z-10 mt-4 w-18":difficulty="difficulty ?? levelDiff ?? 0" :rating="rating ?? levelRating ?? 0" />
+      <DifficultyIcon v-once class="z-10 mt-4 w-18" :difficulty="difficulty ?? levelDiff ?? 0" :rating="rating ?? levelRating ?? 0" />
   
       <section class="flex z-10 flex-col justify-center">
         <h1 class="text-3xl font-extrabold"><img src="@/images/collab.svg" v-if="collabMemberCount > 0" class="inline mr-2 w-4 -translate-y-1">{{ levelName }}</h1>

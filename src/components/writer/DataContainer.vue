@@ -48,11 +48,12 @@ const makeNextParagraph = (e: KeyboardEvent) => {
 	}
 }
 
-const doFocusText = () => {
+const doFocusText = (k: boolean) => {
 	if (!props.editable) return
 
 	mainText.value?.focus()
-	emit('hasFocus', mainText.value)
+	if (!k)
+		emit('hasFocus', mainText.value)
 }
 
 const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
@@ -108,7 +109,7 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 </script>
 
 <template>
-	<div :data-type="type" @click.right.exact.prevent="emit('hasFocus', mainText!); focus = true; editable ? nextTick(() => rmbSettingOpen($event)) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative scroll-mt-10 reviewContainer min-h-4">
+	<div :data-type="type" @click.right.exact.prevent="emit('hasFocus', mainText!); focus = true; editable ? nextTick(() => rmbSettingOpen($event)) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative min-w-48 scroll-mt-10 reviewContainer min-h-4">
 		<hr class="absolute right-[-6px] border-lof-400 h-full border-r-4" :class="{'!border-none': dependentOnChildren || !(focus && focused)}">
 		<p
 			v-if="canEditText"
@@ -121,7 +122,7 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 			v-html="previewText"
 			data-modf="0"
 			:data-hastext="!hasText && editable"
-			class="w-full selection:bg-lof-400 selection:text-black dataContainer min-w-24 whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
+			class="w-full selection:bg-lof-400 selection:text-black dataContainer whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
 			:placeholder="placeholder"
 			:contenteditable="editable"
 			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word', textIndent: currentSettings?.indent ? '2rem' : '', fontSize: fontSizes[currentSettings?.size ?? 0]}"
@@ -143,7 +144,7 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 			:shown="doShowSettings"
 			:mouse-pos="mousePos"
 			@pressed-button="emit('settingsButton', $event)"
-			@hid-settings="doShowSettings = false"
+			@hid-settings="doShowSettings = false; doFocusText(true)"
 			@remove="emit('removeContainer')"
 			@move="emit('moveContainer', $event)"
 			@reset-pos="mousePos = [0, 0]"

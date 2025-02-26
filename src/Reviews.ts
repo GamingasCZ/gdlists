@@ -40,7 +40,8 @@ export const REVIEW_EXTRAS: () => ReviewList = () => ({
     language: SETTINGS.value.language ? 'en' : 'cs',
     whitePage: false,
     readerMode: true,
-    font: 0
+    font: 0,
+    fontTint: false,
 })
 
 export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel, maxLevels = 10) => {

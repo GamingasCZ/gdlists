@@ -85,7 +85,7 @@ const hovering = ref(false)
         @mouseleave="hovering = false"
         @vue:mounted="onResize.observe(carousel!)"
         ref="carousel"
-        class="overflow-x-auto carousel touch-pan-x group overflow-y-clip"
+        class="overflow-x-auto carousel group overflow-y-clip"
         :class="{'pb-1.5': editable}"
     >
         <Transition name="fade">
@@ -96,7 +96,7 @@ const hovering = ref(false)
 
 
         <div v-if="editable" class="absolute inset-0 z-10 w-full">
-            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="512" :editable="editable"></Resizer>
+            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="960" :editable="editable"></Resizer>
         </div>
 
         <section class="flex gap-2 items-center" :style="{'justify-content': flexNames[align]}" :class="{'flex-wrap': settings.overflow, 'w-max': !settings.overflow}">
