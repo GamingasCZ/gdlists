@@ -33,6 +33,10 @@ const getAction = (holdingShift: boolean) => {
     return obj
 }
 
+const titleSwitchable = ref(0)
+const swapTitle = (ind: number) => titleSwitchable.value = ind
+
+const extComponent = ref<HTMLButtonElement>()
 
 </script>
 
@@ -46,7 +50,7 @@ const getAction = (holdingShift: boolean) => {
         ref="but"
         class="flex relative flex-col items-center w-max rounded-md transition-colors duration-75 group disabled:opacity-40 hover:bg-opacity-40 hover:bg-black"
     >
-        <component v-if="button.component" :is="button.component" :disabled="disabled" />
+        <component v-if="button.component" ref="extComponent" @modify-title="swapTitle" :is="button.component" :disabled="disabled" />
         <button
             v-else
             @mousedown.prevent=""
@@ -55,11 +59,21 @@ const getAction = (holdingShift: boolean) => {
             :disabled="disabled"
         >
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
-            <div v-if="comboHeld == button?.shortcut?.[0]" class="absolute -bottom-4 left-1/2 z-10 px-2 py-1 text-sm rounded-sm -translate-x-1/2 bg-lof-100">{{ button.shortcut[1] }}</div>
         </button>
+        <div v-if="comboHeld == button?.shortcut?.[0]" class="absolute -bottom-4 left-1/2 z-10 px-2 py-1 text-sm rounded-sm -translate-x-1/2 bg-lof-100">{{ button.shortcut[1] }}</div>
 
-        <button @click.stop="button?.dropdownText ? (dropdownOpen = !dropdownOpen) : emit('clicked', getAction())" v-if="button?.title && !SETTINGS.compactToolbar" :disabled="disabled" class="flex relative px-2 w-full rounded-b-md disabled:opacity-40" :class="{'hover:bg-black': button?.dropdownText}">
-            <span v-show="button.title" :class="{'font-bold': button.bold, 'group-hover:opacity-0': button?.dropdownText}" class="text-sm transition-opacity duration-75">{{ button.title }}</span>
+        <button
+            @click.stop="
+                button?.dropdownText ?
+                    (dropdownOpen = !dropdownOpen) :
+                    (button.component ?
+                        extComponent?.clickAction() :
+                        emit('clicked', getAction())
+                    )" 
+                v-if="(button.title || button?.titleSwitchable) && !SETTINGS.compactToolbar"
+                @mousedown.prevent=""
+                :disabled="disabled" class="flex relative px-2 w-full rounded-b-md disabled:opacity-40" :class="{'hover:bg-black': button?.dropdownText}">
+            <span :class="{'font-bold': button.bold, 'group-hover:opacity-0': button?.dropdownText}" class="text-sm transition-opacity duration-75">{{ button?.title ?? button?.titleSwitchable?.[titleSwitchable] }}</span>
             <img
                 v-if="button?.dropdownText"
                 src="@/images/dropdown.svg"

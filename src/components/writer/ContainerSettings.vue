@@ -12,23 +12,20 @@ const emit = defineEmits<{
     (e: "resetPos"): void
 }>()
 
-const postData = inject<Ref<PostData>>("postData")!
-const containers = inject<Containers>("settingsTitles")
-
 const props = defineProps<{
     settingsArr: ContainerSettings[]
     type: string
     shown: false | 1 | 2 // 1 - button open, 2 - right-click open
     mousePos: [number, number]
+    index: number
 }>()
 
-watch(props, () => {
-    if (props.shown) showSettings()
-    if (props.mousePos[0]) {
-        nextTick(() => {
-            window.addEventListener("resize", positionFloating)
-            positionFloating()
-        })
+const postData = inject<Ref<PostData>>("postData")!
+const containers = inject<Containers>("settingsTitles")
+const shortcut = inject<Ref<number[]>>("containerSettingsShown", ref([0,-1]))
+watch(shortcut, () => {
+    if (shortcut.value[0] == 3 && shortcut.value[1] == props.index) {
+        showSettings()
     }
 })
 
@@ -38,8 +35,18 @@ const settingsShown = ref(false)
 const showSettings = () => {
 	settingsShown.value = true
 	document.body.addEventListener("click", closeSettings, { capture: true })
-    nextTick(() => containerSettings.value?.[0]?.focus())
+    nextTick(() => {
+        if (props.mousePos[0]) {
+            window.addEventListener("resize", positionFloating)
+            positionFloating()
+            nextTick(() => containerSettings.value?.[0]?.focus())
+        }
+    })
 }
+
+defineExpose({
+    showSettings
+})
 
 const forceHide = () => {
     settingsShown.value = false
@@ -67,7 +74,7 @@ const positionFloating = () => {
 
     let bodyWidth = document.body.clientWidth
     let elPos = containerSettings.value?.getBoundingClientRect()!
-    float.value = [Math.max(0, Math.min(props.mousePos[0], bodyWidth)-elPos.width), props.mousePos[1]]
+    float.value = [Math.max(0, Math.min(props.mousePos[0], bodyWidth)-elPos.width/2), props.mousePos[1]]
 }
 
 onBeforeUnmount(() => {
@@ -80,7 +87,7 @@ onBeforeUnmount(() => {
 
 <template>
     <Teleport :disabled="shown != 2" to="body">
-        <form ref="containerSettings" @keyup.esc="forceHide()" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] gap-2 -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
+        <form ref="containerSettings" @keydown.prevent.esc="forceHide()" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] gap-2 -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
             <template v-for="(_, key, index) in settingsArr" class="flex flex-col" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
                 <div v-if="containers[type].settings[index].type[0] == 0">
                     <label :for="key">{{ containers[type].settings[index].title }}</label><br>

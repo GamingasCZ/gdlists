@@ -114,6 +114,6 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
       :list-type="1" />
 
     <ListSection :header-name="$t('homepage.official')" :empty-text="$t('homepage.listsNonexistent')"
-      content-type="oldLists" :list-type="3" />
+      content-type="oldLists" />
   </main>
 </template>

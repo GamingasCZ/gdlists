@@ -63,7 +63,7 @@ const clearViewed = () => {
 </script>
 
 <template>
-  <section v-if="lists?.length" class="flex flex-col mt-6 max-w-full max-w-8xl">
+  <section v-if="lists?.length" class="flex flex-col mt-6 w-full max-w-7xl">
     <component :is="extraAction ? (extraAction?.startsWith('@') ? 'button' : 'RouterLink') : 'div'" :to="extraAction" @click="extraAction?.startsWith('@') ? clearViewed() : null" class="flex gap-4 justify-between items-center px-1 py-2 my-2 w-full text-left text-white rounded-md" :class="{'hover:bg-white hover:bg-opacity-10': extraAction}">
       <!-- <img src="../../images/wave.svg" class="w-10 max-sm:w-8" alt="" /> -->
       <span class="w-full text-3xl font-bold">{{ headerName }}</span>
@@ -71,29 +71,10 @@ const clearViewed = () => {
         <img v-if="extraAction?.startsWith('@')" src="@/images/del.svg" class="w-7 invert" alt="">
         <img v-else src="@/images/arrow.svg" class="w-4" alt="">
       </component>
-
-      <!-- Link button -->
-
-      <!-- <RouterLink
-        v-if="extraText?.length! > 0 && extraAction?.startsWith('/')"
-        :to="extraAction"
-        class="flex gap-2 px-2 py-0.5 rounded-md button bg-lof-300 selectOutline"
-        >
-        <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
-      </RouterLink> -->
-
-      <!-- Action button -->
-      <!-- <button
-        v-if="extraText?.length! > 0 && extraAction?.startsWith('@')"
-        class="flex gap-2 px-2 py-0.5 rounded-md button bg-lof-300 selectOutline"
-        @click="clearViewed()"
-      >
-        <img :src="getImage()" alt="" class="w-5" />{{ extraText }}
-      </button> -->
     </component>
 
     <div
-      class="flex overflow-auto grid-cols-3 gap-3 max-w-full sm:ml-4"
+      class="flex overflow-auto grid-cols-3 gap-3 max-w-full"
     >
       <p class="text-yellow-200" v-if="!lists?.length">
         - {{ emptyText }} -

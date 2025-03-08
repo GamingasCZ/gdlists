@@ -22,7 +22,7 @@ import router, { timeLastRouteChange } from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
 import TextEditor from "./global/TextEditor.vue";
 import { i18n } from "@/locales";
-import { SETTINGS, hasLocalStorage } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
 import { onMounted } from "vue";
 import { onBeforeRouteLeave, type RouteLocationAsPathGeneric } from "vue-router";
@@ -37,6 +37,8 @@ import { LIST, REVIEW } from "@/writers/Writer";
 import HoldButton from "./ui/HoldButton.vue";
 import { shortcutListen, shortcutUnload } from "@/writers/shortcuts";
 import ShortcutsPopup from "./writer/ShortcutsPopup.vue";
+import containers from "./writer/containers";
+import ZenModeHelp from "./writer/ZenModeHelp.vue";
 
 const props = defineProps<{
     type: number
@@ -66,7 +68,6 @@ provide("levelsRatingsData", getLevelsRatings)
 
 let isNowHidden = false
 
-const writer = ref<HTMLDivElement>()
 const embedsContent = ref()
 provide("batchEmbeds", embedsContent)
 
@@ -108,7 +109,8 @@ const openDialogs = reactive({
     editError: false,
     userAdder: [false, 0],
     drafts: false,
-    shortcuts: false
+    shortcuts: false,
+    zenHelp: false
 })
 
 const previewMode = ref(true)
@@ -116,13 +118,18 @@ const previewMode = ref(true)
 const collabClipboard = ref([])
 provide("openedDialogs", openDialogs)
 
-const selectedContainer = ref<[number, HTMLDivElement | null]>([-1, null])
+const selectedContainer = ref<[number]>([-1])
 provide("selectedContainer", selectedContainer)
 
-const selectedLevel = ref()
-
+/**
+ * Array detailing the current selected column elements
+ * @property {number} 0 - Topmost selected container, same as selectedContainer
+ * @property {number} 1 - The column which is selected
+ * @property {number} 2 - The element inside the column which is selected
+ */
 const selectedNestContainer = ref([-1, -1, -1])
 provide("selectedNestContainer", selectedNestContainer)
+selectedNestContainer.value[0]
 
 
 const levelHashes = ref<number[]>([])
@@ -135,7 +142,7 @@ provide("settingsTitles", CONTAINERS)
 const newID = (offset = 0) => (Date.now() + offset + JSON.stringify(POST_DATA.value).length) >> 1
 
 const containerLastAdded = ref(0)
-const addContainer = (key: string, addTo?: number, returnOnly = false, above = false) => {
+const addContainer = (key: string, addTo?: number | number[], returnOnly = false, above = false) => {
     // Count of all components
     let contAm = 0
     let thisContAm = 0
@@ -182,12 +189,13 @@ const addContainer = (key: string, addTo?: number, returnOnly = false, above = f
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
         if (key == "twoColumns") {
-            containerData.extraComponents = parseInt(addTo[0])-3
+            containerData.extraComponents = addTo[0]-2
             
-            containerData.settings.components = Array(containerData.extraComponents+1).fill([])
+            containerData.settings.components = []
+            for (let i = 0; i < addTo[0]; i++)
+                containerData.settings.components.push([addTo[1]])
 
             containerData.align = addTo[2]
-            console.log(containerData)
         }
 
         if (selectedContainer.value[0] == -1) {
@@ -283,7 +291,8 @@ const columnCommand = (index: number) => {
             nest.extraComponents += 1
             break;
         case 6: // fit width / fill space
-            column[10] = !Boolean(column[10])
+            let flagIndex = column.findIndex(x => typeof x == 'boolean')
+            column[flagIndex] = !column[flagIndex]
             break;
         case 7:
             if (nest.settings.components.length == 2) {
@@ -316,7 +325,7 @@ const doFormatting = (ind: number) => {
 	addCEFormatting(formatIndicies[ind], el, false)
 }
 
-const containerSettingsShown = ref(0)
+const containerSettingsShown = ref([0, -1])
 provide("containerSettingsShown", containerSettingsShown)
 
 function doAction(action: FormattingAction | EditorAction, param: any, holdingShift = false) {
@@ -336,6 +345,11 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
 		case 'splitParagraph':
 			splitParagraph()
             break;
+		case 'columnCreate':
+			let columnButton = document.querySelector("#columnCreatorButton") as HTMLButtonElement
+            if (columnButton)
+                columnButton.click()
+            break;
 
         case 'save':
             saveDraft(false, false);
@@ -347,10 +361,30 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             openDialogs.drafts = true
             break;
         case 'containerOptions':
-            containerSettingsShown.value = 1
+            containerSettingsShown.value = [3, selectedContainer.value[0]]
             break;
         case 'shortcutsMenu':
             openDialogs.shortcuts = true
+            break;
+        case 'resizeSmaller':
+        case 'resizeBigger':
+            let type = POST_DATA.value.containers?.[selectedContainer.value[0]]?.type
+            if (type == "twoColumns") {
+                type = POST_DATA.value.containers?.[selectedContainer.value[0]]?.settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].type
+                if (containers[type]?.resizeableProperty !== undefined) {
+                    let minmax = containers[type].settings[1].valueRange
+                    POST_DATA.value.containers[selectedContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings[containers[type].resizeableProperty] = Math.min(minmax[1], Math.max(minmax[0], POST_DATA.value.containers[selectedContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings[containers[type].resizeableProperty] + (action == 'resizeBigger' ? 25 : -50)))
+                }
+            }
+            if (containers[type]?.resizeableProperty !== undefined) {
+                // SETTINGS INDEX OF THE RESIZABLE VALUE MUST BE ONE, damn you gamingas
+                let minmax = containers[type].settings[1].valueRange
+                POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] = Math.min(minmax[1], Math.max(minmax[0], POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] + (action == 'resizeBigger' ? 25 : -50)))
+            }
+            break;
+        case 'moveUp':
+        case 'moveDown':
+            moveContainer(selectedContainer.value[0], action == 'moveUp' ? -1 : 1);
             break;
 	}
 }
@@ -373,16 +407,8 @@ const setFormatting = () => {
 }
 
 const moveToParagraph = (currentContainerIndex: number) => {
-    if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type == "default") {
-        selectedContainer.value[0] += 1
-        dataContainers.value[selectedContainer.value[0]].doFocusText()
-    }
-    else {
-        let sel = selectedContainer.value[0] + 1
-
+    if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type != "default")
         addContainer("default")
-        nextTick(() => dataContainers.value[sel].doFocusText())
-    }
 }
 
 const startWriting = () => {
@@ -391,6 +417,8 @@ const startWriting = () => {
 }
 
 const moveContainer = (index: number, by: number) => {
+    if (index+by < 0) return
+    
     let data = POST_DATA.value.containers[index]
     POST_DATA.value.containers.splice(index, 1)
     POST_DATA.value.containers.splice(index + by, 0, data)
@@ -425,8 +453,20 @@ const modifyImageURL = (newUrl: string) => {
         }
     }
     // Level card background
-    else if (openDialogs.imagePicker[1] == WriterGallery.LevelCardBG) {
-        POST_DATA.value.levels[openDialogs.imagePicker[2]].BGimage.image[0] = newUrl
+    else if (openDialogs.imagePicker[1] == WriterGallery.LevelImage) {
+        if (!POST_DATA.value.levels?.[openDialogs.imagePicker[2]]?.screenshots)
+            POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots = []
+
+        console.log(newUrl)
+        if (typeof newUrl == 'string')
+            newUrl = [newUrl]
+        newUrl.forEach(img => {
+            POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots.push([
+                0,
+                img,
+                ""
+            ])
+        })
     }
     // Review thumbnail
     else if (openDialogs.imagePicker[1] == WriterGallery.ReviewThumbnail) {
@@ -518,7 +558,8 @@ const uploadReview = () => {
         else reviewUploadErrors(res.data[1])
 
         uploadInProgress.value = false
-        removeDraft(reviewSave.value.backupID)
+        if (!SETTINGS.value.draftNoRemove)
+            removeDraft(reviewSave.value.backupID)
     })
         .catch(() => {
             errorStamp.value = Date.now()
@@ -579,17 +620,6 @@ const updateReview = () => {
         })
 }
 
-let mStarted = [-1, -1]
-const setMouseStart = (e: MouseEvent) => mStarted = [e.x, e.y]
-const unfocusContainer = (e: MouseEvent) => {
-    let rect = writer.value?.getBoundingClientRect()
-    if (!rect) return
-    if (mStarted[0] < rect.x || mStarted[1] < rect.y || mStarted[0] > rect.x + rect?.width || mStarted[1] > rect.y + rect?.height) {
-        selectedContainer.value = [-1, null]
-        selectedNestContainer.value = [-1, -1, -1]
-    }
-}
-
 let autosaveInterval: number
 onMounted(() => {
     if (props.editing) {
@@ -636,17 +666,13 @@ onMounted(() => {
         }, SETTINGS.value.autosave * 1000)
     }
 
-    document.body.addEventListener("mousedown", setMouseStart)
-    document.body.addEventListener("click", unfocusContainer)
-
     shortcutListen(WRITER.value.toolbar, doAction)
 
     document.documentElement.addEventListener("fullscreenchange", toggleZenMode)
 })
 
 onUnmounted(() => {
-    document.body.removeEventListener("click", unfocusContainer)
-    document.body.removeEventListener("mousedown", setMouseStart)
+    
     document.documentElement.removeEventListener("fullscreenchange", toggleZenMode)
     shortcutUnload()
 })
@@ -722,7 +748,7 @@ const previewApply = () => {
 
 const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
 const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
-const saveDraft = (saveAs: boolean, leavingPage?: RouteLocationAsPathGeneric | boolean) => {
+const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | boolean = false) => {
     if (!WRITER.value.drafts.draftabilityConstraint(POST_DATA.value)) return
     if (disableEdits.value) return
     if (typeof leavingPage != "boolean")
@@ -800,6 +826,7 @@ const toggleZenMode = () => {
         navbar.style.display = "none"
         footer.style.display = "none"
 
+        openDialogs.zenHelp = true
         document.documentElement.style.setProperty("--siteBackground", "#060606");
         document.documentElement.style.setProperty("--primaryColor", "#1c1c1c");
         document.documentElement.style.setProperty("--secondaryColor", "#1c1c1c");
@@ -808,13 +835,14 @@ const toggleZenMode = () => {
     }
     else {
         modifyListBG(POST_DATA.value?.pageBGcolor)
-        document.exitFullscreen()
+        try {
+            document.exitFullscreen()
+        }
+        catch (_) {}
         navbar.style.display = null
         footer.style.display = null
     }
 }
-
-const collabEditor = ref<HTMLDivElement>()
 
 </script>
 
@@ -877,8 +905,8 @@ const collabEditor = ref<HTMLDivElement>()
         <DialogVue :open="openDialogs.imagePicker[0]" @close-popup="openDialogs.imagePicker[0] = false"
             :title="$t('reviews.bgImage')" :width="dialog.large">
             <ImageBrowser
-                :disable-external="[WriterGallery.ReviewThumbnail, WriterGallery.LevelCardBG].includes(openDialogs.imagePicker[1])"
-                :allow-multiple-picks="openDialogs.imagePicker[1] == WriterGallery.CarouselItem"
+                :disable-external="[WriterGallery.ReviewThumbnail, WriterGallery.LevelImage].includes(openDialogs.imagePicker[1])"
+                :allow-multiple-picks="[WriterGallery.CarouselItem, WriterGallery.LevelImage].includes(openDialogs.imagePicker[1])"
                 :unselectable="false"
                 @close-popup="openDialogs.imagePicker[0] = false"
                 @pick-image="modifyImageURL"
@@ -908,6 +936,10 @@ const collabEditor = ref<HTMLDivElement>()
                 :index="openDialogs.collabs[1]"
                 :clipboard="collabClipboard"
             />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.zenHelp && !viewedPopups.zenModeHelp" :width="dialog.medium" header-disabled>
+            <ZenModeHelp @close="openDialogs.zenHelp = false" />
         </DialogVue>
 
         <!-- <Header :class="{ 'pointer-events-none opacity-20': disableEdits }" :editing="editing" :has-levels="hasLevels"
@@ -996,8 +1028,8 @@ const collabEditor = ref<HTMLDivElement>()
                     />
                 </template>
                 <template #footer>
-                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 sm:grid-cols-3">
-                        <button @click="saveDraft(false)" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 text-lg sm:grid-cols-3">
+                        <button @click="saveDraft(false)" class="py-1 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                             <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
                             <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
                             <span v-else>{{ pretty }}</span>
@@ -1015,7 +1047,7 @@ const collabEditor = ref<HTMLDivElement>()
             </WriterViewer>
                 
             <!-- Decoration -->
-            <WriterVisuals v-show="!zenMode" :postData="POST_DATA" />
+            <WriterVisuals v-show="!zenMode" :writer-enabled="WRITER.general.allowWriter" :postData="POST_DATA" />
 
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">
@@ -1027,7 +1059,7 @@ const collabEditor = ref<HTMLDivElement>()
                 <button :disabled="uploadInProgress" v-if="!editing" @click="startUpload()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
                     <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                     <img v-else src="@/images/upload.svg" alt="" class="w-7">
-                    <span class="max-sm:hidden">{{ $t('editor.upload') }}</span>
+                    <span>{{ $t('editor.upload') }}</span>
                 </button>
                 <div class="flex gap-2" v-else>
                     <button :disabled="uploadInProgress" @click="updateReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">

@@ -82,7 +82,7 @@ const autoResize = () => {
     <div ref="self" class="relative rounded-lg group" :class="{'border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
         <slot :width="width" />
         
-        <button v-if="editable" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
+        <button v-if="editable" tabindex="-1" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
         :class="{'-right-1': gizmoPos == 'corner', 'left-1/2': gizmoPos == 'vertical'}"
         ></button>
     </div>

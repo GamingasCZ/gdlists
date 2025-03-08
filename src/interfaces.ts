@@ -198,6 +198,7 @@ export interface Level {
   platf: boolean;
   ratings?: [number[], number[]]
   BGimage?: LevelBackground
+  screenshots?: string[]
 }
 
 export interface ListBackground {
@@ -241,6 +242,7 @@ export interface viewedPopup {
   oldListsRedirectHelp?: boolean
   pickedStyling?: boolean
   twitterAd?: boolean
+  zenModeHelp?: boolean
 }
 
 export interface ytSearchDetails {
@@ -342,7 +344,7 @@ export interface LocalNotification {
 
 export enum WriterGallery {
   ReviewBackground = -1,
-  LevelCardBG = -5,
+  LevelImage = -5,
   ReviewThumbnail = -2,
   CarouselItem = -3,
   CarouselModifyItem = -4,
@@ -361,8 +363,8 @@ export interface Setting {
 
 export type PostData = ReviewList & LevelList
 
-export type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph'
-export type EditorAction = 'save' | 'containerDelete' | 'drafts' | 'containerOptions' | 'shortcutsMenu'
+export type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph' | 'columnCreate'
+export type EditorAction = 'save' | 'containerDelete' | 'drafts' | 'containerOptions' | 'shortcutsMenu' | 'resizeSmaller' | 'resizeBigger' | 'moveUp' | 'moveDown'
 
 export interface FormattingButton {
 	title: string

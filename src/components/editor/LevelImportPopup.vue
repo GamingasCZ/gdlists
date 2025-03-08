@@ -95,9 +95,8 @@ const gdInput = ref<HTMLInputElement>()
 
 <template>
     <!-- Main -->
+    <TabBar @switched-tab="tab = $event" :tab-names="[$t('editor.iglists'), $t('editor.idlist')]" />
     <main v-if="page == 0" id="importForm" class="relative w-full h-80">
-
-      <TabBar @switched-tab="tab = $event" :tab-names="[$t('editor.iglists'), $t('editor.idlist')]" />
       <!-- In-game lists -->
       <div v-if="tab == 0">
         <h2 class="mt-2 text-xl font-bold text-center">{{ $t('editor.ingame') }}</h2>

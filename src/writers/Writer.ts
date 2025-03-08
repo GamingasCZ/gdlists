@@ -12,7 +12,8 @@ export enum Key {
     None = 0,
     Ctrl = 1,
     Shift = 2,
-    Alt = 4
+    Alt = 4,
+    Raw = 8
 }
 
 const LANGUAGES = [[i18n.global.t('settingsMenu.czech'), "cs"],
@@ -23,21 +24,24 @@ const LANGUAGES = [[i18n.global.t('settingsMenu.czech'), "cs"],
                    [i18n.global.t('other.russian'), "ru"],
                    [i18n.global.t('other.other'), "ot"]]
 
-export const FONTS: [string, number][] = [["Poppins", 0],
+export const FONTS: [string, number][] = [["Sofia Sans", 0],
                ["Serif", 1],
                ["Sans-Serif", 2],
                ["Monospace", 3],
-               ["Systémové", 4],
-               ["Pusab", 5]]
+               [i18n.global.t('reviews.systemFont'), 4]]
 type Post = 'list' | 'review'
 type PostKeys = keyof (ReviewList & LevelList)
-export type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph'
+export type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph' | 'columnCreate'
 
 export interface ToolbarButton {
     /**
      * Text under the icno
     */
     title?: string,
+    /**
+     * Title that can be modified from within a custom component
+    */
+    titleSwitchable?: string[],
     /**
      * Text that appears on button hover
      */
@@ -58,6 +62,10 @@ export interface ToolbarButton {
      * Global shortcut that get's called no mater the toolbar
      */
     shortcut?: [Key, string] | [Key, string][],
+    /**
+     * Dictates, if the keys of the shortcut should use a keycode instead of a key. Useful for ignoring a keyboard layout.
+     */
+    shortcutRaw?: boolean
     /**
      * Shortcuts that gets called only, if its button is in the current toolbar
      */
@@ -275,6 +283,12 @@ export const REVIEW: Writer = {
     },
     settings: [
         {
+            name: i18n.global.t('reviews.desc'),
+            control: "component",
+            controlOptions: SettingsDescription,
+            affects: "description",
+        },
+        {
             name: i18n.global.t('reviews.private'),
             control: "cbox",
             affects: "private",
@@ -317,7 +331,8 @@ export const REVIEW: Writer = {
                     icon: ["heading1", "heading2", "heading3"],
                     dropdownText: [i18n.global.t('reviews.title', [1]), i18n.global.t('reviews.title', [2]), i18n.global.t('reviews.title', [3])],
                     action: ["add", ["heading1", "heading2", "heading3"]],
-                    shortcut: [[Key.Ctrl, '1'], [Key.Ctrl, '2'], [Key.Ctrl, '3']],
+                    shortcut: [[Key.Ctrl, 'Digit1'], [Key.Ctrl, 'Digit2'], [Key.Ctrl, 'Digit3']],
+                    shortcutRaw: true,
                     splitAfter: true,
                 },
                 {
@@ -373,7 +388,9 @@ export const REVIEW: Writer = {
             ],
             right: [
                 {
-                    title: i18n.global.t('reviews.addColumn'),
+                    titleSwitchable: [i18n.global.t('reviews.addColumn'), i18n.global.t('reviews.editColumn')],
+                    shortcut: [Key.Alt | Key.Shift, 'C'],
+                    action: ["columnCreate"],
                     icon: "twoColumns",
                     component: ColumnSettingsButton
                 },

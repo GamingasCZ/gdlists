@@ -5,6 +5,9 @@ import GearIcon from "@/images/gear.svg?url"
 import TrashIcon from "@/images/trash.svg?url"
 import KeyIcon from "@/images/key.svg?url"
 import EditIcon from "@/images/edit.svg?url"
+import ResizeIcon from "@/images/fullscreen.svg?url"
+import MoveUpIcon from "@/images/moveUp.svg?url"
+import MoveDownIcon from "@/images/moveDown.svg?url"
 import { ref } from "vue";
 
 const writerShortcuts = [
@@ -37,6 +40,30 @@ const writerShortcuts = [
         action: ["drafts"],
         title: i18n.global.t('reviews.drafts'),
         icon: EditIcon
+    },
+    {
+        shortcut: [Key.Alt, '-'],
+        action: ["resizeSmaller"],
+        title: i18n.global.t('reviews.decSize'),
+        icon: ResizeIcon
+    },
+    {
+        shortcut: [Key.Alt, '+'],
+        action: ["resizeBigger"],
+        title: i18n.global.t('reviews.incSize'),
+        icon: ResizeIcon
+    },
+    {
+        shortcut: [Key.Alt | Key.Shift, 'ArrowUp'],
+        action: ["moveUp"],
+        title: i18n.global.t('reviews.elUp'),
+        icon: MoveUpIcon
+    },
+    {
+        shortcut: [Key.Alt | Key.Shift, 'ArrowDown'],
+        action: ["moveDown"],
+        title: i18n.global.t('reviews.elDown'),
+        icon: MoveDownIcon
     },
 ]
 
@@ -75,7 +102,7 @@ const getShortcuts = (toolbar) => {
                     }
                     else {
                         let icon = `${BASE}/formatting/${typeof button?.icon == 'object' ? button.icon[0] : button.icon}.svg`
-                        keyShortcuts.push([button.shortcut, button.action, button?.title || button?.tooltip, icon])
+                        keyShortcuts.push([button.shortcut, button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon])
                     }
                 }
     
@@ -88,13 +115,13 @@ const getShortcuts = (toolbar) => {
     }
 }
 
-const isValidShortcut = (combo: number, key: string) => {
+const isValidShortcut = (combo: number, key: string, code: string) => {
     for (let i = 0; i < keyShortcuts.length; i++) {
-        if (keyShortcuts[i][0][0] == combo && keyShortcuts[i][0][1] == key)
+        if (keyShortcuts[i][0][0] == combo && (keyShortcuts[i][0][1] == key || keyShortcuts[i][0][1] == code))
             return keyShortcuts[i][1]
         if (typeof keyShortcuts[i][0][0] == 'object')
             for (let j = 0; j < keyShortcuts[i][0].length; j++) {
-                if (keyShortcuts[i][0][j][0] == combo && keyShortcuts[i][0][j][1] == key)
+                if (keyShortcuts[i][0][j][0] == combo && (keyShortcuts[i][0][j][1] == key || keyShortcuts[i][0][j][1] == code))
                     return [keyShortcuts[i][1][0], keyShortcuts[i][1][1][j]]
             }
     }
@@ -107,10 +134,9 @@ var isShortcut = null
 export const comboHeld = ref(Key.None)
 function blockNativeShortcuts(e: KeyboardEvent) {
 	let combo = getCombo(e)
-	let key = getKey(e)
     comboHeld.value = combo
 
-	if (combo != Key.None && (isValidShortcut(combo, key))) {
+	if (combo != Key.None && (isValidShortcut(combo, e.key.toUpperCase(), e.code))) {
 		e.preventDefault()
 	}
 }
@@ -118,27 +144,14 @@ function blockNativeShortcuts(e: KeyboardEvent) {
 function checkForShortcut(e: KeyboardEvent) {
     isShortcut = null
 	let currCombo = getCombo(e)
-	let key = getKey(e)
     comboHeld.value = currCombo
 
 	let f: string[] | boolean;
-	if (currCombo != Key.None && (f = isValidShortcut(currCombo, key)))
+	if (currCombo != Key.None && (f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
         actionsFun(...f)
 
 }
 
 function getCombo(e: KeyboardEvent) {
     return +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
-}
-
-
-function getKey(e: KeyboardEvent) {
-    let key = e.key.toUpperCase()
-	switch (key) {
-		case '+': key = '1'; break;
-		case 'Ě': key = '2'; break;
-		case 'Š': key = '3'; break;
-		default: break;
-	}
-    return key
 }

@@ -67,8 +67,10 @@ const Help = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
-const screenWidth = ref(window.innerWidth)
-const sessionsDialog = ref<HTMLDivElement>()
+const refresh = () => window.location.reload()
+const refreshLangShown = ref(false)
+const currLang = SETTINGS.value.language
+
 </script>
 
 <template> 
@@ -128,11 +130,15 @@ const sessionsDialog = ref<HTMLDivElement>()
       <span class="text-center">{{ $t("settingsMenu.language") }}</span>
       <div class="flex gap-1 items-center ml-2">
         <span class="text-xl translate-y-0.5">{{ ["&#x1F1E8;&#x1F1FF;", "&#x1f1fa;&#x1f1f8;"][SETTINGS.language] }}</span>
-        <select name="lang" class="pr-2 pl-0 ml-2 text-sm bg-transparent border-b-white rounded-none !border-b-2 border-0" v-model="SETTINGS.language" @change="setLanguage(SETTINGS.language)">
+        <select name="lang" class="pr-2 pl-0 ml-2 text-sm bg-transparent border-b-white rounded-none !border-b-2 border-0" v-model="SETTINGS.language" @change="refreshLangShown = currLang != SETTINGS.language">
           <option :value="0">{{ $t("settingsMenu.czech") }}</option>
           <option :value="1">{{ $t("settingsMenu.english") }}</option>
         </select>
       </div>
+      <button v-if="refreshLangShown" @click="refresh" class="flex gap-2 justify-center items-center p-1 mx-2 mt-2 rounded-md button bg-lof-400">
+        <img src="@/images/replay.svg" class="w-5 invert" alt="">
+        <span class="text-lg font-black text-black">{{ $t('other.refresh') }}</span>
+      </button>
     </section>
 
     <button

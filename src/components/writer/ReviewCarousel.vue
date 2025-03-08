@@ -6,6 +6,7 @@ import ReviewImage from './ReviewImage.vue';
 import ReviewVideo from './ReviewVideo.vue';
 import Resizer from '../global/Resizer.vue';
 import { flexNames } from '@/Reviews';
+import containers from './containers';
 
 const props = defineProps<{
     index: number
@@ -74,6 +75,7 @@ const onResize = new ResizeObserver(() => {
     buttonsShown.value = carousel.value?.scrollWidth > carousel.value?.parentElement.offsetWidth
 })
 const hovering = ref(false)
+const size = containers.addCarousel.settings[1].valueRange
 
 </script>
 
@@ -89,14 +91,14 @@ const hovering = ref(false)
         :class="{'pb-1.5': editable}"
     >
         <Transition name="fade">
-            <button v-show="hovering && buttonsShown && end != 1" @click="scrollCarousel(-0.75, $event)" class="flex absolute left-2 top-1/2 z-10 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
+            <button v-show="hovering && buttonsShown && end != 1" @click="scrollCarousel(-0.75, $event)" class="flex absolute left-2 top-1/2 z-20 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
                 <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
             </button>
         </Transition>
 
 
         <div v-if="editable" class="absolute inset-0 z-10 w-full">
-            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="960" :editable="editable"></Resizer>
+            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="size[0]" :max-size="size[1]" :editable="editable"></Resizer>
         </div>
 
         <section class="flex gap-2 items-center" :style="{'justify-content': flexNames[align]}" :class="{'flex-wrap': settings.overflow, 'w-max': !settings.overflow}">

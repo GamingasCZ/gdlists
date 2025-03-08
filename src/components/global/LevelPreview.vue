@@ -12,6 +12,7 @@ import axios from "axios";
 import ProfilePicture from "./ProfilePicture.vue";
 import { summonNotification } from "../imageUpload";
 import { i18n } from "@/locales";
+import { doFavoriteLevel } from "./levelCard";
 
 const emit = defineEmits<{
   (e: 'favorite', data: FavoritedLevel): void
@@ -36,6 +37,7 @@ const props = defineProps<{
   favorited?: boolean
   collabMemberCount: number
   disableLink: boolean | 2
+  disableFave: boolean
 
   A_gameplay?: string | null
   A_decoration?: string | null
@@ -61,7 +63,6 @@ const getGradient = () => {
 const round = (x) => parseFloat(parseFloat(x).toFixed(1))
 
 const addToTemporaryList = () => {
-  console.log(props)
   selectedLevels.value.push({
     levelName: props.levelName, 
     creator: props.creator,
@@ -87,16 +88,18 @@ const copyID = () => {
 }
 
 const favoriteLevel = () => {
-  let level = {
-    levelName: props.levelName,
-    creator: props.creator,
-    levelDiff: [props.difficulty, props.rating],
-    levelColor: props.color || makeColor(),
-    levelID: props.levelID,
-    listID: props.listID,
-    timeAdded: Date.now()
-  }
-  emit('favorite', level)
+  // let level = {
+  //   levelName: props.levelName,
+  //   creator: props.creator,
+  //   levelDiff: props.difficulty,
+  //   levelRating: props.rating,
+  //   levelColor: props.color || makeColor(),
+  //   levelID: props.levelID,
+  //   listID: props.listID,
+  //   timeAdded: Date.now()
+  // }
+  // emit('favorite', level)
+  doFavoriteLevel(props, props.favorited, listColor.value)
 }
 
 const selectLevel = () => {
@@ -124,7 +127,7 @@ const selectLevel = () => {
   <component
     :is="disableLink ? 'button' : 'button'"
     :to="`/${listID!}${goto}`"
-    class="flex relative flex-col items-center px-2 w-full max-w-xs text-center text-white overflow-clip rounded-md cursor-pointer min-w-64 group"
+    class="flex relative flex-col items-center px-2 w-full max-w-sm text-center text-white overflow-clip rounded-md cursor-pointer min-w-64 group"
     :style="{
       background: getGradient(),
     }"
@@ -132,8 +135,8 @@ const selectLevel = () => {
     <img v-if="background" :style="{mask: 'linear-gradient(90deg,transparent,black)'}" class="isolate absolute inset-0 opacity-40 mix-blend-luminosity" :src="`${uc}/userContent/${uploaderID}/${background}.webp`" alt="">
     
     <div class="flex flex-col justify-center items-center opacity-100 transition-opacity duration-75 ease-out group-hover:opacity-0">
-      <DifficultyIcon v-once class="z-10 mt-4 w-18" :difficulty="difficulty ?? levelDiff ?? 0" :rating="rating ?? levelRating ?? 0" />
-  
+      <DifficultyIcon v-once class="z-10 mt-4 w-18" :difficulty="difficulty || levelDiff?.[0] || levelDiff || 0" :rating="rating || levelDiff?.[1] ||levelRating || 0" />
+      
       <section class="flex z-10 flex-col justify-center">
         <h1 class="text-3xl font-extrabold"><img src="@/images/collab.svg" v-if="collabMemberCount > 0" class="inline mr-2 w-4 -translate-y-1">{{ levelName }}</h1>
         <p class="">{{ creator }}</p>
@@ -166,7 +169,7 @@ const selectLevel = () => {
       <a @click.stop="" :href="`https://gdbrowser.com/${levelID}`" target="_blank" class="p-2 py-1 m-2 text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img src="@/images/modGDB.svg" class="inline mr-2 w-8">{{ $t('listViewer.dispOnGDB') }}</a>
     </div>
 
-    <button @click.stop="favoriteLevel" :class="{'disabled': favorited}" class="absolute top-1 right-1 z-10 button">
+    <button v-if="!disableFave" @click.stop="favoriteLevel" :class="{'disabled': favorited}" class="absolute top-1 right-1 z-10 button">
       <img src="@/images/star.svg" class="w-7" alt="">
     </button>
 

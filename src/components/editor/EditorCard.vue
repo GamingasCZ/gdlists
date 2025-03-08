@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { shortenYTLink } from "@/Editor";
+import { currentUID, shortenYTLink } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, inject, onMounted, type Ref, ref } from "vue";
-import type { Level, LevelSearchResponse, PostData, ytSearchDetails } from "../../interfaces";
+import { WriterGallery, type Level, type LevelSearchResponse, type PostData, type ytSearchDetails } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
@@ -14,6 +14,7 @@ import LevelBackground from "./LevelBackground.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
 import RatingPicker from "../writer/RatingPicker.vue";
+import { DEFAULT_RATINGS } from "@/Reviews";
 
 const props = defineProps<{
   levelArray: PostData
@@ -208,6 +209,40 @@ const editingRating = ref(false)
 const difficultyButton = ref<HTMLButtonElement>()
 const diffPickerOpen = ref(false)
 const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
+
+const base = import.meta.env.BASE_URL
+
+const pickImages = () => {
+  openDialogs.imagePicker = [true, WriterGallery.LevelImage, props.index]
+}
+const pickingColor = ref(false)
+const changeCardColors = (newColors: [number, number, number]) =>
+(props.levelArray.levels[props.index!].color = [
+  newColors[0],
+  0.5,
+  parseFloat((newColors[2] / 64).toFixed(2)),
+]);
+
+const addingVideo = ref(false)
+const videoInput = ref<HTMLInputElement>()
+const userContent = import.meta.env.VITE_USERCONTENT
+
+const levelMedia = computed(() => {
+  let allMedia = []
+  let video = props.levelArray.levels[props.index]?.video
+  let bgImage = props.levelArray.levels[props.index]?.BGimage
+  let screenshots = props.levelArray.levels[props.index]?.screenshots
+  if (video)
+    allMedia.push([1,video,""])
+  if (bgImage && bgImage[0])
+    allMedia.push([0,bgImage,""])
+
+  if (screenshots)
+  allMedia = allMedia.concat(screenshots)
+
+  return allMedia
+})
+
 </script>
 
 <template>
@@ -259,11 +294,11 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
   
         <div class="flex gap-4 items-center max-sm:pr-2 sm:flex-col">
   
-          <button @click="openedPanel = openedPanel != 1 ? 1 : 0" :title="$t('editor.levelColorTitle')" class="opacity-60 button">
+          <button @click="pickingColor = !pickingColor" :title="$t('editor.levelColorTitle')" :class="{'!opacity-100': pickingColor}" class="opacity-60 button">
             <img class="w-6" src="../../images/color.svg" alt="" />
           </button>
           
-          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="opacity-60 button">
+          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="bg-black bg-opacity-40 opacity-60 button">
             <img class="w-7" src="../../images/trash.svg" alt="" />
           </button>
         </div>
@@ -313,38 +348,107 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
   
         <!-- Level tags -->
         <div class="flex gap-3 items-center mx-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-          <button type="button" class="p-2 button">
-            <img src="@/images/levelID.svg" alt="" class="w-8" />
+          <button type="button" class="p-2 pr-1 button">
+            <img src="@/images/levelID.svg" alt="" class="w-10" />
           </button>
           <div id="tagbox" class="relative w-full" contenteditable="true">
           </div>
         </div>
   
-        
+        <!-- Screenshot carousel & Color Picker -->
         <div class="flex overflow-scroll gap-2 p-2 w-full bg-black bg-opacity-20">
-          <button class="flex flex-col gap-3 items-center p-3 px-6 text-white text-opacity-20 rounded-md border-2 border-white border-opacity-20 border-dashed button">
-            <img src="@/images/image.svg" class="w-8 opacity-20" alt="">
-            Přidat náhled
-          </button>
-          <button class="flex flex-col gap-3 items-center p-3 px-6 text-white text-opacity-20 rounded-md border-2 border-white border-opacity-20 border-dashed button">
-            <img src="@/images/image.svg" class="w-8 opacity-20" alt="">
-            Přidat média
-          </button>
+          <div v-show="!pickingColor" class="flex gap-2 min-w-max">
+            <div v-for="(image, ind) in levelMedia" class="relative duration-200 group">
+              <img class="object-cover object-center h-28 rounded-md transition-all group-hover:brightness-50 aspect-video shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+              <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button @click="levelArray.levels[index]?.screenshots.splice(ind, 1)" class="absolute top-1 right-1">
+                  <img src="@/images/gear.svg" class="w-5" alt="">
+                </button>
+                <button @click="levelArray.levels[index]?.screenshots.splice(ind, 1)" class="flex absolute bottom-1 left-1 text-sm">
+                  <img src="@/images/image.svg" class="mr-2 w-5" alt="">
+                  Jako náhled
+                </button>
+                <button @click="levelArray.levels[index]?.screenshots.splice(ind, 1)" class="absolute right-1 bottom-1">
+                  <img src="@/images/trash.svg" class="w-5" alt="">
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div v-show="!pickingColor" class="p-3 rounded-md border-2 border-white border-dashed opacity-10 transition-opacity mix-blend-plus-lighter hover:opacity-40">
+
+            <!-- Add buttons -->
+            <div v-if="!addingVideo" class="flex flex-col gap-1 min-w-max text-left">
+              <button @click="pickImages" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
+                <img :src="`${base}/formatting/showImage.svg`" class="w-6" alt="">
+                {{ $t('reviews.addImage') }}
+              </button>
+              <hr class="m-0 opacity-50">
+              <button @click="addingVideo = true" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
+                <img :src="`${base}/formatting/addVideo.svg`" class="w-6" alt="">
+                {{ $t('reviews.addVideo') }}
+              </button>
+            </div>
+            
+            <!-- Video link input -->
+            <div v-else class="p-1">
+              <div class="flex items-center mb-2">
+                <button @click="addingVideo = false" class="p-2 mr-2 rounded-md hover:bg-white hover:bg-opacity-20">
+                  <img src="@/images/back.svg" class="w-6" alt="">
+                </button>
+                <img :src="`${base}/formatting/addVideo.svg`" class="mr-1 w-6 pointer-events-none" alt="">
+                <span>{{ $t('reviews.addVideo') }}</span>
+              </div>
+              <input @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" placeholder="Vlož odkaz na YouTube video">
+            </div>
+
+          </div>
+
+          <ColorPicker v-show="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
+          :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
         </div>
+        
       </div>
     </div>
 
     <div v-show="editingRating">
       <header @click="editingRating = false" class="flex gap-2 items-center p-1 pl-5 bg-black bg-opacity-40 transition-colors duration-75 cursor-pointer group hover:bg-opacity-60">
-        <img src="@/images/hideSidebar.svg" class="w-6 transition-transform duration-75 group-hover:-translate-x-2 group-active:translate-x-1" alt="">
+        <img src="@/images/back.svg" class="w-6 transition-transform duration-75 group-active:-translate-x-2" alt="">
         <DifficultyIcon class="ml-2 w-12" :difficulty="levelArray.levels[index].difficulty[0]" :rating="levelArray.levels[index].difficulty[1]" />
         <div>
-          <p class="text-2xl font-bold leading-tight">{{ levelArray.levels[index].levelName }}</p>
-          <p class="text-sm leading-none">{{ levelCreator }}</p>
+          <p class="text-2xl font-bold leading-tight">{{ levelArray.levels[index].levelName || $t('other.unnamesd') }}</p>
+          <p class="text-sm leading-none">{{ levelCreator || $t('other.unnamesd') }}</p>
         </div>
       </header>
-      <section>
-        <RatingPicker :value="levelArray.levels[index!]?.ratings?.[0]?.[0]" />
+      <section class="flex flex-col gap-4 p-4">
+        <RatingPicker
+          :key="DEFAULT_RATINGS[3].name"
+          :color="DEFAULT_RATINGS[3].color"
+          @mod-rating="levelArray.levels[index].ratings[0][i] = $event"
+          :value="levelArray.levels?.[index]?.ratings?.[0]?.[i]"
+          :default-name="DEFAULT_RATINGS[3].name"
+          :rating="DEFAULT_RATINGS[3]"
+        />
+        <p class="text-center">Taky bys měl ohodnotit...</p>
+        <!-- <RatingPicker
+          v-for="(rating, i) in DEFAULT_RATINGS"
+          :key="rating.name"
+          :color="rating.color"
+          @mod-rating="levelArray.levels[index].ratings[0][i] = $event"
+          :value="levelArray.levels?.[index]?.ratings?.[0]?.[i]"
+          :default-name="rating.name"
+          :rating="rating"
+        /> -->
+        <!-- <RatingPicker :default-name="rating.name" :value="reviewData.levels?.[pickedLevel]?.ratings?.[0]?.[index]" @mod-rating="reviewData.levels[pickedLevel].ratings[0][index] = $event" :rating="rating" /> -->
+        <RatingPicker
+          v-for="(rating, i) in levelArray.ratings"
+          :key="rating.name"
+          
+          @mod-rating="levelArray.levels[index].ratings[1][i] = $event"
+          :value="levelArray.levels?.[index]?.ratings?.[1]?.[i]"
+          v-model:name="levelArray.ratings[index].name"
+          editable
+        />
       </section>
     </div>
 
@@ -390,7 +494,6 @@ const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
 .scrollRating {
     @apply relative overflow-clip transition-colors;
     animation: scroll 5s infinite linear;
-    mask: radial-gradient(black, transparent 80%);
 }
 .scrollRating:hover {
     @apply bg-[#6f1a4921] brightness-150;

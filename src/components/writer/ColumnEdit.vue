@@ -14,10 +14,10 @@ const columnCommand = inject<(ind: number) => void>("columnCommand")!
 </script>
 
 <template>
-    <div class="m-2">
+    <div @mousedown.prevent="" class="m-2">
         <div class="flex flex-col gap-3 justify-center mb-5 text-xl text-center text-white">
             <div v-for="(setting, index) in [$t('other.add'), $t('other.duplicate')]">
-                <h2>{{ $t('review.columnSetting', [setting]) }}</h2>
+                <h2>{{ $t('reviews.columnSetting', [setting]) }}</h2>
                 <div>
                     <button :disabled="postData.containers[selectedNest[0]].settings.components.length > 9" @click="columnCommand(index*2)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md disabled:opacity-40 hover:bg-opacity-60 aspect-square">
                         <img src="@/images/moveUp.svg" class="mx-auto w-5 -rotate-90 button" alt="">

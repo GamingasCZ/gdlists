@@ -44,14 +44,14 @@ emit('customColor', `linear-gradient(9deg, ${colorRight}, ${colorLeft})`)
 </script>
 
 <template>
-      <button v-if="!editor && levelID != -1 && collabData[3]" class="flex absolute top-1 left-1 z-50 gap-3 px-2 py-1 w-max bg-black bg-opacity-40 rounded-md button disabled:opacity-30" @click="collabSaved = !collabSaved; saveCollab(index)" :disabled="!hasLStorage">
+      <button v-if="!editor && levelID != -1 && collabData[3]" class="flex absolute left-1 z-50 gap-3 px-2 py-1 my-1 w-max bg-black bg-opacity-40 rounded-md button disabled:opacity-30" @click="collabSaved = !collabSaved; saveCollab(index)" :disabled="!hasLStorage">
         <img v-if="!collabSaved" src="@/images/savedMobHeader.svg" class="w-6" alt="">
         <img v-else src="@/images/trash.svg" class="w-6" alt="">
         <span class="max-sm:hidden">{{ collabSaved ? $t('collabTools.removeSaved') : $t('other.save') }}</span>
       </button>
       <div v-else></div>
     <!-- Graphs --> 
-    <div class="flex overflow-y-auto flex-col gap-1 p-1 h-[min(30vh,15rem)]" v-if="visibleRoles.length">
+    <div class="flex overflow-y-auto flex-col gap-1 p-1 min-h-64" v-if="visibleRoles.length">
       <CollabViewerGraph :role-name="typeof role == 'object' ? role.name : role" :humans="collabData[2].sort((a,b) => a.part[0] - b.part[0])" :all-roles="typeof role == 'object' ? collabData[1].map(r => r = r.name) : collabData[1]" v-for="(role, ind) in visibleRoles" />
     </div>
 
@@ -66,7 +66,7 @@ emit('customColor', `linear-gradient(9deg, ${colorRight}, ${colorLeft})`)
     </header>
     
     <!-- Members -->
-    <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-auto justify-start content-start">
+    <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-96 justify-start content-start">
         <component :is="gridView ? CollabViewerMember : CollabViewerMemberRow" v-for="(member, ind) in collabData[2].toSorted((a,b) => collabData?.[4]?.[a.role] < collabData?.[4]?.[b.role])" :hidden-role="collabData?.[4]?.[member.role]" :index="ind" :role-count="roleCount" :human="member" :role-name="collabData[1][member.role]"/>
     </div>
 </template>

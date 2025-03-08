@@ -20,7 +20,8 @@ export const SETTINGS = ref({
   compactToolbar: false,
   draftNoRemove: false,
   draftNoEdit: false,
-  colorization: true
+  colorization: true,
+  flipControls: true,
 });
 
 watch(SETTINGS, () => {

@@ -239,7 +239,7 @@ const roleInput = ref<HTMLInputElement[]>()
                                 <img src="@/images/checkThick.svg" class="w-4" alt="">
                             </button>
                             <button v-else-if="editingRoleName == -1" @click.stop="openRoleDropdown(ind)" class="p-2 rounded-md hover:bg-black hover:bg-opacity-40 button">
-                                <img src="@/images/levelIcon.svg" class="w-2 rotate-180" alt="">
+                                <img src="@/images/genericRate.svg" class="w-2 rotate-180" alt="">
                             </button>
                         </form>
                         <div v-if="optsShown == ind && editingRoleName == -1" class="flex mt-2">
@@ -256,7 +256,7 @@ const roleInput = ref<HTMLInputElement[]>()
                         <span>{{ $t('collabTools.addRole') }}</span>
                         <hr v-if="containsPresets.length" class="ml-auto w-0.5 h-4 bg-white border-none opacity-40">
                         <button @click.stop="presetDropdownShown = !presetDropdownShown" v-if="containsPresets.length">
-                            <img src="@/images/levelIcon.svg" :class="{'rotate-180': !presetDropdownShown}" class="m-2 w-2 button" alt="">
+                            <img src="@/images/genericRate.svg" :class="{'rotate-180': !presetDropdownShown}" class="m-2 w-2 button" alt="">
                         </button>
                     </button>
 

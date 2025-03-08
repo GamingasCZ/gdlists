@@ -447,6 +447,7 @@ defineExpose({
           :is-pinned="false"
           :favorited="favoriteLevelIDs.includes(list.levelID)"
           :is-list="onlineSubtype == 'lists'"
+          :disable-fave="picking"
           @clicked-option="emit('selectedPostOption', [$event, list.name])"
           @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           @remove-level="removeFavoriteLevel"

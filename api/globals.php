@@ -46,7 +46,11 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = fa
 {
     global $debugMode;
     if ($debugMode) {
-        error_log(sprintf(str_ireplace("?", "%s", $queryTemplate), ...$values));
+        $template = $queryTemplate;
+        for ($i=0;strstr($template, "?") ; $i++)
+            $template = str_ireplace("?", $values[$i], $template);
+
+        error_log($template);
     }
 
     $query = $mysqli->prepare($queryTemplate);

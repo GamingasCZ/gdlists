@@ -108,6 +108,7 @@ const closeLevels = () => {
     <TabBar @switched-tab="switchTab" :tab-names="[$t('help.Lists'), $t('reviews.review'), $t('editor.levels')]" />
 
     <div
+        tabindex="-1"
         class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 pt-0 overflow-y-auto flex flex-col gap-2">    
         <div v-show="!listingLevels">
             <ListBrowser
@@ -143,6 +144,7 @@ const closeLevels = () => {
                     :disable-link="2"
                     @clicked-option="pickList(onlyPickLevels ? level : [$event, ''])"
                     v-bind="level"
+                    disable-fave
                 />
             </div>
 

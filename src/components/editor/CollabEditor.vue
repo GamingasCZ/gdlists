@@ -45,7 +45,6 @@ if (hasLocalStorage()) {
   lastUsedRoles.value = JSON.parse(localStorage.getItem("lastUsedRoles")!) ?? []
   pinnedLastUsedRoles.value = JSON.parse(localStorage.getItem("pinnedLastUsedRoles")!) ?? []
 }
-const allLastUsedRoles = ref([...pinnedLastUsedRoles.value ?? [], ...lastUsedRoles.value ?? []])
 
 /*
 =======
@@ -79,28 +78,11 @@ function pickRole(creatorPos: number, rolePos: number) {
   collab.value[creatorPos == 999 ? 0 : 2][creatorPos == 999 ? 0 : creatorPos].role = rolePos
 }
 
-function changeRole(levelIndex: number) {
-  pickingRole.value = levelIndex;
-  nextTick(() => (document.querySelector(".roleBubble") as HTMLButtonElement).focus())
-}
-
-const invisibleRole = (pos: number) => {
-  if (typeof collab.value == 'string') return
-  if (!collab.value?.[4]) collab.value[4] = Array(collab.value[1].length).fill(false); // Add hidden roles for older lists
-  
-  collab.value[4][pos] = !collab.value[4][pos]
-}
-
 /*
 =======
 Members
 =======
 */
-
-const openSortDropdown = () => {
-  sortDropdownOpen.value = true
-  document.body.addEventListener("click", () => sortDropdownOpen.value = false, { once: true, capture: true },)
-}
 
 function sortCollab(type: 0 | 1 | 2) {
   if (typeof collab.value == 'string') return
@@ -130,7 +112,10 @@ function addMember(params?: CollabHumans) {
     role: params?.role ?? (lastPickedRole == -1 ? 0 : lastPickedRole),
     verified: params?.verified ?? 0
   })
-  nextTick(() => document.querySelector(".collabMember:last-child input").focus())
+  nextTick(() => {
+    let inp = document.querySelectorAll(".collabMember > main > form input")
+    inp[inp.length-1].focus()
+  })
 }
 
 function removeMember(position: number) {
@@ -179,7 +164,6 @@ const localStrg = hasLocalStorage()
 const pickingRole = ref(-1)
 const clipboardContent = ref<[number, string, CollabHumans]>(props.clipboard)
 const sortDropdownOpen = ref(false)
-const presetDropdownOpen = ref(false)
 
 const removeRole = (pos: number) => {
   (collab.value as CollabData)[1].splice(pos, 1);
@@ -519,7 +503,7 @@ defineExpose({
       <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col relative bg-repeat-x p-1 gap-1 h-[39rem]">
             
             <!-- No roles help -->
-        <div v-if="noMembers" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center text-center -translate-x-1/2 -translate-y-1/2">
+        <div v-if="noMembers" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-full text-center -translate-x-1/2 -translate-y-1/2">
           <img src="../../images/collabDudes.svg" class="w-[min(20rem,70vw)] opacity-20" alt="">
           <h1 v-if="noRoles" class="text-2xl opacity-60 max-sm:text-lg">{{ $t('collabTools.addRoleToAddMember') }}</h1>
           <div v-else class="text-2xl max-sm:text-lg">
@@ -536,7 +520,7 @@ defineExpose({
             </div>
           </div>
 
-          <div class="flex gap-2" v-if="noRoles">
+          <div class="flex gap-2 min-w-max" v-if="noRoles">
             <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="createCollab" 
               autofocus="true">
               <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">

@@ -72,27 +72,21 @@ if (hasLocalStorage()) {
         <SectionDivider :text="$t('editor.editor')" />
         <Option
             v-model="SETTINGS.compactToolbar"
-            name="Zmenšená lišta nástrojů"
-            desc="Skryje názvy nástrojů v editoru."
+            :name="$t('settingsMenu.compToolbar')"
+            :desc="$t('settingsMenu.compactHelp')"
             control="cbox"
         >
         </Option>
         <Option
             v-model="SETTINGS.draftNoRemove"
-            name="Nemazat koncepty při nahrání"
-            control="cbox"
-        >
-        </Option>
-        <Option
-            v-model="SETTINGS.draftNoEdit"
-            name="Neukládat koncepty při upravování"
+            :name="$t('settingsMenu.draftNoRemove')"
             control="cbox"
         >
         </Option>
         <Option
             v-model="SETTINGS.colorization"
-            name="Automatické obarvování"
-            desc="Po vybrání pozadí se barva příspěvku automaticky změní."
+            :name="$t('settingsMenu.colorize')"
+            :desc="$t('settingsMenu.colorizeHelp')"
             control="cbox"
         >
         </Option>
@@ -105,6 +99,13 @@ if (hasLocalStorage()) {
             >
         </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
+        <Option
+            v-model="SETTINGS.flipControls"
+            :name="$t('settingsMenu.flipControls')"
+            :desc="$t('settingsMenu.flipControlsHelp')"
+            control="cbox"
+        >
+        </Option>
         <Option
             v-model="SETTINGS.disableColors"
             :name="$t('settingsMenu.disColors')"

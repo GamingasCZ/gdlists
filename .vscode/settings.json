@@ -41,5 +41,6 @@
         "other.lockQuotes[1]",
         "other.lockQuotes[4]",
         "other.lockQuotes[6]"
-    ]
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

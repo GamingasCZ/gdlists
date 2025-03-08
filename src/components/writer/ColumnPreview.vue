@@ -7,6 +7,7 @@ const props = defineProps<{
     fixedAmount?: number
     maxContent?: boolean
     playing: boolean
+    spread?: boolean
 }>()
 
 const hoveringAmount = defineModel({default: -1})
@@ -39,12 +40,12 @@ if (props.playing)
 </script>
 
 <template>
-    <table :class="{'w-full': !maxContent}" class="border-collapse" @mouseout="hoveringAmount = -1">
-        <tr>
+    <table :class="{'w-full': !maxContent || spread}" class="border-collapse" @mouseout="hoveringAmount = -1">
+        <tr :class="{'flex justify-between': spread}">
             <td
                 v-for="i in Math.max(0, colAmount)"
                 @mouseover="hoveringAmount = fixedAmount ?? i"
-                :class="{'bg-lof-300 cursor-pointer': hoveringAmount >= i && !fixedAmount}"
+                :class="{'!bg-lof-300 cursor-pointer': hoveringAmount >= i && !fixedAmount}"
                 class="px-2 h-8 border-2 min-w-4 border-lof-400 first:rounded-l-md last:rounded-r-md"
             >
                 <div v-if="animStep == i" :class="{'w-8': maxContent}" class="h-3 gridEx bg-lof-300"></div>

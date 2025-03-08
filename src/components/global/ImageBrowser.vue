@@ -417,9 +417,32 @@ const imageAction = (id: number, external: boolean, val: string | number) => {
     }
 }
 
+const focusContent = (by: number) => {
+    // Up folder
+    let contentLength
+    if (currentTab.value == Tabs.Uploaded)
+        contentLength = images.value.length+folders.value.length
+    else
+        contentLength = externalImages.value.length+extImgFolders.value.length
+
+    let currSelected = +(document?.activeElement?.dataset?.ind)
+
+    let content = mediaContent.value?.children[Math.max(0, Math.min(currSelected+by, contentLength))]
+    if (content) content.focus()
+}
+
 const holdingShift = ref(false)
 const modifierHeld = (e: KeyboardEvent) => {
     holdingShift.value = e.shiftKey
+    switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+            e.preventDefault()
+            break;
+    }
+
     if (e.type != "keyup") return
 
     // Up folder
@@ -443,32 +466,15 @@ const modifierHeld = (e: KeyboardEvent) => {
         moveToFolder(imagesToMove.value)
     }
 
-    switch (e.key) {
-        case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-            e.preventDefault()
-            break;
-        default: return
-    }
 
-    // Up folder
-    let contentLength
-    if (currentTab.value == Tabs.Uploaded)
-        contentLength = images.value.length+folders.value.length
-    else
-        contentLength = externalImages.value.length+extImgFolders.value.length
-
-    let currSelected = +(document?.activeElement?.dataset?.ind)
     if (e.key == 'ArrowDown')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected+4, contentLength))].focus()
+        focusContent(4)
     if (e.key == 'ArrowUp')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected-4, contentLength))].focus()
+        focusContent(-4)
     if (e.key == 'ArrowLeft')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected-1, contentLength))].focus()
+        focusContent(-1)
     if (e.key == 'ArrowRight')
-        mediaContent.value?.children[Math.max(0, Math.min(currSelected+1, contentLength))].focus()
+        focusContent(1)
         
 }
 document.addEventListener("keydown", modifierHeld)
@@ -928,7 +934,7 @@ onMounted(() => {
                     <hr class="w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
                     <button type="button" :disabled="subfolderExtLevel == 0" ref="folderEditButton"
                         @click="editDropdownOpen = true" class="w-3 h-full button disabled:opacity-20"><img
-                            src="@/images/levelIcon.svg" class="w-2 rotate-180" alt=""></button>
+                            src="@/images/genericRate.svg" class="w-2 rotate-180" alt=""></button>
                 </div>
 
                 <input ref="extImgInput" :placeholder="$t('other.enterURI')" :disabled="loadingImages"
@@ -944,7 +950,7 @@ onMounted(() => {
                             alt=""><span class="ml-2 max-sm:hidden">{{ $t('editor.uploadFile') }}</span></button>
                     <hr v-if="!disableExternal" class="mx-2 w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
                     <button v-if="!disableExternal" ref="imageAddButton" @click="imgAddOptsOpen = true"
-                        class="h-full button disabled:opacity-20"><img src="@/images/levelIcon.svg"
+                        class="h-full button disabled:opacity-20"><img src="@/images/genericRate.svg"
                             class="w-2 rotate-180" alt=""></button>
                 </div>
 
@@ -954,7 +960,7 @@ onMounted(() => {
                             alt=""><span class="ml-2 max-sm:hidden">{{ $t('other.createFolder') }}</span></button>
                     <hr class="w-0.5 h-4/5 bg-white rounded-md border-none opacity-20">
                     <button :disabled="subfolderLevel == 0" ref="folderEditButton" @click="editDropdownOpen = true"
-                        class="w-3 h-full button disabled:opacity-20"><img src="@/images/levelIcon.svg"
+                        class="w-3 h-full button disabled:opacity-20"><img src="@/images/genericRate.svg"
                             class="w-2 rotate-180" alt=""></button>
                 </div>
             </div>

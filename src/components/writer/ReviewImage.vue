@@ -6,6 +6,7 @@ import { inject } from 'vue';
 import { watch } from 'vue';
 import Resizer from '../global/Resizer.vue';
 import { WriterGallery } from '@/interfaces';
+import containers from './containers';
 
 
 const emit = defineEmits<{
@@ -82,6 +83,8 @@ const fullscreenImage = () => {
     preview(props.id)
 }
 
+const size = containers.showImage.settings[1].valueRange
+
 </script>
 
 <template>
@@ -91,7 +94,7 @@ const fullscreenImage = () => {
 
     <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
         <div class="flex relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
-            <Resizer :min-size="64" :max-size="960" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
+            <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
                     class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"

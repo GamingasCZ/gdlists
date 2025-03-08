@@ -14,7 +14,7 @@ getTag()
 </script>
 
 <template>
-  <div class="pr-3 text-xs bg-black bg-opacity-40 rounded-full sm:text-sm">
+  <div class="pr-2 text-xs bg-black bg-opacity-40 rounded-full border-2 border-black border-opacity-50 sm:text-sm">
     <img
       :src="tagPath"
       class="inline mr-2 w-3 align-middle sm:w-6"

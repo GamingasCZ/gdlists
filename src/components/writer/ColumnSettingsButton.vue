@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 import type{ Ref } from 'vue';
 import ColumnEdit from './ColumnEdit.vue';
 import Dropdown from '../ui/Dropdown.vue';
@@ -9,9 +9,27 @@ defineProps<{
     disabled: boolean
 }>()
 
+const emit = defineEmits<{
+    (e: "modifyTitle", ind: number): void
+}>()
+
 const columnOptionsShown = ref(false)
 const selectedNest = inject<Ref<number[]>>("selectedNestContainer")!
+watch(selectedNest, () => {
+    if (selectedNest.value[0] == -1)
+        emit('modifyTitle', 0)
+    else
+        emit('modifyTitle', 1)
+})
 const columnButton = ref<HTMLButtonElement>()
+
+const clickAction = () => {
+    columnOptionsShown.value = true
+}
+
+defineExpose({
+    clickAction
+})
 
 </script>
 
@@ -38,7 +56,8 @@ const columnButton = ref<HTMLButtonElement>()
     <button
         @mousedown.prevent=""
         class="p-1 disabled:opacity-40"
-        @click="columnOptionsShown = true"
+        id="columnCreatorButton"
+        @click="clickAction"
         ref="columnButton"
         :disabled="disabled"
     >

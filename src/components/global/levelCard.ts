@@ -7,8 +7,8 @@ export const doFavoriteLevel = (props: Level, favorited: boolean, col: Color) =>
     let faves: FavoritedLevel[] = JSON.parse(localStorage.getItem("favorites")!);
     let favesIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
   
-    if (favorited) {
-      let levelIndex = favesIDs.indexOf(props.levelID!);
+    let levelIndex = favesIDs.indexOf(props.levelID!);
+    if (levelIndex > -1) {
       favesIDs.splice(levelIndex, 1);
       faves.splice(levelIndex, 1);
     } else {

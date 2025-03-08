@@ -2,7 +2,7 @@
 import type { DataContainerAction, PostData } from '@/interfaces';
 import CONTAINERS from './containers';
 import { flexNames, pickFont } from '@/Reviews';
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, onUnmounted, onMounted } from 'vue';
 import DataContainer from './DataContainer.vue';
 import { SETTINGS } from '@/siteSettings';
 import chroma from 'chroma-js';
@@ -52,10 +52,35 @@ const fontColor = computed(() => {
     }
 })
 
+const writer = ref<HTMLDivElement>()
+let mStarted = [-1, -1]
+const unfocusContainer = (_: MouseEvent) => {
+    if (!props.editable) return
+    
+    let rect = writer.value?.getBoundingClientRect()
+    if (!rect) return
+    if (mStarted[0] < rect.x || mStarted[1] < rect.y || mStarted[0] > rect.x + rect?.width || mStarted[1] > rect.y + rect?.height) {
+        selectedContainer.value = [-1, null]
+        selectedNestContainer.value = [-1, -1, -1]
+    }
+}
+
+const setMouseStart = (e: MouseEvent) => mStarted = [e.x, e.y]
+
+onMounted(() => {
+    document.body.addEventListener("mousedown", setMouseStart)
+    document.body.addEventListener("click", unfocusContainer)
+})
+onUnmounted(() => {
+    document.body.removeEventListener("mousedown", setMouseStart)
+    document.body.removeEventListener("click", unfocusContainer)
+})
+
 </script>
 
 <template>
-<section ref="writer"
+<section
+    ref="writer"
     :style="{
         fontFamily: pickFont(writerData.font),
         backgroundColor: `${translucentBG} !important`,
@@ -81,7 +106,7 @@ const fontColor = computed(() => {
             v-bind="CONTAINERS[container.type]"
             @remove-container="emit('callCommand', {command: 1, data: [index]})"
             @move-container="emit('callCommand', {command: 0, data: [index, $event]})"
-            @has-focus="selectedContainer = [index, $event]; selectedNestContainer = [-1, -1, -1]"
+            @has-focus="selectedContainer[0] = index; selectedNestContainer = [-1, -1, -1]"
             @settings-button="buttonState = [$event, selectedContainer[0]]"
             @add-paragraph="emit('callCommand', {command: 2, data: [index]})"
             @text-modified="container.data = $event"
@@ -90,7 +115,8 @@ const fontColor = computed(() => {
             :class="[CONTAINERS[container.type].styling ?? '']"
             :style="{ textAlign: container.align }"
             :key="container.id"
-            :focused="!zenMode && (editable && selectedContainer[0] == index)"
+            :focused="editable && selectedContainer[0] == index"
+            :index="index"
             :editable="editable"
             :text="container.data"
         >

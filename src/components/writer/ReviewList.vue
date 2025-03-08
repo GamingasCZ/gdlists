@@ -86,9 +86,9 @@ const dialogs = inject("openedDialogs")
     <component
         v-else-if="postData"
         :is="[ReviewPreview, ReviewPreview, LevelPreview][settings.postType]"
+        @mousedown="saveScrolling"
         :key="postData?.[0]?.id"
         class="m-2"
-        @mousedown="saveScrolling"
         v-bind="postData[0]"
         :post="pp"
         :is-list="settings.postType == 0"

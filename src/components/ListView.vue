@@ -14,7 +14,7 @@ import LevelCard from "./global/LevelCard.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
 import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncComponent } from "vue";
-import { modifyListBG } from "@/Editor";
+import { modifyListBG, selectedLevels } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
@@ -42,6 +42,7 @@ import LevelCardTableTable from "./global/LevelCardTableTable.vue";
 import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
 import WriterViewer from "./writer/WriterViewer.vue";
+import TemporaryList from "./global/TemporaryList.vue";
 
 const props = defineProps<{
   listID?: string
@@ -521,6 +522,12 @@ const imageIndex = ref(-1)
   <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
     <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
   </DialogVue>
+
+  <Teleport to="body">
+    <Transition name="fadeSlide">
+      <TemporaryList v-if="selectedLevels.length" />
+    </Transition>
+  </Teleport>
   
   <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" header-disabled>
     <ListUploadedDialog
@@ -602,7 +609,7 @@ const imageIndex = ref(-1)
       <!-- List -->
       <div ref="postContent" v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
         <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
-          <component :is="[LevelCard, LevelCardCompact, LevelCardTable][SETTINGS.levelViewMode]" v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+          <component :is="[LevelCard, LevelCardCompact, LevelCardTable][cardGuessing == -1 ? SETTINGS.levelViewMode : 0]" v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
             class="levelCard"
             :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
             v-bind="level"

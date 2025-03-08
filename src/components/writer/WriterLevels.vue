@@ -104,7 +104,7 @@ const openMoreDialog = (opt: number) => {
             dialogs.lists[2] = true
             break;
         case 1:
-            addRandomLevel()
+            rouletteActive.value = true
             break;
         case 2:
             levelDialogs.value.saved = true
@@ -170,7 +170,7 @@ const rouletteActive = ref(false)
                 </div>
                 <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
-                <div v-for="(level, index) in POST_DATA.levels">
+                <div v-show="!rouletteActive" v-for="(level, index) in POST_DATA.levels">
                     <EditorCardHeader v-if="openedCard != index" :data="level" :updating-positions="updatingPosition"
                         :index="index" @update-opened-card="openedCard = index" @do-move="moveLevel" />
                     <LevelCard v-else @open-collab-tools="dialogs.collabs = true" @open-tag-popup="dialogs.tags = true"
@@ -185,7 +185,7 @@ const rouletteActive = ref(false)
                     {{ $t('reviews.addLevel') }}</button>
                 <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
                 <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels" ref="moreLevOpts" class="p-2 button">
-                    <img src="@/images/levelIcon.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
+                    <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
                 </button>
             </div>
             <Dropdown

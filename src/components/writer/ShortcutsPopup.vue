@@ -14,6 +14,20 @@ const parseKey = (key: [Key, string]) => {
     return [...keys, key[1]]
 }
 
+const overrides = {
+    'Digit1': '1',
+    'Digit2': '2',
+    'Digit3': '3',
+    'ArrowUp': '▲',
+    'ArrowDown': '▼'
+}
+
+const doOverride = (key: string) => {
+    if (overrides[key])
+        return overrides[key]
+    return key
+}
+
 </script>
 
 <template>
@@ -27,7 +41,7 @@ const parseKey = (key: [Key, string]) => {
                     <div>
                         <span v-if="key == -1">+</span>
                         <kbd v-else class="!min-w-max p-1">
-                            {{ key }}
+                            {{ doOverride(key) }}
                         </kbd>
                     </div>
                 </template>

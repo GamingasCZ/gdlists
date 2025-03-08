@@ -66,17 +66,22 @@ const selectNestContainer = (e: Event) => {
     selectedRootContainer.value = [props.index, -1]
 }
 
+const subcomponents = computed(() => props.settings.components[props.subIndex].filter(x => x === Object(x)))
+
 </script>
 
 <template>
     <article
         @click.stop="selectNestContainer"
+        @focusin="selectNestContainer"
+        @blur="selectedNestContainer = [-1,-1,-1]"
         :style="{outlineColor: borderColor, justifyContent: ['start', 'center', 'end'][settings.components[subIndex][settings.components[subIndex].findIndex(x => typeof x == 'number')]], maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
+        :tabindex="(editable || subcomponents.length == 0) ? 0 : -1"
         class="p-0.5 flex flex-col outline outline-1 transition-colors duration-75 min-w-10 grow min-h-8 basis-[min-content]"
         :class="{'!outline-2': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!outline-none': !editable}"
     >
         <DataContainer
-            v-for="(container, ind) in settings.components[subIndex].filter(x => x === Object(x))"
+            v-for="(container, ind) in subcomponents"
             v-bind="CONTAINERS[container.type]"
             @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
             @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"

@@ -8,6 +8,7 @@ import { FONTS } from '@/writers/Writer';
 
 const props = defineProps<{
     postData: PostData
+    writerEnabled: boolean
 }>()
 
 const openDialogs = inject<object>("openedDialogs")
@@ -39,12 +40,13 @@ const resetColor = () => {
 
 <template>
     <section class="bg-lof-200 thinScrollbar mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
-        <header class="flex p-2 cursor-pointer" @click="mainRolledOut = !mainRolledOut">
+        <header class="flex p-2">
             <img src="@/images/sparkles.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('settingsMenu.visual') }}</h2>
             <!-- <button class="button">
                 <img src="@/images/dropdown.svg" :class="{'rotate-180': mainRolledOut}" class="w-6" alt="">
             </button> -->
+            <button v-if="colorPickerOpen || pageDetailsOpen" class="px-2 py-1 rounded-md hover:bg-black hover:bg-opacity-40 button" @click="colorPickerOpen = false; pageDetailsOpen = false"><img src="@/images/checkThick.svg" alt="" class="inline mr-2 w-5">{{ $t('other.accept') }}</button>
         </header>
 
         <div v-show="mainRolledOut && !(colorPickerOpen || pageDetailsOpen)" class="flex overflow-x-auto gap-4 py-4 mx-4 max-w-full">
@@ -80,7 +82,7 @@ const resetColor = () => {
                 </button>
             </button>
             
-            <button @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
+            <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-80 aspect-video">
                 <button class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
@@ -102,20 +104,22 @@ const resetColor = () => {
                         <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('reviews.bgColor') }}</span>
                         <div class="flex gap-2">
-                            <button @click="postData.whitePage = false" :title="$t('other.auto')" class="w-9 h-9 rounded-full bg-lof-200">A</button>
-                            <button @click="postData.whitePage = true" class="w-9 h-9 rounded-full bg-[#ECE6D9]"></button>
+                            <button @click="postData.whitePage = false" :class="{'outline': !postData.whitePage}" :title="$t('other.auto')" class="w-9 h-9 rounded-full outline-2 outline-lof-400 bg-lof-200">A</button>
+                            <button @click="postData.whitePage = true" :class="{'outline': postData.whitePage}" class="w-9 outline-lof-400 outline-2 h-9 rounded-full bg-[#ECE6D9]"></button>
                             <!-- <button class="w-9 h-9 rounded-full bg-lof-100">
                                 <img src="@/images/color.svg" class="mx-auto w-5" alt="">
                             </button> -->
                         </div>
                     </label>
                     <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
-                        <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <img src="@/images/opacity.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('other.opacity') }}</span>
                         <div class="flex gap-2">
-                            <button @click="postData.transparentPage = 0" :title="'Neprůhledná'" class="w-9 h-9 rounded-md button bg-lof-300 border-lof-400"></button>
-                            <button @click="postData.transparentPage = 2" :title="'Průsvitná'" id="pageTranslucent" class="w-9 h-9 rounded-md button bg-lof-300 border-lof-400"></button>
-                            <button @click="postData.transparentPage = 1" :title="'Průhledná'" class="w-9 h-9 rounded-md border border-lof-300 button"></button>
+                            <button @click="postData.transparentPage = 0" :class="{'outline': postData.transparentPage == 0}" :title="$t('reviews.opaque')" class="w-9 h-9 rounded-md outline-2 outline-lof-400 bg-lof-300"></button>
+                            <div :class="{'outline': postData.transparentPage == 2}" class="w-9 h-9 overflow-clip rounded-md outline-2 outline-lof-400">
+                                <button @click="postData.transparentPage = 2" :title="$t('reviews.translucent')" id="pageTranslucent" class="w-full h-full bg-lof-300"></button>
+                            </div>
+                            <button @click="postData.transparentPage = 1" :class="{'outline': postData.transparentPage == 1}" :title="$t('reviews.transparent')" class="w-9 h-9 rounded-md border outline-2 outline-lof-400 border-lof-300"></button>
                         </div>
                     </label>
                 </div>
@@ -130,7 +134,7 @@ const resetColor = () => {
                     </label>
                     
                     <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
-                        <img src="@/images/move.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <img src="@/images/picker.svg" class="my-1 w-7 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('reviews.tintFont') }}</span>
                         <input v-model="postData.fontTint" type="checkbox" class="!m-0 button" name="" id="">
                     </label>
@@ -138,7 +142,7 @@ const resetColor = () => {
 
                 <div class="flex gap-2">                 
                     <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
-                        <img src="@/images/move.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
+                        <img src="@/images/fullscreen.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('reviews.wide') }}</span>
                         <input :value="!postData.readerMode" @change="postData.readerMode = !postData.readerMode" type="checkbox" class="!m-0 button" name="" id="">
                     </label>
@@ -146,10 +150,6 @@ const resetColor = () => {
                 
                 
             </section>
-
-            <div class="flex gap-2 items-center ml-auto">
-                <button class="p-2 bg-black bg-opacity-40 rounded-md button" @click="pageDetailsOpen = false"><img src="@/images/checkThick.svg" alt="" class="inline mr-2 w-5">{{ $t('other.accept') }}</button>
-            </div>
         </div>
 
         <div v-show="mainRolledOut && colorPickerOpen" class="flex flex-col p-4">
@@ -162,8 +162,6 @@ const resetColor = () => {
             <div class="flex gap-2 items-center ml-auto">
                 <button class="p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 disabled:pointer-events-none button" :disabled="!postData.titleImg?.[0]" @click="applyFromBackground()"><img src="@/images/image.svg" alt="" class="inline mr-2 w-5">{{ $t('reviews.selFromBG') }}</button>
                 <button class="p-2 bg-black bg-opacity-40 rounded-md button" @click="resetColor()"><img src="@/images/replay.svg" alt="" class="inline mr-2 w-5">{{ $t('other.reset') }}</button>
-                <hr class="w-0.5 h-4 bg-white rounded-md opacity-40">
-                <button class="p-2 bg-black bg-opacity-40 rounded-md button" @click="colorPickerOpen = false"><img src="@/images/checkThick.svg" alt="" class="inline mr-2 w-5">{{ $t('other.accept') }}</button>
             </div>
         </div>
     </section>

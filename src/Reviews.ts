@@ -58,7 +58,8 @@ export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | Fav
         tags: [],
         video: "",
         ratings: [Array(DEFAULT_RATINGS.length).fill(-1), []],
-        BGimage: newCardBG()
+        BGimage: newCardBG(),
+        screenshots: levelData?.screenshots ?? []
     }
 
     postData.value.levels.push(levelInfo)

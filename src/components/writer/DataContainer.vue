@@ -9,7 +9,7 @@ const emit = defineEmits<{
 	(e: "removeContainer"): void
 	(e: "moveContainer", by: number): void
 	(e: "textModified", newText: string)
-	(e: "hasFocus", elem: HTMLDivElement): void
+	(e: "hasFocus"): void
 	(e: "settingsButton", key: string): void
 	(e: "lostFocus"): void
 	(e: "addParagraph", inNest: boolean): void
@@ -21,15 +21,16 @@ interface Extras {
 	focused: boolean
 	editable?: boolean
 	text?: string
+	index?: number
 }
 
 const props = defineProps<Container & Extras>()
-
 const previewText = ref("")
 
 const fontSizes = ['', '8px', '12px', '14px', '16px', '18px', '20px', '22px', '24px', '32px', '36px', '48px', '64px']
 const doShowSettings = inject<boolean | number>("containerSettingsShown")
 const mainText = ref<HTMLTextAreaElement>()
+const textParent = ref<HTMLDivElement>()
 
 const togglePreview = () => {
 	if (props.type == "twoColumns") return
@@ -51,9 +52,13 @@ const makeNextParagraph = (e: KeyboardEvent) => {
 const doFocusText = (k: boolean) => {
 	if (!props.editable) return
 
-	mainText.value?.focus()
-	if (!k)
-		emit('hasFocus', mainText.value)
+	if (props.canEditText)
+		mainText.value?.focus()
+	else
+		textParent.value?.focus()
+
+	focus.value = true
+	emit('hasFocus')
 }
 
 const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
@@ -101,22 +106,35 @@ const hasText = ref(checkHasText())
 onMounted(doFocusText)
 
 const mousePos = ref([0,0])
-const rmbSettingOpen = (mPos: MouseEvent) => {
+const rmbSettingOpen = (mPos: MouseEvent, openFun: () => void) => {
+	if (!props.editable || !openFun) return
+
 	mousePos.value = [mPos.pageX, mPos.pageY]
 	doShowSettings.value = 2
+	nextTick(openFun)
 }
+
+const settings = ref<HTMLDialogElement>()
 
 </script>
 
 <template>
-	<div :data-type="type" @click.right.exact.prevent="emit('hasFocus', mainText!); focus = true; editable ? nextTick(() => rmbSettingOpen($event)) : null" @click.stop="emit('hasFocus', mainText!); focus = true" class="relative min-w-48 scroll-mt-10 reviewContainer min-h-4">
-		<hr class="absolute right-[-6px] border-lof-400 h-full border-r-4" :class="{'!border-none': dependentOnChildren || !(focus && focused)}">
+	<div
+		@click.right.exact.prevent="!canEditText && emit('hasFocus'); nextTick(() => rmbSettingOpen($event, settings?.showSettings))"
+		@click.left.exact.stop="!canEditText && emit('hasFocus')"
+		class="relative outline-none scroll-mt-24 min-w-48 reviewContainer min-h-4"
+		:data-type="type"
+		ref="textParent"
+		:tabindex="(canEditText || !editable || dependentOnChildren) ? -1 : 0"
+		@focus="emit('hasFocus')"
+	>
+		<hr class="absolute z-10 right-[-6px] border-lof-400 h-full border-r-4" :class="{'!border-none': dependentOnChildren || !(focus && focused)}">
 		<p
 			v-if="canEditText"
 			ref="mainText"
 			@vue:mounted="togglePreview(); startObserving()"
 			@keydown.enter="makeNextParagraph"
-			@focus="emit('hasFocus', mainText!); focus = true"
+			@focus="emit('hasFocus')"
 			@input="emit('textModified', $event.target.outerText); hasText = checkHasText()"
 			@paste="pasteText"
 			v-html="previewText"
@@ -131,18 +149,20 @@ const rmbSettingOpen = (mPos: MouseEvent) => {
 			
 		<slot></slot>
 		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-[38px] box-border max-sm:right-0">
-			<button @click="doShowSettings = 1" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focus && focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
+			<button @click="settings?.showSettings()" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
 				<img src="@/images/gear.svg" class="w-7 invert">
 			</button>
 		</div>
 
 		<ContainerSettings
-			v-if="!dependentOnChildren && editable && (doShowSettings == 1 || focused)"
+			v-if="!dependentOnChildren && editable && focus"
 			class="containerSettings"
+			ref="settings"
 			:type="type"
 			:settings-arr="currentSettings"
 			:shown="doShowSettings"
 			:mouse-pos="mousePos"
+			:index="index"
 			@pressed-button="emit('settingsButton', $event)"
 			@hid-settings="doShowSettings = false; doFocusText(true)"
 			@remove="emit('removeContainer')"

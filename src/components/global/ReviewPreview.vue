@@ -24,14 +24,17 @@ const props = defineProps<{
   hidden: string;
   url: string;
   thumbnail: string;
+  thumbnailLink?: string;
   thumbProps: [number, number, number, boolean];
   reviewDetails: ReviewDetailsResponse[]
+  creator: string
 
   userArray: ListCreatorInfo[];
   disableLink?: boolean | 2
   unrolledOptions: boolean
 
   isList: boolean
+  diffGuesser?: boolean
 }>();
 
 let thumb = ref()
@@ -85,7 +88,7 @@ const getGradient = (col) =>
 
 const uploadDate = new Date(isNaN(+props.timestamp) ? props.timestamp : props.timestamp*1000);
 
-const creator = getUser()
+const creatorData = getUser()
 
 const pre = import.meta.env.VITE_USERCONTENT
 const base = import.meta.env.BASE_URL
@@ -100,6 +103,9 @@ let thumbLink
 if (props.thumbnail) {
   thumbLink = `${pre}/userContent/${props.uid}/${props.thumbnail}.webp`
 }
+else if (props.thumbnailLink) {
+  thumbLink = props.thumbnailLink
+}
 else
   thumbLink = `${base}/defaultThumbnails/${getDefaultThumb()}.webp`
 
@@ -109,7 +115,7 @@ let xPos = ["left", "center", "right"][background[3]]
 const clickReview = (opt: number) => {
   if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: +(!props.isList)})
   else if (props.disableLink == 1) emit('selected')
-  else emit('selectedLink', creator.value)
+  else emit('selectedLink', creatorData.value)
 }
 
 const link = () => {
@@ -123,7 +129,7 @@ const link = () => {
 <template>
   <component :is="disableLink ? 'button' : 'RouterLink'"
     :to="link()"
-    class="flex flex-col min-w-64 w-full text-left max-w-96 cursor-pointer relative rounded-lg overflow-clip border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
+    class="flex flex-col focus-within:outline outline-4 outline-lof-400 min-w-64 w-full text-left max-w-96 cursor-pointer relative rounded-lg overflow-clip border-solid bg-[length:150vw] bg-center text-white group transition-[background-position] duration-200 hover:bg-left"
     :style="{
       backgroundImage: getGradient(listColor),
       borderColor: listColor.darken(2).hex(),
@@ -132,14 +138,14 @@ const link = () => {
   >
     
     <div class="relative w-full h-36 bg-cover">
-      <img ref="thumb" @load="modListCol" :src="thumbLink" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': !thumbnail || SETTINGS.disableColors}">
+      <img ref="thumb" @load="modListCol" :src="thumbLink" loading="lazy" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': (!thumbnail && !thumbnailLink) || SETTINGS.disableColors}">
       <div :style="{background: `linear-gradient(0deg, ${listColor.darken().hex()}, transparent)`}" class="absolute bottom-0 w-full h-8 transition-colors duration-200 group-hover:brightness-50"></div>
       <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between text-base opacity-0 transition-opacity duration-75 group-hover:opacity-100">
-        <div class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
+        <div v-if="views" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
             <img src="../../images/view.svg" alt="" class="inline mr-2 w-4" />
             <span>{{ views }}</span>
         </div>
-        <div v-if="rate_ratio != -1" class="flex items-center px-2 py-1 bg-black bg-opacity-80 rounded-md backdrop-blur-sm grow">
+        <div v-if="rate_ratio && rate_ratio != -1" class="flex items-center px-2 py-1 bg-black bg-opacity-80 rounded-md backdrop-blur-sm grow">
             <ReviewRatingBar :rate="rate_ratio" />
         </div>
         <div v-if="levelCount" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
@@ -151,25 +157,33 @@ const link = () => {
       </div>
       
       <div v-else class="grid absolute inset-2 grid-rows-2 gap-2 text-xl">
-        <button v-if="isList" @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickList') }}</button>
-        <button v-else @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/reviews.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickReview') }}</button>
-        <button @click.stop="clickReview(1)" class="bg-black bg-opacity-90 rounded-md button"><img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
+        <button v-if="isList" @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md outline-white outline-2 focus-within:outline button"><img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickList') }}</button>
+        <button v-else @click.stop="clickReview(0)" class="bg-black bg-opacity-90 rounded-md outline-white outline-2 focus-within:outline button"><img src="@/images/reviews.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickReview') }}</button>
+        <button @click.stop="clickReview(1)" class="bg-black bg-opacity-90 rounded-md outline-white outline-2 focus-within:outline button"><img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
       </div>
     </div>
 
     <section class="flex overflow-hidden flex-col justify-between items-start m-1 h-full">
-      <h2 class="text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
+      <div class="flex items-center">
+        <h2 class="inline text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
+        <img v-if="diffGuesser" class="inline ml-2 w-6" src="@/images/diffGuessSign.svg" alt="" />
+      </div>
       <div class="overflow-hidden w-full text-ellipsis min-h-5">
         <q class="text-sm leading-none opacity-80" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>
       </div>
       <div class="flex gap-2 items-center mt-2">
-        <ProfilePicture class="w-11" :uid="creator.discord_id" :cutout="creator.pfp_cutout" />
+        <ProfilePicture class="w-11" :uid="creatorData?.discord_id ?? -2" :cutout="creatorData.pfp_cutout" />
         <div>
-          <h3 class="text-lg font-bold leading-tight">{{ creator.username }}</h3>
+          <h3 class="text-lg font-bold leading-tight">{{ creatorData?.username ?? creator }}</h3>
           <h4 class="text-xs opacity-70 cursor-help" :title="`${uploadDate.toLocaleDateString()} ${uploadDate.toLocaleTimeString()}`">{{ prettyDate(((new Date()).getTime() - uploadDate.getTime())/1000) }}</h4>
         </div>
       </div>
     </section>
+
+    <div class="absolute previewTypeIcon right-1 bottom-1 invert-[0.7] mix-blend-color-dodge">
+      <img v-if="isList" src="@/images/browseMobHeader.svg" class="w-12" alt="">
+      <img v-else src="@/images/reviews.svg" class="w-12" alt="">
+    </div>
   </component>
 </template>
 
@@ -178,4 +192,9 @@ q {
   quotes: "„" "“";
   font-style: italic;
 }
+
+.previewTypeIcon {
+  mask: linear-gradient(125deg, transparent 21%, black);
+}
+
 </style>
