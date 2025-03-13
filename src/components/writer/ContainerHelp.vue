@@ -23,7 +23,7 @@ const focus = () => {
 </script>
 
 <template>
-<button @vue:mounted="$nextTick(focus)" :disabled="unclickable" ref="main" class="my-2 focus-within:bg-lof-300 transition-colors duration-100 font-[poppins] text-white w-full max-w-96 flex flex-col items-center p-2 text-xl text-center rounded-md bg-lof-100">
+<button @vue:mounted="$nextTick(focus)" :disabled="unclickable" ref="main" class="my-2 containerHelp focus-within:bg-lof-300 transition-colors duration-100 font-[poppins] text-white w-full max-w-96 flex flex-col items-center p-2 text-xl text-center rounded-md bg-lof-100">
     <div>
         <div ref="inner">
             <img :src="`${BASE_URL}/formatting/${icon}.svg`" class="p-2 mx-auto w-24 max-w-[50%] opacity-10" alt="">

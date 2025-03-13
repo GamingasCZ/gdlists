@@ -3,6 +3,7 @@ import { inject, onMounted, type Ref, ref, watch } from 'vue';
 import LevelCard from '../global/LevelCard.vue';
 import ContainerHelp from "./ContainerHelp.vue";
 import type { Level, PostData, ReviewRating } from '@/interfaces';
+import { type cShowLevel } from './containers';
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
@@ -10,7 +11,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: cShowLevel
     buttonState: [string, number]
     index: number
 }>()

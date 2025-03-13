@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router';
 import ReviewPreview from '../global/ReviewPreview.vue';
 import LevelCard from '../global/LevelCard.vue';
 import LevelPreview from '../global/LevelPreview.vue';
+import { type cShowList } from './containers';
 
 
 const emit = defineEmits<{
@@ -17,7 +18,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: cShowList
     index: number
     buttonState: [string, number]
     editable: boolean

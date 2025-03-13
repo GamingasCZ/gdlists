@@ -23,6 +23,7 @@ interface Extras {
   hideRatings?: boolean
   rating?: number
   isEmbed?: boolean
+  uploaderUid?: boolean
 }
 
 const props = defineProps<Level & Extras>();
@@ -31,6 +32,7 @@ const emit = defineEmits<{
   (e: "error"): void;
   (e: "nextGuess", res: number): void;
   (e: "openCollab", index: number, col: [number, number, number]): void;
+  (e: "fullscreenImage", index: number): void;
 }>();
 
 const isFavorited = ref<boolean>(props?.favorited);
@@ -71,6 +73,7 @@ onErrorCaptured(() => {
 })
 
 const listData = inject("levelsRatingsData")()
+const userContent = import.meta.env.VITE_USERCONTENT
 
 </script>
 
@@ -104,11 +107,16 @@ const listData = inject("levelsRatingsData")()
             <DifficultyIcon class="w-14" :difficulty="difficulty?.[0] ?? difficulty" :rating="difficulty?.[1] ?? rating" />
           </div>
 
-          <!-- Level name -->
-          <h2 :class="{'ml-2': !guessingNow}" class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
-            <h4 class="absolute -top-4 text-sm" v-if="platf">Platformer</h4>
-            <component :is="isEmbed ? 'RouterLink' : 'span'" :to="'/'+listID" :class="{'underline cursor-pointer': isEmbed}">{{ levelName || $t('other.unnamesd') }}</component>
-          </h2>
+          <div :class="{'ml-2': !guessingNow}">
+            <!-- Level name -->
+            <h2 class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
+              <h4 class="absolute -top-4 text-sm" v-if="platf">Platformer</h4>
+              <component :is="isEmbed ? 'RouterLink' : 'span'" :to="'/'+listID" :class="{'underline cursor-pointer': isEmbed}">{{ levelName || $t('other.unnamesd') }}</component>
+            </h2>
+  
+            <!-- Level creator -->
+            <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
+          </div>
         </header>
       </div>
 
@@ -142,12 +150,13 @@ const listData = inject("levelsRatingsData")()
       <img src="@/images/star.svg" class="w-8" alt="" />
     </button>
 
-    <!-- Level creator -->
-    <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
-
     <div class="flex flex-col gap-3 mt-2">
       <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
+      <section v-if="screenshots" class="flex overflow-auto z-10 gap-4 py-2 w-full">
+        <img v-for="(img, ind) in screenshots" @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}.webp`" class="max-h-36 rounded-md shadow-drop" alt="">
+      </section>
+
       <!-- Level Tags -->
       <section class="flex z-10 flex-wrap gap-2">
         <Tag v-for="tag in tags" :tag="tag" />

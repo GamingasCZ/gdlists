@@ -9,6 +9,7 @@ import { FONTS } from '@/writers/Writer';
 const props = defineProps<{
     postData: PostData
     writerEnabled: boolean
+    disabled: boolean
 }>()
 
 const openDialogs = inject<object>("openedDialogs")
@@ -39,7 +40,7 @@ const resetColor = () => {
 </script>
 
 <template>
-    <section class="bg-lof-200 thinScrollbar mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
+    <section :class="{'opacity-20 pointer-events-none': disabled}" class="bg-lof-200 thinScrollbar mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
         <header class="flex p-2">
             <img src="@/images/sparkles.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('settingsMenu.visual') }}</h2>
@@ -100,6 +101,22 @@ const resetColor = () => {
         <div v-show="mainRolledOut && pageDetailsOpen" class="flex flex-col gap-2 p-4 text-xl">
             <section class="flex overflow-auto gap-8 justify-between items-center">
                 <div class="flex gap-2">
+                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
+                        <p class="text-5xl opacity-20 pointer-events-none">Aa</p>
+                        <span>{{ $t('reviews.font') }}</span>
+                        <select class="text-base" v-model="postData.font" name="" id="">
+                            <option v-for="font in FONTS" :value="font[1]">{{ font[0] }}</option>
+                        </select>
+                    </label>
+                    
+                    <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
+                        <img src="@/images/picker.svg" class="my-1 w-7 opacity-20 pointer-events-none" alt="">
+                        <span>{{ $t('reviews.tintFont') }}</span>
+                        <input v-model="postData.fontTint" type="checkbox" class="!m-0 button" name="" id="">
+                    </label>
+                </div>
+
+                <div class="flex gap-2">
                     <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
                         <img src="@/images/color.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('reviews.bgColor') }}</span>
@@ -121,22 +138,6 @@ const resetColor = () => {
                             </div>
                             <button @click="postData.transparentPage = 1" :class="{'outline': postData.transparentPage == 1}" :title="$t('reviews.transparent')" class="w-9 h-9 rounded-md border outline-2 outline-lof-400 border-lof-300"></button>
                         </div>
-                    </label>
-                </div>
-
-                <div class="flex gap-2">
-                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
-                        <p class="text-5xl opacity-20 pointer-events-none">Aa</p>
-                        <span>{{ $t('reviews.font') }}</span>
-                        <select class="text-base" v-model="postData.font" name="" id="">
-                            <option v-for="font in FONTS" :value="font[1]">{{ font[0] }}</option>
-                        </select>
-                    </label>
-                    
-                    <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
-                        <img src="@/images/picker.svg" class="my-1 w-7 opacity-20 pointer-events-none" alt="">
-                        <span>{{ $t('reviews.tintFont') }}</span>
-                        <input v-model="postData.fontTint" type="checkbox" class="!m-0 button" name="" id="">
                     </label>
                 </div>
 

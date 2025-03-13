@@ -2,6 +2,7 @@
 header('Content-type: application/json'); // Return as JSON
 header('Access-Control-Allow-Origin: *');
 require("globals.php");
+require("images.php");
 $returnData = [];
 
 function parseLevelList($response, $morePages = false) {
@@ -35,15 +36,37 @@ function parseLevelList($response, $morePages = false) {
 }
 
 function parseLevel($levelString) {
-    global $returnData;
+    global $returnData, $hostname, $username, $password, $database;;
+
     $returnData["id"] = $levelString[1];
     $returnData["name"] = $levelString[3];
     $returnData["difficulty"] = ((int) $levelString[21])*5 + $levelString[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
     $returnData["cp"] = ((int) $levelString[27] > 0) + ((int) $levelString[29] > 0) + ((int) $levelString[31] > 0);
     $returnData["platf"] = $levelString[37] == 5;
+
+    if (isset($_GET["thumb"]) && $_GET["thumb"] == "1") {
+        $uid = getLocalUserID();
+        $path = getUserPath($uid);
+        // Check if a thumbnail is already saved
+        if (file_exists($path . "/" . $returnData["id"] . ".webp")) {
+            $returnData["thumbnail"] = $returnData["id"];
+            return;
+        }
+        
+        // Download thumbnail
+        $thumbQuery = file_get_contents(sprintf("https://raw.githubusercontent.com/cdc-sys/level-thumbnails/refs/heads/main/thumbs/%s.png", strval($levelString[1])));
+        if ($thumbQuery != false) {
+            $mysqli = new mysqli($hostname, $username, $password, $database);
+
+            $thumbFolder = getCreateAttributedFolderID(Folder_Attribute::THUMBNAILS, $uid, $mysqli);
+            $hash = saveImage($thumbQuery, $uid, $mysqli, filename: strval($returnData["id"]), resize: 960, folder: $thumbFolder);
+            $returnData["thumbnail"] = $hash;
+            $mysqli->close();
+        }
+    }
 }
 
-switch (array_keys($_GET)[0]) {
+switch (array_keys($_GET)[1]) {
     case "list": {
         $returnData = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>25,"str"=>$_GET["id"]], []));
         break;

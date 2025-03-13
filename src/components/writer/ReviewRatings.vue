@@ -7,6 +7,7 @@ import chroma from 'chroma-js';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
 import type { Level, PostData, ReviewRating } from '@/interfaces';
+import { type cShowRating } from './containers';
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
@@ -14,7 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: cShowRating
     index: number
     buttonState: string
 }>()

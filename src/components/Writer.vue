@@ -9,7 +9,7 @@ import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
 import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
-import { DataContainerAction } from "@/interfaces"
+import { DataContainerAction, LevelImage } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
 import { pickFont, getDominantColor, getEmbeds, addReviewLevel } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
@@ -47,8 +47,8 @@ const props = defineProps<{
     editing?: boolean
 }>()
 
-const POST_DATA = ref<PostData>()
 const WRITER = ref([LIST, REVIEW][props.type])
+const POST_DATA = ref<PostData>(WRITER.value.general.postObject())
 watch(() => props.type, () => {
     WRITER.value = [LIST, REVIEW][props.type]
     drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
@@ -231,11 +231,19 @@ const addContainer = (key: string, addTo?: number | number[], returnOnly = false
 provide("addContainer", addContainer)
 
 const removeContainer = (index: number) => {
-    POST_DATA.value.containers.splice(index, 1)
+    if (POST_DATA.value.containers[index].type == 'twoColumns') {
+        POST_DATA.value.containers[index].settings
+        .components[selectedNestContainer.value[1]]
+        .splice(selectedNestContainer.value[2], 1)
+    }
+    else 
+        POST_DATA.value.containers.splice(index, 1)
 
     selectedContainer.value[0] = -1
     selectedNestContainer.value = [-1, -1, -1]
 }
+
+provide("removeContainer", removeContainer)
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
     if (selectedContainer.value[0] == -1) return
@@ -437,7 +445,6 @@ const splitParagraph = () => {
 
 const tagline = ref(false)
 
-const dataContainers = ref()
 const modifyImageURL = (newUrl: string) => {
     // Review background
     if (openDialogs.imagePicker[1] == WriterGallery.ReviewBackground) {
@@ -457,12 +464,11 @@ const modifyImageURL = (newUrl: string) => {
         if (!POST_DATA.value.levels?.[openDialogs.imagePicker[2]]?.screenshots)
             POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots = []
 
-        console.log(newUrl)
         if (typeof newUrl == 'string')
             newUrl = [newUrl]
         newUrl.forEach(img => {
             POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots.push([
-                0,
+                LevelImage.IMAGE,
                 img,
                 ""
             ])
@@ -667,12 +673,10 @@ onMounted(() => {
     }
 
     shortcutListen(WRITER.value.toolbar, doAction)
-
     document.documentElement.addEventListener("fullscreenchange", toggleZenMode)
 })
 
 onUnmounted(() => {
-    
     document.documentElement.removeEventListener("fullscreenchange", toggleZenMode)
     shortcutUnload()
 })
@@ -683,17 +687,6 @@ const openRatingHelp = () => {
     if (writerRatings) writerRatings.value.helpOpen = !writerRatings.value.helpOpen
 }
 
-const hasUnrated = computed(() => {
-    if (!POST_DATA.value.levels.length) return true
-
-    let unrated = false
-    POST_DATA.value.levels.forEach(l => {
-        if (l.ratings[0].concat(l.ratings[1]).includes(-1)) unrated = true
-    })
-    return unrated
-})
-
-const hasLevels = computed(() => !POST_DATA.value.levels.length && !POST_DATA.value.disabledRatings)
 const reviewSave = ref({ backupID: 0, lastSaved: 0 })
 const draftPopup = ref<HTMLDivElement>()
 const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => {
@@ -798,7 +791,7 @@ const removeDraft = (key: number) => {
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
 }
 
-const burstTimer = ref(Date.now) // makes "last saved" in footer less jarring
+const burstTimer = ref(Date.now()) // makes "last saved" in footer less jarring
 setInterval(() => burstTimer.value = Date.now(), 10000)
 const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved) / 1000)))
 
@@ -985,8 +978,14 @@ const toggleZenMode = () => {
             <WriterLevels
                 v-if="!zenMode"
                 @toggle-preview="toggleLevelPreview()"
+                @preview-draft="previewDraft(drafts[$event].reviewData, [drafts[$event].createDate, drafts[$event].saveDate], true)"
+                @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
+                @save-draft="saveDraft(false, false)"
                 :subtext="WRITER.general.levelsSubtext"
                 :max-levels="WRITER.general.maxLevels"
+                :drafts="WRITER.general.postType == 'list' ? drafts : null"
+                :last-saved="[reviewSave.backupID, pretty]"
+                :disabled="disableEdits"
             />
 
             <!-- Level Preview -->
@@ -1047,7 +1046,7 @@ const toggleZenMode = () => {
             </WriterViewer>
                 
             <!-- Decoration -->
-            <WriterVisuals v-show="!zenMode" :writer-enabled="WRITER.general.allowWriter" :postData="POST_DATA" />
+            <WriterVisuals v-show="!zenMode" :disabled="disableEdits" :writer-enabled="WRITER.general.allowWriter" :postData="POST_DATA" />
 
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">

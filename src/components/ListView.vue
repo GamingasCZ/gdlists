@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios, { type AxiosResponse } from "axios";
+import axios, { all, type AxiosResponse } from "axios";
 import type {
   ListFetchResponse,
   ListPreview,
@@ -468,6 +468,13 @@ provide("imagePreviewFullscreen", modPreview)
 const imagesArray = computed(() => {
   let allImages: ReviewContainer[] = []
   let data = (LIST_DATA.value.data as ReviewList).containers
+  LIST_DATA.value.data.levels.forEach(x => {
+    if (x.screenshots) {
+      x.screenshots.forEach(y => allImages.push(y[1]))
+    }
+  })
+  console.log(allImages)
+
   data.forEach(con => {
     if (con.type == "showImage") allImages.push(con)
     if (con.type == "twoColumns") {
@@ -480,18 +487,19 @@ const imagesArray = computed(() => {
         if (car?.type == "showImage") allImages.push(car)
       })
     }
+    // todo: ReviewLevel
   })
   return allImages
 })
 const imageIndex = ref(-1)
 
+const levelImageFullscreen = (imgIndex: number) => {
+  imageIndex.value = imgIndex
+}
+
 </script>
 
 <template>
-  <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
-    backgroundImage: `linear-gradient(#00000040, transparent)`,
-  }" class="absolute w-full h-full -z-20"></div>
-
   <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.medium">
     <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
@@ -621,11 +629,13 @@ const imageIndex = ref(-1)
             :disable-stars="cardGuessing == index"
             :guessing-now="cardGuessing == index"
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
+            :uploader-uid="LIST_CREATORDATA.discord_id"
             @vue:mounted="tryJumping(index)"
             @next-guess="doNextGuess($event)"
             @open-tags="tagViewerOpened = $event"
             @open-collab="openCollabTools"
             @error="listErrorLoading = true"
+            @fullscreen-image="levelImageFullscreen"
           />      
         </LevelCardTableTable>
       </div>

@@ -381,7 +381,7 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
         $diff = isset($l["difficulty"]) ? $l["difficulty"][0] : 0;
         $rating = isset($l["difficulty"]) ? $l["difficulty"][1] : 0;
         $color = isset($l["color"]) ? substr(hslToHex($l["color"]), 1) : null;
-        $bgHash = isset($l["background"]) ? $l["background"]["image"][0] : null;
+        $bgHash = isset($l["BGimage"]) ? $l["BGimage"]["image"][0] : null;
         if (strlen($bgHash) == 0) $bgHash = null;
 
         $res = doRequest($mysqli, "INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, color, background, uploaderID, hash)

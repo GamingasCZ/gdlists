@@ -29,7 +29,6 @@
   --primaryColor: #0000;
   --secondaryColor: #0000;
   --brightGreen: #0000;
-  scrollbar-width: thin;
   scrollbar-color: var(--primaryColor) var(--siteBackground);
 }
 

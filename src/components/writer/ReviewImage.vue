@@ -6,7 +6,7 @@ import { inject } from 'vue';
 import { watch } from 'vue';
 import Resizer from '../global/Resizer.vue';
 import { WriterGallery } from '@/interfaces';
-import containers from './containers';
+import containers, { type cShowImage } from './containers';
 
 
 const emit = defineEmits<{
@@ -15,7 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: cShowImage
     index: number
     buttonState: [string, number]
     editable: boolean

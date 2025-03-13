@@ -334,7 +334,7 @@ const containers: Containers = {
 
 export default containers
 
-type ContainerNames = 'default' |
+export type ContainerNames = 'default' |
 'heading1' |
 'heading2' |
 'heading3' |
@@ -349,7 +349,7 @@ type ContainerNames = 'default' |
 'showCollab' |
 'addCarousel'
 
-// type aa = cDefault | cHeading1 | cHeading2 | cHeading3 | cDivisor | cShowImage | caddVideo | cShowRating | cShowLevel | cShowList | cTwoColumns | cAddCarouse
+export type settings = cDefault & cHeading1 & cHeading2 & cHeading3 & cDivisor & cShowImage & caddVideo & cShowRating & cShowLevel & cShowList & cTwoColumns & cAddCarousel
 
 export type Containers = {
     [container in ContainerNames]: Container
@@ -379,16 +379,16 @@ export type ContainerSettings = {
     valueRange?: [number, number]
 }
 
-// type cDefault = {noMD: boolean, size: number, indent: boolean}
-// type cHeading1 = {}
-// type cHeading2 = {}
-// type cHeading3 = {}
-// type cDivisor = {sizeY: number, visible: boolean}
-// type cShowImage = {url: string, width: number, pick: number, alt: string, description: string, link: string}
-// type caddVideo = {width: number, url: string, description: string}
-// type cShowRating = {level: number, show: number}
-// type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
-// type cShowList = {post: boolean, postType: number, pick: number}
-// type cTwoColumns = {components: [[Containers | boolean][]]}
-// type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
+export type cDefault = {noMD: boolean, size: number, indent: boolean}
+export type cHeading1 = {}
+export type cHeading2 = {}
+export type cHeading3 = {}
+export type cDivisor = {sizeY: number, visible: boolean}
+export type cShowImage = {url: string, width: number, pick: number, alt: string, description: string, link: string}
+export type caddVideo = {width: number, url: string, description: string}
+export type cShowRating = {level: number, show: number}
+export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
+export type cShowList = {post: boolean, postType: number, pick: number}
+export type cTwoColumns = {components: (Containers | boolean)[]}
+export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
 

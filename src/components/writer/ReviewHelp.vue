@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { prettyDate } from '@/Editor';
 import type { ReviewDraft } from '@/interfaces';
 import type { Writer } from '@/writers/Writer';
 import { inject, ref } from 'vue';
-import ReviewDrafts from './ReviewDrafts.vue';
+import DraftCard from './DraftCardSmall.vue';
 
 const props = defineProps<{
 	inverted: boolean
@@ -32,23 +31,12 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 			<h2 class="ml-2 text-3xl font-black text-lof-400">{{ $t('reviews.drafts2') }}</h2>
 			<div class="grid">
 				<section class="flex overflow-auto gap-4 px-2 mt-2">
-					<button
+					<DraftCard
 						v-for="(draft, ind) in draftsValues.slice(0,3)"
 						@click="emit('loadDraft', draftsKeys[ind])"
-						class="flex relative flex-col p-2 h-32 text-left rounded-md border group aspect-video border-lof-400"
-					>
-						<h4 class="text-xl font-bold leading-tight">{{ draft.name }}</h4>
-						<p class="text-sm text-white text-opacity-40">{{ prettyDate((Date.now() - draft.saveDate) / 1000) }}</p>
-						<hr class="opacity-20">
-						<p :style="{mask: 'linear-gradient(white, #FFFFFF20)'}">
-							<p class="text-sm font-bold">{{ draft.previewTitle }}</p>
-							<p v-if="draft.previewParagraph.length" class="text-xs">{{ draft.previewParagraph }}</p>
-							<p v-else class="text-xs text-white text-opacity-40">{{ $t('reviews.draftNoPrev') }}</p>
-						</p>
-						<button class="absolute bottom-2 left-1/2 p-2 w-max bg-black bg-opacity-60 rounded-sm opacity-0 transition-opacity duration-75 -translate-x-1/2 button group-hover:opacity-100" @click.stop="emit('previewDraft', draftsKeys[ind])">
-							<img src="@/images/view.svg" class="w-5" alt="">
-						</button>
-					</button>
+						@preview-draft="emit('previewDraft', draftsKeys[ind])"
+						:draft="draft"
+					/>
 	
 					<button v-if="draftsValues.length > 3" class="flex flex-col justify-center items-center rounded-md min-w-32 hover:bg-opacity-20 hover:bg-black grow" @click="openedDialogs.drafts = true">
 						<img class="w-8" src="@/images/more.svg" alt="">
@@ -58,12 +46,17 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 				</section>
 			</div>
 
-			<!-- <div class="flex gap-4 items-center my-8">
+			<div class="flex gap-4 items-center my-8">
 				<hr class="h-0.5 bg-opacity-10 bg-gradient-to-l from-white to-transparent rounded-md border-none opacity-20 grow">
-				<span class="text-xl opacity-20">Nebo začni něco nového...</span>
+				<span class="text-xl opacity-20">{{ $t('reviews.smthNew') }}...</span>
 				<hr class="h-0.5 bg-opacity-10 bg-gradient-to-r from-white to-transparent rounded-md border-none opacity-20 grow">
 			</div>
 
+			<div>
+				<img src="@/images/info.svg" class="inline mr-2 w-5" alt="">
+				<span>Dej své recenzi šmrnc!</span>
+			</div>
+<!-- 
 			<section class="flex gap-3 px-2 mt-8 w-full sm:items-center max-sm:flex-col">
 				<button class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
 					<img src="@/images/searchOpaque.svg" class="w-10" alt="">

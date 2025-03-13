@@ -93,13 +93,13 @@ onMounted(() => {
     .catch(() => localStorage.removeItem("account_info"));
 });
 
-const tabbarOpen = ref(false);
-document.body.addEventListener("keyup", (e) => {
-  if (e.altKey && e.key == "Control") tabbarOpen.value = false;
-});
-document.body.addEventListener("keydown", (e) => {
-  if (e.altKey && e.key == "Control") tabbarOpen.value = true;
-});
+// const tabbarOpen = ref(false);
+// document.body.addEventListener("keyup", (e) => {
+//   if (e.altKey && e.key == "Control") tabbarOpen.value = false;
+// });
+// document.body.addEventListener("keydown", (e) => {
+//   if (e.altKey && e.key == "Control") tabbarOpen.value = true;
+// });
 </script>
 
 <template>

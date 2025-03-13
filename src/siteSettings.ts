@@ -22,6 +22,7 @@ export const SETTINGS = ref({
   draftNoEdit: false,
   colorization: true,
   flipControls: true,
+  saveThumbs: true,
 });
 
 watch(SETTINGS, () => {

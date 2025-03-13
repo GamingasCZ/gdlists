@@ -1,24 +1,23 @@
 <script setup lang="ts">
-import { currentUID, shortenYTLink } from "@/Editor";
+import { currentUID, newCardBG, shortenYTLink } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, inject, onMounted, type Ref, ref } from "vue";
-import { WriterGallery, type Level, type LevelSearchResponse, type PostData, type ytSearchDetails } from "../../interfaces";
+import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
-import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
-import LevelBackground from "./LevelBackground.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
 import RatingPicker from "../writer/RatingPicker.vue";
-import { DEFAULT_RATINGS } from "@/Reviews";
+import { DEFAULT_RATINGS, getDominantColor } from "@/Reviews";
+import { breakCache } from "../global/imageCache";
 
 const props = defineProps<{
   levelArray: PostData
-  index?: number;
+  index: number;
   opened?: boolean;
   data?: Level;
   updatingPositions: number;
@@ -110,14 +109,15 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   let levelName = props.levelArray.levels[props.index!].levelName;
   let searchingFromUser = levelName && levelCreator.value
 
+  let thumb = `thumb=${SETTINGS.value?.saveThumbs ? 1 : 0}`
   let request: string = "";
-  if (searchingByID) request = `id=${levelID}`; // Searching by ID
-  else if (!levelName && levelCreator.value) request = `levelMaker=${levelCreator.value}`
+  if (searchingByID) request = `${thumb}&id=${levelID}`; // Searching by ID
+  else if (!levelName && levelCreator.value) request = `${thumb}&levelMaker=${levelCreator.value}`
   else {
     if (searchingFromUser) {
       // Find level by specific creator
-      request = `userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
-    } else request = `levelName=${levelName}`; // Find level
+      request = `${thumb}&userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
+    } else request = `${thumb}&levelName=${levelName}`; // Find level
   }
   searching.value = true
   axios
@@ -138,6 +138,10 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       props.levelArray.levels[props.index!].levelID = level.id;
       props.levelArray.levels[props.index!].levelName = level.name;
       props.levelArray.levels[props.index!].platf = level.platf;
+      props.levelArray.levels[props.index!].BGimage.image[0] = level.thumbnail;
+
+      colorizeViaThumb()
+
       isPlatformer.value = level.platf
 
       modifyCreator(level.author)
@@ -163,6 +167,19 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
     }).catch(() => searching.value = false);
 }
 
+const colorizeViaThumb = () => {
+  let thumbURL = props.levelArray.levels[props.index!]?.BGimage?.image?.[0]
+  if (!thumbURL) return
+  if (!SETTINGS.value.colorization) return
+
+  let thumbImg = new Image()
+  thumbImg.src = `${userContent}/userContent/${currentUID.value}/${thumbURL}.webp`
+  thumbImg.onload = () => {
+    let thumbCol = getDominantColor(thumbImg).hsl()
+    changeCardColors([thumbCol[0], 0, thumbCol[2]*64])
+    breakCache()
+  }
+}
 
 const isOldCollab = computed(() => typeof props.levelArray.levels[props.index!].creator == 'object' && !props.levelArray.levels[props.index!].creator[3])
 const mess = [
@@ -228,20 +245,58 @@ const videoInput = ref<HTMLInputElement>()
 const userContent = import.meta.env.VITE_USERCONTENT
 
 const levelMedia = computed(() => {
-  let allMedia = []
+  let allMedia: LevelScreenshot[] = []
   let video = props.levelArray.levels[props.index]?.video
-  let bgImage = props.levelArray.levels[props.index]?.BGimage
+  let bgImage = props.levelArray.levels[props.index]?.BGimage?.image?.[0]
   let screenshots = props.levelArray.levels[props.index]?.screenshots
   if (video)
-    allMedia.push([1,video,""])
+    allMedia.push([LevelImage.VIDEO,video,""])
   if (bgImage && bgImage[0])
-    allMedia.push([0,bgImage,""])
+    allMedia.push([LevelImage.THUMBNAIL,bgImage,""])
 
   if (screenshots)
   allMedia = allMedia.concat(screenshots)
 
   return allMedia
 })
+
+const imageSettingsOpen = ref(-1)
+const gearElement = ref<HTMLButtonElement>()
+
+const setAsThumb = (srcshotIndex: number) => {
+  let arr = props.levelArray.levels[props.index]
+  if (!arr?.BGimage)
+  arr.BGimage = newCardBG()
+
+  if (arr.BGimage.image[0])
+  srcshotIndex--
+
+  arr.BGimage.image[0] = arr.screenshots[srcshotIndex][1]
+  arr.screenshots?.splice(srcshotIndex, 1)
+
+  colorizeViaThumb()
+}
+
+const unsetThumb = () => {
+  let arr = props.levelArray.levels[props.index]
+  arr.screenshots.push([
+    LevelImage.IMAGE,
+    arr.BGimage.image[0],
+    ""  
+  ])
+  arr.BGimage.image[0] = ""
+  imageSettingsOpen.value = -1
+}
+
+const removeScreenshot = (type: LevelImage, ind: number) => {
+  let arr = props.levelArray.levels[props.index]
+  if (type == LevelImage.THUMBNAIL) {
+    arr.BGimage.image[0] = ""
+  }
+  else {
+    arr.screenshots?.splice(ind-1, 1)
+  }
+}
 
 </script>
 
@@ -329,7 +384,7 @@ const levelMedia = computed(() => {
             </div>
     
             <!-- Level ID -->
-            <form @submit.prevent="searchLevel(false)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+            <form @submit.prevent="searchLevel(true)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-full text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
               <button :disabled="!levelArray.levels?.[index]?.levelID" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
                 <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
@@ -359,16 +414,23 @@ const levelMedia = computed(() => {
         <div class="flex overflow-scroll gap-2 p-2 w-full bg-black bg-opacity-20">
           <div v-show="!pickingColor" class="flex gap-2 min-w-max">
             <div v-for="(image, ind) in levelMedia" class="relative duration-200 group">
+
+              <!-- Background preview -->
               <img class="object-cover object-center h-28 rounded-md transition-all group-hover:brightness-50 aspect-video shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+              
+              <!-- Thumbail indicator -->
+              <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
+              
+              <!-- Settings overlay -->
               <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <button @click="levelArray.levels[index]?.screenshots.splice(ind, 1)" class="absolute top-1 right-1">
+                <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
                   <img src="@/images/gear.svg" class="w-5" alt="">
                 </button>
-                <button @click="levelArray.levels[index]?.screenshots.splice(ind, 1)" class="flex absolute bottom-1 left-1 text-sm">
-                  <img src="@/images/image.svg" class="mr-2 w-5" alt="">
-                  Jako náhled
+                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                  <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
+                  {{ $t('reviews.setThumb') }}
                 </button>
-                <button @click="levelArray.levels[index]?.screenshots.splice(ind, 1)" class="absolute right-1 bottom-1">
+                <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
                   <img src="@/images/trash.svg" class="w-5" alt="">
                 </button>
               </div>
@@ -391,8 +453,8 @@ const levelMedia = computed(() => {
             </div>
             
             <!-- Video link input -->
-            <div v-else class="p-1">
-              <div class="flex items-center mb-2">
+            <div v-else class="p-1 pt-0">
+              <div class="flex items-center mb-3">
                 <button @click="addingVideo = false" class="p-2 mr-2 rounded-md hover:bg-white hover:bg-opacity-20">
                   <img src="@/images/back.svg" class="w-6" alt="">
                 </button>
@@ -453,6 +515,43 @@ const levelMedia = computed(() => {
     </div>
 
   </section>
+
+  <Dropdown v-if="imageSettingsOpen >= 0" @close="imageSettingsOpen = -1" :button="gearElement[imageSettingsOpen]">
+    <template #header>
+      <section class="flex flex-col gap-1 p-2 text-white">
+				<button @click="openDialogs.BGpicker = [true, 1, index]; imageSettingsOpen = -1" class="p-2 text-xl bg-black bg-opacity-40 rounded-md button">
+					<img src="@/images/move.svg" alt="" class="inline mr-2 w-5">
+					<span>{{ $t('reviews.setPos') }}</span>
+				</button>
+        <span class="mt-2 text-2xl text-opacity-40">{{ $t('editor.thumbStyle') }}</span>
+        <div class="flex gap-2">
+          <button v-for="i in 4" :class="{'outline': levelArray.levels[index].BGimage?.theme == i-1}" @click="levelArray.levels[index].BGimage.theme = i-1" class="p-2 bg-black bg-opacity-40 rounded-md outline-2 outline-lof-400">
+						<img :src="`${base}/cardThemeIcons/theme${i}.svg`" class="w-max" alt="">
+				  </button>
+        </div>
+        <span class="mt-2 text-2xl text-opacity-40">{{ $t('other.opacity') }}</span>
+				<input type="range" class="slider" v-model="levelArray.levels[index].BGimage.opacity">
+
+        <div class="flex justify-between items-center mt-2 text-lg">
+          <span>{{ $t('other.scrolling') }}</span>
+          <select @click.stop="" class="text-base" v-model="levelArray.levels[index].BGimage.scrolling">
+            <option :value="0">{{ $t('other.off') }}</option>
+            <option :value="1">{{ $t('other.byitself') }}</option>
+            <option :value="2">{{ $t('other.parallax') }}</option>
+          </select>
+        </div>
+        <div class="flex justify-between items-center mt-2 text-lg">
+          <span>{{ $t('other.tiling') }}</span>
+          <input type="checkbox" v-model="levelArray.levels[index].BGimage.tile" min="0" max="1" step="0.05" class="!m-0 button">
+        </div>
+
+        <button @click="unsetThumb()" class="flex gap-2 justify-center items-center text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
+          <img class="w-5" src="@/images/del2.svg" alt="">
+          Zrušit náhled
+        </button>
+      </section>
+    </template>
+  </Dropdown>
 </template>
 
 <style scoped>

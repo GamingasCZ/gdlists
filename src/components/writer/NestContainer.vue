@@ -7,9 +7,10 @@ import { computed } from 'vue';
 import chroma from 'chroma-js';
 import { watch } from 'vue';
 import type { PostData } from '@/interfaces';
+import type { cTwoColumns } from './containers';
 
 const props = defineProps<{
-    settings: {components: any[]}
+    settings: cTwoColumns
     index: number
     subIndex: number
     editable: boolean
@@ -67,6 +68,7 @@ const selectNestContainer = (e: Event) => {
 }
 
 const subcomponents = computed(() => props.settings.components[props.subIndex].filter(x => x === Object(x)))
+const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
 
 </script>
 
@@ -84,7 +86,7 @@ const subcomponents = computed(() => props.settings.components[props.subIndex].f
             v-for="(container, ind) in subcomponents"
             v-bind="CONTAINERS[container.type]"
             @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
-            @remove-container="settings.components[subIndex].splice(ind, 1); removeNestContainer()"
+            @remove-container="removeInnerContainer(index); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @settings-button="buttonState = [$event, ind]"
             @text-modified="container.data = $event"

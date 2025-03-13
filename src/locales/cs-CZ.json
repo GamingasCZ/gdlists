@@ -69,7 +69,9 @@
     "colorizeHelp": "Po vybrání obrázku pozadí se barva automaticky přizpůsobí obrázku.",
     "compToolbar": "Zmenšená lišta nástrojů",
     "compactHelp": "Skryje názvy nástrojů v editoru.",
-    "draftNoRemove": "Nemazat koncepty při nahrání"
+    "draftNoRemove": "Nemazat koncepty při nahrání",
+    "saveThumbs": "Ukládat náhledy levelů",
+    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -208,7 +210,8 @@
     "tagl5": "Neuvěřil bys, co je na prvním místě :O!",
     "tagl6": "Demon List se nevzpamatuje!",
     "title": "Editor seznamu",
-    "translHelp": "Karty levelů v seznamu budou průsvitné."
+    "translHelp": "Karty levelů v seznamu budou průsvitné.",
+    "thumbStyle": "Styl náhledu"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -761,7 +764,10 @@
     "transparent": "Průhledná",
     "translucent": "Průsvitná",
     "opaque": "Neprůhledná",
-    "zmHelp6": "Klikni pro zavření"
+    "zmHelp6": "Klikni pro zavření",
+    "smthNew": "Nebo začni něco nového",
+    "setThumb": "Jako náhled",
+    "setPos": "Pozicování"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

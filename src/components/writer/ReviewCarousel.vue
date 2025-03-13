@@ -6,12 +6,12 @@ import ReviewImage from './ReviewImage.vue';
 import ReviewVideo from './ReviewVideo.vue';
 import Resizer from '../global/Resizer.vue';
 import { flexNames } from '@/Reviews';
-import containers from './containers';
+import containers, { type cAddCarousel } from './containers';
 
 const props = defineProps<{
     index: number
     buttonState: [string, number]
-    settings: object
+    settings: cAddCarousel
     editable: boolean
     align: string
 }>()

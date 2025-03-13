@@ -98,6 +98,13 @@ if (hasLocalStorage()) {
             :control-options="[[$t('settingsMenu.asOff'), 0], [$t('settingsMenu.everySec', [30]), 30], [$t('settingsMenu.everySec', [60]), 60], [$t('settingsMenu.everyMin', [3]), 180]]"
             >
         </Option>
+        <Option
+            v-model="SETTINGS.saveThumbs"
+            :name="$t('settingsMenu.saveThumbs')"
+            :desc="$t('settingsMenu.saveThumbsHelp')"
+            control="cbox"
+        >
+        </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
             v-model="SETTINGS.flipControls"

@@ -110,7 +110,8 @@
     "tagl5": "You wouldn't believe what's number one :O!",
     "tagl4": "I'd be down for some Wasabi paste!",
     "tagl1": "These creators have truly peaked!",
-    "translHelp": "Level cards in the list will be translucent."
+    "translHelp": "Level cards in the list will be translucent.",
+    "thumbStyle": "Thumbnail Style"
   },
   "homepage": {
     "clear": "Clear",
@@ -493,7 +494,9 @@
     "compToolbar": "Compact Toolbar",
     "compactHelp": "Hides tool names in the editor.",
     "draftNoRemove": "Do Not Remove Draft after Upload",
-    "colorize": "Colorize via Background Image"
+    "colorize": "Colorize via Background Image",
+    "saveThumbs": "Save Level Thumbnails",
+    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search."
   },
   "help": {
     "Lists": "Lists",
@@ -759,7 +762,10 @@
     "transparent": "Transparent",
     "translucent": "Translucent",
     "opaque": "Opaque",
-    "zmHelp6": "Tap to close"
+    "zmHelp6": "Tap to close",
+    "smthNew": "Or start something new",
+    "setThumb": "Set Thumbnail",
+    "setPos": "Positioning"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -1,3 +1,5 @@
+import type { ContainerNames, settings } from "./components/writer/containers";
+
 export interface ListPreview {
   name: string;
   creator: string;
@@ -187,6 +189,8 @@ export interface LevelBackground {
   scrolling: 0 | 1 | 2
 }
 
+export type LevelScreenshot = [LevelImage, string, string]
+
 export interface Level {
   levelName: string;
   creator: CollabData | string;
@@ -198,7 +202,13 @@ export interface Level {
   platf: boolean;
   ratings?: [number[], number[]]
   BGimage?: LevelBackground
-  screenshots?: string[]
+  screenshots?: LevelScreenshot[]
+}
+
+export enum LevelImage {
+  IMAGE,
+  VIDEO,
+  THUMBNAIL
 }
 
 export interface ListBackground {
@@ -223,6 +233,7 @@ export interface LevelSearchResponse {
   cp: number;
   platf: boolean
   selected?: boolean
+  thumbnail?: string
 }
 
 export interface userDataFetchResponse {
@@ -296,8 +307,8 @@ export interface ReviewContainer {
   data: string
   extraComponents: number
   id: number
-  settings: object[]
-  type: string
+  settings: settings
+  type: ContainerNames
 }
 
 export interface ReviewRating {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Resizer from '../global/Resizer.vue';
-import containers from './containers';
+import containers, { type cDivisor } from './containers';
 
 
 const props = defineProps<{
-    settings: object
+    settings: cDivisor
     editable: boolean
 }>()
 

@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, PostData, ListFetchResponse } from "./interfaces";
+import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBackground } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
@@ -79,7 +79,7 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
 
 export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
-export const newCardBG = () => ({ image: DEFAULT_LEVELLIST().titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
+export const newCardBG = ():LevelBackground => ({ image: DEFAULT_LEVELLIST().titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
 
 export function testIfImageExists(url: string) {
   return new Promise((loaded, error) => {

@@ -111,7 +111,7 @@ export interface Writer {
         /**
         * A function that returns a new instance of a post
         */
-        postObject: () => ReviewList | LevelList
+        postObject: () => ReviewList & LevelList
         /**
          * Title for the webbrowser tab
          */

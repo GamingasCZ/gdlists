@@ -3,7 +3,7 @@ import { shortenYTLink } from '@/Editor';
 import { onMounted, ref, watch } from 'vue';
 import ContainerHelp from './ContainerHelp.vue';
 import Resizer from '../global/Resizer.vue';
-import containers from './containers';
+import containers, { type caddVideo } from './containers';
 
 
 const emit = defineEmits<{
@@ -11,7 +11,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: caddVideo
     editable: boolean
 }>()
 
