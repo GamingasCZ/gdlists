@@ -223,7 +223,10 @@ const uploadExternalImage = async (link: string) => {
 }
 
 const previewImage = ref(false)
-const pickImage = (index: number | number[], external: boolean, event?: MouseEvent) => {
+const pickImage = (index: number | number[], external: boolean, event: MouseEvent) => {
+    if (selectedImages.value.length && props.allowMultiplePicks && typeof index == 'number')
+        index = selectedImages.value
+
     let url;
     let singleSelect = typeof index == 'number'
     emit('closePopup')
@@ -260,6 +263,8 @@ const pickImage = (index: number | number[], external: boolean, event?: MouseEve
 
 const selectedImages = ref<number[]>([])
 const selectImage = (index: number) => {
+    if (index < 0) return
+    
     if (currentTab.value == Tabs.Uploaded)
         copyFromPath = currentFolder.value[subfolderLevel.value][1]
     else
@@ -453,8 +458,17 @@ const modifierHeld = (e: KeyboardEvent) => {
             gotoFolder(currentExtFolder.value[subfolderExtLevel.value-1], subfolderExtLevel.value-1)
     }
 
+    // Select image
+    if (props.allowMultiplePicks && e.key.toLowerCase() == 's') {
+        let currSelected = +(document?.activeElement?.dataset?.ind)
+        if (currentTab.value == Tabs.Uploaded)
+            selectImage(currSelected - folders.value.length)
+        else
+            selectImage(currSelected - extImgFolders.value.length)
+    }
+
     // Switch Tabs
-    if (e.ctrlKey && e.altKey && e.key == 'e')
+    if (e.altKey && e.key == 'e')
         goToTab(!currentTab.value)
 
     // CTRL + X = move mode

@@ -6,7 +6,7 @@ import { checkList, DEFAULT_LEVELLIST, getListPreview } from "@/Editor"
 import type { LevelList, PostData, ReviewList, Setting } from "@/interfaces"
 import { i18n } from "@/locales"
 import { checkReview, DEFAULT_REVIEWDATA, getReviewPreview } from "@/Reviews"
-import type { Component } from "vue"
+import { markRaw, type Component } from "vue"
 
 export enum Key {
     None = 0,
@@ -277,7 +277,7 @@ export const REVIEW: Writer = {
         levelRating: false,
         levelsSubtext: i18n.global.t('reviews.levtoRev'),
         allowWriter: true,
-        writerHelp: ReviewHelp,
+        writerHelp: markRaw(ReviewHelp),
         clientPostValidation: checkReview,
 
     },
@@ -369,7 +369,7 @@ export const REVIEW: Writer = {
                 },
                 {
                     tooltip: i18n.global.t('reviews.showLevel'),
-                    shortcut: [Key.Alt, 'L'],
+                    shortcut: [Key.Alt | Key.Shift, 'L'],
                     icon: "showLevel",
                     action: ["add", 'showLevel']
                 },
@@ -392,7 +392,7 @@ export const REVIEW: Writer = {
                     shortcut: [Key.Alt | Key.Shift, 'C'],
                     action: ["columnCreate"],
                     icon: "twoColumns",
-                    component: ColumnSettingsButton
+                    component: markRaw(ColumnSettingsButton)
                 },
             ]
         },

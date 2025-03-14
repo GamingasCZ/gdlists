@@ -14,7 +14,7 @@ const columnCommand = inject<(ind: number) => void>("columnCommand")!
 </script>
 
 <template>
-    <div @mousedown.prevent="" class="m-2">
+    <div @mousedown.prevent="" @click.stop="" class="m-2">
         <div class="flex flex-col gap-3 justify-center mb-5 text-xl text-center text-white">
             <div v-for="(setting, index) in [$t('other.add'), $t('other.duplicate')]">
                 <h2>{{ $t('reviews.columnSetting', [setting]) }}</h2>

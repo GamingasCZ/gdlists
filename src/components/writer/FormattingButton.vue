@@ -4,7 +4,7 @@ import Tooltip from '../ui/Tooltip.vue';
 import Dropdown from '../ui/Dropdown.vue';
 import { SETTINGS } from '@/siteSettings';
 import type { ToolbarButton, ToolbarAction } from '@/writers/Writer';
-import { comboHeld } from '@/writers/shortcuts';
+import { comboHeld, doOverride } from '@/writers/shortcuts';
 
 const props = defineProps<{
     button: ToolbarButton
@@ -60,7 +60,7 @@ const extComponent = ref<HTMLButtonElement>()
         >
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
         </button>
-        <div v-if="comboHeld == button?.shortcut?.[0]" class="absolute -bottom-4 left-1/2 z-10 px-2 py-1 text-sm rounded-sm -translate-x-1/2 bg-lof-100">{{ button.shortcut[1] }}</div>
+        <div v-if="comboHeld == button?.shortcut?.[0]" class="absolute -bottom-4 left-1/2 z-10 px-2 py-1 text-sm rounded-sm -translate-x-1/2 bg-lof-100">{{ doOverride(button.shortcut[1]) }}</div>
 
         <button
             @click.stop="

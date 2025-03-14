@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { keyShortcuts } from '@/writers/shortcuts';
+import { doOverride, keyShortcuts } from '@/writers/shortcuts';
 import { Key } from '@/writers/Writer';
 
 
@@ -12,20 +12,6 @@ const parseKey = (key: [Key, string]) => {
     if (key[0] & Key.Shift)
         keys.push("Shift", -1)
     return [...keys, key[1]]
-}
-
-const overrides = {
-    'Digit1': '1',
-    'Digit2': '2',
-    'Digit3': '3',
-    'ArrowUp': '▲',
-    'ArrowDown': '▼'
-}
-
-const doOverride = (key: string) => {
-    if (overrides[key])
-        return overrides[key]
-    return key
 }
 
 </script>

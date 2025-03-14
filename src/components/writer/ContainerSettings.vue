@@ -39,8 +39,8 @@ const showSettings = () => {
         if (props.mousePos[0]) {
             window.addEventListener("resize", positionFloating)
             positionFloating()
-            nextTick(() => containerSettings.value?.[0]?.focus())
         }
+        nextTick(() => containerSettings.value?.[0]?.focus())
     })
 }
 

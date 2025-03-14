@@ -208,6 +208,29 @@ export function getDominantColor(image: HTMLImageElement) {
     return dominantColor
 }
 
+export function getDominantLine(image: HTMLImageElement) {
+    if (!image) return 0
+    const w = 48, h = 27
+
+    let canvas = new OffscreenCanvas(w,h)
+    let ctx = canvas.getContext("2d", {alpha: false})
+    ctx?.drawImage(image, 0, 0, w, h)
+    let imageData = ctx?.getImageData(0, 0, w, h)
+    if (!imageData) return 0
+
+    let differenceArray = Array(h).fill(0)
+    let lineCounter = 0
+    const pixelSize = w*4
+    for (let i = 0; i < imageData?.data.length; i += 4) {
+        differenceArray[lineCounter] += 8290687 - imageData?.data[i] * imageData?.data[i+1] * imageData?.data[i+2]
+        if (i >= pixelSize*(lineCounter+1))
+            lineCounter++
+    }
+
+    let maxDiff = Math.min(...differenceArray)
+    return Math.trunc(differenceArray.findIndex(x => x == maxDiff) / h * 100)
+}
+
 export function getWordCount(post: ReviewList) {
     let count = 0
     post.containers.forEach(c => {

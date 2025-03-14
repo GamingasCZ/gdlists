@@ -101,7 +101,6 @@ onUnmounted(() => {
         <slot name="header" />
 
         <DataContainer v-for="(container, index) in writerData.containers"
-            ref="dataContainers"
             v-memo="[editable, containerLastAdded, selectedContainer, selectedNestContainer]"
             v-bind="CONTAINERS[container.type]"
             @remove-container="emit('callCommand', {command: 1, data: [index]})"
@@ -118,28 +117,27 @@ onUnmounted(() => {
             :focused="editable && selectedContainer[0] == index"
             :index="index"
             :editable="editable"
+            :align="container.align"
             :text="container.data"
         >
-            <div class="flex flex-wrap w-full" :style="{ justifyContent: flexNames[container.align] }">
-                <component
-                    v-for="(elements, subIndex) in
-                        (CONTAINERS[container.type].additionalComponents ?? [])
-                         .concat(Array(container.extraComponents)
-                         .fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                    :is="elements"
-                    :key="container.id"
-                    v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                    @clear-button="buttonState[0] = ''"
-                    @remove-subcontainer="container.extraComponents -= 1"
-                    @remove="emit('callCommand', {command: 1, data: [index]})"
-                    :button-state="buttonState"
-                    :settings="container.settings"
-                    :index="index"
-                    :sub-index="subIndex"
-                    :editable="editable"
-                    :align="container.align"
-                />
-            </div>
+            <component
+                v-for="(elements, subIndex) in
+                    (CONTAINERS[container.type].additionalComponents ?? [])
+                        .concat(Array(container.extraComponents)
+                        .fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
+                :is="elements"
+                :key="container.id"
+                v-bind="CONTAINERS[container.type].componentProps ?? {}"
+                @clear-button="buttonState[0] = ''"
+                @remove-subcontainer="container.extraComponents -= 1"
+                @remove="emit('callCommand', {command: 1, data: [index]})"
+                :button-state="buttonState"
+                :settings="container.settings"
+                :index="index"
+                :sub-index="subIndex"
+                :editable="editable"
+                :align="container.align"
+            />
         </DataContainer>
 
         <slot name="footer" />

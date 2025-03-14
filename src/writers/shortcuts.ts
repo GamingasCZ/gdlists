@@ -8,6 +8,7 @@ import EditIcon from "@/images/edit.svg?url"
 import ResizeIcon from "@/images/fullscreen.svg?url"
 import MoveUpIcon from "@/images/moveUp.svg?url"
 import MoveDownIcon from "@/images/moveDown.svg?url"
+import AddIcon from "@/images/plus.svg?url"
 import { ref } from "vue";
 
 const writerShortcuts = [
@@ -40,6 +41,12 @@ const writerShortcuts = [
         action: ["drafts"],
         title: i18n.global.t('reviews.drafts'),
         icon: EditIcon
+    },
+    {
+        shortcut: [Key.Alt, 'L'],
+        action: ["addLevel"],
+        title: i18n.global.t('reviews.addLevel'),
+        icon: AddIcon
     },
     {
         shortcut: [Key.Alt, '-'],
@@ -154,4 +161,18 @@ function checkForShortcut(e: KeyboardEvent) {
 
 function getCombo(e: KeyboardEvent) {
     return +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
+}
+
+const overrides = {
+    'Digit1': '1',
+    'Digit2': '2',
+    'Digit3': '3',
+    'ArrowUp': '▲',
+    'ArrowDown': '▼'
+}
+
+export const doOverride = (key: string) => {
+    if (overrides[key])
+        return overrides[key]
+    return key
 }

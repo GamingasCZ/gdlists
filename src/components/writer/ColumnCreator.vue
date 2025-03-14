@@ -50,7 +50,7 @@ const pickColAmount = (amount: number) => {
             <h2 v-if="highlightedCreateColumns == -1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols') }}</h2>
             <h2 v-else-if="highlightedCreateColumns <= 1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols1') }}</h2>
             <h2 v-else class="mb-2 text-2xl opacity-80">{{ $t('reviews.colsSelected', highlightedCreateColumns) }}</h2>
-            <button class="w-full overflow-clip rounded-lg border bg-lof-100 border-lof-400">
+            <button class="w-full overflow-clip rounded-lg bg-lof-100">
                 <div class="p-2">
                     <ColumnPreview @click="pickColAmount(highlightedCreateColumns)" v-model="highlightedCreateColumns" :playing="false" :col-amount="10" />
                 </div>
@@ -60,7 +60,7 @@ const pickColAmount = (amount: number) => {
         
         <div v-if="pickedColumns">
             <h2 class="mb-2 text-2xl opacity-40">{{ $t('reviews.selColType') }}</h2>
-            <button @mouseenter="playing[0] = true" @mouseleave="playing[0] = false" @mousedown.stop="() => create(highlightedCreateColumns, false, 'left')" class="w-full overflow-clip rounded-lg border button bg-lof-100 border-lof-400">
+            <button @mouseenter="playing[0] = true" @mouseleave="playing[0] = false" @mousedown.stop="() => create(highlightedCreateColumns, false, 'left')" class="w-full overflow-clip rounded-lg button bg-lof-100 border-lof-400">
                 <div class="p-2">
                     <ColumnPreview :fixed-amount="highlightedCreateColumns" :playing="playing[0]" :col-amount="highlightedCreateColumns" />
                 </div>
@@ -70,7 +70,7 @@ const pickColAmount = (amount: number) => {
                 </div>
             </button>
             
-            <button @mouseenter="playing[1] = true" @mouseleave="playing[1] = false" @click="pickedMaxContent = true" class="mt-2 w-full overflow-clip rounded-lg border bg-lof-100 border-lof-400">
+            <button @mouseenter="playing[1] = true" @mouseleave="playing[1] = false" @click="pickedMaxContent = true" class="mt-2 w-full overflow-clip rounded-lg bg-lof-100 border-lof-400">
                 <div class="flex p-2" :style="{justifyContent: ['start', 'center', 'end', 'space-between'][highlightedAlign]}">
                     <ColumnPreview max-content :playing="playing[1]" :spread="highlightedAlign == 3" :fixed-amount="highlightedCreateColumns" :col-amount="highlightedCreateColumns" />
                 </div>

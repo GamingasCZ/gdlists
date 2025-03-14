@@ -76,16 +76,16 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
     <article
         @click.stop="selectNestContainer"
         @focusin="selectNestContainer"
-        @blur="selectedNestContainer = [-1,-1,-1]"
+        
         :style="{outlineColor: borderColor, justifyContent: ['start', 'center', 'end'][settings.components[subIndex][settings.components[subIndex].findIndex(x => typeof x == 'number')]], maxWidth: settings.components[subIndex].includes(true) ? 'max-content' : 'unset'}"
-        :tabindex="(editable || subcomponents.length == 0) ? 0 : -1"
+        :tabindex="(editable && subcomponents.length > 0) ? -1 : 0  "
         class="p-0.5 flex flex-col outline outline-1 transition-colors duration-75 min-w-10 grow min-h-8 basis-[min-content]"
         :class="{'!outline-2': selectedNestContainer[0] == index && selectedNestContainer[1] == subIndex, '!outline-none': !editable}"
     >
         <DataContainer
             v-for="(container, ind) in subcomponents"
             v-bind="CONTAINERS[container.type]"
-            @has-focus="selectedRootContainer = [index, null]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
+            @has-focus="selectedRootContainer = [index]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
             @remove-container="removeInnerContainer(index); removeNestContainer()"
             @move-container="moveContainer(ind, $event)"
             @settings-button="buttonState = [$event, ind]"
@@ -97,21 +97,20 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
             :key="container.id"
             :editable="editable"
             :text="container.data"
+            :index="index"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0] && editable"
         >
-            <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
-                <component
-                    v-for="elements in CONTAINERS[container.type].additionalComponents"
-                    :is="elements"
-                    v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                    @clear-button="buttonState[0] = ''"
-                    :button-state="buttonState"
-                    :settings="container.settings"
-                    :index="ind"
-                    :id="container.id"
-                    :editable="editable"
-                />
-            </div>
+            <component
+                v-for="elements in CONTAINERS[container.type].additionalComponents"
+                :is="elements"
+                v-bind="CONTAINERS[container.type].componentProps ?? {}"
+                @clear-button="buttonState[0] = ''"
+                :button-state="buttonState"
+                :settings="container.settings"
+                :index="ind"
+                :id="container.id"
+                :editable="editable"
+            />
         </DataContainer>
     </article>
 </template>

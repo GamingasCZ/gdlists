@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import LevelCard from "../editor/EditorCard.vue";
-import { inject, onBeforeUnmount, ref, type Ref } from "vue";
+import { computed, inject, onBeforeUnmount, ref, type Ref } from "vue";
 import EditorCardHeader from "../editor/EditorCardHeader.vue";
 import { addReviewLevel } from "@/Reviews";
 import LevelImportPopup from "../editor/LevelImportPopup.vue";
@@ -116,9 +116,9 @@ const openMoreDialog = (opt: number) => {
 }
 
 const rouletteActive = ref(false)
-const draftsValues = Object.values(props.drafts ?? []).reverse().slice(0,4)
-const draftsKeys = Object.keys(props.drafts ?? []).reverse().slice(0,4)
-
+const draftsValues = computed(() => Object.values(props.drafts ?? []).reverse().slice(0,4))
+const draftsKeys = computed(() => Object.keys(props.drafts ?? []).reverse().slice(0,4))
+const isSearching = ref(false)
 </script>
 
 <template>
@@ -172,7 +172,7 @@ const draftsKeys = Object.keys(props.drafts ?? []).reverse().slice(0,4)
                     class="flex flex-col items-center w-full text-center opacity-40">
 
 
-                    <div v-if="draftsKeys.length" class="flex gap-4 items-center mt-8 mb-2 w-full">
+                    <div v-if="draftsKeys.length && drafts != null" class="flex gap-4 items-center mt-8 mb-2 w-full">
                         <hr class="h-0.5 bg-opacity-10 bg-gradient-to-l from-white to-transparent rounded-md border-none opacity-20 grow">
                         <span class="text-xl opacity-20">{{ $t('reviews.smthNew') }}...</span>
                         <hr class="h-0.5 bg-opacity-10 bg-gradient-to-r from-white to-transparent rounded-md border-none opacity-20 grow">
@@ -199,11 +199,24 @@ const draftsKeys = Object.keys(props.drafts ?? []).reverse().slice(0,4)
                 <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
                 <div v-show="!rouletteActive" v-for="(level, index) in POST_DATA.levels">
-                    <EditorCardHeader v-if="openedCard != index || disabled" :data="level" :updating-positions="updatingPosition"
-                        :index="index" @update-opened-card="openedCard = index" @do-move="moveLevel" />
-                    <LevelCard v-else @open-collab-tools="dialogs.collabs = true" @open-tag-popup="dialogs.tags = true"
-                        @do-move="moveLevel" @move-controls="enableMoveControls" :updating-positions="updatingPosition"
-                        :level-array="POST_DATA" :data="level" :index="index" />
+                    <EditorCardHeader v-if="openedCard != index || disabled"
+                        @do-move="moveLevel"
+                        @update-opened-card="!isSearching && (openedCard = index)"
+                        :data="level"
+                        :updating-positions="updatingPosition"
+                        :index="index"
+                    />
+                    <LevelCard v-else
+                        @open-collab-tools="dialogs.collabs = true"
+                        @open-tag-popup="dialogs.tags = true"
+                        @do-move="moveLevel"
+                        @move-controls="enableMoveControls"
+                        v-model="isSearching"
+                        :updating-positions="updatingPosition"
+                        :level-array="POST_DATA"
+                        :data="level"
+                        :index="index"
+                    />
                 </div>
             </div>
             <div class="flex relative gap-2 justify-center items-center max-sm:justify-end">

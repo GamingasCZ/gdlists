@@ -12,7 +12,7 @@ import DifficultyIcon from "../global/DifficultyIcon.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
 import RatingPicker from "../writer/RatingPicker.vue";
-import { DEFAULT_RATINGS, getDominantColor } from "@/Reviews";
+import { DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
 import { breakCache } from "../global/imageCache";
 
 const props = defineProps<{
@@ -99,7 +99,7 @@ const mobileMoveLevel = () => {
 };
 
 const collabFlash = ref(false)
-const searching = ref(false)
+const searching = defineModel({default: false})
 function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   if (searchingByID && !searchAvailableID.value) return
   if (!searchingByID && !searchAvailableCreator.value) return
@@ -139,7 +139,7 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       props.levelArray.levels[props.index!].levelName = level.name;
       props.levelArray.levels[props.index!].platf = level.platf;
       props.levelArray.levels[props.index!].BGimage.image[0] = level.thumbnail;
-
+      
       colorizeViaThumb()
 
       isPlatformer.value = level.platf
@@ -176,6 +176,9 @@ const colorizeViaThumb = () => {
   thumbImg.src = `${userContent}/userContent/${currentUID.value}/${thumbURL}.webp`
   thumbImg.onload = () => {
     let thumbCol = getDominantColor(thumbImg).hsl()
+    let thumbDom = getDominantLine(thumbImg)
+
+    props.levelArray.levels[props.index].BGimage.image[1] = thumbDom
     changeCardColors([thumbCol[0], 0, thumbCol[2]*64])
     breakCache()
   }
@@ -298,6 +301,11 @@ const removeScreenshot = (type: LevelImage, ind: number) => {
   }
 }
 
+const nameInput = ref<HTMLInputElement>()
+onMounted(() => {
+  nameInput.value.focus()
+})
+
 </script>
 
 <template>
@@ -369,9 +377,10 @@ const removeScreenshot = (type: LevelImage, ind: number) => {
               <button ref="difficultyButton" @click="diffPickerOpen = true" type="button" class="button">
                 <DifficultyIcon class="w-12" :difficulty="selectedDiff?.[0] ?? 0" :rating="selectedDiff?.[1] ?? 0" />
               </button>
-              <input v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
-              <button :disabled="!levelArray.levels?.[index]?.levelName" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
-                <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
+              <input ref="nameInput" v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
+              <button :disabled="!levelArray.levels?.[index]?.levelName || searching" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
+                <img v-if="searching" src="@/images/loading.webp" class="w-6 animate-spin min-w-6" alt="">
+                <img v-else src="@/images/searchOpaque.svg" class="min-w-6" alt="">
               </button>
             </form>
     
@@ -386,8 +395,9 @@ const removeScreenshot = (type: LevelImage, ind: number) => {
             <!-- Level ID -->
             <form @submit.prevent="searchLevel(true)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-full text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
-              <button :disabled="!levelArray.levels?.[index]?.levelID" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
-                <img src="@/images/searchOpaque.svg" class="min-w-6" alt="">
+              <button :disabled="!levelArray.levels?.[index]?.levelID || searching" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
+                <img v-if="searching" src="@/images/loading.webp" class="w-6 animate-spin min-w-6" alt="">
+                <img v-else src="@/images/searchOpaque.svg" class="min-w-6" alt="">
               </button>
             </form>
           </div>

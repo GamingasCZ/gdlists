@@ -230,8 +230,8 @@ const addContainer = (key: string, addTo?: number | number[], returnOnly = false
 
 provide("addContainer", addContainer)
 
-const removeContainer = (index: number) => {
-    if (POST_DATA.value.containers[index].type == 'twoColumns') {
+const removeContainer = (index: number, forceColumnRemove = false) => {
+    if (POST_DATA.value.containers[index].type == 'twoColumns' && !forceColumnRemove) {
         POST_DATA.value.containers[index].settings
         .components[selectedNestContainer.value[1]]
         .splice(selectedNestContainer.value[2], 1)
@@ -251,7 +251,7 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
     if (selectedNestContainer.value[0] == -1) {
         if (index < 0) return
         POST_DATA.value.containers[index].align = alignment
-        selectedContainer.value[1]?.focus()
+        // selectedContainer.value[1]?.focus()
     }
     else {
         POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
@@ -315,7 +315,7 @@ const columnCommand = (index: number) => {
             break;
         case 8: moveContainer(selectedNestContainer.value[0], -1); break;
         case 9: moveContainer(selectedNestContainer.value[0], 1); break;
-        case 10: removeContainer(selectedNestContainer.value[0]); break;
+        case 10: removeContainer(selectedNestContainer.value[0], true); break;
         case 11: column[11] = 0; break;
         case 12: column[11] = 1; break;
         case 13: column[11] = 2; break;
@@ -369,7 +369,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             openDialogs.drafts = true
             break;
         case 'containerOptions':
-            containerSettingsShown.value = [3, selectedContainer.value[0]]
+            containerSettingsShown.value = [3, selectedContainer.value[0], selectedNestContainer.value[1]]
             break;
         case 'shortcutsMenu':
             openDialogs.shortcuts = true
@@ -394,6 +394,9 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
         case 'moveDown':
             moveContainer(selectedContainer.value[0], action == 'moveUp' ? -1 : 1);
             break;
+        case 'addLevel':
+            addReviewLevel(POST_DATA)
+            break;
 	}
 }
 provide("writerAction", doAction)
@@ -408,7 +411,6 @@ const toggleLevelPreview = () => {
     previewingLevels.value = !previewingLevels.value
 }
 
-const previewContent = ref(0)
 const setFormatting = () => {
     document.activeElement?.blur()
     setPreviewMode(!previewMode.value)
@@ -690,7 +692,7 @@ const openRatingHelp = () => {
 const reviewSave = ref({ backupID: 0, lastSaved: 0 })
 const draftPopup = ref<HTMLDivElement>()
 const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => {
-    POST_DATA.value = newData.data
+    POST_DATA.value = JSON.parse(JSON.stringify(newData.data))
     reviewSave.value.backupID = newData.id
     reviewSave.value.lastSaved = newData.saved
     fetchEmbeds()
@@ -739,25 +741,22 @@ const previewApply = () => {
     previewID = [0, 0]
 }
 
-const funnySaveAsMessages = [i18n.global.t('reviews.copy1'), i18n.global.t('reviews.copy2'), i18n.global.t('reviews.copy3'), i18n.global.t('reviews.copy4'), i18n.global.t('reviews.copy5'), i18n.global.t('reviews.copy6'), i18n.global.t('reviews.copy2')]
 const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
 const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | boolean = false) => {
     if (!WRITER.value.drafts.draftabilityConstraint(POST_DATA.value)) return
     if (disableEdits.value) return
-    if (typeof leavingPage != "boolean")
-        console.log(leavingPage.path)
     let now = Date.now()
-    let backupID;
+    let backupID: number;
     let preview = WRITER.value.drafts.parsePreview(POST_DATA.value)
+
+    let editing = 0;
+    if (props.editing)
+        editing = parseInt(props.postID!)
+
     if (reviewSave.value.backupID == 0 || saveAs) {
         let saveAsName = POST_DATA.value.reviewName || i18n.global.t('editor.unnamedReview')
         if (saveAs && reviewSave.value.backupID != 0) {
-            let i = 1
-            funnySaveAsMessages.forEach(x => {
-                if (drafts.value[reviewSave.value.backupID].name.includes(x)) saveAsName = " " + funnySaveAsMessages[Math.min(i, funnySaveAsMessages.length - 1)]
-                i += 1
-            })
-            if (saveAsName == "") saveAsName = " " + funnySaveAsMessages[0]
+            saveAsName = saveAsName + ' ' + i18n.global.t("reviews.copy1")
         }
 
         drafts.value[now] = {
@@ -769,6 +768,9 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
             previewTitle: preview.title,
             previewParagraph: preview.preview
         }
+        if (editing)
+            drafts.value[now].editing = editing
+
         backupID = now
     }
     else {
@@ -778,6 +780,9 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
         drafts.value[reviewSave.value.backupID].previewTitle = preview.title
         drafts.value[reviewSave.value.backupID].previewParagraph = preview.preview
         backupID = reviewSave.value.backupID
+
+        if (editing)
+            drafts.value[reviewSave.value.backupID].editing = editing
     }
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
     reviewSave.value = { backupID: backupID, lastSaved: now }
@@ -882,12 +887,6 @@ const toggleZenMode = () => {
                 :disable-controls="openDialogs.BGpicker[1] == 1"
                 :force-aspect-height="[0, 100, 150][openDialogs.BGpicker[1]]"
                 :source="[POST_DATA.titleImg, POST_DATA.levels?.[openDialogs?.BGpicker?.[2]]?.BGimage?.image, POST_DATA.thumbnail][openDialogs.BGpicker[1]]" />
-        </DialogVue>
-
-        <DialogVue :open="openDialogs.ratings" :side-button-text="$t('other.help')" :action="openRatingHelp"
-            @close-popup="openDialogs.ratings = false" :title="$t('reviews.rating')">
-            <template #icon><img src="@/images/info.svg" alt="" class="w-6"></template>
-            <WriterRatings ref="writerRatings" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.carouselPicker[0]" @close-popup="openDialogs.carouselPicker[0] = false"

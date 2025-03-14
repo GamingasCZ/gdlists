@@ -6,9 +6,6 @@ import DraftCard from './DraftCardSmall.vue';
 
 const props = defineProps<{
 	inverted: boolean
-	noRatings: boolean
-	hasLevels: boolean
-	hasRatings: boolean
 	writer: Writer
 	drafts: {[draftKey: string]: ReviewDraft}
 }>()

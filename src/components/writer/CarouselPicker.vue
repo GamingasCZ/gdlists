@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, nextTick, ref } from "vue";
+import { inject, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { computed } from "vue";
 import Dialog from "../global/Dialog.vue";
 import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
@@ -104,6 +104,25 @@ const dialogType = ref(0)
 const uploader = ref<HTMLInputElement>()
 const maxLen = computed(() => carouselComp.length >= 25)
 
+const carouselShortcuts = (e: KeyboardEvent) => {
+    if (openDialogs.imagePicker[0]) return
+    if (textDialogOpen.value != -1) return
+    if (maxLen.value) return
+
+    if (e.key.toLowerCase() == "i")
+        openGallery()
+    if (e.key.toLowerCase() == "v")
+        addVideo()
+}
+
+onMounted(() => {
+    document.addEventListener("keyup", carouselShortcuts)
+})
+
+onUnmounted(() => {
+    document.removeEventListener("keyup", carouselShortcuts)
+})
+
 </script>
 
 <template>
@@ -119,8 +138,15 @@ const maxLen = computed(() => carouselComp.length >= 25)
     </Dialog>
 
     <div class="grid grid-cols-2 gap-1 p-1">
-        <button :disabled="maxLen" @click="openGallery" class="flex gap-2 p-1 pl-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img :src="`${base}/formatting/showImage.svg`" class="w-4" alt="">{{ $t('reviews.addImage') }}</button>
-        <button :disabled="maxLen" @click="addVideo" class="flex gap-2 p-1 pl-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img :src="`${base}/formatting/addVideo.svg`" class="w-4" alt="">{{ $t('reviews.addVideo') }}</button>
+        <button :disabled="maxLen" @click="openGallery" class="flex gap-2 items-center p-1 pl-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20">
+            <img :src="`${base}/formatting/showImage.svg`" class="w-4" alt="">
+            <span>{{ $t('reviews.addImage') }}</span>
+            <kbd class="ml-auto max-sm:hidden">I</kbd>
+        </button>
+        <button :disabled="maxLen" @click="addVideo" class="flex gap-2 items-center p-1 pl-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20">
+            <img :src="`${base}/formatting/addVideo.svg`" class="w-4" alt="">{{ $t('reviews.addVideo') }}
+            <kbd class="ml-auto max-sm:hidden">V</kbd>
+        </button>
     </div>
     
     <UploadIndicator :visible="uploading" :removing="false" />

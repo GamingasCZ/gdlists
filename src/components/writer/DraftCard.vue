@@ -26,7 +26,7 @@ const justSaved = ref(false)
 </script>
 
 <template>
-    <div @click="emit('open')" v-if="!hide" class="w-full bg-black bg-opacity-40 rounded-md transition-transform" :class="{'hover:translate-x-1 active:translate-x-2': !isOpen, 'border-l-4 border-lof-400 ': inUse}">
+    <div @click="emit('open')" v-if="!hide" @keyup.enter="emit('open')" tabindex="0" class="w-full bg-black bg-opacity-40 rounded-md transition-transform focus-within:outline outline-2 outline-lof-400" :class="{'hover:translate-x-1 active:translate-x-2': !isOpen, 'border-l-4 border-lof-400 ': inUse}">
         <div class="flex flex-col justify-between p-2">
             <div class="">
                 <input v-if="editingName" type="text" maxlength="40" :value="draft.name" @click.stop="" @change="emit('editedName', $event.target.value!)" class="px-2 bg-transparent bg-white bg-opacity-0 border-b-2 focus-within:outline-none focus-within:bg-opacity-10" autocomplete="off" @mouseover="$event.target.focus()" :placeholder="$t('reviews.reviewName')">
@@ -35,6 +35,7 @@ const justSaved = ref(false)
                 <ul class="flex gap-2 text-sm list-disc list-inside text-white text-opacity-40">
                     <p :title="`${$t('reviews.created')}: ${prettyDate((Date.now() - draft.createDate)/1000)}`">{{ $t('reviews.saved') }}: {{ prettyDate((Date.now() - draft.saveDate)/1000) }}</p>
                     <li>{{ $t(counterKey, draft.wordCount) }}</li>
+                    <li></li>
                 </ul>
             </div>
             <hr class="my-2 opacity-20">

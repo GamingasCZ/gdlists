@@ -4,6 +4,7 @@ import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
 import parseMD from "../global/parseEditorFormatting";
 import striptags from 'striptags';
+import { flexNames } from '@/Reviews';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -22,6 +23,7 @@ interface Extras {
 	editable?: boolean
 	text?: string
 	index?: number
+	align: string
 }
 
 const props = defineProps<Container & Extras>()
@@ -122,13 +124,14 @@ const settings = ref<HTMLDialogElement>()
 	<div
 		@click.right.exact.prevent="!canEditText && emit('hasFocus'); nextTick(() => rmbSettingOpen($event, settings?.showSettings))"
 		@click.left.exact.stop="!canEditText && emit('hasFocus')"
-		class="relative outline-none scroll-mt-24 min-w-48 reviewContainer min-h-4"
+		class="flex relative flex-wrap w-full outline-none scroll-mt-24 min-w-48 reviewContainer min-h-4"
+		:style="{ justifyContent: flexNames[align] }"
 		:data-type="type"
 		ref="textParent"
 		:tabindex="(canEditText || !editable || dependentOnChildren) ? -1 : 0"
 		@focus="emit('hasFocus')"
 	>
-		<hr class="absolute z-10 right-[-6px] border-lof-400 h-full border-r-4" :class="{'!border-none': dependentOnChildren || !(focus && focused)}">
+		<hr class="absolute z-10 right-[-6px] border-lof-400 h-full border-r-4" v-if="!dependentOnChildren && focus && focused">
 		<p
 			v-if="canEditText"
 			ref="mainText"

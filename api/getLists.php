@@ -39,7 +39,7 @@ $selLevelRange = "
       avg(levels_ratings.difficulty) as A_difficulty,
       avg(overall) as A_overall";
 
-$listRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
+$listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
@@ -120,34 +120,34 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
 }
 
 function getHomepage($lists, $reviews, $user) {
-  global $mysqli, $selRange, $selReviewRange;
+  global $mysqli, $selRange, $selReviewRange, $listRatings, $reviewRatings;
   $home = [];
   if ($lists) {
-    $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio
+    $res = doRequest($mysqli, sprintf("SELECT %s, %s
       FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY lists.id DESC LIMIT 3", $selRange), [], "", true);
+      ORDER BY lists.id DESC LIMIT 3", $selRange, $listRatings), [], "", true);
   
     $home["lists"] = parseResult($res, false, -1, "", 0, false);
   }
   if ($reviews) {
-    $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio
+    $res = doRequest($mysqli, sprintf("SELECT %s, %s
       FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY reviews.id DESC LIMIT 3", $selReviewRange), [], "", true);
+      ORDER BY reviews.id DESC LIMIT 3", $selReviewRange, $reviewRatings), [], "", true);
     
     $home["reviews"] = parseResult($res, false, -1, "", 0, true);
   }
   if ($user) {
     $account = getLocalUserID();
     if ($account) {
-      $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio
+      $res = doRequest($mysqli, sprintf("SELECT %s, %s
         FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
         WHERE lists.uid=%s AND `hidden` LIKE 0
         GROUP BY lists.name
-        ORDER BY lists.id DESC LIMIT 3", $selRange, $account), [], "", true);
+        ORDER BY lists.id DESC LIMIT 3", $selRange, $listRatings, $account), [], "", true);
   
       $home["user"] = parseResult($res);
     }
