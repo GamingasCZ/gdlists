@@ -760,7 +760,10 @@
     "zmHelp6": "Tap to close",
     "smthNew": "Or start something new",
     "setThumb": "Set Thumbnail",
-    "setPos": "Positioning"
+    "setPos": "Positioning",
+    "draftEditing": "Editing Post",
+    "draftExists": "You've made a draft for this edit",
+    "lastEdited": "Last Edited"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -109,7 +109,7 @@ const closeLevels = () => {
 
     <div
         tabindex="-1"
-        class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 pt-0 overflow-y-auto flex flex-col gap-2">    
+        class="bg-[url(@/images/fade.svg)] bg-repeat-x h-[40rem] relative p-2 pt-0 overflow-y-auto flex flex-col gap-2">    
         <div v-show="!listingLevels">
             <ListBrowser
                 online-browser

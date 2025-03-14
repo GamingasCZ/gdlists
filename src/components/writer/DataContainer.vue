@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {inject, nextTick, onMounted, ref, watch } from 'vue';
+import {inject, nextTick, onMounted, onUpdated, ref, watch } from 'vue';
 import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
 import parseMD from "../global/parseEditorFormatting";
@@ -35,6 +35,7 @@ const mainText = ref<HTMLTextAreaElement>()
 const textParent = ref<HTMLDivElement>()
 
 const togglePreview = () => {
+	if (!props.canEditText) return
 	if (props.type == "twoColumns") return
 	
 	let textToParse = props.currentSettings?.noMD ? props.text.replaceAll("\n", "<br>") : props.text

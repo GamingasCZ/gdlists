@@ -28,7 +28,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-2 overflow-y-auto flex flex-col gap-2">
+    <div class="bg-[url(@/images/fade.svg)] bg-repeat-x h-[40rem] relative p-2 overflow-y-auto flex flex-col gap-2">
         <div
             class="flex absolute top-1/2 left-1/2 flex-col items-center w-full text-center -translate-x-1/2 -translate-y-1/2">
             <img src="@/images/collabDudes.svg" alt="" class="w-64 opacity-40">

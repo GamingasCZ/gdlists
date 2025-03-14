@@ -35,7 +35,7 @@ const rollLevels = () => {
                 <button @click="writeReview" class="p-2 text-sm rounded-md hover:bg-black hover:bg-opacity-40"><img class="inline mr-2 w-5" src="@/images/reviews.svg" alt="">{{ $t('homepage.writeReview') }}</button>
             </div>
         </div>
-        <div v-show="unrolled" class="flex bg-[url(@/images/fade.webp)] bg-repeat-x flex-col max-h-44 overflow-y-auto gap-2 bg-lof-200">
+        <div v-show="unrolled" class="flex bg-[url(@/images/fade.svg)] bg-repeat-x flex-col max-h-44 overflow-y-auto gap-2 bg-lof-200">
             <div v-for="(level, index) in selectedLevels" class="flex items-center text-left">
                 <DifficultyIcon class="w-12" :difficulty="level.difficulty[0]" :rating="level.difficulty[1]" />
                 <div class="flex flex-col">

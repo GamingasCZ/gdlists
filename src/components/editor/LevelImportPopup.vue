@@ -151,7 +151,7 @@ const gdInput = ref<HTMLInputElement>()
         <h2 v-if="LEVELS.length > 0" class="text-2xl">{{ $t('editor.foundLevels', [LEVELS.length]) }}</h2>
         <h3 v-show="LEVELS.length > 0" class="text-sm">{{ $t('editor.clickLeave') }}</h3>
       </div>
-      <div class="flex justify-start relative overflow-y-auto flex-col w-full bg-[url('@/images/fade.webp')] bg-repeat-x overflow-x-clip">
+      <div class="flex justify-start relative overflow-y-auto flex-col w-full bg-[url('@/images/fade.svg')] bg-repeat-x overflow-x-clip">
         <div v-if="importError == 3" class="flex flex-col items-center m-auto opacity-40">
           <img src="@/images/loading.webp" class="w-36 animate-spin" alt="">
           <h3 class="mt-4 text-2xl font-bold">{{ $t('other.loading') }}...</h3>

@@ -32,7 +32,7 @@ if (hasLocalStorage()) {
 </script>
 
 <template>
-    <div class="flex bg-repeat-x bg-[url(@/images/fade.webp)] overflow-y-auto flex-col gap-2 p-2">
+    <div class="flex bg-repeat-x bg-[url(@/images/fade.svg)] overflow-y-auto flex-col gap-2 p-2">
         <SectionDivider :text="$t('settingsMenu.behave')" />
         <Option
         :name="$t('settingsMenu.viewMode')"

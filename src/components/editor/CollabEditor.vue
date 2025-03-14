@@ -376,7 +376,7 @@ defineExpose({
       <!-- Saved collabs-->
       <Dialog :open="savedSidebarOpen" @close-popup="savedSidebarOpen = false" :title="$t('navbar.saved')" :width="dialog.small">
           <main
-            class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[46rem]">
+            class="bg-[url(@/images/fade.svg)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[46rem]">
             <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
               :disabled="(typeof collab == 'string')" @click="saveCollab()">
             <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
@@ -500,7 +500,7 @@ defineExpose({
             
         </header>
 
-      <main class="bg-[url(@/images/fade.webp)] overflow-y-auto flex flex-col relative bg-repeat-x p-1 gap-1 h-[39rem]">
+      <main class="bg-[url(@/images/fade.svg)] overflow-y-auto flex flex-col relative bg-repeat-x p-1 gap-1 h-[39rem]">
             
             <!-- No roles help -->
         <div v-if="noMembers" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-full text-center -translate-x-1/2 -translate-y-1/2">

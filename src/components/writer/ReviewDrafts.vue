@@ -13,8 +13,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "save", duplicate: boolean): void
-    (e: "preview", data: ReviewList, id_saved: [number, number]): void
-    (e: "load", data: {data: ReviewList, id: number, saved: number}): void
+    (e: "preview", data: ReviewList, id_saved: string): void
+    (e: "load", draft: ReviewDraft): void
     (e: "remove", id: number): void
 }>()
 
@@ -53,10 +53,10 @@ const doAction = (action: DraftAction, key: string, draft: ReviewDraft) => {
             emit("remove", key)
             break;
         case DraftAction.Preview:
-            emit("preview", draft.reviewData, [draft.createDate, draft.saveDate])
+            emit("preview", draft.reviewData, key)
             break;
         case DraftAction.Load:
-            emit("load", {data: draft.reviewData, id: draft.createDate, saved: draft.saveDate})
+            emit("load", draft)
             break;
     }
 }
@@ -87,7 +87,7 @@ defineExpose({
         </div>
     </header>
     <div
-    class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[45rem] relative p-2 overflow-y-auto flex flex-col gap-2 overflow-x-clip" @click="editingName = -1">
+    class="bg-[url(@/images/fade.svg)] bg-repeat-x h-[45rem] relative p-2 overflow-y-auto flex flex-col gap-2 overflow-x-clip" @click="editingName = -1">
         <!-- Help -->
         <div v-if="!Object.keys(drafts).length" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-3/4 text-center opacity-20 -translate-x-1/2 -translate-y-1/2">
             <img src="@/images/edit.svg" alt="" class="w-48">

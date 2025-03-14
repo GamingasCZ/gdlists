@@ -28,12 +28,12 @@ function getUserPath($uid) {
 }
 
 function getStorage($mysqli, $uid, $addNewImage = null) {
-    $req = doRequest($mysqli, "SELECT SUM(`filesize`), COUNT(`id`) FROM `images` WHERE `uploaderID`=?", [$uid], "s");
+    $req = getSpaceRemaining($mysqli, $uid);
     return json_encode([
         "uid" => $uid,
-        "left" => MAX_STORAGE - floatval($req['SUM(`filesize`)']),
+        "left" => MAX_STORAGE - floatval($req['used']),
         "storageMax" => MAX_STORAGE,
-        "filecount" => intval($req['COUNT(`id`)']),
+        "filecount" => intval($req['filecount']),
         "maxFilecount" => MAX_FILECOUNT,
         "maxUploadSize" => MAX_UPLOADSIZE,
         "newImage" => $addNewImage
@@ -69,7 +69,14 @@ function getAll($uid, $mysqli, $folderID = -1) {
     return json_encode([json_decode(getStorage($mysqli, $uid)), array_reverse(array_map("getHashes", $allImages)), $allFolders, $thumbs]);
 }
 
+function getSpaceRemaining($mysqli, $uid) {
+    $req = doRequest($mysqli, "SELECT ifnull(SUM(`filesize`), 0) as used, ifnull(COUNT(`id`), 0) as filecount FROM `images` WHERE `uploaderID`=?", [$uid], "s");
+    return $req;
+}
+
+$galleryDetails = null;
 function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = true, $saveToDatabase = true, $overwrite = false, $noSave = false, $folder = -1, $resize = false) {
+    global $galleryDetails;
     $userPath = getUserPath($uid);
     
     $filesize = strlen($binaryData);
@@ -93,6 +100,13 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
         }
     }
 
+    if (is_null($galleryDetails))
+        $galleryDetails = getSpaceRemaining($mysqli, $uid);
+
+    // Check if user hasn't gone crazy with file uploads
+    if (MAX_FILECOUNT - $galleryDetails["filecount"] <= 1)
+        die("-10");
+
     // Create image
     $img = imagecreatefromstring($binaryData);
     if (!$img) die("-5");
@@ -111,6 +125,13 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     $compressedFilesize;
     imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 60);
     $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
+    if (MAX_STORAGE - $galleryDetails["used"] - $compressedFilesize <= 0) {
+        imagedestroy($img);
+        imagedestroy($maxsize);
+        unlink($userPath . "/" . $imageHash . ".webp");
+        die("-6");
+    }
+
     
     // Create thumbnail
     if ($makeThumb) {
@@ -129,7 +150,13 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
         $folder = NULL;
 
     if ($saveToDatabase)
-        doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`, `folder`) VALUES (?,?,?,?)", [$uid, $imageHash, $compressedFilesize, $folder], "ssis");
+        $res = doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`, `folder`) VALUES (?,?,?,?)", [$uid, $imageHash, $compressedFilesize, $folder], "ssis");
+
+    if (!array_key_exists("error", $res)) {
+        $galleryDetails["used"] += $compressedFilesize;
+        $galleryDetails["filecount"] += 1;
+    }
+    else die("-5");
 
     return $imageHash;
 }
@@ -152,7 +179,7 @@ function getCreateAttributedFolderID($attribute, $uid, $mysqli) {
     }
 }
 
-function createFolder($name, $base = -1, $color = "#1A1C3C", $attribute = NULL) {
+function createFolder($mysqli, $uid, $name, $base = -1, $color = "#1A1C3C", $attribute = NULL) {
     $slashPos = strpos($name, '/');
     $folderName = trim($name);
     $nameLength = strlen($folderName);
@@ -180,8 +207,9 @@ function createFolder($name, $base = -1, $color = "#1A1C3C", $attribute = NULL) 
     $folderColor = substr($color, 0, 7);
     if ($folderColor[0] != "#") return false;
 
-    $res = doRequest($mysqli, "INSERT INTO `images_folders`(`name`, `color`, `base_path`, `uid`, `attributes`) VALUES (?,?,?,?,?)", [$folderName, $folderColor, $currentFolder, $user["id"], $attribute], "ssiss");
+    $res = doRequest($mysqli, "INSERT INTO `images_folders`(`name`, `color`, `base_path`, `uid`, `attributes`) VALUES (?,?,?,?,?)", [$folderName, $folderColor, $currentFolder, $uid, $attribute], "ssiss");
     if (array_key_exists("error", $res)) return false;
+    return true;
 }
 
 if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
@@ -222,11 +250,12 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             break;
     
         case 'DELETE':
+            
             // Remove folder
-            $folderAddTo = $_GET["folderAddTo"];
-            if ($folderAddTo == -1) $folderAddTo = NULL;
-
             if (isset($_GET["removeFolder"])) {
+                $folderAddTo = $_GET["folderAddTo"];
+                if ($folderAddTo == -1) $folderAddTo = NULL;
+
                 if ($_GET["keepImages"]) {
                     $res = doRequest($mysqli, "UPDATE `images` SET `folder` = ? WHERE `folder` = ? AND `uploaderID` = ?", [$folderAddTo, intval($_GET["removeFolder"]), $user["id"]], "sss");
                     if (is_array($res) && array_key_exists("error", $res))
@@ -266,7 +295,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 
             switch ($DATA["action"]) {
                 case 'createFolder':
-                    $res = createFolder($DATA["name"], $DATA["currentFolder"], $DATA["color"]);
+                    $res = createFolder($mysqli, $user["id"], $DATA["name"], $DATA["currentFolder"], $DATA["color"]);
                     if (!$res) {
                         die(http_response_code(403));
                     }

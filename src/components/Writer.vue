@@ -54,7 +54,16 @@ watch(() => props.type, () => {
     drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
     resetPost()
 })
-watch(timeLastRouteChange, () => resetPost())
+
+var loadEditDraft: ReviewDraft | null = null
+watch(timeLastRouteChange, () => {
+    if (props.editing) {
+        if (loadEditDraft)
+            loadOnlineEdit(loadEditDraft)
+    }
+    else
+        resetPost()
+})
 
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
 
@@ -91,6 +100,42 @@ const resetPost = () => {
     selectedContainer.value[0] = -1
     disableEdits.value = false
     reviewSave.value = { backupID: 0, lastSaved: 0 }
+    loadEditDraft = null
+    editDraftExists.value = null
+}
+
+const editDraftExists = ref<null | string>(null)
+const loadOnlineEdit = (feedData?: ReviewDraft) => {
+    editDraftExists.value = null
+    loadEditDraft = null
+    // Feeds draft data
+    if (feedData) {
+        loadDraft(feedData, true)
+        return
+    }
+    
+    axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
+        if (res.data?.data) {
+            isNowHidden = res.data.hidden != 0
+
+            if (props.type == 0)
+                POST_DATA.value = modernizeList(res.data)
+            else
+                POST_DATA.value = res.data.data
+
+            for (const key in drafts.value) {
+                if (drafts.value[key].editing && drafts.value[key].editing == props.postID)
+                    editDraftExists.value = key
+            }
+
+            fetchEmbeds()
+            modifyListBG(POST_DATA.value.pageBGcolor, false)
+            containerLastAdded.value = Date.now()
+        }
+        else {
+            openDialogs.editError = true
+        }
+    }).catch(() => openDialogs.editError = true)
 }
 
 const openDialogs = reactive({
@@ -428,6 +473,7 @@ const startWriting = () => {
 
 const moveContainer = (index: number, by: number) => {
     if (index+by < 0) return
+    if (index+by >= POST_DATA.value.containers.length) return
     
     let data = POST_DATA.value.containers[index]
     POST_DATA.value.containers.splice(index, 1)
@@ -631,21 +677,7 @@ const updateReview = () => {
 let autosaveInterval: number
 onMounted(() => {
     if (props.editing) {
-        axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
-            if (res.data?.data) {
-                isNowHidden = res.data.hidden != 0
-                if (props.type == 0)
-                    POST_DATA.value = modernizeList(res.data)
-                else
-                    POST_DATA.value = res.data.data
-                fetchEmbeds()
-                modifyListBG(POST_DATA.value.pageBGcolor, false)
-                containerLastAdded.value = Date.now()
-            }
-            else {
-                openDialogs.editError = true
-            }
-        }).catch(() => openDialogs.editError = true)
+        loadOnlineEdit()
     }
     else 
         POST_DATA.value = WRITER.value.general.postObject()
@@ -684,27 +716,33 @@ onUnmounted(() => {
 })
 
 const preUpload = ref(false)
-const writerRatings = ref<HTMLDivElement>()
-const openRatingHelp = () => {
-    if (writerRatings) writerRatings.value.helpOpen = !writerRatings.value.helpOpen
-}
 
 const reviewSave = ref({ backupID: 0, lastSaved: 0 })
 const draftPopup = ref<HTMLDivElement>()
-const loadDraft = (newData: { data: ReviewList, id: number, saved: number }) => {
-    POST_DATA.value = JSON.parse(JSON.stringify(newData.data))
-    reviewSave.value.backupID = newData.id
-    reviewSave.value.lastSaved = newData.saved
+const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
+    if (draft.editing && !noEditCheck) {
+        loadEditDraft = draft
+        router.replace(`/edit/${WRITER.value.general.postType}/${draft.editing}`)
+        return
+    }
+
+    POST_DATA.value = JSON.parse(JSON.stringify(draft.reviewData))
+    reviewSave.value.backupID = draft.createDate
+    reviewSave.value.lastSaved = draft.saveDate
     fetchEmbeds()
-    modifyListBG(newData.data.pageBGcolor, false)
+    modifyListBG(draft.reviewData.pageBGcolor, false)
     containerLastAdded.value = Date.now()
+
+    // Flicker preview mode to refresh text in dataContainers
+    previewMode.value = false
+    nextTick(() => previewMode.value = true)
 }
 
 let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
 var outsideDrafts = false
-var previewID = [0, 0]
-const previewDraft = (previewData: ReviewList, previewIDSaved: [number, number], previewingOutsideDrafts = false) => {
+var previewID: string | null = null
+const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewingOutsideDrafts = false) => {
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = previewData
     previewID = previewIDSaved
@@ -719,7 +757,7 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: [number, number],
 const exitPreview = () => {
     if (!previewHold) return
 
-    previewID = [0, 0]
+    previewID = null
     POST_DATA.value = previewHold[0]
     embedsContent.value = previewHold[1]
     modifyListBG(previewHold[0].pageBGcolor, false)
@@ -737,8 +775,8 @@ const previewApply = () => {
     disableEdits.value = false
     setPreviewMode(true)
     previewHold = null
-    loadDraft({data: POST_DATA.value, id: previewID[0], saved: previewID[1]})
-    previewID = [0, 0]
+    loadDraft(drafts.value[previewID!])
+    previewID = null
 }
 
 const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
@@ -768,7 +806,7 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
             previewTitle: preview.title,
             previewParagraph: preview.preview
         }
-        if (editing)
+        if (editing && !saveAs)
             drafts.value[now].editing = editing
 
         backupID = now
@@ -973,12 +1011,26 @@ const toggleZenMode = () => {
                 </div>
             </div>
 
+            <!-- Warn about already existing edit draft -->
+            <section v-if="editDraftExists && !disableEdits" class="rounded-md gap-3 flex p-3 max-w-[30rem] w-full mx-auto text-white border border-lof-400 bg-lof-100">
+                <img src="@/images/edit.svg" class="w-8" alt="">
+                <div class="w-full">
+                    <span class="text-xl font-bold">{{ $t('reviews.draftExists') }}...</span>
+                    <p class="text-white text-opacity-40">{{ $t('reviews.lastEdited') }}: {{ prettyDate((Date.now() - drafts[editDraftExists].saveDate) / 1000) }}</p>
+                    <div class="flex gap-2 mt-2 max-sm:flex-col">
+                        <button @click="loadOnlineEdit(drafts[editDraftExists])" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button grow"><img src="@/images/checkThick.svg" class="w-5" alt="">{{ $t('other.use') }}</button>
+                        <button @click="previewDraft(drafts[editDraftExists].reviewData, editDraftExists, true)" class="flex gap-2 p-2 button"><img src="@/images/view.svg" class="w-5" alt="">{{ $t('other.preview') }}</button>
+                        <button @click="editDraftExists = null" class="flex gap-2 p-2 button"><img src="@/images/close.svg" class="w-4" alt="">{{ $t('other.cancel') }}</button>
+                    </div>
+                </div>
+            </section>
+
             <!-- Levels -->
             <WriterLevels
                 v-if="!zenMode"
                 @toggle-preview="toggleLevelPreview()"
-                @preview-draft="previewDraft(drafts[$event].reviewData, [drafts[$event].createDate, drafts[$event].saveDate], true)"
-                @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
+                @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
+                @load-draft="loadDraft(drafts[$event])"
                 @save-draft="saveDraft(false, false)"
                 :subtext="WRITER.general.levelsSubtext"
                 :max-levels="WRITER.general.maxLevels"
@@ -1017,8 +1069,8 @@ const toggleZenMode = () => {
                         v-if="!POST_DATA.containers.length"
                         @start-writing="startWriting"
                         
-                        @preview-draft="previewDraft(drafts[$event].reviewData, [drafts[$event].createDate, drafts[$event].saveDate], true)"
-                        @load-draft="loadDraft({data: drafts[$event].reviewData, id: $event, saved: drafts[$event].saveDate})"
+                        @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
+                        @load-draft="loadDraft"
 
                         :inverted="POST_DATA.whitePage"
                         :writer="WRITER"

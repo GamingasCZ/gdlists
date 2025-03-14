@@ -17,7 +17,7 @@ const parseKey = (key: [Key, string]) => {
 </script>
 
 <template>
-    <section class="grid bg-[url(@/images/fade.webp)] bg-repeat-x grid-cols-3 gap-3 max-h-[35rem] overflow-auto p-3">
+    <section class="grid bg-[url(@/images/fade.svg)] bg-repeat-x grid-cols-3 gap-3 max-h-[35rem] overflow-auto p-3">
         <div class="flex flex-col gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md" v-for="shortcut in keyShortcuts">
             <img :src="shortcut[3]" class="w-8" alt="">
             <span>{{ shortcut[2] }}</span>

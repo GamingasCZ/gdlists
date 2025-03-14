@@ -24,7 +24,7 @@ const postData = inject<Ref<PostData>>("postData")!
       </button>
     </div>
     
-    <div class="bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-col gap-2 p-2 h-[40rem] overflow-y-scroll">
+    <div class="bg-[url(@/images/fade.svg)] bg-repeat-x flex flex-col gap-2 p-2 h-[40rem] overflow-y-scroll">
       <template v-for="setting in writer.settings">
         <Option v-if="typeof setting == 'object'" v-model="postData[setting.affects]" v-bind="setting" />
         <SectionDivider :text="setting" v-else />

@@ -151,7 +151,7 @@ onUnmounted(() => {
     
     <UploadIndicator :visible="uploading" :removing="false" />
     <div
-    class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-1 overflow-y-auto  flex flex-col gap-1 overflow-x-clip">
+    class="bg-[url(@/images/fade.svg)] bg-repeat-x h-[40rem] relative p-1 overflow-y-auto  flex flex-col gap-1 overflow-x-clip">
     
         <!-- Help -->
         <div v-if="!postData.containers[index].settings.components.length && !uploading" class="flex absolute top-1/2 left-1/2 z-10 flex-col items-center w-3/4 text-center -translate-x-1/2 -translate-y-1/2 pointer-events-none">

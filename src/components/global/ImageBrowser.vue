@@ -176,9 +176,6 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
         setStorageCache(storage.value)
         uploadingImage.value = false
     }
-    else {
-        if (res == -4) notifyError(ImgFail.TOO_BIG) // Too big
-    }
     uploadingImage.value = 0
 }
 
@@ -438,6 +435,9 @@ const focusContent = (by: number) => {
 
 const holdingShift = ref(false)
 const modifierHeld = (e: KeyboardEvent) => {
+    if (removeConfirmationOpen.value != -1) return
+    if (creatingNewFolder.value) return
+
     holdingShift.value = e.shiftKey
     switch (e.key) {
         case 'ArrowUp':
@@ -1009,7 +1009,7 @@ onMounted(() => {
     <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
         @dragexit="fileDrag = false" @dragleave="fileDrag = false" @submit.prevent=""
         :class="{ 'opacity-40 pointer-events-none': loadingImages }"
-        class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.webp)] bg-repeat-x">
+        class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.svg)] bg-repeat-x">
         <HiddenFileUploader v-if="currentTab == Tabs.Uploaded" @data="uploadImage" ref="imageInput" unclickable multiple
             :disabled="loadingImages || uploadingImage != 0 || folderMoveMode" />
 

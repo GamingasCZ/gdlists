@@ -35,7 +35,7 @@ const justSaved = ref(false)
                 <ul class="flex gap-2 text-sm list-disc list-inside text-white text-opacity-40">
                     <p :title="`${$t('reviews.created')}: ${prettyDate((Date.now() - draft.createDate)/1000)}`">{{ $t('reviews.saved') }}: {{ prettyDate((Date.now() - draft.saveDate)/1000) }}</p>
                     <li>{{ $t(counterKey, draft.wordCount) }}</li>
-                    <li></li>
+                    <li v-if="draft.editing"><img src="@/images/edit.svg" class="inline mr-2 w-4 opacity-40" alt="">{{ $t('reviews.draftEditing') }}</li>
                 </ul>
             </div>
             <hr class="my-2 opacity-20">

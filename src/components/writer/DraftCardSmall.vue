@@ -17,7 +17,10 @@ const emit = defineEmits<{
     <button
         class="flex relative flex-col p-2 h-32 text-left rounded-md border group aspect-video border-lof-400"
     >
-        <h4 class="text-xl font-bold leading-tight">{{ draft.name }}</h4>
+        <h4 class="overflow-hidden text-xl font-bold leading-tight text-ellipsis text-nowrap">
+            <img v-if="draft.editing" src="@/images/edit.svg" class="inline mr-1 w-4" alt="">
+            {{ draft.name }}
+        </h4>
         <p class="text-sm text-white text-opacity-40">{{ prettyDate((Date.now() - draft.saveDate) / 1000) }}</p>
         <hr class="opacity-20">
         <p :style="{mask: 'linear-gradient(white, #FFFFFF20)'}">

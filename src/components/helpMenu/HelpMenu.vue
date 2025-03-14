@@ -109,7 +109,7 @@ const search = (e: Event) => {
       <input type="text" :placeholder="$t('other.searchInHelp')"
         class="p-1 px-2 w-full bg-black bg-opacity-40 rounded-md" @input="search" />
     </div>
-    <div class="flex h-[40em] overflow-y-auto flex-col gap-1 p-1 bg-[url(@/images/fade.webp)] bg-repeat-x grow">
+    <div class="flex h-[40em] overflow-y-auto flex-col gap-1 p-1 bg-[url(@/images/fade.svg)] bg-repeat-x grow">
       <HelpBubble v-for="(question, index) in qa" v-bind="question" :filter-show="filteredQuestions[0] == -1 || filteredQuestions.includes(index)
         " />
     </div>

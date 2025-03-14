@@ -66,7 +66,7 @@ emit('customColor', `linear-gradient(9deg, ${colorRight}, ${colorLeft})`)
     </header>
     
     <!-- Members -->
-    <div class="w-full bg-[url(@/images/fade.webp)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-96 justify-start content-start">
+    <div class="w-full bg-[url(@/images/fade.svg)] bg-repeat-x flex flex-wrap max-h-max p-1 gap-1 overflow-y-auto h-96 justify-start content-start">
         <component :is="gridView ? CollabViewerMember : CollabViewerMemberRow" v-for="(member, ind) in collabData[2].toSorted((a,b) => collabData?.[4]?.[a.role] < collabData?.[4]?.[b.role])" :hidden-role="collabData?.[4]?.[member.role]" :index="ind" :role-count="roleCount" :human="member" :role-name="collabData[1][member.role]"/>
     </div>
 </template>

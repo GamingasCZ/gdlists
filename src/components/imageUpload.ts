@@ -76,6 +76,9 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
         maxContentLength: Infinity
     })
     .then(res => {
+        if (res.data == -10) notifyError(ImgFail.TOO_MANY_IMG)
+        if (res.data == -6) notifyError(ImgFail.NO_FREE_SPACE)
+        if (res.data == -5) notifyError(ImgFail.LOAD_FAILED)
         if (res.data == -4) notifyError(ImgFail.TOO_BIG)
         if (res.data == -3) notifyError(ImgFail.LOAD_FAILED)
         response = res.data

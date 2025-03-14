@@ -762,7 +762,10 @@
     "zmHelp6": "Klikni pro zavření",
     "smthNew": "Nebo začni něco nového",
     "setThumb": "Jako náhled",
-    "setPos": "Pozicování"
+    "setPos": "Pozicování",
+    "draftEditing": "Upravování",
+    "lastEdited": "Naposledy upraveno",
+    "draftExists": "Pro příspěvěk existuje rozepsaný koncept"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
