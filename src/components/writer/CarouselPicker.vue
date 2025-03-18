@@ -93,9 +93,11 @@ const doUpload = async (files: FileList) => {
 }
 
 const closePopup = () => {
-    if (carouselComp[textDialogOpen.value].type == "addVideo" && !shortenYTLink(carouselComp[textDialogOpen.value].settings.url))
-        removeContent(textDialogOpen.value)
-    textDialogOpen.value = -1
+    nextTick(() => {
+        if (carouselComp[textDialogOpen.value].type == "addVideo" && !shortenYTLink(carouselComp[textDialogOpen.value].settings.url))
+            removeContent(textDialogOpen.value)
+        textDialogOpen.value = -1
+    })
 }
 
 const textDialogOpen = ref(-1)

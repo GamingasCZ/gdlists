@@ -21,14 +21,19 @@ const emit = defineEmits<{
 
 const main = ref<HTMLDialogElement>()
 
+const getDialogCount = () => document.querySelectorAll(".modalDialog").length
+
+var dialogIndex = 0
 const clipBody = (closing: boolean, noFocus = false) => {
   if (closing) {
     main.value?.close()
-    if (document.querySelectorAll(".modalDialog").length < 2)
+    if (getDialogCount() < 2)
       document.body.style.overflow = "auto"
   }
   else {
+    lastFocused = document.activeElement
     main.value?.showModal()
+    dialogIndex = getDialogCount()
     document.body.style.overflow = "clip"
     if (!noFocus)
       nextTick(() => main.value?.focus())
@@ -44,11 +49,10 @@ onBeforeUnmount(() => {
 })
 
 watch(() => props.open, () => {
-  if (props.open) 
-    lastFocused = document.activeElement
-  else {
-    if (lastFocused)
+  if (!props.open) {
+    if (lastFocused) {
       lastFocused.focus()
+    }
   }
   clipBody(!props.open)
 })
@@ -63,13 +67,18 @@ const focusEnd = () => {
   (end.value?.previousElementSibling as HTMLLinkElement).focus()
 }
 
+const closeViaKey = () => {
+  if (getDialogCount()-1 == dialogIndex)
+    emit('closePopup')
+}
+
 </script>
 
 
 <template>
   <Transition name="fade">
     <dialog ref="main" role="dialog" aria-modal="true" @click="(SETTINGS.dialogClickClose && !disableTapClose) ? emit('closePopup') : ''"
-      @keyup.esc="emit('closePopup')" class="flex gap-2 justify-center items-center transition-all duration-75 modalDialog" v-if="open">
+      @keyup.esc="closeViaKey" class="flex gap-2 justify-center items-center transition-all duration-75 modalDialog" v-if="open">
       <section @click.stop=""
       :style="{width: width ?? '35rem', backgroundImage: SETTINGS.disableColors ? null : customColor}"
       :class="{

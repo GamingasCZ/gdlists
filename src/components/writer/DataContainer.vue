@@ -30,6 +30,7 @@ interface Extras {
 const props = defineProps<Container & Extras>()
 const fontSizes = ['', '8px', '12px', '14px', '16px', '18px', '20px', '22px', '24px', '32px', '36px', '48px', '64px']
 const doShowSettings = inject<boolean | number>("containerSettingsShown")
+const lastTextChange = inject<() => void>("lastTextChange")!
 const mainText = ref<HTMLTextAreaElement>()
 const textParent = ref<HTMLDivElement>()
 
@@ -68,6 +69,12 @@ const doFocusText = (setFocus = true) => {
 
 const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
 
+const modifyText = (e: InputEvent) => {
+	lastTextChange()
+	emit('textModified', e?.target.outerText)
+	hasText.value = checkHasText()
+}
+
 const pasteText = (e: ClipboardEvent) => {
 	if (!props.editable) return
 	e.preventDefault()
@@ -87,6 +94,7 @@ const pasteText = (e: ClipboardEvent) => {
 	sel?.removeAllRanges()
 	sel?.addRange(range)
 	hasText.value = checkHasText()
+	lastTextChange()
 	emit('textModified', mainText.value?.innerText!)
 }
 
@@ -97,6 +105,7 @@ defineExpose({
 
 const mutation = (record: MutationRecord[]) => {
 	if (record[0].attributeName == "data-modf") {
+		lastTextChange()
 		nextTick(() => emit('textModified', mainText.value?.outerText!))
 		hasText.value = checkHasText()
 	}
@@ -155,7 +164,7 @@ const settings = ref<HTMLDialogElement>()
 			ref="mainText"
 			@vue:mounted="togglePreview(); startObserving()"
 			@keydown.enter="makeNextParagraph"
-			@input="emit('textModified', $event.target.outerText); hasText = checkHasText()"
+			@input="modifyText"
 			@paste="pasteText"
 			data-modf="0"
 			:data-hastext="!hasText && editable"

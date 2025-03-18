@@ -187,6 +187,10 @@ provide("settingsTitles", CONTAINERS)
 const newID = (offset = 0) => (Date.now() + offset + JSON.stringify(POST_DATA.value).length) >> 1
 
 const containerLastAdded = ref(0)
+const containerLastTextChange = ref(0)
+const setLastChange = () => containerLastTextChange.value = Date.now()
+provide("lastTextChange", setLastChange)
+
 const addContainer = (key: string, addTo?: number | number[], returnOnly = false, above = false) => {
     // Count of all components
     let contAm = 0
@@ -821,6 +825,12 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
         backupID = now
     }
     else {
+        // do not save without any recent changes
+        // maybe will add
+        // missing stuff like changing settings
+        // if (containerLastAdded.value < now-SETTINGS.value.autosave*1000 || containerLastTextChange.value < now-SETTINGS.value.autosave*1000)
+        //     return
+
         drafts.value[reviewSave.value.backupID].reviewData = POST_DATA.value,
         drafts.value[reviewSave.value.backupID].saveDate = now
         drafts.value[reviewSave.value.backupID].wordCount = preview.counter
