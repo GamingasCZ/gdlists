@@ -18,16 +18,17 @@ const props = defineProps<{
     shown: false | 1 | 2 // 1 - button open, 2 - right-click open
     mousePos: [number, number]
     index: number
-    nest?: number
+    nest?: [number, number]
 }>()
 
 const postData = inject<Ref<PostData>>("postData")!
 const containers = inject<Containers>("settingsTitles")
 const shortcut = inject<Ref<number[]>>("containerSettingsShown", ref([0,-1]))
 watch(shortcut, () => {
+    // 3 = opened by shortcut
     if (shortcut.value[0] == 3 && shortcut.value[1] == props.index) {
         // nested container settings
-        if (shortcut.value[2] != -1 && shortcut.value[2] == props.nest) {
+        if (shortcut.value[2] != -1 && shortcut.value[2] == props.nest?.[0] && shortcut.value[3] == props.nest[1] ) {
             showSettings()
         }
         // non-nested
@@ -40,14 +41,17 @@ const containerSettings = ref<HTMLFormElement>()
 const settingsShown = ref(false)
 
 const showSettings = () => {
-	settingsShown.value = true
-	document.body.addEventListener("click", closeSettings, { capture: true })
     nextTick(() => {
-        if (props.mousePos[0]) {
-            window.addEventListener("resize", positionFloating)
-            positionFloating()
-        }
-        nextTick(() => containerSettings.value?.[0]?.focus())
+        settingsShown.value = true
+        document.body.addEventListener("mousedown", closeSettings, { capture: true })
+        document.body.addEventListener("contextmenu", closeSettings, { capture: true })
+        nextTick(() => {
+            if (props.mousePos[0]) {
+                window.addEventListener("resize", positionFloating)
+                positionFloating()
+            }
+            nextTick(() => containerSettings.value?.[0]?.focus())
+        })
     })
 }
 
@@ -57,7 +61,8 @@ defineExpose({
 
 const forceHide = () => {
     settingsShown.value = false
-    document.body.removeEventListener("click", closeSettings, { capture: true })
+    document.body.removeEventListener("mousedown", closeSettings, { capture: true })
+    document.body.removeEventListener("contextmenu", closeSettings, { capture: true })
     emit('hidSettings')
 }
 

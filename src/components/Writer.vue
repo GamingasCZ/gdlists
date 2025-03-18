@@ -415,7 +415,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             break;
         case 'containerOptions':
             if (selectedNestContainer.value[1] != -1)
-                containerSettingsShown.value = [3, selectedNestContainer.value[1], selectedNestContainer.value[2]]
+                containerSettingsShown.value = [3, selectedNestContainer.value[0], selectedNestContainer.value[2], selectedNestContainer.value[1]]
             else
                 containerSettingsShown.value = [3, selectedContainer.value[0], -1]
             break;
@@ -435,7 +435,13 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             if (containers[type]?.resizeableProperty !== undefined) {
                 // SETTINGS INDEX OF THE RESIZABLE VALUE MUST BE ONE, damn you gamingas
                 let minmax = containers[type].settings[1].valueRange
-                POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] = Math.min(minmax[1], Math.max(minmax[0], POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] + (action == 'resizeBigger' ? 25 : -50)))
+                console.log(minmax)
+                let to = Math.min(minmax[1], Math.max(minmax[0], POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] + (action == 'resizeBigger' ? 25 : -50)))
+                POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] = to
+                if (type == "addCarousel")
+                    POST_DATA.value.containers[selectedContainer.value[0]].settings.components.forEach(x => {
+                        x.settings.height = to
+                    })
             }
             break;
         case 'moveUp':

@@ -28,8 +28,6 @@ interface Extras {
 }
 
 const props = defineProps<Container & Extras>()
-const previewText = ref("")
-
 const fontSizes = ['', '8px', '12px', '14px', '16px', '18px', '20px', '22px', '24px', '32px', '36px', '48px', '64px']
 const doShowSettings = inject<boolean | number>("containerSettingsShown")
 const mainText = ref<HTMLTextAreaElement>()
@@ -37,11 +35,12 @@ const textParent = ref<HTMLDivElement>()
 
 const togglePreview = () => {
 	if (!props.canEditText) return
+	if (!mainText.value) return
 	if (props.type == "twoColumns") return
 	
 	let textToParse = props.currentSettings?.noMD ? props.text.replaceAll("\n", "<br>") : props.text
-	if (!props.editable) previewText.value = parseMD(textToParse, true, props.currentSettings?.noMD)
-	else previewText.value = striptags(props.text).replaceAll("\n", "<br>")
+	if (!props.editable) mainText.value.innerHTML = parseMD(textToParse, true, props.currentSettings?.noMD)
+	else mainText.value.innerText = textToParse
 }
 
 watch(() => props.editable, togglePreview)
@@ -53,13 +52,15 @@ const makeNextParagraph = (e: KeyboardEvent) => {
 	}
 }
 
-const doFocusText = (k: boolean) => {
+const doFocusText = (setFocus = true) => {
 	if (!props.editable) return
 
-	if (props.canEditText)
-		mainText.value?.focus()
-	else
-		textParent.value?.focus()
+	if (setFocus) {
+		if (props.canEditText)
+			mainText.value?.focus()
+		else
+			textParent.value?.focus()
+	}
 
 	focus.value = true
 	emit('hasFocus')
@@ -107,31 +108,46 @@ const startObserving = () => observer.observe(mainText.value!, {attributes: true
 const focus = ref(false)
 const hasText = ref(checkHasText())
 
-onMounted(doFocusText)
+var settingsFun: () => void
+const mount = () => {
+	doFocusText()
+
+	textParent.value?.addEventListener("click", e => {
+		if (!props.editable) return
+		doFocusText()
+		e.stopPropagation()
+	})
+
+	textParent.value?.addEventListener("contextmenu", e => {
+		if (!props.editable) return
+		e.preventDefault()
+		doFocusText()
+		nextTick(() => rmbSettingOpen(e))
+	})
+}
 
 const mousePos = ref([0,0])
-const rmbSettingOpen = (mPos: MouseEvent, openFun: () => void) => {
-	if (!props.editable || !openFun) return
+const rmbSettingOpen = (mPos: MouseEvent) => {
+	if (!props.editable || !settingsFun) return
 
 	mousePos.value = [mPos.pageX, mPos.pageY]
 	doShowSettings.value = 2
-	nextTick(openFun)
+	nextTick(settingsFun)
 }
 
-const settings = ref<HTMLDialogElement>()
+onMounted(mount)
 
+const settings = ref<HTMLDialogElement>()
 </script>
 
 <template>
 	<div
-		@click.right.exact.prevent="!canEditText && emit('hasFocus'); nextTick(() => rmbSettingOpen($event, settings?.showSettings))"
-		@click.left.exact.stop="!canEditText && emit('hasFocus')"
 		class="flex relative flex-wrap w-full outline-none scroll-mt-24 min-w-48 reviewContainer min-h-4"
 		:style="{ justifyContent: flexNames[align] }"
 		:data-type="type"
 		ref="textParent"
 		:tabindex="(canEditText || !editable || dependentOnChildren) ? -1 : 0"
-		@focus="emit('hasFocus')"
+		@focusin="!dependentOnChildren && doFocusText(false)"
 	>
 		<hr class="absolute z-10 right-[-6px] border-lof-400 h-full border-r-4" v-if="!dependentOnChildren && focus && focused">
 		<p
@@ -139,10 +155,8 @@ const settings = ref<HTMLDialogElement>()
 			ref="mainText"
 			@vue:mounted="togglePreview(); startObserving()"
 			@keydown.enter="makeNextParagraph"
-			@focus="emit('hasFocus')"
 			@input="emit('textModified', $event.target.outerText); hasText = checkHasText()"
 			@paste="pasteText"
-			v-html="previewText"
 			data-modf="0"
 			:data-hastext="!hasText && editable"
 			class="w-full selection:bg-lof-400 selection:text-black dataContainer whitespace-break-spaces text-[align:inherit] bg-transparent border-none outline-none resize-none regularParsing"
@@ -161,6 +175,7 @@ const settings = ref<HTMLDialogElement>()
 
 		<ContainerSettings
 			v-if="!dependentOnChildren && editable && focus"
+			@vue:mounted="settingsFun = settings?.showSettings"
 			class="containerSettings"
 			ref="settings"
 			:type="type"
