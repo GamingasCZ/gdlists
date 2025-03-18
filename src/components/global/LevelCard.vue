@@ -74,13 +74,19 @@ onErrorCaptured(() => {
 
 const listData = inject("levelsRatingsData")()
 const userContent = import.meta.env.VITE_USERCONTENT
+const textCol = computed(() => {
+  return CARD_COL.value.luminance() > 0.5 ? 'black' : 'white'
+})
 
 </script>
 
 <template>
   <section v-if="guessResult"
-    class="relative font-[poppins] overflow-clip w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
-    :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
+    class="relative font-[poppins] overflow-clip w-[min(100%,95vw)] max-w-[58rem] rounded-lg p-3 text-left shadow-lg shadow-[color:#0000008F]"
+    :style="{
+      backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})`,
+      color: textCol
+    }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
   >
@@ -153,8 +159,8 @@ const userContent = import.meta.env.VITE_USERCONTENT
     <div class="flex flex-col gap-3 mt-2">
       <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
-      <section v-if="screenshots" class="flex overflow-auto z-10 gap-4 py-2 w-full">
-        <img v-for="(img, ind) in screenshots" @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}.webp`" class="max-h-36 rounded-md shadow-drop" alt="">
+      <section v-if="screenshots" class="flex overflow-auto z-10 gap-4 w-full">
+        <img v-for="(img, ind) in screenshots" @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="max-h-36 rounded-md inter shadow-drop" alt="">
       </section>
 
       <!-- Level Tags -->

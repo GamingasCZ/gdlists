@@ -24,6 +24,7 @@ interface Extras {
 	text?: string
 	index?: number
 	align: string
+	nestIndex?: number
 }
 
 const props = defineProps<Container & Extras>()
@@ -167,6 +168,7 @@ const settings = ref<HTMLDialogElement>()
 			:shown="doShowSettings"
 			:mouse-pos="mousePos"
 			:index="index"
+			:nest="nestIndex"
 			@pressed-button="emit('settingsButton', $event)"
 			@hid-settings="doShowSettings = false; doFocusText(true)"
 			@remove="emit('removeContainer')"

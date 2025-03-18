@@ -629,7 +629,7 @@ const levelImageFullscreen = (imgIndex: number) => {
             :disable-stars="cardGuessing == index"
             :guessing-now="cardGuessing == index"
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
-            :uploader-uid="LIST_CREATORDATA.discord_id"
+            :uploader-uid="LIST_CREATORDATA?.discord_id"
             @vue:mounted="tryJumping(index)"
             @next-guess="doNextGuess($event)"
             @open-tags="tagViewerOpened = $event"

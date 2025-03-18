@@ -24,7 +24,7 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 <template>
 	<div class="grid text-base thinScrollbar font-[poppins] py-4 w-full gap-y-5">
 
-		<section v-if="drafts">
+		<section v-if="drafts && draftsValues.length">
 			<h2 class="ml-2 text-3xl font-black text-lof-400">{{ $t('reviews.drafts2') }}</h2>
 			<div class="grid">
 				<section class="flex overflow-auto gap-4 px-2 mt-2">
@@ -49,11 +49,15 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 				<hr class="h-0.5 bg-opacity-10 bg-gradient-to-r from-white to-transparent rounded-md border-none opacity-20 grow">
 			</div>
 
+		</section>
+		
+		<section>
 			<div>
 				<img src="@/images/info.svg" class="inline mr-2 w-5" alt="">
 				<span>Dej své recenzi šmrnc!</span>
 			</div>
-<!-- 
+		</section>
+		<!-- 
 			<section class="flex gap-3 px-2 mt-8 w-full sm:items-center max-sm:flex-col">
 				<button class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
 					<img src="@/images/searchOpaque.svg" class="w-10" alt="">
@@ -71,7 +75,6 @@ const draftsKeys = Object.keys(props.drafts).reverse().slice(0,4)
 				</button>
 			</section> -->
 
-		</section>
 
 	</div>
 </template>

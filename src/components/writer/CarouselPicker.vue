@@ -43,7 +43,7 @@ const addVideo = () => {
     carouselComp.push(video)
     dialogType.value = 2
     nextTick(() => {
-        document.querySelector("#carp_inputs input").focus()
+        nextTick(() => youtubeInput.value?.focus())
         video.settings.height = carouselComp[textDialogOpen.value].settings.height
     })
 }
@@ -101,11 +101,13 @@ const closePopup = () => {
 const textDialogOpen = ref(-1)
 const dialogType = ref(0)
 
+const youtubeInput = ref<HTMLInputElement>()
 const uploader = ref<HTMLInputElement>()
 const maxLen = computed(() => carouselComp.length >= 25)
 
 const carouselShortcuts = (e: KeyboardEvent) => {
     if (openDialogs.imagePicker[0]) return
+    if (e.ctrlKey || e.shiftKey) return
     if (textDialogOpen.value != -1) return
     if (maxLen.value) return
 
@@ -123,13 +125,18 @@ onUnmounted(() => {
     document.removeEventListener("keyup", carouselShortcuts)
 })
 
+const checkPaste = (e: Event) => {
+    if (shortenYTLink(e?.clipboardData?.getData("Text") ?? ""))
+        textDialogOpen.value = -1
+}
+
 </script>
 
 <template>
     <Dialog @close-popup="closePopup" :open="textDialogOpen != -1" :title="$t('other.metadata')">
         <div id="carp_inputs" class="flex flex-col p-2">
             <label v-show="dialogType == 2" for="car_url">{{ $t('reviews.ytLink') }}</label>
-            <input v-show="dialogType == 2" @paste.stop="" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="postData.containers[index].settings.components[textDialogOpen].settings.url" type="text" id="car_url">
+            <input v-show="dialogType == 2" @paste.stop="closePopup" ref="youtubeInput" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="postData.containers[index].settings.components[textDialogOpen].settings.url" type="text" id="car_url">
             <label v-show="dialogType != 2" for="car_desc">{{ $t('other.desc') }}</label>
             <input v-show="dialogType != 2" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="postData.containers[index].settings.components[textDialogOpen].settings.description" type="text" id="car_desc">
             <label v-show="dialogType == 1" class="mt-4" for="car_alt">{{ $t('reviews.alttext') }}</label>

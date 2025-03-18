@@ -427,7 +427,8 @@
     "noImage": "Discard Pick",
     "previous": "Previous",
     "reset": "Reset",
-    "auto": "Automatic"
+    "auto": "Automatic",
+    "toTop": "Scroll to Start"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -763,7 +764,8 @@
     "setPos": "Positioning",
     "draftEditing": "Editing Post",
     "draftExists": "You've made a draft for this edit",
-    "lastEdited": "Last Edited"
+    "lastEdited": "Last Edited",
+    "unsetThumb": "Unset Thumbnail"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

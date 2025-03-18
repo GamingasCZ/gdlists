@@ -409,7 +409,8 @@
     "noImage": "Zrušit výběr",
     "previous": "Předchozí",
     "reset": "Resetovat",
-    "auto": "Automatická"
+    "auto": "Automatická",
+    "toTop": "Jít navrch"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -765,7 +766,8 @@
     "setPos": "Pozicování",
     "draftEditing": "Upravování",
     "lastEdited": "Naposledy upraveno",
-    "draftExists": "Pro příspěvěk existuje rozepsaný koncept"
+    "draftExists": "Pro příspěvěk existuje rozepsaný koncept",
+    "unsetThumb": "Zrušit náhled"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

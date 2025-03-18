@@ -16,7 +16,7 @@ import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { modernizeList, modifyListBG, predefinedLevelList, prettyDate } from "@/Editor";
+import { currentUID, modernizeList, modifyListBG, predefinedLevelList, prettyDate } from "@/Editor";
 import { onUnmounted } from "vue";
 import router, { timeLastRouteChange } from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -378,7 +378,7 @@ const doFormatting = (ind: number) => {
 	addCEFormatting(formatIndicies[ind], el, false)
 }
 
-const containerSettingsShown = ref([0, -1])
+const containerSettingsShown = ref([0, -1, -1])
 provide("containerSettingsShown", containerSettingsShown)
 
 function doAction(action: FormattingAction | EditorAction, param: any, holdingShift = false) {
@@ -414,7 +414,10 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             openDialogs.drafts = true
             break;
         case 'containerOptions':
-            containerSettingsShown.value = [3, selectedContainer.value[0], selectedNestContainer.value[1]]
+            if (selectedNestContainer.value[1] != -1)
+                containerSettingsShown.value = [3, selectedNestContainer.value[1], selectedNestContainer.value[2]]
+            else
+                containerSettingsShown.value = [3, selectedContainer.value[0], -1]
             break;
         case 'shortcutsMenu':
             openDialogs.shortcuts = true
@@ -947,7 +950,7 @@ const toggleZenMode = () => {
             :width="dialog.medium" :side-button-text="$t('other.search')" :action="draftPopup?.openSearch">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
-                @load="loadDraft" @preview="previewDraft" @remove="removeDraft" />
+                @load="loadDraft" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.shortcuts" @close-popup="openDialogs.shortcuts = false" :title="$t('reviews.keysh')"
@@ -1042,7 +1045,7 @@ const toggleZenMode = () => {
             <!-- Level Preview -->
             <section v-if="previewingLevels" class="flex flex-col gap-2 items-center">
                 <LevelCard v-for="(l, index) in POST_DATA.levels" v-bind="l" :disable-stars="true"
-                    :level-index="index" :hide-ratings="!WRITER.general.levelRating" />
+                    :level-index="index" :hide-ratings="!WRITER.general.levelRating" :uploader-uid="currentUID" />
             </section>
 
             <!-- Editor -->
@@ -1070,7 +1073,7 @@ const toggleZenMode = () => {
                         @start-writing="startWriting"
                         
                         @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
-                        @load-draft="loadDraft"
+                        @load-draft="loadDraft(drafts[$event])"
 
                         :inverted="POST_DATA.whitePage"
                         :writer="WRITER"
@@ -1079,17 +1082,17 @@ const toggleZenMode = () => {
                 </template>
                 <template #footer>
                     <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 text-lg sm:grid-cols-3">
-                        <button @click="saveDraft(false)" class="py-1 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
-                            <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
+                        <button @click="saveDraft(false)" class="py-1 text-base text-white rounded-md opacity-20 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                            <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
                             <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
                             <span v-else>{{ pretty }}</span>
                         </button>
-                        <button @click="openDialogs.shortcuts = true" class="py-1 text-white rounded-md opacity-40 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
-                            <img src="@/images/key.svg" class="inline mr-4 w-6" alt="">
+                        <button @click="openDialogs.shortcuts = true" class="py-1 text-white rounded-md opacity-20 transition-opacity max-sm:hidden hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                            <img src="@/images/key.svg" class="inline mr-3 w-6" alt="">
                             <span>{{ $t('reviews.keysh') }}</span>
                         </button>
-                        <button @click="goFullscreen()" class="py-1 text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
-                            <img src="@/images/zen.svg" class="inline mr-4 w-6" alt="">
+                        <button @click="goFullscreen()" class="py-1 text-white rounded-md opacity-20 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                            <img src="@/images/zen.svg" class="inline mr-3 w-6" alt="">
                             <span>{{ $t('reviews.zenMode') }}</span>
                         </button>
                     </section>

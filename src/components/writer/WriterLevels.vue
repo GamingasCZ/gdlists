@@ -133,7 +133,7 @@ const isSearching = ref(false)
     </Dialog>
 
     <section :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
-        <header class="flex p-2 text-white cursor-pointer">
+        <header class="flex p-2 text-white">
             <img src="@/images/browseMobHeader.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('editor.levels') }}</h2>
             <!-- <button class="button">

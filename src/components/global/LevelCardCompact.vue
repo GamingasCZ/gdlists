@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Level } from "@/interfaces";
 import type { Color } from "chroma-js";
-import { inject, onErrorCaptured, ref } from "vue";
+import { computed, inject, onErrorCaptured, ref } from "vue";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 import { DEFAULT_RATINGS } from "@/Reviews";
@@ -56,12 +56,18 @@ const listData = inject("listData")
 
 const rateDropdownButton = ref<HTMLImageElement>()
 const ratingsShowing = ref(false)
+const textCol = computed(() => {
+  return CARD_COL.value.luminance() > 0.5 ? 'black' : 'white'
+})
 
 </script>
 
 <template>
-  <section class="relative max-sm:button mx-auto w-[70rem] max-w-[95vw] rounded-lg p-2 text-white shadow-lg shadow-[color:#0000008F]"
-    :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
+  <section class="relative max-sm:button mx-auto w-[58rem] max-w-[95vw] rounded-lg p-2 shadow-lg shadow-[color:#0000008F]"
+    :style="{
+      backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})`,
+      color: textCol
+    }"
     :class="{ 'backdrop-blur-md': translucentCard }" @click="openOverview">
     
     <CardTheme v-if="BGimage" v-bind="BGimage" />

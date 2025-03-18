@@ -18,6 +18,7 @@ const props = defineProps<{
     shown: false | 1 | 2 // 1 - button open, 2 - right-click open
     mousePos: [number, number]
     index: number
+    nest?: number
 }>()
 
 const postData = inject<Ref<PostData>>("postData")!
@@ -25,7 +26,13 @@ const containers = inject<Containers>("settingsTitles")
 const shortcut = inject<Ref<number[]>>("containerSettingsShown", ref([0,-1]))
 watch(shortcut, () => {
     if (shortcut.value[0] == 3 && shortcut.value[1] == props.index) {
-        showSettings()
+        // nested container settings
+        if (shortcut.value[2] != -1 && shortcut.value[2] == props.nest) {
+            showSettings()
+        }
+        // non-nested
+        else if (shortcut.value[2] == -1 && props.nest === undefined)
+            showSettings()
     }
 })
 

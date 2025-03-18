@@ -271,11 +271,22 @@ const setAsThumb = (srcshotIndex: number) => {
   if (!arr?.BGimage)
   arr.BGimage = newCardBG()
 
-  if (arr.BGimage.image[0])
-  srcshotIndex--
+  let previousThumb
+  if (arr.BGimage.image[0]) {
+    srcshotIndex--
+    previousThumb = arr.BGimage.image[0]
+  }
 
   arr.BGimage.image[0] = arr.screenshots[srcshotIndex][1]
   arr.screenshots?.splice(srcshotIndex, 1)
+
+  if (previousThumb) {
+    arr.screenshots?.push([
+      LevelImage.IMAGE,
+      previousThumb,
+      ""
+    ])
+  }
 
   colorizeViaThumb()
 }
@@ -413,9 +424,9 @@ onMounted(() => {
   
         <!-- Level tags -->
         <div class="flex gap-3 items-center mx-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-          <button type="button" class="p-2 pr-1 button">
+          <div class="px-1 py-2 pr-1.5">
             <img src="@/images/levelID.svg" alt="" class="w-10" />
-          </button>
+          </div>
           <div id="tagbox" class="relative w-full" contenteditable="true">
           </div>
         </div>
@@ -526,9 +537,10 @@ onMounted(() => {
 
   </section>
 
+  <!-- Thumbnail / Media options -->
   <Dropdown v-if="imageSettingsOpen >= 0" @close="imageSettingsOpen = -1" :button="gearElement[imageSettingsOpen]">
     <template #header>
-      <section class="flex flex-col gap-1 p-2 text-white">
+      <section v-if="levelMedia[imageSettingsOpen][0] == LevelImage.THUMBNAIL" class="flex flex-col gap-1 p-2 text-white">
 				<button @click="openDialogs.BGpicker = [true, 1, index]; imageSettingsOpen = -1" class="p-2 text-xl bg-black bg-opacity-40 rounded-md button">
 					<img src="@/images/move.svg" alt="" class="inline mr-2 w-5">
 					<span>{{ $t('reviews.setPos') }}</span>
@@ -540,11 +552,11 @@ onMounted(() => {
 				  </button>
         </div>
         <span class="mt-2 text-2xl text-opacity-40">{{ $t('other.opacity') }}</span>
-				<input type="range" class="slider" v-model="levelArray.levels[index].BGimage.opacity">
+				<input type="range" class="slider" min="0.1" max="1" step="0.05" v-model="levelArray.levels[index].BGimage.opacity">
 
         <div class="flex justify-between items-center mt-2 text-lg">
           <span>{{ $t('other.scrolling') }}</span>
-          <select @click.stop="" class="text-base" v-model="levelArray.levels[index].BGimage.scrolling">
+          <select @mousedown.prevent="" class="text-base" v-model="levelArray.levels[index].BGimage.scrolling">
             <option :value="0">{{ $t('other.off') }}</option>
             <option :value="1">{{ $t('other.byitself') }}</option>
             <option :value="2">{{ $t('other.parallax') }}</option>
@@ -552,13 +564,18 @@ onMounted(() => {
         </div>
         <div class="flex justify-between items-center mt-2 text-lg">
           <span>{{ $t('other.tiling') }}</span>
-          <input type="checkbox" v-model="levelArray.levels[index].BGimage.tile" min="0" max="1" step="0.05" class="!m-0 button">
+          <input type="checkbox" v-model="levelArray.levels[index].BGimage.tile" class="!m-0 button">
         </div>
 
         <button @click="unsetThumb()" class="flex gap-2 justify-center items-center text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
           <img class="w-5" src="@/images/del2.svg" alt="">
-          Zrušit náhled
+          {{ $t('reviews.unsetThumb') }}
         </button>
+      </section>
+
+      <section v-else class="p-2 text-white">
+        <p class="text-lg">{{ $t('other.desc') }}</p>
+        <input type="text" v-model="levelMedia[imageSettingsOpen][2]" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
       </section>
     </template>
   </Dropdown>

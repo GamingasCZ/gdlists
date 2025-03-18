@@ -20,7 +20,7 @@ onUpdated(() => {
         <input
           type="text"
           :placeholder="$t('other.search')+'...'"
-          class="px-2 py-1 mx-2 mt-1 bg-white bg-opacity-10 rounded-md grow"
+          class="px-2 py-1 mx-2 mt-1 bg-black bg-opacity-40 rounded-md grow"
           id="pickerInput"
           v-model="search"
         />

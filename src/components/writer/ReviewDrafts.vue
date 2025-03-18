@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ReviewDraft, ReviewList } from "@/interfaces";
 import { DraftAction } from "@/interfaces";
-import { computed, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import DraftCard from "./DraftCard.vue";
 import type { Writer } from "@/writers/Writer";
 
@@ -16,6 +16,7 @@ const emit = defineEmits<{
     (e: "preview", data: ReviewList, id_saved: string): void
     (e: "load", draft: ReviewDraft): void
     (e: "remove", id: number): void
+    (e: "close"): void
 }>()
 
 const searchBoxShown = ref(false)
@@ -31,11 +32,16 @@ const editingName = ref(-1)
 const query = ref("")
 
 const filteredDrafts = computed(() => {
-    let filtered = {}
-    for (const [key, draft] of Object.entries(props.drafts)) {
-        if (draft.name.toLowerCase().includes(query.value.toLowerCase())) filtered[key] = draft
+    let filtered: {[key: string]: ReviewDraft}
+    if (query.value.length) {
+        let filtered = {}
+        for (const [key, draft] of Object.entries(props.drafts)) {
+            if (draft.name.toLowerCase().includes(query.value.toLowerCase())) filtered[key] = draft
+        }
     }
-    return filtered
+    else filtered = props.drafts
+
+    return Object.keys(filtered).reverse()
 })
 
 const doAction = (action: DraftAction, key: string, draft: ReviewDraft) => {
@@ -57,6 +63,7 @@ const doAction = (action: DraftAction, key: string, draft: ReviewDraft) => {
             break;
         case DraftAction.Load:
             emit("load", draft)
+            emit("close", draft)
             break;
     }
 }
@@ -67,6 +74,12 @@ const openSearch = () => {
 
 defineExpose({
     openSearch
+})
+
+onMounted(() => {
+    let firstCard = document.querySelector(".draftCard")
+    if (firstCard && !props.inUseID)
+        nextTick(() => firstCard.focus())
 })
 
 </script>
@@ -113,19 +126,19 @@ defineExpose({
         />
 
         <!-- Show drafts sorted by newest -->
-        <div class="flex flex-col-reverse gap-2">
+        <div class="flex flex-col gap-2">
             <DraftCard
-                v-for="(draft, key, index) in filteredDrafts"
-                @editedName="editName($event, key)"
-                @startNameEdit="editingName = key"
+                v-for="(draft, index) in filteredDrafts"
+                @editedName="editName($event, draft)"
+                @startNameEdit="editingName = draft"
                 @open="optionsOpen = index"
-                @action="doAction($event, key, draft)"
+                @action="doAction($event, draft, drafts[filteredDrafts[index]])"
                 :is-open="optionsOpen == index"
                 :in-use="false"
-                :hide="inUseID == key"
-                :editing-name="editingName == key"
-                :draft="draft"
-                :key="draft.createDate"
+                :hide="inUseID == draft"
+                :editing-name="editingName == draft"
+                :draft="drafts[filteredDrafts[index]]"
+                :key="drafts[filteredDrafts[index]].createDate"
                 :counter-key="writer.drafts.counterLangKey"
             />
         </div>
