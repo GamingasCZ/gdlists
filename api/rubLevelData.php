@@ -41,8 +41,17 @@ function parseLevel($levelString) {
     $returnData["id"] = $levelString[1];
     $returnData["name"] = $levelString[3];
     $returnData["difficulty"] = ((int) $levelString[21])*5 + $levelString[11]/10; // isDemon*10 + weird ass rubrub difficulty thingy/10
-    $returnData["cp"] = ((int) $levelString[27] > 0) + ((int) $levelString[29] > 0) + ((int) $levelString[31] > 0);
+    $returnData["cp"] = ((int) $levelString[27] > 0) + ((int) $levelString[29] > 0) + ((int) $levelString[31]);
     $returnData["platf"] = $levelString[37] == 5;
+    $returnData["objCount"] = (int)$levelString[33];
+    $returnData["downloads"] = (int)$levelString[13];
+    $returnData["likes"] = (int)$levelString[19];
+    $returnData["len"] = (int)$levelString[37];
+    $returnData["gameVer"] = (int)$levelString[17];
+    $returnData["isCopy"] = $levelString[39] != 0;
+    $returnData["coins"] = (int)$levelString[43];
+    $returnData["twoPlayer"] = (bool)$levelString[41];
+
 
     if (isset($_GET["thumb"]) && $_GET["thumb"] == "1") {
         $uid = getLocalUserID();

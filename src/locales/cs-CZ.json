@@ -137,7 +137,10 @@
       "Bossfight",
       "Dlouhý",
       "Nevydaný",
-      "Nedoceněný"
+      "Nedoceněný",
+      "Mince",
+      "Platformer",
+      "Kopie"
     ],
     "descriptionEditor": "Editor popisku",
     "editor": "Editor",
@@ -211,7 +214,8 @@
     "tagl6": "Demon List se nevzpamatuje!",
     "title": "Editor seznamu",
     "translHelp": "Karty levelů v seznamu budou průsvitné.",
-    "thumbStyle": "Styl náhledu"
+    "thumbStyle": "Styl náhledu",
+    "lastUsed": "Poslední"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -767,7 +771,17 @@
     "draftEditing": "Upravování",
     "lastEdited": "Naposledy upraveno",
     "draftExists": "Pro příspěvěk existuje rozepsaný koncept",
-    "unsetThumb": "Zrušit náhled"
+    "unsetThumb": "Zrušit náhled",
+    "noLevels": "Nepřidal jsi žádné levely.",
+    "noRatings": "Neohodnotil jsi některé levely.",
+    "noRatings2": "Některé levely nemají vyplněná všechna hodnocení.",
+    "customRating": "Vlastní hodnocení",
+    "theming": "Theming",
+    "sync": "Sync",
+    "music": "Hudba",
+    "consistency": "Konzistence",
+    "sightreadability": "Sightreadovatelnost",
+    "originality": "Originalita"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

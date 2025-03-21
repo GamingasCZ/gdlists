@@ -5,7 +5,7 @@ import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
 
-export const TAG_COUNT = 27;
+export const TAG_COUNT = 30;
 export const EMOJI_COUNT = 18;
 
 // For demon faces
@@ -290,3 +290,5 @@ export const getListPreview = (postData: PostData) => {
 
 export var lastTab: (number | string | null)[] = [null, null]
 export const modLastTab = (x: [number, string]) => lastTab = x
+
+export const lastUsedTags = ref<number[]>([])

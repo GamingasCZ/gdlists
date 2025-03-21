@@ -1,22 +1,17 @@
 <script setup lang="ts">
 import type { LevelTag } from "@/interfaces";
-import { ref } from "vue";
-const props = defineProps<{
+defineProps<{
   tag: LevelTag;
 }>();
 
-const tagPath = ref("")
-function getTag() {
-  tagPath.value =`${import.meta.env.BASE_URL}/tags/${props.tag[0]}.svg`
-}
-getTag()
+const base = import.meta.env.BASE_URL
 
 </script>
 
 <template>
   <div class="pr-2 text-xs bg-black bg-opacity-40 rounded-full border-2 border-black border-opacity-50 sm:text-sm">
     <img
-      :src="tagPath"
+      :src="`${base}/tags/${tag[0]}.svg`"
       class="inline mr-2 w-3 align-middle sm:w-6"
       alt=""
     />

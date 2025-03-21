@@ -62,7 +62,10 @@ watch(timeLastRouteChange, () => {
             loadOnlineEdit(loadEditDraft)
     }
     else
-        resetPost()
+        if (loadEditDraft)
+            loadDraft(loadEditDraft)
+        else
+            resetPost()
 })
 
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
@@ -439,7 +442,6 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             if (containers[type]?.resizeableProperty !== undefined) {
                 // SETTINGS INDEX OF THE RESIZABLE VALUE MUST BE ONE, damn you gamingas
                 let minmax = containers[type].settings[1].valueRange
-                console.log(minmax)
                 let to = Math.min(minmax[1], Math.max(minmax[0], POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] + (action == 'resizeBigger' ? 25 : -50)))
                 POST_DATA.value.containers[selectedContainer.value[0]].settings[containers[type].resizeableProperty] = to
                 if (type == "addCarousel")
@@ -738,6 +740,13 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
         router.replace(`/edit/${WRITER.value.general.postType}/${draft.editing}`)
         return
     }
+    else if (!draft.editing) {
+        if (router.currentRoute.value.name != "writer") {
+            loadEditDraft = draft
+            router.replace(`/make/${WRITER.value.general.postType}`)
+            return
+        }
+    }
 
     POST_DATA.value = JSON.parse(JSON.stringify(draft.reviewData))
     reviewSave.value.backupID = draft.createDate
@@ -875,6 +884,7 @@ const zenMode = ref(false)
 const toggleZenMode = () => {
     if (WRITER.value.general.postType != 'review') return
     zenMode.value = !zenMode.value
+    openDialogs.bgPreview = false
     let navbar = document.querySelector("#navbar") as HTMLDivElement
     let footer = document.querySelector("#footer") as HTMLDivElement
     if (zenMode.value) {

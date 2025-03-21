@@ -211,7 +211,7 @@ dialog {
 }
 
 .readabilityMode {
-  @apply max-w-[80ch] leading-relaxed text-xl;
+  @apply max-w-[80ch] text-xl;
 }
 
 /* Use when you want regular parsing */

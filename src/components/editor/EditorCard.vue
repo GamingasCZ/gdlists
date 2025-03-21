@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { currentUID, newCardBG, shortenYTLink } from "@/Editor";
+import { currentUID, lastUsedTags, newCardBG, shortenYTLink, TAG_COUNT } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, inject, onMounted, type Ref, ref } from "vue";
@@ -11,9 +11,12 @@ import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
-import RatingPicker from "../writer/RatingPicker.vue";
-import { DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
+import { getDominantColor, getDominantLine } from "@/Reviews";
 import { breakCache } from "../global/imageCache";
+import EditorCardRatingView from "./EditorCardRatingView.vue";
+import EditorTag from "./EditorTag.vue";
+import EditorCardTagDropdown from "./EditorCardTagDropdown.vue";
+import { TagName } from "@/assets/tags";
 
 const props = defineProps<{
   levelArray: PostData
@@ -137,7 +140,25 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 
       props.levelArray.levels[props.index!].levelID = level.id;
       props.levelArray.levels[props.index!].levelName = level.name;
-      props.levelArray.levels[props.index!].platf = level.platf;
+      
+      if (level.platf)
+        props.levelArray.levels[props.index!].tags.push([TagName.PLATFORMER, -1, '']);
+      if (level.objCount >= 40000)
+        props.levelArray.levels[props.index!].tags.push([TagName.HIGH_OBJECTS, -1, '']);
+      if (level.isCopy)
+        props.levelArray.levels[props.index!].tags.push([TagName.COPY, -1, '']);
+      if (level.coins)
+        props.levelArray.levels[props.index!].tags.push([TagName.COINS, -1, '']);
+      if (level.twoPlayer)
+        props.levelArray.levels[props.index!].tags.push([TagName.TWO_PLAYER, -1, '']);
+      if (level.gameVer == 19)
+        props.levelArray.levels[props.index!].tags.push([TagName.ONE_P_NINE, -1, '']);
+      if (level.len == 4) // XL
+        props.levelArray.levels[props.index!].tags.push([TagName.LONG, -1, '']);
+      if (level.downloads > 250 && level.likes / level.downloads < 0.01) // XL
+        props.levelArray.levels[props.index!].tags.push([TagName.CONTROVERSIAL, -1, '']);
+
+
       props.levelArray.levels[props.index!].BGimage.image[0] = level.thumbnail;
       
       colorizeViaThumb()
@@ -312,10 +333,51 @@ const removeScreenshot = (type: LevelImage, ind: number) => {
   }
 }
 
+const tagbox = ref<HTMLInputElement>()
 const nameInput = ref<HTMLInputElement>()
 onMounted(() => {
   nameInput.value.focus()
 })
+
+const tagSearch = ref("")
+const tagDropdownShown = ref(false)
+const tagNames = (() => {
+  let tags: [number, string][] = []
+  for (let i = 0; i < TAG_COUNT; i++)
+    tags.push([i, i18n.global.t(`editor.tags[${i}]`)])
+  return tags
+})()
+const filteredTags = computed(() => {
+  return tagNames.filter(x => x[1].toLowerCase().includes(tagSearch.value.toLowerCase()))
+})
+
+const addTag = (ind: number) => {
+  if (props.levelArray.levels[props.index].tags.length >= 15) return
+
+  if (!lastUsedTags.value.includes(ind))
+        lastUsedTags.value.splice(0,0, ind)
+
+  if (lastUsedTags.value.length > 5)
+      lastUsedTags.value.pop()
+  
+  props.levelArray.levels[props.index].tags.push([ind, -1, ''])
+  tagSearch.value = ''
+}
+
+const editLastTag = (e: KeyboardEvent) => {
+  if (tagSearch.value.length) return
+  let lastTag = props.levelArray.levels[props.index].tags.pop()
+  if (!lastTag) return
+
+  if (lastTag[1] == -1)
+    tagSearch.value = i18n.global.t(`editor.tags[${lastTag[0]}]`)
+  else
+    tagSearch.value = lastTag[1]
+}
+
+const removeTag = (ind: number) => {
+  props.levelArray.levels[props.index].tags.splice(ind, 1)
+}
 
 </script>
 
@@ -348,7 +410,7 @@ onMounted(() => {
       </template>
     </Dropdown>
 
-    <div v-show="!editingRating" class="flex max-sm:flex-col">
+    <div v-show="!editingRating" class="flex overflow-visible max-sm:flex-col">
       <div class="flex justify-between items-center px-0.5 py-2 bg-black bg-opacity-20 sm:flex-col">
   
         <!-- Move level -->
@@ -368,21 +430,21 @@ onMounted(() => {
   
         <div class="flex gap-4 items-center max-sm:pr-2 sm:flex-col">
   
-          <button @click="pickingColor = !pickingColor" :title="$t('editor.levelColorTitle')" :class="{'!opacity-100': pickingColor}" class="opacity-60 button">
+          <button @click="pickingColor = !pickingColor" :title="$t('editor.levelColorTitle')" :class="{'!opacity-100': pickingColor}" class="opacity-40 mix-blend-plus-lighter invert-[0.2] button">
             <img class="w-6" src="../../images/color.svg" alt="" />
           </button>
           
-          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="bg-black bg-opacity-40 opacity-60 button">
+          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="opacity-40 mix-blend-plus-lighter button invert-[0.2]">
             <img class="w-7" src="../../images/trash.svg" alt="" />
           </button>
         </div>
   
       </div>
   
-      <div class="flex flex-col gap-2 mt-2 w-full overflow-clip">
+      <div class="grid gap-2 mt-2">
   
-        <div class="flex gap-2 max-sm:flex-col">
-          <div class="grid grid-cols-2 max-sm:mr-2 sm:max-w-[50%] gap-2">
+        <div class="grid gap-2 sm:grid-cols-2">
+          <div class="grid grid-cols-2 gap-2 max-sm:mr-2">
             <!-- Level name -->
             <form @submit.prevent="searchLevel(false)" class="flex col-span-2 gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <button ref="difficultyButton" @click="diffPickerOpen = true" type="button" class="button">
@@ -416,45 +478,74 @@ onMounted(() => {
           <!-- Level rating -->
           <button
             @click="editingRating = true"
-            class="h-full min-h-16 grow button bg-[url(@/images/reviews/noRating.webp)] relative scrollRating"
+            class="relative mr-2 h-full overflow-clip min-h-16"
           >
+            <div class="absolute inset-0 scrollRating" :style="{backgroundImage: `url(${base}/rateBGs/noRating.webp)`}"></div>
             
           </button>
         </div>
   
         <!-- Level tags -->
-        <div class="flex gap-3 items-center mx-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-          <div class="px-1 py-2 pr-1.5">
-            <img src="@/images/levelID.svg" alt="" class="w-10" />
+        <div ref="tagbox" class="flex relative gap-3 items-center py-1 mx-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+          <div class="px-1 pr-0">
+            <img src="@/images/levelID.svg" alt="" class="w-10 min-w-10" />
           </div>
-          <div id="tagbox" class="relative w-full" contenteditable="true">
+          <div class="flex flex-wrap gap-1 grow">
+            <EditorTag
+              v-for="(tag, ind) in levelArray.levels[index].tags"
+              @auxclick="removeTag(ind)"
+              :tag="tag"
+              selectable
+              gear
+              settable
+            />
+            <div class="flex gap-1" v-show="!levelArray.levels[index].tags.length">
+              <EditorTag @click="addTag(TagName.PLATFORMER)" :tag="[TagName.PLATFORMER, -1, '']" isExample selectable plus />
+              <EditorTag @click="addTag(TagName.COINS)" :tag="[TagName.COINS, -1, '']" isExample selectable plus />
+            </div>
+
+            <input 
+              v-model="tagSearch"
+              @focus="tagDropdownShown = true"
+              @blur="tagDropdownShown = false"
+              @keyup.enter="filteredTags?.[0]?.[0] !== undefined && addTag(filteredTags[0][0])"
+              @keydown.backspace="editLastTag"
+              class="relative bg-transparent outline-none min-w-12 grow"
+            >
           </div>
+
+          <Teleport to="body">
+            <EditorCardTagDropdown
+              v-if="tagDropdownShown"
+              @add="addTag"
+              :filtered-tags="filteredTags"
+              :tagbox="tagbox"
+            />
+          </Teleport>
         </div>
   
         <!-- Screenshot carousel & Color Picker -->
-        <div class="flex overflow-scroll gap-2 p-2 w-full bg-black bg-opacity-20">
-          <div v-show="!pickingColor" class="flex gap-2 min-w-max">
-            <div v-for="(image, ind) in levelMedia" class="relative duration-200 group">
+        <div class="flex overflow-auto gap-2 p-2 bg-black bg-opacity-20">
+          <div v-show="!pickingColor" v-for="(image, ind) in levelMedia" class="relative duration-200 aspect-video group">
 
-              <!-- Background preview -->
-              <img class="object-cover object-center h-28 rounded-md transition-all group-hover:brightness-50 aspect-video shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
-              
-              <!-- Thumbail indicator -->
-              <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
-              
-              <!-- Settings overlay -->
-              <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
-                  <img src="@/images/gear.svg" class="w-5" alt="">
-                </button>
-                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
-                  <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
-                  {{ $t('reviews.setThumb') }}
-                </button>
-                <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
-                  <img src="@/images/trash.svg" class="w-5" alt="">
-                </button>
-              </div>
+            <!-- Background preview -->
+            <img class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+            
+            <!-- Thumbail indicator -->
+            <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
+            
+            <!-- Settings overlay -->
+            <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
+                <img src="@/images/gear.svg" class="w-5" alt="">
+              </button>
+              <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
+                {{ $t('reviews.setThumb') }}
+              </button>
+              <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
+                <img src="@/images/trash.svg" class="w-5" alt="">
+              </button>
             </div>
           </div>
           
@@ -487,53 +578,20 @@ onMounted(() => {
 
           </div>
 
-          <ColorPicker v-show="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
+          <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
           :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
         </div>
         
       </div>
     </div>
 
-    <div v-show="editingRating">
-      <header @click="editingRating = false" class="flex gap-2 items-center p-1 pl-5 bg-black bg-opacity-40 transition-colors duration-75 cursor-pointer group hover:bg-opacity-60">
-        <img src="@/images/back.svg" class="w-6 transition-transform duration-75 group-active:-translate-x-2" alt="">
-        <DifficultyIcon class="ml-2 w-12" :difficulty="levelArray.levels[index].difficulty[0]" :rating="levelArray.levels[index].difficulty[1]" />
-        <div>
-          <p class="text-2xl font-bold leading-tight">{{ levelArray.levels[index].levelName || $t('other.unnamesd') }}</p>
-          <p class="text-sm leading-none">{{ levelCreator || $t('other.unnamesd') }}</p>
-        </div>
-      </header>
-      <section class="flex flex-col gap-4 p-4">
-        <RatingPicker
-          :key="DEFAULT_RATINGS[3].name"
-          :color="DEFAULT_RATINGS[3].color"
-          @mod-rating="levelArray.levels[index].ratings[0][i] = $event"
-          :value="levelArray.levels?.[index]?.ratings?.[0]?.[i]"
-          :default-name="DEFAULT_RATINGS[3].name"
-          :rating="DEFAULT_RATINGS[3]"
-        />
-        <p class="text-center">Taky bys měl ohodnotit...</p>
-        <!-- <RatingPicker
-          v-for="(rating, i) in DEFAULT_RATINGS"
-          :key="rating.name"
-          :color="rating.color"
-          @mod-rating="levelArray.levels[index].ratings[0][i] = $event"
-          :value="levelArray.levels?.[index]?.ratings?.[0]?.[i]"
-          :default-name="rating.name"
-          :rating="rating"
-        /> -->
-        <!-- <RatingPicker :default-name="rating.name" :value="reviewData.levels?.[pickedLevel]?.ratings?.[0]?.[index]" @mod-rating="reviewData.levels[pickedLevel].ratings[0][index] = $event" :rating="rating" /> -->
-        <RatingPicker
-          v-for="(rating, i) in levelArray.ratings"
-          :key="rating.name"
-          
-          @mod-rating="levelArray.levels[index].ratings[1][i] = $event"
-          :value="levelArray.levels?.[index]?.ratings?.[1]?.[i]"
-          v-model:name="levelArray.ratings[index].name"
-          editable
-        />
-      </section>
-    </div>
+    <EditorCardRatingView
+      v-show="editingRating"
+      @close="editingRating = false"
+      :post-data="levelArray"
+      :level-index="index"
+      :level-creator="levelCreator"
+    />
 
   </section>
 
@@ -599,17 +657,12 @@ onMounted(() => {
   }
 }
 
-#tagbox::after {
-  content: v-bind(tagPlaceholder);
-  @apply w-max absolute opacity-40
-}
-
-@keyframes scroll {
+@keyframes scroll2 {
     from {
         background-position: 0 0;
     }
     to {
-        background-position: 64px -64px;
+        background-position: 7rem -7rem;
     }
 }
 
@@ -618,11 +671,15 @@ onMounted(() => {
 }
 
 .scrollRating {
-    @apply relative overflow-clip transition-colors;
-    animation: scroll 5s infinite linear;
-}
+    @apply transition-transform;
+    animation: scroll2 5s infinite linear;
+    background-size: 7rem;
+    mix-blend-mode: plus-lighter;
+    mask-image: radial-gradient(black, transparent 80%)
+  }
+
 .scrollRating:hover {
-    @apply bg-[#6f1a4921] brightness-150;
+  @apply bg-[#6f1a4921] brightness-150 scale-110;
 }
 
 </style>

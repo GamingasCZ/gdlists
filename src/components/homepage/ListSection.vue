@@ -63,7 +63,7 @@ const clearViewed = () => {
 </script>
 
 <template>
-  <section v-if="lists?.length" class="flex flex-col mt-6 w-full max-w-7xl">
+  <section v-if="lists?.length" class="flex flex-col mt-6 w-full max-w-[73.5rem]">
     <component :is="extraAction ? (extraAction?.startsWith('@') ? 'button' : 'RouterLink') : 'div'" :to="extraAction" @click="extraAction?.startsWith('@') ? clearViewed() : null" class="flex gap-4 justify-between items-center px-1 py-2 my-2 w-full text-left text-white rounded-md" :class="{'hover:bg-white hover:bg-opacity-10': extraAction}">
       <img src="../../images/wave.svg" class="w-8" alt="" />
       <span class="w-full text-3xl font-bold">{{ headerName }}</span>

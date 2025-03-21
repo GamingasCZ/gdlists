@@ -232,6 +232,14 @@ export interface LevelSearchResponse {
   difficulty: number;
   cp: number;
   platf: boolean
+  objCount: number
+  downloads: number
+  likes: number
+  len: 0 | 1 | 2 | 3 | 4
+  gameVer: number
+  isCopy: boolean
+  coins: 0 | 1 | 2 | 3
+  twoPlayer: boolean
   selected?: boolean
   thumbnail?: string
 }

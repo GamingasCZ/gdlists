@@ -50,7 +50,10 @@
       "Bossfight",
       "Long",
       "Unreleased",
-      "Unrecognized"
+      "Unrecognized",
+      "Coins",
+      "Platformer",
+      "Copy"
     ],
     "titleImage": "List Background",
     "translucentCards": "Translucent Cards",
@@ -111,7 +114,8 @@
     "tagl4": "I'd be down for some Wasabi paste!",
     "tagl1": "These creators have truly peaked!",
     "translHelp": "Level cards in the list will be translucent.",
-    "thumbStyle": "Thumbnail Style"
+    "thumbStyle": "Thumbnail Style",
+    "lastUsed": "Last Used"
   },
   "homepage": {
     "clear": "Clear",
@@ -765,7 +769,17 @@
     "draftEditing": "Editing Post",
     "draftExists": "You've made a draft for this edit",
     "lastEdited": "Last Edited",
-    "unsetThumb": "Unset Thumbnail"
+    "unsetThumb": "Unset Thumbnail",
+    "noLevels": "You haven't added any levels.",
+    "noRatings": "Some levels aren't rated.",
+    "noRatings2": "Some levels don't have all ratings filled in.",
+    "customRating": "Custom Ratings",
+    "consistency": "Consistency",
+    "music": "Song",
+    "sightreadability": "Sightreadability",
+    "originality": "Originality",
+    "sync": "Sync",
+    "theming": "Theming"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

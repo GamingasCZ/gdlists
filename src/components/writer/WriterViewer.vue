@@ -93,7 +93,7 @@ onUnmounted(() => {
         'readabilityMode': writerData.readerMode,
         'bg-transparent my-16 border-none shadow-none': zenMode,
         'shadow-drop bg-lof-200 shadow-black': writerData.transparentPage == 0 || SETTINGS.disableTL,
-        'shadow-drop backdrop-blur-md backdrop-brightness-[0.3]': writerData.transparentPage == 2 && !SETTINGS.disableTL,
+        'backdrop-blur-md backdrop-brightness-[0.3]': writerData.transparentPage == 2 && !SETTINGS.disableTL,
         '!backdrop-brightness-[0.7]': writerData.whitePage && writerData.transparentPage == 2 && !SETTINGS.disableTL
         }"
     >

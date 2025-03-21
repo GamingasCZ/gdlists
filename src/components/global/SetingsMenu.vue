@@ -3,7 +3,6 @@ import { defineAsyncComponent, ref, watch } from "vue";
 import LoginButton from "./LoginButton.vue";
 import cookier from "cookier";
 import { SETTINGS } from "@/siteSettings";
-import { setLanguage } from "@/locales";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
 import axios from "axios";
@@ -78,23 +77,23 @@ const currLang = SETTINGS.value.language
   class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
   >
 
-  <Teleport to="#app">
-    <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
-      <Sett />
-    </Dialog>
-
-    <Dialog v-if="dialogs.help" :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
-      <Help />
-    </Dialog>
-
-    <Dialog v-if="dialogs.avatar" :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
-      <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
-    </Dialog>
-
-    <Dialog v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
-      <Gallery unselectable />
-    </Dialog>
-  </Teleport>
+    <Teleport to="body">
+      <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
+        <Sett />
+      </Dialog>
+  
+      <Dialog v-if="dialogs.help" :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
+        <Help />
+      </Dialog>
+  
+      <Dialog v-if="dialogs.avatar" :open="dialogs.avatar" @close-popup="dialogs.avatar = false" :width="dialog.large" :title="$t('settingsMenu.pfp')">
+        <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
+      </Dialog>
+  
+      <Dialog v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+        <Gallery unselectable />
+      </Dialog>
+    </Teleport>
 
     <Transition name="fadeSlide">
       <Teleport to="body">

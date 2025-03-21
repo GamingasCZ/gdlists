@@ -464,6 +464,7 @@ const jumpSearch = ref("")
 const modPreview = (clickedImageID: number) => {
   imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
 }
+
 provide("imagePreviewFullscreen", modPreview)
 const imagesArray = computed(() => {
   let allImages: ReviewContainer[] = []
@@ -473,8 +474,9 @@ const imagesArray = computed(() => {
       x.screenshots.forEach(y => allImages.push(y[1]))
     }
   })
-  console.log(allImages)
 
+  if (!data) return allImages
+  
   data.forEach(con => {
     if (con.type == "showImage") allImages.push(con)
     if (con.type == "twoColumns") {
@@ -493,8 +495,17 @@ const imagesArray = computed(() => {
 })
 const imageIndex = ref(-1)
 
-const levelImageFullscreen = (imgIndex: number) => {
-  imageIndex.value = imgIndex
+const viewingLevelScreenshot = ref(false)
+const levelImageFullscreen = (imgIndex: number, levelIndex: number) => {
+  let offset = 0
+  for (let i = 0; i < levelIndex; i++) {
+    let screenshots = LIST_DATA.value.data.levels[i].screenshots
+    if (screenshots)
+      offset += screenshots.length
+  }
+
+  imageIndex.value = offset+imgIndex
+  viewingLevelScreenshot.value = true
 }
 
 </script>
@@ -515,7 +526,14 @@ const levelImageFullscreen = (imgIndex: number) => {
   </DialogVue>
 
   <Transition name="fade">
-    <ImageViewer :images-array="imagesArray" v-model="imageIndex" @close-popup="imageIndex = -1" v-if="imageIndex !== -1" />
+    <ImageViewer
+      v-if="imageIndex !== -1"
+      @close-popup="imageIndex = -1; viewingLevelScreenshot = false"
+      :images-array="viewingLevelScreenshot ? undefined : imagesArray"
+      :hash-array="imagesArray"
+      :uid="LIST_CREATORDATA?.discord_id"
+      v-model="imageIndex"
+    />
   </Transition>
 
   <!-- Mobile options popup -->
@@ -617,7 +635,9 @@ const levelImageFullscreen = (imgIndex: number) => {
       <!-- List -->
       <div ref="postContent" v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
         <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
-          <component :is="[LevelCard, LevelCardCompact, LevelCardTable][cardGuessing == -1 ? SETTINGS.levelViewMode : 0]" v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+          <component
+            v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+            :is="[LevelCard, LevelCardCompact, LevelCardTable][cardGuessing == -1 ? SETTINGS.levelViewMode : 0]"
             class="levelCard"
             :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
             v-bind="level"
@@ -635,7 +655,7 @@ const levelImageFullscreen = (imgIndex: number) => {
             @open-tags="tagViewerOpened = $event"
             @open-collab="openCollabTools"
             @error="listErrorLoading = true"
-            @fullscreen-image="levelImageFullscreen"
+            @fullscreen-image="levelImageFullscreen($event, index)"
           />      
         </LevelCardTableTable>
       </div>

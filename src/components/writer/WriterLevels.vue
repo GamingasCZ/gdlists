@@ -198,7 +198,7 @@ const isSearching = ref(false)
                 </div>
                 <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
-                <div v-show="!rouletteActive" v-for="(level, index) in POST_DATA.levels">
+                <template v-show="!rouletteActive" v-for="(level, index) in POST_DATA.levels">
                     <EditorCardHeader v-if="openedCard != index || disabled"
                         @do-move="moveLevel"
                         @update-opened-card="!isSearching && (openedCard = index)"
@@ -217,7 +217,7 @@ const isSearching = ref(false)
                         :data="level"
                         :index="index"
                     />
-                </div>
+                </template>
             </div>
             <div class="flex relative gap-2 justify-center items-center max-sm:justify-end">
 
