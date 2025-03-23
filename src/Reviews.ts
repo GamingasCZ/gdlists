@@ -1,4 +1,4 @@
-import { type Ref, ref } from "vue"
+import { type Ref, ref, warn } from "vue"
 import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
 import type { FavoritedLevel, Level, LevelList, PostData, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
@@ -77,7 +77,7 @@ const funnyErrorMessages = [
 
 let uploadTries = 0
 export function checkReview(post: ReviewList) {
-    const err = (err: string) => {
+    const err = (err: string, warn: number[]) => {
         let fancyErr = err
         switch (uploadTries) {
             case 1:
@@ -90,9 +90,9 @@ export function checkReview(post: ReviewList) {
         }
 
         uploadTries = (uploadTries + 1) % 5 // TODO
-        return { success: false, error: err }
+        return { success: false, error: err, warn: warn }
     }
-    let error = { success: true, mess: '' }
+    let error = { success: true, mess: '', warn: [0, 0, 0] }
     if (!post.containers.length) return err(i18n.global.t('reviews.bro'))
     if (post.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
     if (post.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
@@ -104,13 +104,22 @@ export function checkReview(post: ReviewList) {
         }
     })
 
+    if (post.levels.length == 0)
+        error.warn[0] = 1
+
     let i = 0
     post.levels.forEach(level => {
         i += 1
         if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
-        if (level.ratings?.[0].concat(level.ratings[1]).includes(-1) && !post.disabledRatings) error.mess = i18n.global.t('reviews.notRatedYet', [i])
+
+        let allRatings = level.ratings?.[0].concat(level.ratings[1])
+        if (allRatings.filter(x => x == -1).length == allRatings.length)
+            error.warn[1] = 1
+
+        else if (allRatings.includes(-1))
+            error.warn[2] = 1
         
         if (error.mess) error.success = false
     })
@@ -147,10 +156,10 @@ export function checkReview(post: ReviewList) {
             });
         });
     })
-    if (!error.success) return err(error.mess)
+    if (!error.success) return err(error.mess, error.warn)
 
     uploadTries = 0
-    return { success: true, error: '' }
+    return { success: true, error: '', warn: error.warn }
 }
 
 export const selectedNestContainer = ref(0)

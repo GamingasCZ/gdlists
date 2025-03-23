@@ -157,7 +157,7 @@ export interface Writer {
          * @param {Object} postObject The post
          * @returns {Object} success - s
          */
-        clientPostValidation: (postObject: PostData) => {success: boolean, error: string}
+        clientPostValidation: (postObject: PostData) => {success: boolean, error: string, warn: number[]}
     },
     settings: {[setting: string]: (Setting & {affects: PostKeys}) | string},
     toolbar: {

@@ -781,7 +781,14 @@
     "music": "Hudba",
     "consistency": "Konzistence",
     "sightreadability": "Sightreadovatelnost",
-    "originality": "Originalita"
+    "originality": "Originalita",
+    "draftFailLoad": "Nepodařilo se načíst koncept!",
+    "sugg1": "Pole pro psaní",
+    "sugg2": "Showcase levelu",
+    "sugg3": "Výstava hodnocení",
+    "reviewIntro": "Vítej v editoru recenzí!",
+    "howStart": "Jak bys rád začal?",
+    "cRatingHelp": "Můžeš si vytvořit další čtyři vlasní hodnocení. Tyto hodnocení se nezapočítávají do globálních statistik."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

@@ -32,8 +32,8 @@ watch(props, () => {
 })
 
 const available = computed(() => postData?.[0].length)
-const getCol = (col: number[]) => {
-    return chroma.hsl(...col).css()
+const getCol = (col: number[], darken = 0) => {
+    return chroma.hsl(...col).darken(darken).css()
 }
 
 const allRatings = computed(() => DEFAULT_RATINGS.concat(postData[1]))
@@ -44,6 +44,15 @@ const errMessage = computed(() => {
     if (!postData?.[0].length) return i18n.global.t('reviews.noLevelsYet')
 })
 const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
+
+const base = import.meta.env.BASE_URL
+const toShow = computed(() => levelRatings.value[Math.floor(props.settings.show / 4)][props.settings.show % 4])
+const rateBG = computed(() => {
+    if (toShow.value == -1) return "noRating"
+    else if (toShow.value < 4) return "sad"
+    else if (toShow.value > 7) return "nice"
+    else return "mid"
+})
 </script>
 
 <template>
@@ -65,10 +74,11 @@ const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
         <div v-if="settings.show != -1" class="w-[40rem] max-w-full">
             <div class="grid grid-cols-2 grid-rows-2 w-full text-left">
                 <span class="text-2xl">{{ allRatings[settings.show].name || $t('other.unnamesd') }}</span>
-                <span v-if="levelRatings[Math.floor(settings.show / 4)][settings.show % 4] > -1" class="w-full text-4xl font-bold text-right">{{ levelRatings[Math.floor(settings.show / 4)][settings.show % 4] }}/10</span>
+                <span v-if="toShow > -1" class="w-full text-4xl font-bold text-right">{{ toShow }}/10</span>
                 <span v-else class="w-full text-4xl font-bold text-right text-red-600">!</span>
                 <div class="relative col-span-2 h-6 overflow-clip bg-black bg-opacity-40 rounded-md">
-                    <div :style="{width: `${levelRatings[Math.floor(settings.show / 4)][settings.show % 4]*10}%`, backgroundColor: getCol(allRatings[settings.show].color)}" class="absolute inset-0 h-full transition-[width_0.3s]"></div>
+                    <div :style="{width: `${toShow*10}%`, background: `linear-gradient(180deg, ${getCol(allRatings[settings.show].color)}, ${getCol(allRatings[settings.show].color, 1)})`}" class="absolute inset-0 h-full"></div>
+                    <div :style="{width: `${toShow*10}%`, background: `url(${base}/rateBGs/${rateBG}.webp)`, backgroundSize: '6rem', animation: 'scroll 10s infinite linear'}" class="absolute inset-0 z-10 h-full mix-blend-soft-light"></div>
                 </div>
             </div>
         </div>
@@ -81,7 +91,7 @@ const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
                     <span v-if="rating > -1" class="text-xl font-bold text-right">{{ rating }}/10</span>
                     <span v-else class="w-full text-2xl font-bold text-right text-red-600">!</span>
                     <div class="relative col-span-2 h-2 overflow-clip bg-black bg-opacity-40 rounded-md">
-                        <div :style="{width: `${rating*10}%`, backgroundColor: getCol(allRatings[index].color)}" class="absolute inset-0 h-full transition-[width_0.3s]"></div>
+                        <div :style="{width: `${rating*10}%`, backgroundColor: getCol(allRatings[index].color)}" class="absolute inset-0 h-full"></div>
                     </div>
                 </div>
             </div>

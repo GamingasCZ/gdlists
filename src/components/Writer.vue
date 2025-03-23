@@ -4,7 +4,7 @@ import DialogVue from "./global/Dialog.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
 import FormattingBar from "./writer/FormattingBar.vue"
-import CONTAINERS from "./writer/containers";
+import CONTAINERS, { type ContainerNames } from "./writer/containers";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
@@ -39,6 +39,7 @@ import { shortcutListen, shortcutUnload } from "@/writers/shortcuts";
 import ShortcutsPopup from "./writer/ShortcutsPopup.vue";
 import containers from "./writer/containers";
 import ZenModeHelp from "./writer/ZenModeHelp.vue";
+import { Limit } from "@/assets/limits";
 
 const props = defineProps<{
     type: number
@@ -194,7 +195,7 @@ const containerLastTextChange = ref(0)
 const setLastChange = () => containerLastTextChange.value = Date.now()
 provide("lastTextChange", setLastChange)
 
-const addContainer = (key: string, addTo?: number | number[], returnOnly = false, above = false) => {
+const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly = false, above = false) => {
     // Count of all components
     let contAm = 0
     let thisContAm = 0
@@ -216,7 +217,7 @@ const addContainer = (key: string, addTo?: number | number[], returnOnly = false
             return
         }
 
-        if (contAm >= 100) {
+        if (contAm >= Limit.MAX_REVIEWCONTAINERS) {
             errorStamp.value = Date.now()
             errorText.value = i18n.global.t('reviews.tooManyContainers')
             return
@@ -481,11 +482,6 @@ const moveToParagraph = (currentContainerIndex: number) => {
         addContainer("default")
 }
 
-const startWriting = () => {
-    addContainer("heading1")
-    addContainer("default")
-}
-
 const moveContainer = (index: number, by: number) => {
     if (index+by < 0) return
     if (index+by >= POST_DATA.value.containers.length) return
@@ -527,8 +523,13 @@ const modifyImageURL = (newUrl: string) => {
         if (!POST_DATA.value.levels?.[openDialogs.imagePicker[2]]?.screenshots)
             POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots = []
 
+        if (POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots.length >= Limit.LEVEL_MAXSCREENSHOTS)
+            return
+
         if (typeof newUrl == 'string')
             newUrl = [newUrl]
+
+        newUrl = newUrl.slice(0, Limit.LEVEL_MAXSCREENSHOTS - POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots.length)
         newUrl.forEach(img => {
             POST_DATA.value.levels[openDialogs.imagePicker[2]].screenshots.push([
                 LevelImage.IMAGE,
@@ -547,7 +548,7 @@ const modifyImageURL = (newUrl: string) => {
             newUrl = [newUrl]
 
         let imgCurrAmount = POST_DATA.value.containers[openDialogs.carouselPicker[1]].settings.components.length
-        let maxImages = 25 - imgCurrAmount
+        let maxImages = Limit.CAROUSEL_MAXMEDIA - imgCurrAmount
         if (newUrl.length > maxImages)
             notifyError(ImgFail.CAROUSEL_FULL)
 
@@ -583,13 +584,14 @@ const checkForErrors = () => {
         errorStamp.value = Date.now()
         errorText.value = check?.error
     }
-    return check?.success
+    return check
 }
 
 const startUpload = () => {
-    if (!checkForErrors()) return
+    let check = checkForErrors()
+    if (!check.success) return
 
-    preUpload.value = true
+    preUpload.value = [true, check.warn]
     openDialogs.settings = true
 }
 
@@ -730,11 +732,16 @@ onUnmounted(() => {
     shortcutUnload()
 })
 
-const preUpload = ref(false)
+const preUpload = ref([false, [0, 0, 0]])
 
 const reviewSave = ref({ backupID: 0, lastSaved: 0 })
 const draftPopup = ref<HTMLDivElement>()
 const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
+    if (!draft) {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.draftFailLoad')
+    }
+
     if (draft.editing && !noEditCheck) {
         loadEditDraft = draft
         router.replace(`/edit/${WRITER.value.general.postType}/${draft.editing}`)
@@ -765,6 +772,11 @@ const disableEdits = ref(false)
 var outsideDrafts = false
 var previewID: string | null = null
 const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewingOutsideDrafts = false) => {
+    if (!previewData) {
+        errorStamp.value = Date.now()
+        errorText.value = i18n.global.t('reviews.draftFailLoad')
+    }
+
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = previewData
     previewID = previewIDSaved
@@ -863,7 +875,7 @@ const removeDraft = (key: number) => {
 }
 
 const burstTimer = ref(Date.now()) // makes "last saved" in footer less jarring
-setInterval(() => burstTimer.value = Date.now(), 10000)
+setInterval(() => burstTimer.value = Date.now(), Limit.SAVETIMER_TIMEOUT)
 const pretty = computed(() => prettyDate(Math.max(1, (burstTimer.value - reviewSave.value.lastSaved) / 1000)))
 
 const listPickerPick = (level: Level | Level[]) => {
@@ -909,6 +921,33 @@ const toggleZenMode = () => {
     }
 }
 
+const addPreset = (ind: number) => {
+    if (POST_DATA.value.containers.length > 0) return
+
+    switch (ind) {
+        case 0:
+            addContainer("heading1")
+            addContainer("default")
+            break;
+        case 1:
+            addContainer("showLevel")
+            addContainer("default")
+            nextTick(() => {
+                POST_DATA.value.containers[0].settings.pickedIndex = 0
+                POST_DATA.value.containers[0].align = "center"
+            })
+            break;
+        case 2:
+            addContainer("showRating")
+            addContainer("default")
+            nextTick(() => {
+                POST_DATA.value.containers[0].settings.show = 3
+                POST_DATA.value.containers[0].align = "center"
+            })
+            break;
+    }
+}
+
 </script>
 
 <template>
@@ -933,7 +972,7 @@ const toggleZenMode = () => {
         <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
             :list-color="POST_DATA.pageBGcolor" />
 
-        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload = false"
+        <DialogVue :open="openDialogs.settings" @close-popup="openDialogs.settings = false; preUpload[0] = false"
             :title="$t('other.settings')" :width="dialog.medium">
             <WriterSettings :uploading="preUpload" :writer="WRITER" @upload="uploadReview" />
             <DialogVue :open="openDialogs.description" @close-popup="openDialogs.description = false"
@@ -1000,10 +1039,6 @@ const toggleZenMode = () => {
         <DialogVue :open="openDialogs.zenHelp && !viewedPopups.zenModeHelp" :width="dialog.medium" header-disabled>
             <ZenModeHelp @close="openDialogs.zenHelp = false" />
         </DialogVue>
-
-        <!-- <Header :class="{ 'pointer-events-none opacity-20': disableEdits }" :editing="editing" :has-levels="hasLevels"
-            :has-unrated="hasUnrated" :uploading="uploadInProgress" @update="updateReview"
-            @remove="openDialogs.removeDialog = true" @upload="startUpload" @open-dialog="openDialogs[$event] = true" /> -->
 
         <section class="max-w-[90rem] flex flex-col gap-y-16 mx-auto">
             <!-- Hero -->
@@ -1096,13 +1131,14 @@ const toggleZenMode = () => {
                     <component
                         :is="WRITER.general.writerHelp"
                         v-if="!POST_DATA.containers.length"
-                        @start-writing="startWriting"
                         
                         @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
                         @load-draft="loadDraft(drafts[$event])"
+                        @preset="addPreset"
 
                         :inverted="POST_DATA.whitePage"
                         :writer="WRITER"
+                        :post="POST_DATA"
                         :drafts="drafts"
                     />
                 </template>

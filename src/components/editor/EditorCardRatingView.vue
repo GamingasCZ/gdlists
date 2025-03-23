@@ -18,14 +18,23 @@ const emit = defineEmits<{
     (e: "close"): void
 }>()
 
-const SUGGESTIONS = [
+const SUGGESTIONS = computed(() => {
+  let suggs = [
     i18n.global.t('reviews.theming'),
     i18n.global.t('reviews.sync'),
     i18n.global.t('reviews.music'),
     i18n.global.t('reviews.consistency'),
     i18n.global.t('reviews.sightreadability'),
     i18n.global.t('reviews.originality')
-]
+  ]
+
+  props.postData.ratings.forEach(x => {
+    let used = suggs.indexOf(x.name)
+    if (used != -1) suggs.splice(used, 1)
+  })
+
+  return suggs
+})
 
 const selectedDefRate = ref(0)
 
@@ -89,6 +98,7 @@ const reorderedDefaultRatings = [
   DEFAULT_RATINGS[1],
   DEFAULT_RATINGS[2]
 ]
+const rInd = [3, 0, 1, 2]
 
 const rateCol = computed(() => chroma.hsl(...reorderedDefaultRatings[selectedDefRate.value].color))
 
@@ -110,11 +120,11 @@ const rateCol = computed(() => chroma.hsl(...reorderedDefaultRatings[selectedDef
         <div class="flex flex-wrap gap-2">
           <button
             v-for="(rating, i) in reorderedDefaultRatings"
-            @click="selectedDefRate = i"
+            @click="selectedDefRate = rInd[i]"
             :style="{
-              background: selectedDefRate == i ? rateCol.darken(2).css() : '#00000066',
-              borderColor: selectedDefRate == i ? rateCol.css() : '#000',
-              boxShadow: `0px 0px 16px ${selectedDefRate == i ? rateCol.css() : '#000'}`,
+              background: selectedDefRate == rInd[i] ? rateCol.darken(2).css() : '#00000066',
+              borderColor: selectedDefRate == rInd[i] ? rateCol.css() : '#000',
+              boxShadow: `0px 0px 16px ${selectedDefRate == rInd[1] ? rateCol.css() : '#000'}`,
             }"
             class="relative p-2 overflow-clip rounded-md border-2 max-sm:grow button"
           >
@@ -152,6 +162,9 @@ const rateCol = computed(() => chroma.hsl(...reorderedDefaultRatings[selectedDef
                 <img src="@/images/genericRate.svg" class="w-2 rotate-180" alt="">
               </button>
         </div>
+
+        <p class="my-3 text-sm text-center opacity-20 mix-blend-plus-lighter" v-if="!postData.ratings.length">{{ $t('reviews.cRatingHelp') }}</p>
+
         <RatingPicker
           v-for="(rating, i) in postData.ratings"
           :key="rating.color"

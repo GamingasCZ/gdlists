@@ -162,8 +162,19 @@ const textCol = computed(() => {
       <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
       <!-- Screenshots -->
-      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-4 w-full">
-        <img v-for="(img, ind) in screenshots" @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="max-h-36 rounded-md inter shadow-drop" alt="">
+      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 w-full">
+        <template v-for="(img, ind) in screenshots">
+          <iframe
+                height="144" width="255"
+                :src="`https://www.youtube-nocookie.com/embed/${img[1]}`"
+                title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                class="rounded-md"
+                >
+            </iframe>
+          <img  @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="max-h-36 rounded-md inter shadow-drop" alt="">
+        </template>
       </section>
 
       <!-- Level Tags -->
