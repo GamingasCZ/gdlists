@@ -100,7 +100,7 @@ const hasPlatTag = (() => {
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
   >
-    <CardTheme v-if="BGimage" v-bind="BGimage" />
+    <CardTheme v-if="BGimage" v-bind="BGimage" :uid="uploaderUid"/>
 
     <Transition name="fade">
       <div v-if="guessResult[0] > -1" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[min(30vw,60rem)] justify-center items-center -z-10 opacity-40 mix-blend-luminosity">
