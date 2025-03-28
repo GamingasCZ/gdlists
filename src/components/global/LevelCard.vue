@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Level } from "@/interfaces";
+import { LevelImage, type Level } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
@@ -10,6 +10,8 @@ import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 import CardTheme from "../levelViewer/CardTheme.vue";
 import { computed } from "vue";
+import { TagName } from "@/assets/tags";
+import EditorCardCommentary from "../editor/EditorCardCommentary.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -74,9 +76,17 @@ onErrorCaptured(() => {
 
 const listData = inject("levelsRatingsData")()
 const userContent = import.meta.env.VITE_USERCONTENT
+
+const isBlackText = computed(() => CARD_COL.value.luminance() > 0.5)
 const textCol = computed(() => {
-  return CARD_COL.value.luminance() > 0.5 ? 'black' : 'white'
+  return isBlackText.value ? 'black' : 'white'
 })
+
+const hasPlatTag = (() => {
+  if (props.tags)
+    return props.tags.find(x => x[0] == TagName.PLATFORMER) !== undefined
+  return false
+})()
 
 </script>
 
@@ -116,7 +126,7 @@ const textCol = computed(() => {
           <div :class="{'ml-2': !guessingNow}">
             <!-- Level name -->
             <h2 class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
-              <h4 class="absolute -top-4 text-sm" v-if="platf">Platformer</h4>
+              <h4 class="absolute -top-4 text-sm" v-if="platf || hasPlatTag">Platformer</h4>
               <component :is="isEmbed ? 'RouterLink' : 'span'" :to="'/'+listID" :class="{'underline cursor-pointer': isEmbed}">{{ levelName || $t('other.unnamesd') }}</component>
             </h2>
   
@@ -159,41 +169,50 @@ const textCol = computed(() => {
     <div class="flex flex-col gap-3 mt-2">
 
       <!-- Collab -->
-      <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
+      <CollabPreview v-if="typeof creator == 'object'" :collab="creator" :white="isBlackText" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
-      <!-- Screenshots -->
-      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 w-full">
-        <template v-for="(img, ind) in screenshots">
-          <iframe
-                height="144" width="255"
-                :src="`https://www.youtube-nocookie.com/embed/${img[1]}`"
-                title="YouTube video player" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-                class="rounded-md"
-                >
-            </iframe>
-          <img  @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="max-h-36 rounded-md inter shadow-drop" alt="">
+      <!-- Level review ratings -->
+      <div v-if="ratings && !hideRatings" class="flex z-10 flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md empty:hidden">
+        <template v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])">
+          <div
+            :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}"
+            class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle"
+            v-if="listData[0][levelIndex]?.ratings?.[Math.floor(index / 4)]?.[index % 4] > -1"
+          >
+            <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
+            <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
+            
+            <span class="text-2xl font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          </div>
         </template>
+      </div>
+      <EditorCardCommentary v-if="commentary" :editable="false" :uid="uploaderUid" :dark="isBlackText" :text="commentary" />
+
+      <!-- Screenshots -->
+      <h2 v-if="scShotSecName && screenshots?.length" class="mt-3 text-2xl font-bold leading-none">{{ scShotSecName }}</h2>
+      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 w-full">
+        <figure v-for="(img, ind) in screenshots" class="flex flex-col">
+          <iframe
+              v-if="img[0] == LevelImage.VIDEO"
+              height="144" width="255"
+              :src="`https://www.youtube-nocookie.com/embed/${img[1]}`"
+              title="YouTube video player" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              class="rounded-md"
+              >
+          </iframe>
+          <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="object-cover object-center max-h-36 rounded-md aspect-video inter shadow-drop" alt="">
+          <figcaption class="text-center text-inherit">{{ img[2] }}</figcaption>
+        </figure>
       </section>
 
       <!-- Level Tags -->
       <section class="flex z-10 flex-wrap gap-2">
-        <Tag v-for="tag in tags" :tag="tag" />
+        <Tag v-for="tag in tags" :tag="tag" :white="isBlackText" />
       </section>
   
       <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
-      
-      <!-- Level review ratings -->
-      <div v-if="ratings && !hideRatings" class="flex z-10 flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
-        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
-          <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-          <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
-          
-          <span v-if="listData[0][levelIndex]?.ratings?.[Math.floor(index / 4)]?.[index % 4] > -1" class="text-2xl font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
-          <span v-else class="text-3xl font-black text-red-600">!</span>
-        </div>
-      </div>
     </div>
 
   </section>

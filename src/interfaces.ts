@@ -203,12 +203,15 @@ export interface Level {
   ratings?: [number[], number[]]
   BGimage?: LevelBackground
   screenshots?: LevelScreenshot[]
+  scShotSecName: string
+  commentary: string
 }
 
 export enum LevelImage {
-  IMAGE,
-  VIDEO,
-  THUMBNAIL
+  IMAGE = 1,
+  VIDEO = 2,
+  THUMBNAIL = 4,
+  OLD_VIDEO = 8,
 }
 
 export interface ListBackground {

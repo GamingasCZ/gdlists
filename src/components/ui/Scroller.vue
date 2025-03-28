@@ -12,41 +12,36 @@ const props = defineProps<{
 const width = 2
 
 const value = defineModel("value", {default: 5})
-const scrolling = ref(false)
 
-const scrollerPerc = ref(value.value == -1 ? 50 :parseInt(value.value/props.max*100))
+const scrollerPerc = ref(value.value == -1 ? 50 : Math.max(width*2, parseInt(value.value/props.max*100)))
+const updateScrollPerc = (val: number) => Math.max(width*2, Math.min(val*100, 100))
+
 const main = ref<HTMLDivElement>()
 const setValue = (e: MouseEvent | TouchEvent) => {
-    // if (!scrolling.value) return
-    
     let val: number
     let pos = main.value?.getBoundingClientRect()
     if (e.type == "touchmove")
-        val = (e.touches?.[0].screenX - pos.x + width*2) / (main.value?.clientWidth - width)
+       val = (e.touches?.[0].screenX - pos.x + width*2) / (main.value?.clientWidth - width)
     else
        val = (e.x - pos.x + width*2) / (main.value?.clientWidth - width)
 
-    let vx100 = val*100
-    let step = vx100 % props.step
-    scrollerPerc.value = Math.max(width*2, Math.min(vx100 - step, 100))
-    value.value = Math.round(Math.max(props.min, Math.min(val * props.max - step, props.max))*10)/10
+    scrollerPerc.value = updateScrollPerc(val)
+    value.value = Math.ceil(Math.max(props.min, Math.min(val * props.max, props.max))*10)/10
 }
 
 const endScroll = () => {
-    scrolling.value = false
     document.removeEventListener("mousemove", setValue)
 }
 const startScroll = () => {
-    scrolling.value = true
     document.addEventListener("mousemove", setValue)
     document.addEventListener("touchmove", setValue)
     document.addEventListener("mouseup", endScroll, {once: true})
 }
 
-const addStep = () => value.value = (value.value*10 + props.step*10)/10
-const subStep = () => value.value = (value.value*10 - props.step*10)/10
-
-const base = import.meta.env.BASE_URL
+const addStep = (by: number) => {
+    value.value = Math.max(props.min, Math.min((value.value*10 + by*props.step*10)/10, props.max))
+    scrollerPerc.value = updateScrollPerc(value.value/10)
+}
 
 </script>
 
@@ -62,8 +57,8 @@ const base = import.meta.env.BASE_URL
             @mousedown="startScroll"
             @touchstart="startScroll"
             @touchend="endScroll"
-            @keydown.left="subStep"
-            @keydown.right="addStep"
+            @keydown.left="addStep(-1)"
+            @keydown.right="addStep(1)"
             class="bg-white rounded-full scale-y-110 group-active:scale-100 touch-pan-x"
         ></button>
     </div>

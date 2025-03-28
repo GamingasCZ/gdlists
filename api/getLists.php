@@ -65,25 +65,28 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
         $ind += 1;
       }
 
-      if ($review) {
-        $idqm = makeIN($allIDs);
-        $reviewDetails = doRequest($mysqli, sprintf("SELECT
-                                            reviewID,
-                                            count(reviewID) AS level_count,
-                                            ifnull(avg(gameplay), 1) AS gameplay,
-                                            avg(decoration) AS decoration,
-                                            avg(difficulty) AS difficulty,
-                                            avg(overall) AS overall
-                                            FROM levels_ratings
-                                            WHERE reviewID IN %s
-                                            GROUP BY reviewID", $idqm[0]), $allIDs, $idqm[1], true);
-      }
-
-      $qqm = makeIN($uid_array);
+      $unique = array_values(array_unique($uid_array));
+      $qqm = makeIN($unique);
       $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
                         FROM users
                         LEFT JOIN profiles ON users.discord_id = profiles.uid
-                        WHERE discord_id IN %s", $qqm[0]), $uid_array, $qqm[1], true);
+                        WHERE discord_id IN %s", $qqm[0]), $unique, $qqm[1], true);
+    }
+
+    if (sizeof($allIDs)) {
+      $idqm = makeIN($allIDs);
+      $rev = $review ? "reviewID" : "listRatingID";
+      $reviewDetails = doRequest($mysqli, sprintf("SELECT
+                                          %s,
+                                          count(%s) AS level_count,
+                                          ifnull(avg(gameplay), 1) AS gameplay,
+                                          avg(decoration) AS decoration,
+                                          avg(difficulty) AS difficulty,
+                                          avg(overall) AS overall
+                                          FROM levels_ratings
+                                          WHERE %s IN %s
+                                          GROUP BY %s", $rev, $rev, $rev, $idqm[0], $rev), $allIDs, $idqm[1], true);
+      // print_r($rev);
     }
 
     $dbInfo["maxPage"] = $maxpage;
@@ -127,7 +130,7 @@ function getHomepage($lists, $reviews, $user) {
       FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY lists.id DESC LIMIT 3", $selRange, $listRatings), [], "", true);
+      ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings), [], "", true);
   
     $home["lists"] = parseResult($res, false, -1, "", 0, false);
   }
@@ -136,7 +139,7 @@ function getHomepage($lists, $reviews, $user) {
       FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY reviews.id DESC LIMIT 3", $selReviewRange, $reviewRatings), [], "", true);
+      ORDER BY reviews.id DESC LIMIT 4", $selReviewRange, $reviewRatings), [], "", true);
     
     $home["reviews"] = parseResult($res, false, -1, "", 0, true);
   }
@@ -147,7 +150,7 @@ function getHomepage($lists, $reviews, $user) {
         FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
         WHERE lists.uid=%s AND `hidden` LIKE 0
         GROUP BY lists.name
-        ORDER BY lists.id DESC LIMIT 3", $selRange, $listRatings, $account), [], "", true);
+        ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings, $account), [], "", true);
   
       $home["user"] = parseResult($res);
     }

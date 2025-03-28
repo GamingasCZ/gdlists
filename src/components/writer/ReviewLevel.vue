@@ -4,6 +4,7 @@ import LevelCard from '../global/LevelCard.vue';
 import ContainerHelp from "./ContainerHelp.vue";
 import type { Level, PostData, ReviewRating } from '@/interfaces';
 import { type cShowLevel } from './containers';
+import { currentUID } from '@/Editor';
 
 const emit = defineEmits<{
     (e: 'openSettings'): void
@@ -26,6 +27,7 @@ watch(props, () => {
 })
 
 const postData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
+const doFullscreen = inject<() => void>("fullscreenLevel", () => {})
 const levelHashes = inject("levelHashes", 0)!
 let indPicked = ref(0)
 
@@ -44,7 +46,7 @@ let indPicked = ref(0)
     </ContainerHelp>
     
     <figure class="flex flex-col p-2 w-full" style="justify-content: inherit" v-else>
-        <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" hide-ratings v-bind="postData[0][settings.pickedIndex]" :disable-stars="true"/>
+        <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" hide-ratings v-bind="postData[0][settings.pickedIndex]" :disable-stars="true" :uploader-uid="currentUID" @fullscreen-image="doFullscreen" />
         <figcaption class="text-[90%] text-inherit mt-1">{{ settings.description }}</figcaption>
     </figure>
 </template>

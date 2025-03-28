@@ -24,12 +24,13 @@ onBeforeUnmount(() => popper.destroy())
 
 <template>
     <Teleport to="body">
-        <div ref="dropdown" role="tooltip" class="z-50" data-popper-placement>
+        <div ref="dropdown" role="tooltip" class="flex z-50 gap-2 items-center bg-lof-200" data-popper-placement>
             <div
-            class="p-2 text-sm text-white rounded-md shadow-drop max-w-52 bg-lof-200" id="tooltip">
+            class="p-2 text-sm text-white rounded-md shadow-drop" id="tooltip">
                 <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
                 <p>{{ text }}</p>
             </div>
+            <slot name="after" />
         </div>
     </Teleport>
 </template>

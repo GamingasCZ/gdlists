@@ -115,7 +115,9 @@
     "tagl1": "These creators have truly peaked!",
     "translHelp": "Level cards in the list will be translucent.",
     "thumbStyle": "Thumbnail Style",
-    "lastUsed": "Last Used"
+    "lastUsed": "Last Used",
+    "commPlaceholder": "Feel free to provide a short comment on the level...",
+    "noDuplicates": "You cannot have multiples of the same level!"
   },
   "homepage": {
     "clear": "Clear",
@@ -432,7 +434,10 @@
     "previous": "Previous",
     "reset": "Reset",
     "auto": "Automatic",
-    "toTop": "Scroll to Start"
+    "toTop": "Scroll to Start",
+    "homepage": "Homepage",
+    "title": "Name",
+    "loginFuckup": "Session is not valid!"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -786,7 +791,8 @@
     "sugg1": "Titled Paragraph",
     "reviewIntro": "Welcome to the Review Writer!",
     "howStart": "How would you like to start?",
-    "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics."
+    "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics.",
+    "sectionName": "Section Name"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

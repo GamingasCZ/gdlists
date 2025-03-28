@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import Dropdown from "../ui/Dropdown.vue";
 import { nextTick } from "vue";
 import { i18n } from "@/locales";
+import { Limit } from "@/assets/limits";
 
 const props = defineProps<{
   tag: LevelTag;
@@ -26,31 +27,74 @@ const editingLink = ref(false)
 
 const contentDiv = ref<HTMLDivElement>()
 
+const getName = () => [-1, ''].includes(props.tag[1]) ? i18n.global.t(`editor.tags[${props.tag[0]}]`) : props.tag[1]
+
+const moveCaretToEnd = () => {
+  let sel = window.getSelection()!
+  if (sel.type != 'Caret') return
+  
+  let range = document.createRange()
+  range.setStart(sel.focusNode, sel.focusNode?.childNodes.length)
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
 const openSettings = () => {
-  if (props.settable) {
+  if (props.settable && !tagSettingsOpen.value) {
     tagSettingsOpen.value = true
-    nextTick(() => contentDiv.value?.focus())
+    nextTick(() => {
+      contentDiv.value?.focus()
+      contentDiv.value.textContent = getName()
+      moveCaretToEnd()
+    })
   }
 }
 
-const modTagName = (to: string) => {
+const modTagName = (to: string, close = true) => {
   if (tagInputEmpty.value) return
 
-  if (editingLink.value)
+  if (!editingLink.value)
     props.tag[1] = to
-  else
-    props.tag[2] = to
+  else {
+    try {
+      let isUrl = new URL(to)
+      props.tag[2] = to
+    }
+    catch (_) {}
+  }
 
-  tagSettingsOpen.value = false
+  if (close) {
+    tagSettingsOpen.value = false
+    editingLink.value = false
+  }
 }
 
 const editLink = () => {
+  modTagName(contentDiv.value?.textContent, false)
+  
   editingLink.value = !editingLink.value
-  contentDiv.value.textContent = editingLink.value ? (props.tag[1] == -1 ? i18n.global.t(`editor.tags[${props.tag[0]}]`) : props.tag[1]) : props.tag[2]
+  contentDiv.value.textContent = editingLink.value ? props.tag[2] : getName()
+  contentDiv.value?.focus()
+  moveCaretToEnd()
+  
+  tagInputEmpty.value = contentDiv.value.textContent.length == 0
 }
 
 const tagInputEmpty = ref(false)
-const placeholderText = computed(() => `'${tagInputEmpty.value ? (editingLink.value ? i18n.global.t('other.link') : 'Název') : ''}')`)
+const placeholderText = computed(() => `'${tagInputEmpty.value ? (editingLink.value ? i18n.global.t('other.link') : i18n.global.t('other.title')) : ''}'`)
+
+const handleInput = (e: InputEvent) => {
+  nextTick(() => {
+    let len = e.target.textContent.length
+    let maxlen = editingLink.value ? Limit.MAX_TAG_LINKLEN : Limit.MAX_TAG_TEXTLEN
+
+    if (len > maxlen) {
+      e.target.textContent = e.target.textContent.slice(0, maxlen)
+      moveCaretToEnd()
+    }
+    tagInputEmpty.value = len == 0
+  })
+}
 
 </script>
 
@@ -61,7 +105,7 @@ const placeholderText = computed(() => `'${tagInputEmpty.value ? (editingLink.va
     <div class="inline relative align-middle">
       <img
         :src="`${base}/tags/${tag[0]}.svg`"
-        class="w-3 sm:w-6"
+        class="w-6"
         alt=""
       />
       <img
@@ -73,13 +117,12 @@ const placeholderText = computed(() => `'${tagInputEmpty.value ? (editingLink.va
     </div>
 
     <div v-if="tagSettingsOpen" class="flex">
-      <div contenteditable="true" ref="contentDiv" @keyup="tagInputEmpty = $event.target.textContent.length == 0" @keydown.enter.prevent="$nextTick(() => modTagName($event.target.textContent))" class="mr-2 outline-none tagEditName min-w-8 focus-within:border-b-2">
-        <span class="text-white text-opacity-40">{{ }}</span>
-        {{ [-1, ''].includes(tag[1]) ? $t(`editor.tags[${tag[0]}]`) : tag[1] }}
+      <div contenteditable="true" ref="contentDiv" @input="handleInput" @keydown.enter.prevent="$nextTick(() => modTagName(contentDiv?.textContent))" class="mr-2 outline-none tagTextInput tagEditName min-w-8 focus-within:border-b-2">
+        
       </div>
 
-      <button @click="editLink" class="mx-1 button"><img src="@/images/link.svg" class="w-4" alt=""></button>
-      <button :disabled="tagInputEmpty" @class="modTagName(contentDiv?.textContent)" class="mx-1 disabled:opacity-20 button"><img src="@/images/checkThick.svg" class="w-4" alt=""></button>
+      <button @click.stop="editLink" class="mx-1 button" :class="{'invert-[0.4] sepia': editingLink}"><img src="@/images/link.svg" class="w-4" alt=""></button>
+      <button :disabled="tagInputEmpty" @click.stop="modTagName(contentDiv?.textContent)" class="mx-1 disabled:opacity-20 button"><img src="@/images/checkThick.svg" class="w-4" alt=""></button>
     </div>
     <div v-else>
       <a
@@ -96,25 +139,13 @@ const placeholderText = computed(() => `'${tagInputEmpty.value ? (editingLink.va
       <img src="@/images/plus.svg" class="w-3" alt="">
     </button>
   </div>
-
-  <!-- <Dropdown v-if="tagSettingsOpen" @close="tagSettingsOpen = false" :button="tagDiv">
-    <template #header>
-      <section class="flex flex-col p-2 text-white">
-        <label for="tagName" class="text-xl">Název tagu</label>
-        <input type="text" name="tagName" class="px-2 py-1 bg-black bg-opacity-40 rounded-md">
-        
-        <label for="tagName" class="mt-3 text-xl">Odkaz</label>
-        <input type="text" name="tagName" class="px-2 py-1 bg-black bg-opacity-40 rounded-md">
-      </section>
-    </template>
-  </Dropdown> -->
 </template>
 
 <style>
 
 .tagEditName::before {
   content: v-bind(placeholderText);
-  @apply text-white text-opacity-40;
+  @apply text-white absolute w-max text-opacity-40;
 }
 
 </style>

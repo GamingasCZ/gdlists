@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { createPopper } from '@popperjs/core';
-import { onMounted, ref } from 'vue';
+import { createPopper, type Instance } from '@popperjs/core';
+import { onMounted, onUnmounted, ref } from 'vue';
 import EditorTag from './EditorTag.vue';
 import { lastUsedTags } from '@/Editor';
 
@@ -16,17 +16,26 @@ const emit = defineEmits<{
 
 const dropdown = ref<HTMLDivElement>()
 
+var popper: Instance
 onMounted(() => {
-    createPopper(props.tagbox, dropdown.value, {
+    popper = createPopper(props.tagbox, dropdown.value, {
         placement: 'bottom',
         modifiers: [{name: 'flip', enabled: false}]
     })
 })
 
+const updateDropdown = () => {if (popper) popper.forceUpdate()}
 
 const addTag = (ind: number) => {
     emit('add', ind)
+    
 }
+
+onUnmounted(() => popper.destroy())
+
+defineExpose({
+    updateDropdown
+})
 
 </script>
 

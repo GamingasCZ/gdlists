@@ -88,7 +88,7 @@ const size = containers.showImage.settings[1].valueRange
 </script>
 
 <template>
-    <ContainerHelp @click="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+    <ContainerHelp @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 

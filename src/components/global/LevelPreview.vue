@@ -143,8 +143,7 @@ const selectLevel = () => {
       </section>
   
       <section v-if="inLists || inReviews" class="relative z-10 h-14">
-        <RatingContainer v-if="inReviews" class="absolute bottom-2 left-1/2 w-64 -translate-x-1/2" :ratings="[round(A_gameplay), round(A_decoration), round(A_difficulty), round(A_overall)]" compact />
-        <div v-else></div>
+        <RatingContainer class="absolute bottom-2 left-1/2 w-64 -translate-x-1/2" :ratings="[round(A_gameplay), round(A_decoration), round(A_difficulty), round(A_overall)]" compact />
       </section>
       <div v-else class="my-4"></div>
     </div>

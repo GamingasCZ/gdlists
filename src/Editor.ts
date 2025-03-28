@@ -4,6 +4,7 @@ import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBa
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
+// import { DEFAULT_RATINGS } from "./Reviews";
 
 export const TAG_COUNT = 30;
 export const EMOJI_COUNT = 18;
@@ -24,6 +25,31 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   tagline: "",
   thumbnail: ["", 0, 33, 1, true],
 }}
+
+export const DEFAULT_LEVEL: () => Level = () => ({
+    levelName: "",
+    creator: "",
+    color: makeColor(),
+    difficulty: [0, 0],
+    levelID: "",
+    tags: [],
+    video: "",
+    ratings: [Array(4).fill(-1), []],
+    BGimage: newCardBG(),
+    screenshots: [],
+    scShotSecName: "",
+    commentary: ""
+})
+
+export const modernizeLevels = (levelArray: Level) => {
+  // Add missing keys
+  let levelKeys = Object.keys(levelArray)
+  let newLevel = DEFAULT_LEVEL()
+  Object.keys(newLevel).forEach(k => {
+    if (!levelKeys.includes(k))
+      levelArray[k] = newLevel[k]
+  })
+}
 
 export const modernizeList = (serverResponse: ListFetchResponse) => {
   // List Name
@@ -59,6 +85,9 @@ export const modernizeList = (serverResponse: ListFetchResponse) => {
       }
     )
   }
+
+  // Modernize levels
+  serverResponse.data.levels.forEach(l => modernizeLevels(l))
 
   return serverResponse.data
 }
@@ -190,7 +219,7 @@ export function fixHEX(hexColor: string) {
 }
 
 export function checkList(postData: PostData): { success: boolean, error?: string, listPos?: number, stamp?: number } {
-  let error = (errorText: string, errorPos?: number) => { return { success: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }
+  let error = (errorText: string, errorPos?: number) => { return { success: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random(), warn: [0,0,0] } }
 
   if (!isOnline.value) return error(i18n.global.t('other.disconnected'))
 
@@ -200,23 +229,32 @@ export function checkList(postData: PostData): { success: boolean, error?: strin
 
   let i = 0
   let listError: object | undefined
+  let allLevelIDs: string[] = []
   postData.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name) {
-      if (typeof level.creator[0][0] == 'string') return // Old collabs
+    if (level.levelID) allLevelIDs.push(level.levelID)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator?.[0]?.[0]?.name) {
+      if (typeof level.creator?.[0]?.[0] == 'string') return // Old collabs
       listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
     }
     if (!level.levelID?.toString().match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.insuccessID', [i + 1]), i)
     i++
-    if (level.ratings)
-      delete level.ratings
   })
+
+  for (let i = 0; i < allLevelIDs.length; i++) {
+    for (let j = i+1; j < allLevelIDs.length; j++) {
+        if (allLevelIDs[i] == allLevelIDs[j]) {
+            return error(i18n.global.t('editor.noDuplicates'))
+        }
+    }
+}
+
   if (listError != undefined) return <any>listError
 
   let listSize = JSON.stringify(postData).length
   if (listSize > 25000) return error(i18n.global.t('editor.overLimit', [(listSize / 25000).toFixed(2)]))
 
-  return { success: true }
+  return { success: true, warn: [0,0,0] }
 }
 
 export function creatorToCollab(currentName: string): CollabData {

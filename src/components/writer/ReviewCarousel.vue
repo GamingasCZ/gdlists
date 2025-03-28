@@ -80,7 +80,7 @@ const size = containers.addCarousel.settings[1].valueRange
 </script>
 
 <template>
-    <ContainerHelp v-if="!settings.components.length" @click="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
+    <ContainerHelp v-if="!settings.components.length" @click.stop="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
     <section
         v-else
         @mouseenter="hovering = true"

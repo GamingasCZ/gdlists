@@ -78,12 +78,6 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
-            v-model="SETTINGS.draftNoRemove"
-            :name="$t('settingsMenu.draftNoRemove')"
-            control="cbox"
-        >
-        </Option>
-        <Option
             v-model="SETTINGS.colorization"
             :name="$t('settingsMenu.colorize')"
             :desc="$t('settingsMenu.colorizeHelp')"

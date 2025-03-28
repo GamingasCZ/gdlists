@@ -13,6 +13,7 @@ import Dropdown from "../ui/Dropdown.vue";
 import Plus from "@/svgs/Plus.vue";
 import LevelRoulette from "./LevelRoulette.vue";
 import DraftCard from "./DraftCardSmall.vue";
+import type { Post } from "@/writers/Writer";
 
 const props = defineProps<{
     subtext: string
@@ -20,6 +21,7 @@ const props = defineProps<{
     drafts: null | {[draftKey: string]: ReviewDraft[]}
     lastSaved: [number, string]
     disabled: boolean
+    postType: Post
 }>()
 
 const emit = defineEmits<{
@@ -149,7 +151,7 @@ const isSearching = ref(false)
 
         <main v-show="mainRolledOut">
             <div class="flex overflow-y-auto relative flex-col gap-2 p-2">
-                <div v-if="!POST_DATA.levels.length && !rouletteActive && drafts !== null">
+                <div v-if="!POST_DATA.levels.length && !rouletteActive && drafts !== null && draftsValues.length">
                     <h2 class="text-3xl font-black text-center text-lof-400">{{ $t('reviews.drafts2') }}</h2>
                     <div class="grid justify-center">
                         <section class="flex overflow-auto gap-4 px-2 pb-2 mt-2">
@@ -216,6 +218,7 @@ const isSearching = ref(false)
                         :level-array="POST_DATA"
                         :data="level"
                         :index="index"
+                        :is-in-list="postType == 'list'"
                     />
                 </template>
             </div>

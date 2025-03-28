@@ -29,7 +29,7 @@ export const FONTS: [string, number][] = [["Sofia Sans", 0],
                ["Sans-Serif", 2],
                ["Monospace", 3],
                [i18n.global.t('reviews.systemFont'), 4]]
-type Post = 'list' | 'review'
+export type Post = 'list' | 'review'
 type PostKeys = keyof (ReviewList & LevelList)
 export type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph' | 'columnCreate'
 

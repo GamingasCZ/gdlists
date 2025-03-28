@@ -7,11 +7,13 @@ import { computed, ref } from 'vue';
 import chroma from 'chroma-js';
 import Dropdown from '../ui/Dropdown.vue';
 import { i18n } from '@/locales';
+import EditorCardCommentary from './EditorCardCommentary.vue';
 
 const props = defineProps<{
     postData: PostData
     levelIndex: number
     levelCreator: string
+    isList: boolean
 }>()
 
 const emit = defineEmits<{
@@ -36,17 +38,20 @@ const SUGGESTIONS = computed(() => {
   return suggs
 })
 
-const selectedDefRate = ref(0)
+const selectedDefRate = ref(3)
 
 const ratings = props.postData.levels[props.levelIndex].ratings
 const customSuggOpen = ref(false)
 const suggButton = ref<HTMLButtonElement>()
 
 const addRatingsToLevels = () => {
-    for (let i = 0; i < props.postData.levels.length; i++) {
-        let unadded = Array(Math.max(0, props.postData.ratings.length - props.postData.levels[i].ratings[1].length)).fill(-1)
-        props.postData.levels[i].ratings[1] = props.postData.levels[i].ratings[1].concat(unadded)
-    }
+  if (!props.postData.ratings) return
+  if (!props.postData.levels?.[props.levelIndex]?.ratings) return
+
+  for (let i = 0; i < props.postData.levels.length; i++) {
+      let unadded = Array(Math.max(0, props.postData.ratings.length - props.postData.levels[i].ratings[1].length)).fill(-1)
+      props.postData.levels[i].ratings[1] = props.postData.levels[i].ratings[1].concat(unadded)
+  }
 }
 
 addRatingsToLevels() // Adds ratings to any newly added levels
@@ -92,15 +97,7 @@ const changeSetting = (option: number, ratingIndex: number) => {
     }
 }
 
-const reorderedDefaultRatings = [
-  DEFAULT_RATINGS[3],
-  DEFAULT_RATINGS[0],
-  DEFAULT_RATINGS[1],
-  DEFAULT_RATINGS[2]
-]
-const rInd = [3, 0, 1, 2]
-
-const rateCol = computed(() => chroma.hsl(...reorderedDefaultRatings[selectedDefRate.value].color))
+const rateCol = computed(() => chroma.hsl(...DEFAULT_RATINGS[selectedDefRate.value].color))
 
 </script>
 
@@ -119,12 +116,12 @@ const rateCol = computed(() => chroma.hsl(...reorderedDefaultRatings[selectedDef
         <!-- Rating selector -->
         <div class="flex flex-wrap gap-2">
           <button
-            v-for="(rating, i) in reorderedDefaultRatings"
-            @click="selectedDefRate = rInd[i]"
+            v-for="(rating, i) in DEFAULT_RATINGS"
+            @click="selectedDefRate = i"
             :style="{
-              background: selectedDefRate == rInd[i] ? rateCol.darken(2).css() : '#00000066',
-              borderColor: selectedDefRate == rInd[i] ? rateCol.css() : '#000',
-              boxShadow: `0px 0px 16px ${selectedDefRate == rInd[1] ? rateCol.css() : '#000'}`,
+              background: selectedDefRate == i ? rateCol.darken(2).css() : '#00000066',
+              borderColor: selectedDefRate == i ? rateCol.css() : '#000',
+              boxShadow: `0px 0px 16px ${selectedDefRate == i ? rateCol.css() : '#000'}`,
             }"
             class="relative p-2 overflow-clip rounded-md border-2 max-sm:grow button"
           >
@@ -142,39 +139,47 @@ const rateCol = computed(() => chroma.hsl(...reorderedDefaultRatings[selectedDef
         </div>
 
         <RatingPicker
-          :key="reorderedDefaultRatings[selectedDefRate].name"
-          :color="reorderedDefaultRatings[selectedDefRate].color"
+          :key="DEFAULT_RATINGS[selectedDefRate].name"
+          :color="DEFAULT_RATINGS[selectedDefRate].color"
           @mod-rating="ratings[0][selectedDefRate] = $event"
           :value="postData.levels?.[levelIndex]?.ratings?.[0]?.[selectedDefRate]"
-          :default-name="reorderedDefaultRatings[selectedDefRate].name"
-          :rating="reorderedDefaultRatings[selectedDefRate]"
+          :default-name="DEFAULT_RATINGS[selectedDefRate].name"
+          :rating="DEFAULT_RATINGS[selectedDefRate]"
         />
 
-        <div class="flex gap-2 px-2 items-center mix-blend-plus-lighter invert-[0.2] mt-6 opacity-50">
-            <span class="text-xl">{{ $t('reviews.customRating') }}</span>
-            <hr class="mx-2 rounded-sm border grow">
-            <button :disabled="postData.ratings.length >= 4" @click="addRating()" class="flex gap-2 items-center px-2 py-1 rounded-md transition-colors hover:bg-black button">
-                <img src="@/images/plus.svg" class="w-5" alt="">
-                {{ $t('other.add') }}
-              </button>
-              <hr class="w-0.5 h-5 bg-white rounded-md border-none">
-              <button class="py-2 button" @click="customSuggOpen = true" ref="suggButton">
-                <img src="@/images/genericRate.svg" class="w-2 rotate-180" alt="">
-              </button>
-        </div>
-
-        <p class="my-3 text-sm text-center opacity-20 mix-blend-plus-lighter" v-if="!postData.ratings.length">{{ $t('reviews.cRatingHelp') }}</p>
-
-        <RatingPicker
-          v-for="(rating, i) in postData.ratings"
-          :key="rating.color"
-          @edit-action="changeSetting($event, i)"
-          @mod-rating="ratings[1][i] = $event"
-          :value="ratings[1][i]"
-          v-model:name="rating.name"
-          :color="rating.color"
+        <template v-if="!isList">
+          <div class="flex gap-2 px-2 items-center mix-blend-plus-lighter invert-[0.2] mt-6 opacity-50">
+              <span class="text-xl">{{ $t('reviews.customRating') }}</span>
+              <hr class="mx-2 rounded-sm border grow">
+              <button :disabled="(postData.ratings ?? []).length >= 4" @click="addRating()" class="flex gap-2 items-center px-2 py-1 rounded-md transition-colors hover:bg-black button">
+                  <img src="@/images/plus.svg" class="w-5" alt="">
+                  {{ $t('other.add') }}
+                </button>
+                <hr class="w-0.5 h-5 bg-white rounded-md border-none">
+                <button class="py-2 button" @click="customSuggOpen = true" ref="suggButton">
+                  <img src="@/images/genericRate.svg" class="w-2 rotate-180" alt="">
+                </button>
+          </div>
+  
+          <p class="my-3 text-sm text-center opacity-20 mix-blend-plus-lighter" v-if="!(postData.ratings ?? []).length">{{ $t('reviews.cRatingHelp') }}</p>
+  
+          <RatingPicker
+            v-for="(rating, i) in postData.ratings"
+            :key="rating.color"
+            @edit-action="changeSetting($event, i)"
+            @mod-rating="ratings[1][i] = $event"
+            :value="ratings[1][i]"
+            v-model:name="rating.name"
+            :color="rating.color"
+            editable
+          />
+        </template>
+        <EditorCardCommentary class="mt-4 mb-0" v-else
+          v-model="postData.levels[levelIndex].commentary"
           editable
         />
+
+        
       </section>
 
       <Dropdown v-if="customSuggOpen" @close="customSuggOpen = false" :button="suggButton!">

@@ -2,7 +2,7 @@
 import { currentUID, lastUsedTags, newCardBG, shortenYTLink, TAG_COUNT } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { computed, inject, onMounted, type Ref, ref } from "vue";
+import { computed, inject, nextTick, onMounted, type Ref, ref } from "vue";
 import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import LevelTags from "./LevelTags.vue";
@@ -26,6 +26,7 @@ const props = defineProps<{
   opened?: boolean;
   data?: Level;
   updatingPositions: number;
+  isInList: boolean
 }>();
 
 const emit = defineEmits<{
@@ -50,7 +51,6 @@ const changeRate = async (newRating: number) => {
   if (props.levelArray.levels[props.index!].difficulty[0] != 0) { // N/A cannot be rated
     props.levelArray.levels[props.index!].difficulty[1] = newRating;
   }
-  rateImagePath.value = await getRateImage()
 }
 const changeFace = async (newFace: number) => {
   modDiff[0] = true
@@ -61,27 +61,13 @@ const changeFace = async (newFace: number) => {
 
   if (newFace == 0) {
     props.levelArray.levels[props.index!].difficulty[1] = 0 // Unrate N/A levels
-    rateImagePath.value = await getRateImage()
   }
 
   props.levelArray.levels[props.index!].difficulty[0] = newFace;
-  diffFacePath.value = await getDiffFace()
 }
 
 const BASE_URL = import.meta.env.BASE_URL
 const ratings = ["error", "star", "featured", "epic", "legendary", "mythic"]
-const rateImagePath = ref("")
-const getRateImage = () => {
-  let rate = props.levelArray.levels[props.index!].difficulty?.[1] ?? 0;
-  if (rate == 0) rateImagePath.value = ""; // Unrated level
-  else {
-    rateImagePath.value = `${BASE_URL}/faces/${ratings[rate - 1]}.webp`
-  }
-};
-getRateImage()
-
-
-const diffFacePath = ref(`${BASE_URL}/faces/${props.levelArray.levels[props.index!].difficulty?.[0] ?? 0}.webp`)
 
 const levelCreator = ref(typeof props.levelArray.levels[props.index!].creator == 'object' ? props.levelArray.levels[props.index!].creator[0][0].name : props.levelArray.levels[props.index!].creator)
 const modifyCreator = (e: Event | string) => {
@@ -164,9 +150,6 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       props.levelArray.levels[props.index!].BGimage.image[0] = level.thumbnail;
       
       colorizeViaThumb()
-
-      isPlatformer.value = level.platf
-
       modifyCreator(level.author)
 
       if (hasLocalStorage()) {
@@ -221,22 +204,8 @@ const openCollabTools = () => {
     openDialogs.collabs = [true, props.index]
 }
 
-const creatorFilledIn = computed(() => {
-  if (typeof props.levelArray.levels[props.index!].creator == "string")
-    return props.levelArray.levels[props.index!].creator
-  else {
-    return props.levelArray.levels[props.index!].creator[0]?.[0]?.name
-  }
-})
-
 const searchAvailableCreator = computed(() => (props.levelArray.levels[props.index!].levelName != '' || props.levelArray.levels[props.index!].creator != '') && !searching.value)
 const searchAvailableID = computed(() => props.levelArray.levels[props.index!].levelID && !searching.value)
-
-const isPlatformer = ref(props.levelArray.levels[props.index!].platf)
-const switchPlatformer = () => {
-  isPlatformer.value = !isPlatformer.value
-  props.levelArray.levels[props.index!].platf = isPlatformer.value
-}
 
 const background = computed(() => {
   if (SETTINGS.value.disableColors)
@@ -277,7 +246,7 @@ const levelMedia = computed(() => {
   let screenshots = props.levelArray.levels[props.index]?.screenshots
 
   if (video)
-    allMedia.push([LevelImage.VIDEO,video,""])
+    allMedia.push([LevelImage.OLD_VIDEO,video,""])
   if (bgImage && bgImage[0])
     allMedia.push([LevelImage.THUMBNAIL,bgImage,""])
 
@@ -319,7 +288,7 @@ const addVideo = (e: ClipboardEvent) => {
   let link = e.clipboardData?.getData("Text")
   if (!link) return
 
-  let shortened = shortenYTLink(link)
+  let shortened = shortenYTLink(link, true)
   if (!shortened) return
 
   props.levelArray.levels[props.index].screenshots?.push([
@@ -382,6 +351,7 @@ const addTag = (ind: number) => {
   
   props.levelArray.levels[props.index].tags.push([ind, -1, ''])
   tagSearch.value = ''
+
 }
 
 const editLastTag = (e: KeyboardEvent) => {
@@ -398,6 +368,36 @@ const editLastTag = (e: KeyboardEvent) => {
 const removeTag = (ind: number) => {
   props.levelArray.levels[props.index].tags.splice(ind, 1)
 }
+
+const editingImageSectionName = ref(false)
+const sectionNameInput = ref<HTMLInputElement>()
+const editSectionName = () => {
+  editingImageSectionName.value = true
+  nextTick(() => sectionNameInput.value?.focus())
+}
+
+const avgRating = computed(() => {
+  if (editingRating.value) return "noRating"
+  let ratings = props.levelArray.levels[props.index].ratings
+  if (!ratings) return "noRating"
+
+  let am = 0
+  let score = ratings[0].concat(ratings[1]).reduce((acc, val) => {
+    if (val != -1) {
+      acc += val
+      am++
+    }
+    return acc
+  }, 0)
+  if (am == 0) return "noRating"
+
+  let avgScore = score/am
+  if (avgScore < 4) return "sad"
+  else if (avgScore > 7) return "nice"
+  else return "mid"
+})
+
+const cardDropdown = ref<HTMLDivElement>()
 
 </script>
 
@@ -430,7 +430,7 @@ const removeTag = (ind: number) => {
       </template>
     </Dropdown>
 
-    <div v-show="!editingRating" class="flex overflow-visible max-sm:flex-col">
+    <div v-show="!editingRating" class="flex overflow-clip max-sm:flex-col">
       <div class="flex justify-between items-center px-0.5 py-2 bg-black bg-opacity-20 sm:flex-col">
   
         <!-- Move level -->
@@ -479,8 +479,10 @@ const removeTag = (ind: number) => {
     
             <!-- Creator -->
             <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
-              <button @click="openCollabTools()" type="button" tabindex="-1" class="p-2 button">
-                <img src="@/images/collabMen.svg" alt="" class="min-w-8" />
+              <button @click="openCollabTools()" type="button" tabindex="-1" class="relative p-2 button" :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
+                <img class="absolute top-3 left-3 animate-ping min-w-6 aspect-square" src="../../images/collabMen.svg" alt=""
+                  v-if="collabFlash" />
+                <img class="min-w-8 aspect-square" src="../../images/collabMen.svg" alt="" />
               </button>
               <input :value="levelCreator" @change="modifyCreator" maxlength="20" type="text" class="w-36 text-lg bg-transparent border-none outline-none" :placeholder="$t('level.creator')">
             </div>
@@ -498,16 +500,18 @@ const removeTag = (ind: number) => {
           <!-- Level rating -->
           <button
             @click="editingRating = true"
-            class="flex relative flex-wrap gap-1 justify-evenly items-center mr-2 h-full overflow-clip min-h-16"
+            class="flex relative flex-wrap gap-1 justify-evenly mr-2 h-full min-h-16"
+            :class="{'items-end': isInList, 'items-center': !isInList}"
           >
-            <div class="absolute inset-0 scrollRating" :style="{backgroundImage: `url(${base}/rateBGs/noRating.webp)`}"></div>
-            <CircularRating :class="{'translate-y-4': i % 2}" v-for="(rating, i) in levelArray.levels[index].ratings?.[0]" :min="0" :max="10" :value="rating" :name="DEFAULT_RATINGS[i].name" :color="chroma.hsl(...DEFAULT_RATINGS[i].color).hex()" />
+            <div class="absolute inset-0 scrollRating" :class="{'bg-red-700': avgRating == 'sad', 'bg-lime-400 bg-opacity-40': avgRating == 'nice'}" :style="{backgroundImage: `url(${base}/rateBGs/${avgRating}.webp)`}"></div>
+            <div class="absolute inset-1 text-sm text-white text-opacity-80 overflow-clip bottomFade">{{ levelArray.levels[index!].commentary }}</div>
+            <CircularRating :class="{'translate-y-4': i % 2 && !isInList}" v-for="(rating, i) in levelArray.levels[index].ratings?.[0]" :min="0" :max="10" :value="rating" :name="DEFAULT_RATINGS[i].name" :color="chroma.hsl(...DEFAULT_RATINGS[i].color).hex()" />
             <CircularRating :class="{'translate-y-4': i % 2}" v-for="(rating, i) in levelArray.levels[index].ratings?.[1]" :min="0" :max="10" :value="rating" :name="levelArray.ratings[i].name" :color="chroma.hsl(...levelArray.ratings[i].color).hex()" />
           </button>
         </div>
   
         <!-- Level tags -->
-        <div ref="tagbox" class="flex relative gap-3 items-center py-1 mx-2 max-w-full bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+        <div ref="tagbox" class="flex relative gap-3 items-center py-1 mx-2 max-w-full bg-black bg-opacity-20 rounded-t-md focus-within:bg-opacity-60" :class="{'rounded-b-md': !tagDropdownShown}">
           <div class="px-1 pr-0">
             <img src="@/images/levelID.svg" alt="" class="w-10 min-w-10" />
           </div>
@@ -520,7 +524,7 @@ const removeTag = (ind: number) => {
               gear
               settable
             />
-            <div class="flex gap-1" v-show="!levelArray.levels[index].tags.length">
+            <div class="flex gap-1" v-show="!(levelArray.levels[index]?.tags ?? []).length">
               <EditorTag @clicked="addTag(TagName.PLATFORMER)" :tag="[TagName.PLATFORMER, -1, '']" isExample selectable plus />
               <EditorTag @clicked="addTag(TagName.COINS)" :tag="[TagName.COINS, -1, '']" isExample selectable plus />
             </div>
@@ -529,8 +533,8 @@ const removeTag = (ind: number) => {
               v-model="tagSearch"
               @focus="tagDropdownShown = true"
               @blur="tagDropdownShown = false"
-              @keyup.enter="filteredTags?.[0]?.[0] !== undefined && addTag(filteredTags[0][0])"
-              @keydown.backspace="editLastTag"
+              @keyup.enter="filteredTags?.[0]?.[0] !== undefined && addTag(filteredTags[0][0]); cardDropdown?.updateDropdown()!"
+              @keydown.backspace="editLastTag($event); cardDropdown?.updateDropdown()!"
               class="relative bg-transparent outline-none min-w-12 grow"
             >
           </div>
@@ -538,7 +542,8 @@ const removeTag = (ind: number) => {
           <Teleport to="body">
             <EditorCardTagDropdown
               v-if="tagDropdownShown"
-              @add="addTag"
+              ref="cardDropdown"
+              @add="addTag($event); cardDropdown?.updateDropdown()!"
               :filtered-tags="filteredTags"
               :tagbox="tagbox"
             />
@@ -546,65 +551,78 @@ const removeTag = (ind: number) => {
         </div>
   
         <!-- Screenshot carousel & Color Picker -->
-        <div class="flex overflow-auto gap-2 p-2 bg-black bg-opacity-20">
-          <div v-show="!pickingColor" v-for="(image, ind) in levelMedia" class="relative duration-200 aspect-video group">
+        <div class="grid overflow-auto p-2 bg-black bg-opacity-20">
+          <template v-if="levelMedia.length && (levelMedia.length != 1 || levelMedia[0][0] != LevelImage.THUMBNAIL)">
+            <form @submit.prevent="editingImageSectionName = false" v-if="editingImageSectionName" class="flex gap-2 items-center mb-2">
+              <input ref="sectionNameInput" type="text" maxlength="20" v-model="levelArray.levels[index].scShotSecName" class="p-1 bg-transparent outline-none focus-within:border-b-2" :placeholder="$t('reviews.sectionName')">
+              <button class="button" type="submit"><img src="@/images/checkThick.svg" class="w-5" alt=""></button>
 
-            <!-- Video indicator -->
-            <img v-if="image[0] == LevelImage.VIDEO" src="@/images/play.svg" class="absolute invert-[0.2] sepia hue-rotate-30 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12" alt="">
+            </form>
+            <p v-else @click="editSectionName" class="flex mb-2 text-xl font-bold transition-opacity cursor-text group hover:opacity-100" :class="{'opacity-20': !levelArray.levels[index].scShotSecName}">
+              {{ levelArray.levels[index].scShotSecName || $t('reviews.sectionName') }} <img src="@/images/edit.svg" class="ml-2 w-4 opacity-0 group-hover:opacity-100" alt="">
+            </p>
+          </template>
 
-            <!-- Image / Video thumbnail -->
-            <img v-if="image[0] != LevelImage.VIDEO" class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
-            <img v-else class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`https://img.youtube.com/vi/${image[1]}/0.jpg`" alt="">
-            
-            <!-- Thumbail indicator -->
-            <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
-            
-            <!-- Settings overlay -->
-            <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
-                <img src="@/images/gear.svg" class="w-5" alt="">
-              </button>
-              <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
-                <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
-                {{ $t('reviews.setThumb') }}
-              </button>
-              <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
-                <img src="@/images/trash.svg" class="w-5" alt="">
-              </button>
-            </div>
-          </div>
-          
-          <div v-show="!pickingColor" v-if="levelArray.levels[index].screenshots.length < 10" class="p-3 rounded-md border-2 border-white border-dashed opacity-10 transition-opacity mix-blend-plus-lighter hover:opacity-40">
-
-            <!-- Add buttons -->
-            <div v-if="!addingVideo" class="flex flex-col gap-1 min-w-max text-left">
-              <button @click="pickImages" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
-                <img :src="`${base}/formatting/showImage.svg`" class="w-6" alt="">
-                {{ $t('reviews.addImage') }}
-              </button>
-              <hr class="m-0 opacity-50">
-              <button @click="addingVideo = true" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
-                <img :src="`${base}/formatting/addVideo.svg`" class="w-6" alt="">
-                {{ $t('reviews.addVideo') }}
-              </button>
-            </div>
-            
-            <!-- Video link input -->
-            <div v-else class="p-1 pt-0">
-              <div class="flex items-center mb-3">
-                <button @click="addingVideo = false" class="p-2 mr-2 rounded-md hover:bg-white hover:bg-opacity-20">
-                  <img src="@/images/back.svg" class="w-6" alt="">
+          <div class="flex overflow-auto gap-2">
+            <div v-show="!pickingColor" v-for="(image, ind) in levelMedia" class="relative duration-200 aspect-video group">
+  
+              <!-- Video indicator -->
+              <img v-if="image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO)" src="@/images/play.svg" class="absolute invert-[0.2] sepia hue-rotate-30 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12" alt="">
+  
+              <!-- Image / Video thumbnail -->
+              <img v-if="!(image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO))" class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+              <img v-else class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`https://img.youtube.com/vi/${image[1]}/0.jpg`" alt="">
+              
+              <!-- Thumbail indicator -->
+              <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
+              
+              <!-- Settings overlay -->
+              <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
+                  <img src="@/images/gear.svg" class="w-5" alt="">
                 </button>
-                <img :src="`${base}/formatting/addVideo.svg`" class="mr-1 w-6 pointer-events-none" alt="">
-                <span>{{ $t('reviews.addVideo') }}</span>
+                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                  <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
+                  {{ $t('reviews.setThumb') }}
+                </button>
+                <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
+                  <img src="@/images/trash.svg" class="w-5" alt="">
+                </button>
               </div>
-              <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" placeholder="Vlož odkaz na YouTube video">
             </div>
-
+            
+            <div v-show="!pickingColor" v-if="(levelArray.levels[index]?.screenshots ?? []).length < 10" class="p-3 rounded-md border-2 border-white border-dashed opacity-10 transition-opacity mix-blend-plus-lighter hover:opacity-40">
+  
+              <!-- Add buttons -->
+              <div v-if="!addingVideo" class="flex flex-col gap-1 min-w-max text-left">
+                <button @click="pickImages" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
+                  <img :src="`${base}/formatting/showImage.svg`" class="w-6" alt="">
+                  {{ $t('reviews.addImage') }}
+                </button>
+                <hr class="m-0 opacity-50">
+                <button @click="addingVideo = true" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
+                  <img :src="`${base}/formatting/addVideo.svg`" class="w-6" alt="">
+                  {{ $t('reviews.addVideo') }}
+                </button>
+              </div>
+              
+              <!-- Video link input -->
+              <div v-else class="p-1 pt-0">
+                <div class="flex items-center mb-3">
+                  <button @click="addingVideo = false" class="p-2 mr-2 rounded-md hover:bg-white hover:bg-opacity-20">
+                    <img src="@/images/back.svg" class="w-6" alt="">
+                  </button>
+                  <img :src="`${base}/formatting/addVideo.svg`" class="mr-1 w-6 pointer-events-none" alt="">
+                  <span>{{ $t('reviews.addVideo') }}</span>
+                </div>
+                <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" placeholder="Vlož odkaz na YouTube video">
+              </div>
+  
+            </div>
+  
+            <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
+            :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
           </div>
-
-          <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
-          :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
         </div>
         
       </div>
@@ -616,6 +634,7 @@ const removeTag = (ind: number) => {
       :post-data="levelArray"
       :level-index="index"
       :level-creator="levelCreator"
+      :is-list="isInList"
     />
 
   </section>
@@ -639,7 +658,7 @@ const removeTag = (ind: number) => {
 
         <div class="flex justify-between items-center mt-2 text-lg">
           <span>{{ $t('other.scrolling') }}</span>
-          <select @mousedown.prevent="" class="text-base" v-model="levelArray.levels[index].BGimage.scrolling">
+          <select class="text-base" v-model="levelArray.levels[index].BGimage.scrolling">
             <option :value="0">{{ $t('other.off') }}</option>
             <option :value="1">{{ $t('other.byitself') }}</option>
             <option :value="2">{{ $t('other.parallax') }}</option>
@@ -656,9 +675,13 @@ const removeTag = (ind: number) => {
         </button>
       </section>
 
-      <section v-else class="p-2 text-white">
+      <section v-else-if="levelMedia[imageSettingsOpen][0] != LevelImage.OLD_VIDEO" class="p-2 text-white">
         <p class="text-lg">{{ $t('other.desc') }}</p>
-        <input type="text" v-model="levelMedia[imageSettingsOpen][2]" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
+        <input type="text" v-model="levelMedia[imageSettingsOpen][2]" maxlength="20" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
+      </section>
+      <section v-else class="p-2 text-white">
+        <p class="text-lg">{{ $t('other.link') }}</p>
+        <input type="text" :value="levelArray.levels[index].video" @change="levelArray.levels[index].video = shortenYTLink($event.target.value)" maxlength="80" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
       </section>
     </template>
   </Dropdown>
@@ -704,7 +727,11 @@ const removeTag = (ind: number) => {
   }
 
 .scrollRating:hover {
-  @apply bg-[#6f1a4921] brightness-150 scale-110;
+  @apply brightness-150 scale-110;
+}
+
+.bottomFade {
+  mask-image: linear-gradient(black 20%, transparent)
 }
 
 </style>

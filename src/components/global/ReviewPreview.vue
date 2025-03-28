@@ -69,7 +69,7 @@ function getUser() {
 var levelCount: number
 var levelRatings: number[] = []
 function getRating() {
-  let details = (props?.reviewDetails ?? []).find(x => x.reviewID == props.id.toString())
+  let details = (props?.reviewDetails ?? []).find(x => x.reviewID == props.id.toString() || x.listRatingID == props.id.toString())
   if (!details) return
 
   Object.keys(details).forEach(key => {

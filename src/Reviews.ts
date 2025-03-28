@@ -1,6 +1,6 @@
-import { type Ref, ref, warn } from "vue"
-import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
-import type { FavoritedLevel, Level, LevelList, PostData, ReviewList, ReviewRating } from "./interfaces"
+import { type Ref, ref } from "vue"
+import { DEFAULT_LEVEL, DEFAULT_LEVELLIST, modernizeLevels } from "./Editor"
+import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -48,24 +48,23 @@ export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | Fav
     if (postData.value.levels.length >= maxLevels) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 
-    let levelInfo = {
-        levelName: levelData?.levelName ?? "",
-        creator: levelData?.creator ?? "",
-        color: levelData?.color ? chroma(levelData?.color).hsl() : makeColor(),
-        difficulty: diff?.[0] ? diff : [0, 0],
-        levelID: levelData?.levelID ?? "",
-        platf: false,
-        tags: [],
-        video: "",
-        ratings: [Array(DEFAULT_RATINGS.length).fill(-1), []],
-        BGimage: newCardBG(),
-        screenshots: levelData?.screenshots ?? []
-    }
+    let levelInfo = DEFAULT_LEVEL()
+    if (levelData?.levelName) levelInfo.levelName = levelData.levelName
+    if (levelData?.creator) levelInfo.creator = levelData.creator
+    if (levelData?.color) levelInfo.color = levelData.color
+    if (levelData?.diff?.[0]) levelInfo.diff = diff
+    if (levelData?.levelID) levelInfo.levelID = levelData.levelID
 
     postData.value.levels.push(levelInfo)
 }
 
 export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXTRAS() })
+
+export const modernizeReview = (serverResponse: ListFetchResponse) => {
+    // Modernize levels
+    modernizeLevels(serverResponse.data.levels)
+    return serverResponse.data
+}
 
 const funnyErrorMessages = [
     "",
@@ -108,11 +107,13 @@ export function checkReview(post: ReviewList) {
         error.warn[0] = 1
 
     let i = 0
-    post.levels.forEach(level => {
+    let allLevelIDs: string[] = []
+    post.levels.forEach((level: Level) => {
         i += 1
         if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
+        if (level.levelID) allLevelIDs.push(level.levelID)
 
         let allRatings = level.ratings?.[0].concat(level.ratings[1])
         if (allRatings.filter(x => x == -1).length == allRatings.length)
@@ -123,6 +124,15 @@ export function checkReview(post: ReviewList) {
         
         if (error.mess) error.success = false
     })
+    
+    for (let i = 0; i < allLevelIDs.length; i++) {
+        for (let j = i+1; j < allLevelIDs.length; j++) {
+            if (allLevelIDs[i] == allLevelIDs[j]) {
+                error.mess = i18n.global.t('editor.noDuplicates')
+                error.success = false
+            }
+        }
+    }
 
     post.containers.forEach(container => {
         if (containers[container.type].canEditText) {

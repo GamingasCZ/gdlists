@@ -444,7 +444,7 @@ const jumpToContent = (type: string, index: number) => {
 }
 
 const getLevelsRatings = () => {
-  return [LIST_DATA.value?.data.levels, LIST_DATA.value?.data.ratings]
+  return [LIST_DATA.value?.data.levels, LIST_DATA.value?.data.ratings ?? []]
 }
 
 provide("settingsTitles", CONTAINERS)
@@ -469,28 +469,33 @@ provide("imagePreviewFullscreen", modPreview)
 const imagesArray = computed(() => {
   let allImages: ReviewContainer[] = []
   let data = (LIST_DATA.value.data as ReviewList).containers
-  LIST_DATA.value.data.levels.forEach(x => {
-    if (x.screenshots) {
-      x.screenshots.forEach(y => allImages.push(y[1]))
-    }
-  })
+
+  if (viewingLevelScreenshot.value) {
+    LIST_DATA.value.data.levels.forEach(x => {
+      if (x.screenshots) {
+        x.screenshots.forEach(y => allImages.push(y[1]))
+      }
+    })
+  }
 
   if (!data) return allImages
   
-  data.forEach(con => {
-    if (con.type == "showImage") allImages.push(con)
-    if (con.type == "twoColumns") {
-      con.settings.components.forEach(sub => {
-        sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
-      })
-    }
-    if (con.type == "addCarousel") {
-      con.settings.components.forEach(car => {
-        if (car?.type == "showImage") allImages.push(car)
-      })
-    }
-    // todo: ReviewLevel
-  })
+  if (!viewingLevelScreenshot.value) {
+    data.forEach(con => {
+      if (con.type == "showImage") allImages.push(con)
+      if (con.type == "twoColumns") {
+        con.settings.components.forEach(sub => {
+          sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
+        })
+      }
+      if (con.type == "addCarousel") {
+        con.settings.components.forEach(car => {
+          if (car?.type == "showImage") allImages.push(car)
+        })
+      }
+      // todo: ReviewLevel
+    })
+  }
   return allImages
 })
 const imageIndex = ref(-1)
@@ -507,6 +512,7 @@ const levelImageFullscreen = (imgIndex: number, levelIndex: number) => {
   imageIndex.value = offset+imgIndex
   viewingLevelScreenshot.value = true
 }
+provide("fullscreenLevel", levelImageFullscreen)
 
 </script>
 

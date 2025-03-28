@@ -17,7 +17,7 @@ const postData = inject<Ref<PostData>>("postData")!
 </script>
 
 <template>
-    <div v-if="uploading" class="flex flex-col p-2 mx-2 mb-2 bg-black bg-opacity-40 rounded-md">
+    <div v-if="uploading[0]" class="flex flex-col p-2 mx-2 mb-2 bg-black bg-opacity-40 rounded-md">
       <div class="flex justify-between items-center">
         <span class="text-xl">{{ $t('reviews.settingsOk') }}</span>
         <button @click="emit('upload')" class="flex gap-2 items-center px-2 py-1 rounded-md button bg-lof-400">

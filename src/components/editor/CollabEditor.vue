@@ -534,7 +534,7 @@ defineExpose({
 
           <!-- Load existing saved -->
           <div v-if="hasSavedCollab > -1">
-            <hr class="w-96 h-1 bg-white rounded-full border-none opacity-80">
+            <hr class="w-96 h-0.5 bg-white rounded-full border-none opacity-20">
             <h1 class="mt-2 text-xl text-center opacity-60">{{ $t('collabTools.collabExists') }}</h1>
             <button class="flex items-center p-1 mx-auto mt-2 bg-black bg-opacity-40 rounded-md button"
               @click="loadCollab(savedCollabs?.[hasSavedCollab]!, hasSavedCollab)">

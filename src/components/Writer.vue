@@ -11,7 +11,7 @@ import ImageBrowser from "./global/ImageBrowser.vue";
 import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction, LevelImage } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
-import { pickFont, getDominantColor, getEmbeds, addReviewLevel } from "@/Reviews";
+import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -125,7 +125,7 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
             if (props.type == 0)
                 POST_DATA.value = modernizeList(res.data)
             else
-                POST_DATA.value = res.data.data
+                POST_DATA.value = modernizeReview(res.data)
 
             for (const key in drafts.value) {
                 if (drafts.value[key].editing && drafts.value[key].editing == props.postID)
@@ -288,6 +288,7 @@ const removeContainer = (index: number, forceColumnRemove = false) => {
         POST_DATA.value.containers[index].settings
         .components[selectedNestContainer.value[1]]
         .splice(selectedNestContainer.value[2], 1)
+        POST_DATA.value.containers.splice(index, 1)
     }
     else 
         POST_DATA.value.containers.splice(index, 1)
@@ -301,10 +302,10 @@ provide("removeContainer", removeContainer)
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
     if (selectedContainer.value[0] == -1) return
 
+    console.log(selectedNestContainer.value)
     if (selectedNestContainer.value[0] == -1) {
         if (index < 0) return
         POST_DATA.value.containers[index].align = alignment
-        // selectedContainer.value[1]?.focus()
     }
     else {
         POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
@@ -740,6 +741,7 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
     if (!draft) {
         errorStamp.value = Date.now()
         errorText.value = i18n.global.t('reviews.draftFailLoad')
+        return
     }
 
     if (draft.editing && !noEditCheck) {
@@ -748,7 +750,7 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
         return
     }
     else if (!draft.editing) {
-        if (router.currentRoute.value.name != "writer") {
+        if (!["writer", "editor"].includes(router.currentRoute.value.name)) {
             loadEditDraft = draft
             router.replace(`/make/${WRITER.value.general.postType}`)
             return
@@ -775,6 +777,7 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewin
     if (!previewData) {
         errorStamp.value = Date.now()
         errorText.value = i18n.global.t('reviews.draftFailLoad')
+        return
     }
 
     previewHold = [POST_DATA.value, embedsContent.value]
@@ -948,6 +951,8 @@ const addPreset = (ind: number) => {
     }
 }
 
+const collabEditor = ref<HTMLDialogElement>()
+
 </script>
 
 <template>
@@ -1012,7 +1017,7 @@ const addPreset = (ind: number) => {
         </DialogVue>
 
         <DialogVue :open="openDialogs.drafts" @close-popup="openDialogs.drafts = false" :title="$t('reviews.drafts')"
-            :width="dialog.medium" :side-button-text="$t('other.search')" :action="draftPopup?.openSearch">
+            :width="dialog.medium">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
@@ -1076,7 +1081,7 @@ const addPreset = (ind: number) => {
             </div>
 
             <!-- Warn about already existing edit draft -->
-            <section v-if="editDraftExists && !disableEdits" class="rounded-md gap-3 flex p-3 max-w-[30rem] w-full mx-auto text-white border border-lof-400 bg-lof-100">
+            <section v-if="editDraftExists && !disableEdits && drafts[editDraftExists]" class="rounded-md gap-3 flex p-3 max-w-[30rem] w-full mx-auto text-white border border-lof-400 bg-lof-100">
                 <img src="@/images/edit.svg" class="w-8" alt="">
                 <div class="w-full">
                     <span class="text-xl font-bold">{{ $t('reviews.draftExists') }}...</span>
@@ -1101,6 +1106,7 @@ const addPreset = (ind: number) => {
                 :drafts="WRITER.general.postType == 'list' ? drafts : null"
                 :last-saved="[reviewSave.backupID, pretty]"
                 :disabled="disableEdits"
+                :post-type="WRITER.general.postType"
             />
 
             <!-- Level Preview -->
@@ -1132,8 +1138,8 @@ const addPreset = (ind: number) => {
                         :is="WRITER.general.writerHelp"
                         v-if="!POST_DATA.containers.length"
                         
-                        @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
-                        @load-draft="loadDraft(drafts[$event])"
+                        @preview-draft="previewDraft(drafts?.[$event]?.reviewData, $event, true)"
+                        @load-draft="loadDraft(drafts?.[$event])"
                         @preset="addPreset"
 
                         :inverted="POST_DATA.whitePage"

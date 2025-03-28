@@ -215,7 +215,9 @@
     "title": "Editor seznamu",
     "translHelp": "Karty levelů v seznamu budou průsvitné.",
     "thumbStyle": "Styl náhledu",
-    "lastUsed": "Poslední"
+    "lastUsed": "Poslední",
+    "commPlaceholder": "Zde můžeš k levelu napsat krátký komentář...",
+    "noDuplicates": "Nelze mít duplicitní levely!"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -414,7 +416,9 @@
     "previous": "Předchozí",
     "reset": "Resetovat",
     "auto": "Automatická",
-    "toTop": "Jít navrch"
+    "toTop": "Jít navrch",
+    "homepage": "Domovská stránka",
+    "title": "Název"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -788,7 +792,8 @@
     "sugg3": "Výstava hodnocení",
     "reviewIntro": "Vítej v editoru recenzí!",
     "howStart": "Jak bys rád začal?",
-    "cRatingHelp": "Můžeš si vytvořit další čtyři vlasní hodnocení. Tyto hodnocení se nezapočítávají do globálních statistik."
+    "cRatingHelp": "Můžeš si vytvořit další čtyři vlasní hodnocení. Tyto hodnocení se nezapočítávají do globálních statistik.",
+    "sectionName": "Jméno sekce"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
