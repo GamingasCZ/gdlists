@@ -59,7 +59,7 @@ const loadContent = async () => {
   if (props.randomList) {
     randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})
   }
-  props.isReview ? await loadReview(randomData) : await loadList(randomData)
+  props.isReview ? await loadReview(randomData.data) : await loadList(randomData.data)
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", (e: MouseEvent) => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1 || !loggedIn.value) return
