@@ -123,7 +123,7 @@ const mount = () => {
 
 	textParent.value?.addEventListener("click", e => {
 		if (!props.editable) return
-		doFocusText()
+		doFocusText(false)
 		e.stopPropagation()
 	})
 
