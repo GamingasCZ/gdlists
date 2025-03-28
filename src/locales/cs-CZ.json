@@ -760,9 +760,7 @@
     "elUp": "Prvek nahorů",
     "elDown": "Prvek dolů",
     "imgCount": "{count} obrázek | {count} obrázků",
-    "decoOnly": "Pouze dekorativní"
-  },
-  "review": {
+    "decoOnly": "Pouze dekorativní",
     "columnSetting": "{0} sloupec",
     "desc": "Popis recenze",
     "colsSelected": "Vybráno {n} sloupců",

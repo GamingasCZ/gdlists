@@ -759,9 +759,7 @@
     "elUp": "Move Element Up",
     "elDown": "Move Element Down",
     "imgCount": "{count} image | {count} images",
-    "decoOnly": "Decoration Only"
-  },
-  "review": {
+    "decoOnly": "Decoration Only",
     "columnSetting": "{0} column",
     "desc": "Review Description",
     "colsSelected": "Selected {n} columns",
