@@ -45,7 +45,7 @@ defineExpose({
             <h3 class="text-xl text-white text-opacity-20">{{ $t('editor.lastUsed') }}</h3>
             <EditorTag
                 v-for="tag in lastUsedTags"
-                @click="addTag(tag[0])"
+                @click="addTag(tag)"
                 :tag="[tag, -1, '']" selectable plus />
         </div>
         <div class="flex flex-wrap gap-2 items-start place-content-start h-max min-h-28">
