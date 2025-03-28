@@ -474,6 +474,7 @@ provide("idCopyTimestamp", copyID)
 const jumpSearch = ref("")
 
 const modPreview = (clickedImageID: number) => {
+  console.log(imagesArray.value, clickedImageID)
   imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
 }
 
@@ -553,6 +554,7 @@ provide("fullscreenLevel", levelImageFullscreen)
       :images-array="viewingLevelScreenshot ? undefined : imagesArray"
       :hash-array="imagesArray"
       :uid="LIST_CREATORDATA?.discord_id"
+      not-editable
       v-model="imageIndex"
     />
   </Transition>

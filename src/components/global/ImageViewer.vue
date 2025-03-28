@@ -9,6 +9,7 @@ const props = defineProps<{
     hashArray?: string[]
     urlArray?: string[]
     uid?: string
+    notEditable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -109,10 +110,12 @@ const base = import.meta.env.VITE_USERCONTENT
                 <div class="flex absolute top-0 right-0 left-0 z-10 justify-between items-center p-2 px-3 bg-black bg-opacity-80 backdrop-blur-sm">
                     <h2 class="text-xl">{{ imageIndex+1 }}/{{ (imagesArray ?? hashArray ?? urlArray ?? []).length }}</h2>
                     <div class="flex gap-2">
-                        <button v-if="uid && urlArray" @click="emit('download')" class="button"><img src="@/images/link.svg" class="inline mr-1 w-6" alt="">{{ $t('other.link') }}</button>
-                        <button v-else-if="uid" @click="emit('download')" class="button"><img src="@/images/copy.svg" class="inline mr-1 w-6" alt="">{{ $t('other.download') }}</button>
-                        <button v-if="uid" @click="emit('remove')" class="button"><img src="@/images/trash.svg" class="inline mr-1 w-6" alt="">{{ $t('editor.remove') }}</button>
-                        <button v-if="uid" @click="emit('move')" class="mr-3 button"><img src="@/images/move.svg" class="inline mr-1 w-6" alt="">{{ $t('other.move') }}</button>
+                        <template v-if="!notEditable">
+                            <button v-if="uid && urlArray" @click="emit('download')" class="button"><img src="@/images/link.svg" class="inline mr-1 w-6" alt="">{{ $t('other.link') }}</button>
+                            <button v-else-if="uid" @click="emit('download')" class="button"><img src="@/images/copy.svg" class="inline mr-1 w-6" alt="">{{ $t('other.download') }}</button>
+                            <button v-if="uid" @click="emit('remove')" class="button"><img src="@/images/trash.svg" class="inline mr-1 w-6" alt="">{{ $t('editor.remove') }}</button>
+                            <button v-if="uid" @click="emit('move')" class="mr-3 button"><img src="@/images/move.svg" class="inline mr-1 w-6" alt="">{{ $t('other.move') }}</button>
+                        </template>
                         <button @click="emit('closePopup')" class="button"><img src="@/images/close.svg" class="w-8" alt=""></button>
                     </div>
                 </div>

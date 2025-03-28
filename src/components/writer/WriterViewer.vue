@@ -137,6 +137,7 @@ onUnmounted(() => {
                 :sub-index="subIndex"
                 :editable="editable"
                 :align="container.align"
+                :id="container.id"
             />
         </DataContainer>
 
