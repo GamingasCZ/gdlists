@@ -4,10 +4,6 @@ import chroma from 'chroma-js';
 import { computed } from 'vue';
 import { ref } from 'vue';
 
-import Sad from "@/images/reviews/sad.webp"
-import Mid from "@/images/reviews/mid.webp"
-import Nice from "@/images/reviews/nice.webp"
-import NoRating from "@/images/reviews/noRating.webp"
 import Dropdown from '../ui/Dropdown.vue';
 import Scroller from '../ui/Scroller.vue';
 

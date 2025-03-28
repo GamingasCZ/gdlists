@@ -125,7 +125,6 @@ const clickList = (opt: number) => {
       <img src="@/images/unpin.svg" alt="">
     </button>
   
-      <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
   </div>
   <div v-if="unrolledOptions" class="flex gap-2 justify-evenly my-2">
     <button @click.stop="clickList(0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
