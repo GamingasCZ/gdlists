@@ -156,7 +156,7 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 z-30 justify-between items-center px-2 w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
+    class="box-border flex sticky top-0 z-30 justify-between items-center w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
     <!-- Home link -->
     <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
       <Logo class="w-10 h-10 button" />
@@ -199,23 +199,16 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       </RouterLink>
 
       <!-- Saved -->
-      <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
+      <!-- <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
         class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
       $t("navbar.saved")
-    }}</RouterLink>
+    }}</RouterLink> -->
     </section>
 
-    <section class="flex relative gap-6 items-center">
+    <section class="flex relative gap-2 items-center py-0.5 pr-4 h-full bg-black bg-opacity-40">
 
-      <!-- Notification button -->
-      <button @click="showNotifs" v-if="isLoggedIn" class="absolute -left-10 top-1/2 -translate-y-1/2 button max-sm:hidden">
-        <img src="../images/notifs.svg" alt=""
-        class="w-6" />
-        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
-        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
-      </button>
-  
+
       <!-- Logged out -->
       <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
         class="px-1 w-10 h-10 button" />
@@ -245,6 +238,18 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
         />
       </div>
       <div v-else></div>
+
+      
+      <span class="text-white" >{{ loginInfo[0] }}</span>
+      <hr class="w-0.5 h-4 bg-white border-none opacity-40">
+      
+      <!-- Notification button -->
+      <button @click="showNotifs" v-if="isLoggedIn" class="pl-2 button max-sm:hidden">
+        <img src="../images/notifs.svg" alt=""
+        class="w-6" />
+        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
+        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+      </button>
     </section>
 
     <Transition name="fadeSlide">

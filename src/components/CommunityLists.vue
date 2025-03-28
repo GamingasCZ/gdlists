@@ -10,6 +10,7 @@ import LevelPreview from "./global/LevelPreview.vue";
 import TemporaryList from "./global/TemporaryList.vue";
 import { Teleport } from "vue";
 import { lastTab, modLastTab, selectedLevels } from "@/Editor";
+import SavedCollab from "./editor/SavedCollab.vue";
 
 document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
@@ -20,8 +21,8 @@ const props = defineProps<{
   browserType: any
 }>();
 
-type Content = 0 | 1 | 2
-const CONTENTS = ['lists', 'reviews', 'levels']
+type Content = 0 | 1 | 2 | 3
+const CONTENTS = ['lists', 'reviews', 'levels', 'saved']
 
 const defaultContentType = () => {
   if (hasLocalStorage()) { 
@@ -36,6 +37,7 @@ const contentType = ref<Content>(defaultContentType())
 const userLists = ref<"" | "user" | "hidden" | "collabs">(lastTab[1] ?? props.onlineType);
 const modifyContentType = (to: Content) => {
   contentType.value = to
+  userLists.value = ''
   if (hasLocalStorage()) {
     modLastTab([contentType.value, userLists.value])
   }
@@ -63,15 +65,19 @@ const switchUserLists = (user: string) => {
         <img src="../images/levelIcon.svg" alt="" class="w-5" />
         <span class="my-2">{{ $t('editor.levels') }}</span>
       </RouterLink>
+      <RouterLink @click="modifyContentType(3)" to="/browse/saved" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': contentType == 3}">
+        <img src="../images/savedMobHeader.svg" alt="" class="w-5" />
+        <span class="my-2">{{ $t('navbar.saved') }}</span>
+      </RouterLink>
     </nav>
-  
     <ListBrowser
-      online-browser
-      :component="[ReviewPreview, ReviewPreview, LevelPreview][contentType]"
+      :online-browser="contentType != 3"
+      :component="[ReviewPreview, ReviewPreview, LevelPreview, userLists == 'collabs' ? SavedCollab : LevelPreview][contentType]"
       :search="query"
       :online-type="userLists"
       :online-subtype="CONTENTS[contentType]"
       :is-logged-in="isLoggedIn"
+      :display-in-rows="contentType == 3 && userLists == 'collabs'"
       @switch-browser="switchUserLists"
     />
   </section>
