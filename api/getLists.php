@@ -111,7 +111,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     setcookie("lastViewed", $rows["id"], time()+300, "/");
 
     // Fetch comment amount
-    $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [list_id($rows)], "s");
+    $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [$rows["id"]], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"];
     $users = doRequest($mysqli, "SELECT username,discord_id,pfp_cutout FROM users LEFT JOIN profiles ON users.discord_id = profiles.uid WHERE discord_id=?", [$rows["uid"]], "s");
 

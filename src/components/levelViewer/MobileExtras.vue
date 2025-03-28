@@ -14,25 +14,25 @@ const canEdit = document.querySelector("#postEditButton")
 </script>
 
 <template>
-    <div class="flex flex-col gap-2 p-2">
-        <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
+    <div class="grid grid-cols-2 gap-2 p-2">
+        <button class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md button"
             @click="emit('closePopup'); emit('doListAction', 'sharePopup')">
-            <img class="w-8" src="../../images/share.svg" alt="">{{ $t('other.share') }}
+            <img class="m-1 w-6" src="../../images/share.svg" alt="">{{ $t('other.share') }}
         </button>
-        <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
+        <button class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md button"
             @click="emit('closePopup'); emit('doListAction', 'jumpPopup')">
-            <img class="w-8" src="../../images/jumpto.svg" alt="">{{ $t('listViewer.jumpTo') }}
+            <img class="m-1 w-6" src="../../images/jumpto.svg" alt="">{{ $t('listViewer.jumpTo') }}
         </button>
-        <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
+        <button class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md button"
             @click="emit('closePopup'); emit('doListAction', 'pinList')">
-            <img class="w-8" src="../../images/pin.svg" alt="" v-if="listPinned">
-            <img class="w-8" src="../../images/unpin.svg" alt="" v-else>
+            <img class="m-1 w-6" src="../../images/pin.svg" alt="" v-if="listPinned">
+            <img class="m-1 w-6" src="../../images/unpin.svg" alt="" v-else>
             {{ listPinned ? $t('level.pin') : $t('level.unpin') }}
         </button>
-        <button class="flex gap-2 items-center p-1 bg-white bg-opacity-10 rounded-md button"
+        <button class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md button"
             v-if="canEdit"
             @click="emit('closePopup'); emit('doListAction', 'editList')">
-            <img class="w-8" src="../../images/edit.svg" alt="">{{ $t('level.edit') }}
+            <img class="m-1 w-6" src="../../images/edit.svg" alt="">{{ $t('level.edit') }}
         </button>
     </div>
 </template>

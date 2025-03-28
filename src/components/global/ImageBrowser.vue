@@ -385,7 +385,7 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
 }
 
 const downloadImage = (hash: string, external: boolean) => {
-    if (external) navigator.clipboard.writeText(hash)
+    if (external) navigator.clipboard.writeText(externalImages.value.filter(x => x[1] == currentExtFolder.value[subfolderExtLevel.value][1])?.[hash]?.[0] ?? 'none')
     else {
         let link = document.createElement("a")
         link.href = `${pre}/userContent/${storage.value.uid}/${images.value[hash]}.webp`
@@ -927,11 +927,11 @@ onMounted(() => {
 
         <!-- Folder options -->
         <Dropdown v-if="editDropdownOpen" @picked-option="folderAction" @close="editDropdownOpen = false"
-            :icons="[fEdit, fRemove]" :options="[$t('level.edit'), $t('editor.remove')]" :button="folderEditButton" />
+            :icons="[fEdit, fRemove]" :options="[$t('level.edit'), $t('editor.remove')]" :button="folderEditButton" no-teleport />
 
         <!-- Image Add options -->
         <Dropdown v-if="imgAddOptsOpen" @picked-option="goToTab(1)" @close="imgAddOptsOpen = false" :icons="[fLink]"
-            :options="[$t('other.addExternal')]" :button="imageAddButton" />
+            :options="[$t('other.addExternal')]" :button="imageAddButton" no-teleport />
 
         <div class="flex gap-10 justify-between">
             <!-- External image input -->
@@ -1050,7 +1050,7 @@ onMounted(() => {
                     <Dropdown :button="button" @close="imageOptsShown = -1"
                         @picked-option="imageAction($event, currentTab == Tabs.External, index)" v-if="imageOptsShown === index"
                         :options="[$t('editor.remove'), $t('other.download'), $t('other.move')]"
-                        :title="$t('other.options')" />
+                        :title="$t('other.options')" no-teleport />
                 </button>
 
                 <!-- Selected check -->

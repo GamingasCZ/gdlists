@@ -31,7 +31,7 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, resetIndentation } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
@@ -57,7 +57,7 @@ const postContent = ref<HTMLDivElement>()
 const loadContent = async () => {
   let randomData = null
   if (props.randomList) {
-    randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}}).then(res => res.data)
+    randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})
   }
   props.isReview ? await loadReview(randomData) : await loadList(randomData)
   if (SETTINGS.value.autoComments) {
@@ -155,9 +155,13 @@ async function loadList(loadedData: LevelList | null) {
     document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
     // Set list colors
-    if (LIST_DATA.value?.data?.pageBGcolor && !isNaN(LIST_DATA.value?.data?.pageBGcolor[0])){
-      modifyListBG(LIST_DATA.value?.data?.pageBGcolor);
-    }
+    LIST_COL.value = LIST_DATA.value?.data.pageBGcolor!;
+    
+    // Saturation 0
+    if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
+    
+    if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
+      modifyListBG(LIST_COL.value);
 
     // Check pinned status
     if (hasLocalStorage()) {
@@ -197,6 +201,7 @@ async function loadReview(loadedData: ReviewList | null) {
     LIST_DATA.value = res[0];
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
     REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
+
     LIST_RATING.value = res[3]
 
     LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
@@ -260,6 +265,9 @@ const tryJumping = (ind: number, forceJump = false) => {
     jumpToPopupOpen.value = false;
     cardGuessing.value = -1
   }
+
+  commentsShowing.value = false
+  scrolledToEnd.value = false
   
   if (isJumpingFromFaves && parseInt(isJumpingFromFaves) == ind) {
     cardGuessing.value = -1
@@ -321,8 +329,8 @@ const toggleListPin = () => {
 
 const getURL = () => {
   let base = `${window.location.protocol}//${window.location.host}/gdlists/`
-  if (props.isReview) return base + 'r/' + window.location.pathname.split("/").toReversed()[0]
-  else return base + 'l/' + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
+  if (props.isReview) return base + 'review/' + window.location.pathname.split("/").toReversed()[0]
+  else return base + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
 const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
@@ -364,6 +372,7 @@ const listActions = (action: string) => {
       sharePopupOpen.value = true;
       break;
     case "jumpPopup":
+      resetIndentation()
       jumpToPopupOpen.value = true;
       break;
     case "pinList":
@@ -438,6 +447,8 @@ const saveCollab = (ind: number) => {
 
 const jumpToContent = (type: string, index: number) => {
   // let get = document.querySelector(`p[data-type=${type}]:nth-of-type(${index+1})`)
+  commentsShowing.value = false
+  scrolledToEnd.value = false
   let get = document.querySelectorAll(`div[data-type=${type}]`).item(index-1)
   get?.scrollIntoView({'behavior': "smooth"})
   jumpToPopupOpen.value = false
@@ -469,7 +480,6 @@ provide("imagePreviewFullscreen", modPreview)
 const imagesArray = computed(() => {
   let allImages: ReviewContainer[] = []
   let data = (LIST_DATA.value.data as ReviewList).containers
-
   if (viewingLevelScreenshot.value) {
     LIST_DATA.value.data.levels.forEach(x => {
       if (x.screenshots) {
@@ -496,6 +506,7 @@ const imagesArray = computed(() => {
       // todo: ReviewLevel
     })
   }
+
   return allImages
 })
 const imageIndex = ref(-1)
@@ -521,12 +532,15 @@ provide("fullscreenLevel", levelImageFullscreen)
     <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
   
-  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.jumpTo')">
+  <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.contents')">
     <PickerPopup v-model="jumpSearch">
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
         <span>{{ $t('listViewer.noGuessJumping') }}</span>
       </template>
-      <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS.filter(x => x[3].toLowerCase().includes(jumpSearch.toLowerCase()))" :text="link[3]" :icon-index="link[2]" />
+      <template v-if="isReview && !REVIEW_CONTENTS.length && !jumpSearch.length" #error>
+        <span>{{ $t('listViewer.noContents') }}</span>
+      </template>
+      <FormattingBubble @click="jumpToContent(link[0], link[1])" v-show="isReview && !reviewLevelsOpen" v-for="link in REVIEW_CONTENTS.filter(x => x[3].toLowerCase().includes(jumpSearch.toLowerCase()))" :text="link[3]" :icon-index="link[0]" :heading-level="link[2]-1" />
       <LevelBubble @pick="tryJumping(LIST_DATA?.data.levels.indexOf($event)!, true)" v-show="(!isReview || reviewLevelsOpen) && cardGuessing == -1" v-for="level in LIST_DATA.data.levels.filter(x => x.levelName.toLowerCase().includes(jumpSearch.toLowerCase()))" :data="level" />
   </PickerPopup>
   </DialogVue>
@@ -587,6 +601,7 @@ provide("fullscreenLevel", levelImageFullscreen)
         :open-dialogs="[commentsShowing, reviewLevelsOpen]"
         :ratings="LIST_RATING"
         :hidden="LIST_DATA.hidden"
+        :color="LIST_COL"
       />
     </header>
 

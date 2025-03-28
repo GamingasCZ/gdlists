@@ -231,7 +231,9 @@
     "inReviews": "in {count} review | in {count} reviews",
     "inLists": "in {count} list | in {count} lists",
     "addToList": "Add to List",
-    "pickedLevels": "{count} level selected | {count} levels selected"
+    "pickedLevels": "{count} level selected | {count} levels selected",
+    "noContents": "No contents available!",
+    "contents": "Contents"
   },
   "navbar": {
     "editor": "Create",
@@ -756,6 +758,10 @@
     "colAlign": "Align Columns",
     "elUp": "Move Element Up",
     "elDown": "Move Element Down",
+    "imgCount": "{count} image | {count} images",
+    "decoOnly": "Decoration Only"
+  },
+  "review": {
     "columnSetting": "{0} column",
     "desc": "Review Description",
     "colsSelected": "Selected {n} columns",

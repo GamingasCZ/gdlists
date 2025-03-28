@@ -178,7 +178,7 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
             @input="modCommentLength()"
             :tabindex="loggedIn ? 0 : -1"
             :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}"
-            contenteditable="true"
+            :contenteditable="loggedIn"
             id="commentBox"
             class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-sm border-l-4 text-lg border-solid min-h-16 sm:h-24"
             :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}">
@@ -205,6 +205,7 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
         </Transition>
         <footer
          :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}"
+         :class="{'opacity-25': !loggedIn}"
          class="flex justify-between p-2 pl-0 rounded-b-sm sm:flex-row-reverse">
             <div v-if="pfp">
                 <ProfilePicture class="inline mr-2 w-8" :uid="pfp[1]" :cutout="pfp[2]" />
@@ -217,7 +218,7 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
                 <button :style="{backgroundColor: darkParsedColor}" class="disabled:opacity-50" :disabled="!loggedIn" @click="openDropdown(1)"><img src="@/images/emoji.svg" class="w-5" alt=""></button>
                 <button 
                     :style="{backgroundColor: cannotSendComment ? darkParsedColor : parsedColor, borderColor: parsedColor}"
-                    class="box-border flex relative gap-2 items-center px-1 w-max font-bold overflow-clip rounded-sm border transition-opacity duration-75 disabled:opacity-50"
+                    class="box-border flex relative gap-2 items-center px-1 ml-1 w-max font-bold overflow-clip rounded-sm border transition-opacity duration-75 disabled:opacity-50"
                     :class="{'!text-black': !cannotSendComment && listColor[2] > 7}"
                     :disabled="cannotSendComment"
                     @click="sendComment()"

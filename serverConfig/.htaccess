@@ -2,21 +2,11 @@ RewriteOptions inherit
 
 RewriteEngine On
 
-## share links, replace with your own server
-
-# lists
-RewriteCond %{REQUEST_URI} ^/gdlists/l/([^/]+)$
-RewriteRule ^ https://gamingas.cz/gdlists/api/s.php?r=0&id=%1 [L,R=301]
-
-# reviews
-RewriteCond %{REQUEST_URI} ^/gdlists/r/([^/]+)$
-RewriteRule ^ https://gamingas.cz/gdlists/api/s.php?r=1&id=%1 [L,R=301]
-
 # routing
-RewriteRule ^index\.html$ - [L]
+RewriteRule ^index\.php - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /gdlists/index.html [L]
+RewriteRule . /gdlists/index.php [L]
 
 ## environment vars, fill these out
 

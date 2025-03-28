@@ -32,7 +32,7 @@ onUpdated(() => {
 
           
           <div
-            class="flex flex-col gap-3 justify-center items-center h-full text-xl opacity-30"
+            class="flex absolute top-1/2 left-1/2 flex-col gap-3 justify-center items-center h-full text-xl opacity-30 -translate-x-1/2 -translate-y-1/2"
             v-if="$slots.error"
             >
             <img src="@/images/close.svg" class="w-36" />

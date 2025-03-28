@@ -482,7 +482,9 @@
     "inReviews": "v {count} recenzi | v {count} recenzích",
     "inLists": "v {count} seznamu | v {count} seznamech",
     "addToList": "Přidat do seznamu",
-    "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely"
+    "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely",
+    "noContents": "Obsah není dostupný!",
+    "contents": "Obsah"
   },
   "level": {
     "levelID": "ID levelu",
@@ -757,6 +759,10 @@
     "colAlign": "Zarovnání sloupců",
     "elUp": "Prvek nahorů",
     "elDown": "Prvek dolů",
+    "imgCount": "{count} obrázek | {count} obrázků",
+    "decoOnly": "Pouze dekorativní"
+  },
+  "review": {
     "columnSetting": "{0} sloupec",
     "desc": "Popis recenze",
     "colsSelected": "Vybráno {n} sloupců",

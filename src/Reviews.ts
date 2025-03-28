@@ -175,11 +175,11 @@ export function checkReview(post: ReviewList) {
 export const selectedNestContainer = ref(0)
 export const flexNames = { left: "start", center: "center", right: "end", justify: "space-between" }
 
-export function parseReviewContainers(containers: object[], headingLevel = "0") {
+let lastHeader = 0
+export const resetIndentation = () => lastHeader = 0
+export function parseReviewContainers(containers: object[], indicies: number[]) {
     // types: 0 - image; 1,2,3 - title 1,2,3; 4 - video
-    let main: [number, number, string][] = []
-    let indicies = [0,0,0]
-    let lastHeader = headingLevel
+    let main: [number, number, number, string][] = []
     containers.forEach(container => {
         if (container !== Object(container)) return
 
@@ -187,22 +187,31 @@ export function parseReviewContainers(containers: object[], headingLevel = "0") 
             case "heading1":
             case "heading2":
             case "heading3":
-                indicies[0] += 1
-                lastHeader = container.type.slice(-1)
-                main.push([container.type, indicies[0], lastHeader, container.data])
+                lastHeader = +container.type.slice(-1)
+                indicies[lastHeader-1] += 1
+                main.push([container.type, indicies[lastHeader-1], lastHeader, container.data])
                 break;
 
             case "showImage":
-                indicies[1] += 1
-                main.push([container.type, indicies[1], lastHeader, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
+                // Decorative only image
+                if (container.settings?.onlyDeco) return
+
+                indicies[3] += 1
+                main.push([container.type, indicies[3], lastHeader+1, container.settings.description || container.settings.alt || i18n.global.t('reviews.picture')])
                 break;
+
             case "addVideo":
-                indicies[2] += 1
-                main.push([container.type, indicies[2], lastHeader, container.settings.description || i18n.global.t("level.video")])
+                indicies[4] += 1
+                main.push([container.type, indicies[4], lastHeader+1, container.settings.description || i18n.global.t("level.video")])
+                break;
+
+            case "addCarousel":
+                indicies[5] += 1
+                main.push([container.type, indicies[5], lastHeader+1, container.settings.components?.[0]?.settings?.description || i18n.global.t("reviews.imgCount", container.settings.components.length)])
                 break;
 
             case "twoColumns":
-                container.settings.components.forEach(column => main.push(...parseReviewContainers(column, lastHeader)))
+                container.settings.components.forEach(column => main.push(...parseReviewContainers(column, indicies)))
                 break;
 
             default:
