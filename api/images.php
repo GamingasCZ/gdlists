@@ -149,14 +149,16 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     if ($toFolder == -1)
         $folder = NULL;
 
-    if ($saveToDatabase)
+    if ($saveToDatabase) {
         $res = doRequest($mysqli, "INSERT INTO `images` (`uploaderID`, `hash`, `filesize`, `folder`) VALUES (?,?,?,?)", [$uid, $imageHash, $compressedFilesize, $folder], "ssis");
 
-    if (!array_key_exists("error", $res)) {
-        $galleryDetails["used"] += $compressedFilesize;
-        $galleryDetails["filecount"] += 1;
+        if (!array_key_exists("error", $res)) {
+            $galleryDetails["used"] += $compressedFilesize;
+            $galleryDetails["filecount"] += 1;
+        }
+        else die("-5");
     }
-    else die("-5");
+
 
     return $imageHash;
 }
