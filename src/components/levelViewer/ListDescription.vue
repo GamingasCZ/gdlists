@@ -110,8 +110,8 @@ const listUploadDate = computed(() =>props.review ?
   new Date(props.timestamp!).toLocaleDateString() :
   new Date(parseInt(props.timestamp!) * 1000).toLocaleDateString())
 
-const headerColor = computed(() => chroma.hsl(props.color[0], 0.39, 0.11, 0.8).css())
-const descColor = computed(() => chroma.hsl(props.color[0], 0.27, 0.16, 0.8).css())
+const headerColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.39, 0.11, 0.8).css())
+const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16, 0.8).css())
 
 </script>
 

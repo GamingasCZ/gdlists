@@ -155,10 +155,10 @@ async function loadList(loadedData: LevelList | null) {
     document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
     // Set list colors
-    LIST_COL.value = LIST_DATA.value?.data.pageBGcolor!;
+    LIST_COL.value = LIST_DATA.value?.data?.pageBGcolor
     
     // Saturation 0
-    if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
+    if (LIST_COL.value && LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
     
     if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
       modifyListBG(LIST_COL.value);
