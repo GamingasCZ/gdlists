@@ -77,11 +77,13 @@ const color = computed(() => {
     return props.bgcolor
 })
 
+const fireBG = `url(${import.meta.env.BASE_URL}/static/flames.webp)`
+
 </script>
 
 <template>
     <section class="relative p-2 w-full break-words rounded-sm border-l-4 border-solid" :style="{borderColor: color, backgroundColor: chroma(color).darken(4).hex() }">
-      <div v-if="uid == '-2'" class="bg-[url(@/images/flames.webp)] absolute z-10 opacity-40 mix-blend-hard-light bottom-0 left-0 w-full h-full bg-repeat-x bg-contain"></div>
+      <div v-if="uid == '-2'" :style="{backgroundImage: fireBG}" class="absolute bottom-0 left-0 z-10 w-full h-full bg-repeat-x bg-contain opacity-40 mix-blend-hard-light"></div>
       <header class="flex gap-2 items-center">
         <ProfilePicture class="w-9 pointer-events-none" :uid="pfp" :cutout="cutout" />
         <div class="inline">

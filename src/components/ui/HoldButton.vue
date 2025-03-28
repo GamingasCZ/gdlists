@@ -5,8 +5,9 @@ const emit = defineEmits<{
     (e: "pushed"): void
 }>()
 
-defineProps<{
-    text: string
+const props = defineProps<{
+    text?: string
+    holdTime?: number
 }>()
 
 const fill = ref(101)
@@ -15,7 +16,7 @@ const startHold = () => {
     if (timer != -1) return
     fill.value = 90
     timer = setInterval(() => {
-        fill.value -= 0.2
+        fill.value -= props.holdTime || 0.2
         if (fill.value <= 0) {
             endHold()
             emit('pushed')
@@ -33,8 +34,9 @@ const fillPerc = computed(() => Math.round(fill.value))
 </script>
 
 <template>
-    <button @mousedown="startHold" @mouseleave="endHold" @mouseup="endHold" class="relative px-2 py-1 font-bold overflow-clip rounded-md border-2 border-red-400 button">
+    <button @mousedown="startHold" @touchstart="startHold" @touchend="endHold" @mouseleave="endHold" @mouseup="endHold" class="relative px-2 py-1 font-bold overflow-clip rounded-md border-2 border-red-400 button">
         <span class="relative z-10">{{ text }}</span>
+        <slot class="relative z-10" />
         <Transition name="fade">
             <div v-show="fill != 101" class="absolute top-0 bottom-0 left-0 z-0 bg-[#14b7b7]" :style="{right: `${fillPerc}%`}"></div>
         </Transition>

@@ -29,6 +29,7 @@
   --primaryColor: #0000;
   --secondaryColor: #0000;
   --brightGreen: #0000;
+  scrollbar-color: var(--primaryColor) var(--siteBackground);
 }
 
 body {
@@ -198,7 +199,7 @@ dialog {
 }
 #reviewText[data-white-page=true] {
   transition: background 0.25s;
-  background: #ece6d9 !important;
+  background: #ece6d9;
 }
 
 @media print {
@@ -210,7 +211,7 @@ dialog {
 }
 
 .readabilityMode {
-  @apply max-w-[80ch] leading-relaxed text-xl;
+  @apply max-w-[80ch] text-xl;
 }
 
 /* Use when you want regular parsing */
@@ -236,5 +237,10 @@ dialog {
 }
 
 kbd {
-  @apply bg-white bg-opacity-20 rounded-md p-0.5 border-white text-xs align-middle mx-1 min-w-16 border-opacity-40 border-2 border-b-4
+  @apply bg-white bg-opacity-20 rounded-md p-0.5 border-white text-xs align-middle mx-1 min-w-6 border-opacity-40 border-2 border-b-4
+}
+
+.thinScrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primaryColor) transparent;
 }

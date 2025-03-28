@@ -31,7 +31,7 @@ const containers: Containers = {
         {
             key: "size",
             title: i18n.global.t('reviews.fontSize'),
-            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 20, 24, 32, 36, 48, 64],
+            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 18, 20, 22, 24, 32, 36, 48, 64],
             default: 0,
         },
         {
@@ -69,25 +69,28 @@ const containers: Containers = {
         nestable: true,
         canEditText: false,
         additionalComponents: [ReviewDivisor],
+        resizeableProperty: "sizeY",
         settings: [
-            {
-                key: "sizeY",
-                title: "",
-                type: [-1],
-                default: 32,
-            },
             {
                 key: "visible",
                 title: i18n.global.t('other.visible'),
                 type: [2],
                 default: true,
-            }
+            },
+            {
+                key: "sizeY",
+                title: "",
+                type: [-1],
+                default: 32,
+                valueRange: [16, 250]
+            },
         ]
     },
     showImage: {
         nestable: true,
         canEditText: false,
         additionalComponents: [ReviewImage],
+        resizeableProperty: "width",
         settings: [
             {
                 key: "url",
@@ -99,7 +102,8 @@ const containers: Containers = {
                 key: "width",
                 title: "",
                 type: [-1],
-                default: 0
+                default: 0,
+                valueRange: [64, 960]
             },
             {
                 key: "pick",
@@ -138,19 +142,21 @@ const containers: Containers = {
         nestable: true,
         canEditText: false,
         additionalComponents: [ReviewVideo],
+        resizeableProperty: "width",
         settings: [
-            {
-                key: "width",
-                title: "",
-                type: [-1],
-                default: 320
-            },
             {
                 key: "url",
                 title: i18n.global.t('reviews.ytLink'),
                 type: [0],
                 required: true,
                 default: ""
+            },
+            {
+                key: "width",
+                title: "",
+                type: [-1],
+                default: 320,
+                valueRange: [104, 720]
             },
             {
                 key: "description",
@@ -264,6 +270,7 @@ const containers: Containers = {
         canEditText: false,
         dependentOnChildren: false,
         additionalComponents: [ReviewCarousel],
+        resizeableProperty: "height",
         settings: [
             {
                 key: "components",
@@ -277,7 +284,8 @@ const containers: Containers = {
                 title: '',
                 type: [-1],
                 required: true,
-                default: 192
+                default: 192,
+                valueRange: [48, 960]
             },
             {
                 key: "pick",
@@ -332,21 +340,25 @@ const containers: Containers = {
 
 export default containers
 
+export type ContainerNames = 'default' |
+'heading1' |
+'heading2' |
+'heading3' |
+'divisor' |
+'list' |
+'showImage' |
+'showLevel' |
+'showList' |
+'addVideo' |
+'showRating' |
+'twoColumns' |
+'showCollab' |
+'addCarousel'
+
+export type settings = cDefault & cHeading1 & cHeading2 & cHeading3 & cDivisor & cShowImage & caddVideo & cShowRating & cShowLevel & cShowList & cTwoColumns & cAddCarousel
+
 export type Containers = {
-    default: Container
-    heading1: Container
-    heading2: Container
-    heading3: Container
-    divisor: Container
-    list: Container
-    showImage: Container
-    showLevel: Container
-    showList: Container
-    addVideo: Container
-    showRating: Container
-    twoColumns: Container
-    showCollab: Container
-    addCarousel: Container
+    [container in ContainerNames]: Container
 }
 
 export type Container = {
@@ -360,6 +372,7 @@ export type Container = {
     nestable: boolean,
     canEditText: boolean,
     settings: ContainerSettings[],
+    resizeableProperty?: string
     errorCheck?: (x: object) => {success: boolean, mess?: string}
 }
 
@@ -369,4 +382,19 @@ export type ContainerSettings = {
     type: number[]
     default: any
     required?: boolean
+    valueRange?: [number, number]
 }
+
+export type cDefault = {noMD: boolean, size: number, indent: boolean}
+export type cHeading1 = {}
+export type cHeading2 = {}
+export type cHeading3 = {}
+export type cDivisor = {sizeY: number, visible: boolean}
+export type cShowImage = {url: string, width: number, pick: number, alt: string, description: string, link: string}
+export type caddVideo = {width: number, url: string, description: string}
+export type cShowRating = {level: number, show: number}
+export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
+export type cShowList = {post: boolean, postType: number, pick: number}
+export type cTwoColumns = {components: (Containers | boolean)[]}
+export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
+

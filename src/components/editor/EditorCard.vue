@@ -1,24 +1,32 @@
 <script setup lang="ts">
-import { diffScaleOffsets, diffTranslateOffsets, shortenYTLink } from "@/Editor";
+import { currentUID, lastUsedTags, newCardBG, shortenYTLink, TAG_COUNT } from "@/Editor";
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
-import { computed, onMounted, ref } from "vue";
-import type { Level, LevelSearchResponse, ytSearchDetails } from "../../interfaces";
+import { computed, inject, nextTick, onMounted, type Ref, ref } from "vue";
+import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
-import DifficultyPicker from "./DifficultyPicker.vue";
 import LevelTags from "./LevelTags.vue";
-import YoutubeVideoPreview from "./YoutubeVideoPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
-import LevelBackground from "./LevelBackground.vue";
+import { i18n } from "@/locales";
+import Dropdown from "../ui/Dropdown.vue";
+import { DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
+import { breakCache } from "../global/imageCache";
+import EditorCardRatingView from "./EditorCardRatingView.vue";
+import EditorTag from "./EditorTag.vue";
+import EditorCardTagDropdown from "./EditorCardTagDropdown.vue";
+import { TagName } from "@/assets/tags";
+import CircularRating from "../ui/CircularRating.vue";
+import { Limit } from "@/assets/limits";
 
 const props = defineProps<{
-  levelArray: Level[]
-  index?: number;
+  levelArray: PostData
+  index: number;
   opened?: boolean;
   data?: Level;
   updatingPositions: number;
+  isInList: boolean
 }>();
 
 const emit = defineEmits<{
@@ -30,49 +38,36 @@ const emit = defineEmits<{
   (e: "throwError", errorText: string): void;
 }>();
 
-// Colors
-const lightCol = () =>
-  chroma
-    .hsl(...props.levelArray.levels[props.index!].color!)
-    .brighten(0.5)
-    .css();
-const changeCardColors = (newColors: [number, number, number]) =>
-(props.levelArray.levels[props.index!].color = [
-  newColors[0],
-  0.5,
-  parseFloat((newColors[2] / 64).toFixed(2)),
-]);
+var modDiff = [false, false]
 
 // Difficulty Picker
 const changeRate = async (newRating: number) => {
+  modDiff[1] = true
+  if (modDiff[0] && modDiff[1]) {
+    modDiff = [false, false]
+    diffPickerOpen.value = false
+  }
+
   if (props.levelArray.levels[props.index!].difficulty[0] != 0) { // N/A cannot be rated
     props.levelArray.levels[props.index!].difficulty[1] = newRating;
   }
-  rateImagePath.value = await getRateImage()
 }
 const changeFace = async (newFace: number) => {
+  modDiff[0] = true
+  if (modDiff[0] && modDiff[1]) {
+    modDiff = [false, false]
+    diffPickerOpen.value = false
+  }
+
   if (newFace == 0) {
     props.levelArray.levels[props.index!].difficulty[1] = 0 // Unrate N/A levels
-    rateImagePath.value = await getRateImage()
   }
 
   props.levelArray.levels[props.index!].difficulty[0] = newFace;
-  diffFacePath.value = await getDiffFace()
 }
 
 const BASE_URL = import.meta.env.BASE_URL
-const rateImagePath = ref("")
-const getRateImage = () => {
-  let rate = props.levelArray.levels[props.index!].difficulty?.[1] ?? 0;
-  if (rate == 0) rateImagePath.value = ""; // Unrated level
-  else {
-    rateImagePath.value = `${BASE_URL}/faces/${["star", "featured", "epic", "legendary", "mythic"][rate - 1]}.webp`
-  }
-};
-getRateImage()
-
-
-const diffFacePath = ref(`${BASE_URL}/faces/${props.levelArray.levels[props.index!].difficulty?.[0] ?? 0}.webp`)
+const ratings = ["error", "star", "featured", "epic", "legendary", "mythic"]
 
 const levelCreator = ref(typeof props.levelArray.levels[props.index!].creator == 'object' ? props.levelArray.levels[props.index!].creator[0][0].name : props.levelArray.levels[props.index!].creator)
 const modifyCreator = (e: Event | string) => {
@@ -88,52 +83,6 @@ const modifyCreator = (e: Event | string) => {
 
 const selectedDiff = ref(props.levelArray.levels[props.index!].difficulty)
 
-const modifyVideo = (e: Event) => {
-  let videoInput = (e.target as HTMLInputElement)
-
-  videoInput.value = shortenYTLink(videoInput.value)
-  props.levelArray.levels[props.index!].video = videoInput.value
-}
-
-const ytPanelOpen = ref(false)
-const ytVideoData = ref<ytSearchDetails>({ videoCount: 0 })
-async function videoSearch() {
-  let data: ytSearchDetails = {
-    success: false,
-    videoCount: 0,
-    titles: [],
-    creators: [],
-    thumbnails: [],
-    links: [],
-    publishTime: []
-  }
-
-  await axios.get(`https://youtube.googleapis.com/youtube/v3/search`, {
-    params: { part: "snippet", "maxResults": 10, q: `Geometry Dash ${props.levelArray.levels[props.index!].levelName}`, key: import.meta.env.VITE_YTAPIKEY }
-  }).then(res => {
-    data.success = true
-    data.videoCount = res.data.pageInfo.resultsPerPage
-    res.data.items.forEach(video => {
-      data.titles.push(video.snippet.title)
-      data.creators.push(video.snippet.channelTitle)
-      data.links.push(video.id.videoId)
-      data.thumbnails.push(video.snippet.thumbnails.default.url)
-      data.publishTime.push(video.snippet.publishTime)
-    })
-    ytPanelOpen.value = true
-  })
-
-  return data
-}
-
-const vidScrollBox = ref(0)
-const scroll = (by: number) => {
-  let ele = document.querySelector("#youtubeScroll") as HTMLDivElement
-  vidScrollBox.value = ele.scrollLeft + by
-  ele.scrollLeft += by
-  vidScrollBox.value = vidScrollBox.value >= (ele.scrollWidth - by) ? -1 : vidScrollBox.value
-}
-
 const openedPanel = ref<number>(0);
 
 const mobileMoveLevel = () => {
@@ -141,7 +90,7 @@ const mobileMoveLevel = () => {
 };
 
 const collabFlash = ref(false)
-const searching = ref(false)
+const searching = defineModel({default: false})
 function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   if (searchingByID && !searchAvailableID.value) return
   if (!searchingByID && !searchAvailableCreator.value) return
@@ -151,272 +100,591 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
   let levelName = props.levelArray.levels[props.index!].levelName;
   let searchingFromUser = levelName && levelCreator.value
 
+  let thumb = `thumb=${SETTINGS.value?.saveThumbs ? 1 : 0}`
   let request: string = "";
-  if (searchingByID) request = `id=${levelID}`; // Searching by ID
-  else if (!levelName && levelCreator.value) request = `levelMaker=${levelCreator.value}`
+  if (searchingByID) request = `${thumb}&id=${levelID}`; // Searching by ID
+  else if (!levelName && levelCreator.value) request = `${thumb}&levelMaker=${levelCreator.value}`
   else {
     if (searchingFromUser) {
       // Find level by specific creator
-        request = `userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
-      } else request = `levelName=${levelName}`; // Find level
+      request = `${thumb}&userSearch=${levelCreator.value}&name=${levelName}&page=${userSearchPage}`;
+    } else request = `${thumb}&levelName=${levelName}`; // Find level
+  }
+  searching.value = true
+  axios
+    .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
+    .then(async (response: AxiosResponse) => {
+      let level: LevelSearchResponse = response.data;
+
+      // Couldn't find level
+      if (typeof response.data != "object") {
+        searching.value = false; return;
       }
-      searching.value = true
-      axios
-        .get(import.meta.env.VITE_API + "/rubLevelData.php?" + request)
-        .then(async (response: AxiosResponse) => {
-          let level: LevelSearchResponse = response.data;
 
-          // Couldn't find level
-          if (typeof response.data != "object") {
-            searching.value = false; return;
-          }
+      // Try next page
+      if (searchingFromUser && userSearchPage < 5) {
+        searchLevel(searchingByID, userSearchPage + 1)
+      }
 
-          // Try next page
-          if (searchingFromUser && userSearchPage < 5) {
-            searchLevel(searchingByID, userSearchPage + 1 )
-          }
-          
-          props.levelArray.levels[props.index!].levelID = level.id;
-          props.levelArray.levels[props.index!].levelName = level.name;
-          props.levelArray.levels[props.index!].platf = level.platf;
-          isPlatformer.value = level.platf
-    
-          modifyCreator(level.author)
-    
-          if (hasLocalStorage()) {
-            let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
-            collabFlash.value = saveIDs.indexOf(parseInt(props.levelArray.levels[props.index].levelID)) > -1
-            setTimeout(() => {
-              collabFlash.value = false
-            }, 5000);
-          }
-    
-          if (level.difficulty == -1) level.difficulty = 11 // Auto levels
-          props.levelArray.levels[props.index!].difficulty = [
-            level.difficulty,
-            level.cp,
-          ];
-          selectedDiff.value = props.levelArray.levels[props.index!].difficulty
-    
-          ytVideoData.value = await videoSearch()
-          searching.value = false;
-          (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
-        }).catch(() => searching.value = false);
-    }
+      props.levelArray.levels[props.index!].levelID = level.id;
+      props.levelArray.levels[props.index!].levelName = level.name;
+      
+      if (level.platf)
+        props.levelArray.levels[props.index!].tags.push([TagName.PLATFORMER, -1, '']);
+      if (level.objCount >= Limit.HIGH_OBJCOUNT)
+        props.levelArray.levels[props.index!].tags.push([TagName.HIGH_OBJECTS, -1, '']);
+      if (level.isCopy)
+        props.levelArray.levels[props.index!].tags.push([TagName.COPY, -1, '']);
+      if (level.coins)
+        props.levelArray.levels[props.index!].tags.push([TagName.COINS, -1, '']);
+      if (level.twoPlayer)
+        props.levelArray.levels[props.index!].tags.push([TagName.TWO_PLAYER, -1, '']);
+      if (level.gameVer == 19)
+        props.levelArray.levels[props.index!].tags.push([TagName.ONE_P_NINE, -1, '']);
+      if (level.len == 4) // XL
+        props.levelArray.levels[props.index!].tags.push([TagName.LONG, -1, '']);
+      if (level.downloads > 250 && level.likes / level.downloads < 0.01) // XL
+        props.levelArray.levels[props.index!].tags.push([TagName.CONTROVERSIAL, -1, '']);
 
+
+      props.levelArray.levels[props.index!].BGimage.image[0] = level.thumbnail;
+      
+      colorizeViaThumb()
+      modifyCreator(level.author)
+
+      if (hasLocalStorage()) {
+        let saveIDs = JSON.parse(localStorage.getItem("savedCollabIDs")!) ?? [];
+        collabFlash.value = saveIDs.indexOf(parseInt(props.levelArray.levels[props.index].levelID)) > -1
+        setTimeout(() => {
+          collabFlash.value = false
+        }, 5000);
+      }
+
+      if (level.difficulty == -1) level.difficulty = 11 // Auto levels
+      props.levelArray.levels[props.index!].difficulty = [
+        level.difficulty,
+        level.cp,
+      ];
+      selectedDiff.value = props.levelArray.levels[props.index!].difficulty
+
+      ytVideoData.value = await videoSearch()
+      searching.value = false;
+      (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
+    }).catch(() => searching.value = false);
+}
+
+const colorizeViaThumb = () => {
+  let thumbURL = props.levelArray.levels[props.index!]?.BGimage?.image?.[0]
+  if (!thumbURL) return
+  if (!SETTINGS.value.colorization) return
+
+  let thumbImg = new Image()
+  thumbImg.src = `${userContent}/userContent/${currentUID.value}/${thumbURL}.webp`
+  thumbImg.onload = () => {
+    let thumbCol = getDominantColor(thumbImg).hsl()
+    let thumbDom = getDominantLine(thumbImg)
+
+    props.levelArray.levels[props.index].BGimage.image[1] = thumbDom
+    changeCardColors([thumbCol[0], 0, thumbCol[2]*64])
+    breakCache()
+  }
+}
 
 const isOldCollab = computed(() => typeof props.levelArray.levels[props.index!].creator == 'object' && !props.levelArray.levels[props.index!].creator[3])
 const mess = [
   useI18n().t('collabTools.noEditOldCollab'),
   useI18n().t('editor.collabNoPhones')
 ]
+
+const openDialogs = inject<Ref<object>>("openedDialogs")
 const openCollabTools = () => {
   if (isOldCollab.value)
     emit('throwError', mess[0])
-  else if (/iPhone|Android/i.test(navigator.userAgent))
-    emit('throwError', mess[1])
   else
-    emit('openCollabTools', props.index!)
+    openDialogs.collabs = [true, props.index]
 }
-
-const creatorFilledIn = computed(() => {
-  if (typeof props.levelArray.levels[props.index!].creator == "string")
-    return props.levelArray.levels[props.index!].creator
-  else {
-    return props.levelArray.levels[props.index!].creator[0]?.[0]?.name
-  }
-})
 
 const searchAvailableCreator = computed(() => (props.levelArray.levels[props.index!].levelName != '' || props.levelArray.levels[props.index!].creator != '') && !searching.value)
 const searchAvailableID = computed(() => props.levelArray.levels[props.index!].levelID && !searching.value)
-
-const isPlatformer = ref(props.levelArray.levels[props.index!].platf)
-const switchPlatformer = () => {
-  isPlatformer.value = !isPlatformer.value
-  props.levelArray.levels[props.index!].platf = isPlatformer.value
-}
 
 const background = computed(() => {
   if (SETTINGS.value.disableColors)
     return getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
 
-  return `linear-gradient(-90deg, ${lightCol()}, ${chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()})`
+  return chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()
 })
+
+const tagPlaceholder = ref(`'${i18n.global.t('editor.levelTags')}'`)
+const start = ref("#951b99")
+const editingRating = ref(false)
+
+const difficultyButton = ref<HTMLButtonElement>()
+const diffPickerOpen = ref(false)
+const difficulties = [1,2,3,4,5,6,7,8,9,10,0,11]
+
+const base = import.meta.env.BASE_URL
+
+const pickImages = () => {
+  openDialogs.imagePicker = [true, WriterGallery.LevelImage, props.index]
+}
+const pickingColor = ref(false)
+const changeCardColors = (newColors: [number, number, number]) =>
+(props.levelArray.levels[props.index!].color = [
+  newColors[0],
+  0.5,
+  parseFloat((newColors[2] / 64).toFixed(2)),
+]);
+
+const addingVideo = ref(false)
+const videoInput = ref<HTMLInputElement>()
+const userContent = import.meta.env.VITE_USERCONTENT
+
+const levelMedia = computed(() => {
+  let allMedia: LevelScreenshot[] = []
+  let video = props.levelArray.levels[props.index]?.video
+  let bgImage = props.levelArray.levels[props.index]?.BGimage?.image?.[0]
+  let screenshots = props.levelArray.levels[props.index]?.screenshots
+
+  if (video)
+    allMedia.push([LevelImage.OLD_VIDEO,video,""])
+  if (bgImage && bgImage[0])
+    allMedia.push([LevelImage.THUMBNAIL,bgImage,""])
+
+  if (screenshots)
+  allMedia = allMedia.concat(screenshots)
+
+  return allMedia
+})
+
+const imageSettingsOpen = ref(-1)
+const gearElement = ref<HTMLButtonElement>()
+
+const setAsThumb = (srcshotIndex: number) => {
+  let arr = props.levelArray.levels[props.index]
+  if (!arr?.BGimage)
+  arr.BGimage = newCardBG()
+
+  let previousThumb
+  if (arr.BGimage.image[0]) {
+    srcshotIndex--
+    previousThumb = arr.BGimage.image[0]
+  }
+
+  arr.BGimage.image[0] = arr.screenshots[srcshotIndex][1]
+  arr.screenshots?.splice(srcshotIndex, 1)
+
+  if (previousThumb) {
+    arr.screenshots?.push([
+      LevelImage.IMAGE,
+      previousThumb,
+      ""
+    ])
+  }
+
+  colorizeViaThumb()
+}
+
+const addVideo = (e: ClipboardEvent) => {
+  let link = e.clipboardData?.getData("Text")
+  if (!link) return
+
+  let shortened = shortenYTLink(link, true)
+  if (!shortened) return
+
+  props.levelArray.levels[props.index].screenshots?.push([
+    LevelImage.VIDEO,
+    shortened,
+    ''
+  ])
+
+  addingVideo.value = false
+  videoInput.value.value = ""
+}
+
+const unsetThumb = () => {
+  let arr = props.levelArray.levels[props.index]
+  arr.screenshots.push([
+    LevelImage.IMAGE,
+    arr.BGimage.image[0],
+    ""  
+  ])
+  arr.BGimage.image[0] = ""
+  imageSettingsOpen.value = -1
+}
+
+const removeScreenshot = (type: LevelImage, ind: number) => {
+  let arr = props.levelArray.levels[props.index]
+  if (type == LevelImage.THUMBNAIL) {
+    arr.BGimage.image[0] = ""
+  }
+  else {
+    arr.screenshots?.splice(ind-1, 1)
+  }
+}
+
+const tagbox = ref<HTMLInputElement>()
+const nameInput = ref<HTMLInputElement>()
+onMounted(() => {
+  nameInput.value.focus()
+})
+
+const tagSearch = ref("")
+const tagDropdownShown = ref(false)
+const tagNames = (() => {
+  let tags: [number, string][] = []
+  for (let i = 0; i < TAG_COUNT; i++)
+    tags.push([i, i18n.global.t(`editor.tags[${i}]`)])
+  return tags
+})()
+const filteredTags = computed(() => {
+  return tagNames.filter(x => x[1].toLowerCase().includes(tagSearch.value.toLowerCase()))
+})
+
+const addTag = (ind: number) => {
+  if (props.levelArray.levels[props.index].tags.length >= Limit.MAX_TAGS) return
+
+  if (!lastUsedTags.value.includes(ind))
+        lastUsedTags.value.splice(0,0, ind)
+
+  if (lastUsedTags.value.length > Limit.MAX_LASTUSED_TAGS)
+      lastUsedTags.value.pop()
+  
+  props.levelArray.levels[props.index].tags.push([ind, -1, ''])
+  tagSearch.value = ''
+
+}
+
+const editLastTag = (e: KeyboardEvent) => {
+  if (tagSearch.value.length) return
+  let lastTag = props.levelArray.levels[props.index].tags.pop()
+  if (!lastTag) return
+
+  if (lastTag[1] == -1)
+    tagSearch.value = i18n.global.t(`editor.tags[${lastTag[0]}]`)
+  else
+    tagSearch.value = lastTag[1]
+}
+
+const removeTag = (ind: number) => {
+  props.levelArray.levels[props.index].tags.splice(ind, 1)
+}
+
+const editingImageSectionName = ref(false)
+const sectionNameInput = ref<HTMLInputElement>()
+const editSectionName = () => {
+  editingImageSectionName.value = true
+  nextTick(() => sectionNameInput.value?.focus())
+}
+
+const avgRating = computed(() => {
+  if (editingRating.value) return "noRating"
+  let ratings = props.levelArray.levels[props.index].ratings
+  if (!ratings) return "noRating"
+
+  let am = 0
+  let score = ratings[0].concat(ratings[1]).reduce((acc, val) => {
+    if (val != -1) {
+      acc += val
+      am++
+    }
+    return acc
+  }, 0)
+  if (am == 0) return "noRating"
+
+  let avgScore = score/am
+  if (avgScore < 4) return "sad"
+  else if (avgScore > 7) return "nice"
+  else return "mid"
+})
+
+const cardDropdown = ref<HTMLDivElement>()
+
 </script>
 
 <template>
-  <!-- Card content -->
-  <section
-    :style="{ background: background }"
-    class="flex flex-col gap-1.5 overflow-clip rounded-md">
-    <div class="flex justify-between p-2 pr-1 bg-black bg-opacity-20">
-      <div class="box-border inline-flex gap-2">
-        <!-- Level ID input -->
-        <img class="w-10 aspect-square" src="../../images/levelID.svg" alt="" />
-        <input autocomplete="off" @keyup.enter="searchLevel(true)"
-          class="max-w-[20vw] box-border rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:max-w-[30vw]"
-          type="text" name="levelID" v-model="levelArray.levels[index!].levelID" :placeholder="$t('level.levelID')" />
-        <button :disabled="!searchAvailableID" type="button" class="box-border relative" :title="$t('editor.searchTitle')"
-          :style="{ opacity: searchAvailableID ? 1 : 0.5 }" @click="searchLevel(true)">
-          <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
-          <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt="" />
-        </button>
-      </div>
+  <section :style="{background: background}" class="rounded-md">
 
-      <div class="flex max-sm:hidden">
-        <!-- Level position -->
-        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveUp.svg" alt="" :title="$t('editor.moveUpTitle')"
-          @click="emit('doMove', index!, index! - 1); openedPanel = 0;" />
-        <input autocomplete="off" readonly
-          class="w-12 mx-1 max-w-[20vw cursor-move outline-none font-black text-2xl rounded-md bg-black bg-opacity-30 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
-          :value="index! + 1" @mousedown="mobileMoveLevel()" />
-        <img class="box-border p-1.5 w-10 button aspect-square" src="../../images/moveDown.svg" alt="" :title="$t('editor.moveDownTitle')"
-          @click="emit('doMove', index!, index! + 1); openedPanel = 0;" />
-      </div>
+    <Dropdown v-if="diffPickerOpen" @close="diffPickerOpen = false" :button="difficultyButton">
+      <template #header>
+        <section class="flex gap-2 p-2 text-white">
+          <div class="">
+            <div class="flex flex-wrap gap-1 gap-y-3 w-60">
+              <button @click="changeFace(diff)" v-for="diff in difficulties" :class="{'!border-lof-400 !bg-lof-300': levelArray.levels[index].difficulty[0] == diff}" class="p-0.5 bg-black bg-opacity-20 rounded-md border border-transparent grow button hover:bg-opacity-60">
+                <img :src="`${BASE_URL}/faces/${diff}.webp`" class="mx-auto w-9" alt="">
+              </button>
+            </div>
+            <p class="mt-2 text-2xl text-center text-white/40">{{ $t('reviews.difficulty') }}</p>
+          </div>
 
-      <!-- Mobile move button -->
-      <button type="button" @click="mobileMoveLevel()" class="mr-1 sm:hidden" v-if="levelArray.levels.length > 1">
-        <img class="p-1 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button"
-          src="../../images/move.svg" alt="" />
-      </button>
-    </div>
-    <div class="flex gap-2 items-center px-2 max-sm:flex-col">
-      <!-- Level name input -->
-      <div class="flex gap-2 max-sm:w-full">
-        <img
-          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
-          src="../../images/level.svg"
-          alt=""
-          :title="$t('editor.switchTypeTitle')"
-          v-if="!isPlatformer"
-          @click="switchPlatformer"
-        />
-        <img
-          class="p-1 bg-black bg-opacity-30 rounded-md min-w-[2.5rem] button aspect-square"
-          src="../../images/levelPlat.svg"
-          alt=""
-          :title="$t('editor.switchTypeTitle')"
-          v-else
-          @click="switchPlatformer"
-        />
-        <button
-          :disabled="!(levelArray.levels[index!].levelName != '' || levelArray.levels[index!].creator != '')"
-          type="button"
-          :title="$t('editor.searchTitle')"
-          @click="searchLevel(false)"
-          class="sm:hidden"
-        >
-          <img
-            class="p-2 min-w-[2.5rem] bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt=""
-            :style="{ opacity: (levelArray.levels[index!].levelName || levelArray.levels[index!].creator) ? 1 : 0.5 }" />
-        </button>
-        <input autocomplete="off"
-          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text"
-          name="levelName"
-          maxlength="20"
-          v-model="levelArray.levels[index!].levelName"
-          :placeholder="isPlatformer ? $t('level.levelNamePlat') : $t('level.levelName')"
-        />
-      </div>
+          <hr class="mx-4 my-auto w-0.5 h-40 bg-white bg-opacity-10 rounded-md border-none opacity-50">
+          
+          <div class="">
+            <div class="grid grid-cols-2 gap-1 mb-5">
+              <button @click="changeRate(i)" v-for="(rate, i) in ratings" :class="{'!border-lof-400 !bg-lof-300': levelArray.levels[index].difficulty[1] == i}" class="p-0.5 bg-black bg-opacity-20 rounded-md border border-transparent grow button hover:bg-opacity-60">
+                <img :src="`${BASE_URL}/faces/${rate}.webp`" class="mx-auto w-9" alt="">
+              </button>
+            </div>
+            <p class="mt-2 text-2xl text-center text-white/40">{{ $t('editor.rating') }}</p>
+          </div>
+        </section>
+      </template>
+    </Dropdown>
 
-      <!-- Level search -->
-      <div class="flex gap-2 items-center max-sm:hidden">
-        <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
-          :style="{ opacity: levelArray.levels[index!].levelName ? 1 : 0.5 }" />
-        
-        <button :disabled="!searchAvailableCreator" type="button" class="box-border relative" :title="$t('editor.searchTitle')"
-          :style="{ opacity: searchAvailableCreator ? 1 : 0.5 }" @click="searchLevel(false)"
-        >
-          <img src="../../images/loading.webp" alt="" class="absolute p-0.5 w-full animate-spin" v-if="searching">
-          <img class="p-2 w-10 bg-black bg-opacity-30 rounded-md transition-opacity duration-100 button aspect-square"
-            src="../../images/searchOpaque.svg" alt="" />
-        </button>
-        
-        <hr class="w-8 h-[0.3rem] bg-white rounded-full transition-opacity duration-100"
-          :style="{ opacity: creatorFilledIn ? 1 : 0.5 }" />
-      </div>
-
-      <!-- Creator input -->
-      <div class="flex gap-2 max-sm:flex-row-reverse max-sm:w-full">
-        <input autocomplete="off"
-          class="h-10 sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full disabled:opacity-20"
-          type="text" name="creator" maxlength="15" :disabled="isOldCollab" :value="levelCreator" @change="modifyCreator"
-          :placeholder="$t('level.creator')" @keyup.enter="searchLevel(false)"/>
-        <button class="relative bg-black bg-opacity-30 rounded-md focus-within:!outline-current button"
-          @click="openCollabTools()"
-          :title="$t('editor.collabTitle')"
-          :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
-          <img class="absolute top-0 left-0 p-1 w-10 animate-ping aspect-square" src="../../images/collabMen.svg" alt=""
-            v-if="collabFlash" />
-          <img class="p-1 w-12 sm:w-10 aspect-square" src="../../images/collabMen.svg" alt="" />
-        </button>
-      </div>
-    </div>
-    <div class="flex justify-between items-center px-2 pb-2 max-sm:flex-col">
-      <!-- Video input -->
-      <div class="flex gap-2 max-sm:w-full">
-        <img class="min-w-[2.5rem] aspect-square" src="../../images/video.svg" alt="" />
-        <input autocomplete="off"
-          class="sm:max-w-[20vw] rounded-md bg-black bg-opacity-30 px-2 placeholder:text-white placeholder:text-opacity-80 max-sm:w-full"
-          type="text" name="video" maxlength="50" @change="modifyVideo" :value="levelArray.levels[index!].video"
-          :placeholder="$t('level.video')" />
-      </div>
-
-      <!-- Extras buttons -->
-      <div class="flex gap-2 items-start max-sm:mt-3">
-        <img
-          class="w-10 button"
-          @click="openedPanel = openedPanel != 1 ? 1 : 0"
-          :title="$t('editor.levelColorTitle')"
-          src="../../images/colorPicker.svg"
-          alt=""
-        />
-        <div class="flex relative justify-center items-center button" :title="$t('editor.diffTitle')" @click="openedPanel = openedPanel != 2 ? 2 : 0">
-          <img
-            class="w-10"
-            alt=""
-            src="../../images/difficultyBG.svg"
-          />
-          <DifficultyIcon class="absolute inset-0 top-1/2 left-1/2 w-8 -translate-x-1/2 -translate-y-1/2" :difficulty="selectedDiff[0]" :rating="selectedDiff[1]" />
+    <div v-show="!editingRating" class="flex overflow-clip max-sm:flex-col">
+      <div class="flex justify-between items-center px-0.5 py-2 bg-black bg-opacity-20 sm:flex-col">
+  
+        <!-- Move level -->
+        <div class="flex items-center sm:gap-2 sm:flex-col">
+          <button class="px-1.5 button"
+              :title="$t('editor.moveUpTitle')" @click="emit('doMove', index!, index! - 1); openedPanel = 0;">
+              <img class="w-6" src="../../images/moveUp.svg" alt="">
+          </button>
+          <input autocomplete="off" readonly
+            class="w-10 mx-1 max-w-[20vw] cursor-move outline-none font-black text-xl rounded-md bg-black bg-opacity-40 px-2 text-center placeholder:text-white placeholder:text-opacity-80"
+            :value="index! + 1" @mousedown="mobileMoveLevel()" />
+          <button class="px-1.5 button"
+              :title="$t('editor.moveDownTitle')" @click="emit('doMove', index!, index! + 1); openedPanel = 0;">
+              <img class="w-6" src="../../images/moveDown.svg" alt="">
+          </button>
         </div>
-        <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 3 ? 3 : 0" src="../../images/tagPicker.svg"
-          alt="" />
-        <img class="w-10 button" :title="$t('editor.labelsTitle')" @click="openedPanel = openedPanel != 4 ? 4 : 0" src="../../images/bgPicker.svg"
-          alt="" />
-        <img class="ml-4 w-10 button" :title="$t('editor.removeTitle')" @click="levelArray.levels.splice(index, 1);" src="../../images/deleteLevel.svg" alt="" />
+  
+        <div class="flex gap-4 items-center max-sm:pr-2 sm:flex-col">
+  
+          <button @click="pickingColor = !pickingColor" :title="$t('editor.levelColorTitle')" :class="{'!opacity-100': pickingColor}" class="opacity-40 mix-blend-plus-lighter invert-[0.2] button">
+            <img class="w-6" src="../../images/color.svg" alt="" />
+          </button>
+          
+          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="opacity-40 mix-blend-plus-lighter button invert-[0.2]">
+            <img class="w-7" src="../../images/trash.svg" alt="" />
+          </button>
+        </div>
+  
+      </div>
+  
+      <div class="grid gap-2 mt-2">
+  
+        <div class="grid gap-2 sm:grid-cols-2">
+          <div class="grid grid-cols-2 gap-2 max-sm:mr-2">
+            <!-- Level name -->
+            <form @submit.prevent="searchLevel(false)" class="flex col-span-2 gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+              <button ref="difficultyButton" @click="diffPickerOpen = true" type="button" class="button">
+                <DifficultyIcon class="w-12" :difficulty="selectedDiff?.[0] ?? 0" :rating="selectedDiff?.[1] ?? 0" />
+              </button>
+              <input ref="nameInput" v-model="levelArray.levels[index!].levelName" maxlength="20" type="text" class="w-full text-2xl font-bold bg-transparent border-none outline-none" :placeholder="$t('level.levelName')">
+              <button :disabled="!levelArray.levels?.[index]?.levelName || searching" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
+                <img v-if="searching" src="@/images/loading.webp" class="w-6 animate-spin min-w-6" alt="">
+                <img v-else src="@/images/searchOpaque.svg" class="min-w-6" alt="">
+              </button>
+            </form>
+    
+            <!-- Creator -->
+            <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+              <button @click="openCollabTools()" type="button" tabindex="-1" class="relative p-2 button" :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
+                <img class="absolute top-3 left-3 animate-ping min-w-6 aspect-square" src="../../images/collabMen.svg" alt=""
+                  v-if="collabFlash" />
+                <img class="min-w-8 aspect-square" src="../../images/collabMen.svg" alt="" />
+              </button>
+              <input :value="levelCreator" @change="modifyCreator" maxlength="20" type="text" class="w-36 text-lg bg-transparent border-none outline-none" :placeholder="$t('level.creator')">
+            </div>
+    
+            <!-- Level ID -->
+            <form @submit.prevent="searchLevel(true)" class="flex gap-3 items-center bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+              <input v-model="levelArray.levels[index!].levelID" maxlength="20" type="text" class="px-2 w-full text-lg bg-transparent border-none outline-none" :placeholder="$t('level.levelID')">
+              <button :disabled="!levelArray.levels?.[index]?.levelID || searching" type="submit" tabindex="-1" class="p-2 transition-opacity disabled:opacity-20">
+                <img v-if="searching" src="@/images/loading.webp" class="w-6 animate-spin min-w-6" alt="">
+                <img v-else src="@/images/searchOpaque.svg" class="min-w-6" alt="">
+              </button>
+            </form>
+          </div>
+  
+          <!-- Level rating -->
+          <button
+            @click="editingRating = true"
+            class="flex relative flex-wrap gap-1 justify-evenly mr-2 h-full min-h-16"
+            :class="{'items-end': isInList, 'items-center': !isInList}"
+          >
+            <div class="absolute inset-0 scrollRating" :class="{'bg-red-700': avgRating == 'sad', 'bg-lime-400 bg-opacity-40': avgRating == 'nice'}" :style="{backgroundImage: `url(${base}/rateBGs/${avgRating}.webp)`}"></div>
+            <div class="absolute inset-1 text-sm text-white text-opacity-80 overflow-clip bottomFade">{{ levelArray.levels[index!].commentary }}</div>
+            <CircularRating :class="{'translate-y-4': i % 2 && !isInList}" v-for="(rating, i) in levelArray.levels[index].ratings?.[0]" :min="0" :max="10" :value="rating" :name="DEFAULT_RATINGS[i].name" :color="chroma.hsl(...DEFAULT_RATINGS[i].color).hex()" />
+            <CircularRating :class="{'translate-y-4': i % 2}" v-for="(rating, i) in levelArray.levels[index].ratings?.[1]" :min="0" :max="10" :value="rating" :name="levelArray.ratings[i].name" :color="chroma.hsl(...levelArray.ratings[i].color).hex()" />
+          </button>
+        </div>
+  
+        <!-- Level tags -->
+        <div ref="tagbox" class="flex relative gap-3 items-center py-1 mx-2 max-w-full bg-black bg-opacity-20 rounded-t-md focus-within:bg-opacity-60" :class="{'rounded-b-md': !tagDropdownShown}">
+          <div class="px-1 pr-0">
+            <img src="@/images/levelID.svg" alt="" class="w-10 min-w-10" />
+          </div>
+          <div class="flex flex-wrap gap-1 grow">
+            <EditorTag
+              v-for="(tag, ind) in levelArray.levels[index].tags"
+              @auxclicked="removeTag(ind)"
+              :tag="tag"
+              selectable
+              gear
+              settable
+            />
+            <div class="flex gap-1" v-show="!(levelArray.levels[index]?.tags ?? []).length">
+              <EditorTag @clicked="addTag(TagName.PLATFORMER)" :tag="[TagName.PLATFORMER, -1, '']" isExample selectable plus />
+              <EditorTag @clicked="addTag(TagName.COINS)" :tag="[TagName.COINS, -1, '']" isExample selectable plus />
+            </div>
+
+            <input 
+              v-model="tagSearch"
+              @focus="tagDropdownShown = true"
+              @blur="tagDropdownShown = false"
+              @keyup.enter="filteredTags?.[0]?.[0] !== undefined && addTag(filteredTags[0][0]); cardDropdown?.updateDropdown()!"
+              @keydown.backspace="editLastTag($event); cardDropdown?.updateDropdown()!"
+              class="relative bg-transparent outline-none min-w-12 grow"
+            >
+          </div>
+
+          <Teleport to="body">
+            <EditorCardTagDropdown
+              v-if="tagDropdownShown"
+              ref="cardDropdown"
+              @add="addTag($event); cardDropdown?.updateDropdown()!"
+              :filtered-tags="filteredTags"
+              :tagbox="tagbox"
+            />
+          </Teleport>
+        </div>
+  
+        <!-- Screenshot carousel & Color Picker -->
+        <div class="grid overflow-auto p-2 bg-black bg-opacity-20">
+          <template v-if="levelMedia.length && (levelMedia.length != 1 || levelMedia[0][0] != LevelImage.THUMBNAIL)">
+            <form @submit.prevent="editingImageSectionName = false" v-if="editingImageSectionName" class="flex gap-2 items-center mb-2">
+              <input ref="sectionNameInput" type="text" maxlength="20" v-model="levelArray.levels[index].scShotSecName" class="p-1 bg-transparent outline-none focus-within:border-b-2" :placeholder="$t('reviews.sectionName')">
+              <button class="button" type="submit"><img src="@/images/checkThick.svg" class="w-5" alt=""></button>
+
+            </form>
+            <p v-else @click="editSectionName" class="flex mb-2 text-xl font-bold transition-opacity cursor-text group hover:opacity-100" :class="{'opacity-20': !levelArray.levels[index].scShotSecName}">
+              {{ levelArray.levels[index].scShotSecName || $t('reviews.sectionName') }} <img src="@/images/edit.svg" class="ml-2 w-4 opacity-0 group-hover:opacity-100" alt="">
+            </p>
+          </template>
+
+          <div class="flex overflow-auto gap-2">
+            <div v-show="!pickingColor" v-for="(image, ind) in levelMedia" class="relative duration-200 aspect-video group">
+  
+              <!-- Video indicator -->
+              <img v-if="image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO)" src="@/images/play.svg" class="absolute invert-[0.2] sepia hue-rotate-30 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12" alt="">
+  
+              <!-- Image / Video thumbnail -->
+              <img v-if="!(image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO))" class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+              <img v-else class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`https://img.youtube.com/vi/${image[1]}/0.jpg`" alt="">
+              
+              <!-- Thumbail indicator -->
+              <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
+              
+              <!-- Settings overlay -->
+              <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
+                  <img src="@/images/gear.svg" class="w-5" alt="">
+                </button>
+                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                  <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
+                  {{ $t('reviews.setThumb') }}
+                </button>
+                <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
+                  <img src="@/images/trash.svg" class="w-5" alt="">
+                </button>
+              </div>
+            </div>
+            
+            <div v-show="!pickingColor" v-if="(levelArray.levels[index]?.screenshots ?? []).length < 10" class="p-3 rounded-md border-2 border-white border-dashed opacity-10 transition-opacity mix-blend-plus-lighter hover:opacity-40">
+  
+              <!-- Add buttons -->
+              <div v-if="!addingVideo" class="flex flex-col gap-1 min-w-max text-left">
+                <button @click="pickImages" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
+                  <img :src="`${base}/formatting/showImage.svg`" class="w-6" alt="">
+                  {{ $t('reviews.addImage') }}
+                </button>
+                <hr class="m-0 opacity-50">
+                <button @click="addingVideo = true" class="flex gap-2 items-center p-2 rounded-md hover:bg-opacity-20 hover:bg-white">
+                  <img :src="`${base}/formatting/addVideo.svg`" class="w-6" alt="">
+                  {{ $t('reviews.addVideo') }}
+                </button>
+              </div>
+              
+              <!-- Video link input -->
+              <div v-else class="p-1 pt-0">
+                <div class="flex items-center mb-3">
+                  <button @click="addingVideo = false" class="p-2 mr-2 rounded-md hover:bg-white hover:bg-opacity-20">
+                    <img src="@/images/back.svg" class="w-6" alt="">
+                  </button>
+                  <img :src="`${base}/formatting/addVideo.svg`" class="mr-1 w-6 pointer-events-none" alt="">
+                  <span>{{ $t('reviews.addVideo') }}</span>
+                </div>
+                <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" placeholder="Vlož odkaz na YouTube video">
+              </div>
+  
+            </div>
+  
+            <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
+            :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
+          </div>
+        </div>
+        
       </div>
     </div>
 
-    <section class="relative bg-black bg-opacity-20" v-if="ytPanelOpen">
-      <header class="flex justify-between items-center px-3 py-2 bg-black bg-opacity-20">
-        <h3>{{ $t('editor.videoSearch') }}</h3>
-        <button class="button" @click="ytPanelOpen = false"><img src="@/images/close.svg" class="w-4" alt=""></button>
-      </header>
+    <EditorCardRatingView
+      v-show="editingRating"
+      @close="editingRating = false"
+      :post-data="levelArray"
+      :level-index="index"
+      :level-creator="levelCreator"
+      :is-list="isInList"
+    />
 
-      <button v-show="vidScrollBox > 5 || vidScrollBox == -1" @click="scroll(-600)"
-        class="absolute left-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&lt;</button>
-      <main class="flex overflow-x-hidden relative gap-2 p-2 max-sm:flex-col scroll-smooth" id="youtubeScroll">
-        <YoutubeVideoPreview v-for="vid in ytVideoData?.videoCount" :index="vid" :video-data="ytVideoData"
-          @pick-video="levelArray.levels[index!].video = $event" />
-      </main>
-      <button v-show="vidScrollBox != -1" @click="scroll(600)"
-        class="absolute right-2 top-1/2 z-10 w-10 h-10 text-3xl font-bold text-black rounded-full border-2 border-black border-solid -translate-y-1/2 max-sm:hidden button bg-lof-400">&gt;</button>
-
-    </section>
-    <!-- Extras panel -->
-    <div class="p-2 bg-black bg-opacity-20" v-show="openedPanel">
-      <!-- Youtube panel -->
-
-      <ColorPicker v-if="openedPanel == 1" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
-        :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
-      <DifficultyPicker v-if="openedPanel == 2" :level="index" @update="selectedDiff = $event" :level-array="levelArray" />
-      <LevelTags :level-array="levelArray" :card-index="index" v-if="openedPanel == 3" @open-popup="emit('openTagPopup')" />
-      <LevelBackground :level-array="levelArray" :card-index="index" v-if="openedPanel == 4" />
-    </div>
   </section>
+
+  <!-- Thumbnail / Media options -->
+  <Dropdown v-if="imageSettingsOpen >= 0" @close="imageSettingsOpen = -1" :button="gearElement[imageSettingsOpen]">
+    <template #header>
+      <section v-if="levelMedia[imageSettingsOpen][0] == LevelImage.THUMBNAIL" class="flex flex-col gap-1 p-2 text-white">
+				<button @click="openDialogs.BGpicker = [true, 1, index]; imageSettingsOpen = -1" class="p-2 text-xl bg-black bg-opacity-40 rounded-md button">
+					<img src="@/images/move.svg" alt="" class="inline mr-2 w-5">
+					<span>{{ $t('reviews.setPos') }}</span>
+				</button>
+        <span class="mt-2 text-2xl text-opacity-40">{{ $t('editor.thumbStyle') }}</span>
+        <div class="flex gap-2">
+          <button v-for="i in 4" :class="{'outline': levelArray.levels[index].BGimage?.theme == i-1}" @click="levelArray.levels[index].BGimage.theme = i-1" class="p-2 bg-black bg-opacity-40 rounded-md outline-2 outline-lof-400">
+						<img :src="`${base}/cardThemeIcons/theme${i}.svg`" class="w-max" alt="">
+				  </button>
+        </div>
+        <span class="mt-2 text-2xl text-opacity-40">{{ $t('other.opacity') }}</span>
+				<input type="range" class="slider" min="0.1" max="1" step="0.05" v-model="levelArray.levels[index].BGimage.opacity">
+
+        <div class="flex justify-between items-center mt-2 text-lg">
+          <span>{{ $t('other.scrolling') }}</span>
+          <select class="text-base" v-model="levelArray.levels[index].BGimage.scrolling">
+            <option :value="0">{{ $t('other.off') }}</option>
+            <option :value="1">{{ $t('other.byitself') }}</option>
+            <option :value="2">{{ $t('other.parallax') }}</option>
+          </select>
+        </div>
+        <div class="flex justify-between items-center mt-2 text-lg">
+          <span>{{ $t('other.tiling') }}</span>
+          <input type="checkbox" v-model="levelArray.levels[index].BGimage.tile" class="!m-0 button">
+        </div>
+
+        <button @click="unsetThumb()" class="flex gap-2 justify-center items-center text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
+          <img class="w-5" src="@/images/del2.svg" alt="">
+          {{ $t('reviews.unsetThumb') }}
+        </button>
+      </section>
+
+      <section v-else-if="levelMedia[imageSettingsOpen][0] != LevelImage.OLD_VIDEO" class="p-2 text-white">
+        <p class="text-lg">{{ $t('other.desc') }}</p>
+        <input type="text" v-model="levelMedia[imageSettingsOpen][2]" maxlength="20" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
+      </section>
+      <section v-else class="p-2 text-white">
+        <p class="text-lg">{{ $t('other.link') }}</p>
+        <input type="text" :value="levelArray.levels[index].video" @change="levelArray.levels[index].video = shortenYTLink($event.target.value)" maxlength="80" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
+      </section>
+    </template>
+  </Dropdown>
 </template>
 
 <style scoped>
@@ -436,4 +704,34 @@ const background = computed(() => {
     transform-origin: top;
   }
 }
+
+@keyframes scroll2 {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 7rem -7rem;
+    }
+}
+
+@media (prefers-reduced-motion) {
+    .scrollRating { animation: none; }
+}
+
+.scrollRating {
+    @apply transition-transform;
+    animation: scroll2 10s infinite linear;
+    background-size: 7rem;
+    mix-blend-mode: plus-lighter;
+    mask-image: radial-gradient(black, transparent 80%)
+  }
+
+.scrollRating:hover {
+  @apply brightness-150 scale-110;
+}
+
+.bottomFade {
+  mask-image: linear-gradient(black 20%, transparent)
+}
+
 </style>

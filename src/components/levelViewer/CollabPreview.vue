@@ -6,6 +6,7 @@ import { socialMedia, socialMediaImages } from "../editor/socialSites";
 
 const props = defineProps<{
   collab: CollabData;
+  white?: boolean
 }>();
 
 const emit = defineEmits<{
@@ -74,9 +75,9 @@ const closeHostSocials = (m: Event) => {
       </span>
     </h2>
     <div
-      class="flex relative flex-wrap gap-3 gap-y-5 justify-center p-2 max-h-28 overflow-clip bg-black bg-opacity-40 rounded-lg transition-colors cursor-pointer hover:bg-opacity-60"
+      class="flex relative flex-wrap gap-3 gap-y-5 justify-center p-2 max-h-28 overflow-clip bg-opacity-40 rounded-lg transition-colors cursor-pointer hover:bg-opacity-60"
       @mouseover="showGDIcons = true"
-      :class="{'!max-h-max': showAll, 'pb-8': showAll}"
+      :class="{'!max-h-max': showAll, 'pb-8': showAll, 'bg-black': !white, 'bg-white': white}"
       ref="preview"
       @click="emit('openCollab')"
     >

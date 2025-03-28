@@ -19,7 +19,7 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 
-$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser";
+$selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser, tagline, thumbnail, thumbProps";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
 
 $selLevelRange = "
@@ -39,7 +39,7 @@ $selLevelRange = "
       avg(levels_ratings.difficulty) as A_difficulty,
       avg(overall) as A_overall";
 
-$listRatings = "ifnull(sum(rate*2-1), 0) AS rate_ratio";
+$listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
@@ -65,25 +65,28 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
         $ind += 1;
       }
 
-      if ($review) {
-        $idqm = makeIN($allIDs);
-        $reviewDetails = doRequest($mysqli, sprintf("SELECT
-                                            reviewID,
-                                            count(reviewID) AS level_count,
-                                            ifnull(avg(gameplay), 1) AS gameplay,
-                                            avg(decoration) AS decoration,
-                                            avg(difficulty) AS difficulty,
-                                            avg(overall) AS overall
-                                            FROM levels_ratings
-                                            WHERE reviewID IN %s
-                                            GROUP BY reviewID", $idqm[0]), $allIDs, $idqm[1], true);
-      }
-
-      $qqm = makeIN($uid_array);
+      $unique = array_values(array_unique($uid_array));
+      $qqm = makeIN($unique);
       $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
                         FROM users
                         LEFT JOIN profiles ON users.discord_id = profiles.uid
-                        WHERE discord_id IN %s", $qqm[0]), $uid_array, $qqm[1], true);
+                        WHERE discord_id IN %s", $qqm[0]), $unique, $qqm[1], true);
+    }
+
+    if (sizeof($allIDs)) {
+      $idqm = makeIN($allIDs);
+      $rev = $review ? "reviewID" : "listRatingID";
+      $reviewDetails = doRequest($mysqli, sprintf("SELECT
+                                          %s,
+                                          count(%s) AS level_count,
+                                          ifnull(avg(gameplay), 1) AS gameplay,
+                                          avg(decoration) AS decoration,
+                                          avg(difficulty) AS difficulty,
+                                          avg(overall) AS overall
+                                          FROM levels_ratings
+                                          WHERE %s IN %s
+                                          GROUP BY %s", $rev, $rev, $rev, $idqm[0], $rev), $allIDs, $idqm[1], true);
+      // print_r($rev);
     }
 
     $dbInfo["maxPage"] = $maxpage;
@@ -113,41 +116,41 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $users = doRequest($mysqli, "SELECT username,discord_id,pfp_cutout FROM users LEFT JOIN profiles ON users.discord_id = profiles.uid WHERE discord_id=?", [$rows["uid"]], "s");
 
     // Fetch ratings
-    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], $review);
+    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], true);
   }
 
   return array($rows, $users, $dbInfo, $ratings, $reviewDetails);
 }
 
 function getHomepage($lists, $reviews, $user) {
-  global $mysqli, $selRange, $selReviewRange;
+  global $mysqli, $selRange, $selReviewRange, $listRatings, $reviewRatings;
   $home = [];
   if ($lists) {
-    $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio
+    $res = doRequest($mysqli, sprintf("SELECT %s, %s
       FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY lists.id DESC LIMIT 3", $selRange), [], "", true);
+      ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings), [], "", true);
   
     $home["lists"] = parseResult($res, false, -1, "", 0, false);
   }
   if ($reviews) {
-    $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio
+    $res = doRequest($mysqli, sprintf("SELECT %s, %s
       FROM `reviews` LEFT JOIN `ratings` ON reviews.id = ratings.review_id
       WHERE `hidden` = '0'
       GROUP BY `name`
-      ORDER BY reviews.id DESC LIMIT 3", $selReviewRange), [], "", true);
+      ORDER BY reviews.id DESC LIMIT 4", $selReviewRange, $reviewRatings), [], "", true);
     
     $home["reviews"] = parseResult($res, false, -1, "", 0, true);
   }
   if ($user) {
     $account = getLocalUserID();
     if ($account) {
-      $res = doRequest($mysqli, sprintf("SELECT %s, ifnull(sum(rate*2-1), 0) AS rate_ratio
+      $res = doRequest($mysqli, sprintf("SELECT %s, %s
         FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
         WHERE lists.uid=%s AND `hidden` LIKE 0
         GROUP BY lists.name
-        ORDER BY lists.id DESC LIMIT 3", $selRange, $account), [], "", true);
+        ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings, $account), [], "", true);
   
       $home["user"] = parseResult($res);
     }
@@ -203,7 +206,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
 
   } elseif (in_array("randomLevel", array_keys($_GET))) {
     // Picking a random list or review
-    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [1], "i");
+    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [intval($_GET["randomLevel"])], "i", true);
     echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {
@@ -248,20 +251,11 @@ elseif (isset($_GET["batch"])) {
     $range = [$selRange, $selReviewRange, $selLevelRange][$type];
 
     $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
-
-    $where = [];
-    $fetchHidden = array_filter($fetchIDs, "isPrivate");
-    $inHidden = makeIN($fetchHidden);
-    if (strlen($inHidden[1]))
-      array_push($where, sprintf("(%s.hidden IN %s)", $types[$type], $inHidden[0]));
     
-    $fetchPublic = array_filter($fetchIDs, "isPublic");
-    $inPublic = makeIN($fetchPublic);
-    if (strlen($inPublic[1]))
-      array_push($where, sprintf("(%s.id IN %s AND `hidden` = 0)", $types[$type], $inPublic[0]));
     $res;
-
     if ($type == 2) {
+      $in = makeIN(array_map("intval", $fetchIDs));
+
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
       INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
       LEFT JOIN levels_ratings ON levels_ratings.levelID = levels_uploaders.levelID
@@ -270,6 +264,17 @@ elseif (isset($_GET["batch"])) {
       ", $range, $in[0]), $fetchIDs, $in[1], true);
     }
     else {
+      $where = [];
+      $fetchHidden = array_filter($fetchIDs, "isPrivate");
+      $inHidden = makeIN($fetchHidden);
+      if (strlen($inHidden[1]))
+        array_push($where, sprintf("(%s.hidden IN %s)", $types[$type], $inHidden[0]));
+      
+      $fetchPublic = array_filter($fetchIDs, "isPublic");
+      $inPublic = makeIN($fetchPublic);
+      if (strlen($inPublic[1]))
+        array_push($where, sprintf("(%s.id IN %s AND `hidden` = 0)", $types[$type], $inPublic[0]));
+
       $res = doRequest($mysqli, sprintf("SELECT %s, %s FROM ratings
       RIGHT JOIN %s ON %s.id = ratings.%s_id
       WHERE %s

@@ -3,11 +3,11 @@ import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import { computed, ref, watch } from "vue";
 import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
-import { useI18n } from "vue-i18n";
 import THEMES, { selectedBeforeSave } from "@/themes";
 import axios from "axios";
+import { i18n } from "@/locales";
 
-document.title = useI18n().t("other.websiteName");
+document.title = `${i18n.global.t('other.homepage')} | ${i18n.global.t("other.websiteName")}`;
 
 const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.value.homepageColumns) : '1fr')
 
@@ -93,24 +93,23 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
     </div>
   </section>
 
-  <main id="homepageSections" class="grid sm:mr-2" :style="{ gridTemplateColumns: columns }">
-    <ListSection :style="{gridColumn: `1 / span ${SETTINGS.homepageColumns}`}" :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
+  <main id="homepageSections" class="flex flex-col overflow-clip items-start sm:px-2 mx-auto max-w-[100.5rem]">
+    <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
+      content-type="@pinnedLists" :max-items="5" :list-type="3" />
+    <ListSection class :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
         :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds?.['reviews']" :list-type="2" />
     
     <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
         :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" :force-content="feeds?. ['lists']" />
 
-    <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
-      content-type="@pinnedLists" :max-items="5" />
-
     <ListSection v-if="loggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
         extra-icon="more" extra-action="/browse/lists?type=user" :empty-text="$t('homepage.noListsUploaded')"
         :force-content="feeds?.['user']" />
 
-    <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash"
-      extra-action="@clear" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
+    <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash" :max-items="4"
+      extra-action="@clear" :list-type="3" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
 
-    <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more"
+    <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more" :max-items="4"
       :empty-text="$t('homepage.noLevelsSaved')" content-type="@favorites" extra-action="/saved" :randomize-content="true"
       :list-type="1" />
 

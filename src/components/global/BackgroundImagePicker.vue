@@ -118,7 +118,7 @@ onUnmounted(() => {
     <img src="@/images/close.svg" alt="" class="w-8" />
     <span v-html="$t('other.imageLoadFailed')"></span>
   </div>
-  <main v-else class="z-20 flex-col gap-6 p-2 bg-[url(@/images/fade.webp)] bg-repeat-x bg-black bg-opacity-40">
+  <main v-else class="z-20 flex-col gap-6 p-2 bg-[url(@/images/fade.svg)] bg-repeat-x bg-black bg-opacity-40">
     <section class="relative mx-auto w-max max-w-full h-max">
       <img :src="imageSource" alt=""
         :class="{ 'object-left': source[3] == 0, 'object-center': source[3] == 1, 'object-right': source[3] == 2 }"

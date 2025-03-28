@@ -51,7 +51,7 @@ const startScale = () => {
         }
         else {
             drag = mousePos.value[1] - mVec[1]
-            imageScale.value = Math.min(Math.max(props.minSize ?? 96, Math.ceil(self.value?.clientHeight/10)*10 + drag), props.maxSize ?? 1024)
+            imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientHeight + drag), props.maxSize ?? 1024)
         }
 
         imageScale.value = Math.ceil(imageScale.value/4)*4
@@ -79,10 +79,10 @@ const autoResize = () => {
 </script>
 
 <template>
-    <div ref="self" class="relative group" :class="{'p-1 border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
+    <div ref="self" class="relative rounded-lg group" :class="{'border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
         <slot :width="width" />
         
-        <button v-if="editable" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -bottom-1.5 w-4 h-4 bg-white rounded-full scale-0 group-hover:scale-100"
+        <button v-if="editable" tabindex="-1" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
         :class="{'-right-1': gizmoPos == 'corner', 'left-1/2': gizmoPos == 'vertical'}"
         ></button>
     </div>

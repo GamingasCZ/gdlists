@@ -17,6 +17,12 @@ export const SETTINGS = ref({
   seasonalThemes: true,
   selectedTheme: 0,
   selectedThemeAlways: 0,
+  compactToolbar: false,
+  draftNoRemove: false,
+  draftNoEdit: false,
+  colorization: true,
+  flipControls: true,
+  saveThumbs: true,
 });
 
 watch(SETTINGS, () => {

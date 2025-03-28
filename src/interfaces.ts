@@ -1,3 +1,5 @@
+import type { ContainerNames, settings } from "./components/writer/containers";
+
 export interface ListPreview {
   name: string;
   creator: string;
@@ -32,7 +34,7 @@ export interface ListFetchResponse {
   name: string;
   creator: string;
   id: number;
-  data: LevelList | ReviewList;
+  data: PostData;
   views: number;
   rate_ratio: number;
   commAmount: number;
@@ -187,6 +189,8 @@ export interface LevelBackground {
   scrolling: 0 | 1 | 2
 }
 
+export type LevelScreenshot = [LevelImage, string, string]
+
 export interface Level {
   levelName: string;
   creator: CollabData | string;
@@ -198,6 +202,16 @@ export interface Level {
   platf: boolean;
   ratings?: [number[], number[]]
   BGimage?: LevelBackground
+  screenshots?: LevelScreenshot[]
+  scShotSecName: string
+  commentary: string
+}
+
+export enum LevelImage {
+  IMAGE = 1,
+  VIDEO = 2,
+  THUMBNAIL = 4,
+  OLD_VIDEO = 8,
 }
 
 export interface ListBackground {
@@ -221,7 +235,16 @@ export interface LevelSearchResponse {
   difficulty: number;
   cp: number;
   platf: boolean
+  objCount: number
+  downloads: number
+  likes: number
+  len: 0 | 1 | 2 | 3 | 4
+  gameVer: number
+  isCopy: boolean
+  coins: 0 | 1 | 2 | 3
+  twoPlayer: boolean
   selected?: boolean
+  thumbnail?: string
 }
 
 export interface userDataFetchResponse {
@@ -241,6 +264,7 @@ export interface viewedPopup {
   oldListsRedirectHelp?: boolean
   pickedStyling?: boolean
   twitterAd?: boolean
+  zenModeHelp?: boolean
 }
 
 export interface ytSearchDetails {
@@ -268,6 +292,7 @@ export interface ReviewList {
   whitePage: boolean
   readerMode: boolean
   font: number
+  fontTint: boolean
 }
 
 export interface ReviewDraft {
@@ -275,13 +300,18 @@ export interface ReviewDraft {
   createDate: number
   saveDate: number
   wordCount: number
-  reviewData: ReviewList
+  reviewData: PostData
   previewTitle: string
   previewParagraph: string
+  editing?: number
 }
 
 export enum DraftAction {
   Remove, Preview, Load, Save, Clone, Disjoin
+}
+
+export enum DataContainerAction {
+  Move, Remove, MakeParagraph
 }
 
 export interface ReviewContainer {
@@ -289,8 +319,8 @@ export interface ReviewContainer {
   data: string
   extraComponents: number
   id: number
-  settings: object[]
-  type: string
+  settings: settings
+  type: ContainerNames
 }
 
 export interface ReviewRating {
@@ -337,10 +367,34 @@ export interface LocalNotification {
 
 export enum WriterGallery {
   ReviewBackground = -1,
-  LevelCardBG = -5,
+  LevelImage = -5,
   ReviewThumbnail = -2,
   CarouselItem = -3,
   CarouselModifyItem = -4,
   ImageContainer = 1,
   ImageContainerNested = -1
+}
+
+type controlType = "cbox" | "dropdown" | "radio" | "slot" | "inline-slot" | "component"
+export interface Setting {
+  name: string
+  desc?: string
+  control: controlType
+  controlOptions?: [string, number][] | string[][] | number
+  disabled?: boolean
+}
+
+export type PostData = ReviewList & LevelList
+
+export type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph' | 'columnCreate'
+export type EditorAction = 'save' | 'containerDelete' | 'drafts' | 'containerOptions' | 'shortcutsMenu' | 'resizeSmaller' | 'resizeBigger' | 'moveUp' | 'moveDown' | 'addLevel'
+
+export interface FormattingButton {
+	title: string
+	icon: string | string[]
+	action: [FormattingAction, string | string[]]
+	dropdownText?: string[]
+	tooltip?: string
+	splitAfter?: boolean
+	bold?: boolean
 }

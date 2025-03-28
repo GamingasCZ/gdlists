@@ -1,27 +1,21 @@
 <script setup lang="ts">
+import type { Setting } from '@/interfaces';
 
-type controlType = "cbox" | "dropdown" | "radio" | "slot" | "inline-slot"
 
 const model = defineModel()
 
-defineProps<{
-    name: string
-    desc?: string
-    control: controlType
-    controlOptions?: [string, number][] | number
-    disabled?: boolean
-}>()
+defineProps<Setting>()
 
 const emit = defineEmits(['updated'])
 
 </script>
 
 <template>
-    <div @click.stop="" :class="{'pointer-events-none opacity-20': disabled, 'flex': control == 'inline-slot'}" class="items-center p-2 bg-black bg-opacity-40 rounded-md transition-opacity duration-75">
-        <div class="flex justify-between items-center w-full">
+    <div @click.stop="" :class="{'pointer-events-none opacity-20': disabled, 'flex': control == 'inline-slot'}" class="items-center bg-black bg-opacity-40 rounded-md transition-opacity duration-75">
+        <div class="flex justify-between items-center p-2 w-full">
             <div class="mr-2">
-                <p class="text-xl leading-none">{{ name }}</p>
-                <p class="text-sm opacity-40">{{ desc }}</p>
+                <p class="text-xl">{{ name }}</p>
+                <p class="mb-1 text-sm leading-4 opacity-40">{{ desc }}</p>
             </div>
 
             <img v-if="disabled" src="@/images/loading.webp" class="w-6 animate-spin" alt="">
@@ -33,5 +27,6 @@ const emit = defineEmits(['updated'])
         <div v-if="['slot', 'inline-slot'].includes(control)">
             <slot />
         </div>
+        <component v-model="model" v-if="control == 'component'" :is="controlOptions" />
     </div>
 </template>

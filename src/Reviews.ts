@@ -1,6 +1,6 @@
-import { ref } from "vue"
-import { DEFAULT_LEVELLIST, makeColor, newCardBG, predefinedLevelList } from "./Editor"
-import type { FavoritedLevel, Level, ReviewList, ReviewRating } from "./interfaces"
+import { type Ref, ref } from "vue"
+import { DEFAULT_LEVEL, DEFAULT_LEVELLIST, modernizeLevels } from "./Editor"
+import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -30,10 +30,7 @@ export const DEFAULT_RATINGS: ReviewRating[] = [
     },
 ]
 
-export const REVIEW_EXTRAS: ReviewList = {
-    reviewName: "",
-    thumbnail: ["", 0, 33, 1, true],
-    tagline: "",
+export const REVIEW_EXTRAS: () => ReviewList = () => ({
     containers: [],
     ratings: [],
     settings: [],
@@ -42,35 +39,32 @@ export const REVIEW_EXTRAS: ReviewList = {
     transparentPage: 0,
     language: SETTINGS.value.language ? 'en' : 'cs',
     whitePage: false,
-    readerMode: false,
-    font: 0
-}
+    readerMode: true,
+    font: 0,
+    fontTint: false,
+})
 
-export const addReviewLevel = (levelData?: Level | FavoritedLevel, toPredefined?: boolean) => {
-    if (reviewData.value.levels.length >= 10) return
+export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel, maxLevels = 10) => {
+    if (postData.value.levels.length >= maxLevels) return
     let diff = levelData?.difficulty?.[0] ? levelData?.difficulty : [levelData?.difficulty, levelData?.rating]
 
-    let levelInfo = {
-        levelName: levelData?.levelName ?? "",
-        creator: levelData?.creator ?? "",
-        color: levelData?.color ? chroma(levelData?.color).hsl() : makeColor(),
-        difficulty: diff?.[0] ? diff : [0, 0],
-        levelID: levelData?.levelID ?? "",
-        platf: false,
-        tags: [],
-        video: "",
-        ratings: [Array(DEFAULT_RATINGS.length).fill(-1), []],
-        BGimage: newCardBG()
-    }
+    let levelInfo = DEFAULT_LEVEL()
+    if (levelData?.levelName) levelInfo.levelName = levelData.levelName
+    if (levelData?.creator) levelInfo.creator = levelData.creator
+    if (levelData?.color) levelInfo.color = levelData.color
+    if (levelData?.diff?.[0]) levelInfo.diff = diff
+    if (levelData?.levelID) levelInfo.levelID = levelData.levelID
 
-    if (toPredefined)
-        predefinedLevelList.value.push(levelInfo)
-    else
-        reviewData.value.levels.push(levelInfo)
+    postData.value.levels.push(levelInfo)
 }
 
-export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST, ...REVIEW_EXTRAS })
-export const reviewData = ref(DEFAULT_REVIEWDATA())
+export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXTRAS() })
+
+export const modernizeReview = (serverResponse: ListFetchResponse) => {
+    // Modernize levels
+    modernizeLevels(serverResponse.data.levels)
+    return serverResponse.data
+}
 
 const funnyErrorMessages = [
     "",
@@ -81,8 +75,8 @@ const funnyErrorMessages = [
 ]
 
 let uploadTries = 0
-export function checkReview() {
-    const err = (err: string) => {
+export function checkReview(post: ReviewList) {
+    const err = (err: string, warn: number[]) => {
         let fancyErr = err
         switch (uploadTries) {
             case 1:
@@ -95,34 +89,52 @@ export function checkReview() {
         }
 
         uploadTries = (uploadTries + 1) % 5 // TODO
-        return { success: false, error: err }
+        return { success: false, error: err, warn: warn }
     }
-    let error = { success: true, mess: '' }
-    if (!reviewData.value.containers.length) return err(i18n.global.t('reviews.bro'))
-    if (reviewData.value.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
-    if (reviewData.value.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
+    let error = { success: true, mess: '', warn: [0, 0, 0] }
+    if (!post.containers.length) return err(i18n.global.t('reviews.bro'))
+    if (post.reviewName.length < 3) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.short')]))
+    if (post.reviewName.length > 40) return err(i18n.global.t('reviews.nameToo', [i18n.global.t('other.long')]))
 
-    if (!reviewData.value.levels.length && !reviewData.value.disabledRatings) return err(i18n.global.t('reviews.noLevels'))
-
-    reviewData.value.ratings.forEach(customRating => {
+    post.ratings.forEach(customRating => {
         if (!customRating.name.length) {
             error.mess = i18n.global.t('reviews.ratingMissingName')
             error.success = false
         }
     })
 
+    if (post.levels.length == 0)
+        error.warn[0] = 1
+
     let i = 0
-    reviewData.value.levels.forEach(level => {
+    let allLevelIDs: string[] = []
+    post.levels.forEach((level: Level) => {
         i += 1
         if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
-        if (level.ratings?.[0].concat(level.ratings[1]).includes(-1) && !reviewData.value.disabledRatings) error.mess = i18n.global.t('reviews.notRatedYet', [i])
+        if (level.levelID) allLevelIDs.push(level.levelID)
+
+        let allRatings = level.ratings?.[0].concat(level.ratings[1])
+        if (allRatings.filter(x => x == -1).length == allRatings.length)
+            error.warn[1] = 1
+
+        else if (allRatings.includes(-1))
+            error.warn[2] = 1
         
         if (error.mess) error.success = false
     })
+    
+    for (let i = 0; i < allLevelIDs.length; i++) {
+        for (let j = i+1; j < allLevelIDs.length; j++) {
+            if (allLevelIDs[i] == allLevelIDs[j]) {
+                error.mess = i18n.global.t('editor.noDuplicates')
+                error.success = false
+            }
+        }
+    }
 
-    reviewData.value.containers.forEach(container => {
+    post.containers.forEach(container => {
         if (containers[container.type].canEditText) {
             if (!container.data) {
                 error.mess = i18n.global.t('reviews.notFilledIn', [containers[container.type].placeholder])
@@ -136,7 +148,7 @@ export function checkReview() {
             error.success = false
         }
     })
-    reviewData.value.containers.filter(c => c.type == "twoColumns").forEach(nest => {
+    post.containers.filter(c => c.type == "twoColumns").forEach(nest => {
         nest.settings.components.forEach(column => {
             column.filter(x => x === Object(x)).forEach(container => { // filter out maxWidth
                 if (containers[container.type].canEditText) {
@@ -154,10 +166,10 @@ export function checkReview() {
             });
         });
     })
-    if (!error.success) return err(error.mess)
+    if (!error.success) return err(error.mess, error.warn)
 
     uploadTries = 0
-    return { success: true, error: '' }
+    return { success: true, error: '', warn: error.warn }
 }
 
 export const selectedNestContainer = ref(0)
@@ -224,9 +236,32 @@ export function getDominantColor(image: HTMLImageElement) {
     return dominantColor
 }
 
-export function getWordCount() {
+export function getDominantLine(image: HTMLImageElement) {
+    if (!image) return 0
+    const w = 48, h = 27
+
+    let canvas = new OffscreenCanvas(w,h)
+    let ctx = canvas.getContext("2d", {alpha: false})
+    ctx?.drawImage(image, 0, 0, w, h)
+    let imageData = ctx?.getImageData(0, 0, w, h)
+    if (!imageData) return 0
+
+    let differenceArray = Array(h).fill(0)
+    let lineCounter = 0
+    const pixelSize = w*4
+    for (let i = 0; i < imageData?.data.length; i += 4) {
+        differenceArray[lineCounter] += 8290687 - imageData?.data[i] * imageData?.data[i+1] * imageData?.data[i+2]
+        if (i >= pixelSize*(lineCounter+1))
+            lineCounter++
+    }
+
+    let maxDiff = Math.min(...differenceArray)
+    return Math.trunc(differenceArray.findIndex(x => x == maxDiff) / h * 100)
+}
+
+export function getWordCount(post: ReviewList) {
     let count = 0
-    reviewData.value.containers.forEach(c => {
+    post.containers.forEach(c => {
         count += (c.data.match(/\w+/g) ?? []).length
         if (c.type == "twoColumns") {
             c.settings.components.forEach(con => {
@@ -237,16 +272,17 @@ export function getWordCount() {
     return count
 }
 
-export const getReviewPreview = () => {
+export const getReviewPreview = (postData: PostData) => {
     let firstHeading = (document.querySelector("div[data-type*=heading] > p")?.innerText ?? "").trim()
     let firstParagraph = (document.querySelector("div[data-type=default] > p")?.innerText ?? "").trim()
     if (firstHeading.length > 100) firstHeading = firstHeading.slice(0, 100)+"..."
     if (firstParagraph.length > 100) firstParagraph = firstParagraph.slice(0, 100)+"..."
-    return [firstHeading, firstParagraph]
+    return {title: firstHeading, preview: firstParagraph, counter: getWordCount(postData)}
 }
 
 export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | false = false) => {
     let ids: number[][] = [[], [], []]
+    if (!data?.containers) return ids
     if (forceIDs === false) {
         data.containers.forEach(container => {
             // embeds aren't nestable, no need to check for columns (phew :D)

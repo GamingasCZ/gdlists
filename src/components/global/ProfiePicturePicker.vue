@@ -262,7 +262,7 @@ const editFinished = ref(false)
                 </button>
                 <button @click="useDiscord" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
                     <img v-if="discordLoading" src="@/images/loading.webp" class="w-6 animate-spin" alt="">
-                    <img v-else src="@/images/discord.svg" class="w-6" alt="">
+                    <img v-else src="@/images/socials/discord.svg" class="w-6" alt="">
                     {{ $t('settingsMenu.pickDiscord') }}
                 </button>
             </div>

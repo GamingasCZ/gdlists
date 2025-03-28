@@ -123,8 +123,8 @@ const base = import.meta.env.VITE_USERCONTENT
             </div>
         </Transition>
 
-        <figure @touchmove="swipe" @touchend="stopDrag" @touchstart="dragDisabled = false">
-            <img v-if="imagesArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="imagesArray[imageIndex].settings.url" :alt="imagesArray[imageIndex].settings.alt">
+        <figure class="touch-pan-x" @touchmove="swipe" @touchend="stopDrag" @touchstart="dragDisabled = false">
+            <img v-if="imagesArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[98vh] transition-transform h-max pointer-events-none rounded-md" :src="imagesArray[imageIndex].settings.url" :alt="imagesArray[imageIndex].settings.alt">
             <img v-else-if="hashArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="`${base}/userContent/${uid}/${hashArray[imageIndex]}.webp`" :alt="hashArray[imageIndex]">
             <img v-else-if="urlArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]" :alt="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]">
 

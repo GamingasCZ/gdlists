@@ -65,11 +65,11 @@ const formatting = [
         id="mainTextbox"
         v-show="!isPreviewing"
         v-model="editValue.description"
-        class="h-max w-full grow resize-none bg-[url(@/images/fade.webp)] bg-repeat-x bg-black bg-opacity-20 focus-within:bg-opacity-40 focus-within:outline-none px-2 py-1"
+        class="h-max w-full grow resize-none bg-[url(@/images/fade.svg)] bg-repeat-x bg-black bg-opacity-20 focus-within:bg-opacity-40 focus-within:outline-none px-2 py-1"
         :placeholder="$t('editor.listDescription') + $t('editor.mdHelp')"
       ></textarea>
       <div
-        class="h-max grow bg-[url(@/images/fade.webp)] bg-repeat-x bg-opacity-10 bg-black overflow-y-auto regularParsing px-1"
+        class="h-max grow bg-[url(@/images/fade.svg)] bg-repeat-x bg-opacity-10 bg-black overflow-y-auto regularParsing px-1"
         v-show="isPreviewing"
         v-html="parseText(editValue.description)"
       ></div>

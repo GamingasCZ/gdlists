@@ -3,7 +3,7 @@ import { ref } from "vue";
 import THEMES from "./themes";
 import { SETTINGS } from "./siteSettings";
 
-const         router = createRouter({
+const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
@@ -14,12 +14,14 @@ const         router = createRouter({
     {
       path: "/make/list",
       name: "editor",
-      component: () => import("@/components/Editor.vue"),
+      component: () => import("@/components/Writer.vue"),
+      props: {type: 0}
     },
     {
       path: "/make/review",
       name: "writer",
       component: () => import("@/components/Writer.vue"),
+      props: {type: 1}
     },
     {
       path: "/browse/:type",
@@ -51,13 +53,13 @@ const         router = createRouter({
     {
       path: "/edit/list/:id",
       name: "editing",
-      props: (route) => ({ listID: route.params.id, editing: true }),
-      component: () => import("@/components/Editor.vue")
+      props: (route) => ({ type: 0, postID: route.params.id, editing: true }),
+      component: () => import("@/components/Writer.vue")
     },
     {
       path: "/edit/review/:id",
       name: "editingReview",
-      props: (route) => ({ reviewID: route.params.id, editing: true }),
+      props: (route) => ({ type: 1, postID: route.params.id, editing: true }),
       component: () => import("@/components/Writer.vue")
     },
     {
@@ -69,10 +71,19 @@ const         router = createRouter({
       },
       component: () => import("@/components/ListView.vue"),
     },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "404",
+      component: () => import("@/components/404.vue"),
+    },
   ],
 });
 
-router.afterEach(() => window.scrollTo(0,0))
+export const timeLastRouteChange = ref(Date.now())
+router.afterEach(() => {
+  window.scrollTo(0,0)
+  timeLastRouteChange.value = Date.now()
+})
 
 
 export const loadingProgress = ref(0)
@@ -89,6 +100,10 @@ router.beforeEach(async (to, from) => {
   if (
     THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor != document.documentElement.style.getPropertyValue("--primaryColor")
   ) {
+    // Do not reset color when editing a post
+    if (["editing", "editingReview"].includes(to.name) && ["listViewer", "reviewViewer"].includes(from.name)) return
+    
+    // Do not reset color when updating a post
     if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
     
       document.documentElement.style.setProperty("--siteBackground", THEMES[SETTINGS.value.selectedTheme || 0].colors.siteBackground);

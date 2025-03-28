@@ -60,7 +60,7 @@ const isDiscordServer = computed(() => {
         </div>
         <div class="flex flex-col justify-center items-start">
             <span class="flex gap-1 items-center w-max" v-if="!isDiscordServer && dcIndex != -1">
-                <img class="w-4" src="@/images/discord.svg" alt="">
+                <img class="w-4" src="@/images/socials/discord.svg" alt="">
                 {{ human.socials[dcIndex][1] }}
             </span>
             <footer class="flex gap-1">

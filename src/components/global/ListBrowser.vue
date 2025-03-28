@@ -27,6 +27,7 @@ const props = defineProps<{
   refreshButton: boolean
   component: object
   picking: false | 1 | 2
+  displayInRows: boolean
 }>()
 
 // Page title
@@ -51,7 +52,7 @@ const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
 const unrolled = ref<boolean>(-1)
 
-const LISTS_ON_PAGE = 8;
+const LISTS_ON_PAGE = 9;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
@@ -268,8 +269,8 @@ let favoriteLevelIDs = ref<number[]>([]);
 let favoriteLevels: FavoritedLevel[];
 let favoriteCollabs: any;
 if (!props.onlineBrowser) {
-  favoriteLevels = JSON.parse(localStorage.getItem("favorites")!);
-  favoriteCollabs = JSON.parse(localStorage.getItem("savedCollabs")!);
+  favoriteLevels = JSON.parse(localStorage.getItem("favorites")!) ?? [];
+  favoriteCollabs = JSON.parse(localStorage.getItem("savedCollabs")!) ?? [];
 }
 
 onMounted(() => {
@@ -355,12 +356,14 @@ defineExpose({
           </button>
         </form>
       </div>
-      <main class="flex flex-col gap-3 items-center mt-4 transition-opacity duration-75" :class="{'opacity-60 pointer-events-none': loading, 'grid md:grid-cols-3': ['reviews', 'levels'].includes(onlineSubtype), 'md:!grid-cols-2': ['reviews', 'levels'].includes(onlineSubtype) && picking}">
+      <main
+        class="flex relative flex-col gap-3 items-center mt-4 transition-opacity duration-75 min-h-72"
+        :class="{'!grid md:grid-cols-3': !displayInRows && !LISTS.length == 0, 'opacity-60 pointer-events-none': loading, 'md:!grid-cols-2': picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/savedMobHeader.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">{{ $t('other.noSavedLevels') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('other.noSavedLevels') }}</p>
           <RouterLink to="/random">
             <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
               <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
@@ -373,7 +376,7 @@ defineExpose({
           class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/collabDudes.svg" alt="" class="w-72 opacity-25" />
           <div class="text-center">
-          <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
             <p class="text-sm opacity-70">{{ $t('collabTools.noSavedSub') }}</p>
           </div>
           <RouterLink to="/make/list">
@@ -386,15 +389,15 @@ defineExpose({
 
         <!-- No results BG -->
         <div v-else-if="searchNoResults && LISTS.length == 0 && !loading"
-          class="flex flex-col gap-3 justify-center items-center">
+          class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
         </div>
 
         <!-- Loading error BG -->
-        <div v-else-if="loadFailed && !loading" class="flex flex-col gap-3 justify-center items-center">
+        <div v-else-if="loadFailed && !loading" class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
           <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
             <img src="@/images/replay.svg" class="p-1 w-10 text-2xl" alt="" />{{ $t('other.reload') }}
           </button>
@@ -403,21 +406,21 @@ defineExpose({
         <!-- Loading -->
         <div v-else-if="loading" class="flex absolute left-1/2 z-10 flex-col gap-4 items-center mt-24 drop-shadow-lg -translate-x-1/2">
           <img src="@/images/loading.webp" alt="" class="w-24 opacity-80 animate-spin">
-          <p class="text-xl text-opacity-80">{{ $t('other.loading') }}...</p>
+          <p class="min-w-max text-xl text-opacity-80">{{ $t('other.loading') }}...</p>
         </div>
 
         <!-- No lists/comments BG -->
         <div v-else-if="LISTS.length == 0 && !searchNoResults && !loading"
-          class="flex flex-col gap-3 justify-center items-center">
+          class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
 
           <div class="flex flex-col gap-6 items-center" v-if="onlineType != 'comments'">
             <img src="@/images/listEmpty.svg" alt="" class="w-48 opacity-25" />
-            <p class="text-xl opacity-90">{{ $t('other.noListsHere') }}</p>
+            <p class="min-w-max text-xl opacity-90">{{ $t('other.noListsHere') }}</p>
           </div>
 
           <div class="flex flex-col gap-6 items-center" v-else>
             <img src="@/images/noComments.svg" alt="" class="w-48 opacity-25" />
-            <p class="text-xl opacity-90">{{ $t('other.noCommentsHere') }}</p>
+            <p class="min-w-max text-xl opacity-90">{{ $t('other.noCommentsHere') }}</p>
           </div>
 
           <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
@@ -443,6 +446,8 @@ defineExpose({
           :review-details="REVIEW_DETAILS"
           :is-pinned="false"
           :favorited="favoriteLevelIDs.includes(list.levelID)"
+          :is-list="onlineSubtype == 'lists'"
+          :disable-fave="picking"
           @clicked-option="emit('selectedPostOption', [$event, list.name])"
           @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           @remove-level="removeFavoriteLevel"

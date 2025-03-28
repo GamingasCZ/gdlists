@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios, { type AxiosResponse } from "axios";
+import axios, { all, type AxiosResponse } from "axios";
 import type {
   ListFetchResponse,
   ListPreview,
@@ -14,7 +14,7 @@ import LevelCard from "./global/LevelCard.vue";
 import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
 import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncComponent } from "vue";
-import { modifyListBG } from "@/Editor";
+import { modifyListBG, selectedLevels } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
 import router from "@/router";
@@ -23,7 +23,7 @@ import { useI18n } from "vue-i18n";
 import ListBackground from "./global/ListBackground.vue";
 import GuessingFinished from "./levelViewer/GuessingFinished.vue";
 import DiffGuesserHelpDialog from "./levelViewer/DiffGuesserHelpDialog.vue";
-import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
 import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import TagViewerPopup from "./levelViewer/TagViewerPopup.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
@@ -31,7 +31,7 @@ import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, resetIndentation, reviewData } from "@/Reviews";
+import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, resetIndentation } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
@@ -41,16 +41,14 @@ import ImageViewer from "./global/ImageViewer.vue";
 import LevelCardTableTable from "./global/LevelCardTableTable.vue";
 import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
+import WriterViewer from "./writer/WriterViewer.vue";
+import TemporaryList from "./global/TemporaryList.vue";
 
 const props = defineProps<{
   listID?: string
   isReview: boolean
   randomList: boolean
 }>()
-
-onUnmounted(() => {
-  reviewData.value = DEFAULT_REVIEWDATA()
-});
 
 let gdlists = useI18n().t('other.websiteName')
 
@@ -62,10 +60,9 @@ const loadContent = async () => {
     randomData = await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})
   }
   props.isReview ? await loadReview(randomData) : await loadList(randomData)
-
   if (SETTINGS.value.autoComments) {
-    window.addEventListener("scroll", () => {
-      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value) return
+    window.addEventListener("scroll", (e: MouseEvent) => {
+      if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1 || !loggedIn.value) return
       let postBottom = postContent.value?.clientHeight+postContent.value?.clientTop
       let currentScroll = document.documentElement.clientHeight + document.documentElement.scrollTop
       
@@ -203,11 +200,8 @@ async function loadReview(loadedData: ReviewList | null) {
 
     LIST_DATA.value = res[0];
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
-    reviewData.value.levels = LIST_DATA.value.data.levels;
-    reviewData.value.ratings = LIST_DATA.value.data.ratings;
+    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
 
-    let indicies = [0,0,0,0,0,0]
-    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers, indicies)
     LIST_RATING.value = res[3]
 
     LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
@@ -314,7 +308,7 @@ const toggleListPin = () => {
     }
     else {
       let pinData = {
-        name: encodeURIComponent(LIST_DATA.value.name),
+        name: LIST_DATA.value.name,
         creator: LIST_CREATOR.value,
         uploadDate: Date.now(),
         hidden: LIST_DATA.value.hidden,
@@ -460,9 +454,13 @@ const jumpToContent = (type: string, index: number) => {
   jumpToPopupOpen.value = false
 }
 
+const getLevelsRatings = () => {
+  return [LIST_DATA.value?.data.levels, LIST_DATA.value?.data.ratings ?? []]
+}
+
 provide("settingsTitles", CONTAINERS)
 provide("saveCollab", saveCollab)
-provide("listData", LIST_DATA)
+provide("levelsRatingsData", getLevelsRatings)
 
 const collabViewerColor = ref("")
 
@@ -477,34 +475,59 @@ const jumpSearch = ref("")
 const modPreview = (clickedImageID: number) => {
   imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
 }
+
 provide("imagePreviewFullscreen", modPreview)
 const imagesArray = computed(() => {
   let allImages: ReviewContainer[] = []
   let data = (LIST_DATA.value.data as ReviewList).containers
-  data.forEach(con => {
-    if (con.type == "showImage" && !con.settings?.onlyDeco) allImages.push(con)
-    if (con.type == "twoColumns") {
-      con.settings.components.forEach(sub => {
-        sub.forEach(subc => {if (subc?.type == "showImage" && !subc.settings?.onlyDeco) allImages.push(subc)})
-      })
-    }
-    if (con.type == "addCarousel") {
-      con.settings.components.forEach(car => {
-        if (car?.type == "showImage") allImages.push(car)
-      })
-    }
-  })
+  if (viewingLevelScreenshot.value) {
+    LIST_DATA.value.data.levels.forEach(x => {
+      if (x.screenshots) {
+        x.screenshots.forEach(y => allImages.push(y[1]))
+      }
+    })
+  }
+
+  if (!data) return allImages
+  
+  if (!viewingLevelScreenshot.value) {
+    data.forEach(con => {
+      if (con.type == "showImage") allImages.push(con)
+      if (con.type == "twoColumns") {
+        con.settings.components.forEach(sub => {
+          sub.forEach(subc => {if (subc?.type == "showImage") allImages.push(subc)})
+        })
+      }
+      if (con.type == "addCarousel") {
+        con.settings.components.forEach(car => {
+          if (car?.type == "showImage") allImages.push(car)
+        })
+      }
+      // todo: ReviewLevel
+    })
+  }
+
   return allImages
 })
 const imageIndex = ref(-1)
 
+const viewingLevelScreenshot = ref(false)
+const levelImageFullscreen = (imgIndex: number, levelIndex: number) => {
+  let offset = 0
+  for (let i = 0; i < levelIndex; i++) {
+    let screenshots = LIST_DATA.value.data.levels[i].screenshots
+    if (screenshots)
+      offset += screenshots.length
+  }
+
+  imageIndex.value = offset+imgIndex
+  viewingLevelScreenshot.value = true
+}
+provide("fullscreenLevel", levelImageFullscreen)
+
 </script>
 
 <template>
-  <div v-if="LIST_DATA?.data.titleImg?.[4]" :style="{
-    backgroundImage: `linear-gradient(#00000040, transparent)`,
-  }" class="absolute w-full h-full -z-20"></div>
-
   <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.medium">
     <SharePopup :share-text="getURL()" :review="isReview" />
   </DialogVue>
@@ -523,7 +546,14 @@ const imageIndex = ref(-1)
   </DialogVue>
 
   <Transition name="fade">
-    <ImageViewer :images-array="imagesArray" v-model="imageIndex" @close-popup="imageIndex = -1" v-if="imageIndex !== -1" />
+    <ImageViewer
+      v-if="imageIndex !== -1"
+      @close-popup="imageIndex = -1; viewingLevelScreenshot = false"
+      :images-array="viewingLevelScreenshot ? undefined : imagesArray"
+      :hash-array="imagesArray"
+      :uid="LIST_CREATORDATA?.discord_id"
+      v-model="imageIndex"
+    />
   </Transition>
 
   <!-- Mobile options popup -->
@@ -538,12 +568,18 @@ const imageIndex = ref(-1)
   <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
     <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
   </DialogVue>
+
+  <Teleport to="body">
+    <Transition name="fadeSlide">
+      <TemporaryList v-if="selectedLevels.length" />
+    </Transition>
+  </Teleport>
   
   <DialogVue :open="LIST_DATA.name != undefined && uploadedDialogShown" header-disabled>
     <ListUploadedDialog
       :link="getURL()"
       :is-updating="uploadedDialogShown == 2"
-      :is-review="true"
+      :is-review="isReview"
       @do-edit="listActions('editList')"
       @close-popup="uploadedDialogShown = 0"
     />
@@ -620,7 +656,9 @@ const imageIndex = ref(-1)
       <!-- List -->
       <div ref="postContent" v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
         <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
-          <component :is="[LevelCard, LevelCardCompact, LevelCardTable][SETTINGS.levelViewMode]" v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+          <component
+            v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
+            :is="[LevelCard, LevelCardCompact, LevelCardTable][cardGuessing == -1 ? SETTINGS.levelViewMode : 0]"
             class="levelCard"
             :style="{animationDelay: `${LIST_DATA?.diffGuesser ? 0 : index/25}s`}"
             v-bind="level"
@@ -632,47 +670,19 @@ const imageIndex = ref(-1)
             :disable-stars="cardGuessing == index"
             :guessing-now="cardGuessing == index"
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
+            :uploader-uid="LIST_CREATORDATA?.discord_id"
             @vue:mounted="tryJumping(index)"
             @next-guess="doNextGuess($event)"
             @open-tags="tagViewerOpened = $event"
             @open-collab="openCollabTools"
             @error="listErrorLoading = true"
+            @fullscreen-image="levelImageFullscreen($event, index)"
           />      
         </LevelCardTableTable>
       </div>
       
       <div ref="postContent" v-else v-show="!commentsShowing && !reviewLevelsOpen">
-        <!-- Review -->
-        <section id="reviewText" :style="{fontFamily: pickFont(LIST_DATA.data.font)}" :data-white-page="LIST_DATA.data.whitePage" class="p-2 text-white rounded-md max-w-[90rem] mx-auto w-full" :class="{'readabilityMode': LIST_DATA.data.readerMode, 'shadow-drop bg-lof-200 shadow-black': LIST_DATA.data.transparentPage == 0 || SETTINGS.disableTL, 'shadow-drop bg-black bg-opacity-30 backdrop-blur-md backdrop-brightness-[0.4]': LIST_DATA.data.transparentPage == 2 && !SETTINGS.disableTL, '!text-black': LIST_DATA.data.whitePage}">
-          <DataContainer
-              v-for="(container, index) in LIST_DATA.data.containers"
-              v-bind="CONTAINERS[container.type]"
-              :type="container.type"
-              :current-settings="container.settings"
-              :class="[CONTAINERS[container.type].styling ?? '']"
-              :style="{textAlign: container.align}"
-              :key="container.id"
-              :focused="false"
-              :text="container.data"
-              :editable="false"
-          >
-              <div class="flex flex-wrap w-full" :style="{justifyContent: flexNames[container.align]}">
-                  <component
-                      v-for="(elements, subIndex) in (CONTAINERS[container.type].additionalComponents ?? []).concat(Array(container.extraComponents).fill(CONTAINERS[container.type].additionalComponents?.[0] ?? []))"
-                      :is="elements"
-                      v-bind="CONTAINERS[container.type].componentProps ?? {}"
-                      :button-state="false"
-                      :settings="container.settings"
-                      :index="index"
-                      :id="container.id"
-                      :sub-index="subIndex"
-                      :key="container.id"
-                      :editable="false"
-                      :align="container.align"
-                  />
-              </div>
-          </DataContainer>
-        </section>
+        <WriterViewer :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
       </div>
 
       <!-- Guessing bottom padding -->
@@ -698,7 +708,6 @@ const imageIndex = ref(-1)
         :showing="commentsShowing || scrolledToEnd"
         :comments-disabled="LIST_DATA.data.disComments"
         :is-review="isReview"
-        :end-scroll="scrolledToEnd && !commentsShowing"
       />
     </main>
   </section>

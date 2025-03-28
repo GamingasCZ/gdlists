@@ -118,7 +118,7 @@ const clickList = (opt: number) => {
   
     <section class="flex flex-col items-start">
       <h1 class="text-lg font-bold">{{ name }}</h1>
-      <p class="text-xs !text-white">- {{ creatorName }} -</p>
+      <p class="text-xs !text-white">{{ creatorName }}</p>
     </section>
   
     <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-sm button">

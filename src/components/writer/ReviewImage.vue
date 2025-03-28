@@ -6,6 +6,7 @@ import { inject } from 'vue';
 import { watch } from 'vue';
 import Resizer from '../global/Resizer.vue';
 import { WriterGallery } from '@/interfaces';
+import containers, { type cShowImage } from './containers';
 
 
 const emit = defineEmits<{
@@ -14,7 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: cShowImage
     index: number
     buttonState: [string, number]
     editable: boolean
@@ -82,16 +83,18 @@ const fullscreenImage = () => {
     preview(props.id)
 }
 
+const size = containers.showImage.settings[1].valueRange
+
 </script>
 
 <template>
-    <ContainerHelp @click="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+    <ContainerHelp @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
-        <div class="flex relative group min-h-[48px] max-w-fit m-2 mb-0.5" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
-            <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
+        <div class="flex relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
+            <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
                     class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"

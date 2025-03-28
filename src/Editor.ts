@@ -1,29 +1,97 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, LevelBackup, ReviewList } from "./interfaces";
+import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBackground } from "./interfaces";
 import { SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
-import router from "./router";
 import { changeTheme } from "./themes";
+// import { DEFAULT_RATINGS } from "./Reviews";
 
-export const TAG_COUNT = 27;
+export const TAG_COUNT = 30;
 export const EMOJI_COUNT = 18;
 
 // For demon faces
 export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
 export const diffTranslateOffsets = [0, 0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
-export const DEFAULT_LEVELLIST: LevelList = {
+export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
+  reviewName: "",
   description: "",
   pageBGcolor: [140, 0.37, 3],
   diffGuesser: [false, false, false],
-  titleImg: ["", 0, 33, 1, true],
+  titleImg: ["", 0, 100, 1, true],
   translucent: false,
   disComments: false,
   levels: [],
+  tagline: "",
+  thumbnail: ["", 0, 33, 1, true],
+}}
+
+export const DEFAULT_LEVEL: () => Level = () => ({
+    levelName: "",
+    creator: "",
+    color: makeColor(),
+    difficulty: [0, 0],
+    levelID: "",
+    tags: [],
+    video: "",
+    ratings: [Array(4).fill(-1), []],
+    BGimage: newCardBG(),
+    screenshots: [],
+    scShotSecName: "",
+    commentary: ""
+})
+
+export const modernizeLevels = (levelArray: Level) => {
+  // Add missing keys
+  let levelKeys = Object.keys(levelArray)
+  let newLevel = DEFAULT_LEVEL()
+  Object.keys(newLevel).forEach(k => {
+    if (!levelKeys.includes(k))
+      levelArray[k] = newLevel[k]
+  })
 }
 
-export const levelList = ref<LevelList>(DEFAULT_LEVELLIST);
+export const modernizeList = (serverResponse: ListFetchResponse) => {
+  // List Name
+  serverResponse.data.reviewName ??= serverResponse.name
+
+  // Convert hex colors
+  if (serverResponse.data.pageBGcolor == "#020202")
+    serverResponse.data.pageBGcolor = DEFAULT_LEVELLIST().pageBGcolor
+  else
+    serverResponse.data.pageBGcolor = makeColor(serverResponse.data.pageBGcolor)
+
+  // Add missing keys
+  let listKeys = Object.keys(serverResponse.data)
+  let newList = DEFAULT_LEVELLIST()
+  Object.keys(newList).forEach(k => {
+    if (!listKeys.includes(k))
+      serverResponse.data[k] = newList[k]
+  })
+
+  // Convert thumbnail
+  if (typeof serverResponse.data.titleImg == 'string')
+    serverResponse.data.titleImg = newList.titleImg
+
+  // Add scattered levels into level array
+  let levelKeys = Object.keys(serverResponse.data).filter(x => !isNaN(parseInt(x)))
+  if (levelKeys.length) {
+    serverResponse.data.levels = []
+    levelKeys.forEach(x => {
+      let level = serverResponse.data[x]
+      level.color = makeColor(level.color)
+      serverResponse.data.levels.push(level)
+      delete serverResponse.data[x]
+      }
+    )
+  }
+
+  // Modernize levels
+  serverResponse.data.levels.forEach(l => modernizeLevels(l))
+
+  return serverResponse.data
+}
+
 export const predefinedLevelList = ref<Level[]>([]);
 
 export function makeColor(col?: [number, number, number] | string, hex = false): [number, number, number] | string {
@@ -40,35 +108,7 @@ export function makeColor(col?: [number, number, number] | string, hex = false):
 
 export const getBGcolor = () => document.documentElement.style.getPropertyValue('--siteBackground')
 
-export const newCardBG = () => ({ image: DEFAULT_LEVELLIST.titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
-
-export function addLevel(values: Level | null, toPredefined?: boolean) {
-  let levelInfo: Level = {
-    levelName: values?.levelName ?? "",
-    creator: values?.creator ?? "",
-    color: values?.color ? chroma(values?.color).hsl() : makeColor(),
-    levelID: values?.levelID ?? "",
-    video: values?.video ?? "",
-    difficulty: values?.difficulty ?? [0, 0],
-    tags: values?.tags ?? [],
-    platf: values?.platf ?? false,
-    BGimage: values?.BGimage ?? newCardBG()
-  };
-
-  if (toPredefined)
-    predefinedLevelList.value.push(levelInfo);
-  else
-    levelList.value.levels.push(levelInfo);
-}
-
-export const moveLevel = (from: number, to: number) => {
-  if (to < 0 || to >= levelList.value.levels.length) return from;
-
-  let currentCard = levelList.value.levels[from];
-  levelList.value.levels.splice(from, 1);
-  levelList.value.levels.splice(to, 0, currentCard);
-  return to;
-};
+export const newCardBG = ():LevelBackground => ({ image: DEFAULT_LEVELLIST().titleImg.slice(0), opacity: 1, theme: 0, tile: false, scrolling: 0 })
 
 export function testIfImageExists(url: string) {
   return new Promise((loaded, error) => {
@@ -80,12 +120,12 @@ export function testIfImageExists(url: string) {
   });
 }
 
-export const modifyListBG = (newColors: number[] | string, reset = false, review = false) => {
-  if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
-  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor)) return modifyListBG(0, true, review)
+export const modifyListBG = (newColors: number[] | string, reset = false) => {
+  if (SETTINGS.value.disableColors) return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor))
+  if (JSON.stringify(newColors) == JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor)) return modifyListBG(0, true)
   if (reset) {
     changeTheme(SETTINGS.value.selectedTheme)
-    return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST.pageBGcolor))
+    return JSON.parse(JSON.stringify(DEFAULT_LEVELLIST().pageBGcolor))
   }
 
   // Default colors
@@ -151,10 +191,6 @@ export function parseElapsed(secs: number) {
   else return Math.round(secs / 1892160000) + "y"; //y - years
 }
 
-export function resetList() {
-  if (router.currentRoute.value.name == "editor") router.push({ path: "/editor", force: true })
-}
-
 export const makeColorFromString = (name: string) => {
   if (SETTINGS.value.disableColors) {
     return chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
@@ -182,32 +218,43 @@ export function fixHEX(hexColor: string) {
   else return fixed;
 }
 
-export function checkList(listName: string): { valid: boolean, error?: string, listPos?: number, stamp?: number } {
-  let error = (errorText: string, errorPos?: number) => { return { valid: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random() } }
+export function checkList(postData: PostData): { success: boolean, error?: string, listPos?: number, stamp?: number } {
+  let error = (errorText: string, errorPos?: number) => { return { success: false, error: errorText, listPos: errorPos ?? -1, stamp: Math.random(), warn: [0,0,0] } }
 
   if (!isOnline.value) return error(i18n.global.t('other.disconnected'))
 
-  if (listName.length <= 3) return error(i18n.global.t('editor.nameShort'))
+  if (postData.reviewName.length <= 3) return error(i18n.global.t('editor.nameShort'))
 
-  if (levelList.value.levels.length == 0) return error(i18n.global.t('editor.emptyListSend'))
+  if (postData.levels.length == 0) return error(i18n.global.t('editor.emptyListSend'))
 
   let i = 0
   let listError: object | undefined
-  levelList.value.levels.forEach(level => {
+  let allLevelIDs: string[] = []
+  postData.levels.forEach(level => {
     if (level.levelName.length == 0) listError = error(i18n.global.t('editor.noNameAt', [i + 1]), i)
-    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator[0][0].name) {
-      if (typeof level.creator[0][0] == 'string') return // Old collabs
+    if (level.levelID) allLevelIDs.push(level.levelID)
+    if (typeof level.creator == 'string' ? !level.creator.length : !level.creator?.[0]?.[0]?.name) {
+      if (typeof level.creator?.[0]?.[0] == 'string') return // Old collabs
       listError = error(i18n.global.t('editor.noCreatorAt', [i + 1]), i)
     }
-    if (!level.levelID?.match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.invalidID', [i + 1]), i)
+    if (!level.levelID?.toString().match(/^\d+$/) && level.levelID?.length) listError = error(i18n.global.t('editor.insuccessID', [i + 1]), i)
     i++
   })
+
+  for (let i = 0; i < allLevelIDs.length; i++) {
+    for (let j = i+1; j < allLevelIDs.length; j++) {
+        if (allLevelIDs[i] == allLevelIDs[j]) {
+            return error(i18n.global.t('editor.noDuplicates'))
+        }
+    }
+}
+
   if (listError != undefined) return <any>listError
 
-  let listSize = JSON.stringify(levelList.value).length
+  let listSize = JSON.stringify(postData).length
   if (listSize > 25000) return error(i18n.global.t('editor.overLimit', [(listSize / 25000).toFixed(2)]))
 
-  return { valid: true }
+  return { success: true, warn: [0,0,0] }
 }
 
 export function creatorToCollab(currentName: string): CollabData {
@@ -223,16 +270,6 @@ export function creatorToCollab(currentName: string): CollabData {
 export const isOnline = ref(true)
 window.addEventListener("offline", () => isOnline.value = false)
 window.addEventListener("online", () => isOnline.value = true)
-
-export function saveBackup(listName: string, hidden: boolean, review: boolean | ReviewList = false, draftID: number) {
-  if (localStorage && SETTINGS.value.autosave) {
-    let backup: LevelBackup = { listName: listName, levelData: JSON.stringify(review !== false ? review : levelList.value), listHidden: hidden, listDate: Date.now() }
-    if (review) backup.backupID = draftID
-
-    localStorage.setItem(`${review ? 'review' : 'list'}Backup`, JSON.stringify(backup))
-  }
-  return Math.random()
-}
 
 export const removeBackup = (isReview = false) => {
   localStorage.removeItem(`${isReview ? 'review' : 'list'}Backup`)
@@ -278,3 +315,18 @@ export function manageParallax(e: WheelEvent) {
   parascroll.value += Math.round((window.scrollY - prevScroll)/3)
   prevScroll = window.scrollY
 }
+
+export const getListPreview = (postData: PostData) => {
+  let i = 0
+  let levels = postData.levels.slice(0, 3).map(l => {
+    let name = l.levelName || i18n.global.t('other.unnamesd')
+    let creator = typeof l.creator == 'string' ? (l.creator || i18n.global.t('other.unnamesd')) : l.creator[0][0].name
+    return `- #${++i}: ${name} - ${creator}`
+  })
+  return {title: '', preview: levels.join("\n"), counter: i}
+}
+
+export var lastTab: (number | string | null)[] = [null, null]
+export const modLastTab = (x: [number, string]) => lastTab = x
+
+export const lastUsedTags = ref<number[]>([])

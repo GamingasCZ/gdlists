@@ -7,6 +7,8 @@ import { dialog } from "../ui/sizes";
 const contactMenuOpen = ref<boolean>(false);
 const currentCommit = import.meta.env.VITE_LASTCOMMIT
 
+const scrollTop = () => window.scrollTo({top: 0, behavior: "smooth"})
+
 </script>
 
 <template>
@@ -15,9 +17,9 @@ const currentCommit = import.meta.env.VITE_LASTCOMMIT
   </Dialog>
 
 
-  <section
+  <footer
     id="footer"
-    class="flex z-50 flex-col justify-center items-center mt-20 w-full h-24 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
+    class="flex relative flex-col justify-center items-center mt-20 w-full h-24 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
   >
     <div class="flex items-center">
       <img
@@ -41,5 +43,9 @@ const currentCommit = import.meta.env.VITE_LASTCOMMIT
         {{ $t('other.contact') }}
       </button>
     </div>
-  </section>
+
+    <button :title="$t('other.toTop')" @click="scrollTop">
+      <img src="@/images/back.svg" class="absolute right-8 top-1/2 p-2 w-12 rounded-md mix-blend-soft-light rotate-90 -translate-y-1/2 hover:bg-white hover:bg-opacity-20" alt="">
+    </button>
+  </footer>
 </template>

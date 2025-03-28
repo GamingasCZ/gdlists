@@ -6,11 +6,12 @@ import ReviewImage from './ReviewImage.vue';
 import ReviewVideo from './ReviewVideo.vue';
 import Resizer from '../global/Resizer.vue';
 import { flexNames } from '@/Reviews';
+import containers, { type cAddCarousel } from './containers';
 
 const props = defineProps<{
     index: number
     buttonState: [string, number]
-    settings: object
+    settings: cAddCarousel
     editable: boolean
     align: string
 }>()
@@ -74,32 +75,33 @@ const onResize = new ResizeObserver(() => {
     buttonsShown.value = carousel.value?.scrollWidth > carousel.value?.parentElement.offsetWidth
 })
 const hovering = ref(false)
+const size = containers.addCarousel.settings[1].valueRange
 
 </script>
 
 <template>
-    <ContainerHelp v-if="!settings.components.length" @click="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
+    <ContainerHelp v-if="!settings.components.length" @click.stop="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
     <section
         v-else
         @mouseenter="hovering = true"
         @mouseleave="hovering = false"
         @vue:mounted="onResize.observe(carousel!)"
         ref="carousel"
-        class="overflow-x-auto carousel touch-pan-x group overflow-y-clip"
+        class="overflow-x-auto carousel group overflow-y-clip"
         :class="{'pb-1.5': editable}"
     >
         <Transition name="fade">
-            <button v-show="hovering && buttonsShown && end != 1" @click="scrollCarousel(-0.75, $event)" class="flex absolute left-2 top-1/2 z-10 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
+            <button v-show="hovering && buttonsShown && end != 1" @click="scrollCarousel(-0.75, $event)" class="flex absolute left-2 top-1/2 z-20 justify-center items-center w-10 rounded-full -translate-y-1/2 button bg-lof-400 aspect-square">
                 <img src="@/images/showCommsL.svg" class="w-3 invert -translate-x-0.5" alt="">
             </button>
         </Transition>
 
 
-        <div class="absolute inset-0 w-full">
-            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="48" :max-size="260" :editable="editable"></Resizer>
+        <div v-if="editable" class="absolute inset-0 z-10 w-full">
+            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="size[0]" :max-size="size[1]" :editable="editable"></Resizer>
         </div>
 
-        <section class="flex items-center" :style="{'justify-content': flexNames[align]}" :class="{'flex-wrap': settings.overflow, 'w-max': !settings.overflow}">
+        <section class="flex gap-2 items-center" :style="{'justify-content': flexNames[align]}" :class="{'flex-wrap': settings.overflow, 'w-max': !settings.overflow}">
             <component
             v-for="medium in settings.components"
             :is="[ReviewImage, ReviewVideo][+(medium.type == 'addVideo')]"

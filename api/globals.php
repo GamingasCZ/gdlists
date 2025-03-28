@@ -4,7 +4,7 @@ $hostname = getenv("DB_HOSTNAME");
 $username = getenv("DB_USERNAME");
 $password = getenv("DB_PASSWORD");
 $database = getenv("DB_NAME");
-$debugMode = true;
+$debugMode = false;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
@@ -46,7 +46,12 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = fa
 {
     global $debugMode;
     if ($debugMode) {
-        error_log(sprintf(str_ireplace("?", "%s", $queryTemplate), ...$values));
+        $template = $queryTemplate;
+
+        for ($i = 0; $i < sizeof($values); $i++)
+            $template = preg_replace("/\?/m", $values[$i] ?? 0, $template, 1);
+        
+        error_log($template);
     }
 
     $query = $mysqli->prepare($queryTemplate);
@@ -359,6 +364,9 @@ function hslToHex($hslArray) {
 }
 
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
+
+    doRequest($mysqli, sprintf("DELETE FROM `levels_uploaders` WHERE `%s`=?", $isReview ? "reviewID" : "listID"), [$listID], "i");
+    doRequest($mysqli, sprintf("DELETE FROM `levels_ratings` WHERE `%s`=?", $isReview ? 'reviewID' : 'listRatingID'), [$listID], "i");
     foreach ($levels as $l) {
         $hash = $l["levelID"];
         if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 200000000) continue;
@@ -377,8 +385,14 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
         $diff = isset($l["difficulty"]) ? $l["difficulty"][0] : 0;
         $rating = isset($l["difficulty"]) ? $l["difficulty"][1] : 0;
         $color = isset($l["color"]) ? substr(hslToHex($l["color"]), 1) : null;
-        $bgHash = isset($l["background"]) ? $l["background"]["image"][0] : null;
+        $bgHash = isset($l["BGimage"]) ? $l["BGimage"]["image"][0] : null;
         if (strlen($bgHash) == 0) $bgHash = null;
+
+        $platf = isset($l["platf"]);
+        foreach ($l["tags"] as $tag) {
+            if ($tag[0] == 28) // Platformer tag
+                $platf = true;
+        }
 
         $res = doRequest($mysqli, "INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, color, background, uploaderID, hash)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -390,7 +404,7 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
             $l["levelID"],
             $diff,
             $rating,
-            isset($l["platf"]) ? $l["platf"] : false,
+            $platf,
             $color,
             $bgHash,
             $userID,
@@ -403,11 +417,15 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
         [$l["levelID"], $listID], "ii");
             
         // Add review level ratings
-        if ($isReview) {
-            doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
-            [$l["levelID"], $listID, $l["ratings"][0][0], $l["ratings"][0][1], $l["ratings"][0][2], $l["ratings"][0][3]],
-            "iiiiii");
-        }
+        $res = doRequest($mysqli, 
+            sprintf("INSERT INTO `levels_ratings`(levelID, %s, gameplay, decoration, difficulty, overall)
+                    VALUES (?,?,?,?,?,?)", $isReview ? 'reviewID' : 'listRatingID'),
+            [$l["levelID"], $listID,
+            $l["ratings"][0][0] == -1 ? NULL : $l["ratings"][0][0],
+            $l["ratings"][0][1] == -1 ? NULL : $l["ratings"][0][1],
+            $l["ratings"][0][2] == -1 ? NULL : $l["ratings"][0][2],
+            $l["ratings"][0][3] == -1 ? NULL : $l["ratings"][0][3]],
+            "iidddd");
     }
 }
 

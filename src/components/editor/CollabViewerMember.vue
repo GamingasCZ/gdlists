@@ -59,7 +59,7 @@ const isDiscordServer = computed(() => {
         <h5 class="w-max text-xs leading-none" :class="{'opacity-40': !hiddenRole, 'font-bold': hiddenRole}">{{ roleName }}</h5>
         <h2 class="w-max text-lg font-extrabold leading-none">{{ human.name }}</h2>
         <span class="flex gap-1 items-center w-max" v-if="!isDiscordServer && dcIndex != -1">
-            <img class="w-4" src="@/images/discord.svg" alt="">
+            <img class="w-4" src="@/images/socials/discord.svg" alt="">
             {{ human.socials[dcIndex][1] }}
         </span>
         <footer class="flex gap-1 mt-1">

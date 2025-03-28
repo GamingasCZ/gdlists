@@ -32,30 +32,14 @@ if (hasLocalStorage()) {
 </script>
 
 <template>
-    <div class="flex bg-repeat-x bg-[url(@/images/fade.webp)] overflow-y-auto flex-col gap-2 p-2">
-        <SectionDivider :text="$t('settingsMenu.visual')" />
+    <div class="flex bg-repeat-x bg-[url(@/images/fade.svg)] overflow-y-auto flex-col gap-2 p-2">
+        <SectionDivider :text="$t('settingsMenu.behave')" />
         <Option
         :name="$t('settingsMenu.viewMode')"
             control="slot"
             :desc="$t('settingsMenu.levelHelp')"
             >
             <RadioPicker v-model="SETTINGS.levelViewMode" id="level" :opt-names="[$t('settingsMenu.classic'), $t('settingsMenu.compact'), $t('settingsMenu.table')]" :opt-icons="['/viewModes/classic.svg', '/viewModes/compact.svg', '/viewModes/spreadsheet.svg']" />
-        </Option>
-        <Option
-            v-model="SETTINGS.homepageColumns"
-            :name="$t('settingsMenu.homepage')"
-            control="dropdown"
-            :control-options="[[$t('settingsMenu.columns', 1), 1],[$t('settingsMenu.columns', 2), 2],[$t('settingsMenu.columns', 3), 3]]"
-        >
-        </Option>
-        <SectionDivider :text="$t('settingsMenu.behave')" />
-        <Option
-            v-model="SETTINGS.autosave"
-            :name="$t('settingsMenu.autosave')"
-            :desc="$t('settingsMenu.autosaveHelp')"
-            control="dropdown"
-            :control-options="[[$t('settingsMenu.asOff'), 0], [$t('settingsMenu.everySec', [30]), 30], [$t('settingsMenu.everySec', [60]), 60], [$t('settingsMenu.everyMin', [3]), 180]]"
-            >
         </Option>
         <Option
             v-model="SETTINGS.dialogClickClose"
@@ -85,7 +69,44 @@ if (hasLocalStorage()) {
             control="cbox"
         >
         </Option>
+        <SectionDivider :text="$t('editor.editor')" />
+        <Option
+            v-model="SETTINGS.compactToolbar"
+            :name="$t('settingsMenu.compToolbar')"
+            :desc="$t('settingsMenu.compactHelp')"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-model="SETTINGS.colorization"
+            :name="$t('settingsMenu.colorize')"
+            :desc="$t('settingsMenu.colorizeHelp')"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-model="SETTINGS.autosave"
+            :name="$t('settingsMenu.autosave')"
+            :desc="$t('settingsMenu.autosaveHelp')"
+            control="dropdown"
+            :control-options="[[$t('settingsMenu.asOff'), 0], [$t('settingsMenu.everySec', [30]), 30], [$t('settingsMenu.everySec', [60]), 60], [$t('settingsMenu.everyMin', [3]), 180]]"
+            >
+        </Option>
+        <Option
+            v-model="SETTINGS.saveThumbs"
+            :name="$t('settingsMenu.saveThumbs')"
+            :desc="$t('settingsMenu.saveThumbsHelp')"
+            control="cbox"
+        >
+        </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
+        <Option
+            v-model="SETTINGS.flipControls"
+            :name="$t('settingsMenu.flipControls')"
+            :desc="$t('settingsMenu.flipControlsHelp')"
+            control="cbox"
+        >
+        </Option>
         <Option
             v-model="SETTINGS.disableColors"
             :name="$t('settingsMenu.disColors')"

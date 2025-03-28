@@ -3,10 +3,10 @@ import { RouterLink } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { currentCutout, currentUID, isOnline, profileCutouts, resetList } from "@/Editor";
+import { currentCutout, currentUID, isOnline, profileCutouts } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
-import router, { loadingProgress } from "@/router";
+import router, { loadingProgress, timeLastRouteChange } from "@/router";
 import ProfilePicture from "./global/ProfilePicture.vue";
 
 const props = defineProps<{
@@ -49,7 +49,9 @@ const scrollerInd = ref(0)
 const locale = useI18n().locale
 watch(locale, () => {
   nextTick(() => {
-    let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
+    let selectedLink = document.querySelectorAll(".websiteLink")?.[scrollerInd.value]
+    if (!selectedLink) return
+    
     scrollerXOff.value = selectedLink.offsetLeft
     scrollerWidth.value = selectedLink.clientWidth
     if (router.currentRoute.value.name == "home") scrollerHome()
@@ -77,6 +79,7 @@ const modScrollerWidth = (e: Event) => {
   scrollerInd.value = parseInt(link.dataset.ind!)
   scrollerWidth.value = link.clientWidth
   scrollerXOff.value = link.offsetLeft
+  timeLastRouteChange.value = Date.now()
 }
 
 const scrollerHome = () => {
@@ -168,7 +171,7 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       <RouterLink to="/browse/lists" @click="modScrollerWidth" data-ind="2"
         class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
-        <img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{ $t("navbar.lists") }}
+        <img src="../images/browse.svg" alt="" class="w-6" />{{ $t("navbar.lists") }}
       </RouterLink>
 
       <!-- Saved -->
