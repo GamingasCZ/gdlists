@@ -73,6 +73,8 @@ const loadContent = async () => {
       lastScroll = currentScroll
     })
   }
+
+  if (window.location.search.includes("comment")) commentsShowing.value = true
 }
 
 watch(props, loadContent)

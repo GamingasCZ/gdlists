@@ -398,3 +398,18 @@ export interface FormattingButton {
 	splitAfter?: boolean
 	bold?: boolean
 }
+
+export interface NotificationContent {
+  to: string
+  from: string
+  from_user: string
+  type: 'comment' | 'rating' | 'other'
+  unread: boolean
+  time: string
+  postType: 'list' | 'review' | 'other'
+  objectID: number
+  otherID: number | null
+  comment: string | null
+  count: number
+  id: number
+}

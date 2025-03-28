@@ -157,6 +157,7 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
       <main class="relative backdrop-blur-sm grow">
         <section role="none" :style="{backgroundColor: headerColor}" class="relative rounded-t-md">
           <ProfilePicture class="absolute bottom-1 mx-2 w-12 pointer-events-none shadow-drop" :uid="pfp || -2" :cutout="creatorData?.pfp_cutout || 0" />
+
           <h1 id="objectName" class="absolute bottom-6 pl-2 ml-14 text-xl">{{ name }}</h1>
 
           <!-- List information -->

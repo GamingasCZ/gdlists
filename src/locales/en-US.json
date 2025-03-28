@@ -233,12 +233,16 @@
     "addToList": "Add to List",
     "pickedLevels": "{count} level selected | {count} levels selected",
     "noContents": "No contents available!",
-    "contents": "Contents"
+    "contents": "Contents",
+    "highlighted": "Highlighted Comment"
   },
   "navbar": {
     "editor": "Create",
     "lists": "Browse",
-    "saved": "Saved"
+    "saved": "Saved",
+    "notifs": "Notifications",
+    "dropdown": "Dropdown",
+    "fullscreen": "Fullscreen"
   },
   "other": {
     "404": "This path sadly doesn't lead anywhere...",
@@ -439,7 +443,10 @@
     "toTop": "Scroll to Start",
     "homepage": "Homepage",
     "title": "Name",
-    "loginFuckup": "Session is not valid!"
+    "loginFuckup": "Session is not valid!"=======
+    "type": "Type",
+    "sort": "Sorting",
+    "oldUnread": "Oldest unread"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -508,7 +515,9 @@
     "draftNoRemove": "Do Not Remove Draft after Upload",
     "colorize": "Colorize via Background Image",
     "saveThumbs": "Save Level Thumbnails",
-    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search."
+    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search.",
+    "notifBehave": "Displaying Notifications",
+    "notifBeHelp": "Modifies displaying of notifications on clicking the notification icon,"
   },
   "help": {
     "Lists": "Lists",

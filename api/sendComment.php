@@ -13,6 +13,7 @@ Return codes:
 */
 
 require("globals.php");
+require("notifications.php");
 header('Content-type: application/json'); // Return as JSON
 
 $DATA = json_decode(file_get_contents("php://input"), true);
@@ -45,7 +46,7 @@ if (!$discord_id) die("7");
 $time = new DateTime();
 
 // Disabled comments
-$list = doRequest($mysqli, sprintf("SELECT `commDisabled` FROM `%s` WHERE `id` = ?", $column), [$fuckupData[2]], "i");
+$list = doRequest($mysqli, sprintf("SELECT `commDisabled`,`uid` FROM `%s` WHERE `id` = ?", $column), [$fuckupData[2]], "i");
 if ($list["commDisabled"] == 1) die("8");
 
 
@@ -59,6 +60,9 @@ $values = array($fuckupData[0], $fuckupData[1], $fuckupData[3], $fuckupData[2], 
 $result = doRequest($mysqli, $template, $values, "sssssss");
 if (is_array($result) && array_key_exists("error", $result)) die("2");
 
+$id = doRequest($mysqli, "SELECT LAST_INSERT_ID() as 'id'", [], "");
+
+createNotification($mysqli, $discord_id, $list["uid"], 1, intval(isset($DATA["reviewID"]))+1, $fuckupData[2], $id["id"]);
 echo "6";
 $mysqli->close();
 

@@ -4,6 +4,7 @@ import ListBrowser from '../global/ListBrowser.vue';
 import CommentBox from './CommentBox.vue';
 import CommentPreview from './CommentPreview.vue';
 import { isOnline } from '@/Editor';
+import router from '@/router';
 
 const props = defineProps<{
     listID: number
@@ -22,10 +23,15 @@ const browser = ref<HTMLDivElement>()
 
 const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
+const highlight = ref(window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null)
 const showingOnce = ref(false)
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
 watch(props, () => { // only refresh comments once
     if (!showingOnce.value) showingOnce.value = true
+})
+
+watch(router.currentRoute, () => {
+    highlight.value = window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null
 })
 
 </script>
@@ -60,6 +66,7 @@ watch(props, () => { // only refresh comments once
             class="p-2"
             :comment-i-d="{type: commentType, objectID: listID}"
             :refreshButton="!commentsDisabled"
+            :highlight="highlight"
             @refreshed-browser="amount = $event; emit('updateCommentAmount', $event)"
         />
     </main>

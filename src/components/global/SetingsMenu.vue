@@ -6,11 +6,16 @@ import { SETTINGS } from "@/siteSettings";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
 import axios from "axios";
+import { currentUnread } from "./profiles";
 
 defineProps<{
   isLoggedIn: boolean;
   username: string;
 }>();
+
+const emit = defineEmits<{
+  (e: "openNotifs"): void
+}>()
 
 let loggingOut = false
 function logout() {
@@ -65,6 +70,7 @@ const Help = defineAsyncComponent({
   loader: () => import("@/components/helpMenu/HelpMenu.vue"),
   loadingComponent: LoadingBlock
 })
+
 
 const refresh = () => window.location.reload()
 const refreshLangShown = ref(false)
@@ -122,6 +128,14 @@ const currLang = SETTINGS.value.language
       </button>
     </section>
 
+    <button
+      class="relative px-2 py-1 text-left bg-black bg-opacity-40 rounded-md sm:hidden button"
+      @click="emit('openNotifs')"
+    >
+    <div v-if="currentUnread > 0" class="absolute -top-1 -left-1 w-3 rounded-md bg-lof-400 aspect-square"></div>
+      <img src="@/images/notifs.svg" class="inline mr-3 w-5" alt="" />{{ $t('navbar.notifs') }}
+    </button>
+  
     <section
       class="flex flex-col gap-1 py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >

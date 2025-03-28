@@ -76,6 +76,11 @@ const router = createRouter({
       name: "404",
       component: () => import("@/components/404.vue"),
     },
+    {
+      path: "/notifications",
+      name: "notifications",
+      component: () => import("@/components/Notifications.vue")
+    },
   ],
 });
 

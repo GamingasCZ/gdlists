@@ -28,6 +28,7 @@ const props = defineProps<{
   component: object
   picking: false | 1 | 2
   displayInRows: boolean
+  highlight?: number
 }>()
 
 // Page title
@@ -153,6 +154,7 @@ function refreshBrowser() {
     }
     if (props.commentID.type == "list") fetchQuery.listID = props.commentID.objectID
     else fetchQuery.reviewID = props.commentID.objectID
+    if (props.highlight) fetchQuery.highlight = props.highlight
   }
 
   axios
@@ -431,7 +433,7 @@ defineExpose({
 
         <component
           :is="component"
-          v-for="(list, index) in LISTS" v-bind="list"
+          v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
           class="min-w-full listPreviews"
           :key="list?.name ?? list?.levelName ?? list?.comID ?? PAGE"
           :in-use="false"
@@ -454,6 +456,12 @@ defineExpose({
           @remove-collab="removeCollab"
           @favorite="favoriteLevel"
         />
+
+        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
+          <h3 class="my-3 text-xl">{{ $t('listViewer.highlighted') }}</h3>
+          <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
+          <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
+        </section>
 
         </main>
         <!-- Page Switcher -->

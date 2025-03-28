@@ -2,7 +2,10 @@
   "navbar": {
     "editor": "Vytvářet",
     "lists": "Procházet",
-    "saved": "Uložené"
+    "saved": "Uložené",
+    "notifs": "Notifikace",
+    "dropdown": "Boční panel",
+    "fullscreen": "Celá obrazovka"
   },
   "settingsMenu": {
     "czech": "Čeština",
@@ -71,7 +74,9 @@
     "compactHelp": "Skryje názvy nástrojů v editoru.",
     "draftNoRemove": "Nemazat koncepty při nahrání",
     "saveThumbs": "Ukládat náhledy levelů",
-    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání."
+    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání.",
+    "notifBehave": "Zobrazování notifikací",
+    "notifBeHelp": "Mění, jakým stylem se zobrazují všechy notikace,"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -418,7 +423,11 @@
     "auto": "Automatická",
     "toTop": "Jít navrch",
     "homepage": "Domovská stránka",
-    "title": "Název"
+    "title": "Název",
+    "type": "Druh",
+    "sort": "Řazení",
+    "oldest": "Nejstarší",
+    "oldUnread": "Nejstarší nepřečtené"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -484,7 +493,8 @@
     "addToList": "Přidat do seznamu",
     "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely",
     "noContents": "Obsah není dostupný!",
-    "contents": "Obsah"
+    "contents": "Obsah",
+    "highlighted": "Zvýrazněný komentář"
   },
   "level": {
     "levelID": "ID levelu",

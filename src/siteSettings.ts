@@ -23,6 +23,9 @@ export const SETTINGS = ref({
   colorization: true,
   flipControls: true,
   saveThumbs: true,
+  disableBGs: false,
+  disableTL: false,
+  notifBehaviour: 0,
 });
 
 watch(SETTINGS, () => {

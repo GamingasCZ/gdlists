@@ -32,14 +32,15 @@ if (!is_numeric($_GET["page"]) &&
     die("1");
 }
 
+$highlight = sprintf("SELECT * FROM `comments` WHERE `comID`=%s AND `%s`=%s UNION ALL", intval($_GET["highlight"]), $type, $fuckupID);
+
 // How many comments should be fetched and the offset (page)
 $dbSlice = clamp(intval($_GET["fetchAmount"]), 2, 15) * intval($_GET["page"]);
-
-$query = sprintf("SELECT * FROM `comments`
+$query = sprintf("%s SELECT * FROM `comments`
             WHERE `comID`<=%d AND %s=%d
             ORDER BY `comID` DESC
             LIMIT %d 
-            OFFSET %s", $_GET["startID"], $type, $fuckupID, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+            OFFSET %s", $highlight,  $_GET["startID"], $type, $fuckupID, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
 
 $commAmount = intval(doRequest($mysqli, sprintf("SELECT COUNT(*) as commAmount from `comments` WHERE %s=?", $type), [$fuckupID], "i")["commAmount"]);
 $maxpage = ceil($commAmount / clamp(intval($_GET["fetchAmount"]), 2, 15));
