@@ -74,9 +74,9 @@ const unpinList = () => {
 const creatorName = computed(() => props.creator?.length ? props.creator : getUsername())
 
 const postLink = props.url ? `/review/${props.url}` : `/${props.hidden == 0 ? props.id : props.hidden}`
-const clickList = () => {
-  if (props.disableLink == 1) emit('selected')
-  else if (props.disableLink == 2) emit('clickedOption', {option: 1, postID: props.id, postType: 0})
+const clickList = (opt: number) => {
+  if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: 0})
+  else if (props.disableLink == 1) emit('selected')
   else emit('selectedLink', creatorName.value)
 }
 
@@ -86,7 +86,7 @@ const clickList = () => {
   <component
     :is="disableLink ? 'button' : 'RouterLink'"
     :to="postLink"
-    class="flex flex-col font-[poppins] w-full max-w-6xl cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex flex-col font-[poppins] w-full max-w-6xl min-w-64 cursor-pointer relative rounded-md border-[0.2rem] border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       background: getGradient(),
       borderColor: listColor.darken(2).hex(),
@@ -118,21 +118,19 @@ const clickList = () => {
   
     <section class="flex flex-col items-start">
       <h1 class="text-lg font-bold">{{ name }}</h1>
-      <p class="text-xs">- {{ creatorName }} -</p>
+      <p class="text-xs !text-white">{{ creatorName }}</p>
     </section>
   
     <button @click.stop.prevent="unpinList()" v-if="isPinned" class="box-border p-1 ml-auto w-10 bg-black bg-opacity-40 rounded-sm button">
       <img src="@/images/unpin.svg" alt="">
     </button>
   
-      <img src="@/images/questionFarts.svg" class="absolute right-0 h-12 mix-blend-soft-light" v-if="diffGuesser == '1'" alt="">
   </div>
   <div v-if="unrolledOptions" class="flex gap-2 justify-evenly my-2">
-    <button @click.stop="emit('clickedOption', {option: 0, postID: id, postType: 0})" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+    <button @click.stop="clickList(0)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
       <img src="@/images/browseMobHeader.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickList') }}</button>
-    <button @click.stop="emit('clickedOption', {option: 1, postID: id, postType: 0})" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
+    <button @click.stop="clickList(1)" class="p-1 w-full bg-black bg-opacity-60 rounded-md max-w-60 hover:bg-opacity-80">
       <img src="@/images/searchOpaque.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pickLevels') }}</button>
   </div>
   </component>
 </template>
-3

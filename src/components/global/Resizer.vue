@@ -22,10 +22,13 @@ const gizmo = ref<HTMLButtonElement>()
 
 const mousePos = ref([0, 0])
 const trackPos = (e: MouseEvent | TouchEvent) => {
+    if (e?.buttons == 0) return endScale()
+    
     if (e?.clientX) mousePos.value = [e.clientX, e.clientY]
     else mousePos.value = [e.touches.item(0).screenX, e.touches.item(0).screenY]
 }
 var scaleID
+var prevSize = -1
 const startScale = () => {
     document.body.addEventListener("mouseup", endScale, {once: true})
     document.body.addEventListener("mousedown", trackPos)
@@ -37,6 +40,8 @@ const startScale = () => {
     
     scaleID = setInterval(() => {
         if (!mousePos.value[0] || !mousePos.value[1]) return
+        if (mousePos.value[0] + mousePos.value[1] == prevSize) return
+
         let rect = gizmo.value?.getBoundingClientRect()
         let mVec = [rect.x + 8, rect.y + 8]
         let drag
@@ -49,10 +54,11 @@ const startScale = () => {
             imageScale.value = Math.min(Math.max(props.minSize ?? 96, self.value?.clientHeight + drag), props.maxSize ?? 1024)
         }
 
-        imageScale.value = Math.floor(imageScale.value/10)*10
+        imageScale.value = Math.ceil(imageScale.value/4)*4
+        prevSize = mousePos.value[0] + mousePos.value[1]
 
         emit("resize", imageScale.value)
-    }, 20)
+    }, 5)
 }
 
 const endScale = () => {
@@ -64,14 +70,19 @@ const endScale = () => {
     clearInterval(scaleID)
 }
 
+const autoResize = () => {
+    let newSize = imageScale.value == props.maxSize ? props.minSize : props.maxSize
+    imageScale.value = newSize
+    emit('resize', imageScale.value)
+}
+
 </script>
 
 <template>
-    <div ref="self" class="relative group">
-        <div :class="{'p-1 border-2 border-transparent group-hover:border-blue-400': editable, 'border-blue-400': alwaysVisible}">
-            <slot :width="width" />
-        </div>
-        <button v-if="editable" ref="gizmo" @mousedown="startScale" @touchstart="startScale" class="isolate absolute -bottom-1.5 w-4 h-4 bg-white rounded-full scale-0 group-hover:scale-100"
+    <div ref="self" class="relative rounded-lg group" :class="{'border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
+        <slot :width="width" />
+        
+        <button v-if="editable" tabindex="-1" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
         :class="{'-right-1': gizmoPos == 'corner', 'left-1/2': gizmoPos == 'vertical'}"
         ></button>
     </div>

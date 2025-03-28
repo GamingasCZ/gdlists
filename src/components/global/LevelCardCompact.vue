@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { Level } from "@/interfaces";
 import type { Color } from "chroma-js";
-import { inject, onErrorCaptured, ref } from "vue";
+import { computed, inject, onErrorCaptured, ref } from "vue";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
 import { DEFAULT_RATINGS } from "@/Reviews";
 import chroma from "chroma-js";
 import Dropdown from "../ui/Dropdown.vue";
+import CardTheme from "../levelViewer/CardTheme.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -55,13 +56,22 @@ const listData = inject("listData")
 
 const rateDropdownButton = ref<HTMLImageElement>()
 const ratingsShowing = ref(false)
+const textCol = computed(() => {
+  return CARD_COL.value.luminance() > 0.5 ? 'black' : 'white'
+})
 
 </script>
 
 <template>
-  <section class="relative max-sm:button mx-auto w-[70rem] max-w-[95vw] rounded-lg p-2 text-white shadow-lg shadow-[color:#0000008F]"
-    :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
+  <section class="relative max-sm:button mx-auto w-[58rem] max-w-[95vw] rounded-lg p-2 shadow-lg shadow-[color:#0000008F]"
+    :style="{
+      backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})`,
+      color: textCol
+    }"
     :class="{ 'backdrop-blur-md': translucentCard }" @click="openOverview">
+    
+    <CardTheme v-if="BGimage" v-bind="BGimage" />
+
     <main class="flex justify-between items-center">
       <div>
         <header class="flex items-center">
@@ -109,9 +119,9 @@ const ratingsShowing = ref(false)
     </button>
 
     <!-- Favorite star -->
-    <button class="absolute top-1 right-1 button max-sm:hidden" @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
+    <button class="absolute top-1 right-1 drop-shadow-md button max-sm:hidden" @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
       :class="{ disabled: isFavorited }" v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars">
-      <img src="@/images/star.webp" class="w-6" alt="" />
+      <img src="@/images/star.svg" class="w-6" alt="" />
     </button>
 
     <!-- Level review ratings -->

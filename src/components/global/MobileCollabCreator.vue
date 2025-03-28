@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { levelList } from '@/Editor';
 import ColorPicker from '../global/ColorPicker.vue';
 import chroma from 'chroma-js';
-import { computed, nextTick, ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { socialMediaImages } from '../editor/socialSites';
 import { socialMedia } from '../editor/socialSites';
 import type { CollabData, CollabHumans, userDataFetchResponse } from '@/interfaces';

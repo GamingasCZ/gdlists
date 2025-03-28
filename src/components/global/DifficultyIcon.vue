@@ -31,13 +31,10 @@ function draw() {
         let diff = new Image()
         diff.src = import.meta.env.BASE_URL + `/faces/${props.difficulty}.webp`
         diff.onload = () => {
-            if (props.rating)
-                if (props.difficulty > 6 && props.difficulty < 11)
-                    placeImage(diff, [0.8 * diffScaleOffsets[props.difficulty - 6], 0.8 * diffScaleOffsets[props.difficulty - 6]], [0, 3]) // Rated - make room for rating
-                else
-                    placeImage(diff, [0.8, 0.8], [0, 3]) // Rated - make room for rating
+            if (props.difficulty > 6 && props.difficulty < 11)
+                placeImage(diff, [0.8 * diffScaleOffsets[props.difficulty - 6], 0.8 * diffScaleOffsets[props.difficulty - 6]], [0, 3]) // Rated - make room for rating
             else
-                placeImage(diff, [1, 1], [0,0]) // Unrated - bigger
+                placeImage(diff, [0.8, 0.8], [0, 3]) // Rated - make room for rating
             res(true)
         }
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+ <g fill-rule="evenodd">
+  <path d="m21.43 7.3516-6.2461 17.297h15.816c0.554-1e-6 1-0.446 1-1v-15.297c0-0.554-0.446-1-1-1z" fill="#cbcbcb" style="paint-order:stroke markers fill"/>
+  <path d="m1 7.3516c-0.554 0-1 0.446-1 1v15.297c0 0.554 0.446 1 1 1h9.5703l6.1504-17.297z" fill="#fff" style="paint-order:stroke markers fill"/>
+  <path d="m16.721 7.3516-6.1502 17.297h4.6126l6.2462-17.297z" fill="#3e3e3e" style="paint-order:stroke markers fill"/>
+ </g>
+</svg>

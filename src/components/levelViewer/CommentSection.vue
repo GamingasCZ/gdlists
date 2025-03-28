@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import ListBrowser from '../global/ListBrowser.vue';
 import CommentBox from './CommentBox.vue';
 import CommentPreview from './CommentPreview.vue';
+import { isOnline } from '@/Editor';
 import router from '@/router';
 
 const props = defineProps<{
@@ -12,12 +13,13 @@ const props = defineProps<{
     commAmount: number
     showing: boolean
     commentsDisabled: boolean
-    endScroll: boolean
 }>()
 
 const emit = defineEmits<{
     (e: "updateCommentAmount", count: number): void
 }>()
+
+const browser = ref<HTMLDivElement>()
 
 const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
@@ -35,22 +37,29 @@ watch(router.currentRoute, () => {
 </script>
 
 <template>
-    <main>
-        <h2 class="mt-10 mb-2  max-w-[95vw] w-[80rem] mx-auto text-3xl font-bold" v-if="endScroll">{{ $t('level.comments') }}</h2>
+    <main class="mt-10">
         <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
         
         <!-- Comments disabled info -->
-        <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max rounded-md bg-greenGradient" v-if="commentsDisabled">
+        <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">
             <img src="../../images/noComments.svg" class="w-12 opacity-60" alt="">
             <span>{{ $t('listViewer.commDisableHelp', [isReview ? $t('listViewer.thisReview') : $t('listViewer.thisList')]) }}</span>
         </div>
 
-        <hr class="max-w-[95vw] w-[70rem] rounded-full bg-white bg-opacity-40 border-none h-0.5 mx-auto my-4 max-sm:hidden" :class="{'hidden': amount == 0 || commentsDisabled}">
-
+        <section class="flex mx-auto mt-8 mb-3 items-center gap-4 max-w-[95vw] w-[58rem]" :class="{'hidden': amount == 0 || commentsDisabled}">
+            <h2 class="text-3xl font-bold">{{ $t('level.comments') }}</h2>
+            <hr class="h-0.5 bg-white bg-opacity-10 border-none grow">
+            <button id="listRefreshButton" @click="browser?.doRefresh()" class="box-border text-lg rounded-md button">
+                <img src="@/images/replay.svg" class="inline p-1 mr-3 w-8" alt="">{{ $t('other.refresh') }}
+            </button>
+        </section>
+        
         <ListBrowser
             v-if="showingOnce && !noNoCommsIfDisabledComments"
+            ref="browser"
             v-memo="[showingOnce]"
             :component="CommentPreview"
+            :display-in-rows="true"
             :online-browser="true"
             :hide-search="true"
             online-type="comments"

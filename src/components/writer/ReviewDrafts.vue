@@ -1,63 +1,96 @@
 <script setup lang="ts">
-import { prettyDate } from "@/Editor";
-import { reviewData } from "@/Reviews";
 import type { ReviewDraft, ReviewList } from "@/interfaces";
-import { i18n } from "@/locales";
-import { computed, inject, ref } from "vue";
+import { DraftAction } from "@/interfaces";
+import { computed, nextTick, onMounted, ref } from "vue";
+import DraftCard from "./DraftCard.vue";
+import type { Writer } from "@/writers/Writer";
 
 const props = defineProps<{
     inUseID: number
-    drafts: object
+    drafts: {[draft: string]: ReviewDraft}
+    writer: Writer
 }>()
 
 const emit = defineEmits<{
     (e: "save", duplicate: boolean): void
-    (e: "preview", data: ReviewList): void
-    (e: "load", data: {data: ReviewList, id: number, saved: number}): void
+    (e: "preview", data: ReviewList, id_saved: string): void
+    (e: "load", draft: ReviewDraft): void
     (e: "remove", id: number): void
+    (e: "close"): void
 }>()
-
-const searchBoxShown = ref(false)
 
 const editName = (newName: string, key: string) => {
     props.drafts[key].name = newName
-    localStorage.setItem("reviewDrafts", JSON.stringify(props.drafts))
+    editingName.value = -1
+    localStorage.setItem(props.writer.drafts.storageKey, JSON.stringify(props.drafts))
 }
 
 const optionsOpen = ref(-1)
 const editingName = ref(-1)
-const justSaved = ref(false)
 const query = ref("")
 
 const filteredDrafts = computed(() => {
-    let filtered = {}
-    for (const [key, draft] of Object.entries(props.drafts)) {
-        if (draft.name.toLowerCase().includes(query.value.toLowerCase())) filtered[key] = draft
+    let filtered: {[key: string]: ReviewDraft}
+    if (query.value.length) {
+        let filtered = {}
+        for (const [key, draft] of Object.entries(props.drafts)) {
+            if (draft.name.toLowerCase().includes(query.value.toLowerCase())) filtered[key] = draft
+        }
     }
-    return filtered
+    else filtered = props.drafts
+
+    return Object.keys(filtered).reverse()
+})
+
+const doAction = (action: DraftAction, key: string, draft: ReviewDraft) => {
+    switch (action) {
+        case DraftAction.Save:
+            emit("save", false)
+            break;
+        case DraftAction.Clone:
+            emit("save", true)
+            break;
+        case DraftAction.Disjoin:
+            // TODO
+            break;
+        case DraftAction.Remove:
+            emit("remove", key)
+            break;
+        case DraftAction.Preview:
+            emit("preview", draft.reviewData, key)
+            break;
+        case DraftAction.Load:
+            emit("load", draft)
+            emit("close", draft)
+            break;
+    }
+}
+
+onMounted(() => {
+    let firstCard = document.querySelector(".draftCard")
+    if (firstCard && !props.inUseID)
+        nextTick(() => firstCard.focus())
 })
 
 </script>
 
 <template>
-    <div v-if="searchBoxShown" class="flex items-center px-1 my-1">
-        <button class="bg-black bg-opacity-40 rounded-md" @click="searchBoxShown = false; query = ''">
-            <img src="@/images/moveUp.svg" class="p-2 w-8 -rotate-90" alt="">
+    <header class="flex gap-2 items-center px-2 my-2 mt-1">
+        <input type="text" v-model="query" :placeholder="$t('other.search')" class="px-2 py-1.5 bg-black bg-opacity-40 rounded-md p grow">
+
+        <button v-if="!inUseID" @click="doAction(DraftAction.Save)" class="flex gap-3 justify-center items-center px-2 py-1.5 w-max font-bold bg-black bg-opacity-40 rounded-md button">
+            <img src="@/images/symbolicSave.svg" class="w-6" alt="">
+            <span>{{ $t('other.save') }}</span>
         </button>
-        <input type="text" @mouseover="$event.target.focus()" v-model="query" :placeholder="$t('other.search')" class="px-2 py-1 ml-1 bg-black bg-opacity-40 rounded-md grow">
-    </div>
-    <div v-else class="grid grid-cols-3 gap-1 p-1">
-        <button @click="emit('save', false); justSaved = true" :disabled="justSaved || !reviewData.containers.length" class="flex gap-2 p-1 pl-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img src="@/images/symbolicSave.svg" class="w-4" alt="">{{ justSaved ? $t('reviews.justSaved') : $t('other.save') }}</button>
-        <button @click="emit('save', true)" :disabled="inUseID == 0" class="flex gap-2 p-1 pl-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img src="@/images/copy.svg" class="w-4" alt="">{{ $t('other.duplicate') }}</button>
-        <button @click="searchBoxShown = true" class="flex gap-2 p-1 pl-2 bg-black bg-opacity-40 rounded-md"><img src="@/images/searchOpaque.svg" class="w-4" alt="">{{ $t('other.search') }}</button>
-    </div>
-
+        <!-- <button v-if="!inUseID" @click="doAction(DraftAction.Save)" class="flex gap-3 justify-center items-center px-2 py-1.5 w-max font-bold bg-black bg-opacity-40 rounded-md button">
+            <img src="@/images/more.svg" class="w-6" alt="">
+        </button> -->
+    </header>
     <div
-        class="bg-[url(@/images/fade.webp)] bg-repeat-x h-[40rem] relative p-1 overflow-y-auto flex flex-col gap-1 overflow-x-clip" @click="editingName = -1">
-
+    class="bg-[url(@/images/fade.svg)] bg-repeat-x h-[45rem] relative p-2 overflow-y-auto flex flex-col gap-2 overflow-x-clip" @click="editingName = -1">
         <!-- Help -->
         <div v-if="!Object.keys(drafts).length" class="flex absolute top-1/2 left-1/2 flex-col gap-3 items-center w-3/4 text-center opacity-20 -translate-x-1/2 -translate-y-1/2">
-            <img src="@/images/reviews.svg" alt="" class="w-48">
+            <img src="@/images/edit.svg" alt="" class="w-48">
             <h2 class="text-2xl">{{ $t('reviews.draftHelp1') }}</h2>
             <p class="">{{ $t('reviews.draftHelp2') }}</p>
         </div>
@@ -66,31 +99,35 @@ const filteredDrafts = computed(() => {
             <img src="@/images/searchOpaque.svg" alt="" class="w-48">
             <h2 class="text-2xl">{{ $t('editor.nothingFound') }}</h2>
         </div>
+        <DraftCard
+            v-if="inUseID"
+            @editedName="editName($event, inUseID)"
+            @startNameEdit="editingName = inUseID"
+            @action="doAction($event, key, drafts[inUseID])"
+            :is-open="true"
+            :in-use="true"
+            :draft="drafts[inUseID]"
+            :editing-name="editingName == inUseID"
+            :key="inUseID"
+            :counter-key="writer.drafts.counterLangKey"
+        />
 
-        <div v-for="(draft, key) in filteredDrafts" @click="optionsOpen = optionsOpen == -1 || optionsOpen != key ? key : -1; editingName = -1" class="w-full bg-black bg-opacity-40 rounded-md transition-transform" :class="{'hover:translate-x-1 active:translate-x-2': optionsOpen != key, 'border-l-4 border-lof-400 ': inUseID == key}">
-            <div class="flex flex-col justify-between p-2">
-                <div class="flex flex-col">
-                    <h2 v-if="editingName != key" @click.stop="editingName = key" class="flex gap-2 items-center w-max text-xl leading-tight group">{{ draft.name }} <img src="@/images/edit.svg" class="w-2 opacity-0 transition-opacity group-hover:opacity-100"></h2>
-                    <input v-else type="text" maxlength="40" :value="draft.name" @click.stop="" @change="editName($event.target.value, key)" class="px-2 bg-transparent bg-white bg-opacity-0 border-b-2 focus-within:outline-none focus-within:bg-opacity-10" autocomplete="off" @mouseover="$event.target.focus()" :placeholder="$t('reviews.reviewName')">
-
-                    <ul class="flex gap-2 list-disc list-inside">
-                        <li class="text-sm text-white text-opacity-40">{{ $t('reviews.saved') }}: {{ prettyDate((Date.now() - draft.saveDate)/1000) }}</li>
-                        <li class="text-sm text-white text-opacity-40">{{ $t('reviews.created') }}: {{ prettyDate((Date.now() - draft.createDate)/1000) }}</li>
-                        <li class="text-sm text-white text-opacity-40">{{ $t('other.words', draft.wordCount) }}</li>
-                    </ul>
-                </div>
-                <hr class="my-2 opacity-20 rounded-">
-                <div>
-                    <h2 v-if="!draft.previewTitle && !draft.previewParagraph" class="opacity-20">{{ $t('reviews.draftNoPrev') }}</h2>
-                    <h2>{{ draft.previewTitle }}</h2>
-                    <p class="text-xs text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent">{{ draft.previewParagraph }}</p>
-                </div>
-                <div v-if="optionsOpen == key" class="grid grid-cols-3 gap-2 p-1">
-                    <button @click.stop="emit('remove', key)" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img class="w-6" src="@/images/trash.svg">{{ $t('editor.remove') }}</button>
-                    <button @click.stop="emit('preview', draft.reviewData)" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img class="w-6" src="@/images/filePreview.svg">{{ $t('other.preview') }}</button>
-                    <button :disabled="inUseID == key" @click.stop="emit('load', {data: draft.reviewData, id: draft.createDate, saved: draft.saveDate})" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img class="w-6" src="@/images/checkThick.svg">{{ inUseID == key ? $t('other.inUse') : $t('other.use') }}</button>
-                </div>
-            </div>
+        <!-- Show drafts sorted by newest -->
+        <div class="flex flex-col gap-2">
+            <DraftCard
+                v-for="(draft, index) in filteredDrafts"
+                @editedName="editName($event, draft)"
+                @startNameEdit="editingName = draft"
+                @open="optionsOpen = index"
+                @action="doAction($event, draft, drafts[filteredDrafts[index]])"
+                :is-open="optionsOpen == index"
+                :in-use="false"
+                :hide="inUseID == draft"
+                :editing-name="editingName == draft"
+                :draft="drafts[filteredDrafts[index]]"
+                :key="drafts[filteredDrafts[index]].createDate"
+                :counter-key="writer.drafts.counterLangKey"
+            />
         </div>
     </div>
 </template>

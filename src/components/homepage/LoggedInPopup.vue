@@ -29,7 +29,7 @@ const BASE_URL = import.meta.env.BASE_URL
     </h1>
   </div>
 
-  <div class="bg-[url(@/images/fade.webp)] relative bg-repeat-x flex-col flex gap-2 max-h-64 overflow-y-auto">
+  <div class="bg-[url(@/images/fade.svg)] relative bg-repeat-x flex-col flex gap-2 max-h-64 overflow-y-auto">
     <div class="flex gap-2 items-center p-3 px-2 mx-2 mt-2 bg-black bg-opacity-20 rounded-md">
       <img src="@/images/emoji.svg" class="w-6" alt="">
       <p>{{ $t('homepage.loginHelp1') }}</p>

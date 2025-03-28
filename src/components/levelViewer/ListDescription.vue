@@ -7,6 +7,7 @@ import { hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
 import Tooltip from "../ui/Tooltip.vue";
 import ProfilePicture from "../global/ProfilePicture.vue";
+import chroma from "chroma-js";
 
 const props = defineProps<{
   name: string;
@@ -23,6 +24,7 @@ const props = defineProps<{
   openDialogs: [boolean, boolean]
   ratings: [number, number, number]
   hidden: string
+  color: number[]
 }>();
 
 const emit = defineEmits<{
@@ -108,6 +110,9 @@ const listUploadDate = computed(() =>props.review ?
   new Date(props.timestamp!).toLocaleDateString() :
   new Date(parseInt(props.timestamp!) * 1000).toLocaleDateString())
 
+const headerColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.39, 0.11, 0.8).css())
+const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16, 0.8).css())
+
 </script>
 
 <template>
@@ -150,8 +155,9 @@ const listUploadDate = computed(() =>props.review ?
 
       <!-- Description -->
       <main class="relative backdrop-blur-sm grow">
-        <section role="none" class="relative bg-gray-900 bg-opacity-80 rounded-t-md">
-          <ProfilePicture class="absolute bottom-1 mx-2 w-12 pointer-events-none shadow-drop" :uid="pfp" :cutout="creatorData?.pfp_cutout" />
+        <section role="none" :style="{backgroundColor: headerColor}" class="relative rounded-t-md">
+          <ProfilePicture class="absolute bottom-1 mx-2 w-12 pointer-events-none shadow-drop" :uid="pfp || -2" :cutout="creatorData?.pfp_cutout || 0" />
+
           <h1 id="objectName" class="absolute bottom-6 pl-2 ml-14 text-xl">{{ name }}</h1>
 
           <!-- List information -->
@@ -172,8 +178,8 @@ const listUploadDate = computed(() =>props.review ?
             <span>{{ listUploadDate }}</span>
           </div>
         </section>
-        <pre id="listDescription"
-          class="descriptionFade regularParsing h-24 overflow-y-hidden break-words max-w-[95vw] whitespace-pre-wrap rounded-b-md bg-gray-800 bg-opacity-80 px-2 font-[poppins] leading-5 text-white transition-[height] duration-75 ease-in-out before:transition-opacity"
+        <pre id="listDescription" :style="{backgroundColor: descColor}"
+          class="descriptionFade regularParsing h-24 overflow-y-hidden break-words max-w-[95vw] whitespace-pre-wrap rounded-b-md px-2 font-[poppins] leading-5 text-white transition-[height] duration-75 ease-in-out before:transition-opacity"
           :class="{
                 'text-opacity-40': ['', undefined].includes(data?.description),
                 'before:opacity-0': !tallDescription || toggleDescription,
@@ -208,21 +214,22 @@ const listUploadDate = computed(() =>props.review ?
 
         <!-- Comments button -->
         <div class="md:ml-9">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
+          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
             <img src="@/images/comment.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{
               $t('level.comments') }}</label>
             <label
-              class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-md:absolute max-md:bottom-1 max-md:right-1">{{
+              v-show="commAmount > 0"
+              class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 commAmount }}</label>
           </button>
         </div>
 
         <!-- Review level ratings button -->
         <div class="ml-2" v-if="review && !data.disabledRatings && data.levels.length > 0">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="relative p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
+          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
             <img src="@/images/rating.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{ $t('editor.levels') }}</label>
             <label
-              class="px-0.5 py-0.5 ml-1.5 text-xs leading-3 bg-red-500 rounded-sm max-md:absolute max-md:bottom-1 max-md:right-1">{{
+            class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 data.levels.length }}</label>
           </button>
         </div>
@@ -230,44 +237,40 @@ const listUploadDate = computed(() =>props.review ?
 
       <div class="flex gap-2 max-md:hidden">
         <!-- Share popup -->
-        <button @click="emit('doListAction', 'sharePopup')"
-          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2">
-          <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/share.svg" alt="" /><label class="max-md:hidden">{{
-            $t('other.share') }}</label>
+        <button :style="{backgroundColor: descColor}" :title="$t('other.share')" @click="emit('doListAction', 'sharePopup')"
+          class="p-2.5 rounded-md button aspect-square">
+          <img class="w-5" src="@/images/share.svg" alt="" />
         </button>
 
         <!-- Jump to popup -->
-        <button @click="emit('doListAction', 'jumpPopup')"
-          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2">
-          <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/jumpto.svg" alt="" /><label class="max-md:hidden">{{
-            $t('listViewer.jumpTo') }}</label>
+        <button :style="{backgroundColor: descColor}" :title="$t('listViewer.contents')" @click="emit('doListAction', 'jumpPopup')"
+          class="p-2.5 rounded-md button aspect-square">
+          <img class="w-5" src="@/images/jumpto.svg" alt="" />
         </button>
 
         <!-- Pin list -->
-        <button
-          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2"
+        <button :style="{backgroundColor: descColor}" :title="$t('level.pin')"
+          class="p-2.5 rounded-md button aspect-square"
           @click="emit('doListAction', 'pinList')"
           v-if="localStorg">
-          <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/pin.svg" alt="" v-if="!listPinned" />
-          <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/unpin.svg" alt="" v-else />
-          <label class="max-md:hidden">{{ listPinned ? $t('level.unpin') : $t('level.pin') }}</label>
+          <img class="w-5" src="@/images/pin.svg" alt="" v-if="!listPinned" />
+          <img class="w-5" src="@/images/unpin.svg" alt="" v-else />
         </button>
 
         <!-- Edit list -->
-        <button
-          class="button w-28 rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2"
+        <button :style="{backgroundColor: descColor}" :title="$t('level.edit')"
+          class="p-2.5 rounded-md button aspect-square"
           id="postEditButton"
           @click="emit('doListAction', 'editList')" v-if="userUID == uid">
-          <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/edit.svg" alt="" /><label class="max-md:hidden">{{
-            $t('level.edit') }}</label>
+          <img class="w-5" src="@/images/edit.svg" alt="" />
         </button>
       </div>
 
       <!-- Mobile show actions button -->
       <div class="md:hidden">
-        <button @click="emit('doListAction', 'mobileExtras')"
-          class="button rounded-md bg-[linear-gradient(9deg,#141f20,#044a51)] p-1 py-0.5 align-middle text-left max-md:!p-2">
-          <img class="inline w-4 max-md:w-6 md:mr-2" src="@/images/more.svg" alt="" /><label class="max-md:hidden">{{
+        <button :style="{backgroundColor: descColor}" @click="emit('doListAction', 'mobileExtras')"
+          class="p-2.5 rounded-md button aspect-square">
+          <img class="w-5" src="@/images/more.svg" alt="" /><label class="max-md:hidden">{{
             $t('other.share') }}</label>
         </button>
       </div>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
+import type { FavoritedLevel, Level, ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
-import { SETTINGS } from "@/siteSettings";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
-import { isOnline } from "@/Editor";
+import { isOnline, makeColor } from "@/Editor";
 import { onUnmounted } from "vue";
 
 const emit = defineEmits<{
@@ -26,7 +26,8 @@ const props = defineProps<{
   commentID: {type: 'list' | 'review', objectID: number}
   refreshButton: boolean
   component: object
-  picking?: false | 1 | 2
+  picking: false | 1 | 2
+  displayInRows: boolean
   highlight?: number
 }>()
 
@@ -52,7 +53,7 @@ const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
 const unrolled = ref<boolean>(-1)
 
-const LISTS_ON_PAGE = 8;
+const LISTS_ON_PAGE = 9;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
@@ -61,12 +62,17 @@ const LISTS = ref<ListPreview[]>([]);
 const REVIEW_DETAILS = ref<ReviewDetailsResponse[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
+const main = ref<HTMLDivElement>()
 function switchPage(setPage: number) {
   if (setPage < 0 || setPage >= maxPages.value) return;
-  LISTS.value = [] // Do not clear when using infinite scrolling
+  // LISTS.value = [] // Do not clear when using infinite scrolling
   PAGE.value = setPage;
   // window.history.pushState("", "", `?p=${PAGE.value + 1}`);
 
+  if (!props.picking) {
+    window.scrollTo({top: main.value?.offsetTop-100, behavior: "instant"})
+  }
+  
   pagesArray.value = listScroll();
   refreshBrowser();
 }
@@ -173,6 +179,14 @@ function refreshBrowser() {
         return;
       }
 
+      // load favorites             
+      if (props.onlineSubtype == 'levels') {
+        if (!favoriteLevels) {
+          favoriteLevels = JSON.parse(localStorage.getItem("favorites")!) || []
+          favoriteLevelIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!) || []
+        }
+      }
+
       maxPages.value = res.data[2].maxPage;
       pagesArray.value = listScroll();
 
@@ -203,22 +217,41 @@ const doRefresh = () => {
   refreshBrowser()
 }
 
+const favoriteLevel = (level: FavoritedLevel) => {
+  if (!hasLocalStorage()) return
+  if (favoriteLevelIDs.value.includes(level.levelID)) {
+    return removeFavoriteLevel(level.levelID)
+  }
+
+  favoriteLevelIDs.value.splice(0, 0, level.levelID)
+  favoriteLevels.splice(0, 0, level)
+
+  localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
+  localStorage.setItem("favoriteIDs", JSON.stringify(favoriteLevelIDs.value));
+}
+
 const removeFavoriteLevel = (levelID: string) => {
   let levelIDs: string[] = JSON.parse(localStorage.getItem("favoriteIDs")!);
   let position = levelIDs.indexOf(levelID);
   favoriteLevels.splice(position, 1);
+  favoriteLevelIDs.value.splice(position, 1);
   levelIDs.splice(position, 1);
-  for (let i = 0; i < LISTS.value.length; i++) {
-    if (LISTS.value[i].levelID == levelID) {
-      LISTS.value.splice(i, 1)
-      break
-    }
-  }
 
   localStorage.setItem("favorites", JSON.stringify(favoriteLevels));
   localStorage.setItem("favoriteIDs", JSON.stringify(levelIDs));
+  
+  if (!props.onlineBrowser) {
+    for (let i = 0; i < LISTS.value.length; i++) {
+      if (LISTS.value[i].levelID == levelID) {
+        LISTS.value.splice(i, 1)
+        break
+      }
+    }
+    
+    refreshBrowser()
+  }
 
-  refreshBrowser()
+
 };
 
 const removeCollab = (obj: SavedCollab) => {
@@ -234,11 +267,12 @@ const removeCollab = (obj: SavedCollab) => {
 };
 
 
-let favoriteLevels: any;
+let favoriteLevelIDs = ref<number[]>([]);
+let favoriteLevels: FavoritedLevel[];
 let favoriteCollabs: any;
 if (!props.onlineBrowser) {
-  favoriteLevels = JSON.parse(localStorage.getItem("favorites")!);
-  favoriteCollabs = JSON.parse(localStorage.getItem("savedCollabs")!);
+  favoriteLevels = JSON.parse(localStorage.getItem("favorites")!) ?? [];
+  favoriteCollabs = JSON.parse(localStorage.getItem("savedCollabs")!) ?? [];
 }
 
 onMounted(() => {
@@ -278,10 +312,14 @@ watch(props, (newBrowser) => {
 
 onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
 
+defineExpose({
+  doRefresh
+})
+
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-[80rem] text-white">
+  <section ref="main" class="mx-auto w-full text-white" :class="{'max-w-[59rem]': onlineType == 'comments', 'max-w-[80rem]': onlineType != 'comments'}">
     <main>
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
@@ -320,21 +358,14 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           </button>
         </form>
       </div>
-      <header class="flex gap-3 justify-between max-sm:flex-col max-sm:items-center" id="browserHeader">
-
-        <!-- Refresh Button -->
-        <button class="box-border rounded-md sm:pr-2 button bg-greenGradient" id="listRefreshButton" @click="doRefresh()"
-          v-if="refreshButton && isOnline && LISTS.length > 0 && !loadFailed">
-          <img src="@/images/replay.svg" class="inline p-1 w-10 sm:mr-1" alt=""><label class="max-sm:hidden">{{
-            $t('other.refresh') }}</label>
-        </button>
-      </header>
-      <main class="flex flex-col gap-3 items-center mt-4" :class="{'grid md:grid-cols-3': onlineSubtype == 'reviews', 'md:!grid-cols-2': onlineSubtype == 'reviews' && picking}">
+      <main
+        class="flex relative flex-col gap-3 items-center mt-4 transition-opacity duration-75 min-h-72"
+        :class="{'!grid md:grid-cols-3': !displayInRows && !LISTS.length == 0, 'opacity-60 pointer-events-none': loading, 'md:!grid-cols-2': picking}">
         <!-- No saved levels, hardcoded to offline browsers!!! (fix later) -->
         <div v-if="!onlineBrowser && LISTS.length == 0 && !filtered && onlineType == ''"
           class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/savedMobHeader.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">{{ $t('other.noSavedLevels') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('other.noSavedLevels') }}</p>
           <RouterLink to="/random">
             <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
               <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
@@ -347,7 +378,7 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           class="flex flex-col gap-3 justify-center items-center">
           <img src="@/images/collabDudes.svg" alt="" class="w-72 opacity-25" />
           <div class="text-center">
-          <p class="text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('collabTools.noSaved') }}</p>
             <p class="text-sm opacity-70">{{ $t('collabTools.noSavedSub') }}</p>
           </div>
           <RouterLink to="/make/list">
@@ -360,38 +391,38 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
 
         <!-- No results BG -->
         <div v-else-if="searchNoResults && LISTS.length == 0 && !loading"
-          class="flex flex-col gap-3 justify-center items-center">
+          class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
           <img src="@/images/searchOpaque.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('other.noSearchResults') }}</p>
         </div>
 
         <!-- Loading error BG -->
-        <div v-else-if="loadFailed && !loading" class="flex flex-col gap-3 justify-center items-center">
+        <div v-else-if="loadFailed && !loading" class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
           <img src="@/images/listError.svg" alt="" class="w-48 opacity-25" />
-          <p class="text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
+          <p class="min-w-max text-xl opacity-90">{{ $t('other.failedLoad') }}</p>
           <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
             <img src="@/images/replay.svg" class="p-1 w-10 text-2xl" alt="" />{{ $t('other.reload') }}
           </button>
         </div>
 
         <!-- Loading -->
-        <div v-else-if="loading" class="flex absolute left-1/2 flex-col gap-4 items-center mt-24 -translate-x-1/2">
-          <img src="@/images/loading.webp" alt="" class="w-24 opacity-40 animate-spin">
-          <p class="text-xl text-opacity-40">{{ $t('other.loading') }}...</p>
+        <div v-else-if="loading" class="flex absolute left-1/2 z-10 flex-col gap-4 items-center mt-24 drop-shadow-lg -translate-x-1/2">
+          <img src="@/images/loading.webp" alt="" class="w-24 opacity-80 animate-spin">
+          <p class="min-w-max text-xl text-opacity-80">{{ $t('other.loading') }}...</p>
         </div>
 
         <!-- No lists/comments BG -->
         <div v-else-if="LISTS.length == 0 && !searchNoResults && !loading"
-          class="flex flex-col gap-3 justify-center items-center">
+          class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
 
           <div class="flex flex-col gap-6 items-center" v-if="onlineType != 'comments'">
             <img src="@/images/listEmpty.svg" alt="" class="w-48 opacity-25" />
-            <p class="text-xl opacity-90">{{ $t('other.noListsHere') }}</p>
+            <p class="min-w-max text-xl opacity-90">{{ $t('other.noListsHere') }}</p>
           </div>
 
           <div class="flex flex-col gap-6 items-center" v-else>
             <img src="@/images/noComments.svg" alt="" class="w-48 opacity-25" />
-            <p class="text-xl opacity-90">{{ $t('other.noCommentsHere') }}</p>
+            <p class="min-w-max text-xl opacity-90">{{ $t('other.noCommentsHere') }}</p>
           </div>
 
           <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient" @click="refreshBrowser()">
@@ -400,16 +431,37 @@ onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value,
           </button>
         </div>
 
+        <component
+          :is="component"
+          v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
+          class="min-w-full listPreviews"
+          :key="list?.name ?? list?.levelName ?? list?.comID ?? PAGE"
+          :in-use="false"
+          :on-saves-page="true"
+          :coll-index="index"
+          :save="list"
+          :user-array="USERS"
+          :index="index"
+          :hide-remove="onlineBrowser"
+          :unrolled-options="unrolled == index"
+          :disable-link="picking"
+          :review-details="REVIEW_DETAILS"
+          :is-pinned="false"
+          :favorited="favoriteLevelIDs.includes(list.levelID)"
+          :is-list="onlineSubtype == 'lists'"
+          :disable-fave="picking"
+          @clicked-option="emit('selectedPostOption', [$event, list.name])"
+          @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
+          @remove-level="removeFavoriteLevel"
+          @remove-collab="removeCollab"
+          @favorite="favoriteLevel"
+        />
+
         <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
           <h3 class="my-3 text-xl">{{ $t('listViewer.highlighted') }}</h3>
           <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
           <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
         </section>
-
-        <component :is="component" class="min-w-full listPreviews" v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
-          :in-use="false" :on-saves-page="true" :coll-index="index" :save="list" :user-array="USERS" :index="index" hide-remove :unrolled-options="unrolled == index"
-          :disable-link="picking" @clicked-option="emit('selectedPostOption', [$event, list.name])" @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
-          :is-pinned="false" :review-details="REVIEW_DETAILS" @remove-level="removeFavoriteLevel" @remove-collab="removeCollab" :key="Math.random()" />
 
         </main>
         <!-- Page Switcher -->

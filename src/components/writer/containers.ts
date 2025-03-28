@@ -7,18 +7,19 @@ import NestContainer from "./NestContainer.vue"
 import ReviewRatings from "./ReviewRatings.vue"
 import ReviewUsers from "./ReviewUsers.vue"
 import { i18n } from "@/locales"
+import ReviewCarousel from "./ReviewCarousel.vue"
 
 const success = {success: true}
 
 const error = (ind: number, msg = 0) => {
-    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty')]
+    const message = [i18n.global.t('reviews.isMissing'), i18n.global.t('reviews.notSelected'), i18n.global.t('reviews.areEmpty'), i18n.global.t('reviews.isEmpty')]
     return {success: false, error: message[msg], index: ind}
 }
 
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
-        styling: "min-h-12",
+        styling: "min-h-12 my-1",
         nestable: true,
         canEditText: true,
         settings: [{
@@ -26,25 +27,38 @@ const containers: Containers = {
             title: i18n.global.t('reviews.disMD'),
             type: [2],
             default: false,
-        }]
+        },
+        {
+            key: "size",
+            title: i18n.global.t('reviews.fontSize'),
+            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 18, 20, 22, 24, 32, 36, 48, 64],
+            default: 0,
+        },
+        {
+            key: "indent",
+            title: i18n.global.t('reviews.indent'),
+            type: [2],
+            default: false,
+        },
+    ]
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
-        styling: "text-3xl leading-10 mb-3",
+        styling: "text-3xl leading-10 my-4",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
         placeholder: i18n.global.t('reviews.title', [2]),
-        styling: "text-2xl leading-8 mb-2",
+        styling: "text-2xl leading-8 my-3",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "text-xl leading-6 mb-1",
+        styling: "text-xl leading-6 my-2",
         nestable: true,
         canEditText: true,
         settings: []
@@ -55,25 +69,28 @@ const containers: Containers = {
         nestable: true,
         canEditText: false,
         additionalComponents: [ReviewDivisor],
+        resizeableProperty: "sizeY",
         settings: [
-            {
-                key: "sizeY",
-                title: "",
-                type: [-1],
-                default: 32,
-            },
             {
                 key: "visible",
                 title: i18n.global.t('other.visible'),
                 type: [2],
                 default: true,
-            }
+            },
+            {
+                key: "sizeY",
+                title: "",
+                type: [-1],
+                default: 32,
+                valueRange: [16, 250]
+            },
         ]
     },
     showImage: {
         nestable: true,
         canEditText: false,
         additionalComponents: [ReviewImage],
+        resizeableProperty: "width",
         settings: [
             {
                 key: "url",
@@ -85,7 +102,8 @@ const containers: Containers = {
                 key: "width",
                 title: "",
                 type: [-1],
-                default: 0
+                default: 0,
+                valueRange: [64, 960]
             },
             {
                 key: "pick",
@@ -111,6 +129,12 @@ const containers: Containers = {
                 type: [0],
                 default: ""
             },
+            {
+                key: "onlyDeco",
+                title: i18n.global.t('reviews.decoOnly'),
+                type: [2],
+                default: false
+            },
         ],
         errorCheck: (settings: object) => settings.url.length ? success : error(0)
     },
@@ -118,19 +142,21 @@ const containers: Containers = {
         nestable: true,
         canEditText: false,
         additionalComponents: [ReviewVideo],
+        resizeableProperty: "width",
         settings: [
-            {
-                key: "width",
-                title: "",
-                type: [-1],
-                default: 320
-            },
             {
                 key: "url",
                 title: i18n.global.t('reviews.ytLink'),
                 type: [0],
                 required: true,
                 default: ""
+            },
+            {
+                key: "width",
+                title: "",
+                type: [-1],
+                default: 320,
+                valueRange: [104, 720]
             },
             {
                 key: "description",
@@ -195,7 +221,7 @@ const containers: Containers = {
         errorCheck: (settings: object) => settings.pickedIndex != -1 ? success : error(0, 1)
     },
     showList: {
-        nestable: false,
+        nestable: true,
         canEditText: false,
         additionalComponents: [ReviewList],
         limit: 20,
@@ -238,6 +264,49 @@ const containers: Containers = {
             settings.components.forEach(e => len += e.length)
             return len ? success : error(0, 2)
         }
+    },
+    addCarousel: {
+        nestable: false,
+        canEditText: false,
+        dependentOnChildren: false,
+        additionalComponents: [ReviewCarousel],
+        resizeableProperty: "height",
+        settings: [
+            {
+                key: "components",
+                title: i18n.global.t('reviews.carousel'),
+                type: [-1],
+                required: true,
+                default: []
+            },
+            {
+                key: "height",
+                title: '',
+                type: [-1],
+                required: true,
+                default: 192,
+                valueRange: [48, 960]
+            },
+            {
+                key: "pick",
+                title: i18n.global.t('reviews.pickMedia'),
+                type: [1],
+                default: 0
+            },
+            {
+                key: "overflow",
+                title: i18n.global.t('reviews.overflow'),
+                type: [2],
+                default: false
+            },
+            {
+                key: "crop",
+                title: i18n.global.t('reviews.cropWidth'),
+                type: [2],
+                default: false
+            },
+        ],
+        errorCheck: (settings: object) => settings.components.length ? success : error(0, 3)
     }
 }
 
@@ -271,20 +340,25 @@ const containers: Containers = {
 
 export default containers
 
+export type ContainerNames = 'default' |
+'heading1' |
+'heading2' |
+'heading3' |
+'divisor' |
+'list' |
+'showImage' |
+'showLevel' |
+'showList' |
+'addVideo' |
+'showRating' |
+'twoColumns' |
+'showCollab' |
+'addCarousel'
+
+export type settings = cDefault & cHeading1 & cHeading2 & cHeading3 & cDivisor & cShowImage & caddVideo & cShowRating & cShowLevel & cShowList & cTwoColumns & cAddCarousel
+
 export type Containers = {
-    default: Container
-    heading1: Container
-    heading2: Container
-    heading3: Container
-    divisor: Container
-    list: Container
-    showImage: Container
-    showLevel: Container
-    showList: Container
-    addVideo: Container
-    showRating: Container
-    twoColumns: Container
-    showCollab: Container
+    [container in ContainerNames]: Container
 }
 
 export type Container = {
@@ -298,6 +372,7 @@ export type Container = {
     nestable: boolean,
     canEditText: boolean,
     settings: ContainerSettings[],
+    resizeableProperty?: string
     errorCheck?: (x: object) => {success: boolean, mess?: string}
 }
 
@@ -307,4 +382,19 @@ export type ContainerSettings = {
     type: number[]
     default: any
     required?: boolean
+    valueRange?: [number, number]
 }
+
+export type cDefault = {noMD: boolean, size: number, indent: boolean}
+export type cHeading1 = {}
+export type cHeading2 = {}
+export type cHeading3 = {}
+export type cDivisor = {sizeY: number, visible: boolean}
+export type cShowImage = {url: string, width: number, pick: number, alt: string, description: string, link: string}
+export type caddVideo = {width: number, url: string, description: string}
+export type cShowRating = {level: number, show: number}
+export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
+export type cShowList = {post: boolean, postType: number, pick: number}
+export type cTwoColumns = {components: (Containers | boolean)[]}
+export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
+

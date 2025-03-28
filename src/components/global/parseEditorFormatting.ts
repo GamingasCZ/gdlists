@@ -12,7 +12,7 @@ export default function parseText(textToParse: string, limited?: boolean, no?: b
   else
     keepTags = ["h1", "h2", "h3", "ul", "li", "br", "strong","del", "table", "th", "td", "thead", "hr", "strike", "em", "ol", "a", "blockquote", "img", "code", "input", "p"]
 
-  return striptags(marked.parse(textToParse, {gfm: true}).toString(), keepTags)
+  return striptags(marked.parse(striptags(textToParse), {gfm: true}).toString(), keepTags)
 }
 
 export function addFormatting(type: number, textbox: HTMLTextAreaElement) {
@@ -91,6 +91,14 @@ export function addFormatting(type: number, textbox: HTMLTextAreaElement) {
       break;
   }
   return textbox.value
+}
+
+export function deleteCESelection(textbox: HTMLTextAreaElement) {
+  let selection = window.getSelection()
+  let range = selection?.getRangeAt(0)
+  let textContent = range?.toString()
+  range?.deleteContents()
+  return textContent
 }
 
 export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {

@@ -1,12 +1,9 @@
 <script setup lang="ts">
+import type { LocalNotification } from '@/interfaces';
 import { onMounted, ref, watch } from 'vue'
+import { Stack } from '../imageUpload';
 
-const props = defineProps<{
-    title: string
-    content: string
-    icon: string
-    stamp: number
-}>()
+const props = defineProps<LocalNotification & {stackIndex: number}>()
 
 const getIcon = ref(props.icon)
 switch (props.icon) {
@@ -22,22 +19,25 @@ switch (props.icon) {
 }
 
 const shown = ref(false)
-watch(props, () => { // todo rozbitý když měníš jazyk
-    if (!props.content) return
-
+onMounted(() => { // todo rozbitý když měníš jazyk
     shown.value = true
-    setTimeout(() => shown.value = false, 1500 + props.content.length * 100);
+    setTimeout(() => {
+        shown.value = false
+        setTimeout(() => {
+            delete Stack.value[props.stackIndex]
+        }, 300);
+    }, 2000 + props.text.length * 100);
 })
 
 </script>
 
 <template>
-    <Transition name="slide">
-        <article v-if="shown" class="flex items-center fixed right-0 bottom-5 p-2 rounded-md rounded-r-none shadow-lg z-50 min-w-[15em] gap-3 bg-lof-200 bg-opacity-50 shadow-black">
+    <Transition name="notifSlide">
+        <article v-show="shown" class="flex z-10 max-w-xs items-center p-2 rounded-md rounded-r-none shadow-lg min-w-[15em] gap-3 bg-lof-300 bg-opacity-50 shadow-black">
             <img :src="getIcon" class="box-border p-1 w-10 h-10 bg-black bg-opacity-40 rounded-md" alt="">
             <p class="leading-none text-white">
                 <h2 class="font-bold">{{ title }}</h2>
-                <p class="mt-1" v-if="content">{{ content }}</p>
+                <p class="mt-1" v-if="text">{{ text }}</p>
             </p>
         </article>
     </Transition>
@@ -45,14 +45,14 @@ watch(props, () => { // todo rozbitý když měníš jazyk
 
 <style>
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: right 0.3s cubic-bezier(0.77, 0, 0.175, 1);
+.notifSlide-enter-active,
+.notifSlide-leave-active {
+  transition: transform 0.3s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-.slide-enter-from,
-.slide-leave-to {
-  right: -25rem;
+.notifSlide-enter-from,
+.notifSlide-leave-to {
+    @apply translate-x-full
 }
 
 </style>

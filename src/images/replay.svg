@@ -1,19 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg width="120" height="120" version="1.1" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
- <defs>
-  <clipPath id="b">
-   <circle cx="60" cy="60" r="34.956" d="M 94.955627,60 A 34.955627,34.955627 0 0 1 60,94.955627 34.955627,34.955627 0 0 1 25.044373,60 34.955627,34.955627 0 0 1 60,25.044373 34.955627,34.955627 0 0 1 94.955627,60 Z" display="none" fill="#f00" stroke="#040000" stroke-linecap="round" stroke-linejoin="round" style="paint-order:stroke markers fill"/>
-   <path class="powerclip" d="m10.146 10.146h99.707v99.707h-99.707zm84.809 49.854a34.956 34.956 0 0 0-34.956-34.956 34.956 34.956 0 0 0-34.956 34.956 34.956 34.956 0 0 0 34.956 34.956 34.956 34.956 0 0 0 34.956-34.956z" fill="#f00" stroke="#040000" stroke-linecap="round" stroke-linejoin="round" style="paint-order:stroke markers fill"/>
-  </clipPath>
-  <clipPath id="a">
-   <path d="m16.591 48.707a44.854 44.854 0 0 1 36.607-33.042l6.802 44.335z" display="none" fill="#f00" stroke="#040000" stroke-linecap="round" stroke-linejoin="round" style="paint-order:stroke markers fill"/>
-   <path class="powerclip" d="m10.146 10.146h99.707v99.707h-99.707zm6.4449 38.561 43.409 11.293-6.802-44.335a44.854 44.854 0 0 0-36.607 33.042z" fill="#f00" stroke="#040000" stroke-linecap="round" stroke-linejoin="round" style="paint-order:stroke markers fill"/>
-  </clipPath>
- </defs>
- <g transform="matrix(1.1856 0 0 1.1856 -3.7176 -11.136)" stroke-width="0">
-  <g clip-path="url(#a)">
-   <path d="M 104.35,60 A 44.354,44.354 0 0 1 59.996,104.354 44.354,44.354 0 0 1 15.642,60 44.354,44.354 0 0 1 59.996,15.646 44.354,44.354 0 0 1 104.35,60 Z" clip-path="url(#b)" fill="#fff" stroke-width="0" style="paint-order:stroke markers fill"/>
-  </g>
-  <path transform="matrix(1.603 .41911 -.25294 .96748 -55.648 -22.234)" d="m70.379 50.32c-0.13017 0.22546-25.903 0.22546-26.033-1e-6 -0.13017-0.22546 12.756-22.546 13.017-22.546 0.26033 0 13.147 22.32 13.017 22.546z" fill="#fff" style="paint-order:stroke markers fill"/>
-  <ellipse cx="54.149" cy="20.789" rx="5.1801" ry="4.7155" fill="#fff" style="paint-order:stroke markers fill"/>
- </g>
+ <path transform="matrix(-.36984 .55976 -.41043 -.12369 169.02 6.1651)" d="m117.97 142.58-105.6-34.295 82.5-74.304z" fill="#fff" fill-rule="evenodd" stroke-width="0" style="paint-order:stroke markers fill"/>
+ <path transform="rotate(11.193)" d="m112.26 69.409a47.286 47.286 0 0 1-48.741 24.567 47.286 47.286 0 0 1-39.428-37.744 47.286 47.286 0 0 1 22.418-49.766 47.286 47.286 0 0 1 54.395 4.5198" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="20" style="paint-order:stroke markers fill"/>
 </svg>

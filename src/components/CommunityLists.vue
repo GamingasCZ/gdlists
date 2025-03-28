@@ -6,7 +6,10 @@ import ListPreview from "./global/ListPreview.vue";
 import ReviewPreview from "./global/ReviewPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
-import FavoritePreview from "./global/FavoritePreview.vue";
+import LevelPreview from "./global/LevelPreview.vue";
+import TemporaryList from "./global/TemporaryList.vue";
+import { Teleport } from "vue";
+import { lastTab, modLastTab, selectedLevels } from "@/Editor";
 
 document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
@@ -22,21 +25,27 @@ const CONTENTS = ['lists', 'reviews', 'levels']
 
 const defaultContentType = () => {
   if (hasLocalStorage()) { 
-    let lastTabSelected = sessionStorage.getItem("browserTab")
-    if (lastTabSelected != null) return parseInt(lastTabSelected)
-    else return CONTENTS.indexOf(useRouter().currentRoute.value.path.split("/")[2])
+    let route = CONTENTS.indexOf(useRouter().currentRoute.value.path.split("/")[2])
+    if (lastTab[0] != null) return lastTab[0]
+    else return route == -1 ? 0 : route
   } else return 0
 }
 
 
 const contentType = ref<Content>(defaultContentType())
-const userLists = ref<"" | "user" | "hidden" | "collabs">(props.onlineType);
+const userLists = ref<"" | "user" | "hidden" | "collabs">(lastTab[1] ?? props.onlineType);
 const modifyContentType = (to: Content) => {
   contentType.value = to
   if (hasLocalStorage()) {
-    sessionStorage.setItem("browserTab", contentType.value.toString())
+    modLastTab([contentType.value, userLists.value])
   }
 }
+
+const switchUserLists = (user: string) => {
+  userLists.value = user
+  modLastTab([contentType.value, userLists.value])
+}
+
 </script>
 
 <template>
@@ -58,12 +67,18 @@ const modifyContentType = (to: Content) => {
   
     <ListBrowser
       online-browser
-      :component="[ListPreview, ReviewPreview, FavoritePreview][contentType]"
+      :component="[ReviewPreview, ReviewPreview, LevelPreview][contentType]"
       :search="query"
       :online-type="userLists"
       :online-subtype="CONTENTS[contentType]"
       :is-logged-in="isLoggedIn"
-      @switch-browser="userLists = $event"
+      @switch-browser="switchUserLists"
     />
   </section>
+
+  <Teleport to="body">
+    <Transition name="fadeSlide">
+      <TemporaryList v-if="selectedLevels.length" />
+    </Transition>
+  </Teleport>
 </template>

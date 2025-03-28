@@ -3,6 +3,7 @@ import { fixHEX } from "@/Editor";
 import type { FavoritedLevel, Level } from "@/interfaces";
 import { SETTINGS } from "@/siteSettings";
 import chroma from "chroma-js";
+import { computed } from "vue";
 
 const props = defineProps<{
   data: FavoritedLevel | Level;
@@ -19,10 +20,13 @@ if (SETTINGS.value.disableColors)
   color = getComputedStyle(document.documentElement).getPropertyValue("--siteBackground")
 
 const isCollab = typeof props.data.creator != "string"
+const textCol = computed(() => {
+  return chroma(color).luminance() > 0.5 ? 'black' : 'white'
+})
 </script>
 <template>
   <button
-    :style="{ backgroundColor: color }"
+    :style="{ backgroundColor: color, color: textCol }"
     class="hover:translate-x-1 transition-transform duration-75 rounded-md px-2 py-1 text-left leading-4 focus-visible:!outline"
     @click="emit('pick', data)"
   >

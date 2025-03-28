@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SETTINGS } from "@/siteSettings";
 import chroma from "chroma-js";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 const props = defineProps<{
   hue?: number;
@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(["colorsModified"]);
-const colors = ref([props.hue ?? 0, props.saturation ?? 1, props.lightness ?? 0]);
+const colors = computed(() => [props.hue ?? 0, props.saturation ?? 1, props.lightness ?? 0]);
 const colorsHex = ref(props.hex ?? chroma.hsl(props.hue, props.saturation, props.lightness).hex())
 
 const modColors = (ind: number, val: number) => {
@@ -23,6 +23,9 @@ const modColors = (ind: number, val: number) => {
 onMounted(() => {
   if (!props.hex) {
     colors.value = [props.hue, props.saturation, props.lightness]
+    if (colors.value[2] <= 1)
+      colors.value[2] *= 64
+    
     colorsHex.value = chroma.hsl(props.hue, props.saturation, props.lightness).hex()
   }
   else {
@@ -37,7 +40,7 @@ onMounted(() => {
 <template>
   <section class="w-full">
     <div>
-    <img src="@/images/rgb.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
+    <div :style="{background: `linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 10%, rgba(208,222,33,1) 20%, rgba(79,220,74,1) 30%, rgba(63,218,216,1) 40%, rgba(47,201,226,1) 50%, rgba(28,127,238,1) 60%, rgba(95,21,242,1) 70%, rgba(186,12,248,1) 80%, rgba(251,7,217,1) 90%, rgba(255,0,0,1) 100%)`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
       <input
         type="range"
         class="w-full colorPickerSlider"
@@ -50,7 +53,7 @@ onMounted(() => {
     </div>
 
     <div>
-      <img src="@/images/value.webp" alt="" class="w-full h-6 rounded-md pointer-events-none" />
+      <div :style="{background: `linear-gradient(90deg, black, transparent)`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
       <input
         type="range"
         class="w-full colorPickerSlider"

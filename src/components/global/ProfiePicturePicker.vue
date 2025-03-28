@@ -4,12 +4,13 @@ import HiddenFileUploader from '../ui/HiddenFileUploader.vue';
 import Option from '../ui/Option.vue';
 import Dialog from './Dialog.vue';
 import { dialog } from '../ui/sizes';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, render } from 'vue';
 import ImageBrowser from './ImageBrowser.vue';
 import { getDominantColor } from '@/Reviews';
 import chroma from 'chroma-js';
 import ProfilePicture from './ProfilePicture.vue';
-import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/components/global/profiles';
+import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
+import { ImgFail, notifyError } from '../imageUpload';
 
 const openEditPopup = ref(false)
 const discordLoading = ref(false)
@@ -27,20 +28,27 @@ const bigPreview = ref<HTMLCanvasElement>()
 const editScale = ref(1)
 
 const openEdit = (uploadData: Blob) => {
-    openEditPopup.value = true
-    resizerTopLeft.value = [0,0]
-    lastX = [-1,-1]
-    editScale.value = 1
     let reader = new FileReader()
     reader.readAsDataURL(uploadData!)
-    nextTick(() => {
-        reader.onload = () => {
-            if (typeof reader.result != 'string') return
+    let load = new Promise((res, err) => {
+        reader.onload = async () => {
+            if (typeof reader.result != 'string') return notifyError(ImgFail.BAD_FORMAT)
             imageElement.src = reader.result
             basedData.value = reader.result
 
-            imageElement.onload = updatePreviews
+            imageElement.onload = () => res(true)
+            imageElement.onerror = () => err(notifyError(ImgFail.BAD_FORMAT))
+                
         }
+        reader.onerror = () => err(notifyError(ImgFail.BAD_FORMAT))
+    })
+
+    load.then(() => {
+        openEditPopup.value = true
+        resizerTopLeft.value = [0,0]
+        lastX = [-1,-1]
+        editScale.value = 1
+        nextTick(updatePreviews)
     })
 }
 
@@ -254,7 +262,7 @@ const editFinished = ref(false)
                 </button>
                 <button @click="useDiscord" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
                     <img v-if="discordLoading" src="@/images/loading.webp" class="w-6 animate-spin" alt="">
-                    <img v-else src="@/images/discord.svg" class="w-6" alt="">
+                    <img v-else src="@/images/socials/discord.svg" class="w-6" alt="">
                     {{ $t('settingsMenu.pickDiscord') }}
                 </button>
             </div>

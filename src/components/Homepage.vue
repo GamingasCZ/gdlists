@@ -1,90 +1,51 @@
 <script setup lang="ts">
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
-import LoggedInPopup from "./homepage/LoggedInPopup.vue";
-import cookier from "cookier";
-import { computed, onMounted, ref, watch } from "vue";
-import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
-import { useI18n } from "vue-i18n";
-import DialogVue from "./global/Dialog.vue";
-import { dialog } from "./ui/sizes";
+import { computed, ref, watch } from "vue";
+import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
+import THEMES, { selectedBeforeSave } from "@/themes";
+import axios from "axios";
+import { i18n } from "@/locales";
 
-document.title = useI18n().t("other.websiteName");
-
-const props = defineProps({
-  isLoggedIn: Boolean,
-});
-
-const returnedFromLogin = ref<boolean>(false);
-const firstTimeUser = ref<boolean>(false);
-
-const returnfromLoginPFP = ref<string>("");
-const returnfromLoginName = ref<string>("");
+document.title = `${i18n.global.t('other.homepage')} | ${i18n.global.t("other.websiteName")}`;
 
 const columns = computed(() => window.innerWidth > 900 ? '1fr '.repeat(SETTINGS.value.homepageColumns) : '1fr')
 
-onMounted(() => {
-  let get = new URLSearchParams(location.search)
-  if (get.has("loginerr")) {
-    let errorToast = document.getElementById("loginErrorToast");
-    errorToast?.classList.add("popout");
-  }
-  
-  let loginCookie = cookier("logindata").get();
-  if (loginCookie != null) {
-    returnedFromLogin.value = true;
-  
-    loginCookie = JSON.parse(loginCookie);
-    returnfromLoginName.value = loginCookie[0];
-  
-    // first-time user
-    firstTimeUser.value = loginCookie[2];
-    if (!firstTimeUser.value) {
-      let loginToast = document.getElementById("loginToast");
-      loginToast?.classList.add("popout");
-    }
-  
-    returnfromLoginPFP.value = loginCookie[1]
-  
-    cookier("logindata").remove();
-  }
-})
-
-
 const localStorg = ref(hasLocalStorage())
 
-const closeTwitterAd = () => {
-  viewedPopups.twitterAd = true
-  localStorage.setItem("popupsViewed", JSON.stringify(viewedPopups))
-  document.querySelector("#twitterAd")?.remove()
+const base = import.meta.env.BASE_URL
+const api = import.meta.env.VITE_API
+const headerBG = ref(`url(${base}/graphics/${THEMES[SETTINGS.value.selectedTheme].graphic}.webp)`)
+watch(selectedBeforeSave, () => {
+  headerBG.value = `url(${base}/graphics/${THEMES[selectedBeforeSave.value].graphic}.webp)`
+})
+
+/*
+ * Fetching homepage feeds
+ */
+const feeds = ref()
+
+const getFeeds = async () => {
+  if (loggedIn.value == null) return {lists: [], reviews: [], user: []}
+  let f = await axios.get(api + "/getLists.php", {
+    params: {
+      homepage: 1, feeds: [1,1, +loggedIn.value].join(',')}
+    }
+  )
+  
+  if (f.status == 200) {
+    return f.data
+  }
+  return {lists: [], reviews: [], user: []}
 }
+
+getFeeds().then(e => feeds.value = e)
+watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
 
 </script>
 
 <template>
-  <DialogVue :width="dialog.large" :open="firstTimeUser" header-disabled>
-    <LoggedInPopup @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
-  </DialogVue>
-  
-  <div id="loginToast" v-if="!firstTimeUser && localStorg"
-    class="absolute top-16 left-1/2 p-2 px-6 text-xl text-white bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
-    {{ $t('homepage.welcomeBack') }} <b>{{ returnfromLoginName }}</b>!
-  </div>
-
-  <div id="loginErrorToast" v-if="!firstTimeUser && localStorg"
-    class="flex absolute top-16 left-1/2 gap-3 p-2 px-6 text-xl bg-black bg-opacity-80 rounded-md transition-transform duration-75 -translate-x-1/2 -translate-y-24">
-    <img src="@/images/warn.svg" alt="" class="w-8">
-    <span class="text-white">{{ $t('homepage.loginFail') }}</span>
-  </div>
-
-  <header class="flex flex-col h-[256px] justify-end items-center bg-[url(../images/introGrad2.webp)] bg-center">
-    <!-- Twitter notif -->
-    <div v-if="!viewedPopups.twitterAd && localStorg" id="twitterAd" class="flex absolute right-2 top-14 gap-2 items-center p-2 text-white bg-black bg-opacity-80 rounded-md backdrop-blur-md">
-      <img src="@/images/socials/twitter.svg" class="w-6" alt="">
-      <span>{{ $t('homepage.tAd1') }} <a @click="closeTwitterAd" target="_blank" href="https://twitter.com/geodlists" class="underline">@GDLists</a> {{ $t('homepage.tAd2') }}</span>
-      <button @click="closeTwitterAd" class="ml-3 text-xl text-white text-opacity-40">X</button>
-    </div>
-
+  <header :style="{backgroundImage: headerBG}" class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-center">
     <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
       <div class="relative">
         <input type="text" name="q"
@@ -132,24 +93,23 @@ const closeTwitterAd = () => {
     </div>
   </section>
 
-  <main id="homepageSections" class="grid sm:mr-2" :style="{ gridTemplateColumns: columns }">
-    <ListSection :style="{gridColumn: `1 / span ${SETTINGS.homepageColumns}`}" :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
-      :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" content-type="/getLists.php?homepage=2" :list-type="2" />
+  <main id="homepageSections" class="flex flex-col overflow-clip items-start sm:px-2 mx-auto max-w-[100.5rem]">
+    <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
+      content-type="@pinnedLists" :max-items="5" :list-type="3" />
+    <ListSection class :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
+        :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds?.['reviews']" :list-type="2" />
     
     <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
-      :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" content-type="/getLists.php?homepage=1" />
+        :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" :force-content="feeds?. ['lists']" />
 
-    <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
-      content-type="@pinnedLists" :max-items="5" />
+    <ListSection v-if="loggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
+        extra-icon="more" extra-action="/browse/lists?type=user" :empty-text="$t('homepage.noListsUploaded')"
+        :force-content="feeds?.['user']" />
 
-    <ListSection v-if="isLoggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
-      extra-icon="more" extra-action="/browse/lists?type=user" :empty-text="$t('homepage.noListsUploaded')"
-      content-type="/getLists.php?homeUser" />
+    <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash" :max-items="4"
+      extra-action="@clear" :list-type="3" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
 
-    <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash"
-      extra-action="@clear" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
-
-    <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more"
+    <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more" :max-items="4"
       :empty-text="$t('homepage.noLevelsSaved')" content-type="@favorites" extra-action="/saved" :randomize-content="true"
       :list-type="1" />
 
@@ -157,16 +117,3 @@ const closeTwitterAd = () => {
       content-type="oldLists" />
   </main>
 </template>
-
-<style>
-@keyframes slideTop {
-  0% {@apply -translate-y-24}
-  5% {@apply translate-y-0}
-  95% {@apply translate-y-0}
-  100% {@apply -translate-y-24}
-}
-
-.popout {
-  animation: slideTop 5s ease forwards;
-}
-</style>

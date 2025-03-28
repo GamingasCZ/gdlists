@@ -31,7 +31,7 @@ const goToDiscord = () => {
     class="flex gap-3 items-center p-2 text-sm text-white bg-black bg-opacity-50 rounded-md button"
     @click="goToDiscord"
   >
-    <img src="../../images/discord.svg" alt="" class="w-6" />{{
+    <img src="../../images/socials/discord.svg" alt="" class="w-6" />{{
       $t("homepage.logIn")
     }}
   </button>

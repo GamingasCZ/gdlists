@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { makeColorFromString } from "@/Editor";
+import { makeColorFromString, newCardBG } from "@/Editor";
 import type { selectedList } from "@/interfaces";
 import { SETTINGS } from "@/siteSettings";
 import { number } from "@intlify/core-base";
@@ -17,6 +17,7 @@ const props = defineProps<{
   levelName: string
   creator: string
   levelColor?: string
+  color?: string
   levelID: string
   listID: string
   listName: string
@@ -37,7 +38,7 @@ const props = defineProps<{
   disableLink?: boolean | 2
 }>()
 
-const listColor = ref<Color>(chroma(props.levelColor! ?? makeColorFromString(props.levelName)));
+const listColor = ref<Color>(chroma(props.color ?? props.levelColor! ?? makeColorFromString(props.levelName)));
 if (SETTINGS.value.disableColors) {
   listColor.value = chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
 }
@@ -67,7 +68,9 @@ const goto = props.listPosition ? `?goto=${props.listPosition}`: ''
 const round = (x) => parseFloat(parseFloat(x).toFixed(1))
 
 const clickLevel = () => {
-  emit('clickedOption', {levelName: props.levelName, creator: props.creator, levelID: props.levelID, difficulty: props.difficulty, rating: props.rating})
+  let bg = newCardBG()
+  bg.image[0] = props?.background
+  emit('clickedOption', {levelName: props.levelName, creator: props.creator, levelID: props.levelID, difficulty: props.difficulty, rating: props.rating, color: props?.color, background: bg})
 }
 </script>
 
@@ -75,7 +78,7 @@ const clickLevel = () => {
   <component
     :is="disableLink ? 'button' : 'RouterLink'"
     :to="`/${listID!}${goto}`"
-    class="flex text-left max-w-6xl w-full cursor-pointer items-center flex-wrap gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
+    class="flex text-left max-w-6xl w-full min-w-64 cursor-pointer items-center flex-wrap gap-3 rounded-md border-2 border-solid bg-[length:150vw] bg-center px-2 py-0.5 text-white transition-[background-position] duration-200 hover:bg-left"
     :style="{
       background: getGradient(),
       borderColor: listColor.darken(2).hex(),
@@ -98,7 +101,7 @@ const clickLevel = () => {
 
     <section class="flex flex-col justify-center">
       <h1 class="text-lg font-bold">{{ levelName }}</h1>
-      <p class="text-xs">- {{ creator }} -</p>
+      <p class="text-xs">{{ creator }}</p>
     </section>
 
     <section v-if="inLists || inReviews" class="grid grid-cols-[1fr_0.5fr] gap-2 ml-auto">

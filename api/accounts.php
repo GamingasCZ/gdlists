@@ -4,12 +4,14 @@ Return codes:
 0 - Every error
 1 - Account already created
 */
+
+$https = strstr($_SERVER["HTTP_HOST"], "localhost") ? 'http://' : 'https://';
+$local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
+
 header('Content-type: application/json'); // Return as JSON
 require("globals.php");
 require("images.php");
 
-$https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
-$local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
 
 // Error can happen when cancelling
 if (isset($_GET["error"])) {
@@ -29,7 +31,7 @@ function allTokens($res) {
 
 if ($_SERVER["REQUEST_METHOD"] == "PUT") {
     $DATA = file_get_contents("php://input");
-    $acc = checkAccount($mysqli);
+    $acc = checkAccount($mysqli, false, true);
     if (!$acc) die();
 
     if ($DATA == -1) {
@@ -54,17 +56,16 @@ if ($_SERVER["REQUEST_METHOD"] == "PATCH") {
 }
 
 if (sizeof($_GET) > 0) {
-    $state = $_COOKIE["state"];
-    removeCookie("state");
-    if ($state != $_GET["state"])
-        die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
     if (array_keys($_GET)[0] == "check") { // Check login validity
         $auth = getAuthorization();
         if (!$auth) die(json_encode(["status" => "logged_out"])); // Not logged in
 
+        if (isset($_COOKIE["momentToken"]))
+            removeCookie("momentToken");
+
         $accCheck = checkAccount($mysqli);
-        if (!$accCheck) die();
+        if (!$accCheck) die("0");
 
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
         $unread = doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$accCheck["id"]], "s");
@@ -79,6 +80,11 @@ if (sizeof($_GET) > 0) {
         $mysqli -> close();
         die($accCheck ? json_encode($profileData) : 0);
     }
+
+    $state = $_COOKIE["state"];
+    removeCookie("state");
+    if ($state != $_GET["state"])
+        die(header("Location: " . $https . $local . '/gdlists/?loginerr'));
 
     if (!isset($_GET["code"])) die("0");
 
@@ -112,9 +118,11 @@ if (sizeof($_GET) > 0) {
     saveAccessToken($accessInfo, $dcApiResponse["id"]);
 
     // Save profile pic
-    $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
-    if ($pfp !== false)
-        saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
+    if (!file_exists(getUserPath($dcApiResponse["id"]) . "/pfp.webp")) {
+        $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
+        if ($pfp !== false)
+            saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
+    }
 
     $mysqli -> close();
     header("Location: " . $https . $local . '/gdlists');

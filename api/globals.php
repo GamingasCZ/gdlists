@@ -10,12 +10,14 @@ $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
 $SECRET = getenv("SECRET"); // Use a random string :)
 
+define('PRIV_ID_LEN', 10);
+
 error_reporting($debugMode ? -1 : 0);
 
 function privateIDGenerator($listName, $creator, $timestamp) {
     $str = $listName . $creator . $timestamp;
-    $pid = substr(sha1($str),0,10);
-    if (is_numeric($pid)) $pid = "p" . substr($pid, 0, 9);
+    $pid = substr(sha1($str), 0, PRIV_ID_LEN);
+    if (is_numeric($pid)) $pid = "p" . substr($pid, 0, PRIV_ID_LEN - 1);
     return $pid;
 }   
 
@@ -43,7 +45,14 @@ function sanitizeInput($inputArray)
 function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = false)
 {
     global $debugMode;
-    if ($debugMode) error_log(sprintf(str_replace("?", "%s", $queryTemplate), ...$values));
+    if ($debugMode) {
+        $template = $queryTemplate;
+
+        for ($i = 0; $i < sizeof($values); $i++)
+            $template = preg_replace("/\?/m", $values[$i] ?? 0, $template, 1);
+        
+        error_log($template);
+    }
 
     $query = $mysqli->prepare($queryTemplate);
 
@@ -103,7 +112,7 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
     }
 
     // This may cause problems. 
-    $https = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
+    $https = strstr($_SERVER["HTTP_HOST"], "localhost") ? 'http://' : 'https://';
 
     if ($needsRURL) { $data["redirect_uri"] = $https . $_SERVER["HTTP_HOST"] . $_SERVER["PHP_SELF"]; }
 
@@ -126,6 +135,41 @@ function post($url, $data, $headers, $needsRURL = false, $noEncodeKeys = []) {
 
     curl_close($curl);
     return $result;
+}
+
+function createMomentToken($uid) {
+    $data = [
+        time(),
+        $uid
+    ];
+
+    $decodedToken = implode(";", $data);
+    $token = $decodedToken . ";" . md5($decodedToken);
+    return base64_encode(encrypt($token));
+}
+
+function verifyMomentToken($token) {
+    $decoded = decrypt(base64_decode($token));
+    if (!$decoded) // Decryption failed
+        return false;
+    
+    $token = explode(";", $decoded);
+    if (sizeof($token) != 3) // time+uid+hash
+        return false;
+    
+    // Moment tokens are valid for 30 minutes
+    if (time() - $token[0] > 1800)
+        return false;
+    
+    // validate hash
+    if (md5(implode(";", array_slice($token, 0, 2))) != $token[2])
+        return false;
+
+    $localUID = getLocalUserID();
+    if (!$localUID) return false;
+
+    // validate that access token and moment token uids are the same
+    return $localUID == $token[1];
 }
 
 function refreshToken() {
@@ -218,13 +262,22 @@ function getLocalUserID() {
     return $token[2]; // User ID
 }
 
-function checkAccount($mysqli, $forceToken = false) {
+function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     global $DO_REFRESH;
-    if (!getAuthorization()) return false;
+    $auth = getAuthorization();
+    if (!$auth) return false;
 
     $token;
-    if (!$forceToken) $token = getAuthorization();
+    if (!$forceToken) $token = $auth;
     else $token = $forceToken;
+    
+    if (!$skipMomentToken && isset($_COOKIE["momentToken"])) {
+        $getToken = $_COOKIE["momentToken"];
+        if ($getToken) {
+            $momentToken = verifyMomentToken($getToken);
+            if ($momentToken) return ["id" => $token[2]];
+        }
+    }
 
     if ($token[1]-time() < 86400) {
         $refresh_token = refreshToken($token);
@@ -245,6 +298,10 @@ function checkAccount($mysqli, $forceToken = false) {
 
         return checkAccount($mysqli, $res);
     }
+
+    $mt = createMomentToken($token[2]);
+    setcookie("momentToken", $mt, time() + 1800, "/");
+
     return $json;
 }
 
@@ -286,7 +343,30 @@ function getRatings($mysqli, $userID, $type, $object_id, $splitRatings = false) 
     return $ratingArray;
 }
 
+// i think i used this in the frontend too :D: https://stackoverflow.com/a/44134328
+function f($n, $a, $h) {
+    $k = fmod(($n + $h[0] / 30), 12.0);
+    $color = $h[2] - $a * max(min($k - 3, 9 - $k, 1), -1);
+    return str_pad(dechex(round(255 * $color)), 2, '0');   // convert to Hex and prefix "0" if needed
+}
+
+function hslToHex($hslArray) {
+    // is probably hex
+    if (is_string($hslArray)) {
+        if (substr($hslArray,0,1) == '#' && strlen($hslArray) == 7) return $hslArray;
+        else return "#000000";
+    }
+        
+    $hslArray[1] *= 100;
+    $a = $hslArray[1] * min($hslArray[2], 1 - $hslArray[2]) / 100;
+    
+    return sprintf("#%s%s%s", f(0,$a,$hslArray), f(8,$a,$hslArray), f(4,$a,$hslArray));
+}
+
 function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
+
+    doRequest($mysqli, sprintf("DELETE FROM `levels_uploaders` WHERE `%s`=?", $isReview ? "reviewID" : "listID"), [$listID], "i");
+    doRequest($mysqli, sprintf("DELETE FROM `levels_ratings` WHERE `%s`=?", $isReview ? 'reviewID' : 'listRatingID'), [$listID], "i");
     foreach ($levels as $l) {
         $hash = $l["levelID"];
         if (!isnum($l["levelID"]) || $l["levelID"] < 128 || $l["levelID"] > 200000000) continue;
@@ -301,29 +381,51 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
                 $creator = $l["creator"][0][0];
         }
 
-        $res = doRequest($mysqli, "
-        INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, uploaderID, hash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",[
+        $collabCount = $isCollab ? sizeof($l["creator"][2]) : 0;
+        $diff = isset($l["difficulty"]) ? $l["difficulty"][0] : 0;
+        $rating = isset($l["difficulty"]) ? $l["difficulty"][1] : 0;
+        $color = isset($l["color"]) ? substr(hslToHex($l["color"]), 1) : null;
+        $bgHash = isset($l["BGimage"]) ? $l["BGimage"]["image"][0] : null;
+        if (strlen($bgHash) == 0) $bgHash = null;
+
+        $platf = isset($l["platf"]);
+        foreach ($l["tags"] as $tag) {
+            if ($tag[0] == 28) // Platformer tag
+                $platf = true;
+        }
+
+        $res = doRequest($mysqli, "INSERT INTO `levels` (levelName, creator, collabMemberCount, levelID, difficulty, rating, platformer, color, background, uploaderID, hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+        `creator` = ?, `collabMemberCount` = ?, `difficulty` = ?, `rating` = ?, `color` = ?, `background` = ?",[
             $l["levelName"],
             $creator,
-            $isCollab ? sizeof($l["creator"][2]) : 0,
+            $collabCount,
             $l["levelID"],
-            isset($l["difficulty"]) ? $l["difficulty"][0] : 0,
-            isset($l["difficulty"]) ? $l["difficulty"][1] : 0,
-            isset($l["platf"]) ? $l["platf"] : false,
+            $diff,
+            $rating,
+            $platf,
+            $color,
+            $bgHash,
             $userID,
-            $hash], "ssiiiiiss");
+            $hash,
+        
+            $creator, $collabCount, $diff, $rating, $color, $bgHash], "ssiiiiisssssiiiss");
 
         // Add list/review connections
         doRequest($mysqli, sprintf("INSERT INTO `levels_uploaders` (levelID, %s) VALUES (?, ?)", $isReview ? "reviewID" : "listID"),
         [$l["levelID"], $listID], "ii");
             
         // Add review level ratings
-        if ($isReview) {
-            doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
-            [$l["levelID"], $listID, $l["ratings"][0][0], $l["ratings"][0][1], $l["ratings"][0][2], $l["ratings"][0][3]],
-            "iiiiii");
-        }
+        $res = doRequest($mysqli, 
+            sprintf("INSERT INTO `levels_ratings`(levelID, %s, gameplay, decoration, difficulty, overall)
+                    VALUES (?,?,?,?,?,?)", $isReview ? 'reviewID' : 'listRatingID'),
+            [$l["levelID"], $listID,
+            $l["ratings"][0][0] == -1 ? NULL : $l["ratings"][0][0],
+            $l["ratings"][0][1] == -1 ? NULL : $l["ratings"][0][1],
+            $l["ratings"][0][2] == -1 ? NULL : $l["ratings"][0][2],
+            $l["ratings"][0][3] == -1 ? NULL : $l["ratings"][0][3]],
+            "iidddd");
     }
 }
 
@@ -355,5 +457,12 @@ function ass() {
         addLevelsToDatabase($mysqli, $allLevels, $res[$i][1], $res[$i][2]);
     }
 }
+
+function makeIN($arr) {
+    return [
+      "(" . substr(str_repeat("?,", sizeof($arr)), 0, sizeof($arr)*2-1) . ")",
+      str_repeat("s", sizeof($arr))
+    ];
+  }
 
 ?>

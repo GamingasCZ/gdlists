@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import type { Level } from "@/interfaces";
+import { LevelImage, type Level } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { inject, onErrorCaptured, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
-import { DEFAULT_RATINGS } from "@/Reviews";
+import { DEFAULT_RATINGS, DEFAULT_REVIEWDATA } from "@/Reviews";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
+import CardTheme from "../levelViewer/CardTheme.vue";
+import { computed } from "vue";
+import { TagName } from "@/assets/tags";
+import EditorCardCommentary from "../editor/EditorCardCommentary.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -21,6 +25,7 @@ interface Extras {
   hideRatings?: boolean
   rating?: number
   isEmbed?: boolean
+  uploaderUid?: boolean
 }
 
 const props = defineProps<Level & Extras>();
@@ -29,10 +34,11 @@ const emit = defineEmits<{
   (e: "error"): void;
   (e: "nextGuess", res: number): void;
   (e: "openCollab", index: number, col: [number, number, number]): void;
+  (e: "fullscreenImage", index: number): void;
 }>();
 
-const isFavorited = ref<boolean>(props.favorited);
-const CARD_COL = ref<Color>(fixBrokenColors(props.color));
+const isFavorited = ref<boolean>(props?.favorited);
+const CARD_COL = computed<Color>(() => fixBrokenColors(props.color));
 
 const guessResult = ref([-1,-1])
 const guessGradient = ref("")
@@ -68,17 +74,33 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const listData = inject("listData")
+const listData = inject("levelsRatingsData")()
+const userContent = import.meta.env.VITE_USERCONTENT
+
+const isBlackText = computed(() => CARD_COL.value.luminance() > 0.5)
+const textCol = computed(() => {
+  return isBlackText.value ? 'black' : 'white'
+})
+
+const hasPlatTag = (() => {
+  if (props.tags)
+    return props.tags.find(x => x[0] == TagName.PLATFORMER) !== undefined
+  return false
+})()
 
 </script>
 
 <template>
   <section v-if="guessResult"
-    class="relative font-[poppins] w-[min(100%,95vw)] max-w-[70rem] rounded-lg p-3 text-white text-left shadow-lg shadow-[color:#0000008F]"
-    :style="{ backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})` }"
+    class="relative font-[poppins] overflow-clip w-[min(100%,95vw)] max-w-[58rem] rounded-lg p-3 py-5 text-left shadow-lg shadow-[color:#0000008F]"
+    :style="{
+      backgroundImage: `linear-gradient(39deg, ${CARD_COL!.alpha(translucentCard ? 0.4 : 1).css()}, ${CARD_COL!.brighten(1).alpha(translucentCard ? 0.4 : 1).css()})`,
+      color: textCol
+    }"
     :class="{'backdrop-blur-md': translucentCard}"
     :id="guessResult[0] != -1 ? 'levelCard' : ''"
   >
+    <CardTheme v-if="BGimage" v-bind="BGimage" />
 
     <Transition name="fade">
       <div v-if="guessResult[0] > -1" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-[min(30vw,60rem)] justify-center items-center -z-10 opacity-40 mix-blend-luminosity">
@@ -101,11 +123,16 @@ const listData = inject("listData")
             <DifficultyIcon class="w-14" :difficulty="difficulty?.[0] ?? difficulty" :rating="difficulty?.[1] ?? rating" />
           </div>
 
-          <!-- Level name -->
-          <h2 :class="{'ml-2': !guessingNow}" class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
-            <h4 class="absolute -top-4 text-sm" v-if="platf">Platformer</h4>
-            <component :is="isEmbed ? 'RouterLink' : 'span'" :to="'/'+listID" :class="{'underline cursor-pointer': isEmbed}">{{ levelName || $t('other.unnamesd') }}</component>
-          </h2>
+          <div :class="{'ml-2': !guessingNow}">
+            <!-- Level name -->
+            <h2 class="text-3xl relative font-black max-sm:max-w-[60vw] max-sm:text-center break-words">
+              <h4 class="absolute -top-4 text-sm" v-if="platf || hasPlatTag">Platformer</h4>
+              <component :is="isEmbed ? 'RouterLink' : 'span'" :to="'/'+listID" :class="{'underline cursor-pointer': isEmbed}">{{ levelName || $t('other.unnamesd') }}</component>
+            </h2>
+  
+            <!-- Level creator -->
+            <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
+          </div>
         </header>
       </div>
 
@@ -131,35 +158,61 @@ const listData = inject("listData")
 
     <!-- Favorite star -->
     <button
-      class="absolute top-1 right-1 button"
+      class="absolute top-1 right-1 drop-shadow-md button"
       @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
       :class="{ disabled: isFavorited }"
       v-if="favorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars"
     >
-      <img src="@/images/star.webp" class="w-8" alt="" />
+      <img src="@/images/star.svg" class="w-8" alt="" />
     </button>
 
-    <!-- Level creator -->
-    <h3 v-if="typeof creator == 'string'">{{ creator || $t('other.unnamesd') }}</h3>
-
     <div class="flex flex-col gap-3 mt-2">
-      <CollabPreview v-if="typeof creator == 'object'" :collab="creator" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
+
+      <!-- Collab -->
+      <CollabPreview v-if="typeof creator == 'object'" :collab="creator" :white="isBlackText" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
+      <!-- Level review ratings -->
+      <div v-if="ratings && !hideRatings" class="flex z-10 flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md empty:hidden">
+        <template v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])">
+          <div
+            :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}"
+            class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle"
+            v-if="listData[0][levelIndex]?.ratings?.[Math.floor(index / 4)]?.[index % 4] > -1"
+          >
+            <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
+            <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
+            
+            <span class="text-2xl font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          </div>
+        </template>
+      </div>
+      <EditorCardCommentary v-if="commentary" :editable="false" :uid="uploaderUid" :dark="isBlackText" :text="commentary" />
+
+      <!-- Screenshots -->
+      <h2 v-if="scShotSecName && screenshots?.length" class="mt-3 text-2xl font-bold leading-none">{{ scShotSecName }}</h2>
+      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 w-full">
+        <figure v-for="(img, ind) in screenshots" class="flex flex-col">
+          <iframe
+              v-if="img[0] == LevelImage.VIDEO"
+              height="144" width="255"
+              :src="`https://www.youtube-nocookie.com/embed/${img[1]}`"
+              title="YouTube video player" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              class="rounded-md"
+              >
+          </iframe>
+          <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="object-cover object-center max-h-36 rounded-md aspect-video inter shadow-drop" alt="">
+          <figcaption class="text-center text-inherit">{{ img[2] }}</figcaption>
+        </figure>
+      </section>
+
       <!-- Level Tags -->
-      <section class="flex flex-wrap gap-2">
-        <Tag v-for="tag in tags" :tag="tag" />
+      <section class="flex z-10 flex-wrap gap-2">
+        <Tag v-for="tag in tags" :tag="tag" :white="isBlackText" />
       </section>
   
       <DifficultyGuesserContainer :difficulty="difficulty" :diff-guess-array="diffGuessArray" v-if="guessingNow" @guessed="nextGuess" />
-      
-      <!-- Level review ratings -->
-      <div v-if="ratings && !hideRatings" class="flex flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md">
-        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}" class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle">
-          <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-          <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
-          <span class="text-2xl font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
-        </div>
-      </div>
     </div>
 
   </section>

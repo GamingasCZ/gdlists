@@ -12,12 +12,17 @@ export default defineConfig(mode => {
       vue(),
     ],
     base: '/gdlists',
+    build: {
+      target: 'esnext'
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
-      }
+      },
+      extensions: ['.ts', '.json']
     },
     server: {
+      watch: {usePolling: false},
       proxy: {
         '/gdlists/api': {
           target: env.VITE_ENDPOINT,

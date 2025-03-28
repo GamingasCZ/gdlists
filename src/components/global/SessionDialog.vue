@@ -66,7 +66,7 @@ defineExpose({logoutAll})
 </script>
 
 <template>
-    <section class="flex min-h-96 flex-col overflow-y-auto gap-2 p-2 bg-[url(@/images/fade.webp)] bg-repeat-x">
+    <section class="flex min-h-96 flex-col overflow-y-auto gap-2 p-2 bg-[url(@/images/fade.svg)] bg-repeat-x">
         <div v-for="(session, ind) in SESSIONS" :class="{'border-l-4 border-lof-400': currentSession == session.session_index}" class="flex gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md">
             <img class="w-14 opacity-40" :src="base + `/deviceIcons/${session.session_data.mobile ? 'mobile' : 'desktop'}.svg`" alt="">
             <div class="grow">

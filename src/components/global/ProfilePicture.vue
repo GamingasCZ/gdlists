@@ -40,5 +40,5 @@ watch(currentCutout, () => {
 </script>
 
 <template>
-    <img :src="PFP" class="profilePicture" :style="{clipPath: profileCutouts[currCutout ?? 0]}" alt="">
+    <img :src="PFP" class="profilePicture" :style="{clipPath: profileCutouts[currCutout ?? 0]}" :class="{'rounded-md': currCutout == 1}" alt="">
 </template>

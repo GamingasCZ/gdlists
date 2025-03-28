@@ -25,14 +25,15 @@
 }
 
 :root {
-  --siteBackground: #08110b;
-  --primaryColor: #045124;
-  --secondaryColor: #142019;
-  --brightGreen: #71d471;
+  --siteBackground: #000;
+  --primaryColor: #0000;
+  --secondaryColor: #0000;
+  --brightGreen: #0000;
+  scrollbar-color: var(--primaryColor) var(--siteBackground);
 }
 
 body {
-  @apply bg-lof-100 transition-[background-color] duration-300 bg-fixed bg-no-repeat bg-cover font-[poppins] flex flex-col justify-between
+  @apply bg-lof-100 bg-repeat transition-[background-color] duration-300 bg-fixed font-[poppins] flex flex-col justify-between
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -198,7 +199,7 @@ dialog {
 }
 #reviewText[data-white-page=true] {
   transition: background 0.25s;
-  background: #ece6d9 !important;
+  background: #ece6d9;
 }
 
 @media print {
@@ -210,16 +211,16 @@ dialog {
 }
 
 .readabilityMode {
-  @apply max-w-[80ch] leading-relaxed text-xl;
+  @apply max-w-[80ch] text-xl;
 }
 
 /* Use when you want regular parsing */
 .regularParsing h1 { @apply mt-2 text-2xl}
 .regularParsing h2 { @apply mt-1 text-xl}
 .regularParsing h3 { @apply text-lg}
-.regularParsing li:has(input) { @apply list-none m-[revert] my-2 pl-2}
-.regularParsing ul { @apply whitespace-normal list-disc list-inside m-[revert] pl-2}
-.regularParsing ol { @apply list-decimal list-inside m-[revert] pl-2}
+.regularParsing li:has(input) { @apply list-none my-2 pl-2}
+.regularParsing ul { @apply whitespace-normal list-disc list-inside pl-2}
+.regularParsing ol { @apply list-decimal whitespace-normal list-inside m-0 pl-2}
 .regularParsing a { @apply underline}
 .regularParsing blockquote { @apply whitespace-normal border-l-4 border-lof-400 pl-2 bg-black bg-opacity-20 my-1}
 .regularParsing img { @apply max-w-48 my-1}
@@ -233,4 +234,13 @@ dialog {
   mask: radial-gradient(51px, #0000 96%, #000);
   background: conic-gradient(var(--bg) var(--fill), rgb(0 0 0 / 0.4) var(--fill));
   @apply content-[''] rounded-full absolute -inset-2;
+}
+
+kbd {
+  @apply bg-white bg-opacity-20 rounded-md p-0.5 border-white text-xs align-middle mx-1 min-w-6 border-opacity-40 border-2 border-b-4
+}
+
+.thinScrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primaryColor) transparent;
 }

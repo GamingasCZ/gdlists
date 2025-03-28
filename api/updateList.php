@@ -59,8 +59,7 @@ if (!$checkUser) {
 
 $disableComments = intval($DATA["disComments"]);
 $doHide = intval($DATA["hidden"]) == 1;
-$thumbdata;
-if (!$IS_LIST) $thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
+$thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $retListID = $DATA["id"];
 
@@ -69,7 +68,7 @@ $compressedData = base64_encode(gzcompress($fuckupData[1]));
 $hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
 $hidden = $doHide ? $hiddenID : '0';
 if ($IS_LIST) {
-    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $DATA["id"]], "ssssi");
+    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ?, `tagline` = ?, `thumbnail` = ?, `thumbProps` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $decoded["tagline"], $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $DATA["id"]], "sssssssi");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
 }
 else {
@@ -83,17 +82,7 @@ $retListID = $doHide ? $hiddenID : $listData["id"];;
 // Adding levels to database
 if ($fuckupData[3] == 0) {
     // // hope it's not an old list :D
-    doRequest($mysqli, sprintf("DELETE FROM `levels_uploaders` WHERE `%s`=?", $IS_LIST ? "listID" : "reviewID"), [$DATA["id"]], "i");
     addLevelsToDatabase($mysqli, $decoded["levels"], $DATA["id"], $listData["uid"], !$IS_LIST);
-    if (!$IS_LIST) {
-        doRequest($mysqli, "DELETE FROM `levels_ratings` WHERE `reviewID`=?", [$DATA["id"]], "i");
-        foreach ($decoded["levels"] as $level) {
-            doRequest($mysqli, "INSERT INTO `levels_ratings`(levelID, reviewID, gameplay, decoration, difficulty, overall) VALUES (?,?,?,?,?,?)",
-                [$level["levelID"], $DATA["id"], $level["ratings"][0][0], $level["ratings"][0][1], $level["ratings"][0][2], $level["ratings"][0][3]],
-                "iiiiii");
-        }
-
-    }
 }
 
 echo json_encode([$retListID]);

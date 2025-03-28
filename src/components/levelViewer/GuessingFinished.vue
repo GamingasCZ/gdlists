@@ -81,7 +81,7 @@ const shareResult = () => {
         }
     })
 
-	let text = `${props.listName} ${translation[0]} ${props.listCreator}\n${coolEmojiArray.join("")} ${points.value}/${maxPoints.value}\n${translation[1]}\nhttps://gamingas.wz.cz/gdlists/s/${props.listID}`
+	let text = `${props.listName} ${translation[0]} ${props.listCreator}\n${coolEmojiArray.join("")} ${points.value}/${maxPoints.value}\n${translation[1]}\nhttps://gamingas.cz/gdlists/${props.listID}`
     navigator.clipboard.writeText(text)
     copied.value = true
     setTimeout(() => copied.value = false, 500);

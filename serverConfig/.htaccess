@@ -1,0 +1,24 @@
+RewriteOptions inherit
+
+RewriteEngine On
+
+# routing
+RewriteRule ^index\.php - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /gdlists/index.php [L]
+
+## environment vars, fill these out
+
+# database credentials
+SetEnv DB_HOSTNAME
+SetEnv DB_USERNAME
+SetEnv DB_PASSWORD
+SetEnv DB_NAME
+
+# set up an app in discord dev portal
+SetEnv DC_CLIENT_ID
+SetEnv DC_CLIENT_SECRET
+
+# can be a random string
+SetEnv SECRET

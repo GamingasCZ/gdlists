@@ -95,9 +95,8 @@ const gdInput = ref<HTMLInputElement>()
 
 <template>
     <!-- Main -->
+    <TabBar @switched-tab="tab = $event" :tab-names="[$t('editor.iglists'), $t('editor.idlist')]" />
     <main v-if="page == 0" id="importForm" class="relative w-full h-80">
-
-      <TabBar @switched-tab="tab = $event" :tab-names="[$t('editor.iglists'), $t('editor.idlist')]" />
       <!-- In-game lists -->
       <div v-if="tab == 0">
         <h2 class="mt-2 text-xl font-bold text-center">{{ $t('editor.ingame') }}</h2>
@@ -152,7 +151,7 @@ const gdInput = ref<HTMLInputElement>()
         <h2 v-if="LEVELS.length > 0" class="text-2xl">{{ $t('editor.foundLevels', [LEVELS.length]) }}</h2>
         <h3 v-show="LEVELS.length > 0" class="text-sm">{{ $t('editor.clickLeave') }}</h3>
       </div>
-      <div class="flex justify-start relative overflow-y-auto flex-col w-full bg-[url('@/images/fade.webp')] bg-repeat-x overflow-x-clip">
+      <div class="flex justify-start relative overflow-y-auto flex-col w-full bg-[url('@/images/fade.svg')] bg-repeat-x overflow-x-clip">
         <div v-if="importError == 3" class="flex flex-col items-center m-auto opacity-40">
           <img src="@/images/loading.webp" class="w-36 animate-spin" alt="">
           <h3 class="mt-4 text-2xl font-bold">{{ $t('other.loading') }}...</h3>

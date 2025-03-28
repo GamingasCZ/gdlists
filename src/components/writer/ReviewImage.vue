@@ -5,6 +5,8 @@ import { computed } from 'vue';
 import { inject } from 'vue';
 import { watch } from 'vue';
 import Resizer from '../global/Resizer.vue';
+import { WriterGallery } from '@/interfaces';
+import containers, { type cShowImage } from './containers';
 
 
 const emit = defineEmits<{
@@ -13,7 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const props = defineProps<{
-    settings: object
+    settings: cShowImage
     index: number
     buttonState: [string, number]
     editable: boolean
@@ -21,7 +23,6 @@ const props = defineProps<{
 }>()
 
 const image = ref<HTMLImageElement>()
-const imageScale = ref(0)
 const imageLoading = ref(-2)
 
 onMounted(() => {
@@ -30,7 +31,7 @@ onMounted(() => {
         imageLoading.value = 0;
 
         // Default - image width, overriden by epic dasher set width :)
-        imageScale.value = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
+        props.settings.width = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
 
     })
     image.value?.addEventListener("error", () => {
@@ -48,11 +49,12 @@ const text = computed(() => {
 })
 
 watch(props, () => {
+    if (!props?.buttonState) return
     if (props.buttonState[1] != props.index) return
     
     switch (props.buttonState[0]) {
         case "pick":
-            dialogs.imagePicker = [true, props.index]
+            dialogs.imagePicker = [WriterGallery.ImageContainer, props.index]
             break;
         }
     emit("clearButton")
@@ -76,24 +78,28 @@ const noClickWhenEditing = (e: Event) => {
 
 const preview = inject<(arg0: number) => void>("imagePreviewFullscreen", null)
 const fullscreenImage = () => {
-    if (props.editable || preview == null) return
+    if (props.editable || preview == null || props.settings?.onlyDeco) return
 
     preview(props.id)
 }
 
+const size = containers.showImage.settings[1].valueRange
+
 </script>
 
 <template>
-    <ContainerHelp @click="dialogs.imagePicker = [true, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+    <ContainerHelp @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
     <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
-        <div class="flex relative group min-h-[48px] max-w-fit m-2" :style="{width: `${imageScale}px`}">
-            <Resizer :min-size="32" :max-size="720" gizmo-pos="corner" :editable="editable" @resize="imageScale = $event; settings.width = $event">
+        <div class="flex relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
+            <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
-                    class="w-full text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
+                    class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
+                    :class="{'min-w-max': settings?.height, 'aspect-video object-cover': settings?.crop}"
+                    :style="{height: settings?.height ? `${settings.height}px` : ''}"
                     :src="settings.url"
                     :alt="settings.alt"
                     :title="settings.alt"
@@ -104,7 +110,7 @@ const fullscreenImage = () => {
                 {{ linkHost }}
             </a>
         </div>
-        <figcaption class="text-inherit">{{ settings.description }}</figcaption>
+        <figcaption class="text-[90%] text-inherit">{{ settings.description }}</figcaption>
     </figure>
 
 </template>
