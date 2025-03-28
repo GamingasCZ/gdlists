@@ -20,7 +20,7 @@ const hoveredRatingName = ref("")
             <span v-show="compact" v-if="!noHelp" class="text-xs text-center opacity-0 transition-opacity duration-200">{{ hoveredRatingName }}</span>
             <div class="flex">
                 <template v-for="(defRating, index) in DEFAULT_RATINGS">
-                    <div v-if="!isNaN(ratings[index])" @mouseover="hoveredRatingName = defRating.name" :style="{borderColor: chroma.hsl(defRating.color).css(), background: `linear-gradient(0deg, ${chroma.hsl(defRating.color).alpha(0.3).css()}, transparent)`}" class="px-2 w-full text-center border-b-4 max-w-24">
+                    <div v-if="!isNaN(ratings[index])" @mouseover="hoveredRatingName = defRating.name" :style="{borderColor: chroma.hsl(defRating.color).css(), background: `linear-gradient(0deg, ${chroma.hsl(defRating.color).alpha(0.3).css()}, transparent)`}" class="px-2 grow w-full text-center border-b-4 w-24">
                         <h3 v-if="!compact">{{ defRating.name }}</h3>
                         <span class="font-bold" :class="{'text-2xl': !compact}">{{ ratings[index] }}</span><span :class="{'text-xs opacity-40': compact}">/10</span>
                     </div>
