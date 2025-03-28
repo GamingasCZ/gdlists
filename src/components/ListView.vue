@@ -198,9 +198,10 @@ async function loadReview(loadedData: ReviewList | null) {
       return
     }
 
+    let indicies = [0,0,0,0,0,0]
     LIST_DATA.value = res[0];
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
-    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers)
+    REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers, indicies)
 
     LIST_RATING.value = res[3]
 
