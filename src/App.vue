@@ -8,12 +8,11 @@ import { SETTINGS, hasLocalStorage, loggedIn } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
 import { i18n, setLanguage } from "./locales";
-import { currentCutout, currentUID } from "./Editor";
+import { currentCutout, currentUID, currentUnread } from "./Editor";
 import NotificationStack from "./components/global/NotificationStack.vue";
 import { summonNotification } from "./components/imageUpload";
 import { dialog } from "./components/ui/sizes";
 import Dialog from "./components/global/Dialog.vue";
-import { currentUnread } from "@/components/global/profiles";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??

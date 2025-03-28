@@ -6,7 +6,7 @@ import { SETTINGS } from "@/siteSettings";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
 import axios from "axios";
-import { currentUnread } from "./profiles";
+import { currentUnread } from "@/Editor";
 
 defineProps<{
   isLoggedIn: boolean;

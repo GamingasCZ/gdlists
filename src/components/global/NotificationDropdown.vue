@@ -3,7 +3,7 @@ import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import NotificationCard from './NotificationCard.vue';
 import type { NotificationContent } from '@/interfaces';
-import { currentUnread, notificationCache } from './profiles';
+import { currentUnread, notificationCache } from '@/Editor';
 import { RouterLink } from 'vue-router';
 
 const unreadAmount = ref(0)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios';
 import NotificationCard from './global/NotificationCard.vue';
-import { notificationCache } from './global/profiles';
+import { notificationCache } from '@/Editor';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
 

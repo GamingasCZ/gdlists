@@ -3,8 +3,7 @@ import { RouterLink } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { currentCutout, currentUID, isOnline, profileCutouts } from "@/Editor";
-import { currentUnread } from "@/components/global/profiles";
+import { currentCutout, currentUID, isOnline, profileCutouts, currentUnread } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress, timeLastRouteChange } from "@/router";
@@ -212,7 +211,7 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       <!-- Notification button -->
       <button @click="showNotifs" v-if="isLoggedIn" class="absolute -left-10 top-1/2 -translate-y-1/2 button max-sm:hidden">
         <img src="../images/notifs.svg" alt=""
-        class="w-5" />
+        class="w-6" />
         <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
         <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
       </button>

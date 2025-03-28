@@ -297,6 +297,9 @@ export const shortenYTLink = (link: string, disableParams = false) => {
 export const lastPFPchange = ref(Date.now())
 export const currentCutout = ref(0)
 export const currentUID = ref("0")
+export const currentUnread = ref(0)
+export const notificationCache = ref([[],[]])
+
 export const profileCutouts = [
   'circle()',
   '',
