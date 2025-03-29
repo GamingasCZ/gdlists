@@ -10,6 +10,7 @@ import ListBackground from "./ListBackground.vue";
 import RatingContainer from "./RatingContainer.vue";
 import { SETTINGS } from "@/siteSettings";
 import ProfilePicture from "./ProfilePicture.vue";
+import { hide } from "@popperjs/core";
 
 const props = defineProps<{
   rate_ratio: string;
@@ -133,7 +134,7 @@ const link = () => {
     :style="{
       backgroundImage: getGradient(listColor),
       borderColor: listColor.darken(2).hex(),
-    }" :class="{ '!border-dotted !border-white !border-opacity-40': hidden != '0' }"
+    }"
     @click="clickReview"
   >
     
@@ -180,6 +181,9 @@ const link = () => {
       </div>
     </section>
 
+    <div v-if="hidden != 0" class="absolute previewTypeIcon right-1 bottom-14 invert-[0.1] mix-blend-color-dodge">
+      <img  src="@/images/hidden.svg" class="w-12" alt="">
+    </div>
     <div class="absolute previewTypeIcon right-1 bottom-1 invert-[0.7] mix-blend-color-dodge">
       <img v-if="isList" src="@/images/browseMobHeader.svg" class="w-12" alt="">
       <img v-else src="@/images/reviews.svg" class="w-12" alt="">
