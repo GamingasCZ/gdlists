@@ -181,7 +181,7 @@ const selectLevel = () => {
             <ProfilePicture :uid="post.uid" :cutout="0" class="w-8 aspect-square" /> <!-- todo: maybe fetch proper cutout -->
             <div class="flex flex-col">
               <span class="text-xs opacity-40">{{ [$t('other.list'), $t('other.review')][post.type] }}</span>
-              <span class="leading-[0.5] mb-1">{{ decodeURIComponent(post.name) }}</span>
+              <span class="leading-[0.5] mb-1">{{ decodeURIComponent(post.name).replace('+', ' ') }}</span>
             </div>
             <img src="@/images/arrow.svg" class="ml-auto w-2 aspect-square" alt="">
           </RouterLink>
