@@ -24,7 +24,7 @@ const openLinkTooltip = () => {
   >
     <img
       :src="`${base}/tags/${tag[0]}.svg`"
-      class="inline mr-2 w-3 align-middle sm:w-6"
+      class="inline mr-2 align-middle w-6"
       alt=""
     />
     <a

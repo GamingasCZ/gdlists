@@ -49,7 +49,7 @@ const isCollab = typeof props.creator != 'string'
 const rateDropdownButton = ref<HTMLImageElement>() 
 const ratingsShowing = ref(false)
 
-const listData = inject("listData")
+const listData = inject("levelsRatingsData")()
 
 </script>
 
@@ -68,7 +68,7 @@ const listData = inject("listData")
           <DifficultyIcon class="w-6" :difficulty="difficulty[0]" :rating="difficulty[1]" />
           <span>{{ levelName || $t('other.unnamesd') }}</span>
           <img src="@/images/platformer.svg" title="Platformer" v-if="platf" class="w-5" alt="">
-          <img @click="ratingsShowing = true" class="w-5 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">
+          <img @click.stop="ratingsShowing = true" class="w-5 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">
           <button class="w-6 button focus-within:outline-current" v-if="tags && tags.length > 0" @click="emit('openTags', levelIndex)"><img src="@/images/levelID.svg"></button>
         </div>
       </h2>
@@ -95,7 +95,7 @@ const listData = inject("listData")
     <!-- Favorite star -->
     <td class="pr-1 w-5">
       <button @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)" :class="{ disabled: isFavorited }" class="flex justify-center items-center w-max"
-        v-if="isFavorited != undefined && levelID?.match(/^\d+$/) && !disableStars"><img class="w-5" src="../../images/star.svg">
+        v-if="isFavorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars"><img class="w-5" src="../../images/star.svg">
       </button>
     </td>
   </tr>
@@ -103,13 +103,13 @@ const listData = inject("listData")
   <!-- Level review ratings -->
   <Dropdown v-if="ratingsShowing" @close="ratingsShowing = false" :title="$t('reviews.rating')" :options="[]" :button="rateDropdownButton">
     <template #header>
-      <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" class="flex flex-col gap-1 p-1">
+      <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])" class="flex flex-col gap-1 p-1">
         <div class="flex justify-between text-white">
           <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-          <span class="text-sm font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+          <span class="text-sm font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]  }}/10</span>
         </div>
         <div class="relative w-full h-1 bg-black bg-opacity-40">
-          <div :style="{background: chroma.hsl(...rating.color).hex(), width: `${10*listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]}%`}" class="absolute h-full"></div>
+          <div :style="{background: chroma.hsl(...rating.color).hex(), width: `${10*listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]}%`}" class="absolute h-full"></div>
         </div>
       </div>
     </template>

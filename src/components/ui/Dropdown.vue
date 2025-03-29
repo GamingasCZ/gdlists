@@ -34,7 +34,7 @@ const closeDropdown = e => {
     }
 }
 
-onBeforeUnmount(() => popper.destroy())
+onBeforeUnmount(() => popper?.destroy())
 
 document.body.addEventListener("click", closeDropdown, {capture: true})
 
