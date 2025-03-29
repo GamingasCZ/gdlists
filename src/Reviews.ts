@@ -34,7 +34,6 @@ export const REVIEW_EXTRAS: () => ReviewList = () => ({
     containers: [],
     ratings: [],
     settings: [],
-    disabledRatings: false,
     private: false,
     transparentPage: 0,
     language: SETTINGS.value.language ? 'en' : 'cs',

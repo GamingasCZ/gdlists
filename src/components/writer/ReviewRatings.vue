@@ -85,7 +85,7 @@ const rateBG = computed(() => {
 
         <div v-else>
             <!-- All ratings -->
-            <div v-if="!postData.disabledRatings" class="grid grid-rows-4 grid-flow-col gap-x-4">
+            <div class="grid grid-rows-4 grid-flow-col gap-x-4">
                 <div v-for="(rating, index) in levelRatings[0].concat(levelRatings[1])" class="min-w-[min(30vw,_10rem)] grid grid-cols-2 grid-rows-2 text-left">
                     <span>{{ allRatings[index].name || $t('other.unnamesd') }}</span>
                     <span v-if="rating > -1" class="text-xl font-bold text-right">{{ rating }}/10</span>

@@ -285,7 +285,6 @@ export interface ReviewList {
   ratings: ReviewRating[]
   defaultRatings: ReviewRating[]
   settings: ReviewSettings
-  disabledRatings: number
   private: boolean
   transparentPage: 0 | 1 | 2
   language: number

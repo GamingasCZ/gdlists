@@ -224,7 +224,7 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
         </div>
 
         <!-- Review level ratings button -->
-        <div class="ml-2" v-if="review && !data.disabledRatings && data.levels.length > 0">
+        <div class="ml-2" v-if="review && data.levels.length > 0">
           <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
             <img src="@/images/rating.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{ $t('editor.levels') }}</label>
             <label
