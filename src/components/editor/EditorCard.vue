@@ -478,7 +478,7 @@ const cardDropdown = ref<HTMLDivElement>()
             </form>
     
             <!-- Creator -->
-            <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+            <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60 overflow-clip">
               <button @click="openCollabTools()" type="button" tabindex="-1" class="relative p-2 button" :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
                 <img class="absolute top-3 left-3 animate-ping min-w-6 aspect-square" src="../../images/collabMen.svg" alt=""
                   v-if="collabFlash" />
