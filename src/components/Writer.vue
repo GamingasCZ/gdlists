@@ -291,7 +291,6 @@ const removeContainer = (index: number, forceColumnRemove = false) => {
         POST_DATA.value.containers[index].settings
         .components[selectedNestContainer.value[1]]
         .splice(selectedNestContainer.value[2], 1)
-        POST_DATA.value.containers.splice(index, 1)
     }
     else 
         POST_DATA.value.containers.splice(index, 1)
@@ -306,7 +305,6 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
     if (!previewMode.value) return
     if (selectedContainer.value[0] == -1) return
 
-    console.log(selectedNestContainer.value)
     if (selectedNestContainer.value[0] == -1) {
         if (index < 0) return
         POST_DATA.value.containers[index].align = alignment
