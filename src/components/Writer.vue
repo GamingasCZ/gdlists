@@ -196,6 +196,8 @@ const setLastChange = () => containerLastTextChange.value = Date.now()
 provide("lastTextChange", setLastChange)
 
 const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly = false, above = false) => {
+    if (!previewMode.value) return
+
     // Count of all components
     let contAm = 0
     let thisContAm = 0
@@ -284,6 +286,7 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
 provide("addContainer", addContainer)
 
 const removeContainer = (index: number, forceColumnRemove = false) => {
+    if (!previewMode.value) return
     if (POST_DATA.value.containers[index].type == 'twoColumns' && !forceColumnRemove) {
         POST_DATA.value.containers[index].settings
         .components[selectedNestContainer.value[1]]
@@ -300,6 +303,7 @@ const removeContainer = (index: number, forceColumnRemove = false) => {
 provide("removeContainer", removeContainer)
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
+    if (!previewMode.value) return
     if (selectedContainer.value[0] == -1) return
 
     console.log(selectedNestContainer.value)
@@ -433,6 +437,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             break;
         case 'resizeSmaller':
         case 'resizeBigger':
+            if (!previewMode.value) return
             let type = POST_DATA.value.containers?.[selectedContainer.value[0]]?.type
             if (type == "twoColumns") {
                 type = POST_DATA.value.containers?.[selectedContainer.value[0]]?.settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].type
@@ -484,6 +489,7 @@ const moveToParagraph = (currentContainerIndex: number) => {
 }
 
 const moveContainer = (index: number, by: number) => {
+    if (!previewMode.value) return
     if (index+by < 0) return
     if (index+by >= POST_DATA.value.containers.length) return
     
