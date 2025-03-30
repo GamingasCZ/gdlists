@@ -43,6 +43,9 @@ const props = defineProps<{
   A_decoration?: string | null
   A_difficulty?: string | null
   A_overall?: string | null
+
+  BGhash: string | null
+  BGuploader: string | null
 }>()
 
 const listColor = ref<Color>(chroma(props.color ?? props.levelColor! ?? makeColorFromString(props.levelName)));
@@ -132,7 +135,7 @@ const selectLevel = () => {
       background: getGradient(),
     }"
   >
-    <img v-if="background" :style="{mask: 'linear-gradient(90deg,transparent,black)'}" class="isolate absolute inset-0 opacity-40 mix-blend-luminosity" :src="`${uc}/userContent/${uploaderID}/${background}.webp`" alt="">
+    <img v-if="BGhash" :style="{mask: 'linear-gradient(90deg,transparent,black)'}" class="isolate absolute inset-0 opacity-40 mix-blend-luminosity" :src="`${uc}/userContent/${BGuploader}/${BGhash}.webp`" alt="">
     
     <div class="flex flex-col justify-center items-center opacity-100 transition-opacity duration-75 ease-out group-hover:opacity-0">
       <DifficultyIcon v-once class="z-10 mt-4 w-18" :difficulty="difficulty || levelDiff?.[0] || levelDiff || 0" :rating="rating || levelDiff?.[1] ||levelRating || 0" />

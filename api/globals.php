@@ -386,7 +386,13 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
         $rating = isset($l["difficulty"]) ? $l["difficulty"][1] : 0;
         $color = isset($l["color"]) ? substr(hslToHex($l["color"]), 1) : null;
         $bgHash = isset($l["BGimage"]) ? $l["BGimage"]["image"][0] : null;
-        if (strlen($bgHash) == 0) $bgHash = null;
+
+        if (!is_null($bgHash) && strlen($bgHash) > 5) {
+            $imgID = doRequest($mysqli, "SELECT id FROM images WHERE `hash`=?", [$bgHash], "s");
+            if (array_key_exists("error", $imgID)) die(json_encode([-1, 8]));
+    
+            $bgHash = $imgID["id"];
+        }
 
         $platf = isset($l["platf"]);
         foreach ($l["tags"] as $tag) {

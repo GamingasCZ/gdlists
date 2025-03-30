@@ -31,13 +31,14 @@ $selLevelRange = "
       rating,
       platformer,
       CONCAT('#',color) as color,
-      background,
-      uploaderID,
+      levels.uploaderID,
       ifnull(listID, concat('review/', (SELECT reviews.id FROM reviews WHERE id=levels_uploaders.reviewID))) as listID,
       avg(gameplay) as A_gameplay,
       avg(decoration) as A_decoration,
       avg(levels_ratings.difficulty) as A_difficulty,
-      avg(overall) as A_overall";
+      avg(overall) as A_overall,
+      images.hash as BGhash,
+      images.uploaderID as BGuploader";
 
 $listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
@@ -353,6 +354,7 @@ else {
   else {
     $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders
       INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
+      LEFT JOIN images ON levels.background = images.id
       LEFT JOIN levels_ratings ON levels_ratings.levelID = levels_uploaders.levelID
       WHERE levels_uploaders.id<=? AND `levelName` LIKE ?
       GROUP BY levels_uploaders.levelID
