@@ -1116,7 +1116,7 @@ const collabEditor = ref<HTMLDialogElement>()
             <!-- Level Preview -->
             <section v-if="previewingLevels" class="flex flex-col gap-2 items-center">
                 <LevelCard v-for="(l, index) in POST_DATA.levels" v-bind="l" :disable-stars="true"
-                    :level-index="index" :hide-ratings="!WRITER.general.levelRating" :uploader-uid="currentUID" />
+                    :level-index="index" :uploader-uid="currentUID" />
             </section>
 
             <!-- Editor -->

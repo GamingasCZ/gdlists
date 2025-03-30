@@ -77,7 +77,7 @@ onErrorCaptured(() => {
 const listData = inject("levelsRatingsData")()
 const userContent = import.meta.env.VITE_USERCONTENT
 
-const isBlackText = computed(() => CARD_COL.value.luminance() > 0.5)
+const isBlackText = computed(() => CARD_COL.value.luminance() > 0.4)
 const textCol = computed(() => {
   return isBlackText.value ? 'black' : 'white'
 })
@@ -172,17 +172,21 @@ const hasPlatTag = (() => {
       <CollabPreview v-if="typeof creator == 'object'" :collab="creator" :white="isBlackText" @open-collab="emit('openCollab', levelIndex, CARD_COL?.hsl()!)" />
   
       <!-- Level review ratings -->
-      <div v-if="ratings && !hideRatings" class="flex z-10 flex-wrap gap-x-10 gap-y-10 justify-center p-4 bg-black bg-opacity-40 rounded-md empty:hidden">
+      <div v-if="ratings && !hideRatings" class="flex z-10 flex-wrap gap-3 justify-start empty:hidden">
         <template v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])">
           <div
-            :style="{'--bg': chroma.hsl(...rating.color).hex(), '--fill': `${listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]*10}%`}"
-            class="flex relative flex-col justify-center items-center p-1 w-24 group aspect-square ratingCircle"
+            :class="{'bg-black': !isBlackText, 'bg-white': isBlackText}"
+            class="flex relative justify-center items-center p-1 px-2 py-1 overflow-clip bg-opacity-70 rounded-md group"
             v-if="listData[0][levelIndex]?.ratings?.[Math.floor(index / 4)]?.[index % 4] > -1"
           >
-            <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-            <span v-if="rating.name.length > 12" class="absolute z-10 p-1 text-xl opacity-0 transition-opacity group-hover:opacity-100 bg-lof-300 shadow-drop">{{ rating.name }}</span>
+            <h3 class="overflow-hidden mr-4 min-w-max text-ellipsis">{{ rating.name }}</h3>
             
-            <span class="text-2xl font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+            <span class="text-2xl font-black">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4] }}</span>
+            <span class="ml-1 opacity-40 translate-y-1 text-inherit">/10</span>
+
+            <div
+            class="absolute bottom-0 left-0 w-full h-1 bg-white"
+            :style="{background: chroma.hsl(...rating.color).css(), width: `${parseInt(listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]/10*100)}%` }"></div>
           </div>
         </template>
       </div>

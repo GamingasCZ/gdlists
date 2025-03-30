@@ -28,7 +28,7 @@ const commentary = defineModel({default: ""})
             class="p-2 py-1 ml-4 leading-relaxed bg-white bg-opacity-5 rounded-md outline-none resize-none group-focus-within:bg-opacity-10 grow"
             :placeholder="$t('editor.commPlaceholder')"
         ></textarea>
-        <article v-else class="p-2 py-1 ml-4 leading-relaxed bg-opacity-60 rounded-md grow" :class="{'bg-black': !dark, 'bg-white': dark}">{{ text }}</article>
+        <article v-else class="p-2 py-1 ml-4 leading-relaxed bg-opacity-70 rounded-md backdrop-brightness-75 backdrop-grayscale grow" :class="{'bg-black': !dark, 'bg-white': dark}">{{ text }}</article>
     </div>
     <div v-if="editable" class="ml-auto text-lg"
         :class="{
