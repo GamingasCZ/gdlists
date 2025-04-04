@@ -31,10 +31,8 @@ Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and mo
 # Screenshots
 ## Homepage
 ![homepage](https://github.com/GamingasCZ/gdlists/assets/51487573/e47b09b4-7238-443c-a317-bf65bd413170)
-## Review Writer
-![review editor](https://github.com/GamingasCZ/gdlists/assets/51487573/e30bd33c-5735-4f2d-b03c-69e4b51f95a2)
-## List Editor
-![list editor](https://github.com/GamingasCZ/gdlists/assets/51487573/463f0220-dff8-4d4f-8f87-ccf3354a85fc)
+## The Editor
+![editor](https://github.com/user-attachments/assets/1c5abd00-085d-4fee-9a83-febb9e68cc5a)
 
 
 
