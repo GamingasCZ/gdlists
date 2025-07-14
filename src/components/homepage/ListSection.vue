@@ -83,7 +83,7 @@ const clearViewed = () => {
         v-else
         v-for="level in lists"
         v-bind="level"
-        :is-list="listType == 0"
+        :is-list="listType == 0 || level?.type == 0"
         :user-array="users"
         :hide-remove="true"
         :review-details="reviewDetails"

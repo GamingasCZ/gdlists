@@ -104,10 +104,10 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
 
     <ListSection v-if="loggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
         extra-icon="more" extra-action="/browse/lists?type=user" :empty-text="$t('homepage.noListsUploaded')"
-        :force-content="feeds?.['user']" />
+        :force-content="feeds?.['user']" :list-type="2" />
 
     <ListSection :header-name="$t('homepage.visited')" :extra-text="$t('homepage.clear')" extra-icon="trash" :max-items="4"
-      extra-action="@clear" :list-type="3" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
+      extra-action="@clear" :list-type="2" :empty-text="$t('homepage.noListsVisited')" content-type="@recentlyViewed" />
 
     <ListSection :header-name="$t('homepage.savedMix')" :extra-text="$t('homepage.more')" extra-icon="more" :max-items="4"
       :empty-text="$t('homepage.noLevelsSaved')" content-type="@favorites" extra-action="/saved" :randomize-content="true"

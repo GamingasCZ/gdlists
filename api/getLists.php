@@ -21,6 +21,8 @@ $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 
 $selRange = "creator, name, lists.id, timestamp, hidden, lists.uid, views, diffGuesser, tagline, thumbnail, thumbProps";
 $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thumbnail, tagline, thumbProps";
+define("selConcatRange", "name, id, timestamp, hidden, uid, views, hidden, thumbnail, thumbProps, tagline, 0 as type");
+define("selConcatRangeRev", "name, id, unix_timestamp(timestamp) as timestamp, hidden, uid, views, hidden, thumbnail, thumbProps, tagline, 1 as type");
 
 $selLevelRange = "
       levelName,
@@ -147,12 +149,13 @@ function getHomepage($lists, $reviews, $user) {
   if ($user) {
     $account = getLocalUserID();
     if ($account) {
-      $res = doRequest($mysqli, sprintf("SELECT %s, %s
-        FROM `lists` LEFT JOIN `ratings` ON lists.id = ratings.list_id
-        WHERE lists.uid=%s AND `hidden` LIKE 0
-        GROUP BY lists.name
-        ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings, $account), [], "", true);
-  
+      $res = doRequest($mysqli, sprintf("SELECT %s
+        FROM `lists`
+        UNION SELECT %s
+        FROM `reviews`
+        WHERE `uid`=%s AND `hidden` LIKE 0
+        ORDER BY timestamp DESC LIMIT 4", selConcatRange, selConcatRangeRev, $account), [], "", true);
+
       $home["user"] = parseResult($res);
     }
   }
@@ -216,6 +219,7 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
       if (sizeof($feeds) != 3) die("0");
 
       getHomepage((bool)$feeds[0], (bool)$feeds[1], (bool)$feeds[2]);
+      die();
     }
     
   } elseif (in_array("levelsIn", array_keys($_GET))) {
@@ -240,19 +244,28 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
 
     echo json_encode($result);
   }
+  die();
 }
 elseif (isset($_GET["batch"])) {
-  $types = ["lists", "reviews", "levels"];
-  $postData = [[],[],[]];
-  for ($type=0; $type < 3; $type++) {
+  $data = [[],[],[]];
+  for ($i = 0; $i < 3; $i++) {
     if (!isset($_GET[$types[$type]])) continue;
     if (!strlen($_GET[$types[$type]])) continue;
 
+    $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
+
+  }
+
+  echo json_encode(...$data);
+}
+
+function selectBatch($data) {
+  $types = ["lists", "reviews", "levels"];
+  $postData = [[],[],[]];
+  for ($type=0; $type < 3; $type++) {
     $ratings = [$listRatings, $reviewRatings][$type];
     $range = [$selRange, $selReviewRange, $selLevelRange][$type];
 
-    $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
-    
     $res;
     if ($type == 2) {
       $in = makeIN(array_map("intval", $fetchIDs));
@@ -284,9 +297,9 @@ elseif (isset($_GET["batch"])) {
     }
     $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1);
   }
-  echo json_encode($postData);
+  return $postData;
 }
-else {
+
   // --- Loading all lists ---
 
   // Are values numbers?
@@ -368,6 +381,5 @@ else {
 
   $result = doRequest($mysqli, $query, [$_GET["startID"], "%".$_GET["searchQuery"]."%"], "is", true);
   echo json_encode(parseResult($result, false, $maxpage, $_GET["searchQuery"], $_GET["page"], $type == "reviews"));
-}
 
 $mysqli->close();
