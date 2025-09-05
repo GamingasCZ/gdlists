@@ -919,10 +919,9 @@ const toggleZenMode = () => {
     }
     else {
         modifyListBG(POST_DATA.value?.pageBGcolor)
-        try {
+        if (document.fullscreenElement != null)
             document.exitFullscreen()
-        }
-        catch (_) {}
+        
         navbar.style.display = null
         footer.style.display = null
     }
