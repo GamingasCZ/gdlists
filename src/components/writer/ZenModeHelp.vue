@@ -6,18 +6,19 @@ const emit = defineEmits<{
 }>()
 
 const close = (e: KeyboardEvent | TouchEvent) => {
-    if (e.type != 'touchstart') {
-        if (e.code == "Space") return
-        document.body.removeEventListener("keyup", close)
-    }
+    if (e.type != 'touchstart')
+        if (e.code != "Space") return
+
+    document.body.removeEventListener("keyup", close)
+    document.body.removeEventListener("touchstart", close)
     viewedPopups.zenModeHelp = true
     localStorage.setItem("popupsViewed", JSON.stringify(viewedPopups))
     emit('close')
 
 }
 
-document.body.addEventListener("keyup", close)
-document.body.addEventListener("touchstart", close)
+window.addEventListener("keyup", close)
+window.addEventListener("touchstart", close)
 
 </script>
 
