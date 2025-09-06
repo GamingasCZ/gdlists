@@ -44,21 +44,21 @@ const containers: Containers = {
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
-        styling: "text-5xl font-bold leading-10 my-4",
+        styling: "text-5xl font-bold leading-10 mt-3 mb-1",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
         placeholder: i18n.global.t('reviews.title', [2]),
-        styling: "text-4xl font-bold leading-8 my-3",
+        styling: "text-4xl font-bold leading-8 mt-3 mb-1",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "text-3xl font-bold leading-6 my-2",
+        styling: "text-3xl font-bold leading-6 mt-3 mb-1",
         nestable: true,
         canEditText: true,
         settings: []
