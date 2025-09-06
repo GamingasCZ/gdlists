@@ -315,7 +315,7 @@ export const REVIEW: Writer = {
                     title: i18n.global.t('reviews.addParagraph'),
                     icon: "default",
                     action: ["add", "default"],
-                    shortcut: [Key.Alt, 'F'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'F'],
                     splitAfter: true,
                     bold: true
                 },
@@ -323,7 +323,7 @@ export const REVIEW: Writer = {
                     title: i18n.global.t('other.preview'),
                     icon: "view",
                     action: ["preview", 1],
-                    shortcut: [Key.Alt, 'J'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'J'],
                     splitAfter: true,
                 },
                 {
@@ -346,42 +346,42 @@ export const REVIEW: Writer = {
                 {
                     tooltip: i18n.global.t('reviews.addImage'),
                     icon: "showImage",
-                    shortcut: [Key.Alt, 'I'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'I'],
                     action: ["add", 'showImage']
                 },
                 {
                     tooltip: i18n.global.t('reviews.addVideo'),
-                    shortcut: [Key.Alt, 'V'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'V'],
                     icon: "addVideo",
                     action: ["add", 'addVideo']
                 },
                 {
                     tooltip: i18n.global.t('reviews.makeCarousel'),
-                    shortcut: [Key.Alt, 'C'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'C'],
                     icon: "addCarousel",
                     action: ["add", 'addCarousel']
                 },
                 {
                     tooltip: i18n.global.t('reviews.addDivisor'),
-                    shortcut: [Key.Alt, 'S'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'S'],
                     icon: "divisor",
                     action: ["add", 'divisor']
                 },
                 {
                     tooltip: i18n.global.t('reviews.showLevel'),
-                    shortcut: [Key.Alt | Key.Shift, 'L'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'L'],
                     icon: "showLevel",
                     action: ["add", 'showLevel']
                 },
                 {
                     tooltip: i18n.global.t('reviews.dispRatings'),
                     icon: "showRating",
-                    shortcut: [Key.Alt, 'R'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'R'],
                     action: ["add", 'showRating']
                 },
                 {
                     tooltip: i18n.global.t('reviews.listLink'),
-                    shortcut: [Key.Alt, 'P'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'E'],
                     icon: "showList",
                     action: ["add", 'showList']
                 },
@@ -389,7 +389,7 @@ export const REVIEW: Writer = {
             right: [
                 {
                     titleSwitchable: [i18n.global.t('reviews.addColumn'), i18n.global.t('reviews.editColumn')],
-                    shortcut: [Key.Alt | Key.Shift, 'C'],
+                    shortcut: [Key.Ctrl | Key.Shift, 'D'],
                     action: ["columnCreate"],
                     icon: "twoColumns",
                     component: markRaw(ColumnSettingsButton)
@@ -413,7 +413,7 @@ export const REVIEW: Writer = {
                 {
                     title: i18n.global.t('reviews.strike'),
                     icon: "strike",
-                    shortcut: [Key.Ctrl | Key.Alt, 'S'],
+                    shortcut: [Key.Ctrl, 'D'],
                     action: ["format", 2],
                 },
                 {
@@ -425,13 +425,13 @@ export const REVIEW: Writer = {
                 {
                     title: i18n.global.t('other.blockquote'),
                     icon: "quotes",
-                    shortcut: [Key.Ctrl | Key.Alt, 'B'],
+                    shortcut: [Key.Ctrl, 'B'],
                     action: ["format", 4],
                 },
                 {
                     title: i18n.global.t('other.checklist'),
                     icon: "check",
-                    shortcut: [Key.Ctrl | Key.Shift, 'L'],
+                    shortcut: [Key.Ctrl, 'M'],
                     action: ["format", 5],
                 },
                 {

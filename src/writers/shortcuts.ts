@@ -76,16 +76,16 @@ const writerShortcuts = [
 
 var actionsFun
 export const shortcutListen = (toolbar, actions) => {
-    document.documentElement.addEventListener("keydown", blockNativeShortcuts)
-    document.documentElement.addEventListener("keyup", checkForShortcut)
+    window.addEventListener("keydown", blockNativeShortcuts)
+    window.addEventListener("keyup", checkForShortcut)
 
     actionsFun = actions
     getShortcuts(toolbar)
 }
 
 export const shortcutUnload = () => {
-    document.documentElement.removeEventListener("keydown", blockNativeShortcuts)
-    document.documentElement.removeEventListener("keyup", checkForShortcut)
+    window.removeEventListener("keydown", blockNativeShortcuts)
+    window.removeEventListener("keyup", checkForShortcut)
 }
 
 
