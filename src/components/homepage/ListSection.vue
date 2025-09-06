@@ -5,6 +5,7 @@ import type {
   ListCreatorInfo,
   ListPreview,
   ReviewDetailsResponse,
+  ViewedPinArray,
 } from "../../interfaces";
 import { oldLists } from "./officialLists";
 import { hasLocalStorage } from "@/siteSettings";
@@ -57,7 +58,10 @@ watch(props, refreshContent)
 refreshContent()
 
 const clearViewed = () => {
-  localStorage.setItem("recentlyViewed", "[]");
+  let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem("viewedPinArray")!);
+  if (!vpArr) return
+  vpArr.viewed = [[],[]]
+  localStorage.setItem("viewedPinArray", JSON.stringify(vpArr))
   lists.value = [];
 };
 </script>

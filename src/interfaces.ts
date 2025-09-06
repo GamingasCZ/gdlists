@@ -86,6 +86,11 @@ export interface FavoritedLevel {
   timeAdded: number;
 }
 
+export interface ViewedPinArray {
+  pinned: [(string|number)[], (string|number)[]];
+  viewed: [(string|number)[], (string|number)[]];
+}
+
 /**
  * Saved collab. This object gets saved into localStorage while in the collab editor and clicking "Save", or when in the Collab Viewer inside a list and clicking save. It's visually shown in Saved, or in the saves section in Collab tools.
  *

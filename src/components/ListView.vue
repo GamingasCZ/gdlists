@@ -8,6 +8,7 @@ CollabData,
 LevelList,
 ReviewList,
 ReviewContainer,
+ViewedPinArray,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -131,48 +132,10 @@ async function loadList(loadedData: LevelList | null) {
         });
     }
 
-    if (hasLocalStorage()) {
-      favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
-      recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
-
-      addIntoRecentlyViewed =
-        recentlyViewed.filter((list: ListPreview) => list.id == (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!))
-          .length == 0; // Has not been viewed yet
-    }
-
-    if (addIntoRecentlyViewed) {
-      recentlyViewed.push({
-        creator: LIST_CREATOR.value,
-        id: (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!).toString(),
-        name: LIST_DATA.value?.name!,
-        uploadDate: Date.now(),
-        hidden: "0",
-      });
-      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
-      localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
-    }
-
-    document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
-
-    // Set list colors
-    LIST_COL.value = LIST_DATA.value?.data?.pageBGcolor
-    
-    // Saturation 0
-    if (LIST_COL.value && LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
-    
-    if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
-      modifyListBG(LIST_COL.value);
-
-    // Check pinned status
-    if (hasLocalStorage()) {
-      JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
-        if ([LIST_DATA.value.id, LIST_DATA.value.hidden].includes(pin.id!)) listPinned.value = true
-      });
-    }
+    postExtrasApply()
 
     // Set difficulty guessing
     guessHelpOpened.value = hasLocalStorage() && !viewedPopups.diffGuesserHelp && LIST_DATA.value.diffGuesser
-    LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
     if (LIST_DATA.value.data.diffGuesser?.[0] && !isJumpingFromFaves) cardGuessing.value = 0
   } catch (e) {
     listErrorLoading.value = true
@@ -211,49 +174,51 @@ async function loadReview(loadedData: ReviewList | null) {
     // Fetch embeds
     embedsContent.value = await getEmbeds(LIST_DATA.value.data)
 
+    postExtrasApply()
+  } catch (e) {
+    listErrorLoading.value = true
+  }
+}
+
+function postExtrasApply() {
+    let vpArray: ViewedPinArray;
+    let postType = +props.isReview
     if (hasLocalStorage()) {
       favoritedIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
-      recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed")!) ?? [];
+      vpArray = JSON.parse(localStorage.getItem("viewedPinArray")!) ?? createViewPinArray()
 
       addIntoRecentlyViewed =
-        recentlyViewed.filter((list: ListPreview) => list.url == props.listID)
+        vpArray.viewed[postType].filter((list: number | string) => list == props.listID)
           .length == 0; // Has not been viewed yet
-    }
-    if (addIntoRecentlyViewed) {
-      recentlyViewed.push({
-        creator: LIST_CREATOR.value,
-        url: props.listID,
-        name: LIST_DATA.value?.name!,
-        uploadDate: Date.now(),
-        hidden: "0",
+
+      if (addIntoRecentlyViewed) {
+        let numtest = +(props.listID)
+        vpArray.viewed[postType].push(isNaN(numtest) ? LIST_DATA.value.hidden : numtest)
+        let viewLen = vpArray.viewed[0].length + vpArray.viewed[1].length
+        let toDelete = +(vpArray.viewed[1].length > vpArray.viewed[0].length)
+
+        if (viewLen == 5) vpArray.viewed[toDelete].splice(0, 1); // Gets sliced to 3 on homepage
+        localStorage.setItem("viewedPinArray", JSON.stringify(vpArray));
+      }
+
+      // Check pinned status
+      vpArray.pinned[postType].forEach((pin: any) => {
+        if (props.listID == pin || LIST_DATA.value.hidden == pin) listPinned.value = true
       });
-      if (recentlyViewed.length == 10) recentlyViewed.splice(0, 1); // Gets sliced to 3 on homepage
-      localStorage.setItem("recentlyViewed", JSON.stringify(recentlyViewed));
     }
 
     document.title = `${LIST_DATA.value?.name} | ${gdlists}`;
 
-    // Set review colors
+    // Set post colors
     LIST_COL.value = LIST_DATA.value?.data.pageBGcolor!;
     
     // Saturation 0
-    if (LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
+    if (LIST_COL.value && LIST_COL?.value?.[0] == null) LIST_COL.value[0] = 0
     
     if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
       modifyListBG(LIST_COL.value);
 
-    // Check pinned status
-    if (hasLocalStorage()) {
-      JSON.parse(localStorage.getItem("pinnedLists")!).forEach((pin: ListPreview) => {
-        if (props.listID == pin.url) listPinned.value = true
-      });
-    }
-
     LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
-  } catch (e) {
-    console.log(e)
-    listErrorLoading.value = true
-  }
 }
 
 
@@ -296,35 +261,29 @@ const doNextGuess = (result: number) => {
   window.scrollTo({top: guessingCardElement.offsetTop-windowHeight.value/2+128, behavior: "smooth"})
 }
 
+function createViewPinArray() {return ({pinned: [[],[]], viewed: [[], []]})}
 const listPinned = ref<boolean>(false)
 const toggleListPin = () => {
   if (localStorage) {
-    let pinned: ListPreview[] = JSON.parse(localStorage.getItem('pinnedLists')!)
+    let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem('viewedPinArray')!) ?? createViewPinArray()
+    let typeInd = +props.isReview
     if (listPinned.value) { // Remove from pinned
       let i = 0
-      pinned.forEach((pin: ListPreview) => {
-        if (pin.id == LIST_DATA.value.id || pin.url == props.listID) pinned.splice(i, 1)
+      vpArr.pinned[typeInd].forEach((pin: any) => {
+        if (pin == props.listID) vpArr.pinned[typeInd].splice(i, 1)
         i++
       })
     }
     else {
-      let pinData = {
-        name: LIST_DATA.value.name,
-        creator: LIST_CREATOR.value,
-        uploadDate: Date.now(),
-        hidden: LIST_DATA.value.hidden,
-        isPinned: true
-      }
-      if (props.isReview) pinData.url = props.listID
-      else pinData.id = LIST_DATA.value.id
-      pinned.push(pinData)
+      let numtest = +(props.listID)
+      vpArr.pinned[typeInd].push(isNaN(numtest) ? LIST_DATA.value.hidden : numtest)
     }
-    if (pinned.length > 5) { // Remove last pinned level
-      pinned.splice(0, 1)
+    if (vpArr.pinned[typeInd].length > 5) { // Remove last pinned level
+      vpArr.pinned[typeInd].splice(0, 1)
     }
 
     listPinned.value = !listPinned.value
-    localStorage.setItem("pinnedLists", JSON.stringify(pinned))
+    localStorage.setItem("viewedPinArray", JSON.stringify(vpArr))
   }
 }
 

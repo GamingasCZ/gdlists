@@ -49,7 +49,7 @@ function doRequest($mysqli, $queryTemplate, $values, $valueTypes, $fetchAll = fa
         $template = $queryTemplate;
 
         for ($i = 0; $i < sizeof($values); $i++)
-            $template = preg_replace("/\?/m", $values[$i] ?? 0, $template, 1);
+            $template = preg_replace(["/\?/m"], $values[$i] ?? 0, $template, 1);
         
         error_log($template);
     }

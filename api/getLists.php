@@ -38,14 +38,12 @@ $selLevelRange = "
       avg(gameplay) as A_gameplay,
       avg(decoration) as A_decoration,
       avg(levels_ratings.difficulty) as A_difficulty,
-      avg(overall) as A_overall,
-      images.hash as BGhash,
-      images.uploaderID as BGuploader";
+      avg(overall) as A_overall";
 
 $listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
-function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false) {
+function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false, $noDeathOnEmpty = false) {
   global $mysqli;
   $ind = 0;
   $ratings = [];
@@ -56,7 +54,8 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
-      die("3");
+      if ($noDeathOnEmpty) return [];
+      else die("3");
     }
 
     $allIDs = [];
@@ -160,7 +159,7 @@ function getHomepage($lists, $reviews, $user) {
     }
   }
 
-  echo json_encode($home);
+  return $home;
 }
 
 function isPrivate($x) {
@@ -171,7 +170,7 @@ function isPublic($x) {
   return !isPrivate($x);
 }
 
-if (count($_GET) <= 2 && !isset($_GET["batch"])) {
+if (count($_GET) <= 3 && !isset($_GET["batch"])) {
   // Loading a single list
   if (in_array("id", array_keys($_GET))) {
     // Private lists can't be accessed by their id!
@@ -218,8 +217,17 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
       $feeds = explode(",", $_GET["feeds"]);
       if (sizeof($feeds) != 3) die("0");
 
-      getHomepage((bool)$feeds[0], (bool)$feeds[1], (bool)$feeds[2]);
-      die();
+      if (!isset($_GET["extra"])) die("0");
+      $exData = json_decode($_GET["extra"], true);
+      if (!$exData || !isset($exData[0]) || !isset($exData[1])) die("0");
+
+      $pins = selectBatch([$exData[0][0], $exData[0][1]]);
+      $viewed = selectBatch([$exData[1][0], $exData[1][1]]);
+
+      $hp = getHomepage((bool)$feeds[0], (bool)$feeds[1], (bool)$feeds[2]);
+      $hp["pinned"] = $pins;
+      $hp["recent"] = $viewed;
+      die(json_encode($hp));
     }
     
   } elseif (in_array("levelsIn", array_keys($_GET))) {
@@ -247,44 +255,46 @@ if (count($_GET) <= 2 && !isset($_GET["batch"])) {
   die();
 }
 elseif (isset($_GET["batch"])) {
-  $data = [[],[],[]];
+  $data;
+  $types = ["lists", "reviews", "levels"];
+  $fetchIDs = [];
   for ($i = 0; $i < 3; $i++) {
-    if (!isset($_GET[$types[$type]])) continue;
-    if (!strlen($_GET[$types[$type]])) continue;
-
-    $fetchIDs = array_slice(explode(",", $_GET[$types[$type]]), 0, 20);
-
+    array_push($fetchIDs, array_slice(explode(",", $_GET[$types[$i]]), 0, 20));
   }
 
-  echo json_encode(...$data);
+  die(json_encode(selectBatch($fetchIDs)));
 }
 
 function selectBatch($data) {
+  global $listRatings, $reviewRatings, $selRange, $selReviewRange, $selLevelRange, $mysqli;
   $types = ["lists", "reviews", "levels"];
   $postData = [[],[],[]];
   for ($type=0; $type < 3; $type++) {
+    if (!isset($data[$type])) continue;
+    if (!sizeof($data[$type])) continue;
+
     $ratings = [$listRatings, $reviewRatings][$type];
     $range = [$selRange, $selReviewRange, $selLevelRange][$type];
 
     $res;
     if ($type == 2) {
-      $in = makeIN(array_map("intval", $fetchIDs));
+      $in = makeIN(array_map("intval", $data));
 
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
       INNER JOIN levels ON levels.levelID = levels_uploaders.levelID
       LEFT JOIN levels_ratings ON levels_ratings.levelID = levels_uploaders.levelID
       WHERE levels.levelID IN %s
       GROUP BY levels_uploaders.levelID
-      ", $range, $in[0]), $fetchIDs, $in[1], true);
+      ", $range, $in[0]), $data, $in[1], true);
     }
     else {
       $where = [];
-      $fetchHidden = array_filter($fetchIDs, "isPrivate");
+      $fetchHidden = array_filter($data[$type], "isPrivate");
       $inHidden = makeIN($fetchHidden);
       if (strlen($inHidden[1]))
         array_push($where, sprintf("(%s.hidden IN %s)", $types[$type], $inHidden[0]));
       
-      $fetchPublic = array_filter($fetchIDs, "isPublic");
+      $fetchPublic = array_filter($data[$type], "isPublic");
       $inPublic = makeIN($fetchPublic);
       if (strlen($inPublic[1]))
         array_push($where, sprintf("(%s.id IN %s AND `hidden` = 0)", $types[$type], $inPublic[0]));
@@ -295,7 +305,7 @@ function selectBatch($data) {
       GROUP BY `name`
       ", $range, $ratings, $types[$type], $types[$type], substr($types[$type], 0, -1), implode(" OR ", $where)), array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
     }
-    $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1);
+    $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1, true);
   }
   return $postData;
 }
