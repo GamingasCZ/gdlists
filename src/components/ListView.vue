@@ -278,8 +278,11 @@ const toggleListPin = () => {
       let numtest = +(props.listID)
       vpArr.pinned[typeInd].push(isNaN(numtest) ? LIST_DATA.value.hidden : numtest)
     }
-    if (vpArr.pinned[typeInd].length > 5) { // Remove last pinned level
-      vpArr.pinned[typeInd].splice(0, 1)
+
+    let pinLen = vpArr.pinned[0].length + vpArr.pinned[1].length
+    let toDelete = +(vpArr.pinned[1].length > vpArr.pinned[0].length)
+    if (pinLen > 5) { // Remove last pinned level
+      vpArr.pinned[toDelete].splice(0, 1)
     }
 
     listPinned.value = !listPinned.value
