@@ -135,6 +135,9 @@ const isValidShortcut = (combo: number, key: string, code: string) => {
     return false
 }
 
+// we need to disable the little help tooltips in firefox bcus key events don't fire when modifier keys only are pressed
+export const isFirefox = ref(navigator.userAgent.includes("Firefox"))
+
 // Mainly for text selection to keep working
 // Disables browser shortcuts
 var isShortcut = null
