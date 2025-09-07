@@ -290,7 +290,6 @@ export interface ReviewList {
   ratings: ReviewRating[]
   defaultRatings: ReviewRating[]
   settings: ReviewSettings
-  disabledRatings: number
   private: boolean
   transparentPage: 0 | 1 | 2
   language: number
@@ -403,6 +402,7 @@ export interface FormattingButton {
 	splitAfter?: boolean
 	bold?: boolean
 }
+<<<<<<< HEAD
 
 export interface NotificationContent {
   to: string
@@ -418,3 +418,5 @@ export interface NotificationContent {
   count: number
   id: number
 }
+=======
+>>>>>>> master

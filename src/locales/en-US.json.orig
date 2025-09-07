@@ -444,11 +444,14 @@
     "homepage": "Homepage",
     "title": "Name",
     "loginFuckup": "Session is not valid!",
+<<<<<<< HEAD
     "type": "Type",
     "sort": "Sorting",
-    "oldUnread": "Oldest unread",
+    "oldUnread": "Oldest unread"
+=======
     "moveHere": "Move Here",
     "lIDcopied": "Level ID copied!"
+>>>>>>> master
   },
   "settingsMenu": {
     "asOff": "Off",

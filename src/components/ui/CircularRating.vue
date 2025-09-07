@@ -23,7 +23,7 @@ const hovering = ref(false)
         <div :style="{background: rateGradient}" class="w-full h-full rounded-full circularCutout"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <Transition name="fade">
-                <p class="isolate absolute top-0 left-1/2 z-10 p-1 leading-3 rounded-sm -translate-x-1/2">{{ name }}</p>
+                <p class="isolate absolute top-0 left-1/2 z-10 p-1 leading-3 bg-black bg-opacity-40 rounded-sm -translate-x-1/2">{{ name }}</p>
             </Transition>
             <p v-if="value != -1" class="mt-3 text-lg font-black">
                 <span>{{ value }}</span>

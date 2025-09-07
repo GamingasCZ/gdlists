@@ -4,11 +4,12 @@ import type { LevelBackground } from '@/interfaces';
 import { SETTINGS } from '@/siteSettings';
 import { computed } from 'vue';
 
+type Extras = {uid: string}
 
-const props = defineProps<LevelBackground>()
+const props = defineProps<LevelBackground & Extras>()
 
 const base = import.meta.env.VITE_USERCONTENT
-let imgurl = `url(${base}/userContent/${currentUID.value}/${props.image[0]}.webp)`
+let imgurl = `url(${base}/userContent/${props.uid}/${props.image[0]}.webp)`
 const styles = [
     {backgroundImage: imgurl, backgroundPositionY: `${props.image[1]}%`, backgroundRepeat: props.tile ? 'repeat' : 'no-repeat', backgroundSize: props.tile ? '' : 'cover', mask: `linear-gradient(90deg, transparent, black)`, opacity: props.opacity},
     {backgroundImage: imgurl, backgroundPositionY: `${props.image[1]}%`, backgroundRepeat: props.tile ? 'repeat' : 'no-repeat', backgroundSize: props.tile ? '' : 'cover', mask: `linear-gradient(120deg, transparent 55%, black 55%)`, opacity: props.opacity},

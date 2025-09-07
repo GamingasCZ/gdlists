@@ -2,7 +2,7 @@
 $COMMON_KEYS = ["description", "pageBGcolor", "titleImg", "levels"];
 
 $LIST_KEYS = ["diffGuesser", "translucent", "platf"];
-$REVIEW_KEYS = ["reviewName", "thumbnail", "tagline", "containers", "ratings", "settings", "disabledRatings", "private", "transparentPage", "language", "whitePage", "readerMode", "font"];
+$REVIEW_KEYS = ["reviewName", "thumbnail", "tagline", "containers", "ratings", "settings", "private", "transparentPage", "language", "whitePage", "readerMode", "font"];
 $LEVEL_KEYS = ["levelName", "creator", "color", "levelID", "video", "difficulty", "tags"];
 
 $LEVEL_PROP_LEN = [

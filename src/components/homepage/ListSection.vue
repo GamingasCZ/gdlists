@@ -5,6 +5,7 @@ import type {
   ListCreatorInfo,
   ListPreview,
   ReviewDetailsResponse,
+  ViewedPinArray,
 } from "../../interfaces";
 import { oldLists } from "./officialLists";
 import { hasLocalStorage } from "@/siteSettings";
@@ -57,7 +58,10 @@ watch(props, refreshContent)
 refreshContent()
 
 const clearViewed = () => {
-  localStorage.setItem("recentlyViewed", "[]");
+  let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem("viewedPinArray")!);
+  if (!vpArr) return
+  vpArr.viewed = [[],[]]
+  localStorage.setItem("viewedPinArray", JSON.stringify(vpArr))
   lists.value = [];
 };
 </script>
@@ -83,7 +87,7 @@ const clearViewed = () => {
         v-else
         v-for="level in lists"
         v-bind="level"
-        :is-list="listType == 0"
+        :is-list="listType == 0 || level?.type == 0"
         :user-array="users"
         :hide-remove="true"
         :review-details="reviewDetails"

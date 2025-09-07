@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { DataContainerAction, PostData } from '@/interfaces';
+import type { PostData } from '@/interfaces';
+import { DataContainerAction } from '@/interfaces';
 import CONTAINERS from './containers';
 import { flexNames, pickFont } from '@/Reviews';
 import { computed, inject, ref, onUnmounted, onMounted } from 'vue';
@@ -103,11 +104,11 @@ onUnmounted(() => {
         <DataContainer v-for="(container, index) in writerData.containers"
             v-memo="[editable, containerLastAdded, selectedContainer, selectedNestContainer]"
             v-bind="CONTAINERS[container.type]"
-            @remove-container="emit('callCommand', {command: 1, data: [index]})"
-            @move-container="emit('callCommand', {command: 0, data: [index, $event]})"
+            @remove-container="emit('callCommand', {command: DataContainerAction.Remove, data: [index]})"
+            @move-container="emit('callCommand', {command: DataContainerAction.Move, data: [index, $event]})"
             @has-focus="selectedContainer[0] = index; selectedNestContainer = [-1, -1, -1]"
             @settings-button="buttonState = [$event, selectedContainer[0]]"
-            @add-paragraph="emit('callCommand', {command: 2, data: [index]})"
+            @add-paragraph="emit('callCommand', {command: DataContainerAction.MakeParagraph, data: [index]})"
             @text-modified="container.data = $event"
             :type="container.type"
             :current-settings="container.settings"
@@ -131,6 +132,7 @@ onUnmounted(() => {
                 @clear-button="buttonState[0] = ''"
                 @remove-subcontainer="container.extraComponents -= 1"
                 @remove="emit('callCommand', {command: 1, data: [index]})"
+                @add-paragraph="emit('callCommand', {command: DataContainerAction.MakeParagraph, data: [index]})"
                 :button-state="buttonState"
                 :settings="container.settings"
                 :index="index"

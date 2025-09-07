@@ -172,8 +172,8 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 CREATE TABLE IF NOT EXISTS `users` (
   `username` tinytext NOT NULL,
   `discord_id` varchar(40) NOT NULL,
-  `refresh_token` varchar(40) NOT NULL,
-  `access_token` varchar(40) DEFAULT NULL,
+  `refresh_token` tinytext NOT NULL,
+  `access_token` tinytext DEFAULT NULL,
   `id` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`),
   UNIQUE KEY `discord_id` (`discord_id`)

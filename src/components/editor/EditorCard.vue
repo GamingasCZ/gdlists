@@ -209,10 +209,12 @@ const searchAvailableID = computed(() => props.levelArray.levels[props.index!].l
 
 const background = computed(() => {
   if (SETTINGS.value.disableColors)
-    return getComputedStyle(document.documentElement).getPropertyValue("--primaryColor")
+    return chroma(getComputedStyle(document.documentElement).getPropertyValue("--primaryColor"))
 
-  return chroma.hsl(...props.levelArray.levels[props.index!].color!).hex()
+  return chroma.hsl(...props.levelArray.levels[props.index!].color!)
 })
+
+const bgIsBright = computed(() => background.value.luminance() > 0.4)
 
 const tagPlaceholder = ref(`'${i18n.global.t('editor.levelTags')}'`)
 const start = ref("#951b99")
@@ -402,7 +404,7 @@ const cardDropdown = ref<HTMLDivElement>()
 </script>
 
 <template>
-  <section :style="{background: background}" class="rounded-md">
+  <section :style="{background: background.css()}" class="rounded-md">
 
     <Dropdown v-if="diffPickerOpen" @close="diffPickerOpen = false" :button="difficultyButton">
       <template #header>
@@ -478,7 +480,7 @@ const cardDropdown = ref<HTMLDivElement>()
             </form>
     
             <!-- Creator -->
-            <div class="flex gap-3 items-center ml-2 bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
+            <div class="flex gap-3 items-center ml-2 overflow-clip bg-black bg-opacity-20 rounded-md focus-within:bg-opacity-60">
               <button @click="openCollabTools()" type="button" tabindex="-1" class="relative p-2 button" :class="{ 'hue-rotate-180': typeof levelArray.levels[index!].creator == 'object', '!-hue-rotate-90': isOldCollab, 'hue-rotate-90': collabFlash }">
                 <img class="absolute top-3 left-3 animate-ping min-w-6 aspect-square" src="../../images/collabMen.svg" alt=""
                   v-if="collabFlash" />
@@ -504,7 +506,7 @@ const cardDropdown = ref<HTMLDivElement>()
             :class="{'items-end': isInList, 'items-center': !isInList}"
           >
             <div class="absolute inset-0 scrollRating" :class="{'bg-red-700': avgRating == 'sad', 'bg-lime-400 bg-opacity-40': avgRating == 'nice'}" :style="{backgroundImage: `url(${base}/rateBGs/${avgRating}.webp)`}"></div>
-            <div class="absolute inset-1 text-sm text-white text-opacity-80 overflow-clip bottomFade">{{ levelArray.levels[index!].commentary }}</div>
+            <div :class="{'text-white': !bgIsBright, 'text-black': bgIsBright}" class="absolute inset-1 text-sm text-opacity-80 overflow-clip bottomFade">{{ levelArray.levels[index!].commentary }}</div>
             <CircularRating :class="{'translate-y-4': i % 2 && !isInList}" v-for="(rating, i) in levelArray.levels[index].ratings?.[0]" :min="0" :max="10" :value="rating" :name="DEFAULT_RATINGS[i].name" :color="chroma.hsl(...DEFAULT_RATINGS[i].color).hex()" />
             <CircularRating :class="{'translate-y-4': i % 2}" v-for="(rating, i) in levelArray.levels[index].ratings?.[1]" :min="0" :max="10" :value="rating" :name="levelArray.ratings[i].name" :color="chroma.hsl(...levelArray.ratings[i].color).hex()" />
           </button>
@@ -635,6 +637,7 @@ const cardDropdown = ref<HTMLDivElement>()
       :level-index="index"
       :level-creator="levelCreator"
       :is-list="isInList"
+      :bright-bg="bgIsBright"
     />
 
   </section>

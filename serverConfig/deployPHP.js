@@ -6,12 +6,13 @@ readFile('dist/index.html', (e, res) => {
     let style = dom.querySelector("link[rel='stylesheet']").toString()
     let script = dom.querySelector("script").toString()
 
-    copyFile('serverConfig/index.php', 'dist/index.php', (res) => null)
-    readFile('dist/index.php', (e, data) => {
-        let text = data.toString()
-        writeFile("dist/index.php",
-            text.replace("<!-- SCRIPT -->", script)
-                .replace("<!-- STYLE -->", style), {encoding: 'utf-8'}, (res) => null)
+    copyFile('serverConfig/index.php', 'dist/index.php', (res) => {
+        readFile('dist/index.php', (e, data) => {
+            let text = data.toString()
+            writeFile("dist/index.php",
+                text.replace("<!-- SCRIPT -->", script)
+                    .replace("<!-- STYLE -->", style), {encoding: 'utf-8'}, (res2) => null)
+        })
     })
 })
 

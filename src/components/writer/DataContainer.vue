@@ -212,7 +212,7 @@ const settings = ref<HTMLDialogElement>()
 p[data-hasText=true]::before {
 	content: attr(placeholder);
 	text-align: inherit;
-	@apply opacity-30 pointer-events-none;
+	@apply opacity-30 pointer-events-none absolute;
 }
 
 </style>

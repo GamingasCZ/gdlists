@@ -52,7 +52,7 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const listData = inject("listData")
+const listData = inject("levelsRatingsData")()
 
 const rateDropdownButton = ref<HTMLImageElement>()
 const ratingsShowing = ref(false)
@@ -86,7 +86,7 @@ const textCol = computed(() => {
               <div class="flex gap-2">
                 <span class="font-black">{{ levelName || $t('other.unnamesd') }}</span>
                 <img class="w-6" v-if="platf" title="Platformer" src="@/images/platformer.svg" alt="">
-                <img @click="ratingsShowing = true" class="w-6 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">
+                <img @click.stop="ratingsShowing = true" class="w-6 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">
                 <button class="w-6 button focus-within:outline-current max-sm:hidden" v-if="tags && tags.length > 0" @click="emit('openTags', levelIndex)"><img src="@/images/levelID.svg" alt=""></button>
               </div>
               <div>
@@ -107,7 +107,7 @@ const textCol = computed(() => {
             src="@/images/modYT.svg" alt="" /></a>
         <a class="button" v-if="levelID" :href="`https://gdbrowser.com/${levelID}`" target="_blank"><img
             class="w-12 max-sm:w-10" src="@/images/modGDB.svg" alt="" /></a>
-        <button class="button" v-if="levelID?.match(/^\d+$/)" @click="copyID(levelID)">
+        <button class="button" v-if="levelID?.toString()?.match(/^\d+$/)" @click="copyID(levelID)">
           <img class="w-12 max-sm:w-10" src="@/images/modID.svg" alt="" />
         </button>
       </div>
@@ -120,20 +120,20 @@ const textCol = computed(() => {
 
     <!-- Favorite star -->
     <button class="absolute top-1 right-1 drop-shadow-md button max-sm:hidden" @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)"
-      :class="{ disabled: isFavorited }" v-if="favorited != undefined && levelID?.match(/^\d+$/) && !disableStars">
+      :class="{ disabled: isFavorited }" v-if="favorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars">
       <img src="@/images/star.svg" class="w-6" alt="" />
     </button>
 
     <!-- Level review ratings -->
     <Dropdown v-if="ratingsShowing" @close="ratingsShowing = false" :title="$t('reviews.rating')" :options="[]" :button="rateDropdownButton">
       <template #header>
-        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData.data.ratings)" class="flex flex-col gap-1 p-1">
+        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])" class="flex flex-col gap-1 p-1">
           <div class="flex justify-between text-white">
             <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-            <span class="text-sm font-bold">{{ listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4] }}/10</span>
+            <span class="text-sm font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]  }}/10</span>
           </div>
           <div class="relative w-full h-1 bg-black bg-opacity-40">
-            <div :style="{background: chroma.hsl(...rating.color).hex(), width: `${10*listData.data.levels[levelIndex].ratings[Math.floor(index / 4)][index % 4]}%`}" class="absolute h-full"></div>
+            <div :style="{background: chroma.hsl(...rating.color).hex(), width: `${10*listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]}%`}" class="absolute h-full"></div>
           </div>
         </div>
       </template>

@@ -14,6 +14,7 @@ const props = defineProps<{
     levelIndex: number
     levelCreator: string
     isList: boolean
+    brightBg: boolean
 }>()
 
 const emit = defineEmits<{
@@ -174,9 +175,10 @@ const rateCol = computed(() => chroma.hsl(...DEFAULT_RATINGS[selectedDefRate.val
             editable
           />
         </template>
-        <EditorCardCommentary class="mt-4 mb-0" v-else
+        <EditorCardCommentary  class="mt-4 mb-0" v-else
           v-model="postData.levels[levelIndex].commentary"
           editable
+          :class="{'text-black': brightBg}"
         />
 
         

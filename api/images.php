@@ -165,7 +165,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
 
 function getCreateAttributedFolderID($attribute, $uid, $mysqli) {
     $att = $attribute->value;
-    $folderExists = doRequest($mysqli, "SELECT id FROM `images_folders` WHERE `attributes`=?", [$att], "s");
+    $folderExists = doRequest($mysqli, "SELECT id FROM `images_folders` WHERE `attributes`=? AND `uid`=?", [$att, $uid], "ss");
     if (!$folderExists) {
         $folderCreate = doRequest($mysqli,
         "INSERT INTO `images_folders`(`name`, `color`, `base_path`, `uid`, `attributes`)

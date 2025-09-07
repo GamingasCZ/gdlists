@@ -424,12 +424,15 @@
     "toTop": "Jít navrch",
     "homepage": "Domovská stránka",
     "title": "Název",
+<<<<<<< HEAD
     "type": "Druh",
     "sort": "Řazení",
     "oldest": "Nejstarší",
-    "oldUnread": "Nejstarší nepřečtené",
+    "oldUnread": "Nejstarší nepřečtené"
+=======
     "moveHere": "Přesunout sem",
     "lIDcopied": "ID levelu zkopírováno!"
+>>>>>>> master
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -495,7 +498,8 @@
     "addToList": "Přidat do seznamu",
     "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely",
     "noContents": "Obsah není dostupný!",
-    "contents": "Obsah"
+    "contents": "Obsah",
+    "highlighted": "Zvýrazněný komentář"
   },
   "level": {
     "levelID": "ID levelu",

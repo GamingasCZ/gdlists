@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from 'vue';
 import DifficultyIcon from '../global/DifficultyIcon.vue';
 import { summonNotification } from '../imageUpload';
 import type { Level } from '@/interfaces';
+import { i18n } from '@/locales';
 
 
 const scrolling = ref<HTMLDivElement>()
@@ -25,11 +26,13 @@ const getLevelQueue = () => {
 
 const isScrolling = ref(false)
 const levelShowing = computed(() => levelQueue.value[queuePos.value] && !isScrolling.value)
-const doScroll = async (force = false) => {
+const doScroll = async (force = false, by = 1) => {
     if (isScrolling.value || (levelShowing.value && !force)) return
 
     isScrolling.value = true
     scrolling.value.id = "carouselScroll"
+    if (by < 0)
+        scrolling.value?.classList.add("revAnim")
 
     if (queuePos.value == 4 || !levelQueue.value.length) {
         getLevelQueue()
@@ -37,7 +40,7 @@ const doScroll = async (force = false) => {
             queuePos.value = 0
     }
     else {
-        queuePos.value++
+        queuePos.value += by
     }
 
     colorScroll = setInterval(() => {
@@ -51,6 +54,8 @@ const doScroll = async (force = false) => {
         setTimeout(() => {
             scrolling.value.id = ""
             isScrolling.value = false
+            if (by < 0)
+                scrolling.value?.classList.remove("revAnim")
         }, 300);
     }, 500);
 }
@@ -61,7 +66,7 @@ onMounted(() => {
 })
 
 const copyLevelID = () => {
-    summonNotification("ID levelu zkopírováno", "", "check")
+    summonNotification(i18n.global.t('other.lIDcopied'), "", "check")
     navigator.clipboard.writeText(levelQueue.value[queuePos.value].levelID)
 }
 const cardColors = ref([random().hex(), random().hex(), random().hex(), random().hex()])
@@ -101,7 +106,7 @@ const useLevel = () => {
                     <img src="@/images/close.svg" class="w-5 -scale-100" alt="">
                 </button>
 
-                <button class="flex left-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors md:-translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
+                <button v-if="queuePos > 0" @click="doScroll(true, -1)" class="flex left-8 top-1/2 gap-2 items-center p-3 text-2xl rounded-md opacity-50 transition-colors md:-translate-y-1/2 md:absolute hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/play.svg" class="-scale-100" alt="">
                     {{ $t('other.previous') }}
                 </button>
@@ -148,6 +153,10 @@ const useLevel = () => {
 }
 #carouselScrollOut {
     animation: scrollCarOut 0.2s ease-out;
+}
+
+.revAnim {
+    animation-direction: reverse !important;
 }
 
 .levelRoulette {

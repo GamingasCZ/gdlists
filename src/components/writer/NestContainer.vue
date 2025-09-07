@@ -19,6 +19,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: "remove"): void
     (e: "removeSubcontainer"): void
+    (e: "addParagraph"): void
 }>()
 
 const selectedNestContainer = inject<number[]>("selectedNestContainer", [-1, -1, -1])!
@@ -36,22 +37,6 @@ const moveContainer = (i: number, by: number) => {
 
 const buttonState = ref([0,0])
 const CONTAINERS = inject("settingsTitles")!
-
-const removeNestContainer = () => {
-    if (!props.editable) return
-    // Don't try to remove non-empty containers
-    if (props.settings.components[props.subIndex].length > 0) return
-
-    switch (props.settings.components.length) {
-        case 2: 
-            if (!props.settings.components[1].length && !props.settings.components[0].length) emit("remove")
-            break; // Leave columns
-        default:
-            props.settings.components.splice(props.subIndex, 1)
-            emit('removeSubcontainer')
-            break;
-    }
-}
 
 const postData = inject<Ref<PostData>>("postData")!
 const borderColor = computed(() => {
@@ -86,10 +71,11 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
             v-for="(container, ind) in subcomponents"
             v-bind="CONTAINERS[container.type]"
             @has-focus="selectedRootContainer = [index]; selectedContainer = [ind, $event]; selectedNestContainer = [index, subIndex, ind]"
-            @remove-container="removeInnerContainer(index); removeNestContainer()"
+            @remove-container="removeInnerContainer(index);"
             @move-container="moveContainer(ind, $event)"
             @settings-button="buttonState = [$event, ind]"
             @text-modified="container.data = $event"
+            @add-paragraph="emit('addParagraph')"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"

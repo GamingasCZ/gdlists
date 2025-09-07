@@ -196,6 +196,8 @@ const setLastChange = () => containerLastTextChange.value = Date.now()
 provide("lastTextChange", setLastChange)
 
 const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly = false, above = false) => {
+    if (!previewMode.value) return
+
     // Count of all components
     let contAm = 0
     let thisContAm = 0
@@ -284,11 +286,11 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
 provide("addContainer", addContainer)
 
 const removeContainer = (index: number, forceColumnRemove = false) => {
+    if (!previewMode.value) return
     if (POST_DATA.value.containers[index].type == 'twoColumns' && !forceColumnRemove) {
         POST_DATA.value.containers[index].settings
         .components[selectedNestContainer.value[1]]
         .splice(selectedNestContainer.value[2], 1)
-        POST_DATA.value.containers.splice(index, 1)
     }
     else 
         POST_DATA.value.containers.splice(index, 1)
@@ -300,9 +302,9 @@ const removeContainer = (index: number, forceColumnRemove = false) => {
 provide("removeContainer", removeContainer)
 
 const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
+    if (!previewMode.value) return
     if (selectedContainer.value[0] == -1) return
 
-    console.log(selectedNestContainer.value)
     if (selectedNestContainer.value[0] == -1) {
         if (index < 0) return
         POST_DATA.value.containers[index].align = alignment
@@ -433,6 +435,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             break;
         case 'resizeSmaller':
         case 'resizeBigger':
+            if (!previewMode.value) return
             let type = POST_DATA.value.containers?.[selectedContainer.value[0]]?.type
             if (type == "twoColumns") {
                 type = POST_DATA.value.containers?.[selectedContainer.value[0]]?.settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].type
@@ -479,11 +482,19 @@ const setFormatting = () => {
 }
 
 const moveToParagraph = (currentContainerIndex: number) => {
-    if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type != "default")
-        addContainer("default")
+    let isSubcontainer = POST_DATA.value.containers?.[currentContainerIndex]?.type == "twoColumns"
+    if (isSubcontainer) {
+        if (POST_DATA.value.containers?.[currentContainerIndex]?.settings.components[selectedNestContainer.value[1]]?.[selectedNestContainer.value[2]+1]?.type != "default")
+            addContainer("default")
+    }
+    else {
+        if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type != "default")
+            addContainer("default")   
+    }
 }
 
 const moveContainer = (index: number, by: number) => {
+    if (!previewMode.value) return
     if (index+by < 0) return
     if (index+by >= POST_DATA.value.containers.length) return
     
@@ -915,10 +926,9 @@ const toggleZenMode = () => {
     }
     else {
         modifyListBG(POST_DATA.value?.pageBGcolor)
-        try {
+        if (document.fullscreenElement != null)
             document.exitFullscreen()
-        }
-        catch (_) {}
+        
         navbar.style.display = null
         footer.style.display = null
     }
@@ -1112,7 +1122,7 @@ const collabEditor = ref<HTMLDialogElement>()
             <!-- Level Preview -->
             <section v-if="previewingLevels" class="flex flex-col gap-2 items-center">
                 <LevelCard v-for="(l, index) in POST_DATA.levels" v-bind="l" :disable-stars="true"
-                    :level-index="index" :hide-ratings="!WRITER.general.levelRating" :uploader-uid="currentUID" />
+                    :level-index="index" :uploader-uid="currentUID" />
             </section>
 
             <!-- Editor -->

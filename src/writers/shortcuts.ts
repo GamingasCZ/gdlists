@@ -76,16 +76,16 @@ const writerShortcuts = [
 
 var actionsFun
 export const shortcutListen = (toolbar, actions) => {
-    document.documentElement.addEventListener("keydown", blockNativeShortcuts)
-    document.documentElement.addEventListener("keyup", checkForShortcut)
+    window.addEventListener("keydown", blockNativeShortcuts)
+    window.addEventListener("keyup", checkForShortcut)
 
     actionsFun = actions
     getShortcuts(toolbar)
 }
 
 export const shortcutUnload = () => {
-    document.documentElement.removeEventListener("keydown", blockNativeShortcuts)
-    document.documentElement.removeEventListener("keyup", checkForShortcut)
+    window.removeEventListener("keydown", blockNativeShortcuts)
+    window.removeEventListener("keyup", checkForShortcut)
 }
 
 
@@ -134,6 +134,9 @@ const isValidShortcut = (combo: number, key: string, code: string) => {
     }
     return false
 }
+
+// we need to disable the little help tooltips in firefox bcus key events don't fire when modifier keys only are pressed
+export const isFirefox = ref(navigator.userAgent.includes("Firefox"))
 
 // Mainly for text selection to keep working
 // Disables browser shortcuts
