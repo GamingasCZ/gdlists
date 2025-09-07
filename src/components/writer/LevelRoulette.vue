@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from 'vue';
 import DifficultyIcon from '../global/DifficultyIcon.vue';
 import { summonNotification } from '../imageUpload';
 import type { Level } from '@/interfaces';
+import { i18n } from '@/locales';
 
 
 const scrolling = ref<HTMLDivElement>()
@@ -61,7 +62,7 @@ onMounted(() => {
 })
 
 const copyLevelID = () => {
-    summonNotification("ID levelu zkopírováno", "", "check")
+    summonNotification(i18n.global.t('other.lIDcopied'), "", "check")
     navigator.clipboard.writeText(levelQueue.value[queuePos.value].levelID)
 }
 const cardColors = ref([random().hex(), random().hex(), random().hex(), random().hex()])

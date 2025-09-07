@@ -1124,7 +1124,7 @@ onMounted(() => {
             </div>
             <button v-if="folderMoveMode" @click="moveToFolder(imagesToMove)"
                 class="p-1 bg-black bg-opacity-40 rounded-md button"><img class="inline mr-2 w-5"
-                    src="@/images/move.svg" alt="">Move here</button>
+                    src="@/images/move.svg" alt="">{{ $t('other.moveHere') }}</button>
         </div>
     </Transition>
 

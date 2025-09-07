@@ -418,7 +418,9 @@
     "auto": "Automatická",
     "toTop": "Jít navrch",
     "homepage": "Domovská stránka",
-    "title": "Název"
+    "title": "Název",
+    "moveHere": "Přesunout sem",
+    "lIDcopied": "ID levelu zkopírováno!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

@@ -439,7 +439,9 @@
     "toTop": "Scroll to Start",
     "homepage": "Homepage",
     "title": "Name",
-    "loginFuckup": "Session is not valid!"
+    "loginFuckup": "Session is not valid!",
+    "moveHere": "Move Here",
+    "lIDcopied": "Level ID copied!"
   },
   "settingsMenu": {
     "asOff": "Off",
