@@ -19,6 +19,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: "remove"): void
     (e: "removeSubcontainer"): void
+    (e: "addParagraph"): void
 }>()
 
 const selectedNestContainer = inject<number[]>("selectedNestContainer", [-1, -1, -1])!
@@ -74,6 +75,7 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
             @move-container="moveContainer(ind, $event)"
             @settings-button="buttonState = [$event, ind]"
             @text-modified="container.data = $event"
+            @add-paragraph="emit('addParagraph')"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"

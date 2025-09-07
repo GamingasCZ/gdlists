@@ -482,8 +482,15 @@ const setFormatting = () => {
 }
 
 const moveToParagraph = (currentContainerIndex: number) => {
-    if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type != "default")
-        addContainer("default")
+    let isSubcontainer = POST_DATA.value.containers?.[currentContainerIndex]?.type == "twoColumns"
+    if (isSubcontainer) {
+        if (POST_DATA.value.containers?.[currentContainerIndex]?.settings.components[selectedNestContainer.value[1]]?.[selectedNestContainer.value[2]+1]?.type != "default")
+            addContainer("default")
+    }
+    else {
+        if (POST_DATA.value.containers?.[currentContainerIndex + 1]?.type != "default")
+            addContainer("default")   
+    }
 }
 
 const moveContainer = (index: number, by: number) => {
