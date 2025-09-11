@@ -32,8 +32,7 @@ const reviewDetails = ref<ReviewDetailsResponse>();
 const empty = ref(props.forceContent === false)
 
 const refreshContent = () => {
-  if (props.forceContent === false)
-    empty.value = true
+  empty.value = props.forceContent === false
   
   if (props.contentType?.startsWith("@")) {
     if (!hasLocalStorage()) lists.value = []
