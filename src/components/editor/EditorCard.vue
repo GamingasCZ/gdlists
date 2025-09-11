@@ -146,6 +146,9 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
       if (level.downloads > 250 && level.likes / level.downloads < 0.01) // XL
         props.levelArray.levels[props.index!].tags.push([TagName.CONTROVERSIAL, -1, '']);
 
+      setTimeout(() => {
+        (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
+      }, 50)
 
       props.levelArray.levels[props.index!].BGimage.image[0] = level.thumbnail;
       
@@ -169,7 +172,6 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 
       ytVideoData.value = await videoSearch()
       searching.value = false;
-      (document.querySelector("#addLevelButton") as HTMLButtonElement).focus()
     }).catch(() => searching.value = false);
 }
 

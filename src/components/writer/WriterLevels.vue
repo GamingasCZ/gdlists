@@ -232,14 +232,16 @@ const isSearching = ref(false)
                 </button>
 
                 <!-- Add level -->
-                <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels"
-                    class="flex gap-2 px-2 py-3 text-xl font-bold disabled:opacity-40 disabled:grayscale text-lof-400">
-                    <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
-                    {{ $t('reviews.addLevel') }}</button>
-                <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
-                <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels" ref="moreLevOpts" class="p-2 button">
-                    <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
-                </button>
+                <div class="flex gap-2 items-center focus-within:border-b-2 border-lof-400">
+                    <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels"
+                        class="flex gap-2 px-2 py-3 text-xl font-bold outline-none disabled:opacity-40 disabled:grayscale text-lof-400" id="addLevelButton">
+                        <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
+                        {{ $t('reviews.addLevel') }}</button>
+                    <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
+                    <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels" ref="moreLevOpts" class="p-2 button">
+                        <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
+                    </button>
+                </div>
             </div>
             <Dropdown
                 v-if="moreLevOptOpen"
