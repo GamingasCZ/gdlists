@@ -275,7 +275,7 @@ elseif (isset($_GET["batch"])) {
   die(json_encode(selectBatch($fetchIDs)));
 }
 
-function selectBatch($data, $noUserFetch) {
+function selectBatch($data, $noUserFetch = false) {
   global $listRatings, $reviewRatings, $selRange, $selReviewRange, $selLevelRange, $mysqli;
   $types = ["lists", "reviews", "levels"];
   $postData = [[],[],[]];
