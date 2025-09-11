@@ -258,8 +258,7 @@ function getLocalUserID() {
     $auth = getAuthorization();
     if (!$auth) return false;
     
-    $token = getAuthorization();
-    return $token[2]; // User ID
+    return $auth[2]; // User ID
 }
 
 function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {

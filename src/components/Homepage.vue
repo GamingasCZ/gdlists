@@ -42,8 +42,8 @@ const getFeeds = async () => {
     let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem("viewedPinArray")!)
 
     if (vpArr !== null) {
-      defFeed.pinned = vpArr.pinned
-      defFeed.recent = vpArr.viewed
+      defFeed.pinned = (!vpArr.pinned[0].length && !vpArr.pinned[1].length) ? false : vpArr.pinned
+      defFeed.recent = (!vpArr.viewed[0].length && !vpArr.viewed[1].length) ? false : vpArr.viewed
     }
   }
 
@@ -58,11 +58,14 @@ const getFeeds = async () => {
   if (f.status == 200) {
     let hp = f.data
     hp.pinned = mergeBatchFeed(hp.pinned)
+    if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
     hp.recent = mergeBatchFeed(hp.recent)
+    if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
 
     // replace uids with users
     for (const row in hp) {
       if (row == "users") continue;
+      if (hp[row] === false) continue;
 
       for (let i = 0; i < hp[row][1].length; i++)
         hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
@@ -129,7 +132,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
 
   <main id="homepageSections" class="flex flex-col overflow-clip items-start sm:px-2 mx-auto max-w-[100.5rem]">
     <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
-      :force-content="feeds?.['pinned']" :list-type="2" />
+      :force-content="feeds?.['pinned'] ?? false" :list-type="2" />
     <ListSection :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
         :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds?.['reviews']" :list-type="2" />
     

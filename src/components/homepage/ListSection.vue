@@ -29,8 +29,12 @@ const props = defineProps({
 const users = ref<ListCreatorInfo[]>();
 const lists = ref<ListPreview[] | FavoritedLevel[]>();
 const reviewDetails = ref<ReviewDetailsResponse>();
+const empty = ref(props.forceContent === false)
 
 const refreshContent = () => {
+  if (props.forceContent === false)
+    empty.value = true
+  
   if (props.contentType?.startsWith("@")) {
     if (!hasLocalStorage()) lists.value = []
     else {
@@ -42,6 +46,7 @@ const refreshContent = () => {
 
       lists.value = data.slice(0, props.maxItems);
     }
+    if (!lists.value.length) empty.value = true
   } else if (props.contentType == "oldLists") {
     lists.value = oldLists;
   } else if (props.forceContent) {
@@ -67,7 +72,7 @@ const clearViewed = () => {
 </script>
 
 <template>
-  <section v-if="lists?.length" class="flex flex-col mt-6 w-full max-w-[100.5rem]">
+  <section v-if="!empty" class="flex flex-col mt-6 w-full max-w-[100.5rem]">
     <component :is="extraAction ? (extraAction?.startsWith('@') ? 'button' : 'RouterLink') : 'div'" :to="extraAction" @click="extraAction?.startsWith('@') ? clearViewed() : null" class="flex gap-4 justify-between items-center px-1 py-2 my-2 w-full text-left text-white rounded-md" :class="{'hover:bg-white hover:bg-opacity-10': extraAction}">
       <img src="../../images/wave.svg" class="w-8" alt="" />
       <span class="w-full text-3xl font-bold">{{ headerName }}</span>
@@ -80,8 +85,8 @@ const clearViewed = () => {
     <div
       class="flex overflow-auto grid-cols-3 gap-3 max-w-full"
     >
-      <p class="text-yellow-200" v-if="!lists?.length">
-        - {{ emptyText }} -
+      <p class="flex gap-2 text-yellow-200" v-if="!lists?.length">
+        <div v-for="i in 4" class="bg-white bg-opacity-10 rounded-lg min-h-[248px] animate-pulse min-w-[24rem]"></div>
       </p>
       <component
         v-else
