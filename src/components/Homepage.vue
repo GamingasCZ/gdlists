@@ -59,6 +59,15 @@ const getFeeds = async () => {
     let hp = f.data
     hp.pinned = mergeBatchFeed(hp.pinned)
     hp.recent = mergeBatchFeed(hp.recent)
+
+    // replace uids with users
+    for (const row in hp) {
+      if (row == "users") continue;
+
+      for (let i = 0; i < hp[row][1].length; i++)
+        hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
+    }
+
     return hp
   }
   return DEF_FEED_RESULT

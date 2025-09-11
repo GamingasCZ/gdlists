@@ -43,16 +43,23 @@ $selLevelRange = "
 $listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
-function getUsersByID($userArray) {
-  global $mysqli;
-  $allIDs = [];
+$usersToFetch = [];
+function getUsersByID($userArray, $uid_only = false, $onlyUIDs = false) {
+  global $mysqli, $usersToFetch;
   $uid_array = [];
-  foreach ($userArray as $row) {
-    array_push($uid_array, $row["uid"]);
-    array_push($allIDs, $row["id"]);
-
-    $ind += 1;
+  $allIDs = [];
+  if (!$onlyUIDs) {
+    foreach ($userArray as $row) {
+      array_push($uid_array, $row["uid"]);
+      array_push($allIDs, $row["id"]);
+    }
+  
+    if ($uid_only) {
+      $usersToFetch = array_merge($usersToFetch, $uid_array);
+      return [$uid_array, $allIDs];
+    }
   }
+  else $uid_array = &$userArray;
 
   $unique = array_values(array_unique($uid_array));
   $qqm = makeIN($unique);
@@ -63,13 +70,13 @@ function getUsersByID($userArray) {
   return [$users, $allIDs];
 }
 
-function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false, $noDeathOnEmpty = false) {
+function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false, $noDeathOnEmpty = false, $noUserFetch = false) {
   global $mysqli;
-  $ind = 0;
   $ratings = [];
   $dbInfo = [];
   $reviewDetails = [];
   $users = [];
+  $allIDs = [];
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
@@ -78,7 +85,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     }
 
     if (isset($rows[0]["uid"])) {
-      [$users, $allIDs] = getUsersByID($rows);
+      [$users, $allIDs] = getUsersByID($rows, $noUserFetch);
     }
 
     if (sizeof($allIDs)) {
@@ -94,15 +101,10 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
                                           FROM levels_ratings
                                           WHERE %s IN %s
                                           GROUP BY %s", $rev, $rev, $rev, $idqm[0], $rev), $allIDs, $idqm[1], true);
-      // print_r($rev);
     }
 
     $dbInfo["maxPage"] = $maxpage;
-    $dbInfo["startID"] = isset($rows[0]["id"]) ? $rows[0]["id"] : $rows[0]["levelID"];
     $dbInfo["searchQuery"] = $search;
-    $dbInfo["page"] = $page;
-    $dbInfo["path"] = $_SERVER["SCRIPT_NAME"];
-
   } else {
     // Single list
     $decoded = base64_decode($rows["data"], true);
@@ -140,7 +142,7 @@ function getHomepage($lists, $reviews, $user) {
       GROUP BY `name`
       ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings), [], "", true);
   
-    $home["lists"] = parseResult($res, false, -1, "", 0, false);
+    $home["lists"] = parseResult($res, false, -1, "", 0, false, false, true);
   }
   if ($reviews) {
     $res = doRequest($mysqli, sprintf("SELECT %s, %s
@@ -149,7 +151,7 @@ function getHomepage($lists, $reviews, $user) {
       GROUP BY `name`
       ORDER BY reviews.id DESC LIMIT 4", $selReviewRange, $reviewRatings), [], "", true);
     
-    $home["reviews"] = parseResult($res, false, -1, "", 0, true);
+    $home["reviews"] = parseResult($res, false, -1, "", 0, true, false, true);
   }
   if ($user) {
     $account = getLocalUserID();
@@ -162,7 +164,7 @@ function getHomepage($lists, $reviews, $user) {
         WHERE uid=%s AND `hidden` LIKE 0
         ORDER BY timestamp DESC LIMIT 4", selConcatRange, $account, selConcatRangeRev, $account), [], "", true);
 
-      $home["user"] = parseResult($res);
+      $home["user"] = parseResult($res, noUserFetch: true);
     }
   }
 
@@ -228,12 +230,13 @@ if (count($_GET) <= 3 && !isset($_GET["batch"])) {
       $exData = json_decode($_GET["extra"], true);
       if (!$exData || !isset($exData[0]) || !isset($exData[1])) die("0");
 
-      $pins = selectBatch([$exData[0][0], $exData[0][1]]);
-      $viewed = selectBatch([$exData[1][0], $exData[1][1]]);
+      $pins = selectBatch([$exData[0][0], $exData[0][1]], true);
+      $viewed = selectBatch([$exData[1][0], $exData[1][1]], true);
 
       $hp = getHomepage((bool)$feeds[0], (bool)$feeds[1], (bool)$feeds[2]);
       $hp["pinned"] = $pins;
       $hp["recent"] = $viewed;
+      $hp["users"] = getUsersByID($usersToFetch, onlyUIDs: true)[0];
       die(json_encode($hp));
     }
     
@@ -272,7 +275,7 @@ elseif (isset($_GET["batch"])) {
   die(json_encode(selectBatch($fetchIDs)));
 }
 
-function selectBatch($data) {
+function selectBatch($data, $noUserFetch) {
   global $listRatings, $reviewRatings, $selRange, $selReviewRange, $selLevelRange, $mysqli;
   $types = ["lists", "reviews", "levels"];
   $postData = [[],[],[]];
@@ -312,7 +315,7 @@ function selectBatch($data) {
       GROUP BY `name`
       ", $range, $ratings, $types[$type], $types[$type], substr($types[$type], 0, -1), implode(" OR ", $where)), array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
     }
-    $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1, true);
+    $postData[$type] = parseResult($res, false, -1, "", 0, $type == 1, true, $noUserFetch);
   }
   return $postData;
 }
