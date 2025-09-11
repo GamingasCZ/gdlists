@@ -114,7 +114,7 @@ function doSearch() {
 
 function refreshBrowser() {
   if (!props.onlineBrowser) {
-    let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][filtered != undefined | 0]
+    let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][+(filtered != undefined)]
     let ind = +(props.onlineType == "collabs")
     LISTS.value = hasSearch[ind].slice(
       LISTS_ON_PAGE * PAGE.value!,
