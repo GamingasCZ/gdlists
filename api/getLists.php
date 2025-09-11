@@ -43,12 +43,31 @@ $selLevelRange = "
 $listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
 
+function getUsersByID($userArray) {
+  global $mysqli;
+  $allIDs = [];
+  $uid_array = [];
+  foreach ($userArray as $row) {
+    array_push($uid_array, $row["uid"]);
+    array_push($allIDs, $row["id"]);
+
+    $ind += 1;
+  }
+
+  $unique = array_values(array_unique($uid_array));
+  $qqm = makeIN($unique);
+  $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
+                    FROM users
+                    LEFT JOIN profiles ON users.discord_id = profiles.uid
+                    WHERE discord_id IN %s", $qqm[0]), $unique, $qqm[1], true);
+  return [$users, $allIDs];
+}
+
 function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $page = 0, $review = false, $noDeathOnEmpty = false) {
   global $mysqli;
   $ind = 0;
   $ratings = [];
   $dbInfo = [];
-  $uid_array = array();
   $reviewDetails = [];
   $users = [];
   if (!$singleList) {
@@ -58,21 +77,8 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       else die("3");
     }
 
-    $allIDs = [];
     if (isset($rows[0]["uid"])) {
-      foreach ($rows as $row) {
-        array_push($uid_array, $row["uid"]);
-        array_push($allIDs, $row["id"]);
-
-        $ind += 1;
-      }
-
-      $unique = array_values(array_unique($uid_array));
-      $qqm = makeIN($unique);
-      $users = doRequest($mysqli, sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
-                        FROM users
-                        LEFT JOIN profiles ON users.discord_id = profiles.uid
-                        WHERE discord_id IN %s", $qqm[0]), $unique, $qqm[1], true);
+      [$users, $allIDs] = getUsersByID($rows);
     }
 
     if (sizeof($allIDs)) {
@@ -115,7 +121,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [$rows["id"]], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"];
-    $users = doRequest($mysqli, "SELECT username,discord_id,pfp_cutout FROM users LEFT JOIN profiles ON users.discord_id = profiles.uid WHERE discord_id=?", [$rows["uid"]], "s");
+    $users = getUsersByID([$rows])[0][0];
 
     // Fetch ratings
     $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], true);
