@@ -19,7 +19,7 @@ const notifDropdownShown = ref(false);
 const showSettings = (e: MouseEvent) => {
 if (e.target.id == "settingsOpener") return
   settingsShown.value = true
-  closeNotifs2()
+  // closeNotifs2()
   document.body.addEventListener("click", closeSettings, { capture: true })
 };
 const showNotifs = () => {
@@ -31,9 +31,8 @@ const showNotifs = () => {
 };
 
 const closeSettings2 = () => {
-  let settingsMenu = document.querySelector("#settingsMenu") as HTMLDivElement
   settingsShown.value = false
-  settingsMenu.removeEventListener("click", closeSettings, { capture: true })
+  document.body.removeEventListener("click", closeSettings, { capture: true })
 }
 
 const closeNotifs2 = () => {
@@ -156,53 +155,11 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 z-30 justify-between items-center w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
+    class="box-border flex sticky top-0 z-30 justify-between w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
     <!-- Home link -->
-    <!-- <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative websiteLink">
+    <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative ml-2 websiteLink">
       <Logo class="w-10 h-10 button" />
-    </RouterLink> -->
-
-    <section class="flex relative gap-2 items-center py-0.5 pr-4 pl-2 h-full bg-black bg-opacity-40">
-
-
-      <!-- Logged out -->
-      <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
-        class="px-1 w-10 h-10 button" />
-  
-      <!-- Loading response from accounts.php -->
-      <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
-        class="mr-1 w-6 animate-spin aspect-square" />
-      
-      <!-- Logged in, settings -->
-      <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
-        <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
-        
-        <ProfilePicture
-          :uid="currentUID"
-          :cutout="currentCutout"
-          :class="{ 'left-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-          class="absolute animate-ping top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-          id="profilePicture" v-if="!isOnline"
-          />
-          
-        <ProfilePicture
-          :uid="currentUID"
-          :cutout="currentCutout"
-          :class="{ 'left-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-          class="absolute top-0 right-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-          id="profilePicture"
-        />
-      </div>
-      <div v-else></div>
-
-      <!-- Notification button -->
-      <button @click="showNotifs" v-if="isLoggedIn" class="pl-2 button max-sm:hidden">
-        <img src="../images/notifs.svg" alt=""
-        class="w-6" />
-        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
-        <div v-if="currentUnread > 0" class="absolute top-0 -right-2 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
-      </button>
-    </section>
+    </RouterLink>
 
     <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{ 'opacity-50 pointer-events-none': !isOnline }">
@@ -211,13 +168,6 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       <hr v-if="scrollerInd != 0"
         class="absolute w-[1px] bg-white border-none h-1 z-10 bottom-0 origin-left transition-transform"
         :style="{ transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff / scrollerWidth}px)` }">
-
-      <!-- Browse -->
-      <RouterLink to="/" @click="modScrollerWidth" data-ind="2"
-        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
-        <img src="../images/browse.svg" alt="" class="w-6" />Domov
-      </RouterLink>
 
       <!-- Editor -->
       <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
@@ -248,18 +198,56 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       </RouterLink>
 
       <!-- Saved -->
-      <!-- <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
+      <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
         class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
       $t("navbar.saved")
-    }}</RouterLink> -->
+    }}</RouterLink>
     </section>
 
-    <section></section>
+    <section class="flex relative gap-6 items-center px-2 min-h-full bg-black bg-opacity-40">
+      <!-- Notification button -->
+      <button @click="showNotifs" v-if="isLoggedIn" class="pl-2 button max-sm:hidden">
+        <img src="../images/notifs.svg" alt=""
+        class="w-5" />
+        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
+        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+      </button>
+
+      <!-- Logged out -->
+      <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
+        class="px-1 w-10 h-10 button" />
+  
+      <!-- Loading response from accounts.php -->
+      <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
+        class="mr-1 w-6 animate-spin aspect-square" />
+      
+      <!-- Logged in, settings -->
+      <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
+        <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
+        
+        <ProfilePicture
+          :uid="currentUID"
+          :cutout="currentCutout"
+          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          class="absolute animate-ping top-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          id="profilePicture" v-if="!isOnline"
+          />
+          
+        <ProfilePicture
+          :uid="currentUID"
+          :cutout="currentCutout"
+          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+          class="absolute top-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          id="profilePicture"
+        />
+      </div>
+      <div v-else></div>
+    </section>
 
     <Transition name="fadeSlide">
       <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"
-        v-if="localStorg" id="settingsMenu" @open-notifs="showNotifs()" />
+        v-if="localStorg" @open-notifs="showNotifs()" />
     </Transition>
 
     <!-- Loading bar -->

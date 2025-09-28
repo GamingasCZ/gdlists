@@ -65,10 +65,10 @@ const switchUserLists = (user: string) => {
         <img src="../images/levelIcon.svg" alt="" class="w-5" />
         <span class="my-2">{{ $t('editor.levels') }}</span>
       </RouterLink>
-      <RouterLink @click="modifyContentType(3)" to="/browse/saved" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': contentType == 3}">
+      <!-- <RouterLink @click="modifyContentType(3)" to="/browse/saved" class="flex gap-2 px-4 hover:bg-opacity-10 hover:bg-black" :class="{'bg-black !bg-opacity-40': contentType == 3}">
         <img src="../images/savedMobHeader.svg" alt="" class="w-5" />
         <span class="my-2">{{ $t('navbar.saved') }}</span>
-      </RouterLink>
+      </RouterLink> -->
     </nav>
     <ListBrowser
       :online-browser="contentType != 3"
