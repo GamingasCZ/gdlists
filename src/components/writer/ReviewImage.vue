@@ -24,6 +24,7 @@ const props = defineProps<{
 
 const image = ref<HTMLImageElement>()
 const imageLoading = ref(-2)
+const minWidth = ref(16)
 
 onMounted(() => {
     image.value?.addEventListener("loadstart", () => imageLoading.value = 1)
@@ -32,6 +33,7 @@ onMounted(() => {
 
         // Default - image width, overriden by epic dasher set width :)
         props.settings.width = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
+        minWidth.value = image.value?.width!
 
     })
     image.value?.addEventListener("error", () => {
@@ -94,12 +96,12 @@ const size = containers.showImage.settings[1].valueRange
 
     <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
         <div class="flex relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
-            <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
+            <Resizer :min-size="minWidth" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
-                    class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
+                    class="text-xl text-white max-h-auto rounded-md border-transparent pointer-events-none min-w-8"
                     :class="{'min-w-max': settings?.height, 'aspect-video object-cover': settings?.crop}"
-                    :style="{height: settings?.height ? `${settings.height}px` : ''}"
+                    :style="{height: settings?.height ? `${settings.height}px` : '', width: settings?.height ? '' : `${settings.width}px`}"
                     :src="settings.url"
                     :alt="settings.alt"
                     :title="settings.alt"
