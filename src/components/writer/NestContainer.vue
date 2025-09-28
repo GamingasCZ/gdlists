@@ -84,6 +84,7 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
             :editable="editable"
             :text="container.data"
             :index="index"
+            :align="container.align"
             :nest-index="[ind, subIndex]"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0] && editable"
         >
