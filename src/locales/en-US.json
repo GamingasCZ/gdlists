@@ -798,7 +798,8 @@
     "reviewIntro": "Welcome to the Review Writer!",
     "howStart": "How would you like to start?",
     "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics.",
-    "sectionName": "Section Name"
+    "sectionName": "Section Name",
+    "colGaps": "Spacing"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
