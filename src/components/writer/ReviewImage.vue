@@ -20,6 +20,7 @@ const props = defineProps<{
     buttonState: [string, number]
     editable: boolean
     id: number
+    align: string
 }>()
 
 const image = ref<HTMLImageElement>()
@@ -94,8 +95,8 @@ const size = containers.showImage.settings[1].valueRange
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
-    <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full">
-        <div class="flex relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
+    <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full flex flex-col" :style="{'align-items': align}">
+        <div class="relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
             <Resizer :min-size="minWidth" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
