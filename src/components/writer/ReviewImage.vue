@@ -95,12 +95,12 @@ const size = containers.showImage.settings[1].valueRange
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
-    <figure v-show="imageLoading == 0" @click="fullscreenImage" class="max-w-full flex flex-col" :style="{'align-items': align}">
+    <figure v-show="imageLoading == 0" @click="fullscreenImage" class="flex flex-col max-w-full" :style="{'align-items': align}">
         <div class="relative group min-h-[48px] my-1 max-w-fit" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
-            <Resizer :min-size="minWidth" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
+            <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event">
                 <img
                     ref="image"
-                    class="text-xl text-white max-h-auto rounded-md border-transparent pointer-events-none min-w-8"
+                    class="text-xl text-white rounded-md border-transparent pointer-events-none max-h-auto min-w-8"
                     :class="{'min-w-max': settings?.height, 'aspect-video object-cover': settings?.crop}"
                     :style="{height: settings?.height ? `${settings.height}px` : '', width: settings?.height ? '' : `${settings.width}px`}"
                     :src="settings.url"
