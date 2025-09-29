@@ -158,6 +158,7 @@ const settings = ref<HTMLDialogElement>()
 		ref="textParent"
 		:tabindex="(canEditText || !editable || dependentOnChildren) ? -1 : 0"
 		@focusin="!dependentOnChildren && doFocusText(false)"
+		:data-selected="focus && focused"
 	>
 		<hr class="absolute z-10 right-[-6px] border-lof-400 h-full border-r-4" v-if="!dependentOnChildren && focus && focused">
 		<p

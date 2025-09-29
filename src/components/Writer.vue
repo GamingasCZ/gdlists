@@ -466,9 +466,28 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
 }
 provide("writerAction", doAction)
 
+const getContainerSelectedElement = () => {
+    return document.querySelector("[data-selected=true]")
+}
+
+var prePreviewScrollTop = 0
 const setPreviewMode = (preview: boolean) => {
+    let currSelectedElement = getContainerSelectedElement()
     previewMode.value = preview
-    // nextTick(() => dataContainers.value.forEach(c => c.togglePreview()))
+
+    // Resets scroll when exiting preview
+    if (!previewMode.value) {
+        prePreviewScrollTop = document.documentElement.scrollTop
+
+        // Scrolls to currently selected element
+        if (currSelectedElement != null)
+            nextTick(() => currSelectedElement?.scrollIntoView())
+    }
+    else {
+        if (prePreviewScrollTop != 0) {
+            document.documentElement.scrollTop = prePreviewScrollTop
+        }
+    }
 }
 
 const previewingLevels = ref(false)
