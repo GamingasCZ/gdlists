@@ -258,6 +258,12 @@ const containers: Containers = {
             title: i18n.global.t('reviews.columns'),
             type: [-1],
             default: [[], []]
+        },
+        {
+            key: "gaps",
+            title: "gaps",
+            type: [-1],
+            default: false
         }],
         errorCheck: (settings: object) => {
             let len = 0
@@ -395,6 +401,6 @@ export type caddVideo = {width: number, url: string, description: string}
 export type cShowRating = {level: number, show: number}
 export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
 export type cShowList = {post: boolean, postType: number, pick: number}
-export type cTwoColumns = {components: (Containers | boolean)[]}
+export type cTwoColumns = {components: (Containers | boolean)[], gaps: boolean}
 export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
 

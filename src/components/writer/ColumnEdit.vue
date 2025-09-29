@@ -41,6 +41,10 @@ const columnCommand = inject<(ind: number) => void>("columnCommand")!
                     </button>
                 </div>
             </div>
+            <div class="flex justify-between my-2">
+                <h2>Mezery</h2>
+                <input v-model="postData.containers[selectedNest[0]].settings.gaps" type="checkbox" class="w-9 button">
+            </div>
             <button @click="columnCommand(7); emit('close')" class="flex gap-1 items-center p-1 text-base font-bold text-black bg-red-400 rounded-md">
                 <img src="@/images/del.svg" alt="" class="w-5">
                 <span>{{ $t('reviews.removeColumn') }}</span>
