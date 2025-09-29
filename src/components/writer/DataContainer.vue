@@ -67,7 +67,7 @@ const doFocusText = (setFocus = true) => {
 	emit('hasFocus')
 }
 
-const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
+const checkHasText = () => (((mainText.value?.innerText || props.text) ?? "")?.trim() ?? "").length > 0
 
 const modifyText = (e: InputEvent) => {
 	lastTextChange()

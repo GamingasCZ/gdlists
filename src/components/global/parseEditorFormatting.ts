@@ -96,9 +96,9 @@ export function addFormatting(type: number, textbox: HTMLTextAreaElement) {
 export function deleteCESelection(textbox: HTMLTextAreaElement) {
   let selection = window.getSelection()
   let range = selection?.getRangeAt(0)
-  let textContent = range?.toString()
-  range?.deleteContents()
-  return textContent
+  let textContent = range?.extractContents().textContent?.trim()
+  let newText = selection?.anchorNode?.textContent?.trim()
+  return [newText, textContent]
 }
 
 export function addCEFormatting(type: number, textbox: HTMLTextAreaElement) {

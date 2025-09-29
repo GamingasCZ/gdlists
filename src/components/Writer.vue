@@ -529,7 +529,9 @@ const splitParagraph = () => {
     let selectedText = deleteCESelection(document.activeElement)
     let newPos = selectedContainer.value[0] + 1
     let newParagraph = addContainer("default", 0, true)
-    newParagraph.data = selectedText
+    newParagraph.data = selectedText[1]
+    console.log(selectedText)
+    POST_DATA.value.containers[selectedContainer.value[0]].data = selectedText[0]?.toString()
     POST_DATA.value.containers.splice(newPos, 0, newParagraph)
 }
 
