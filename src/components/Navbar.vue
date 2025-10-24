@@ -9,6 +9,10 @@ import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress, timeLastRouteChange } from "@/router";
 import ProfilePicture from "./global/ProfilePicture.vue";
 import NotificationDropdown from "./global/NotificationDropdown.vue";
+import { defineAsyncComponent } from "vue";
+import LoadingBlock from "./global/LoadingBlock.vue";
+import { dialog } from "./ui/sizes";
+import Dialog from "./global/Dialog.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -148,33 +152,40 @@ modifyNavbarScroll()
 const navbarHidden = ref(false)
 watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
+const Sett = defineAsyncComponent({
+  loader: () => import("@/components/global/SiteSettings.vue"),
+  loadingComponent: LoadingBlock
+})
+const settingsOpen = ref(false)
+
 </script>
 
 <template>
+  <Teleport to="body">
+      <Dialog v-if="settingsOpen" :open="settingsOpen" :title="$t('other.settings')" :width="dialog.medium" @close-popup="settingsOpen = false">
+        <Sett />
+      </Dialog>
+  </Teleport>
+
   <nav
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 z-30 justify-between w-full transition-transform shadow-drop overflow-x-clip bg-greenGradient">
+    class="box-border flex sticky top-0 backdrop-blur-md max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform overflow-x-clip">
+    <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
+      :class="{ 'opacity-50 pointer-events-none': !isOnline }">
     <!-- Home link -->
     <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative ml-2 websiteLink">
       <Logo class="w-10 h-10 button" />
     </RouterLink>
-
-    <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
-      :class="{ 'opacity-50 pointer-events-none': !isOnline }">
-
-      <!-- Button underline -->
-      <hr v-if="scrollerInd != 0"
-        class="absolute w-[1px] bg-white border-none h-1 z-10 bottom-0 origin-left transition-transform"
-        :style="{ transform: `scaleX(${scrollerWidth}) scaleY(${scrollerInd == -1 ? 0 : 1}) translateX(${scrollerXOff / scrollerWidth}px)` }">
+    
 
       <!-- Editor -->
       <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
         class="flex relative flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }">
-        <img src="../images/editorMobHeader.svg" :class="{'rotate-[45deg]': editorDropdownOpen}"
-          alt="" class="w-6 transition-transform" />{{ $t("navbar.editor") }}
+        <img src="../images/browseMobHeader.svg" :class="{'rotate-[45deg]': editorDropdownOpen}"
+          alt="" class="w-4 transition-transform" />Seznamy
         
         <Transition name="fadeSlide">
           <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full min-w-max text-lg max-sm:top-14 bg-greenGradient" v-if="editorDropdownOpen">
@@ -194,24 +205,27 @@ watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
       <RouterLink to="/browse/lists" @click="modScrollerWidth" data-ind="2"
         class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
-        <img src="../images/browse.svg" alt="" class="w-6" />{{ $t("navbar.lists") }}
+        <img src="../images/reviews.svg" alt="" class="w-4" />Recenze
       </RouterLink>
 
       <!-- Saved -->
       <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
         class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/savedMobHeader.svg" alt="" class="w-6" />{{
-      $t("navbar.saved")
-    }}</RouterLink>
+        :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/levelIcon.svg" alt="" class="w-4" />Levely</RouterLink>
     </section>
 
-    <section class="flex relative gap-6 items-center px-2 min-h-full bg-black bg-opacity-40">
+    <section class="flex relative gap-7 items-center px-2 min-h-full bg-black bg-opacity-40">
       <!-- Notification button -->
-      <button @click="showNotifs" v-if="isLoggedIn" class="pl-2 button max-sm:hidden">
+      <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
         <img src="../images/notifs.svg" alt=""
         class="w-5" />
         <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
         <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+      </button>
+
+      <button @click="settingsOpen = true" class="button max-sm:hidden">
+        <img src="../images/gear.svg" alt=""
+        class="w-5" />
       </button>
 
       <!-- Logged out -->

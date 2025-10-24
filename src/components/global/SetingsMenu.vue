@@ -46,11 +46,6 @@ const Gallery = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
-const Sett = defineAsyncComponent({
-  loader: () => import("@/components/global/SiteSettings.vue"),
-  loadingComponent: LoadingBlock
-})
-
 const AvatarEditor = defineAsyncComponent({
   loader: () => import("@/components/global/ProfiePicturePicker.vue"),
   loadingComponent: LoadingBlock
@@ -84,10 +79,6 @@ const currLang = SETTINGS.value.language
   id="settingsMenu"
   >
     <Teleport to="body">
-      <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
-        <Sett />
-      </Dialog>
-  
       <Dialog v-if="dialogs.help" :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
         <Help />
       </Dialog>
@@ -154,12 +145,11 @@ const currLang = SETTINGS.value.language
       </button>
     </section>
 
-    <button
+    <RouterLink to="/saved"
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
-      @click="dialogs.settings = true"
     >
-      <img src="@/images/gear.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.settings') }}
-    </button>
+      <img src="@/images/savedMobHeader.svg" class="inline mr-3 w-5" alt="" />Uložené
+    </RouterLink>
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
       @click="dialogs.gallery = true"
