@@ -176,8 +176,8 @@ const settings = ref<HTMLDialogElement>()
 		</p>
 			
 		<slot></slot>
-		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-[38px] box-border max-sm:right-0">
-			<button @click="settings?.showSettings()" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
+		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] box-border max-sm:right-0" :class="{'-right-[38px]': !nestIndex, '-right-1': nestIndex}">
+			<button @click="settings?.showSettings()" tabindex="-1" @auxclick.prevent="emit('removeContainer')" :class="{'!opacity-100': focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
 				<img src="@/images/gear.svg" class="w-7 invert">
 			</button>
 		</div>
