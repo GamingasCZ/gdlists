@@ -63,7 +63,7 @@ function parseLevel($levelString) {
         }
         
         // Download thumbnail
-        $thumbQuery = file_get_contents(sprintf("https://raw.githubusercontent.com/cdc-sys/level-thumbnails/refs/heads/main/thumbs/%s.png", strval($levelString[1])));
+        $thumbQuery = file_get_contents(sprintf("https://levelthumbs.prevter.me/thumbnail/%s/medium", strval($levelString[1])));
         if ($thumbQuery != false) {
             $mysqli = new mysqli($hostname, $username, $password, $database);
 
