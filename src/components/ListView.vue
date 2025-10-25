@@ -12,7 +12,6 @@ ViewedPinArray,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
-import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
 import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncComponent } from "vue";
 import { modifyListBG, selectedLevels } from "@/Editor";
@@ -44,6 +43,7 @@ import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
 import WriterViewer from "./writer/WriterViewer.vue";
 import TemporaryList from "./global/TemporaryList.vue";
+import ShareSection from "./levelViewer/ShareSection.vue";
 
 const props = defineProps<{
   listID?: string
@@ -297,7 +297,6 @@ const getURL = () => {
   if (props.isReview) return base + 'review/' + window.location.pathname.split("/").toReversed()[0]
   else return base + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
-const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
 const scrolledToEnd = ref(false)
 const commentsShowing = ref(false)
@@ -493,11 +492,7 @@ provide("fullscreenLevel", levelImageFullscreen)
 
 </script>
 
-<template>
-  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.medium">
-    <SharePopup :share-text="getURL()" :review="isReview" />
-  </DialogVue>
-  
+<template> 
   <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.contents')">
     <PickerPopup v-model="jumpSearch">
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
@@ -664,6 +659,8 @@ provide("fullscreenLevel", levelImageFullscreen)
         :both-modes-enabled="LIST_DATA.data.diffGuesser[1] && LIST_DATA.data.diffGuesser[2]"
         @replay-list="guesses = []; cardGuessing = 0"
       />
+
+      <ShareSection v-if="LIST_DATA.name != undefined && !nonexistentList" :share-text="getURL()" :review="isReview" />
 
       <CommentSection
         v-if="LIST_DATA?.id != undefined"
