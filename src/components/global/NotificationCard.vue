@@ -5,6 +5,7 @@ import ProfilePicture from './ProfilePicture.vue';
 import { parseElapsed, prettyDate } from '@/Editor';
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
+import { i18n } from '@/locales';
 
 const props = defineProps<NotificationContent & {postNames: any[], selected: boolean}>()
 const types = ['comment', 'rating', 'other']
@@ -12,8 +13,8 @@ const types2 = ['list', 'review']
 
 let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
 const formText = computed(() => {
-    let actionText = [`olajkoval`, 'okomentoval'][+(props.type == 'comment')]
-    let more = props.count > 1 ? `a další ` : ''
+    let actionText = [i18n.global.t('other.liked'), i18n.global.t('other.commented')][+(props.type == 'comment')]
+    let more = props.count > 1 ? `${i18n.global.t('other.andMore')} ` : ''
     return `<b>${props.from}</b> ${more}${actionText}`
 })
 
@@ -46,7 +47,7 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.ind
         <div class="flex flex-col">
             <div>
                 <span class="inline pr-1 w-max" v-html="formText"></span>
-                <b><RouterLink :to="link" class="inline hover:underline">{{ decodeURIComponent(props.postNames[postName].name).replace("+", " ") }}</RouterLink></b>
+                <b><RouterLink :to="link" class="inline hover:underline">{{ decodeURIComponent(props.postNames?.[postName]?.name ?? $t('other.removedPost')).replace("+", " ") }}</RouterLink></b>
             </div>
             
             <button v-if="props.count > 1 && props.type == 'rating'" @click="getRatingUsers">V</button>
@@ -56,7 +57,7 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.ind
                     <ProfilePicture :uid="user.discord_id" :cutout="0" class="w-8" />
                     <span>{{ user.username }}</span>
                 </div>
-                <span v-if="ratingsAllShown == 1">Zobrazit další</span>
+                <span v-if="ratingsAllShown == 1">i18n.t('other.showMore')</span>
             </section>
 
             <p v-if="props.comment" class="text-sm">
