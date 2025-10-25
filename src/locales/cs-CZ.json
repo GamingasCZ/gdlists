@@ -429,7 +429,14 @@
     "oldest": "Nejstarší",
     "oldUnread": "Nejstarší nepřečtené",
     "moveHere": "Přesunout sem",
-    "lIDcopied": "ID levelu zkopírováno!"
+    "lIDcopied": "ID levelu zkopírováno!",
+    "removedPost": "odstraněný příspěvek",
+    "liked": "olajkoval",
+    "commented": "okomentoval",
+    "andMore": "a další",
+    "showMore": "Zobrazit další",
+    "noNotifs": "Nic nového zatím nepřišlo!",
+    "copyLink": "Zkopírovat odkaz"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -808,7 +815,10 @@
     "reviewIntro": "Vítej v editoru recenzí!",
     "howStart": "Jak bys rád začal?",
     "cRatingHelp": "Můžeš si vytvořit další čtyři vlasní hodnocení. Tyto hodnocení se nezapočítávají do globálních statistik.",
-    "sectionName": "Jméno sekce"
+    "sectionName": "Jméno sekce",
+    "colGaps": "Mezery",
+    "uploadingMedia": "Nahrávání médií",
+    "titEditor": "Editor nadpisu"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

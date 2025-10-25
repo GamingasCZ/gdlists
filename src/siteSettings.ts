@@ -24,7 +24,6 @@ export const SETTINGS = ref({
   flipControls: true,
   saveThumbs: true,
   disableBGs: false,
-  disableTL: false,
   notifBehaviour: 0,
 });
 

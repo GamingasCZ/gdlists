@@ -110,19 +110,13 @@ router.beforeEach(async (to, from) => {
     
     // Do not reset color when updating a post
     if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
-    
       document.documentElement.style.setProperty("--siteBackground", THEMES[SETTINGS.value.selectedTheme || 0].colors.siteBackground);
-      document.querySelector("nav")?.classList.add("slidingNavbar");
   
       setTimeout(() => {
         document.documentElement.style.setProperty("--primaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor);
         document.documentElement.style.setProperty("--secondaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.secondaryColor);
         document.documentElement.style.setProperty("--brightGreen", THEMES[SETTINGS.value.selectedTheme || 0].colors.brightGreen);
       }, 150);
-  
-      setTimeout(() => {
-        document.querySelector("nav")?.classList.remove("slidingNavbar");
-      }, 300);
     }
 });
 

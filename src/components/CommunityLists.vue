@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ListPreview from "./global/ListPreview.vue";
 import ReviewPreview from "./global/ReviewPreview.vue";
 import { useI18n } from "vue-i18n";
@@ -11,6 +11,7 @@ import TemporaryList from "./global/TemporaryList.vue";
 import { Teleport } from "vue";
 import { lastTab, modLastTab, selectedLevels } from "@/Editor";
 import SavedCollab from "./editor/SavedCollab.vue";
+import router from "@/router";
 
 document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
@@ -47,6 +48,19 @@ const switchUserLists = (user: string) => {
   userLists.value = user
   modLastTab([contentType.value, userLists.value])
 }
+
+watch(router.currentRoute, (path) => {
+  let pName = path.path.match(/\w+$/)?.[0]
+  if (pName == null)
+    modifyContentType(0)
+  else {
+    let ind = CONTENTS.indexOf(pName)
+    if (ind == -1)
+      modifyContentType(0)
+    else
+      modifyContentType(ind as Content)
+  }
+})
 
 </script>
 

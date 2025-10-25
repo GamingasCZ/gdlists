@@ -13,6 +13,7 @@ import { defineAsyncComponent } from "vue";
 import LoadingBlock from "./global/LoadingBlock.vue";
 import { dialog } from "./ui/sizes";
 import Dialog from "./global/Dialog.vue";
+import NavbarDropdown from "./ui/NavbarDropdown.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -115,11 +116,12 @@ const scrollerHome = () => {
 }
 
 const localStorg = ref(hasLocalStorage())
-const editorDropdownOpen = ref(false)
-const openEditorDropdown = () => {
+const editorDropdownOpen = ref(0)
+const openEditorDropdown = (e: MouseEvent, ind: number) => {
   if (editorDropdownOpen.value) return
-  editorDropdownOpen.value = true
-  document.body.addEventListener("click", () => editorDropdownOpen.value = false, { once: true, capture: true },)
+  e.preventDefault()
+  editorDropdownOpen.value = ind
+  document.body.addEventListener("click", () => editorDropdownOpen.value = 0, { once: true, capture: true },)
 }
 
 const hideUploadDropdown = () => setTimeout(() => editorDropdownOpen.value = false, 10)
@@ -174,44 +176,34 @@ const settingsOpen = ref(false)
     class="box-border flex sticky top-0 backdrop-blur-md max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform overflow-x-clip">
     <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{ 'opacity-50 pointer-events-none': !isOnline }">
-    <!-- Home link -->
-    <RouterLink to="/" @click="scrollerHome" data-ind="0" class="relative ml-2 websiteLink">
-      <Logo class="w-10 h-10 button" />
-    </RouterLink>
+      
+      <!-- Home link -->
+      <RouterLink to="/" @click="scrollerHome" class="relative ml-2 websiteLink">
+        <Logo class="w-10 h-10 button" />
+      </RouterLink>
     
 
-      <!-- Editor -->
-      <button v-if="localStorg" @click="openEditorDropdown" data-ind="1"
-        class="flex relative flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+      <!-- Lists -->
+      <RouterLink @click="openEditorDropdown($event, 1)" to="/browse/lists"
+        class="flex relative flex-col gap-2 items-center px-4 group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }">
         <img src="../images/browseMobHeader.svg" :class="{'rotate-[45deg]': editorDropdownOpen}"
-          alt="" class="w-4 transition-transform" />Seznamy
-        
-        <Transition name="fadeSlide">
-          <div class="flex absolute left-0 top-10 flex-col gap-1 p-1 w-full min-w-max text-lg max-sm:top-14 bg-greenGradient" v-if="editorDropdownOpen">
-            <RouterLink @click="modScrollerWidth" to="/make/list"  class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
-              <img src="@/images/browseMobHeader.svg" class="w-10 scale-[0.6]" alt="">
-              <span>{{ $t('other.list') }}</span>
-            </RouterLink>
-            <RouterLink @click="modScrollerWidth" to="/make/review" class="flex items-center p-1 bg-black bg-opacity-40 rounded-md button" @mouseup="hideUploadDropdown">
-              <img src="@/images/reviews.svg" class="w-10 scale-[0.6]" alt="">
-              <span>{{ $t('other.review') }}</span>
-            </RouterLink>
-          </div>
-        </Transition>
-      </button>
+          alt="" class="w-4 transition-transform" />{{ $t('help.Lists') }}
 
-      <!-- Browse -->
-      <RouterLink to="/browse/lists" @click="modScrollerWidth" data-ind="2"
-        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
-        <img src="../images/reviews.svg" alt="" class="w-4" />Recenze
+        <NavbarDropdown v-if="editorDropdownOpen == 1" :is-review="false" />
       </RouterLink>
 
-      <!-- Saved -->
-      <RouterLink to="/saved" v-if="localStorg" @click="modScrollerWidth" data-ind="3"
-        class="flex flex-col gap-2 items-center px-4 bg-black bg-opacity-20 transition-colors max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/levelIcon.svg" alt="" class="w-4" />Levely</RouterLink>
+      <!-- Reviews -->
+      <RouterLink to="/browse/reviews"
+        class="flex flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
+        <img src="../images/reviews.svg" alt="" class="w-4" />{{ $t('reviews.review') }}
+      </RouterLink>
+
+      <!-- Levels -->
+      <RouterLink to="/browse/levels"
+        class="flex flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/levelIcon.svg" alt="" class="w-4" />{{ $t('editor.levels') }}</RouterLink>
     </section>
 
     <section class="flex relative gap-7 items-center px-2 min-h-full bg-black bg-opacity-40">
@@ -265,11 +257,16 @@ const settingsOpen = ref(false)
     </Transition>
 
     <!-- Loading bar -->
-    <div class="absolute left-0 -bottom-1 w-full h-1 opacity-100 transition-opacity bg-lof-200 -z-30"
-      :class="{ '!opacity-0': loadingProgress == 100 }">
-      <div class="absolute h-full bg-lof-400 transition-[width] w-0 ease-out"
+    <div class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 -z-30"
+      :class="{ 'opacity-0': loadingProgress == 100 }">
+      <div class="absolute h-full opacity-80 transition-all ease-out"
+        :style="{
+          backgroundImage: `linear-gradient(90deg, transparent, var(--brightGreen) 95%)`,
+          backgroundPositionX: `${-loadingProgress}%`,
+          width: `${loadingProgress}%`
+        }"
         :class="{ 'duration-0': loadingProgress == 0, 'duration-200': loadingProgress == 100, 'duration-[10s]': loadingProgress == 99 }"
-        :style="{ width: `${loadingProgress}%` }"></div>
+      ></div>
     </div>
 
     <!-- Notification Dropdown -->

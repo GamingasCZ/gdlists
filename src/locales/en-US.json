@@ -448,7 +448,14 @@
     "sort": "Sorting",
     "oldUnread": "Oldest unread",
     "moveHere": "Move Here",
-    "lIDcopied": "Level ID copied!"
+    "lIDcopied": "Level ID copied!",
+    "removedPost": "a removed post",
+    "liked": "liked",
+    "commented": "commented on",
+    "andMore": "and more",
+    "showMore": "Show More",
+    "noNotifs": "Nothing new's arrived yet!",
+    "copyLink": "Copy Link"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -807,7 +814,10 @@
     "reviewIntro": "Welcome to the Review Writer!",
     "howStart": "How would you like to start?",
     "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics.",
-    "sectionName": "Section Name"
+    "sectionName": "Section Name",
+    "colGaps": "Spacing",
+    "uploadingMedia": "Uploading Media",
+    "titEditor": "Title Editor"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
