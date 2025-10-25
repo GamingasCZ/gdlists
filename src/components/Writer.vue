@@ -109,6 +109,7 @@ const resetPost = () => {
 }
 
 const editDraftExists = ref<null | string>(null)
+const loadingOnlineEdit = ref(false)
 const loadOnlineEdit = (feedData?: ReviewDraft) => {
     editDraftExists.value = null
     loadEditDraft = null
@@ -118,7 +119,9 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
         return
     }
     
+    loadingOnlineEdit.value = true
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
+        loadingOnlineEdit.value = false
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
 
@@ -139,7 +142,10 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
         else {
             openDialogs.editError = true
         }
-    }).catch(() => openDialogs.editError = true)
+    }).catch(() => {
+        loadingOnlineEdit.value = false
+        openDialogs.editError = true
+    })
 }
 
 const openDialogs = reactive({
@@ -966,6 +972,12 @@ const collabEditor = ref<HTMLDialogElement>()
 </script>
 
 <template>
+    <section v-if="loadingOnlineEdit"
+        class="flex flex-col gap-8 items-center mt-10 text-center text-white opacity-40">
+        <img class="w-32 animate-spin" src="@/images/loading.webp" alt="">
+        <span class="text-2xl">{{ $t('other.loading') }}...</span>
+    </section>
+
     <section v-if="openDialogs.editError"
         class="flex flex-col gap-3 items-center mt-10 text-center text-white opacity-40">
         <img class="w-64" src="@/images/listError.svg" alt="">
