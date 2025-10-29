@@ -2,7 +2,7 @@
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import { computed, ref, watch } from "vue";
-import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, homepageCache, loggedIn, viewedPopups } from "@/siteSettings";
 import THEMES, { selectedBeforeSave } from "@/themes";
 import axios from "axios";
 import { i18n } from "@/locales";
@@ -47,18 +47,36 @@ const getFeeds = async () => {
     }
   }
 
-
   if (loggedIn.value == null) return DEF_FEED_RESULT
-  let f = await axios.get(api + "/getLists.php", {
-    params: {
-      homepage: 1, feeds: [1,1, +loggedIn.value].join(','), extra: JSON.stringify([defFeed.pinned, defFeed.recent])}
-    }
-  )
+
+  let getParams = {homepage: 1, feeds: [1,1, +(loggedIn.value && !homepageCache.uploads)].join(',')}
+  if (homepageCache.pinned === null && homepageCache.recent === null)
+    getParams.extra = JSON.stringify([defFeed.pinned, defFeed.recent])
+  
+  let f = await axios.get(api + "/getLists.php", {params: getParams})
   
   if (f.status == 200) {
     let hp = f.data
-    hp.pinned = mergeBatchFeed(hp.pinned)
-    hp.recent = mergeBatchFeed(hp.recent)
+    if (homepageCache.uploads)
+      hp.user = homepageCache.uploads
+    
+    if (homepageCache.pinned)
+      hp.pinned = homepageCache.pinned
+    else {
+      hp.pinned = mergeBatchFeed(hp.pinned)
+      homepageCache.pinned = hp.pinned
+    }
+    
+    if (homepageCache.recent)
+      hp.recent = homepageCache.recent
+    else {
+      hp.recent = mergeBatchFeed(hp.recent)
+      homepageCache.recent = hp.recent
+    }
+
+    if (hp.user)
+      homepageCache.uploads = hp.user
+
     return hp
   }
   return DEF_FEED_RESULT

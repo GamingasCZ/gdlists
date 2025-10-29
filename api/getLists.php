@@ -218,16 +218,19 @@ if (count($_GET) <= 3 && !isset($_GET["batch"])) {
       $feeds = explode(",", $_GET["feeds"]);
       if (sizeof($feeds) != 3) die("0");
 
-      if (!isset($_GET["extra"])) die("0");
-      $exData = json_decode($_GET["extra"], true);
-      if (!$exData || !isset($exData[0]) || !isset($exData[1])) die("0");
-
-      $pins = selectBatch([$exData[0][0], $exData[0][1]]);
-      $viewed = selectBatch([$exData[1][0], $exData[1][1]]);
-
+      if (isset($_GET["extra"])) {
+        $exData = json_decode($_GET["extra"], true);
+        if (!$exData || !isset($exData[0]) || !isset($exData[1])) die("0");
+        
+        $pins = selectBatch([$exData[0][0], $exData[0][1]]);
+        $viewed = selectBatch([$exData[1][0], $exData[1][1]]);
+      }
+      
       $hp = getHomepage((bool)$feeds[0], (bool)$feeds[1], (bool)$feeds[2]);
-      $hp["pinned"] = $pins;
-      $hp["recent"] = $viewed;
+      if (isset($_GET["extra"])) {
+        $hp["pinned"] = $pins;
+        $hp["recent"] = $viewed;
+      }
       die(json_encode($hp));
     }
     

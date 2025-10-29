@@ -1,5 +1,5 @@
 import { ref, watch } from "vue";
-import type { viewedPopup } from "./interfaces";
+import type { ListFetchResponse, viewedPopup } from "./interfaces";
 
 export const SETTINGS = ref({
   scrolling: 1,
@@ -69,4 +69,10 @@ if (hasLocalStorage()) {
   }
 }
 
-export const loggedIn = ref<boolean | null>(null); 
+export const loggedIn = ref<boolean | null>(null);
+
+export const homepageCache: {[section: string]: null | ListFetchResponse} = {
+  pinned: null,
+  uploads: null,
+  recent: null
+}
