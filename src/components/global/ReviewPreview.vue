@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { makeColorFromString, prettyDate } from "@/Editor";
+import { currentUID, makeColorFromString, prettyDate } from "@/Editor";
 import type { ListCreatorInfo, ListPreview, ReviewDetailsResponse } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
 import { computed, reactive, ref, watch } from "vue";
@@ -125,6 +125,14 @@ const link = () => {
   return pre + id
 }
 
+const editLink = () => {
+  let pre = props.isList ? "/edit/list/" : "/edit/review/"
+  let id = props.post ?? props.id
+  return pre + id
+}
+
+const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
+
 </script>
 
 <template>
@@ -152,9 +160,17 @@ const link = () => {
         <div v-if="levelCount" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
             <span>{{ levelCount }} {{ $t('other.levels', [levelCount]) }}</span>
         </div>
-        <div v-if="levelCount" class="absolute -bottom-24 left-1/2 w-72 -translate-x-1/2">
+        <div v-if="levelCount" :class="{'left-1/2 -translate-x-1/2': !canEdit, 'left-0': canEdit}" class="absolute -bottom-24 w-72">
           <RatingContainer class="mr-3" :ratings="levelRatings" compact />
         </div>
+
+        <RouterLink
+          v-if="canEdit"
+          :to="editLink()"
+          class="flex absolute right-0 top-24 gap-2 items-center px-2 py-1 bg-black bg-opacity-80 rounded-md button">
+            <img src="@/images/edit.svg" class="w-4" alt="">
+            {{ $t('level.edit') }}
+        </RouterLink>
       </div>
       
       <div v-else class="grid absolute inset-2 grid-rows-2 gap-2 text-xl">
