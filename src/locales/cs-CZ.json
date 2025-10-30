@@ -76,7 +76,11 @@
     "saveThumbs": "Ukládat náhledy levelů",
     "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání.",
     "notifBehave": "Zobrazování notifikací",
-    "notifBeHelp": "Mění, jakým stylem se zobrazují všechy notikace,"
+    "notifBeHelp": "Mění, jakým stylem se zobrazují všechy notikace,",
+    "navDClick": "Dvojklik v navbaru",
+    "browsing": "Procházení",
+    "creating": "Vytváření",
+    "navDClickHelp": "Dvojklik na \"Seznamy\" a \"Recenze\" v navigaci rychle zvolí vybranou možnost."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

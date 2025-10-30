@@ -526,7 +526,11 @@
     "saveThumbs": "Save Level Thumbnails",
     "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search.",
     "notifBehave": "Displaying Notifications",
-    "notifBeHelp": "Modifies displaying of notifications on clicking the notification icon,"
+    "notifBeHelp": "Modifies displaying of notifications on clicking the notification icon,",
+    "navDClick": "Double-clicking Navigation",
+    "browsing": "Browsing",
+    "creating": "Creating",
+    "navDClickHelp": "Double-clicking \"Lists\" or \"Reviews\" in the navbar can trigger a selected action."
   },
   "help": {
     "Lists": "Lists",

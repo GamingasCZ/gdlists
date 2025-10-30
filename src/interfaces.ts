@@ -184,6 +184,7 @@ export interface LevelList {
   translucent: boolean;
   disComments: boolean;
   levels: Level[];
+  titleData?: TitleData
 }
 
 export interface LevelBackground {
@@ -298,6 +299,18 @@ export interface ReviewList {
   readerMode: boolean
   font: number
   fontTint: boolean
+  titleData?: TitleData
+}
+
+export interface TitleData {
+  theme: number
+  tagline: boolean
+  colors: any[]
+  size: number
+  outline: boolean
+  shadow: number
+  followFont: boolean
+  align: number
 }
 
 export interface ReviewDraft {

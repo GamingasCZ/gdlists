@@ -8,22 +8,6 @@
   src: url("../assets/SofiaSans-VariableFont_wght.ttf");
 }
 
-@keyframes navbarSlide {
-  0% {
-    translate: 0;
-  }
-  50% {
-    translate: 0 -100%;
-  }
-  100% {
-    translate: 0;
-  }
-}
-
-.slidingNavbar {
-  animation: navbarSlide 300ms;
-}
-
 :root {
   --siteBackground: #000;
   --primaryColor: #0000;
