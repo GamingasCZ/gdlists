@@ -14,6 +14,9 @@ import LoadingBlock from "./global/LoadingBlock.vue";
 import { dialog } from "./ui/sizes";
 import Dialog from "./global/Dialog.vue";
 import NavbarDropdown from "./ui/NavbarDropdown.vue";
+import List from "@/svgs/List.vue";
+import LevelIcon from "@/svgs/LevelIcon.vue";
+import Review from "@/svgs/Review.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -70,50 +73,14 @@ watch(props, () => {
   }
 })
 
-const scrollerWidth = ref(0)
-const scrollerXOff = ref(0)
-const scrollerInd = ref(0)
-
-// Modify line size on content resize (lang change)
-const locale = useI18n().locale
-watch(locale, () => {
-  nextTick(() => {
-    let selectedLink = document.querySelectorAll(".websiteLink")?.[scrollerInd.value]
-    if (!selectedLink) return
-    
-    scrollerXOff.value = selectedLink.offsetLeft
-    scrollerWidth.value = selectedLink.clientWidth
-    if (router.currentRoute.value.name == "home") scrollerHome()
-  })
-})
-
-onMounted(() => {
-  // Modify line size on content resize (lang change, mobile view)
-  let ro = new ResizeObserver(() => {
-    let selectedLink = document.querySelectorAll(".websiteLink")[scrollerInd.value]
-    scrollerXOff.value = selectedLink.offsetLeft
-    scrollerWidth.value = selectedLink.clientWidth
-  });
-
-  ro.observe(document.querySelectorAll(".websiteLink")[scrollerInd.value]);
-  if (router.currentRoute.value.name == "home") scrollerHome()
-
-})
-
-const modScrollerWidth = (e: Event) => {
-  let link = e.target as HTMLLinkElement
-  if (link.nodeName == "IMG")
-    link = (e.target as HTMLImageElement).parentElement as HTMLLinkElement
-
-  scrollerInd.value = parseInt(link.dataset.ind!)
-  scrollerWidth.value = link.clientWidth
-  scrollerXOff.value = link.offsetLeft
-  timeLastRouteChange.value = Date.now()
+enum NAV_SEL {
+  Home,
+  Lists,
+  Reviews,
+  Levels,
+  None
 }
-
-const scrollerHome = () => {
-  scrollerInd.value = -1
-}
+const scrollerInd = ref(NAV_SEL.Home)
 
 const localStorg = ref(hasLocalStorage())
 const editorDropdownOpen = ref(0)
@@ -148,7 +115,36 @@ const modifyNavbarScroll = () => {
 
 }
 
-router.afterEach(() => navbarHidden.value = false)
+router.afterEach(newP => {
+  navbarHidden.value = false
+  switch (newP.name) {
+    case 'home':
+      scrollerInd.value = NAV_SEL.Home; break;
+
+    case 'listViewer':
+    case 'editor':
+    case 'editing':
+      scrollerInd.value = NAV_SEL.Lists; break;
+
+    case 'reviewViewer':
+    case 'editingReview':
+    case 'writer':
+      scrollerInd.value = NAV_SEL.Reviews; break;
+
+    case 'browser':
+      if (newP.path.includes("reviews"))
+        scrollerInd.value = NAV_SEL.Reviews
+      else if (newP.path.includes("lists"))
+        scrollerInd.value = NAV_SEL.Lists
+      else if (newP.path.includes("levels"))
+        scrollerInd.value = NAV_SEL.Levels
+      break;
+      
+    default:
+      scrollerInd.value = NAV_SEL.None; break;
+      break;
+  }
+})
 modifyNavbarScroll()
 
 const navbarHidden = ref(false)
@@ -159,6 +155,14 @@ const Sett = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 const settingsOpen = ref(false)
+
+const open = (to: string) => {
+  editorDropdownOpen.value = 0
+  if (SETTINGS.value.navDClick)
+    router.push(`/make/${to.slice(0, to.length-1)}`)
+  else
+    router.push(`/browse/${to}`)
+}
 
 </script>
 
@@ -173,40 +177,43 @@ const settingsOpen = ref(false)
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 backdrop-blur-md max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform overflow-x-clip">
-    <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
+    class="box-border flex sticky top-0 max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform overflow-x-clip">
+    <section class="flex backdrop-blur-md text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{ 'opacity-50 pointer-events-none': !isOnline }">
       
       <!-- Home link -->
-      <RouterLink to="/" @click="scrollerHome" class="relative ml-2 websiteLink">
-        <Logo class="w-10 h-10 button" />
+      <RouterLink to="/" class="relative ml-2 websiteLink">
+        <Logo class="w-10 h-10 button"
+          :class="{'stroke-lof-400 fill-lof-200': scrollerInd == NAV_SEL.Home, 'fill-lof-300 brightness-125 stroke-lof-200': scrollerInd != NAV_SEL.Home}"
+        />
       </RouterLink>
     
 
       <!-- Lists -->
-      <RouterLink @click="openEditorDropdown($event, 1)" to="/browse/lists"
-        class="flex relative flex-col gap-2 items-center px-4 group max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 1 }">
-        <img src="../images/browseMobHeader.svg" :class="{'rotate-[45deg]': editorDropdownOpen}"
-          alt="" class="w-4 transition-transform" />{{ $t('help.Lists') }}
-
-        <NavbarDropdown v-if="editorDropdownOpen == 1" :is-review="false" />
-      </RouterLink>
+       <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex relative flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists}"
+       >
+          <List class="w-4 h-4" />{{ $t('help.Lists') }}
+   
+          <NavbarDropdown @close="editorDropdownOpen = 0" v-if="editorDropdownOpen == 1" :is-review="false" />
+       </button>
 
       <!-- Reviews -->
-      <RouterLink to="/browse/reviews"
-        class="flex flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 2 }">
-        <img src="../images/reviews.svg" alt="" class="w-4" />{{ $t('reviews.review') }}
-      </RouterLink>
+      <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex relative flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews}"
+      >
+          <Review class="w-4 h-4" />{{ $t('reviews.review') }}
+   
+          <NavbarDropdown @close="editorDropdownOpen = 0" v-if="editorDropdownOpen == 2" :is-review="true" />
+      </button>
 
       <!-- Levels -->
-      <RouterLink to="/browse/levels"
+      <RouterLink to="/browse/levels" :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Levels, 'fill-white stroke-white': scrollerInd != NAV_SEL.Levels}"
         class="flex flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{ 'md:!bg-opacity-60': scrollerInd == 3 }"><img src="../images/levelIcon.svg" alt="" class="w-4" />{{ $t('editor.levels') }}</RouterLink>
+      ><LevelIcon class="w-4 h-4" />{{ $t('editor.levels') }}</RouterLink>
     </section>
 
-    <section class="flex relative gap-7 items-center px-2 min-h-full bg-black bg-opacity-40">
+    <section class="flex relative gap-7 items-center px-2 min-h-full bg-opacity-40 backdrop-blur-md">
       <!-- Notification button -->
       <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
         <img src="../images/notifs.svg" alt=""

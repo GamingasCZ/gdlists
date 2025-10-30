@@ -56,6 +56,14 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
+            v-model="SETTINGS.navDClick"
+            :name="$t('settingsMenu.navDClick')"
+            :desc="$t('settingsMenu.navDClickHelp')"
+            control="dropdown"
+            :control-options="[[$t('settingsMenu.browsing'), 0], [$t('settingsMenu.creating'), 1]]"
+            >
+        </Option>
+        <Option
             v-model="SETTINGS.autoComments"
             :name="$t('settingsMenu.loadCom')"
             :desc="$t('settingsMenu.loadCHelp')"
