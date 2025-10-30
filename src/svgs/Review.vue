@@ -1,0 +1,3 @@
+<template>
+<svg width="32" height="32" version="1.1" viewBox="0 0 32 32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="m27.075 0.72333c-0.7081 0.002891-1.404 0.18464-2.023 0.52837l-20.212 12.898 0.96067 12.046 12.981 0.51141 12.12-20.052c0.24616-0.54234 0.37426-1.1308 0.37579-1.7264 7.33e-4 -2.3212-1.8804-4.2036-4.2015-4.2044z" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3962" style="paint-order:stroke markers fill"/><path d="m7.8386 21.617 0.10959 2.0822 2.4634 0.06773-9.8833 7.7111 1.9815-4.8886 5.3111-5.3111" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0419" style="paint-order:stroke markers fill"/></svg>
+</template>

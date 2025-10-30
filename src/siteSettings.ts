@@ -25,6 +25,7 @@ export const SETTINGS = ref({
   saveThumbs: true,
   disableBGs: false,
   notifBehaviour: 0,
+  navDClick: 0,
 });
 
 watch(SETTINGS, () => {

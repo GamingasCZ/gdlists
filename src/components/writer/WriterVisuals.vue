@@ -5,6 +5,9 @@ import ColorPicker from '../global/ColorPicker.vue';
 import { modifyListBG } from '@/Editor';
 import { getDominantColor } from '@/Reviews';
 import { FONTS } from '@/writers/Writer';
+import WriterTitleEditor from './WriterTitleEditor.vue';
+import Dialog from '../global/Dialog.vue';
+import { dialog } from '../ui/sizes';
 
 const props = defineProps<{
     postData: PostData
@@ -18,6 +21,7 @@ const uid = JSON.parse(localStorage.getItem("account_info") ?? ["0"])[1]
 const mainRolledOut = ref(true)
 const colorPickerOpen = ref(false)
 const pageDetailsOpen = ref(false)
+const titleEditorOpen = ref(false)
 
 const modifyColor = (newColor: number[]) => {
     props.postData.pageBGcolor = newColor
@@ -40,6 +44,10 @@ const resetColor = () => {
 </script>
 
 <template>
+    <Dialog :open="titleEditorOpen" @close-popup="titleEditorOpen = false" :width="dialog.xl" :title="$t('reviews.titEditor')">
+        <WriterTitleEditor :name="postData.reviewName" :data="postData.titleData" :font="postData.font" :tagline="postData.tagline" />
+    </Dialog>
+
     <section :class="{'opacity-20 pointer-events-none': disabled}" class="bg-lof-200 thinScrollbar mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
         <header class="flex p-2">
             <img src="@/images/sparkles.svg" class="mr-3 ml-2 w-8" alt="">
@@ -83,12 +91,20 @@ const resetColor = () => {
                 </button>
             </button>
             
-            <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-80 aspect-video">
-                <button class="flex flex-col gap-2 items-center p-2 button">
-                    <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
-                    <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
+            <div class="flex flex-col gap-4 h-32 grow">
+                <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow disabled:opacity-20 hover:bg-opacity-80">
+                    <button class="flex gap-2 items-center p-1 button">
+                        <img src="@/images/page.svg" alt="" class="w-8 opacity-40">
+                        <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
+                    </button>
                 </button>
-            </button>
+                <button @click="titleEditorOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow disabled:opacity-20 hover:bg-opacity-80">
+                    <button class="flex gap-2 items-center p-1 button">
+                        <img src="@/images/titleEdit.svg" alt="" class="w-8 opacity-40">
+                        <p class="text-xl text-white text-opacity-40">{{ $t('reviews.heading') }}</p>
+                    </button>
+                </button>
+            </div>
 
             <button @click="colorPickerOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow hover:bg-opacity-80">
                 <button class="flex flex-col gap-2 items-center p-2 button">
