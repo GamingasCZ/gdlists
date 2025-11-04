@@ -2,24 +2,65 @@
 import type { TitleData } from '@/interfaces';
 import PostTitle from '../levelViewer/PostTitle.vue';
 import Option from '../ui/Option.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import ColorPicker from '../global/ColorPicker.vue';
 
 const themePath = import.meta.env.BASE_URL+"/titleThemes"
 const themeCount = 4
 
-defineProps<{
+const props = defineProps<{
     name: string
     tagline: string
     font: number
     data?: TitleData
 }>()
 
+// scaling preview text
 const elA = ref<HTMLDivElement>()
 const elB = ref<HTMLDivElement>()
 const scale = ref(1)
 onMounted(() => {
     scale.value = elA.value?.clientWidth/elB.value?.clientWidth ?? 1
 })
+
+const themeColors = [
+    2, 1, 1, 1
+]
+const colorCount = () => {
+    let colors: {[setting: string]: any} = {}
+    colors.theme = themeColors[props.data?.theme]
+    if (props.data?.outline) colors.outline = 1
+    if (props.data?.shadow > 0) colors.shadow = 1
+
+    return colors
+}
+const getEditableColors = computed(colorCount)
+const generateColorArray = () => {
+    if (!props.data) return
+
+    let cols = colorCount()
+    for (const col in cols) {
+        if (props.data.colors[1]?.[col] && props.data.colors[1][col].length == cols[col]) continue
+        cols[col] = Array(cols[col]).fill([140, 32, 3]);
+    }
+    
+    if (!props.data.colors[1].length)
+        props.data.colors[1] = cols
+    else {
+        for (const col in cols)
+            props.data.colors[1][col] = cols[col]
+    }
+}
+
+watch(getEditableColors, generateColorArray, {deep: true})
+
+const colorPickerOpen = ref<(-1 | [string, number])>(-1)
+const base = import.meta.env.BASE_URL
+generateColorArray(true)
+
+const deb = (newCols: any) => {
+    props.data.colors[1][colorPickerOpen[0]][colorPickerOpen[1]] = newCols
+}
 
 </script>
 
@@ -59,11 +100,33 @@ onMounted(() => {
                 :name="'Barvy'"
                 control="slot"
             >
-                <div>
+                {{ data?.colors[1] }}
+                <div v-if="colorPickerOpen != -1" class="p-2">
+                    <ColorPicker
+                        @colors-modified="deb($event)"
+                        :hue="data.colors[1][colorPickerOpen[0]][colorPickerOpen[1]][0]"
+                        :lightness="data.colors[1][colorPickerOpen[0]][colorPickerOpen[1]][2]"
+                    />
+                    <button @click="colorPickerOpen = -1" class="flex gap-2 p-2 ml-auto bg-black rounded-md button"><img src="@/images/checkThick.svg" class="w-4" alt="">{{ $t('other.accept') }}</button>
+                </div>
+                <div v-else class="flex gap-2 items-center">
                     <div class="flex flex-col gap-2 items-center p-2 m-2 w-max bg-black bg-opacity-40 rounded-md">
-                        <input type="checkbox" id="teAutoColor">
+                        <input v-model="data.colors[0]" type="checkbox" id="teAutoColor">
                         <label for="teAutoColor">Automaticky</label>
                     </div>
+
+                    <template v-for="(colAmount, colKey, ind) in getEditableColors">
+                        <button
+                            v-for="colIndex in colAmount"
+                            class="flex justify-center items-center w-10 h-10 rounded-md border-4 border-white border-solid button focus-visible:!outline focus-visible:!outline-current"
+                            :class="{'disabled': data.colors[0]}"
+                            :disabled="data.colors[0]"
+                            :style="{backgroundColor: `hsl(${data?.colors[1][colKey][colIndex-1][0]}, ${data?.colors[1][colKey][colIndex-1][1]*100}%, ${data?.colors[1][colKey][colIndex-1][2]}%)`}"
+                            @click="colorPickerOpen = [colKey, colIndex-1]"
+                        >
+                            <img :src="`${base}/titleThemes/${colKey}.svg`" class="w-6" alt="">
+                        </button>
+                    </template>
                 </div>
             </Option>
             <div class="grid grid-cols-2 gap-2">
