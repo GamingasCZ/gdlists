@@ -218,8 +218,8 @@ const open = (to: string) => {
       <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
         <img src="../images/notifs.svg" alt=""
         class="w-5" />
-        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-3 rounded-md border-2 border-black animate-ping bg-lof-400 aspect-square"></div>
-        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black motion-safe:animate-ping bg-lof-400 aspect-square"></div>
+        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black bg-lof-400 aspect-square"></div>
       </button>
 
       <button @click="settingsOpen = true" class="button max-sm:hidden">
@@ -238,20 +238,11 @@ const open = (to: string) => {
       <!-- Logged in, settings -->
       <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
         <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
-        
         <ProfilePicture
           :uid="currentUID"
           :cutout="currentCutout"
           :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-          class="absolute animate-ping top-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
-          id="profilePicture" v-if="!isOnline"
-          />
-          
-        <ProfilePicture
-          :uid="currentUID"
-          :cutout="currentCutout"
-          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-          class="absolute top-0 z-10 w-9 h-9 shadow-drop motion-safe:!transition-[top,right,transform] duration-[20ms] button"
+          class="absolute right-0 button top-0 z-20 w-9 h-9 shadow-drop motion-safe:transition-all duration-[10ms]"
           id="profilePicture"
         />
       </div>
