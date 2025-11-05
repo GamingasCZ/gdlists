@@ -354,7 +354,7 @@ function selectBatch($data) {
   if (isset($_GET["hidden"])) {
     if (!getAuthorization()) die();
     $user = checkAccount($mysqli)["id"];
-    $addReq = "AND " . $type . ".uid=" . $user;
+    $addReq = "AND " . $type . ".uid=" . $user . " AND `hidden` NOT LIKE 0";
     $showHidden = "";
   }
 
@@ -367,15 +367,17 @@ function selectBatch($data) {
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
   // Lists/Reviews
+  $maxFetch = clamp(intval($_GET["fetchAmount"]), 2, 50);
+  $ratingKey = substr($type, 0, -1) . '_id';
   $maxpageQuery;
   if ($type != "levels") {
-    $query = sprintf("SELECT %s, %s FROM ratings
-      RIGHT JOIN %s ON %s.id = ratings.%s_id
-      WHERE %s %s.id<=? AND `name` LIKE ? %s
-      GROUP BY `name`
-      ORDER BY hidden DESC, id DESC
-      LIMIT %s
-      OFFSET %s", $range, $ratings, $type, $type, substr($type, 0, -1), $showHidden, $type, $addReq, clamp(intval($_GET["fetchAmount"]), 2, 50), $dbSlice);
+    $query = "SELECT $range, $ratings FROM ratings
+              RIGHT JOIN $type ON $type.id = ratings.$ratingKey
+              WHERE $showHidden $type.id<=? AND `name` LIKE ? $addReq
+              GROUP BY `name`
+              ORDER BY hidden DESC, id DESC
+              LIMIT $maxFetch
+              OFFSET $dbSlice";
     $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
   }
   else {
