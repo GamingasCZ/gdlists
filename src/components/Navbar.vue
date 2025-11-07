@@ -195,7 +195,9 @@ const open = (to: string) => {
        >
           <List class="w-4 h-4" />{{ $t('help.Lists') }}
    
-          <NavbarDropdown @close="editorDropdownOpen = 0" v-if="editorDropdownOpen == 1" :is-review="false" />
+          <Transition name="fadeSlide">
+            <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 1" :is-review="false" />
+          </Transition>
        </button>
 
       <!-- Reviews -->
@@ -204,7 +206,9 @@ const open = (to: string) => {
       >
           <Review class="w-4 h-4" />{{ $t('reviews.review') }}
    
-          <NavbarDropdown @close="editorDropdownOpen = 0" v-if="editorDropdownOpen == 2" :is-review="true" />
+          <Transition name="fadeSlide">
+            <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 2" :is-review="true" />
+          </Transition>
       </button>
 
       <!-- Levels -->

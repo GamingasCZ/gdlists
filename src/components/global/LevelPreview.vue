@@ -162,7 +162,7 @@ const selectLevel = () => {
       <hr class="px-2 my-2 w-72 h-0.5 bg-white border-none opacity-40">
 
       <button v-if="loggedIn && !disableLink" @click.stop="addToTemporaryList" :disabled="selectedLevels.length >= 50" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
-        <img src="@/images/addLevel.svg" class="inline mr-2 w-5" alt="">{{ $t('listViewer.addToList') }}
+        <img src="@/images/plus.svg" class="inline mr-2 w-5" alt="">{{ $t('listViewer.addToList') }}
       </button>
       <button v-else-if="disableLink" @click.stop="selectLevel()" class="z-20 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-60 button">
         <img src="@/images/modPick.svg" class="inline mr-2 w-5" alt="">{{ $t('other.pick') }}

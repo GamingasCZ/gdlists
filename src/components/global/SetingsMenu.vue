@@ -75,7 +75,7 @@ const currLang = SETTINGS.value.language
 
 <template> 
   <div
-  class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
+  class="flex absolute right-2 top-16 flex-col gap-2 p-2 text-white rounded-md -z-10 bg-greenGradient sm:top-12"
   id="settingsMenu"
   >
     <Teleport to="body">

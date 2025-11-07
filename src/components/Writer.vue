@@ -46,27 +46,38 @@ const props = defineProps<{
     postID?: string
     isLoggedIn: boolean
     editing?: boolean
+    editDraft?: string
 }>()
 
 const WRITER = ref([LIST, REVIEW][props.type])
 const POST_DATA = ref<PostData>(WRITER.value.general.postObject())
-watch(() => props.type, () => {
-    WRITER.value = [LIST, REVIEW][props.type]
-    drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
-    resetPost()
-})
 
 var loadEditDraft: ReviewDraft | null = null
 watch(timeLastRouteChange, () => {
+    let ptype = ['list', 'review'][props.type]
+    if (ptype != WRITER.value.general.postType) {
+        WRITER.value = [LIST, REVIEW][props.type]
+        drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
+    }
+    
     if (props.editing) {
-        if (loadEditDraft)
+        if (props.editDraft) {
+            loadDraft(drafts.value[props.editDraft])
+        }
+        else if (loadEditDraft)
             loadOnlineEdit(loadEditDraft)
+        else resetPost()
     }
     else
-        if (loadEditDraft)
-            loadDraft(loadEditDraft)
-        else
-            resetPost()
+        if (props.editDraft) {
+            loadDraft(drafts.value[props.editDraft])
+        }
+        else {
+            if (loadEditDraft)
+                loadDraft(loadEditDraft)
+            else
+                resetPost()
+        }
 })
 
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
@@ -712,10 +723,17 @@ const updateReview = () => {
 let autosaveInterval: number
 onMounted(() => {
     if (props.editing) {
-        loadOnlineEdit()
+        if (props.editDraft)
+            loadOnlineEdit(drafts.value[props.editDraft])
+        else
+            loadOnlineEdit()
     }
-    else 
-        POST_DATA.value = WRITER.value.general.postObject()
+    else {
+        if (props.editDraft)
+            loadDraft(drafts.value[props.editDraft])
+        else
+            POST_DATA.value = WRITER.value.general.postObject()
+    }
 
     // Add lavels from saved
     if (predefinedLevelList.value.length) {

@@ -15,13 +15,13 @@ const router = createRouter({
       path: "/make/list",
       name: "editor",
       component: () => import("@/components/Writer.vue"),
-      props: {type: 0}
+      props: (route) => ({type: 0, editDraft: route.query.draft ?? false})
     },
     {
       path: "/make/review",
       name: "writer",
       component: () => import("@/components/Writer.vue"),
-      props: {type: 1}
+      props: (route) => ({type: 1, editDraft: route.query.draft ?? false})
     },
     {
       path: "/browse/:type",
@@ -53,13 +53,13 @@ const router = createRouter({
     {
       path: "/edit/list/:id",
       name: "editing",
-      props: (route) => ({ type: 0, postID: route.params.id, editing: true }),
+      props: (route) => ({ type: 0, postID: route.params.id, editing: true, editDraft: route.query.draft ?? false }),
       component: () => import("@/components/Writer.vue")
     },
     {
       path: "/edit/review/:id",
       name: "editingReview",
-      props: (route) => ({ type: 1, postID: route.params.id, editing: true }),
+      props: (route) => ({ type: 1, postID: route.params.id, editing: true, editDraft: route.query.draft ?? false }),
       component: () => import("@/components/Writer.vue")
     },
     {
