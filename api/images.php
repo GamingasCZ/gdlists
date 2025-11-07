@@ -81,7 +81,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     $filesize = strlen($binaryData);
     if ($filesize > MAX_UPLOADSIZE) die("-4");
-    if ($filesize < 2049) die("-4");
+    if ($filesize < 2049) die("-11");
 
     // Create directory for user
     if (!is_dir($userPath)) {
