@@ -78,7 +78,7 @@ const currLang = SETTINGS.value.language
   class="flex absolute right-2 top-16 flex-col gap-2 p-2 text-white rounded-md -z-10 bg-greenGradient sm:top-12"
   id="settingsMenu"
   >
-    <Teleport to="body">
+    <Teleport to="#app">
       <Dialog v-if="dialogs.help" :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
         <Help />
       </Dialog>
@@ -87,13 +87,13 @@ const currLang = SETTINGS.value.language
         <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
       </Dialog>
   
-      <Dialog v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+      <Dialog class="z-40" v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
         <Gallery unselectable />
       </Dialog>
     </Teleport>
 
     <Transition name="fadeSlide">
-      <Teleport to="body">
+      <Teleport to="#app">
         <div v-if="dialogs.themes" class="z-30">
             <Themes @close="dialogs.themes = false" />
         </div>
