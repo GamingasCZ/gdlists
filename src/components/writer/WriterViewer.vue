@@ -112,7 +112,7 @@ onUnmounted(() => {
             @text-modified="container.data = $event"
             :type="container.type"
             :current-settings="container.settings"
-            :class="[CONTAINERS[container.type].styling ?? '']"
+            :class="[CONTAINERS[container.type]?.styling ?? '']"
             :style="{ textAlign: container.align }"
             :key="container.id"
             :focused="editable && selectedContainer[0] == index"
