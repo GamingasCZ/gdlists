@@ -9,6 +9,7 @@ import ResizeIcon from "@/images/resizer.svg?url"
 import MoveUpIcon from "@/images/moveUp.svg?url"
 import MoveDownIcon from "@/images/moveDown.svg?url"
 import AddIcon from "@/images/plus.svg?url"
+import RemoveIcon from "@/images/close.svg?url"
 import { ref } from "vue";
 
 const writerShortcuts = [
@@ -72,6 +73,12 @@ const writerShortcuts = [
         title: i18n.global.t('reviews.elDown'),
         icon: MoveDownIcon
     },
+    {
+        shortcut: [Key.None, 'Escape'],
+        action: ["deselect"],
+        title: i18n.global.t('other.deselect'),
+        icon: RemoveIcon
+    }
 ]
 
 var actionsFun
@@ -157,7 +164,7 @@ function checkForShortcut(e: KeyboardEvent) {
     comboHeld.value = currCombo
 
 	let f: string[] | boolean;
-	if (currCombo != Key.None && (f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
+	if ((f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
         actionsFun(...f)
 
 }

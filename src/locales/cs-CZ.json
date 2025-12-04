@@ -420,7 +420,8 @@
     "homepage": "Domovská stránka",
     "title": "Název",
     "moveHere": "Přesunout sem",
-    "lIDcopied": "ID levelu zkopírováno!"
+    "lIDcopied": "ID levelu zkopírováno!",
+    "deselect": "Zneaktivnit prvek"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

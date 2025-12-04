@@ -462,7 +462,13 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
         case 'addLevel':
             addReviewLevel(POST_DATA)
             break;
-	}
+        case 'deselect':
+            if (selectedContainer.value[0] > -1) {
+                selectedContainer.value = [-1]
+                document?.activeElement?.blur()
+            }
+            break;
+        }
 }
 provide("writerAction", doAction)
 
