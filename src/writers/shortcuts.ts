@@ -163,8 +163,12 @@ function checkForShortcut(e: KeyboardEvent) {
 	let currCombo = getCombo(e)
     comboHeld.value = currCombo
 
+    // do not check for shortcuts without modifiers when an element is selected
+    let comboChecking = document.activeElement == document.body
+                        ? true : (comboHeld.value != Key.None || e.key == 'Escape')
+
 	let f: string[] | boolean;
-	if ((f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
+	if (comboChecking && (f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
         actionsFun(...f)
 
 }
