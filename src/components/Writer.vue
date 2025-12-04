@@ -53,6 +53,8 @@ const POST_DATA = ref<PostData>(WRITER.value.general.postObject())
 watch(() => props.type, () => {
     WRITER.value = [LIST, REVIEW][props.type]
     drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
+    shortcutUnload()
+    shortcutListen(WRITER.value.toolbar, doAction)
     resetPost()
 })
 
