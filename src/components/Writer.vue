@@ -991,6 +991,7 @@ const addPreset = (ind: number) => {
 }
 
 const collabEditor = ref<HTMLDialogElement>()
+const shortcutsPopup = ref<HTMLDialogElement>()
 
 </script>
 
@@ -1063,8 +1064,9 @@ const collabEditor = ref<HTMLDialogElement>()
         </DialogVue>
 
         <DialogVue :open="openDialogs.shortcuts" @close-popup="openDialogs.shortcuts = false" :title="$t('reviews.keysh')"
-            :width="dialog.medium">
-            <ShortcutsPopup />
+            :width="dialog.medium" :side-button-text="$t('other.profiles')" :action="shortcutsPopup?.profilePopupOpen">
+            <template #icon><img src="@/images/edit.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-4"></template>
+            <ShortcutsPopup ref="shortcutsPopup" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.collabs[0]" @close-popup="openDialogs.collabs[0] = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :side-button-text="$t('navbar.saved')" :action="collabEditor?.openSaved">

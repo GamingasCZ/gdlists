@@ -421,7 +421,8 @@
     "title": "Název",
     "moveHere": "Přesunout sem",
     "lIDcopied": "ID levelu zkopírováno!",
-    "deselect": "Zneaktivnit prvek"
+    "deselect": "Zneaktivnit prvek",
+    "profiles": "Profily"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

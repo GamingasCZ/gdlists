@@ -442,7 +442,8 @@
     "loginFuckup": "Session is not valid!",
     "moveHere": "Move Here",
     "lIDcopied": "Level ID copied!",
-    "deselect": "Deselect Element"
+    "deselect": "Deselect Element",
+    "profiles": "Profiles"
   },
   "settingsMenu": {
     "asOff": "Off",
