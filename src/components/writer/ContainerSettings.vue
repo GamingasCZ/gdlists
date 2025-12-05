@@ -107,7 +107,7 @@ onBeforeUnmount(() => {
                 </div>
                 
                 <!-- Button -->
-                <button v-if="containers[type].settings[index].type[0] == 1" @click.stop="emit('pressedButton', key); forceHide()" class="px-4 py-1 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
+                <button v-if="containers[type].settings[index].type[0] == 1" type="button" @click.stop="emit('pressedButton', key); forceHide()" class="px-4 py-1 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
                 
                 <!-- Checkbox -->
                 <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">
@@ -149,13 +149,13 @@ onBeforeUnmount(() => {
     
             </template>
             <div class="flex gap-1 justify-between mt-3">
-                <button @click="emit('move', -1)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+                <button @click="emit('move', -1)" type="button" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
                     <img src="@/images/moveUp.svg" class="mx-auto w-5 button" alt="">
                 </button>
-                <button @click="emit('move', 1)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+                <button @click="emit('move', 1)" type="button" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
                     <img src="@/images/moveDown.svg" class="mx-auto w-5 button" alt="">
                 </button>
-                <button @click="emit('remove')" class="flex gap-1 items-center p-1 ml-6 text-xl font-bold text-black bg-red-400 rounded-md">
+                <button @click="emit('remove')" type="button" class="flex gap-1 items-center p-1 ml-6 text-xl font-bold text-black bg-red-400 rounded-md">
                     <img src="@/images/del.svg" alt="" class="w-6">
                     <span>{{ $t('editor.remove') }}</span>
                 </button>
