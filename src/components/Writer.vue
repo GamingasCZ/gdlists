@@ -992,6 +992,16 @@ const addPreset = (ind: number) => {
 
 const collabEditor = ref<HTMLDialogElement>()
 const shortcutsPopup = ref<HTMLDialogElement>()
+const editingShortcut = ref(false)
+
+const doShortcutEdit = () => {
+    shortcutUnload()
+    editingShortcut.value = true
+}
+const endShortcutEdit = () => {
+    shortcutListen(WRITER.value.toolbar, doAction)
+    editingShortcut.value = false
+}
 
 </script>
 
@@ -1063,10 +1073,10 @@ const shortcutsPopup = ref<HTMLDialogElement>()
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.shortcuts" @close-popup="openDialogs.shortcuts = false" :title="$t('reviews.keysh')"
+        <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"
             :width="dialog.medium" :side-button-text="$t('other.profiles')" :action="shortcutsPopup?.profilePopupOpen">
-            <template #icon><img src="@/images/edit.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-4"></template>
-            <ShortcutsPopup ref="shortcutsPopup" />
+            <template #icon><img src="@/images/key.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-4"></template>
+            <ShortcutsPopup ref="shortcutsPopup" @editing="doShortcutEdit" @finished-edit="endShortcutEdit" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.collabs[0]" @close-popup="openDialogs.collabs[0] = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :side-button-text="$t('navbar.saved')" :action="collabEditor?.openSaved">

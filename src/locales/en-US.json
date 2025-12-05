@@ -443,7 +443,11 @@
     "moveHere": "Move Here",
     "lIDcopied": "Level ID copied!",
     "deselect": "Deselect Element",
-    "profiles": "Profiles"
+    "profiles": "Profiles",
+    "ksSingle": "Single-key",
+    "custom": "Custom",
+    "ksCtrl": "Control-style",
+    "ksAlt": "Alt-style"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -801,7 +805,8 @@
     "howStart": "How would you like to start?",
     "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics.",
     "sectionName": "Section Name",
-    "colGaps": "Spacing"
+    "colGaps": "Spacing",
+    "enterCombo": "Enter a new combo"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

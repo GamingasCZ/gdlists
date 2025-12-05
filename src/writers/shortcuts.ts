@@ -11,6 +11,49 @@ import MoveDownIcon from "@/images/moveDown.svg?url"
 import AddIcon from "@/images/plus.svg?url"
 import RemoveIcon from "@/images/close.svg?url"
 import { ref } from "vue";
+import { SETTINGS } from "@/siteSettings";
+
+var defaultShortcuts = [
+    {
+        "save": [Key.Ctrl, 'S'],
+        "containerOptions": [Key.Alt | Key.Shift, 'P'],
+        "containerDelete": [Key.Alt | Key.Shift, 'Q'],
+        "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
+        "drafts": [Key.Ctrl, 'O'],
+        "addLevel": [Key.Alt, 'L'],
+        "resizeSmaller": [Key.Alt, '-'],
+        "resizeBigger": [Key.Alt, '+'],
+        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp'],
+        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown'],
+        "deselect": [Key.None, 'Escape']
+    },
+    {
+        "save": [Key.Ctrl, 'S'],
+        "containerOptions": [Key.Alt | Key.Shift, 'P'],
+        "containerDelete": [Key.Alt | Key.Shift, 'Q'],
+        "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
+        "drafts": [Key.Ctrl, 'O'],
+        "addLevel": [Key.Alt, 'L'],
+        "resizeSmaller": [Key.Alt, '-'],
+        "resizeBigger": [Key.Alt, '+'],
+        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp'],
+        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown'],
+        "deselect": [Key.None, 'Escape']
+    },
+    {
+        "save": [Key.Ctrl, 'S'],
+        "containerOptions": [Key.Alt | Key.Shift, 'P'],
+        "containerDelete": [Key.Alt | Key.Shift, 'Q'],
+        "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
+        "drafts": [Key.Ctrl, 'O'],
+        "addLevel": [Key.Alt, 'L'],
+        "resizeSmaller": [Key.Alt, '-'],
+        "resizeBigger": [Key.Alt, '+'],
+        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp'],
+        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown'],
+        "deselect": [Key.None, 'Escape']
+    },
+]
 
 const writerShortcuts = [
     {
@@ -83,6 +126,13 @@ const writerShortcuts = [
 
 var actionsFun
 export const shortcutListen = (toolbar, actions) => {
+    if (SETTINGS.value.shortcutProfile == -1) {
+        if (isFirefox)
+            SETTINGS.value.shortcutProfile = 1 // ctrl shortcuts bcus of firefox bug
+        else
+            SETTINGS.value.shortcutProfile = 0 // chromium ctrl shortcuts
+    }
+
     window.addEventListener("keydown", blockNativeShortcuts)
     window.addEventListener("keyup", checkForShortcut)
 

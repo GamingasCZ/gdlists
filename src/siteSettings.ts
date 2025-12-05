@@ -23,6 +23,7 @@ export const SETTINGS = ref({
   colorization: true,
   flipControls: true,
   saveThumbs: true,
+  shortcutProfile: -1 // will properly select itself based on browser
 });
 
 watch(SETTINGS, () => {

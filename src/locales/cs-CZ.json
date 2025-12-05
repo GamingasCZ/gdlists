@@ -422,7 +422,11 @@
     "moveHere": "Přesunout sem",
     "lIDcopied": "ID levelu zkopírováno!",
     "deselect": "Zneaktivnit prvek",
-    "profiles": "Profily"
+    "profiles": "Profily",
+    "custom": "Vlastní",
+    "ksSingle": "Jednoklávesové",
+    "ksCtrl": "Control-ové",
+    "ksAlt": "Alt-ové"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -802,7 +806,8 @@
     "howStart": "Jak bys rád začal?",
     "cRatingHelp": "Můžeš si vytvořit další čtyři vlasní hodnocení. Tyto hodnocení se nezapočítávají do globálních statistik.",
     "sectionName": "Jméno sekce",
-    "colGaps": "Mezery"
+    "colGaps": "Mezery",
+    "enterCombo": "Stiskni novou kombinaci"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
