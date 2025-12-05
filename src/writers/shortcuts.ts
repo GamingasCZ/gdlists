@@ -16,7 +16,7 @@ import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 var defaultShortcuts = [
     {
         "save": [Key.Ctrl, 'S'],
-        "containerOptions": [Key.Alt | Key.Shift, 'P'],
+        "containerOptions": [Key.Alt, 'P'],
         "containerDelete": [Key.Alt | Key.Shift, 'Q'],
         "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
         "drafts": [Key.Ctrl, 'O'],
@@ -55,7 +55,7 @@ var defaultShortcuts = [
     },
     {
         "save": [Key.Ctrl, 'S'],
-        "containerOptions": [Key.Ctrl | Key.Shift, 'P'],
+        "containerOptions": [Key.Ctrl, 'P'],
         "containerDelete": [Key.Ctrl | Key.Shift, 'Q'],
         "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
         "drafts": [Key.Ctrl, 'O'],
@@ -94,7 +94,7 @@ var defaultShortcuts = [
     },
     {
         "save": [Key.Ctrl, 'S'],
-        "containerOptions": [Key.Ctrl | Key.Shift, 'P'],
+        "containerOptions": [Key.Ctrl, 'P'],
         "containerDelete": [Key.Ctrl | Key.Shift, 'Q'],
         "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
         "drafts": [Key.Ctrl, 'O'],

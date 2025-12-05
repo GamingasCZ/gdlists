@@ -111,8 +111,8 @@ defineExpose({profilePopupOpen})
     <section class="grid bg-[url(@/images/fade.svg)] mt-1 bg-repeat-x grid-cols-3 gap-3 max-h-[35rem] overflow-auto p-3">
         <div
             v-for="(shortcut, ind) in keyShortcuts"
-            v-memo="[justChangedProfile]"
-            :key="selectedProfile"
+            v-memo="[justChangedProfile, editingInd, newCombo]"
+            :key="ind+selectedProfile"
             @click="editShortcut(ind)"
             :class="{'hover:bg-opacity-80 button': editingInd != ind, 'disabled': (editingInd != -1 && editingInd != ind)}"
             class="flex relative flex-col gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md group"
