@@ -1075,7 +1075,7 @@ const endShortcutEdit = () => {
 
         <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"
             :width="dialog.medium" :side-button-text="$t('other.profiles')" :action="shortcutsPopup?.profilePopupOpen">
-            <template #icon><img src="@/images/key.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-4"></template>
+            <template #icon><img src="@/images/key.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-5"></template>
             <ShortcutsPopup ref="shortcutsPopup" @editing="doShortcutEdit" @finished-edit="endShortcutEdit" />
         </DialogVue>
 

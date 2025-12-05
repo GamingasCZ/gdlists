@@ -2,7 +2,7 @@
 import { doOverride, keyShortcuts } from '@/writers/shortcuts';
 import { Key } from '@/writers/Writer';
 import Dropdown from '../ui/Dropdown.vue';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { onMounted } from 'vue';
 import SaveIcon from '@/images/symbolicSave.svg?url'
 import LoadIcon from '@/images/filePreview.svg?url'
@@ -39,9 +39,18 @@ onMounted(() => {
 })
 
 const profiles = [i18n.global.t('other.ksAlt'), i18n.global.t('other.ksCtrl'), i18n.global.t('other.ksSingle'), i18n.global.t('other.custom')]
+const justChangedProfile = ref(Date.now())
 const changeProfile = (to: number) => {
     selectedProfile.value = to
     SETTINGS.value.shortcutProfile = to
+    ppOpen.value = false
+    emit('editing')
+    nextTick(() => {
+        emit('finishedEdit')
+        nextTick(() => {
+            justChangedProfile.value = Date.now()
+        })
+    })
 }
 
 const listen = (e: KeyboardEvent) => {
@@ -102,6 +111,8 @@ defineExpose({profilePopupOpen})
     <section class="grid bg-[url(@/images/fade.svg)] mt-1 bg-repeat-x grid-cols-3 gap-3 max-h-[35rem] overflow-auto p-3">
         <div
             v-for="(shortcut, ind) in keyShortcuts"
+            v-memo="[justChangedProfile]"
+            :key="selectedProfile"
             @click="editShortcut(ind)"
             :class="{'hover:bg-opacity-80 button': editingInd != ind, 'disabled': (editingInd != -1 && editingInd != ind)}"
             class="flex relative flex-col gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md group"
