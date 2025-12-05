@@ -7,6 +7,7 @@ import { onMounted } from 'vue';
 import SaveIcon from '@/images/symbolicSave.svg?url'
 import LoadIcon from '@/images/filePreview.svg?url'
 import { hasLocalStorage, SETTINGS } from '@/siteSettings';
+import { i18n } from '@/locales';
 
 const emit = defineEmits<{
     (e: "editing"): void
