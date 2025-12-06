@@ -42,6 +42,7 @@ onMounted(() => {
 const profiles = [i18n.global.t('other.ksAlt'), i18n.global.t('other.ksCtrl'), i18n.global.t('other.ksSingle'), i18n.global.t('other.custom')]
 const justChangedProfile = ref(Date.now())
 const changeProfile = (to: number) => {
+    editingInd.value = -1
     selectedProfile.value = to
     SETTINGS.value.shortcutProfile = to
     ppOpen.value = false
@@ -76,10 +77,21 @@ const editShortcut = (which: number) => {
 const newCombo = ref<[Key, number] | null>(null)
 
 const saveNewCombo = (shortcut: any[]) => {
+    if (newCombo == null) return
+
     // check if single-letter is allowed
     let action = shortcut[1].join(".")
-    if (defaultShortcuts[0][action]?.[2] === false)
+    if (defaultShortcuts[0][action]?.[2] === false && newCombo.value[0] == Key.None)
         return summonNotification(i18n.global.t('other.badSh'), i18n.global.t('other.badShHelp'), "error")
+
+    // check duplicates
+    let dupl = false
+    keyShortcuts.forEach(k => {
+        if (k[0][0] == newCombo.value[0] && k[0][1] == newCombo.value[1])
+            dupl = true
+    })
+    if (dupl)
+        return summonNotification("Zkratka je již použitá", "Vyber prosím jinou.", "error")
 
     // switch to custom
     if (selectedProfile.value != profiles.length-1) {
@@ -106,12 +118,26 @@ const doExport = () => {
     summonNotification(i18n.global.t('other.shortcutsExported'), "", "check")
 }
 
+const doImport = () => {
+    var a = document.createElement("input")
+    a.type = "file"
+    a.style.display = "none"
+    document.body.appendChild(a)
+    a.click()
+    a.oninput = e => {
+        alert("vlozeno")
+    }
+    a.oncancel = e => {
+        document.removeChild(a)
+    }
+}
+
 defineExpose({profilePopupOpen})
 
 </script>
 
 <template>
-    <Dropdown v-if="ppOpen" :button="button" @close="ppOpen = false" @picked-option="doExport()" :options="['Export','Import']" :icons="[SaveIcon, LoadIcon]">
+    <Dropdown v-if="ppOpen" :button="button" @close="ppOpen = false" @picked-option="$event ? doImport() : doExport()" :options="['Export','Import']" :icons="[SaveIcon, LoadIcon]">
         <template #header>
             <div class="flex flex-col gap-2 p-2">
                 <button
