@@ -367,7 +367,7 @@
     "blockquote": "Blockquote",
     "post": "Post",
     "long": "long",
-    "name": "name",
+    "name": "Name",
     "short": "short",
     "creator": "creator",
     "users": "Users",
@@ -447,7 +447,10 @@
     "ksSingle": "Single-key",
     "custom": "Custom",
     "ksCtrl": "Control-style",
-    "ksAlt": "Alt-style"
+    "ksAlt": "Alt-style",
+    "badSh": "Unusable Shortcut",
+    "badShHelp": "This action won't work, if a single-letter shortcut is used.",
+    "shortcutsExported": "Shortcuts exported!"
   },
   "settingsMenu": {
     "asOff": "Off",

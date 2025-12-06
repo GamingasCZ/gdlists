@@ -109,7 +109,7 @@ export function checkReview(post: ReviewList) {
     let allLevelIDs: string[] = []
     post.levels.forEach((level: Level) => {
         i += 1
-        if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
+        if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name').toLowerCase()])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
         if (level.levelID) allLevelIDs.push(level.levelID)

@@ -345,7 +345,7 @@
     "post": "Post",
     "long": "dlouhé",
     "short": "krátké",
-    "name": "jméno",
+    "name": "Jméno",
     "creator": "tvůrce",
     "backTO": "Zpět na",
     "points": "Odrážka",
@@ -426,7 +426,10 @@
     "custom": "Vlastní",
     "ksSingle": "Jednoklávesové",
     "ksCtrl": "Control-ové",
-    "ksAlt": "Alt-ové"
+    "ksAlt": "Alt-ové",
+    "badSh": "Nepoužitelná zkratka",
+    "badShHelp": "Tato akce nebude fungovat, pokud je použita jednoklávesová zkratka.",
+    "shortcutsExported": "Zkratky exportovány!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

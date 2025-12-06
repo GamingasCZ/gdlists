@@ -13,25 +13,25 @@ import RemoveIcon from "@/images/close.svg?url"
 import { ref } from "vue";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 
-var defaultShortcuts = [
+export var defaultShortcuts = [
     {
         "save": [Key.Ctrl, 'S'],
-        "containerOptions": [Key.Alt, 'P'],
-        "containerDelete": [Key.Alt | Key.Shift, 'Q'],
+        "containerOptions": [Key.Alt, 'P', false],
+        "containerDelete": [Key.Alt | Key.Shift, 'Q', false],
         "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
         "drafts": [Key.Ctrl, 'O'],
         "addLevel": [Key.Alt, 'L'],
-        "resizeSmaller": [Key.Alt, '-'],
-        "resizeBigger": [Key.Alt, '+'],
-        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp'],
-        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown'],
+        "resizeSmaller": [Key.Alt, '-', false],
+        "resizeBigger": [Key.Alt, '+', false],
+        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp', false],
+        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown', false],
         "deselect": [Key.None, 'Escape'],
 
         "add.default": [Key.Alt | Key.Shift, 'F'],
         "preview.1": [Key.Alt | Key.Shift, 'J'],                
-        "add.heading1": [Key.Alt, 'Digit1', true],
-        "add.heading2": [Key.Alt, 'Digit2', true],
-        "add.heading3": [Key.Alt, 'Digit3', true],
+        "add.heading1": [Key.Alt, 'Digit1'],
+        "add.heading2": [Key.Alt, 'Digit2'],
+        "add.heading3": [Key.Alt, 'Digit3'],
         "align.left": [Key.Alt, 'L'],
         "align.center": [Key.Alt, 'E'],
         "align.right": [Key.Alt, 'R'],
@@ -44,14 +44,14 @@ var defaultShortcuts = [
         "add.showRating": [Key.Alt | Key.Shift, 'R'],
         "add.showList": [Key.Alt | Key.Shift, 'E'],
         "columnCreate": [Key.Alt | Key.Shift, 'D'],
-        "format.0": [Key.Ctrl, 'B'],
-        "format.1": [Key.Ctrl, 'I'],
-        "format.2": [Key.Ctrl, 'D'],
-        "format.3": [Key.Ctrl, 'L'],
-        "format.4": [Key.Ctrl, 'B'],
-        "format.5": [Key.Ctrl, 'M'],
-        "format.6": [Key.Ctrl, 'L'],
-        "splitParagraph": [Key.Ctrl | Key.Alt, 'S']
+        "format.0": [Key.Ctrl, 'B', false],
+        "format.1": [Key.Ctrl, 'I', false],
+        "format.2": [Key.Ctrl, 'D', false],
+        "format.3": [Key.Ctrl, 'L', false],
+        "format.4": [Key.Ctrl, 'B', false],
+        "format.5": [Key.Ctrl, 'M', false],
+        "format.6": [Key.Ctrl, 'L', false],
+        "splitParagraph": [Key.Ctrl | Key.Alt, 'S', false]
     },
     {
         "save": [Key.Ctrl, 'S'],

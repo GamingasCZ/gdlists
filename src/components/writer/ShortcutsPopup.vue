@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { doOverride, keyShortcuts } from '@/writers/shortcuts';
+import { defaultShortcuts, doOverride, keyShortcuts } from '@/writers/shortcuts';
 import { Key } from '@/writers/Writer';
 import Dropdown from '../ui/Dropdown.vue';
 import { nextTick, ref } from 'vue';
@@ -8,6 +8,7 @@ import SaveIcon from '@/images/symbolicSave.svg?url'
 import LoadIcon from '@/images/filePreview.svg?url'
 import { hasLocalStorage, SETTINGS } from '@/siteSettings';
 import { i18n } from '@/locales';
+import { summonNotification } from '../imageUpload';
 
 const emit = defineEmits<{
     (e: "editing"): void
@@ -75,12 +76,16 @@ const editShortcut = (which: number) => {
 const newCombo = ref<[Key, number] | null>(null)
 
 const saveNewCombo = (shortcut: any[]) => {
+    // check if single-letter is allowed
+    let action = shortcut[1].join(".")
+    if (defaultShortcuts[0][action]?.[2] === false)
+        return summonNotification(i18n.global.t('other.badSh'), i18n.global.t('other.badShHelp'), "error")
+
     // switch to custom
     if (selectedProfile.value != profiles.length-1) {
         changeProfile(profiles.length-1)
     }
 
-    let action = shortcut[1].join(".")
     if (hasLocalStorage()) {
         let shortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}
         shortcuts[action] = newCombo.value
@@ -89,12 +94,24 @@ const saveNewCombo = (shortcut: any[]) => {
     endListen()
 }
 
+const doExport = () => {
+    var blob = new Blob([localStorage.getItem("customShortcuts") ?? ""], {type: " application/json"});
+    var downloadUrl = window.URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = "gdlists_shortcuts.json"
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(downloadUrl);
+    summonNotification(i18n.global.t('other.shortcutsExported'), "", "check")
+}
+
 defineExpose({profilePopupOpen})
 
 </script>
 
 <template>
-    <Dropdown v-if="ppOpen" :button="button" @close="ppOpen = false" :options="['Export','Import']" :icons="[SaveIcon, LoadIcon]">
+    <Dropdown v-if="ppOpen" :button="button" @close="ppOpen = false" @picked-option="doExport()" :options="['Export','Import']" :icons="[SaveIcon, LoadIcon]">
         <template #header>
             <div class="flex flex-col gap-2 p-2">
                 <button
