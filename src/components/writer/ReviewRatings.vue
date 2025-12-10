@@ -23,6 +23,9 @@ const props = defineProps<{
 const postData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
 
 watch(props, () => {
+    if (!props?.buttonState) return
+    if (props.buttonState[1] != props.index) return
+    
     switch (props.buttonState) {
         case "pick": props.settings.level = false; break;
     }
