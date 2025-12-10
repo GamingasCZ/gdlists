@@ -465,7 +465,10 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             addReviewLevel(POST_DATA)
             break;
         case 'deselect':
-            if (selectedContainer.value[0] > -1 && document.querySelector(".modalDialog") == null) {
+            if (selectedContainer.value[0] > -1
+                && document.querySelector(".modalDialog") == null
+                && document.querySelector(".containerSettings") == null
+            ) {
                 selectedContainer.value = [-1]
                 document?.activeElement?.blur()
             }

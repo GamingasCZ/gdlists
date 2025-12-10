@@ -450,7 +450,12 @@
     "ksAlt": "Alt-style",
     "badSh": "Unusable Shortcut",
     "badShHelp": "This action won't work, if a single-letter shortcut is used.",
-    "shortcutsExported": "Shortcuts exported!"
+    "shortcutsExported": "Shortcuts exported!",
+    "kbFail": "This isn't a valid shortcut file",
+    "success": "Success",
+    "kbLoaded": "Shortcuts have been loaded!",
+    "kbInUse": "Shortcut is already in use",
+    "kbInUseHelp": "Please use a different shortcut."
   },
   "settingsMenu": {
     "asOff": "Off",

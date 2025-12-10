@@ -91,7 +91,7 @@ const saveNewCombo = (shortcut: any[]) => {
             dupl = true
     })
     if (dupl)
-        return summonNotification("Zkratka je již použitá", "Vyber prosím jinou.", "error")
+        return summonNotification(i18n.global.t('other.kbInUse'), i18n.global.t('other.kbInUseHelp'), "error")
 
     // switch to custom
     if (selectedProfile.value != profiles.length-1) {
@@ -106,8 +106,23 @@ const saveNewCombo = (shortcut: any[]) => {
     endListen()
 }
 
+const doHash = (str: string, encode: false | string) => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+        hash += str.charCodeAt(i)-64
+    }
+    hash %= 32
+    if (encode === false) {
+        return String.fromCharCode(hash)
+    }
+    else {
+        return String.fromCharCode(hash) == encode
+    }
+}
+
 const doExport = () => {
-    var blob = new Blob([localStorage.getItem("customShortcuts") ?? ""], {type: " application/json"});
+    let csString = localStorage.getItem("customShortcuts") ?? ""
+    var blob = new Blob([doHash(csString, false)+csString], {type: " application/json"});
     var downloadUrl = window.URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = downloadUrl;
@@ -120,15 +135,43 @@ const doExport = () => {
 
 const doImport = () => {
     var a = document.createElement("input")
+
+    const importFail = () => {
+        summonNotification(i18n.global.t('other.error'), i18n.global.t('other.kbFail'), "error")
+        a.remove()
+    }
+
     a.type = "file"
     a.style.display = "none"
     document.body.appendChild(a)
     a.click()
-    a.oninput = e => {
-        alert("vlozeno")
+    a.oninput = (e: Event) => {
+        let file = e.target?.files as FileList
+        if (file.length > 0) {
+            let shortcutFile = file.item(0)
+            if (shortcutFile?.type != "application/json" || !hasLocalStorage())
+                return importFail()
+            shortcutFile.text().then(string => {
+                let jsonOnly = string.slice(1)
+                let parsedShortcuts = JSON.parse(jsonOnly)
+                
+                if (parsedShortcuts == null)
+                    return importFail()
+                let hash = string[0]
+                let hashValid = doHash(jsonOnly, hash)
+                if (!hashValid)
+                    return importFail()
+                
+                localStorage.setItem("customShortcuts", jsonOnly)
+                changeProfile(profiles.length-1)
+                emit('editing')
+                nextTick(() => emit('finishedEdit'))
+                summonNotification(i18n.global.t('other.kbLoaded'), "", "check")
+            })
+        }
     }
     a.oncancel = e => {
-        document.removeChild(a)
+        a.remove()
     }
 }
 
@@ -143,8 +186,8 @@ defineExpose({profilePopupOpen})
                 <button
                 v-for="(p, ind) in profiles"
                 @click="changeProfile(ind)"
-                class="py-2 text-white bg-black bg-opacity-40 rounded-md border-2 border-gray-900 button"
-                :class="{'!border-lof-400': selectedProfile == ind}"
+                class="py-2 text-white bg-black bg-opacity-40 rounded-md button"
+                :class="{'border-2 border-lof-400': selectedProfile == ind}"
                 >{{ p }}</button>
                 <hr class="m-2 border opacity-20">
             </div>

@@ -429,7 +429,12 @@
     "ksAlt": "Alt-ové",
     "badSh": "Nepoužitelná zkratka",
     "badShHelp": "Tato akce nebude fungovat, pokud je použita jednoklávesová zkratka.",
-    "shortcutsExported": "Zkratky exportovány!"
+    "shortcutsExported": "Zkratky exportovány!",
+    "success": "Úspěch",
+    "kbLoaded": "Zkratky byly načteny!",
+    "kbFail": "Toto není platný soubor se zkratkami",
+    "kbInUse": "Zkratka je již použitá",
+    "kbInUseHelp": "Vyber prosím jinou."
   },
   "listViewer": {
     "jumpTo": "Skočit na",
