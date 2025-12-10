@@ -297,7 +297,9 @@ function checkForShortcut(e: KeyboardEvent) {
     comboHeld.value = currCombo
 
     // do not check for shortcuts without modifiers when an element is selected
-    let comboChecking = document.activeElement == document.body
+    let actEl = document.activeElement
+    let nonEditing = actEl == null || (actEl.nodeName != "INPUT" && actEl.nodeName != "P")
+    let comboChecking = nonEditing
                         ? true : (comboHeld.value != Key.None || e.key == 'Escape')
 
 	let f: string[] | boolean;

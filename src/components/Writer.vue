@@ -466,8 +466,8 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             break;
         case 'deselect':
             if (selectedContainer.value[0] > -1
-                && document.querySelector(".modalDialog") == null
-                && document.querySelector(".containerSettings") == null
+                && document.querySelector(".modalDialog") == null    
+                && document.activeElement != null
             ) {
                 selectedContainer.value = [-1]
                 document?.activeElement?.blur()

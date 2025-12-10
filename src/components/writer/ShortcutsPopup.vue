@@ -240,7 +240,6 @@ defineExpose({profilePopupOpen})
                     </div>
                 </template>
             </div>
-        
         </div>
     </section>
 </template>
