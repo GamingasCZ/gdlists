@@ -81,7 +81,7 @@ const saveNewCombo = (shortcut: any[]) => {
 
     // check if single-letter is allowed
     let action = shortcut[1].join(".")
-    if (defaultShortcuts[0][action]?.[2] === false && newCombo.value[0] == Key.None)
+    if (defaultShortcuts[0][action]?.[2] === false && (newCombo.value[0] == Key.None || newCombo.value[0] == Key.Shift))
         return summonNotification(i18n.global.t('other.badSh'), i18n.global.t('other.badShHelp'), "error")
 
     // check duplicates
