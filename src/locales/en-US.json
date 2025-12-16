@@ -524,7 +524,9 @@
     "draftNoRemove": "Do Not Remove Draft after Upload",
     "colorize": "Colorize via Background Image",
     "saveThumbs": "Save Level Thumbnails",
-    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search."
+    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search.",
+    "zenFS": "Fullscreen Zen Mode",
+    "zenFSHelp": "Zen Mode will fullscreen the browser, if enabled."
   },
   "help": {
     "Lists": "Lists",

@@ -934,8 +934,10 @@ const listPickerPick = (level: Level | Level[]) => {
 const goFullscreen = () => {
     if (document.fullscreenElement)
         document.exitFullscreen()
-    else
+    else if (SETTINGS.value.fsZenMode)
         document.documentElement.requestFullscreen({navigationUI: "hide"})
+    else
+        toggleZenMode()
 }
 
 const zenMode = ref(false)

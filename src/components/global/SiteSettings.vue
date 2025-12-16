@@ -99,6 +99,13 @@ if (hasLocalStorage()) {
             control="cbox"
         >
         </Option>
+        <Option
+            v-model="SETTINGS.fsZenMode"
+            :name="$t('settingsMenu.zenFS')"
+            :desc="$t('settingsMenu.zenFSHelp')"
+            control="cbox"
+        >
+        </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />
         <Option
             v-model="SETTINGS.flipControls"

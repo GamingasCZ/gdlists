@@ -71,7 +71,9 @@
     "compactHelp": "Skryje názvy nástrojů v editoru.",
     "draftNoRemove": "Nemazat koncepty při nahrání",
     "saveThumbs": "Ukládat náhledy levelů",
-    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání."
+    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání.",
+    "zenFS": "Celoobrazovkový mód Zen",
+    "zenFSHelp": "Zda-li se prohlížeč se přepne do režimu celé obrazovky v módu Zen."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
