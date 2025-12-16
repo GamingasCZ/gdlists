@@ -304,3 +304,5 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
     let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(',')}}).then(res => res.data)
     return postData
 }
+
+export const containerSettingsOpen = ref(false)

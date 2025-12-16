@@ -11,7 +11,7 @@ import ImageBrowser from "./global/ImageBrowser.vue";
 import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction, LevelImage } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
-import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview } from "@/Reviews";
+import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview, containerSettingsOpen } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -471,6 +471,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             if (selectedContainer.value[0] > -1
                 && document.querySelector(".modalDialog") == null    
                 && document.activeElement != null
+                && containerSettingsOpen.value == false
             ) {
                 selectedContainer.value = [-1]
                 document?.activeElement?.blur()
