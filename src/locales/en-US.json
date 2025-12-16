@@ -818,7 +818,8 @@
     "colGaps": "Spacing",
     "enterCombo": "Enter a new combo",
     "kbWarn1": "This profile may not work in Firefox.",
-    "kbWarn2": "This profile may not work, if the browser is fullscreened (such as in Zen Mode)."
+    "kbWarn2": "This profile may not work, if the browser is fullscreened (such as in Zen Mode).",
+    "rouletteFail": "Failed to fetch levels!"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

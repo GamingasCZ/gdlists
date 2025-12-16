@@ -20,7 +20,15 @@ const levelQueue = ref([])
 const queuePos = ref(0)
 const getLevelQueue = () => {
     axios.get(import.meta.env.VITE_API+"/getLists.php?randomLevel=5").then(res => {
-        levelQueue.value = res.data[0]
+        if (res.status == 200)
+            levelQueue.value = res.data[0]
+        else {
+            summonNotification(i18n.global.t('other.error'), i18n.global.t('reviews.rouletteFail'), "error")
+            emit('exit')
+        }
+    }).catch(() => {
+        summonNotification(i18n.global.t('other.error'), i18n.global.t('reviews.rouletteFail'), "error")
+        emit('exit')
     })
 }
 

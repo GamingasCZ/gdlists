@@ -819,7 +819,8 @@
     "colGaps": "Mezery",
     "enterCombo": "Stiskni novou kombinaci",
     "kbWarn1": "Tento profil nemusí fungovat ve Firefoxu.",
-    "kbWarn2": "Tento profil nemusí fungovat, pokud je prohlížeč na celou obrazovku (např. v Zen Módu)."
+    "kbWarn2": "Tento profil nemusí fungovat, pokud je prohlížeč na celou obrazovku (např. v Zen Módu).",
+    "rouletteFail": "Nepodařilo se získat levely!"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

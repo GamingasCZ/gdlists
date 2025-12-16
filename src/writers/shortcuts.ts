@@ -25,7 +25,7 @@ export var defaultShortcuts = [
         "resizeBigger": [Key.Alt, '+', false],
         "moveUp": [Key.Alt | Key.Shift, 'ArrowUp', false],
         "moveDown": [Key.Alt | Key.Shift, 'ArrowDown', false],
-        "deselect": [Key.None, 'Escape'],
+        "deselect": [Key.None, 'Escape', false],
 
         "add.default": [Key.Alt | Key.Shift, 'F'],
         "preview.1": [Key.Alt | Key.Shift, 'J'],                
