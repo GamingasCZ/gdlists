@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defaultShortcuts, doOverride, keyShortcuts } from '@/writers/shortcuts';
+import { defaultShortcuts, doOverride, isFirefox, keyShortcuts } from '@/writers/shortcuts';
 import { Key } from '@/writers/Writer';
 import Dropdown from '../ui/Dropdown.vue';
 import { nextTick, ref } from 'vue';
@@ -42,6 +42,12 @@ onMounted(() => {
 const profiles = [i18n.global.t('other.ksAlt'), i18n.global.t('other.ksCtrl'), i18n.global.t('other.ksSingle'), i18n.global.t('other.custom')]
 const justChangedProfile = ref(Date.now())
 const changeProfile = (to: number) => {
+    if (isFirefox.value && to == 0) // firefox alt bug
+        warnMsg(1)
+
+    if (to == 2 && SETTINGS.value.fsZenMode) // single-key
+        warnMsg(0)
+
     editingInd.value = -1
     selectedProfile.value = to
     SETTINGS.value.shortcutProfile = to
@@ -190,6 +196,24 @@ const doImport = () => {
     }
 }
 
+const infoMessages = [
+    i18n.global.t('reviews.kbWarn2'),
+    i18n.global.t('reviews.kbWarn1')
+]
+var msgsShown = [false, false]
+const infoMsgShown = ref(false)
+const infoMsg = ref("")
+const warnMsg = (which: number) => {
+    if (msgsShown[which]) return
+
+    msgsShown[which] = true
+    infoMsg.value = infoMessages[which]
+    infoMsgShown.value = true
+    setTimeout(() => {
+        infoMsgShown.value = false
+    }, 2000);
+}
+
 defineExpose({profilePopupOpen})
 
 </script>
@@ -210,6 +234,14 @@ defineExpose({profilePopupOpen})
     </Dropdown>
 
     <section class="grid bg-[url(@/images/fade.svg)] mt-1 bg-repeat-x grid-cols-3 gap-3 max-h-[35rem] overflow-auto p-3">
+
+        <Transition name="fade">
+            <div v-if="infoMsgShown" class="flex absolute right-2 bottom-2 left-2 z-20 gap-2 items-center p-2 rounded-md shadow-drop bg-lof-300">
+                <img src="@/images/info.svg" alt="">
+                <p>{{ infoMsg }}</p>
+            </div>
+        </Transition>
+
         <div
             v-for="(shortcut, ind) in keyShortcuts"
             v-memo="[justChangedProfile, editingInd, newCombo]"

@@ -816,7 +816,9 @@
     "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics.",
     "sectionName": "Section Name",
     "colGaps": "Spacing",
-    "enterCombo": "Enter a new combo"
+    "enterCombo": "Enter a new combo",
+    "kbWarn1": "This profile may not work in Firefox.",
+    "kbWarn2": "This profile may not work, if the browser is fullscreened (such as in Zen Mode)."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
