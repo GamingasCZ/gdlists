@@ -69,10 +69,25 @@ const endListen = () => {
 }
 
 const editingInd = ref(-1)
-const editShortcut = (which: number) => {
-    editingInd.value = which
-    emit('editing')
-    document.documentElement.addEventListener("keydown", listen)
+const editShortcut = (which: number, reset: boolean) => {
+    // Reset shortcut
+    if (reset) {
+        let shortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}
+        let key = keyShortcuts[which][1].join(".")
+        delete shortcuts[key]
+        localStorage.setItem("customShortcuts", JSON.stringify(shortcuts))
+        keyShortcuts[which][0] = defaultShortcuts[0][key]
+        keyShortcuts[which][4] = 0
+        justChangedProfile.value = Date.now()
+
+        emit('editing')
+        nextTick(() => emit('finishedEdit'))
+    }
+    else {
+        editingInd.value = which
+        emit('editing')
+        document.documentElement.addEventListener("keydown", listen)
+    }
 }
 const newCombo = ref<[Key, number] | null>(null)
 
@@ -199,7 +214,7 @@ defineExpose({profilePopupOpen})
             v-for="(shortcut, ind) in keyShortcuts"
             v-memo="[justChangedProfile, editingInd, newCombo]"
             :key="ind+selectedProfile"
-            @click="editShortcut(ind)"
+            @click="editShortcut(ind, shortcut[4]!)"
             :class="{'hover:bg-opacity-80 button': editingInd != ind, 'disabled': (editingInd != -1 && editingInd != ind)}"
             class="flex relative flex-col gap-2 items-center p-2 overflow-clip bg-black bg-opacity-40 rounded-sm group"
         >
@@ -207,7 +222,8 @@ defineExpose({profilePopupOpen})
             <div v-if="shortcut[4]" class="absolute -top-1.5 -right-1.5 w-3 rotate-45 aspect-square bg-lof-400"></div>
 
             <div v-if="editingInd != ind">
-                <img src="@/images/edit.svg" alt="" class="absolute top-2 right-2 w-4 opacity-0 transition-opacity duration-75 group-hover:opacity-100">
+                <img v-if="shortcut[4]" src="@/images/replay.svg" alt="" class="absolute top-2 right-2 w-4 opacity-0 transition-opacity duration-75 group-hover:opacity-100">
+                <img v-else src="@/images/edit.svg" alt="" class="absolute top-2 right-2 w-4 opacity-0 transition-opacity duration-75 group-hover:opacity-100">
                 <img :src="shortcut[3]" class="w-8" alt="">
             </div>
             <div v-else class="flex px-4 w-full">
