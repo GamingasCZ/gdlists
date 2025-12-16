@@ -216,11 +216,15 @@ export const shortcutUnload = () => {
 export const getShortcut = (action?: any[]) => {
     let text = (action ?? Array()).join(".")
     let profile = defaultShortcuts[SETTINGS.value.shortcutProfile]
-    let shortcut: [Key, string];
-    if (!profile) // load custom
-        shortcut = customShortcuts[text] ?? defaultShortcuts[0][text]
+    let shortcut: [[Key, string], 0|1];
+    if (!profile) {// load custom
+        if (customShortcuts[text])
+            shortcut = [customShortcuts[text], 1]
+        else
+            shortcut = [defaultShortcuts[0][text], 0]
+    }
     else // pick from profile
-        shortcut = profile[text]
+        shortcut = [profile[text], 0]
     return shortcut
 }
 
@@ -233,8 +237,10 @@ const getShortcuts = (toolbar) => {
         customShortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}
     }
 
-    writerShortcuts.forEach(button => 
-        keyShortcuts.push([getShortcut(button.action), button.action, button.title, button.icon]))
+    writerShortcuts.forEach(button => {
+        let sh = getShortcut(button.action)
+        keyShortcuts.push([sh[0], button.action, button.title, button.icon, sh[1]])
+    })
 
     for (const key in toolbar) {
         for (const key2 in toolbar[key]) {
@@ -244,13 +250,14 @@ const getShortcuts = (toolbar) => {
                     for (let i = 0; i < button.action[1].length; i++) {
                         let icon = `${BASE}/formatting/${button.icon[i]}.svg`
                         let act = [button.action[0], button.action[1][i]]
-                        keyShortcuts.push([getShortcut(act), act, button?.dropdownText?.[i], icon])
+                        let sh = getShortcut(act)
+                        keyShortcuts.push([sh[0], act, button?.dropdownText?.[i], icon, sh[1]])
                     }
                 }
                 else {
                     let shortcut = getShortcut(button.action)
                     if (shortcut)
-                        keyShortcuts.push([shortcut, button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon])
+                        keyShortcuts.push([shortcut[0], button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon, shortcut[1]])
                 }
 
             // Fixed shortcuts apply only if a given toolbar is active
@@ -317,7 +324,9 @@ const overrides = {
     'Digit2': '2',
     'Digit3': '3',
     'ArrowUp': '▲',
-    'ArrowDown': '▼'
+    'ArrowDown': '▼',
+    'ArrowLeft': '◀',
+    'ArrowRight': '▶'
 }
 
 export const doOverride = (key: string) => {

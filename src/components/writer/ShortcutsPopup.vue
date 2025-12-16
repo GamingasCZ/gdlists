@@ -201,8 +201,11 @@ defineExpose({profilePopupOpen})
             :key="ind+selectedProfile"
             @click="editShortcut(ind)"
             :class="{'hover:bg-opacity-80 button': editingInd != ind, 'disabled': (editingInd != -1 && editingInd != ind)}"
-            class="flex relative flex-col gap-2 items-center p-2 bg-black bg-opacity-40 rounded-md group"
+            class="flex relative flex-col gap-2 items-center p-2 overflow-clip bg-black bg-opacity-40 rounded-sm group"
         >
+            <!-- edited mark -->
+            <div v-if="shortcut[4]" class="absolute -top-1.5 -right-1.5 w-3 rotate-45 aspect-square bg-lof-400"></div>
+
             <div v-if="editingInd != ind">
                 <img src="@/images/edit.svg" alt="" class="absolute top-2 right-2 w-4 opacity-0 transition-opacity duration-75 group-hover:opacity-100">
                 <img :src="shortcut[3]" class="w-8" alt="">
