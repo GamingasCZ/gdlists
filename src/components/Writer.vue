@@ -111,6 +111,7 @@ const resetPost = () => {
 }
 
 const editDraftExists = ref<null | string>(null)
+const loadingEditDraft = ref(false)
 const loadOnlineEdit = (feedData?: ReviewDraft) => {
     editDraftExists.value = null
     loadEditDraft = null
@@ -119,10 +120,12 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
         loadDraft(feedData, true)
         return
     }
+    loadingEditDraft.value = true
     
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
+            loadingEditDraft.value = false
 
             if (props.type == 0)
                 POST_DATA.value = modernizeList(res.data)
@@ -1026,7 +1029,7 @@ const endShortcutEdit = () => {
         <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
     </div>
 
-    <main v-else-if="POST_DATA" class="p-2">
+    <main v-else-if="POST_DATA" v-show="!loadingEditDraft" class="p-2">
         <ErrorPopup :error-text="errorText" :previewing="false" :stamp="errorStamp" />
 
         <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
