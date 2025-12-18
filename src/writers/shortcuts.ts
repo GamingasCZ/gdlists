@@ -326,7 +326,8 @@ const overrides = {
     'ArrowUp': '▲',
     'ArrowDown': '▼',
     'ArrowLeft': '◀',
-    'ArrowRight': '▶'
+    'ArrowRight': '▶',
+    ' ': 'Space'
 }
 
 export const doOverride = (key: string) => {
