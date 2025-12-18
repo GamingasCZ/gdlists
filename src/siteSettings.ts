@@ -24,7 +24,7 @@ export const SETTINGS = ref({
   flipControls: true,
   saveThumbs: true,
   shortcutProfile: -1, // will properly select itself based on browser
-  fsZenMode: true,
+  fsZenMode: false,
 });
 
 watch(SETTINGS, () => {
