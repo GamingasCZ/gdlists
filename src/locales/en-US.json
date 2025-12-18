@@ -117,7 +117,8 @@
     "thumbStyle": "Thumbnail Style",
     "lastUsed": "Last Used",
     "commPlaceholder": "Feel free to provide a short comment on the level...",
-    "noDuplicates": "You cannot have multiples of the same level!"
+    "noDuplicates": "You cannot have multiples of the same level!",
+    "ytLink": "Paste a YouTube Link"
   },
   "homepage": {
     "clear": "Clear",
