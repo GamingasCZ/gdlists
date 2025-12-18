@@ -242,7 +242,8 @@
     "saved": "Saved",
     "notifs": "Notifications",
     "dropdown": "Dropdown",
-    "fullscreen": "Fullscreen"
+    "fullscreen": "Fullscreen",
+    "random": "Random"
   },
   "other": {
     "404": "This path sadly doesn't lead anywhere...",
