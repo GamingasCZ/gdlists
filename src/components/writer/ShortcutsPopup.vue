@@ -25,7 +25,11 @@ const parseKey = (key: [Key, string]) => {
         keys.push("Alt", -1)
     if (key[0] & Key.Shift)
         keys.push("Shift", -1)
-    return [...keys, key[1]]
+
+    let final = [...keys]
+    if (key[1] != null)
+        final.push(key[1])
+    return final
 }
 
 const ppOpen = ref(false)
@@ -65,7 +69,10 @@ const listen = (e: KeyboardEvent) => {
     e.preventDefault()
     newCombo.value = Array(2)
     newCombo.value[0] = +e.ctrlKey * Key.Ctrl | +e.shiftKey * Key.Shift | +e.altKey * Key.Alt
-    newCombo.value[1] = e.key[0].toUpperCase()+e.key.slice(1)
+    if (!["Control", "Shift", "Alt"].includes(e.key))
+        newCombo.value[1] = e.key[0].toUpperCase()+e.key.slice(1)
+    else
+        newCombo.value[1] = null
 }
 const endListen = () => {
     document.documentElement.removeEventListener("keydown", listen)
