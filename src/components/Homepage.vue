@@ -38,7 +38,7 @@ const feeds = ref()
 
 const getFeeds = async () => {
   let defFeed = DEF_FEED_RESULT()
-  if (localStorg) {
+  if (localStorg.value) {
     let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem("viewedPinArray")!)
 
     if (vpArr !== null) {

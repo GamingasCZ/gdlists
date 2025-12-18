@@ -614,7 +614,7 @@ provide("fullscreenLevel", levelImageFullscreen)
       </DialogVue>
 
       <!-- List view picker -->
-      <div v-if="!viewedPopups.pickedStyling && !isReview">
+      <div v-if="!viewedPopups?.pickedStyling && !isReview">
         <ViewModePicker />
       </div>
 
