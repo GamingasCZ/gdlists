@@ -379,7 +379,7 @@ export interface ImageFolder {
 export interface LocalNotification {
   title: string
   text: string
-  icon: 'save' | 'error' | 'check'
+  icon: 'save' | 'error' | 'check' | 'loading'
   stamp?: any
 }
 
