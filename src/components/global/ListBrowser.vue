@@ -179,7 +179,7 @@ function refreshBrowser() {
 
       // load favorites             
       if (props.onlineSubtype == 'levels') {
-        if (!favoriteLevels) {
+        if (hasLocalStorage() && !favoriteLevels) {
           favoriteLevels = JSON.parse(localStorage.getItem("favorites")!) || []
           favoriteLevelIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!) || []
         }

@@ -110,7 +110,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
     </form>
   </header>
 
-  <section class="flex justify-center">
+  <section class="relative left-1/2 w-max -translate-x-1/2">
     <div v-if="isLoggedIn == false && localStorg"
       class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
@@ -121,7 +121,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
       <LoginButton class="ml-auto" />
     </div>
     <div v-if="!localStorg"
-      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
+      class="flex gap-3 justify-center items-center px-2 py-1 mt-6 w-max text-white rounded-md -translate-x-7 mx bg-greenGradient">
       <img src="../images/disCookies.svg" alt="" class="w-6" />
       <div>
         <p class="max-sm:text-xs">{{ $t('homepage.cookies1') }}</p>
