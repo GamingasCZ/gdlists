@@ -292,7 +292,12 @@ onMounted(() => {
     pagesArray.value = listScroll();
   }
 
-  let gotoPage = JSON.parse(sessionStorage.getItem("pageLast")!) ?? [0, 'unknown']
+  let gotoPage = [0, 'unknown']
+  if (hasLocalStorage()) {
+    let pageLast = JSON.parse(sessionStorage.getItem("pageLast")!)
+    if (pageLast)
+      gotoPage = pageLast
+  }
   if (props.onlineType == gotoPage[1]) PAGE.value = gotoPage[0]
 
   refreshBrowser();
@@ -308,7 +313,10 @@ watch(props, (newBrowser) => {
   refreshBrowser();
 });
 
-onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
+onUnmounted(() => {
+  if (hasLocalStorage())
+    sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType]))
+})
 
 defineExpose({
   doRefresh

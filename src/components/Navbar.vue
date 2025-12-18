@@ -36,7 +36,7 @@ const closeSettings = (m: MouseEvent) => {
 const loginInfo = ref<string[]>([]);
 
 watch(props, () => {
-  if (localStorage && props.isLoggedIn) {
+  if (localStorg.value && props.isLoggedIn) {
     loginInfo.value = JSON.parse(localStorage.getItem("account_info")!);
   }
 })

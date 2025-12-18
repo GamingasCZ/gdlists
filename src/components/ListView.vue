@@ -264,7 +264,7 @@ const doNextGuess = (result: number) => {
 function createViewPinArray() {return ({pinned: [[],[]], viewed: [[], []]})}
 const listPinned = ref<boolean>(false)
 const toggleListPin = () => {
-  if (localStorage) {
+  if (hasLocalStorage()) {
     let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem('viewedPinArray')!) ?? createViewPinArray()
     let typeInd = +props.isReview
     if (listPinned.value) { // Remove from pinned

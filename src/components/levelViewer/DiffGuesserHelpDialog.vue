@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import type { viewedPopups } from '@/interfaces';
+import { hasLocalStorage } from '@/siteSettings';
 import { ref } from 'vue';
 
 
 const emit = defineEmits(["closePopup"])
 
 const closePopup = () => {
-    let hidePopup: viewedPopups = JSON.parse(localStorage.getItem("popupsViewed")!)
+    if (!hasLocalStorage()) return 
+    
+    let hidePopup = JSON.parse(localStorage.getItem("popupsViewed")!)
     if (hidePopup.diffGuesserHelp == undefined) hidePopup.diffGuesserHelp = true
     localStorage.setItem("popupsViewed", JSON.stringify(hidePopup))
     emit('closePopup')
