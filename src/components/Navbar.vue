@@ -190,8 +190,8 @@ const open = (to: string) => {
     
 
       <!-- Lists -->
-       <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex relative flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists}"
+       <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists, 'opacity-20': editorDropdownOpen != 1 && editorDropdownOpen != 0}"
        >
           <List class="w-4 h-4" />{{ $t('help.Lists') }}
    
@@ -201,8 +201,8 @@ const open = (to: string) => {
        </button>
 
       <!-- Reviews -->
-      <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex relative flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews}"
+      <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews, 'opacity-20': editorDropdownOpen != 2 && editorDropdownOpen != 0}"
       >
           <Review class="w-4 h-4" />{{ $t('reviews.review') }}
    
@@ -212,8 +212,10 @@ const open = (to: string) => {
       </button>
 
       <!-- Levels -->
-      <RouterLink to="/browse/levels" :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Levels, 'fill-white stroke-white': scrollerInd != NAV_SEL.Levels}"
-        class="flex flex-col gap-2 items-center px-4 max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+      <RouterLink
+        to="/browse/levels"
+        :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Levels, 'fill-white stroke-white': scrollerInd != NAV_SEL.Levels, 'opacity-20': editorDropdownOpen != 0}"
+        class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
       ><LevelIcon class="w-4 h-4" />{{ $t('editor.levels') }}</RouterLink>
     </section>
 
