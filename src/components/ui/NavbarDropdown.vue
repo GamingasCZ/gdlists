@@ -26,7 +26,6 @@ const draftsList = ref<navDraft[]>([])
 onMounted(() => {
     let drafts = JSON.parse(localStorage.getItem(path+"Drafts")!)
     if (drafts) {
-        console.log("fetchiji")
         let draftKeys = Object.keys(drafts).sort((a,b) => (+b) - (+a))
         let maxLen = Math.min(draftKeys.length, 3)
         for (let i = 0; i < maxLen; i++) {
@@ -66,7 +65,7 @@ const editLink = (key: string, isEdit: number | undefined) => {
                 <img src="@/images/hidden.svg" class="h-6" alt="">
                 {{ $t('other.private') }}
             </RouterLink>
-            <RouterLink :to="`/make/${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+            <RouterLink :to="`/random?${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
                 <img src="@/images/dice.svg" class="mb-1 h-5" alt="">
                 {{ $t('navbar.random') }}
             </RouterLink>

@@ -17,7 +17,7 @@ import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncCompo
 import { modifyListBG, selectedLevels } from "@/Editor";
 import chroma, { hsl } from "chroma-js";
 import PickerPopup from "./global/PickerPopup.vue";
-import router from "@/router";
+import router, { timeLastRouteChange } from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
 import { useI18n } from "vue-i18n";
 import ListBackground from "./global/ListBackground.vue";
@@ -53,10 +53,15 @@ const props = defineProps<{
 
 let gdlists = useI18n().t('other.websiteName')
 
+watch(timeLastRouteChange, () => {
+  loadContent()
+})
+
 let lastScroll = 0
 const postContent = ref<HTMLDivElement>()
 const loadContent = async () => {
   let randomData = null
+  let forceType: number | boolean = +props.isReview
   if (props.randomList) {
     randomData = (await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})).data
   }
@@ -78,7 +83,6 @@ const loadContent = async () => {
   if (window.location.search.includes("comment")) commentsShowing.value = true
 }
 
-watch(props, loadContent)
 onMounted(loadContent)
 
 const NONPRIVATE_LIST = computed<boolean>(() => {
@@ -107,6 +111,7 @@ async function loadList(loadedData: LevelList | null) {
   let listURL = `${!NONPRIVATE_LIST.value ? "pid" : "id"}=${props?.listID}`;
 
   nonexistentList.value = false
+  cardGuessing.value = -1
 
   let res: LevelList | number;
   if (loadedData) res = loadedData
@@ -219,6 +224,8 @@ function postExtrasApply() {
     
     if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
       modifyListBG(LIST_COL.value);
+    else
+      modifyListBG([0,0,0], true)
 
     LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
 }

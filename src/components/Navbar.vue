@@ -177,7 +177,7 @@ const open = (to: string) => {
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform overflow-x-clip">
+    class="box-border flex sticky top-0 max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform">
     <section class="flex backdrop-blur-md text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{ 'opacity-50 pointer-events-none': !isOnline }">
       
