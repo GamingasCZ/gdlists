@@ -10,6 +10,9 @@ import ProfilePicture from "../global/ProfilePicture.vue";
 import chroma from "chroma-js";
 import { prettyDate } from "@/Editor";
 import PostTitle from "./PostTitle.vue";
+import LikeIcon from "@/images/like.svg?raw"
+import LevelsIcon from "@/images/levels.svg?raw"
+import CommentsIcon from "@/images/comment.svg?raw"
 
 const props = defineProps<{
   name: string;
@@ -121,9 +124,41 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
       <h1 class="text-xl">{{ name }}</h1>
       <h2 class="text-xl">{{ creator }}</h2>
     </section>
-    <section class="gap-2 descriptionControls">
+    <section class="relative gap-2 descriptionControls">
       <PostTitle :title-data="data.titleData" :text="name" :tagline="data.tagline" :font="data.font" />
 
+
+      <!-- Likes and dislikes -->
+      <div @mouseenter="hoveringRatebox = true" @mouseleave="hoveringRatebox = false" class="box-border flex absolute top-2 -left-16 flex-col items-center min-w-max max-md:hidden">
+        <!-- Like button -->
+        <button id="likeButton" class="button relative rounded-lg p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
+        @click="sendRating(1)">
+
+          <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -top-5 left-1/2 text-sm text-lime-400 -translate-x-1/2">{{ ratings[0] }}</h6></Transition>
+          <div class="transition-colors" :style="{
+            stroke: '#21cc5b',
+            filter: ratings?.[2] == 1 ? 'drop-shadow(#21cc5b 0px 0px 10px)' : '',
+            fill: ratings?.[2] == 1 ? '#21cc5b' : 'none'
+            }" v-html="LikeIcon">
+          </div>
+        </button>
+
+        <!-- Rating text -->
+        <span @mouseenter="hoveringRating = true" @mouseleave="hoveringRating = false" class="my-0.5 text-lg font-bold cursor-help">{{ ratings[0]-ratings[1] }}</span>
+
+        <!-- Dislike button -->
+        <button ref="ratingButs" id="dislikeButton" class="button relative rounded-lg p-1 !transition-colors disabled:grayscale disabled:opacity-20" :disabled="!localStorg"
+          @click="sendRating(0)">
+
+          <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -bottom-5 left-1/2 text-sm text-red-500 -translate-x-1/2">{{ ratings[1] }}</h6></Transition>
+          <div class="transition-colors rotate-180" :style="{
+            stroke: '#cc2121',
+            filter: ratings?.[2] == 0 ? 'drop-shadow(#cc2121 0px 0px 10px)' : '',
+            fill: ratings?.[2] == 0 ? '#cc2121' : 'none'
+            }" v-html="LikeIcon">
+          </div>
+        </button>
+      </div>
 
       <!-- <Transition name="fade">
         <Tooltip v-if="userUID == '' && hoveringRatebox" :text="$t('listViewer.likeNotLoggedIn')" :button="ratingButs" />
@@ -138,6 +173,33 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
             • 
             <span class="inline-flex"><img src="@/images/view.svg" alt="" class="mr-2 w-4">{{ views }}</span>
           </span>
+        </div>
+
+        <hr class="mr-4 ml-6 w-0.5 h-6 bg-white border-none opacity-40">
+
+        <div class="flex">
+          <button
+            class="flex relative items-center p-2 rounded-md button" @click="emit('doListAction', 'comments')">
+            <div class="w-6 h-6" :class="{'[&_.glasa]:fill-black': openDialogs[0]}" :style="{
+              fill: openDialogs[0] ? 'white' : 'none'
+              }" v-html="CommentsIcon">
+            </div>
+            <label v-show="commAmount > 0"
+              class="absolute right-1 bottom-1 p-0.5 my-auto ml-3 text-base font-bold leading-3 text-black rounded-sm bg-lof-400">{{
+                commAmount }}</label>
+          </button>
+
+          <button v-if="review && data?.levels?.length > 0"
+            class="flex relative items-center p-2 rounded-md button"
+            @click="emit('doListAction', 'reviewLevels')">
+            <div class="w-6 h-6" :style="{
+              fill: openDialogs[1] ? 'white' : 'none'
+              }" v-html="LevelsIcon">
+            </div>
+            <label
+              class="absolute right-0 bottom-1 p-0.5 my-auto ml-3 text-base font-bold leading-3 text-black rounded-sm bg-lof-400">{{
+                data.levels.length }}</label>
+          </button>
         </div>
       </section>
     </section>
@@ -163,26 +225,10 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
         <hr class="mx-2 my-auto w-1 h-6 bg-white bg-opacity-40 rounded-full border-none md:hidden">
 
         <!-- Comments button -->
-        <!-- <div class="md:ml-9">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
-            <img src="@/images/comment.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{
-              $t('level.comments') }}</label>
-            <label
-              v-show="commAmount > 0"
-              class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
-                commAmount }}</label>
-          </button>
-        </div> -->
+        
 
         <!-- Review level ratings button -->
-        <div class="ml-2" v-if="review && data.levels.length > 0">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
-            <img src="@/images/rating.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{ $t('editor.levels') }}</label>
-            <label
-            class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
-                data.levels.length }}</label>
-          </button>
-        </div>
+
       </div>
 
       <div class="flex gap-2 max-md:hidden">
