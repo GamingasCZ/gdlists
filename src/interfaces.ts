@@ -391,7 +391,7 @@ export interface Setting {
 export type PostData = ReviewList & LevelList
 
 export type FormattingAction = 'add' | 'preview' | 'align' | 'column' | 'format' | 'splitParagraph' | 'columnCreate'
-export type EditorAction = 'save' | 'containerDelete' | 'drafts' | 'containerOptions' | 'shortcutsMenu' | 'resizeSmaller' | 'resizeBigger' | 'moveUp' | 'moveDown' | 'addLevel'
+export type EditorAction = 'save' | 'containerDelete' | 'drafts' | 'containerOptions' | 'shortcutsMenu' | 'resizeSmaller' | 'resizeBigger' | 'moveUp' | 'moveDown' | 'addLevel' | 'deselect'
 
 export interface FormattingButton {
 	title: string

@@ -367,7 +367,7 @@
     "blockquote": "Blockquote",
     "post": "Post",
     "long": "long",
-    "name": "name",
+    "name": "Name",
     "short": "short",
     "creator": "creator",
     "users": "Users",
@@ -441,7 +441,21 @@
     "title": "Name",
     "loginFuckup": "Session is not valid!",
     "moveHere": "Move Here",
-    "lIDcopied": "Level ID copied!"
+    "lIDcopied": "Level ID copied!",
+    "deselect": "Deselect Element",
+    "profiles": "Profiles",
+    "ksSingle": "Single-key",
+    "custom": "Custom",
+    "ksCtrl": "Control-style",
+    "ksAlt": "Alt-style",
+    "badSh": "Unusable Shortcut",
+    "badShHelp": "This action won't work, if a single-letter shortcut is used.",
+    "shortcutsExported": "Shortcuts exported!",
+    "kbFail": "This isn't a valid shortcut file",
+    "success": "Success",
+    "kbLoaded": "Shortcuts have been loaded!",
+    "kbInUse": "Shortcut is already in use",
+    "kbInUseHelp": "Please use a different shortcut."
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -510,7 +524,9 @@
     "draftNoRemove": "Do Not Remove Draft after Upload",
     "colorize": "Colorize via Background Image",
     "saveThumbs": "Save Level Thumbnails",
-    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search."
+    "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search.",
+    "zenFS": "Fullscreen Zen Mode",
+    "zenFSHelp": "Zen Mode will fullscreen the browser, if enabled."
   },
   "help": {
     "Lists": "Lists",
@@ -799,7 +815,11 @@
     "howStart": "How would you like to start?",
     "cRatingHelp": "You can create four more ratings of your own. These don't count towards global statistics.",
     "sectionName": "Section Name",
-    "colGaps": "Spacing"
+    "colGaps": "Spacing",
+    "enterCombo": "Enter a new combo",
+    "kbWarn1": "This profile may not work in Firefox.",
+    "kbWarn2": "This profile may not work, if the browser is fullscreened (such as in Zen Mode).",
+    "rouletteFail": "Failed to fetch levels!"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

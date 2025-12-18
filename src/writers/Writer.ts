@@ -59,17 +59,11 @@ export interface ToolbarButton {
      */
     action?: [ToolbarAction, any],
     /**
-     * Global shortcut that get's called no mater the toolbar
      */
-    shortcut?: [Key, string] | [Key, string][],
     /**
-     * Dictates, if the keys of the shortcut should use a keycode instead of a key. Useful for ignoring a keyboard layout.
      */
-    shortcutRaw?: boolean
     /**
-     * Shortcuts that gets called only, if its button is in the current toolbar
      */
-    shortcutFixed?: [Key, string] | [Key, string][],
     /**
      * Creates a vertical splitter after the button
      */
@@ -315,7 +309,6 @@ export const REVIEW: Writer = {
                     title: i18n.global.t('reviews.addParagraph'),
                     icon: "default",
                     action: ["add", "default"],
-                    shortcut: [Key.Ctrl | Key.Shift, 'F'],
                     splitAfter: true,
                     bold: true
                 },
@@ -323,7 +316,6 @@ export const REVIEW: Writer = {
                     title: i18n.global.t('other.preview'),
                     icon: "view",
                     action: ["preview", 1],
-                    shortcut: [Key.Ctrl | Key.Shift, 'J'],
                     splitAfter: true,
                 },
                 {
@@ -331,57 +323,47 @@ export const REVIEW: Writer = {
                     icon: ["heading1", "heading2", "heading3"],
                     dropdownText: [i18n.global.t('reviews.title', [1]), i18n.global.t('reviews.title', [2]), i18n.global.t('reviews.title', [3])],
                     action: ["add", ["heading1", "heading2", "heading3"]],
-                    shortcut: [[Key.Ctrl, 'Digit1'], [Key.Ctrl, 'Digit2'], [Key.Ctrl, 'Digit3']],
-                    shortcutRaw: true,
                     splitAfter: true,
                 },
                 {
                     title: i18n.global.t('other.alignment'),
                     icon: ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
                     dropdownText: [i18n.global.t('reviews.left'), i18n.global.t('reviews.center'), i18n.global.t('reviews.right'), i18n.global.t('reviews.justify')],
-                    shortcut: [[Key.Ctrl, 'L'], [Key.Ctrl, 'E'], [Key.Ctrl, 'R'], [Key.Ctrl, 'J']],
                     action: ["align", ["left", "center", "right", "justify"]],
                     splitAfter: true,
                 },
                 {
                     tooltip: i18n.global.t('reviews.addImage'),
                     icon: "showImage",
-                    shortcut: [Key.Ctrl | Key.Shift, 'I'],
                     action: ["add", 'showImage']
                 },
                 {
                     tooltip: i18n.global.t('reviews.addVideo'),
-                    shortcut: [Key.Ctrl | Key.Shift, 'V'],
                     icon: "addVideo",
                     action: ["add", 'addVideo']
                 },
                 {
                     tooltip: i18n.global.t('reviews.makeCarousel'),
-                    shortcut: [Key.Ctrl | Key.Shift, 'C'],
                     icon: "addCarousel",
                     action: ["add", 'addCarousel']
                 },
                 {
                     tooltip: i18n.global.t('reviews.addDivisor'),
-                    shortcut: [Key.Ctrl | Key.Shift, 'S'],
                     icon: "divisor",
                     action: ["add", 'divisor']
                 },
                 {
                     tooltip: i18n.global.t('reviews.showLevel'),
-                    shortcut: [Key.Ctrl | Key.Shift, 'L'],
                     icon: "showLevel",
                     action: ["add", 'showLevel']
                 },
                 {
                     tooltip: i18n.global.t('reviews.dispRatings'),
                     icon: "showRating",
-                    shortcut: [Key.Ctrl | Key.Shift, 'R'],
                     action: ["add", 'showRating']
                 },
                 {
                     tooltip: i18n.global.t('reviews.listLink'),
-                    shortcut: [Key.Ctrl | Key.Shift, 'E'],
                     icon: "showList",
                     action: ["add", 'showList']
                 },
@@ -389,7 +371,6 @@ export const REVIEW: Writer = {
             right: [
                 {
                     titleSwitchable: [i18n.global.t('reviews.addColumn'), i18n.global.t('reviews.editColumn')],
-                    shortcut: [Key.Ctrl | Key.Shift, 'D'],
                     action: ["columnCreate"],
                     icon: "twoColumns",
                     component: markRaw(ColumnSettingsButton)
@@ -401,43 +382,36 @@ export const REVIEW: Writer = {
                 {
                     title: i18n.global.t('reviews.bold'),
                     icon: "bold",
-                    shortcut: [Key.Ctrl, 'B'],
                     action: ["format", 0],
                 },
                 {
                     title: i18n.global.t('reviews.italics'),
                     icon: "cursive",
-                    shortcut: [Key.Ctrl, 'I'],
                     action: ["format", 1],
                 },
                 {
                     title: i18n.global.t('reviews.strike'),
                     icon: "strike",
-                    shortcut: [Key.Ctrl, 'D'],
                     action: ["format", 2],
                 },
                 {
                     title: i18n.global.t('other.points'),
                     icon: "list",
-                    shortcut: [Key.Ctrl, 'L'],
                     action: ["format", 3],
                 },
                 {
                     title: i18n.global.t('other.blockquote'),
                     icon: "quotes",
-                    shortcut: [Key.Ctrl, 'B'],
                     action: ["format", 4],
                 },
                 {
                     title: i18n.global.t('other.checklist'),
                     icon: "check",
-                    shortcut: [Key.Ctrl, 'M'],
                     action: ["format", 5],
                 },
                 {
                     title: i18n.global.t('other.link'),
                     icon: "link",
-                    shortcut: [Key.Ctrl, 'L'],
                     action: ["format", 6],
                 },
             ],
@@ -445,7 +419,6 @@ export const REVIEW: Writer = {
                 {
                     title: i18n.global.t('reviews.splitPg'),
                     icon: "divisor",
-                    shortcut: [Key.Ctrl | Key.Alt, 'S'],
                     action: ["splitParagraph"],
                 },
             ]

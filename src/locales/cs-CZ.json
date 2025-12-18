@@ -71,7 +71,9 @@
     "compactHelp": "Skryje názvy nástrojů v editoru.",
     "draftNoRemove": "Nemazat koncepty při nahrání",
     "saveThumbs": "Ukládat náhledy levelů",
-    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání."
+    "saveThumbsHelp": "Při hledání levelu se jeho náhled stáhne do Galerie. Vypnutím se zrychlí hledání.",
+    "zenFS": "Celoobrazovkový mód Zen",
+    "zenFSHelp": "Zda-li se prohlížeč se přepne do režimu celé obrazovky v módu Zen."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -345,7 +347,7 @@
     "post": "Post",
     "long": "dlouhé",
     "short": "krátké",
-    "name": "jméno",
+    "name": "Jméno",
     "creator": "tvůrce",
     "backTO": "Zpět na",
     "points": "Odrážka",
@@ -420,7 +422,21 @@
     "homepage": "Domovská stránka",
     "title": "Název",
     "moveHere": "Přesunout sem",
-    "lIDcopied": "ID levelu zkopírováno!"
+    "lIDcopied": "ID levelu zkopírováno!",
+    "deselect": "Zneaktivnit prvek",
+    "profiles": "Profily",
+    "custom": "Vlastní",
+    "ksSingle": "Jednoklávesové",
+    "ksCtrl": "Control-ové",
+    "ksAlt": "Alt-ové",
+    "badSh": "Nepoužitelná zkratka",
+    "badShHelp": "Tato akce nebude fungovat, pokud je použita jednoklávesová zkratka.",
+    "shortcutsExported": "Zkratky exportovány!",
+    "success": "Úspěch",
+    "kbLoaded": "Zkratky byly načteny!",
+    "kbFail": "Toto není platný soubor se zkratkami",
+    "kbInUse": "Zkratka je již použitá",
+    "kbInUseHelp": "Vyber prosím jinou."
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -800,7 +816,11 @@
     "howStart": "Jak bys rád začal?",
     "cRatingHelp": "Můžeš si vytvořit další čtyři vlasní hodnocení. Tyto hodnocení se nezapočítávají do globálních statistik.",
     "sectionName": "Jméno sekce",
-    "colGaps": "Mezery"
+    "colGaps": "Mezery",
+    "enterCombo": "Stiskni novou kombinaci",
+    "kbWarn1": "Tento profil nemusí fungovat ve Firefoxu.",
+    "kbWarn2": "Tento profil nemusí fungovat, pokud je prohlížeč na celou obrazovku (např. v Zen Módu).",
+    "rouletteFail": "Nepodařilo se získat levely!"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

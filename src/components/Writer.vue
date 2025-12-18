@@ -11,7 +11,7 @@ import ImageBrowser from "./global/ImageBrowser.vue";
 import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction, LevelImage } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
-import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview } from "@/Reviews";
+import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview, containerSettingsOpen } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -53,6 +53,8 @@ const POST_DATA = ref<PostData>(WRITER.value.general.postObject())
 watch(() => props.type, () => {
     WRITER.value = [LIST, REVIEW][props.type]
     drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
+    shortcutUnload()
+    shortcutListen(WRITER.value.toolbar, doAction)
     resetPost()
 })
 
@@ -109,6 +111,7 @@ const resetPost = () => {
 }
 
 const editDraftExists = ref<null | string>(null)
+const loadingEditDraft = ref(false)
 const loadOnlineEdit = (feedData?: ReviewDraft) => {
     editDraftExists.value = null
     loadEditDraft = null
@@ -117,10 +120,12 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
         loadDraft(feedData, true)
         return
     }
+    loadingEditDraft.value = true
     
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
+            loadingEditDraft.value = false
 
             if (props.type == 0)
                 POST_DATA.value = modernizeList(res.data)
@@ -462,7 +467,17 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
         case 'addLevel':
             addReviewLevel(POST_DATA)
             break;
-	}
+        case 'deselect':
+            if (selectedContainer.value[0] > -1
+                && document.querySelector(".modalDialog") == null    
+                && document.activeElement != null
+                && containerSettingsOpen.value == false
+            ) {
+                selectedContainer.value = [-1]
+                document?.activeElement?.blur()
+            }
+            break;
+        }
 }
 provide("writerAction", doAction)
 
@@ -923,8 +938,10 @@ const listPickerPick = (level: Level | Level[]) => {
 const goFullscreen = () => {
     if (document.fullscreenElement)
         document.exitFullscreen()
-    else
+    else if (SETTINGS.value.fsZenMode)
         document.documentElement.requestFullscreen({navigationUI: "hide"})
+    else
+        toggleZenMode()
 }
 
 const zenMode = ref(false)
@@ -983,6 +1000,17 @@ const addPreset = (ind: number) => {
 }
 
 const collabEditor = ref<HTMLDialogElement>()
+const shortcutsPopup = ref<HTMLDialogElement>()
+const editingShortcut = ref(false)
+
+const doShortcutEdit = () => {
+    shortcutUnload()
+    editingShortcut.value = true
+}
+const endShortcutEdit = () => {
+    shortcutListen(WRITER.value.toolbar, doAction)
+    editingShortcut.value = false
+}
 
 </script>
 
@@ -1002,7 +1030,7 @@ const collabEditor = ref<HTMLDialogElement>()
         <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
     </div>
 
-    <main v-else-if="POST_DATA" class="p-2">
+    <main v-else-if="POST_DATA" v-show="!loadingEditDraft" class="p-2">
         <ErrorPopup :error-text="errorText" :previewing="false" :stamp="errorStamp" />
 
         <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
@@ -1054,9 +1082,10 @@ const collabEditor = ref<HTMLDialogElement>()
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.shortcuts" @close-popup="openDialogs.shortcuts = false" :title="$t('reviews.keysh')"
-            :width="dialog.medium">
-            <ShortcutsPopup />
+        <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"
+            :width="dialog.medium" :side-button-text="$t('other.profiles')" :action="shortcutsPopup?.profilePopupOpen">
+            <template #icon><img src="@/images/key.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-5"></template>
+            <ShortcutsPopup ref="shortcutsPopup" @editing="doShortcutEdit" @finished-edit="endShortcutEdit" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.collabs[0]" @close-popup="openDialogs.collabs[0] = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :side-button-text="$t('navbar.saved')" :action="collabEditor?.openSaved">

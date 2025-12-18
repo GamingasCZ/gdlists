@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import type { ContainerSettings } from './containers';
-import { DEFAULT_RATINGS } from '@/Reviews';
 import type { PostData } from '@/interfaces';
+import { containerSettingsOpen, DEFAULT_RATINGS } from '@/Reviews';
 
 const emit = defineEmits<{
     (e: "remove"): void
@@ -42,6 +42,7 @@ const settingsShown = ref(false)
 
 const showSettings = () => {
     nextTick(() => {
+        containerSettingsOpen.value = true
         settingsShown.value = true
         document.body.addEventListener("mousedown", closeSettings, { capture: true })
         document.body.addEventListener("contextmenu", closeSettings, { capture: true })
@@ -64,6 +65,7 @@ const forceHide = () => {
     document.body.removeEventListener("mousedown", closeSettings, { capture: true })
     document.body.removeEventListener("contextmenu", closeSettings, { capture: true })
     emit('hidSettings')
+    setTimeout(() => containerSettingsOpen.value = false, 20) // not good
 }
 
 const closeSettings = (m: MouseEvent) => {
@@ -99,7 +101,7 @@ onBeforeUnmount(() => {
 
 <template>
     <Teleport :disabled="shown != 2" to="body">
-        <form ref="containerSettings" @keydown.prevent.esc="forceHide()" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] gap-2 -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient">
+        <form ref="containerSettings" @keyup.prevent.esc="forceHide()" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] gap-2 -right-1 z-10 flex-col p-2 text-base text-left rounded-md rounded-tr-none bg-greenGradient containerSettings">
             <template v-for="(_, key, index) in settingsArr" class="flex flex-col" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
                 <div v-if="containers[type].settings[index].type[0] == 0">
                     <label :for="key">{{ containers[type].settings[index].title }}</label><br>
@@ -107,7 +109,7 @@ onBeforeUnmount(() => {
                 </div>
                 
                 <!-- Button -->
-                <button v-if="containers[type].settings[index].type[0] == 1" @click.stop="emit('pressedButton', key); forceHide()" class="px-4 py-1 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
+                <button v-if="containers[type].settings[index].type[0] == 1" type="button" @click.stop="emit('pressedButton', key); forceHide()" class="px-4 py-1 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
                 
                 <!-- Checkbox -->
                 <div v-if="containers[type].settings[index].type[0] == 2" class="flex justify-between">
@@ -149,13 +151,13 @@ onBeforeUnmount(() => {
     
             </template>
             <div class="flex gap-1 justify-between mt-3">
-                <button @click="emit('move', -1)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+                <button @click="emit('move', -1)" type="button" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
                     <img src="@/images/moveUp.svg" class="mx-auto w-5 button" alt="">
                 </button>
-                <button @click="emit('move', 1)" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
+                <button @click="emit('move', 1)" type="button" class="box-border p-1 w-9 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60 aspect-square">
                     <img src="@/images/moveDown.svg" class="mx-auto w-5 button" alt="">
                 </button>
-                <button @click="emit('remove')" class="flex gap-1 items-center p-1 ml-6 text-xl font-bold text-black bg-red-400 rounded-md">
+                <button @click="emit('remove')" type="button" class="flex gap-1 items-center p-1 ml-6 text-xl font-bold text-black bg-red-400 rounded-md">
                     <img src="@/images/del.svg" alt="" class="w-6">
                     <span>{{ $t('editor.remove') }}</span>
                 </button>

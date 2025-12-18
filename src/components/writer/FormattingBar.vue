@@ -5,6 +5,7 @@ import { SETTINGS } from '@/siteSettings';
 import { Key, type Writer } from '@/writers/Writer';
 import FormattingButton from './FormattingButton.vue';
 import type { FormattingAction } from '@/interfaces';
+import { getShortcut } from '@/writers/shortcuts';
 
 const props = defineProps<{
 	selectedNest: number[]
@@ -72,10 +73,11 @@ const getToolbarButtons = (side: 'left' | 'right') => {
 					let newArr = JSON.parse(JSON.stringify(buts[i]))
 					newArr.tooltip = buts[i].dropdownText[j]
 					delete newArr.dropdownText
+					let act = [buts[i].action[0], buts[i].action[1][j]]
 					newArr.icon = buts[i].icon[j]
 					newArr.splitAfter = j == buts[i].dropdownText?.length-1
-					newArr.action = [buts[i].action[0], buts[i].action[1][j]]
-					newArr.shortcut = buts[i].shortcut[j]
+					newArr.action = act
+					newArr.shortcut = getShortcut(act)
 					newButs?.splice(i+b, 0, newArr)
 					j--
 				})
