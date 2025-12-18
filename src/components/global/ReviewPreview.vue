@@ -41,8 +41,8 @@ const props = defineProps<{
 let thumb = ref()
 
 
-const modListCol = () => {
-  if (!props.thumbnail || SETTINGS.value.disableColors) return
+const modListCol = (force = false) => {
+  if ((!props.thumbnail || SETTINGS.value.disableColors) && force) return
 
   let dom = getDominantColor(thumb.value).hsv()
   listColor.value = chroma.hsv(dom[0], dom[1], Math.min(dom[2], 0.5))
@@ -100,18 +100,18 @@ const getDefaultThumb = () => {
   return t
 }
 
-let thumbLink
+const thumbLink = ref("")
 if (props.thumbnail) {
-  thumbLink = `${pre}/userContent/${props.uid}/${props.thumbnail}.webp`
+  thumbLink.value = `${pre}/userContent/${props.uid}/${props.thumbnail}-mthumb.webp`
 }
 else if (props.thumbnailLink) {
-  thumbLink = props.thumbnailLink
+  thumbLink.value = props.thumbnailLink
 }
-else
-  thumbLink = `${base}/defaultThumbnails/${getDefaultThumb()}.webp`
+
+const defaultThumb = `${base}/defaultThumbnails/${getDefaultThumb()}.webp`
 
 let background = JSON.parse(props.thumbProps || '[]')
-background.splice(0,0,thumbLink)
+background.splice(0,0,thumbLink.value)
 let xPos = ["left", "center", "right"][background[3]]
 const clickReview = (opt: number) => {
   if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: +(!props.isList)})
@@ -147,7 +147,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
   >
     
     <div class="relative w-full h-36 bg-cover">
-      <img ref="thumb" @load="modListCol" :src="thumbLink" loading="lazy" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': (!thumbnail && !thumbnailLink) || SETTINGS.disableColors}">
+      <img ref="thumb" @load="modListCol" @error="thumbLink = defaultThumb" :src="thumbLink" loading="lazy" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': (!thumbnail && !thumbnailLink) || SETTINGS.disableColors}">
       <div :style="{background: `linear-gradient(0deg, ${listColor.darken().hex()}, transparent)`}" class="absolute bottom-0 w-full h-8 transition-colors duration-200 group-hover:brightness-50"></div>
       <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between text-base opacity-0 transition-opacity duration-75 group-hover:opacity-100">
         <div v-if="views" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
