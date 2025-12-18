@@ -8,7 +8,7 @@ import axios, { type AxiosResponse } from 'axios'
 import cookier from 'cookier'
 import LoginButton from '../global/LoginButton.vue'
 import { useI18n } from 'vue-i18n'
-import { SETTINGS } from '@/siteSettings'
+import { hasLocalStorage, SETTINGS } from '@/siteSettings'
 import ProfilePicture from '../global/ProfilePicture.vue'
 
 const props = defineProps<{
@@ -23,7 +23,7 @@ const MAX_COMMENT_LEN = 300
 const loggedIn = ref<boolean>(true)
 
 const pfp = ref<any[]>()
-if (localStorage) {
+if (hasLocalStorage()) {
     let userInfo = JSON.parse(localStorage.getItem("account_info")!)
     if (userInfo == null) loggedIn.value = false
     else {

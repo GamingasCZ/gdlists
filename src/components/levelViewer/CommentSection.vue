@@ -4,6 +4,7 @@ import ListBrowser from '../global/ListBrowser.vue';
 import CommentBox from './CommentBox.vue';
 import CommentPreview from './CommentPreview.vue';
 import { isOnline } from '@/Editor';
+import { hasLocalStorage } from '@/siteSettings';
 
 const props = defineProps<{
     listID: number
@@ -20,6 +21,7 @@ const emit = defineEmits<{
 
 const browser = ref<HTMLDivElement>()
 
+const localStrg = ref(hasLocalStorage())
 const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
 const showingOnce = ref(false)
@@ -32,7 +34,7 @@ watch(props, () => { // only refresh comments once
 
 <template>
     <main class="mt-10">
-        <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
+        <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled && localStrg"/>
         
         <!-- Comments disabled info -->
         <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">
