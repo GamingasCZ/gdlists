@@ -13,6 +13,8 @@ export const EMOJI_COUNT = 18;
 export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
 export const diffTranslateOffsets = [0, 0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
+export const DEFAULT_TITLEDATA = () => ({theme: 0, tagline: true, size: 1, colors: [true, []], followFont: true, outline: false, shadow: 0, align: 0})
+
 export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   reviewName: "",
   description: "",
@@ -24,7 +26,7 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   levels: [],
   tagline: "",
   thumbnail: ["", 0, 33, 1, true],
-  titleData: {theme: 0, tagline: true, size: 1, colors: [0], followFont: true, outline: false, shadow: 0, align: 0}
+  titleData: DEFAULT_TITLEDATA()
 }}
 
 export const DEFAULT_LEVEL: () => Level = () => ({

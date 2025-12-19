@@ -43,12 +43,12 @@ const resetColor = () => {
 
 </script>
 
-<template>
-    <Dialog :open="titleEditorOpen" @close-popup="titleEditorOpen = false" :width="dialog.xl" :title="$t('reviews.titEditor')">
-        <WriterTitleEditor :name="postData.reviewName" :data="postData.titleData" :font="postData.font" :tagline="postData.tagline" />
-    </Dialog>
-
+<template>    
     <section :class="{'opacity-20 pointer-events-none': disabled}" class="bg-lof-200 thinScrollbar mx-auto max-w-[58rem] text-white w-full rounded-md shadow-drop">
+        <Dialog :open="titleEditorOpen" @close-popup="titleEditorOpen = false" :width="dialog.xl" :title="$t('reviews.titEditor')">
+            <WriterTitleEditor :name="postData.reviewName" :data="postData.titleData" :font="postData.font" :tagline="postData.tagline" />
+        </Dialog>
+        
         <header class="flex p-2">
             <img src="@/images/sparkles.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('settingsMenu.visual') }}</h2>
