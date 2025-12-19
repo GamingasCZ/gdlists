@@ -145,11 +145,6 @@ const currLang = SETTINGS.value.language
       </button>
     </section>
 
-    <RouterLink to="/saved"
-      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
-    >
-      <img src="@/images/savedMobHeader.svg" class="inline mr-3 w-5" alt="" />{{ $t('navbar.saved') }}
-    </RouterLink>
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
       @click="dialogs.gallery = true"

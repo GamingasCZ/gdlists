@@ -17,6 +17,7 @@ import NavbarDropdown from "./ui/NavbarDropdown.vue";
 import List from "@/svgs/List.vue";
 import LevelIcon from "@/svgs/LevelIcon.vue";
 import Review from "@/svgs/Review.vue";
+import Saved from "@/svgs/Saved.vue";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -78,6 +79,7 @@ enum NAV_SEL {
   Lists,
   Reviews,
   Levels,
+  Saved,
   None
 }
 const scrollerInd = ref(NAV_SEL.Home)
@@ -139,6 +141,9 @@ router.afterEach(newP => {
       else if (newP.path.includes("levels"))
         scrollerInd.value = NAV_SEL.Levels
       break;
+
+    case 'savedBrowser':
+      scrollerInd.value = NAV_SEL.Saved; break;
       
     default:
       scrollerInd.value = NAV_SEL.None; break;
@@ -217,6 +222,13 @@ const open = (to: string) => {
         :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Levels, 'fill-white stroke-white': scrollerInd != NAV_SEL.Levels, 'opacity-20': editorDropdownOpen != 0}"
         class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
       ><LevelIcon class="w-4 h-4" />{{ $t('editor.levels') }}</RouterLink>
+      
+      <!-- Saved -->
+      <RouterLink
+        to="/saved"
+        :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Saved, 'fill-white stroke-white': scrollerInd != NAV_SEL.Saved, 'opacity-20': editorDropdownOpen != 0}"
+        class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+      ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
     </section>
 
     <section class="flex relative gap-7 items-center px-2 min-h-full bg-opacity-40 backdrop-blur-md">
