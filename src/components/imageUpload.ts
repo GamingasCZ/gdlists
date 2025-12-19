@@ -47,6 +47,7 @@ const errorMessages = [
 
 export const notifyError = (ind: ImgFail) => {
     summonNotification(i18n.global.t('other.error'), i18n.global.t(errorMessages[ind]), 'error')
+    return ind
 }
 
 export const uploadImages = async (e: FileList | string, singleFile: boolean, folder = -1) => {
@@ -58,12 +59,14 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
 
     if (singleFile) {
         if (!e?.item(0)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
+        if (e.item(0)?.size <= 2048) return notifyError(ImgFail.TOO_SMALL)
         imageData.append('image_0', e.item(0))
     }
     else {
         for (let i = 0; i < e.length; i++) {
-            imageData.append(`image_${i}`, e?.item(i))
+            if (e.item(i)?.size <= 2048) return notifyError(ImgFail.TOO_SMALL)
             if (!e?.item(i)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
+            imageData.append(`image_${i}`, e?.item(i))
         }
     }
 
@@ -80,6 +83,7 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
         if (res.data == -6) notifyError(ImgFail.NO_FREE_SPACE)
         if (res.data == -5) notifyError(ImgFail.LOAD_FAILED)
         if (res.data == -4) notifyError(ImgFail.TOO_BIG)
+        if (res.data == -11) notifyError(ImgFail.TOO_SMALL)
         if (res.data == -3) notifyError(ImgFail.LOAD_FAILED)
         response = res.data
     })

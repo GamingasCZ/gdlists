@@ -30,7 +30,7 @@ import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
 import { addCEFormatting, deleteCESelection } from "./global/parseEditorFormatting";
 import LevelCard from "./global/LevelCard.vue";
-import { ImgFail, notifyError } from "./imageUpload";
+import { ImgFail, notifyError, summonNotification, uploadImages } from "./imageUpload";
 import WriterViewer from "./writer/WriterViewer.vue";
 import WriterVisuals from "./writer/WriterVisuals.vue";
 import { LIST, REVIEW } from "@/writers/Writer";
@@ -40,6 +40,7 @@ import ShortcutsPopup from "./writer/ShortcutsPopup.vue";
 import containers from "./writer/containers";
 import ZenModeHelp from "./writer/ZenModeHelp.vue";
 import { Limit } from "@/assets/limits";
+import HiddenFileUploader from "./ui/HiddenFileUploader.vue";
 
 const props = defineProps<{
     type: number
@@ -298,6 +299,7 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
         }
     }
     containerLastAdded.value = Date.now()
+    return containerData
 }
 
 provide("addContainer", addContainer)
@@ -527,7 +529,8 @@ const splitParagraph = () => {
     let selectedText = deleteCESelection(document.activeElement)
     let newPos = selectedContainer.value[0] + 1
     let newParagraph = addContainer("default", 0, true)
-    newParagraph.data = selectedText
+    newParagraph.data = selectedText[1]
+    POST_DATA.value.containers[selectedContainer.value[0]].data = selectedText[0]?.toString()
     POST_DATA.value.containers.splice(newPos, 0, newParagraph)
 }
 
@@ -761,12 +764,74 @@ onMounted(() => {
 
     shortcutListen(WRITER.value.toolbar, doAction)
     document.documentElement.addEventListener("fullscreenchange", toggleZenMode)
+
+    document.documentElement.addEventListener("paste", uploadPasteImage)
+    window.addEventListener("drop", uploadPasteImage)
+    window.addEventListener("dragover", toggleFileDrop);
 })
 
 onUnmounted(() => {
     document.documentElement.removeEventListener("fullscreenchange", toggleZenMode)
+    document.documentElement.removeEventListener("paste", uploadPasteImage)
+    window.removeEventListener("drop", uploadPasteImage)
+    window.removeEventListener("dragover", toggleFileDrop)
     shortcutUnload()
 })
+
+var dropAllowed = false 
+const toggleFileDrop = (e: DragEvent) => {
+    dropAllowed = e.dataTransfer?.items?.length > 0
+    if (dropAllowed) {
+        dropAllowed = false
+        let len = e.dataTransfer?.items?.length ?? 0
+        for (let i = 0; i < len; i++) {
+            if (e.dataTransfer?.items[i].kind == "file") {
+                e.preventDefault()
+                dropAllowed = true
+                break
+            }
+        }
+    }
+}
+
+const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
+    if (!dropAllowed) return
+
+    e.preventDefault()
+    let fileCount
+    if (e.type == "drop")
+        fileCount = e.dataTransfer?.items.length
+    else
+        fileCount = e.clipboardData?.files.length
+
+    if (fileCount) {
+        e.preventDefault()
+        summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
+
+        let files
+        if (e.type == "drop")
+            files = e.dataTransfer?.files
+        else
+            files = e.clipboardData?.files
+        uploadImages(files, fileCount == 1).then(e => {
+            if (typeof e == "number")
+                return;
+
+            if (fileCount == 1) {
+                let el = addContainer("showImage")
+                el.settings.url = import.meta.env.VITE_USERCONTENT+"/userContent/"+currentUID.value+"/"+e.newImage[0]+".webp"
+            }
+            else {
+                let el = addContainer("addCarousel")
+                e.newImage.forEach(f => {
+                    let im = addContainer("showImage", 0, true)
+                    im.settings.url = import.meta.env.VITE_USERCONTENT+"/userContent/"+currentUID.value+"/"+f+".webp"
+                    el.settings.components.push(im)
+                })
+            }
+        })
+    }
+}
 
 const preUpload = ref([false, [0, 0, 0]])
 
@@ -1011,7 +1076,7 @@ const collabEditor = ref<HTMLDialogElement>()
         <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
     </div>
 
-    <main v-else-if="POST_DATA" class="p-2">
+    <main v-else-if="POST_DATA" v-show="!loadingOnlineEdit" class="px-2">
         <ErrorPopup :error-text="errorText" :previewing="false" :stamp="errorStamp" />
 
         <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
