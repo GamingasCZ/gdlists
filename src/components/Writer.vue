@@ -4,7 +4,8 @@ import DialogVue from "./global/Dialog.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
 import FormattingBar from "./writer/FormattingBar.vue"
-import CONTAINERS, { type ContainerNames } from "./writer/containers";
+import CONTAINERS from "./writer/containers";
+import type {ContainerNames, Container} from "./writer/containers";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
@@ -40,7 +41,7 @@ import ShortcutsPopup from "./writer/ShortcutsPopup.vue";
 import containers from "./writer/containers";
 import ZenModeHelp from "./writer/ZenModeHelp.vue";
 import { Limit } from "@/assets/limits";
-import HiddenFileUploader from "./ui/HiddenFileUploader.vue";
+import { lastVisitedPath } from "./global/imageCache";
 
 const props = defineProps<{
     type: number
@@ -778,7 +779,7 @@ onUnmounted(() => {
     shortcutUnload()
 })
 
-var dropAllowed = false 
+var dropAllowed = false
 const toggleFileDrop = (e: DragEvent) => {
     dropAllowed = e.dataTransfer?.items?.length > 0
     if (dropAllowed) {
@@ -792,6 +793,17 @@ const toggleFileDrop = (e: DragEvent) => {
             }
         }
     }
+}
+
+const specialUploadProgress = reactive({
+    bg: false,
+    thumb: false
+})
+
+enum UploadTypes {
+    ADD_IMAGE,
+    SET_BACKGROUND,
+    SET_THUMBNAIL
 }
 
 const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
@@ -808,27 +820,53 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
         e.preventDefault()
         summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
 
-        let files
-        if (e.type == "drop")
+        let uploadType = UploadTypes.ADD_IMAGE
+        let files: FileList;
+        if (e.type == "drop") {
             files = e.dataTransfer?.files
+
+            if (e.target && (e.target as HTMLElement).classList.contains("backgroundPicker")) {
+                specialUploadProgress.bg = true
+                uploadType = UploadTypes.SET_BACKGROUND
+            }
+            else if (e.target && (e.target as HTMLElement).classList.contains("thumbnailPicker")) {
+                specialUploadProgress.thumb = true
+                uploadType = UploadTypes.SET_THUMBNAIL
+            }
+        }
         else
-            files = e.clipboardData?.files
-        uploadImages(files, fileCount == 1).then(e => {
+            files = e.clipboardData?.files           
+
+        let lastFolderID = lastVisitedPath.tree[lastVisitedPath.subfolder][1]
+        uploadImages(files, fileCount == 1 || uploadType != 0, lastFolderID).then(e => {
+            specialUploadProgress.bg = false
+            specialUploadProgress.thumb = false
             if (typeof e == "number")
                 return;
 
+            let base = import.meta.env.VITE_USERCONTENT+"/userContent/"+currentUID.value+"/"
+            if (uploadType == UploadTypes.SET_BACKGROUND) {
+                openDialogs.imagePicker[1] = WriterGallery.ReviewBackground
+                return modifyImageURL(base+e.newImage[0]+".webp")
+            }
+            if (uploadType == UploadTypes.SET_THUMBNAIL) {
+                openDialogs.imagePicker[1] = WriterGallery.ReviewThumbnail
+                return modifyImageURL(e.newImage[0])
+            }
+
             if (fileCount == 1) {
                 let el = addContainer("showImage")
-                el.settings.url = import.meta.env.VITE_USERCONTENT+"/userContent/"+currentUID.value+"/"+e.newImage[0]+".webp"
+                el.settings.url = base+e.newImage[0]+".webp"
             }
             else {
                 let el = addContainer("addCarousel")
                 e.newImage.forEach(f => {
                     let im = addContainer("showImage", 0, true)
-                    im.settings.url = import.meta.env.VITE_USERCONTENT+"/userContent/"+currentUID.value+"/"+f+".webp"
+                    im.settings.url = base+f+".webp"
                     el.settings.components.push(im)
                 })
             }
+            containerLastAdded.value = Date.now()
         })
     }
 }
@@ -1273,7 +1311,13 @@ const collabEditor = ref<HTMLDialogElement>()
             </WriterViewer>
                 
             <!-- Decoration -->
-            <WriterVisuals v-show="!zenMode" :disabled="disableEdits" :writer-enabled="WRITER.general.allowWriter" :postData="POST_DATA" />
+            <WriterVisuals
+                v-show="!zenMode"
+                :disabled="disableEdits"
+                :writer-enabled="WRITER.general.allowWriter"
+                :postData="POST_DATA"
+                :uploading="specialUploadProgress"
+            />
 
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">

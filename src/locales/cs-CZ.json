@@ -823,7 +823,8 @@
     "sectionName": "Jméno sekce",
     "colGaps": "Mezery",
     "uploadingMedia": "Nahrávání médií",
-    "titEditor": "Editor nadpisu"
+    "titEditor": "Editor nadpisu",
+    "dragUpload": "Upusť pro nahrání"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

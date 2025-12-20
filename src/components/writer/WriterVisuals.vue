@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PostData } from '@/interfaces';
-import { inject, ref } from 'vue';
+import { inject, reactive, ref } from 'vue';
 import ColorPicker from '../global/ColorPicker.vue';
 import { modifyListBG } from '@/Editor';
 import { getDominantColor } from '@/Reviews';
@@ -13,6 +13,7 @@ const props = defineProps<{
     postData: PostData
     writerEnabled: boolean
     disabled: boolean
+    uploading: {bg: boolean, thumb: boolean}
 }>()
 
 const openDialogs = inject<object>("openedDialogs")
@@ -41,6 +42,11 @@ const resetColor = () => {
     props.postData.pageBGcolor = modifyListBG("", true)
 }
 
+const dragOver = reactive({
+    bg: false,
+    thumb: false
+})
+
 </script>
 
 <template>    
@@ -59,36 +65,63 @@ const resetColor = () => {
         </header>
 
         <div v-show="mainRolledOut && !(colorPickerOpen || pageDetailsOpen)" class="flex overflow-x-auto gap-4 py-4 mx-4 max-w-full">
-            <button @click="openDialogs.imagePicker = [true, -1]" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
-                <button class="flex flex-col gap-2 items-center p-2 button">
-                    <img src="@/images/image.svg" alt="" class="w-10 opacity-40">
-                    <p class="text-xl text-white text-opacity-40">{{ $t('other.bg') }}</p>
-                </button>
-                <img v-show="postData.titleImg[0].length" :src="postData.titleImg[0]" class="absolute inset-0 opacity-20 mix-blend-screen pointer-events-none">
-                <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.bgPreview = !openDialogs.bgPreview" :class="{'!opacity-100': openDialogs.bgPreview}" class="flex absolute top-1 left-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/view.svg" class="w-6" alt="">
-                </button>
-                <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.BGpicker[1] = 0; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/gear.svg" class="w-6" alt="">
-                </button>
-                <button v-show="postData.titleImg[0].length" @click.stop="postData.titleImg[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/trash.svg" class="w-6" alt="">
-                </button>
+            <button @click="openDialogs.imagePicker = [true, -1]" @dragenter="dragOver.bg = true" @dragleave="dragOver.bg = false" @drop="dragOver.bg = false" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md backgroundPicker hover:bg-opacity-80 aspect-video">
+                <template v-if="uploading.bg">
+                    <button class="flex flex-col gap-2 items-center p-2 pointer-events-none button">
+                        <img src="@/images/loading.webp" alt="" class="w-10 opacity-40 animate-spin">
+                        <p class="text-base text-white text-opacity-40">{{ $t('other.uploading') }}...</p>
+                    </button>
+                </template>
+                <template v-else-if="!dragOver.bg">
+                    <button class="flex flex-col gap-2 items-center p-2 button">
+                        <img src="@/images/image.svg" alt="" class="w-10 opacity-40">
+                        <p class="text-xl text-white text-opacity-40">{{ $t('other.bg') }}</p>
+                    </button>
+                    <img v-show="postData.titleImg[0].length" :src="postData.titleImg[0]" class="absolute inset-0 opacity-20 mix-blend-screen pointer-events-none">
+                    <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.bgPreview = !openDialogs.bgPreview" :class="{'!opacity-100': openDialogs.bgPreview}" class="flex absolute top-1 left-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/view.svg" class="w-6" alt="">
+                    </button>
+                    <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.BGpicker[1] = 0; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/gear.svg" class="w-6" alt="">
+                    </button>
+                    <button v-show="postData.titleImg[0].length" @click.stop="postData.titleImg[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/trash.svg" class="w-6" alt="">
+                    </button>
+                </template>
+                <template v-else>
+                    <button class="flex flex-col gap-2 items-center p-2 pointer-events-none button">
+                        <img src="@/images/plus.svg" alt="" class="w-10 opacity-40">
+                        <p class="text-base text-white text-opacity-40">{{ $t('reviews.dragUpload') }}...</p>
+                    </button>
+                </template>
             </button>
-    
 
-            <button @click="openDialogs.imagePicker = [true, -2]" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
-                <img v-show="postData?.thumbnail?.[0].length" :src="`${pre}/userContent/${uid}/${postData?.thumbnail?.[0]}.webp`" class="absolute inset-0 opacity-20 mix-blend-screen pointer-events-none">
-                <button class="flex flex-col gap-2 items-center p-2 button">
-                    <img src="@/images/reviews/thumbnail.svg" alt="" class="w-10 opacity-40">
-                    <p class="text-xl text-white text-opacity-40">{{ $t('reviews.thumbnail') }}</p>
-                </button>
-                <button v-show="postData?.thumbnail?.[0].length" @click.stop="openDialogs.BGpicker[1] = 2; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/gear.svg" class="w-6" alt="">
-                </button>
-                <button v-show="postData.thumbnail[0].length" @click.stop="postData.thumbnail[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/trash.svg" class="w-6" alt="">
-                </button>
+            <button @click="openDialogs.imagePicker = [true, -2]" @dragenter="dragOver.thumb = true" @dragleave="dragOver.thumb = false" @drop="dragOver.thumb = false" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md thumbnailPicker hover:bg-opacity-80 aspect-video">
+                <template v-if="uploading.thumb">
+                    <button class="flex flex-col gap-2 items-center p-2 pointer-events-none button">
+                        <img src="@/images/loading.webp" alt="" class="w-10 opacity-40 animate-spin">
+                        <p class="text-base text-white text-opacity-40">{{ $t('other.uploading') }}...</p>
+                    </button>
+                </template>
+                <template v-else-if="!dragOver.thumb">
+                    <img v-show="postData?.thumbnail?.[0].length" :src="`${pre}/userContent/${uid}/${postData?.thumbnail?.[0]}.webp`" class="absolute inset-0 opacity-20 mix-blend-screen pointer-events-none">
+                    <button class="flex flex-col gap-2 items-center p-2 button">
+                        <img src="@/images/reviews/thumbnail.svg" alt="" class="w-10 opacity-40">
+                        <p class="text-xl text-white text-opacity-40">{{ $t('reviews.thumbnail') }}</p>
+                    </button>
+                    <button v-show="postData?.thumbnail?.[0].length" @click.stop="openDialogs.BGpicker[1] = 2; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/gear.svg" class="w-6" alt="">
+                    </button>
+                    <button v-show="postData.thumbnail[0].length" @click.stop="postData.thumbnail[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/trash.svg" class="w-6" alt="">
+                    </button>
+                </template>
+                <template v-else>
+                    <button class="flex flex-col gap-2 items-center p-2 pointer-events-none button">
+                        <img src="@/images/plus.svg" alt="" class="w-10 opacity-40">
+                        <p class="text-base text-white text-opacity-40">{{ $t('reviews.dragUpload') }}...</p>
+                    </button>
+                </template>
             </button>
             
             <div class="flex flex-col gap-4 h-32 grow">

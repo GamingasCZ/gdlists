@@ -822,7 +822,8 @@
     "sectionName": "Section Name",
     "colGaps": "Spacing",
     "uploadingMedia": "Uploading Media",
-    "titEditor": "Title Editor"
+    "titEditor": "Title Editor",
+    "dragUpload": "Drop the file to upload it"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
