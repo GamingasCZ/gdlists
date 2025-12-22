@@ -824,7 +824,8 @@
     "colGaps": "Mezery",
     "uploadingMedia": "Nahrávání médií",
     "titEditor": "Editor nadpisu",
-    "dragUpload": "Upusť pro nahrání"
+    "dragUpload": "Upusť pro nahrání",
+    "replImg": "Nahradit obrázek"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

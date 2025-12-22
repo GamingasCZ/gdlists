@@ -823,7 +823,8 @@
     "colGaps": "Spacing",
     "uploadingMedia": "Uploading Media",
     "titEditor": "Title Editor",
-    "dragUpload": "Drop the file to upload it"
+    "dragUpload": "Drop the file to upload it",
+    "replImg": "Replace Image"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

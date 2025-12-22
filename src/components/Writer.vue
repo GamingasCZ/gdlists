@@ -803,13 +803,18 @@ const specialUploadProgress = reactive({
 enum UploadTypes {
     ADD_IMAGE,
     SET_BACKGROUND,
-    SET_THUMBNAIL
+    SET_THUMBNAIL,
+    REPL_IMAGE
 }
 
 const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
     if (!dropAllowed) return
 
     e.preventDefault()
+
+    if (document.querySelector(".modalDialog"))
+        return
+
     let fileCount
     if (e.type == "drop")
         fileCount = e.dataTransfer?.items.length
@@ -825,13 +830,18 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
         if (e.type == "drop") {
             files = e.dataTransfer?.files
 
-            if (e.target && (e.target as HTMLElement).classList.contains("backgroundPicker")) {
-                specialUploadProgress.bg = true
-                uploadType = UploadTypes.SET_BACKGROUND
-            }
-            else if (e.target && (e.target as HTMLElement).classList.contains("thumbnailPicker")) {
-                specialUploadProgress.thumb = true
-                uploadType = UploadTypes.SET_THUMBNAIL
+            if (e.target) {
+                if ((e.target as HTMLElement).classList.contains("backgroundPicker")) {
+                    specialUploadProgress.bg = true
+                    uploadType = UploadTypes.SET_BACKGROUND
+                }
+                else if ((e.target as HTMLElement).classList.contains("thumbnailPicker")) {
+                    specialUploadProgress.thumb = true
+                    uploadType = UploadTypes.SET_THUMBNAIL
+                }
+                else if ((e.target as HTMLElement).classList.contains("imgContainer")) {
+                    uploadType = UploadTypes.REPL_IMAGE
+                }
             }
         }
         else
@@ -852,6 +862,10 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
             if (uploadType == UploadTypes.SET_THUMBNAIL) {
                 openDialogs.imagePicker[1] = WriterGallery.ReviewThumbnail
                 return modifyImageURL(e.newImage[0])
+            }
+            if (uploadType == UploadTypes.REPL_IMAGE) {
+                openDialogs.imagePicker[1] = selectedContainer.value[0]
+                return modifyImageURL(base+e.newImage[0]+".webp")
             }
 
             if (fileCount == 1) {
