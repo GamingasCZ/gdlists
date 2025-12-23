@@ -137,7 +137,7 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
           <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -top-5 left-1/2 text-sm text-lime-400 -translate-x-1/2">{{ ratings[0] }}</h6></Transition>
           <div class="transition-colors" :style="{
             stroke: '#21cc5b',
-            filter: ratings?.[2] == 1 ? 'drop-shadow(#21cc5b 0px 0px 10px)' : '',
+            filter: ratings?.[2] == 1 ? 'drop-shadow(#21cc5b 0px 0px 10px)' : 'drop-shadow(black 0px 0px 10px)',
             fill: ratings?.[2] == 1 ? '#21cc5b' : 'none'
             }" v-html="LikeIcon">
           </div>
@@ -153,7 +153,7 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
           <Transition name="fade"><h6 v-if="hoveringRating" class="absolute -bottom-5 left-1/2 text-sm text-red-500 -translate-x-1/2">{{ ratings[1] }}</h6></Transition>
           <div class="transition-colors rotate-180" :style="{
             stroke: '#cc2121',
-            filter: ratings?.[2] == 0 ? 'drop-shadow(#cc2121 0px 0px 10px)' : '',
+            filter: ratings?.[2] == 0 ? 'drop-shadow(#cc2121 0px 0px 10px)' : 'drop-shadow(black 0px 0px 10px)',
             fill: ratings?.[2] == 0 ? '#cc2121' : 'none'
             }" v-html="LikeIcon">
           </div>

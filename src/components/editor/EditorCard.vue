@@ -233,8 +233,8 @@ const pickingColor = ref(false)
 const changeCardColors = (newColors: [number, number, number]) =>
 (props.levelArray.levels[props.index!].color = [
   newColors[0],
-  0.5,
-  parseFloat((newColors[2] / 64).toFixed(2)),
+  parseFloat((newColors[1] / 32).toFixed(2)),
+  parseFloat((newColors[2] / 32).toFixed(2)),
 ]);
 
 const addingVideo = ref(false)
@@ -623,7 +623,7 @@ const cardDropdown = ref<HTMLDivElement>()
             </div>
   
             <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
-            :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
+            :saturation="levelArray.levels[index!].color[1] * 32" :lightness="levelArray.levels[index!].color[2] * 32" />
           </div>
         </div>
         
@@ -645,7 +645,7 @@ const cardDropdown = ref<HTMLDivElement>()
   <!-- Thumbnail / Media options -->
   <Dropdown v-if="imageSettingsOpen >= 0" @close="imageSettingsOpen = -1" :button="gearElement[imageSettingsOpen]">
     <template #header>
-      <section v-if="levelMedia[imageSettingsOpen][0] == LevelImage.THUMBNAIL" class="flex flex-col gap-1 p-2 text-white">
+      <section @mousedown.stop="" v-if="levelMedia[imageSettingsOpen][0] == LevelImage.THUMBNAIL" class="flex flex-col gap-1 p-2 text-white">
 				<button @click="openDialogs.BGpicker = [true, 1, index]; imageSettingsOpen = -1" class="p-2 text-xl bg-black bg-opacity-40 rounded-md button">
 					<img src="@/images/move.svg" alt="" class="inline mr-2 w-5">
 					<span>{{ $t('reviews.setPos') }}</span>

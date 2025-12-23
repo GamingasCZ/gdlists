@@ -16,7 +16,7 @@ const colorsHex = ref(props.hex ?? chroma.hsl(props.hue, props.saturation, props
 
 const modColors = (ind: number, val: number) => {
   colors.value[ind] = val
-  colorsHex.value = chroma.hsl(colors.value[0], colors.value[1], colors.value[2]/64).hex()
+  colorsHex.value = chroma.hsl(colors.value[0], colors.value[1]/32, colors.value[2]/32).hex()
   emit('colorsModified', props.hex ? colorsHex.value : colors.value)
 }
 
@@ -24,13 +24,16 @@ onMounted(() => {
   if (!props.hex) {
     colors.value = [props.hue, props.saturation, props.lightness]
     if (colors.value[2] <= 1)
-      colors.value[2] *= 64
+      colors.value[2] *= 32
+    if (colors.value[1] <= 1)
+      colors.value[1] *= 32
     
-    colorsHex.value = chroma.hsl(props.hue, props.saturation, props.lightness).hex()
+    colorsHex.value = chroma.hsl(props.hue, props.saturation/32, props.lightness/32).hex()
   }
   else {
     colors.value = chroma(props.hex).hsl()
-    colors.value[2] *= 64
+    colors.value[2] *= 32
+    colors.value[1] *= 32
     colorsHex.value = props.hex
   }
 }
@@ -52,18 +55,34 @@ onMounted(() => {
       />
     </div>
 
-    <div>
-      <div :style="{background: `linear-gradient(90deg, black, transparent)`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
-      <input
-        type="range"
-        class="w-full colorPickerSlider"
-        min="0"
-        max="32"
-        step="1"
-        :value="colors[2]"
-        @input="modColors(2, parseInt($event.target?.value))"
-      />
+    <div class="flex flex-wrap gap-2">      
+      <div class="grow min-w-84">
+        <div :style="{background: `linear-gradient(90deg, white, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <input
+          type="range"
+          class="w-full colorPickerSlider"
+          min="0"
+          max="32"
+          step="1"
+          :value="colors[1]"
+          @input="modColors(1, parseInt($event.target?.value))"
+        />
+      </div>
+  
+      <div class="grow min-w-96">
+        <div :style="{background: `linear-gradient(90deg, black, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <input
+          type="range"
+          class="w-full colorPickerSlider"
+          min="0"
+          max="32"
+          step="1"
+          :value="colors[2]"
+          @input="modColors(2, parseInt($event.target?.value))"
+        />
+      </div>
     </div>
+
     <div class="flex gap-2" v-if="SETTINGS.disableColors">
       <div :style="{background: colorsHex}" class="w-10 h-10 rounded-full"></div>
       <div>

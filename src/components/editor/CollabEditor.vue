@@ -448,7 +448,7 @@ defineExpose({
             v-if="(typeof collab != 'string')" @click="addMember()" id="addCollabMember"
                   :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
             :class="{ 'disabled': typeof collab != 'string' && (noRoles || collab[2].length >= 100) }">
-                    <img src="@/images/addLevel.svg" alt="">
+                    <img src="@/images/plus.svg" alt="">
                 </button>
             </div>
             
@@ -510,7 +510,7 @@ defineExpose({
             <h1 class="opacity-60">{{ $t('collabTools.addSomeMembers') }}</h1>
             <div class="flex gap-2 mx-auto mt-2 mb-8 w-max text-base">
               <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="addMember">
-                <img src="../../images/addLevel.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
+                <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
                 {{ $t('collabTools.addMemberTitle') }}
               </button>
               <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="deleteCollab">
