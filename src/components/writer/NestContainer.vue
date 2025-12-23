@@ -97,6 +97,7 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
                 :index="ind"
                 :id="container.id"
                 :editable="editable"
+                :nest-index="[index, subIndex, ind]"
             />
         </DataContainer>
     </article>

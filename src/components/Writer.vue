@@ -807,7 +807,7 @@ enum UploadTypes {
     REPL_IMAGE
 }
 
-const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
+const uploadPasteImage = (e: ClipboardEvent | DragEvent, extra?: any) => {
     if (!dropAllowed) return
 
     e.preventDefault()
@@ -864,8 +864,12 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
                 return modifyImageURL(e.newImage[0])
             }
             if (uploadType == UploadTypes.REPL_IMAGE) {
-                openDialogs.imagePicker[1] = selectedContainer.value[0]
-                return modifyImageURL(base+e.newImage[0]+".webp")
+                let link = base+e.newImage[0]+".webp"
+                if (typeof extra == "number")
+                    POST_DATA.value.containers[extra].settings.url = link
+                else
+                    POST_DATA.value.containers[extra[0]].settings.components[extra[1]][extra[2]].settings.url = link
+                return
             }
 
             if (fileCount == 1) {
@@ -884,6 +888,8 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent) => {
         })
     }
 }
+
+provide("replImage", uploadPasteImage)
 
 const preUpload = ref([false, [0, 0, 0]])
 

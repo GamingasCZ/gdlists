@@ -20,12 +20,16 @@ const props = defineProps<{
     buttonState: [string, number]
     editable: boolean
     id: number
+    nestIndex?: [number, number]
 }>()
 
 const image = ref<HTMLImageElement>()
 const figure = ref<HTMLDivElement>()
 const imageLoading = ref(-2)
 const fileDragover = ref(false)
+
+type replFunc = (e: Event, extra?: any) => void | undefined
+const replaceImageFunc = inject<replFunc>("replImage")
 
 onMounted(() => {
     image.value?.addEventListener("loadstart", () => imageLoading.value = 1)
@@ -44,7 +48,13 @@ onMounted(() => {
     if (props.editable) {
         figure.value?.addEventListener("dragover", () => fileDragover.value = true)
         figure.value?.addEventListener("dragleave", () => fileDragover.value = false)
-        figure.value?.addEventListener("drop", () => fileDragover.value = false)
+        figure.value?.addEventListener("drop", e => {
+            e.stopPropagation()
+            e.preventDefault()
+            console.log("bbbb")
+            replaceImageFunc(e, props.nestIndex ?? props.index)
+            fileDragover.value = false
+        })
     }
 })
 
@@ -100,16 +110,16 @@ const size = containers.showImage.settings[1].valueRange
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 
+        <!-- Dragging replace image -->
+        <Transition name="fade">
+            <div v-if="editable && fileDragover" class="flex absolute top-1/2 left-1/2 z-20 flex-col gap-3 items-center p-3 w-max bg-black bg-opacity-80 rounded-md -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <img src="@/images/dropfile.svg" class="w-10" alt="">
+                <span>{{ $t('reviews.replImg') }}</span>
+            </div>
+        </Transition>
+
     <figure v-show="imageLoading == 0" @click="fullscreenImage" ref="figure" class="max-w-full imgContainer">
         <div class="flex relative group min-h-[48px] my-1 max-w-fit imgContainer" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
-            
-            <!-- Dragging replace image -->
-            <Transition name="fade">
-                <div v-if="editable && fileDragover" class="flex absolute top-1/2 left-1/2 z-20 flex-col gap-3 items-center p-3 w-max bg-black bg-opacity-80 rounded-md -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                    <img src="@/images/dropfile.svg" class="w-10" alt="">
-                    <span>{{ $t('reviews.replImg') }}</span>
-                </div>
-            </Transition>
 
             <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event" class="imgContainer">
                 <img
