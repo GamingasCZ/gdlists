@@ -130,18 +130,28 @@ const removeImage = (hash: string, external: boolean) => {
 
     }
     else {
-        for (let i = 0; i < allExternalImages.length; i++) {
-            let img = typeof hash == 'object' ? hash[0] : hash
-            if (typeof allExternalImages[i] == 'string') {
-                if (allExternalImages[i] == img) {
-                    allExternalImages.splice(i, 1)
-                    break
+        // console.log(allExternalImages, hash, selectedImages.value)
+        if (selectedImages.value && !hash) {
+            selectedImages.value.forEach((x: number) =>
+                allExternalImages[x] = null
+            )
+            allExternalImages = allExternalImages.filter(x => x != null)
+            selectedImages.value = []
+        }
+        else {
+            for (let i = 0; i < allExternalImages.length; i++) {
+                let img = typeof hash == 'object' ? hash[0] : hash
+                if (typeof allExternalImages[i] == 'string') {
+                    if (allExternalImages[i] == img) {
+                        allExternalImages.splice(i, 1)
+                        break
+                    }
                 }
-            }
-            else {
-                if (allExternalImages[i][0] == img) {
-                    allExternalImages.splice(i, 1)
-                    break
+                else {
+                    if (allExternalImages[i][0] == img) {
+                        allExternalImages.splice(i, 1)
+                        break
+                    }
                 }
             }
         }
