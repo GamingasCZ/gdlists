@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, reactive, ref, watch } from "vue";
 import { computed } from "vue";
 import axios from "axios";
 import type { ImageFolder, ImageStorage } from "@/interfaces";
@@ -19,6 +19,7 @@ import ImageViewer from "./ImageViewer.vue";
 import fEdit from "@/images/edit.svg?url"
 import fRemove from "@/images/trash.svg?url"
 import fLink from "@/images/link.svg?url"
+import { i18n } from "@/locales";
 
 const props = defineProps<{
     unselectable: boolean
@@ -826,6 +827,113 @@ const modifyColors = (newColor: Color | null, reset?: boolean) => {
     assParent?.style.setProperty("--brightGreen", chroma.hsl(hue, 0.53, 0.63).hex())
 }
 
+enum mIErrors {
+    OK,
+    BAD_URL,
+    NO_REPL_SYMBOL,
+    RANGE_NOT_FILLED_IN,
+    INVALID_RANGE,
+    RANGE_TOO_LONG
+}
+const addingMulti = ref(false)
+const multiInput = ref<HTMLInputElement>()
+const multiInpForm = reactive({
+    url: "",
+    from: null, to: null,
+    pad: 0, reverse: false,
+    error: 0, errorMsg: ""
+})
+const openMultiAdd = () => {
+    multiInpForm.url = ""
+    multiInpForm.from = null
+    multiInpForm.to = null
+    multiInpForm.pad = 0
+    multiInpForm.reverse = false
+    multiInpForm.error = mIErrors.OK // no error
+
+    addingMulti.value = true
+}
+
+const validateMultiInp = () => {
+    let uri = multiInpForm.url
+    multiInpForm.error = mIErrors.OK
+
+    try {
+        new URL(uri)
+    } catch (e) {
+        multiInpForm.error = mIErrors.BAD_URL
+    }
+    if (multiInpForm.error) return makeInpErrMsg()
+
+    if (!uri.includes("$")) {
+        multiInpForm.error = mIErrors.NO_REPL_SYMBOL
+        return makeInpErrMsg()
+    }
+
+    if (multiInpForm.from === null || multiInpForm.to === null) {
+        multiInpForm.error = mIErrors.RANGE_NOT_FILLED_IN
+        return makeInpErrMsg()
+    }
+
+    let diff = multiInpForm.to - multiInpForm.from
+    let isN = isNaN(parseInt(multiInpForm.from)) || isNaN(parseInt(multiInpForm.to))
+    let isNeg = multiInpForm.from < 0 || multiInpForm.to < 0
+    if (isN || isNeg || diff <= 0) {
+        multiInpForm.error = mIErrors.INVALID_RANGE
+        return makeInpErrMsg()
+    }
+
+    if (diff > 30) {
+        multiInpForm.error = mIErrors.RANGE_TOO_LONG
+        return makeInpErrMsg()
+    }
+    makeInpErrMsg()
+}
+
+const makeInpErrMsg = () => {
+    switch (multiInpForm.error) {
+        case mIErrors.OK:
+            multiInpForm.errorMsg = ""; break;
+        case mIErrors.BAD_URL:
+            multiInpForm.errorMsg = i18n.global.t('other.rImgErr1'); break;
+        case mIErrors.NO_REPL_SYMBOL:
+            multiInpForm.errorMsg = i18n.global.t('other.rImgErr2'); break;
+        case mIErrors.RANGE_NOT_FILLED_IN:
+            multiInpForm.errorMsg = i18n.global.t('other.rImgErr3'); break;
+        case mIErrors.INVALID_RANGE:
+            multiInpForm.errorMsg = i18n.global.t('other.rImgErr4'); break;
+        case mIErrors.RANGE_TOO_LONG:
+            multiInpForm.errorMsg = i18n.global.t('other.rImgErr5'); break;
+    }
+}
+
+const makeMultiURL = (isFrom: boolean, returnNum = -1) => {
+    if (multiInpForm.from === null || multiInpForm.to === null) return
+
+    let uri = multiInpForm.url
+    if (returnNum != -1) {
+        return uri.replaceAll("$", returnNum.toString().padStart(multiInpForm.pad, '0'))
+    }
+
+    let from = uri.replaceAll("$", (multiInpForm.from as number).toString().padStart(multiInpForm.pad, '0'))
+    let to = uri.replaceAll("$", (multiInpForm.to as number).toString().padStart(multiInpForm.pad, '0'))
+    if (isFrom)
+        return multiInpForm.reverse ? to : from
+    else
+        return multiInpForm.reverse ? from : to
+}
+
+const addMultiImg = async () => {
+    if (multiInpForm.from === null || multiInpForm.to === null) return
+
+    let range = Array.from(Array(multiInpForm.to - multiInpForm.from + 1).keys()).map(x => x += multiInpForm.from)
+    if (!multiInpForm.reverse) // not a bug, we want to invert the reverse here
+        range.reverse()
+
+    range.forEach(x => uploadExternalImage(makeMultiURL(false, x)))
+    addingMulti.value = false
+}
+
 onMounted(() => {
     // Load images from cache or server
     refreshContent(lastVisitedPath, false)
@@ -926,6 +1034,56 @@ onMounted(() => {
             </form>
         </Dialog>
 
+        <!-- Multi-add dialog -->
+        <Dialog :title="$t('other.rImgAdd')" @close-popup="addingMulti = false"
+            :open="addingMulti">
+            <form @submit.prevent="addMultiImg" class="p-2">
+                <p class="py-2 pl-2 mb-4 border-l-4 bg-lof-300 border-lof-400"><img src="@/images/info.svg" class="mb-1" alt="">
+                    <div v-html="$t('other.rImgHelp')"></div>
+                </p>
+                <div class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md">
+                    <img src="@/images/searchOpaque.svg" class="w-5" alt="">
+                    <input autocomplete="off" autofocus="on" v-model="multiInpForm.url" @input="$nextTick(validateMultiInp)" @vue:mounted="$nextTick(multiInput?.focus())" ref="multiInput" :placeholder="$t('other.enterURI')" class="bg-transparent border-none outline-none grow" type="text">
+                </div>
+
+                <div v-if="multiInpForm.url && multiInpForm.error > 0" class="p-1 pl-2 my-2 bg-red-700 bg-opacity-20 border-l-4 border-red-500">
+                    <span>{{ multiInpForm.errorMsg }}</span>
+                </div>
+                <div v-else-if="multiInpForm.url && multiInpForm.error == 0" class="my-2">
+                    <span>{{ $t('other.rImgFin') }}:</span>
+                    <p class="ml-2 text-xs">{{ makeMultiURL(true) }}</p>
+                    <p class="ml-2 text-xs">...</p>
+                    <p class="ml-2 text-xs">{{ makeMultiURL(false) }}</p>
+                </div>
+
+                <hr class="my-6 h-0.5 bg-white border-none opacity-20">
+
+                <div class="grid grid-cols-4 gap-2 mb-2">
+                    <label class="place-self-end text-lg" for="ma_from">{{ $t('other.from') }}:</label>
+                    <input v-model.number="multiInpForm.from" autocomplete="off" @input="$nextTick(validateMultiInp)" size="4" inputmode="numeric" min="0" maxlength="10" placeholder="0" class="place-self-start p-1 ml-2 bg-black bg-opacity-40 rounded-md" id="ma_from" type="text">
+                    <label class="place-self-end text-lg" for="ma_to">{{ $t('other.to') }}:</label>
+                    <input v-model.number="multiInpForm.to" autocomplete="off" @input="$nextTick(validateMultiInp)" size="4" inputmode="numeric" min="0" maxlength="10" placeholder="10" class="place-self-start p-1 ml-2 bg-black bg-opacity-40 rounded-md" id="ma_to" type="text">
+                    <label class="place-self-end mb-1" for="ma_fill">{{ $t('other.zeroPad') }}:</label>
+                    <input v-model.number="multiInpForm.pad" autocomplete="off" @input="$nextTick(validateMultiInp)" size="4" inputmode="numeric" min="0" max="10" value="0" class="place-self-start p-1 ml-2 bg-black bg-opacity-40 rounded-md" id="ma_fill" type="text">
+                    <label class="place-self-end" for="ma_reverse">{{ $t('other.flipVals') }}: </label>
+                    <input v-model="multiInpForm.reverse" @input="$nextTick(validateMultiInp)" id="ma_reverse" class="mt-1.5 ml-2" type="checkbox">
+                </div>
+
+
+                <div class="flex justify-between">
+                    <button type="button" @click="addingMulti = false"
+                        class="font-bold text-lof-400">{{
+                            $t('other.cancel') }}</button>
+
+
+                    <button :disabled="!multiInpForm.url || multiInpForm.error != 0" type="submit"
+                        class="p-2 font-bold text-black rounded-md disabled:grayscale disabled:opacity-20 bg-lof-400"><img
+                            src="@/images/check.svg" class="inline mr-1 w-5" alt="">{{ $t('other.add')
+                    }}</button>
+                </div>
+            </form>
+        </Dialog>
+
         <!-- Folder options -->
         <Dropdown v-if="editDropdownOpen" @picked-option="folderAction" @close="editDropdownOpen = false"
             :icons="[fEdit, fRemove]" :options="[$t('level.edit'), $t('editor.remove')]" :button="folderEditButton" no-teleport />
@@ -955,6 +1113,10 @@ onMounted(() => {
                 <input ref="extImgInput" :placeholder="$t('other.enterURI')" :disabled="loadingImages"
                     @paste="uploadExternalImage($event.clipboardData?.getData('Text'))"
                     class="p-1 bg-[url(@/images/searchOpaque.svg)] bg-[size:1rem] bg-[0.5rem] bg-no-repeat pl-8 w-full bg-black bg-opacity-40 rounded-md transition-opacity grow disabled:opacity-40">
+
+                <button @click="openMultiAdd" type="button" :title="$t('other.rImgAdd')" class="px-2 ml-2 bg-black bg-opacity-40 rounded-md button">
+                    <img src="@/images/copy.svg" alt="" class="w-7">
+                </button>
             </form>
 
             <!-- Image upload header -->

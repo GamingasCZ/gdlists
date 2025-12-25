@@ -456,7 +456,18 @@
     "success": "Success",
     "kbLoaded": "Shortcuts have been loaded!",
     "kbInUse": "Shortcut is already in use",
-    "kbInUseHelp": "Please use a different shortcut."
+    "kbInUseHelp": "Please use a different shortcut.",
+    "rImgHelp": "Using this tool, you can import multiple images at once. Image names in the address must be enumerated.<br><br>The <b><b>$</b></b> symbol will be replaced with your given interval.",
+    "from": "From",
+    "to": "To",
+    "zeroPad": "Pad Zeros",
+    "flipVals": "Reverse Order",
+    "rImgAdd": "Importing a Range of Images",
+    "rImgFin": "The final addresses will look like this",
+    "rImgErr1": "This is not a valid address!",
+    "rImgErr3": "The range below hasn't been set!",
+    "rImgErr4": "The interval isn't valid!",
+    "rImgErr2": "The wildcard character is missing!"
   },
   "settingsMenu": {
     "asOff": "Off",

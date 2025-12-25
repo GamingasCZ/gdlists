@@ -437,7 +437,19 @@
     "kbLoaded": "Zkratky byly načteny!",
     "kbFail": "Toto není platný soubor se zkratkami",
     "kbInUse": "Zkratka je již použitá",
-    "kbInUseHelp": "Vyber prosím jinou."
+    "kbInUseHelp": "Vyber prosím jinou.",
+    "rImgAdd": "Přidávání rozsahu obrázků",
+    "from": "Od",
+    "to": "Po",
+    "zeroPad": "Výplň nulami",
+    "flipVals": "Obrátit pořadí",
+    "rImgHelp": "Tímto nástrojem můžeš přidat vícero obrázků zaráz. Jména obrázků v adrese musí být očíslovaná.<br><br>Symbol <b><b>$</b></b> se v adrese nahradí vybraným číselným intervalem.",
+    "rImgFin": "Takto budou adresy vypadat",
+    "rImgErr1": "Toto není platná adresa!",
+    "rImgErr2": "V adrese není zástupný znak!",
+    "rImgErr3": "Není vyplněn číselný interval!",
+    "rImgErr4": "Interval není platný!",
+    "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
