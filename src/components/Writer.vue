@@ -820,6 +820,9 @@ let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
 var outsideDrafts = false
 var previewID: string | null = null
+
+const containerHelpDisabled = computed(() => disableEdits.value)
+provide("containerHelpDisabled", containerHelpDisabled)
 const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewingOutsideDrafts = false) => {
     if (!previewData) {
         errorStamp.value = Date.now()
