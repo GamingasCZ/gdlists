@@ -182,17 +182,17 @@ const isSearching = ref(false)
 
                     <h2 v-else class="text-2xl max-sm:mt-8">{{ subtext }}</h2>
                     <section class="flex gap-3 px-2 mt-8 w-full sm:items-center max-sm:flex-col">
-                        <button @click="openMoreDialog(0)" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
+                        <button :disabled="disabled" @click="openMoreDialog(0)" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
                             <img src="@/images/searchOpaque.svg" class="w-10" alt="">
                             <p>{{ $t('reviews.browseLevels') }}</p>
                         </button>
                         <hr class="w-0.5 h-20 bg-white bg-opacity-20 border-none max-sm:hidden">
-                        <button @click="rouletteActive = true" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
+                        <button :disabled="disabled" @click="rouletteActive = true" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
                             <img src="@/images/dice.svg" class="w-10" alt="">
                             <p>{{ $t('reviews.surprise') }}</p>
                         </button>
                         <hr class="w-0.5 h-20 bg-white bg-opacity-20 border-none max-sm:hidden">
-                        <button @click="openMoreDialog(3)" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
+                        <button :disabled="disabled" @click="openMoreDialog(3)" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
                             <img src="@/images/filePreview.svg" class="w-10" alt="">
                             <p>{{ $t('reviews.impGD') }}</p>
                         </button>
@@ -225,7 +225,7 @@ const isSearching = ref(false)
             <div class="flex relative gap-2 justify-center items-center max-sm:justify-end">
 
                 <!-- Save draft -->
-                <button v-if="POST_DATA.levels.length && drafts !== null" @click="emit('saveDraft')" class="absolute left-2 p-2 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                <button v-if="POST_DATA.levels.length && drafts !== null && !disabled" @click="emit('saveDraft')" class="absolute left-2 p-2 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
                     <span v-if="lastSaved[0] == 0">{{ $t('other.save') }}</span>
                     <span v-else>{{ lastSaved[1] }}</span>
@@ -233,12 +233,12 @@ const isSearching = ref(false)
 
                 <!-- Add level -->
                 <div class="flex gap-2 items-center focus-within:border-b-2 border-lof-400">
-                    <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels"
+                    <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels || disabled "
                         class="flex gap-2 px-2 py-3 text-xl font-bold outline-none disabled:opacity-40 disabled:grayscale text-lof-400" id="addLevelButton">
                         <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
                         {{ $t('reviews.addLevel') }}</button>
                     <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
-                    <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels" ref="moreLevOpts" class="p-2 button">
+                    <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels || disabled" ref="moreLevOpts" class="p-2 button">
                         <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
                     </button>
                 </div>

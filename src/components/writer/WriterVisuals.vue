@@ -18,6 +18,7 @@ const uid = JSON.parse(localStorage.getItem("account_info") ?? ["0"])[1]
 const mainRolledOut = ref(true)
 const colorPickerOpen = ref(false)
 const pageDetailsOpen = ref(false)
+const disabled = inject("containerHelpDisabled", false)
 
 const modifyColor = (newColor: number[]) => {
     props.postData.pageBGcolor = newColor
@@ -51,50 +52,54 @@ const resetColor = () => {
         </header>
 
         <div v-show="mainRolledOut && !(colorPickerOpen || pageDetailsOpen)" class="flex overflow-x-auto gap-4 py-4 mx-4 max-w-full">
-            <button @click="openDialogs.imagePicker = [true, -1]" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
-                <button class="flex flex-col gap-2 items-center p-2 button">
+            <button @click="openDialogs.imagePicker = [true, -1]" :disabled="disabled" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
+                <div class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/image.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('other.bg') }}</p>
-                </button>
+                </div>
                 <img v-show="postData.titleImg[0].length" :src="postData.titleImg[0]" class="absolute inset-0 opacity-20 mix-blend-screen pointer-events-none">
-                <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.bgPreview = !openDialogs.bgPreview" :class="{'!opacity-100': openDialogs.bgPreview}" class="flex absolute top-1 left-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/view.svg" class="w-6" alt="">
-                </button>
-                <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.BGpicker[1] = 0; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/gear.svg" class="w-6" alt="">
-                </button>
-                <button v-show="postData.titleImg[0].length" @click.stop="postData.titleImg[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/trash.svg" class="w-6" alt="">
-                </button>
+                <template v-if="!disabled">
+                    <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.bgPreview = !openDialogs.bgPreview" :class="{'!opacity-100': openDialogs.bgPreview}" class="flex absolute top-1 left-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/view.svg" class="w-6" alt="">
+                    </button>
+                    <button v-show="postData.titleImg[0].length" @click.stop="openDialogs.BGpicker[1] = 0; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/gear.svg" class="w-6" alt="">
+                    </button>
+                    <button v-show="postData.titleImg[0].length" @click.stop="postData.titleImg[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/trash.svg" class="w-6" alt="">
+                    </button>
+                </template>
             </button>
     
 
-            <button @click="openDialogs.imagePicker = [true, -2]" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
+            <button @click="openDialogs.imagePicker = [true, -2]" :disabled="disabled" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md hover:bg-opacity-80 aspect-video">
                 <img v-show="postData?.thumbnail?.[0].length" :src="`${pre}/userContent/${uid}/${postData?.thumbnail?.[0]}.webp`" class="absolute inset-0 opacity-20 mix-blend-screen pointer-events-none">
-                <button class="flex flex-col gap-2 items-center p-2 button">
+                <div class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/reviews/thumbnail.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('reviews.thumbnail') }}</p>
-                </button>
-                <button v-show="postData?.thumbnail?.[0].length" @click.stop="openDialogs.BGpicker[1] = 2; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/gear.svg" class="w-6" alt="">
-                </button>
-                <button v-show="postData.thumbnail[0].length" @click.stop="postData.thumbnail[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
-                    <img src="@/images/trash.svg" class="w-6" alt="">
-                </button>
+                </div>
+                <template v-if="!disabled">
+                    <button v-show="postData?.thumbnail?.[0].length" @click.stop="openDialogs.BGpicker[1] = 2; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/gear.svg" class="w-6" alt="">
+                    </button>
+                    <button v-show="postData.thumbnail[0].length" @click.stop="postData.thumbnail[0] = ''" class="flex absolute right-1 bottom-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/trash.svg" class="w-6" alt="">
+                    </button>
+                </template>
             </button>
             
-            <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-80 aspect-video">
-                <button class="flex flex-col gap-2 items-center p-2 button">
+            <button :disabled="!writerEnabled || disabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md disabled:opacity-20 hover:bg-opacity-80 aspect-video">
+                <div class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
-                </button>
+                </div>
             </button>
 
-            <button @click="colorPickerOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow hover:bg-opacity-80">
-                <button class="flex flex-col gap-2 items-center p-2 button">
+            <button @click="colorPickerOpen = true" :disabled="disabled" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow hover:bg-opacity-80">
+                <div class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/color.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('editor.bgColor') }}</p>
-                </button>
+                </div>
             </button>
         </div>
 

@@ -1112,19 +1112,19 @@ const endShortcutEdit = () => {
             <!-- Hero -->
             <div v-show="!zenMode" class="flex flex-col items-center mt-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
-                <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing"
+                <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing || disableEdits"
                     :placeholder="WRITER.general.titlePlaceholder"
                     class="text-6xl max-sm:text-5xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
-                <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" @click="tagline = true"
+                <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" :disabled="disableEdits" @click="tagline = true"
                     class="flex gap-2 justify-center items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
-                    <input type="text" v-once :maxlength="60" v-model="POST_DATA.tagline" autofocus
+                    <input type="text" v-once :maxlength="60" v-model="POST_DATA.tagline" autofocus :disabled="disableEdits"
                         class="text-lg italic text-center bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400"
                         :placeholder="WRITER.general.placeholderTaglines[Math.floor(Math.random() * WRITER.general.placeholderTaglines.length)]">
-                    <button @click="POST_DATA.tagline = ''; tagline = false">
+                    <button @click="POST_DATA.tagline = ''; tagline = false" :disabled="disableEdits">
                         <img src="@/images/trash.svg" alt=""
                             class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md min-w-6 group-focus-within:block button">
                     </button>
@@ -1236,17 +1236,17 @@ const endShortcutEdit = () => {
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">
 
-                <button @click="openDialogs.settings = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
+                <button @click="openDialogs.settings = true" :disabled="disableEdits" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
                     <span>{{ $t('other.settings') }}</span>
                 </button>
 
-                <button :disabled="uploadInProgress" v-if="!editing" @click="startUpload()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                <button :disabled="uploadInProgress || disableEdits" v-if="!editing" @click="startUpload()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
                     <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                     <img v-else src="@/images/upload.svg" alt="" class="w-7">
                     <span>{{ $t('editor.upload') }}</span>
                 </button>
                 <div class="flex gap-2" v-else>
-                    <button :disabled="uploadInProgress" @click="updateReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                    <button :disabled="uploadInProgress || disableEdits" @click="updateReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
                         <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                         <img v-else src="@/images/upload.svg" alt="" class="w-7">
                         <span class="max-sm:hidden">{{ $t('editor.update') }}</span>
@@ -1256,7 +1256,7 @@ const endShortcutEdit = () => {
                     </HoldButton>
                 </div>
 
-                <button @click="openDialogs.drafts = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
+                <button @click="openDialogs.drafts = true" :disabled="disableEdits" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
                     <span >{{ $t('reviews.drafts') }}</span>
                 </button>
 

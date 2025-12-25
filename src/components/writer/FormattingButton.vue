@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import Tooltip from '../ui/Tooltip.vue';
 import Dropdown from '../ui/Dropdown.vue';
 import { SETTINGS } from '@/siteSettings';
@@ -37,6 +37,7 @@ const titleSwitchable = ref(0)
 const swapTitle = (ind: number) => titleSwitchable.value = ind
 
 const extComponent = ref<HTMLButtonElement>()
+const extDisabled = inject("containerHelpDisabled", false)
 
 </script>
 
@@ -56,7 +57,7 @@ const extComponent = ref<HTMLButtonElement>()
             @mousedown.prevent=""
             class="relative p-1 disabled:opacity-40"
             @click="emit('clicked', getAction($event.shiftKey))"
-            :disabled="disabled"
+            :disabled="disabled || extDisabled"
         >
             <img :src="iconPath(button.icon)" class="w-6 pointer-events-none min-w-6">
         </button>
@@ -71,7 +72,7 @@ const extComponent = ref<HTMLButtonElement>()
                     )" 
                 v-if="(button.title || button?.titleSwitchable) && !SETTINGS.compactToolbar"
                 @mousedown.prevent=""
-                :disabled="disabled" class="flex relative px-2 w-full rounded-b-md disabled:opacity-40" :class="{'hover:bg-black': button?.dropdownText}">
+                :disabled="disabled || extDisabled" class="flex relative px-2 w-full rounded-b-md disabled:opacity-40" :class="{'hover:bg-black': button?.dropdownText}">
             <span :class="{'font-bold': button.bold, 'group-hover:opacity-0': button?.dropdownText}" class="text-sm transition-opacity duration-75">{{ button?.title ?? button?.titleSwitchable?.[titleSwitchable] }}</span>
             <img
                 v-if="button?.dropdownText"
