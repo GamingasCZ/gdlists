@@ -166,15 +166,6 @@ const uploadImage = async (e: FileList, fileList?: boolean) => {
     if (loadingImages.value || uploadingImage.value || folderMoveMode.value) return
     goToTab(Tabs.Uploaded)
 
-    let totalFilesize = 0
-    for (let i = 0; i < e.length; i++) {
-        let file = e.item(i)
-        totalFilesize += file?.size
-        if (!file?.type.startsWith("image")) return notifyError(ImgFail.BAD_FORMAT) // Too big
-        if (file?.size < 50) return notifyError(ImgFail.TOO_SMALL) // Too small
-    }
-    if (totalFilesize > storage.value.left) return notifyError(ImgFail.NO_FREE_SPACE) // Not enough storage
-
     uploadingImage.value = true
     let res = await uploadImages(e, false, currentFolder.value[subfolderLevel.value][1])
     if (typeof res == 'object') {
@@ -1016,7 +1007,7 @@ onMounted(() => {
         </div>
     </div>
 
-    <form action="." method="post" @dragover.prevent="fileDrag = true" @drop.prevent="dragInImage"
+    <form action="." method="post" @dragover.prevent="fileDrag = true"
         @dragexit="fileDrag = false" @dragleave="fileDrag = false" @submit.prevent=""
         :class="{ 'opacity-40 pointer-events-none': loadingImages }"
         class="h-[40rem] overflow-y-auto relative bg-[url(@/images/fade.svg)] bg-repeat-x">

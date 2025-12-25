@@ -58,12 +58,14 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
 
     if (singleFile) {
         if (!e?.item(0)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
+        if (e.item(0)?.size <= 200) return notifyError(ImgFail.TOO_SMALL)
         imageData.append('image_0', e.item(0))
     }
     else {
         for (let i = 0; i < e.length; i++) {
             imageData.append(`image_${i}`, e?.item(i))
             if (!e?.item(i)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
+            if (e?.item(i)?.size <= 200) return notifyError(ImgFail.TOO_SMALL)
         }
     }
 
