@@ -51,8 +51,7 @@ const refreshContent = () => {
   } else if (props.forceContent) {
     lists.value = props.forceContent[0]
     users.value = props.forceContent[1]
-    if (props.listType == 2)
-      reviewDetails.value = props.forceContent?.[4]
+    reviewDetails.value = props.forceContent?.[4]
   } else {
     lists.value = [];
   }

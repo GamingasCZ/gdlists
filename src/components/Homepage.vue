@@ -136,7 +136,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
     <ListSection :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
         :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds?.['reviews']" :list-type="2" />
     
-    <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more" :list-type="2"
+    <ListSection :header-name="$t('homepage.newest')" :extra-text="$t('homepage.more')" extra-icon="more"
         :empty-text="$t('homepage.listsUnavailable', [$t('homepage.levels')])" extra-action="/browse/lists" :force-content="feeds?. ['lists']" />
 
     <ListSection v-if="loggedIn" :header-name="$t('homepage.uploaded')" :extra-text="$t('homepage.more')"
