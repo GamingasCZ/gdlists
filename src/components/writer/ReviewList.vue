@@ -71,6 +71,7 @@ watch(levels, getList)
 getList()
 
 const dialogs = inject("openedDialogs")
+const mountedOnce = ref(false)
 </script>
 
 <template>
@@ -78,7 +79,7 @@ const dialogs = inject("openedDialogs")
         <span class="text-sm leading-none opacity-50">{{ $t('reviews.embeddedHelp') }}</span>
     </ContainerHelp>
 
-    <ContainerHelp @click="dialogs.lists = [true, index, 0]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click="dialogs.lists = [true, index, 0]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
     </ContainerHelp>
 
     <ContainerHelp unclickable v-else-if="settings.post && ((postData?.[0] === undefined && typeof postData?.[1] == 'object') || !postData)" icon="view" :help-content="$t('reviews.deletedPost')">

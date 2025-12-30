@@ -51,7 +51,6 @@ onMounted(() => {
         figure.value?.addEventListener("drop", e => {
             e.stopPropagation()
             e.preventDefault()
-            console.log("bbbb")
             replaceImageFunc(e, props.nestIndex ?? props.index)
             fileDragover.value = false
         })
@@ -102,11 +101,12 @@ const fullscreenImage = () => {
 }
 
 const size = containers.showImage.settings[1].valueRange
+const mountedOnce = ref(false)
 
 </script>
 
 <template>
-    <ContainerHelp @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]" v-show="imageLoading != 0" v-if="editable" icon="showImage" :help-content="['', $t('other.loading'), $t('reviews.imgError')][text]" >
         <span>{{ $t('reviews.pickImage') }}</span>
     </ContainerHelp>
 

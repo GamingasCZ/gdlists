@@ -76,11 +76,12 @@ const onResize = new ResizeObserver(() => {
 })
 const hovering = ref(false)
 const size = containers.addCarousel.settings[1].valueRange
+const mountedOnce = ref(false)
 
 </script>
 
 <template>
-    <ContainerHelp v-if="!settings.components.length" @click.stop="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
+    <ContainerHelp v-if="!settings.components.length" ref="cHelp" @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click.stop="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
     <section
         v-else
         @mouseenter="hovering = true"
