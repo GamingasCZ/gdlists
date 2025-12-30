@@ -436,7 +436,6 @@ provide("idCopyTimestamp", copyID)
 const jumpSearch = ref("")
 
 const modPreview = (clickedImageID: number) => {
-  console.log(imagesArray.value, clickedImageID)
   imageIndex.value = imagesArray.value.findIndex(c => c.id == clickedImageID)
 }
 

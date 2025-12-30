@@ -126,12 +126,14 @@ const base = import.meta.env.VITE_USERCONTENT
             </div>
         </Transition>
 
-        <figure class="touch-pan-x" @touchmove="swipe" @touchend="stopDrag" @touchstart="dragDisabled = false">
-            <img v-if="imagesArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[98vh] transition-transform h-max pointer-events-none rounded-md" :src="imagesArray[imageIndex].settings.url" :alt="imagesArray[imageIndex].settings.alt">
-            <img v-else-if="hashArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="`${base}/userContent/${uid}/${hashArray[imageIndex]}.webp`" :alt="hashArray[imageIndex]">
-            <img v-else-if="urlArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="max-h-[90vh] transition-transform h-max pointer-events-none rounded-md" :src="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]" :alt="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]">
+        <figure class="touch-pan-x h-[98vh]" @touchmove="swipe" @touchend="stopDrag" @touchstart="dragDisabled = false">
+            <img v-if="imagesArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="mx-auto w-max h-full rounded-md transition-transform pointer-events-none" :src="imagesArray[imageIndex].settings.url" :alt="imagesArray[imageIndex].settings.alt">
+            <img v-else-if="hashArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="mx-auto w-max h-full rounded-md transition-transform pointer-events-none" :src="`${base}/userContent/${uid}/${hashArray[imageIndex]}.webp`" :alt="hashArray[imageIndex]">
+            <img v-else-if="urlArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="mx-auto w-max h-full rounded-md transition-transform pointer-events-none" :src="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]" :alt="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]">
 
-            <figcaption v-if="imagesArray" class="mt-4 text-lg text-center text-white">{{ imagesArray[imageIndex].settings.alt }}</figcaption>
+            <Transition name="fade">
+                <figcaption v-if="imagesArray && imagesArray[imageIndex].settings.alt" v-show="uiShown" @mouseenter="stopCooldown" @mouseleave="startCooldown" @click.stop="" class="overflow-y-auto absolute bottom-4 left-1/2 z-10 p-1 mx-4 w-full max-h-24 text-lg text-center text-white bg-black bg-opacity-80 rounded-md -translate-x-1/2">{{ imagesArray[imageIndex].settings.alt }}</figcaption>
+            </Transition>
         </figure>
 
     </section>
