@@ -2,14 +2,15 @@
 import { onMounted, ref } from 'vue';
 
 
-defineProps<{
+const props = defineProps<{
     tabNames: string[]
+    defaultTab?: number
 }>()
 const emit = defineEmits<{
     (e: "switchedTab", index: number)
 }>()
 
-const tabSelected = ref(0)
+const tabSelected = ref(props.defaultTab)
 const switchTab = (ind: number) => {
     tabSelected.value = ind
     emit('switchedTab', ind)

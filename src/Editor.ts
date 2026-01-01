@@ -336,3 +336,6 @@ export var lastTab: (number | string | null)[] = [null, null]
 export const modLastTab = (x: [number, string]) => lastTab = x
 
 export const lastUsedTags = ref<number[]>([])
+
+export var lastPostPickerTab = [0, 0]
+export const modLastPPTab = (x: [0 | 1 | 2, 0 | 1 | 2]) => lastPostPickerTab = x
