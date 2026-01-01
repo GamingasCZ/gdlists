@@ -132,7 +132,7 @@ const base = import.meta.env.VITE_USERCONTENT
             <img v-else-if="urlArray" @click.stop="" :style="{transform: `translateX(${imgOffset}px)`}" class="mx-auto w-max max-h-full rounded-md transition-transform pointer-events-none" :src="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]" :alt="urlArray[imageIndex]?.[0] ?? urlArray[imageIndex]">
 
             <Transition name="fade">
-                <figcaption v-if="imagesArray && imagesArray[imageIndex].settings.alt" v-show="uiShown" @mouseenter="stopCooldown" @mouseleave="startCooldown" @click.stop="" class="overflow-y-auto absolute bottom-4 left-1/2 z-10 p-1 mx-4 w-full max-h-24 text-lg text-center text-white bg-black bg-opacity-80 rounded-md -translate-x-1/2">{{ imagesArray[imageIndex].settings.alt }}</figcaption>
+                <figcaption v-if="imagesArray && imagesArray[imageIndex].settings.alt" v-show="uiShown" @mouseenter="stopCooldown" @mouseleave="startCooldown" @click.stop="" class="overflow-y-auto absolute bottom-4 left-4 right-4 z-10 p-1 mx-4 max-h-24 text-lg text-center text-white bg-black bg-opacity-80 rounded-md">{{ imagesArray[imageIndex].settings.alt }}</figcaption>
             </Transition>
         </figure>
 
