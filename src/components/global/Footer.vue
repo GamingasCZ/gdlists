@@ -30,7 +30,7 @@ const scrollTop = () => window.scrollTo({top: 0, behavior: "smooth"})
       <div class="ml-3">
         <span class="mr-1 text-xs leading-tight align-middle opacity-40">GD Lists by</span>
         <strong>GamingasCZ</strong>
-        <p class="text-[0.6rem] opacity-40">2021 - 2025 • commit {{ currentCommit }}</p>
+        <p class="text-[0.6rem] opacity-40">2021 - 2026 • commit {{ currentCommit }}</p>
       </div>
     </div>
     <div class="flex gap-4 text-sm">
