@@ -94,7 +94,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       $reviewDetails = doRequest($mysqli, sprintf("SELECT
                                           %s,
                                           count(%s) AS level_count,
-                                          ifnull(avg(gameplay), 1) AS gameplay,
+                                          avg(gameplay) AS gameplay,
                                           avg(decoration) AS decoration,
                                           avg(difficulty) AS difficulty,
                                           avg(overall) AS overall
