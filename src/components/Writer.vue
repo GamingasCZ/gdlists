@@ -391,7 +391,10 @@ const columnCommand = (index: number) => {
             break;
         case 8: moveContainer(selectedNestContainer.value[0], -1); break;
         case 9: moveContainer(selectedNestContainer.value[0], 1); break;
-        case 10: removeContainer(selectedNestContainer.value[0], true); break;
+        case 10:
+            removeContainer(selectedNestContainer.value[0], true);
+            nextTick(() => selectedNestContainer.value = [-1,-1,-1])
+            break;
         case 11: column[11] = 0; break;
         case 12: column[11] = 1; break;
         case 13: column[11] = 2; break;
