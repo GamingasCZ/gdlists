@@ -71,7 +71,7 @@ const addToTemporaryList = () => {
     creator: props.creator,
     levelID: props.levelID,
     difficulty: [props.difficulty || props.levelDiff || 0, props.rating || props.levelRating || 0],
-    color: listColor.value,
+    color: listColor.value.hsl(),
     platf: props.platformer
   })
 }
