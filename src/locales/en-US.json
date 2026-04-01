@@ -527,7 +527,7 @@
     "saveThumbs": "Save Level Thumbnails",
     "saveThumbsHelp": "Searching a level will save its thumbnail to the Gallery. Disable to speed up search.",
     "notifBehave": "Displaying Notifications",
-    "notifBeHelp": "Modifies displaying of notifications on clicking the notification icon,",
+    "notifBeHelp": "Modifies displaying of notifications on clicking the notification icon.",
     "navDClick": "Double-clicking Navigation",
     "browsing": "Browsing",
     "creating": "Creating",
@@ -627,7 +627,9 @@
     "removeAll": "Removing the last role will delete the collab!",
     "removeAllHelp": "Are you sure you want to continue?",
     "bluesky": "Bluesky account",
-    "removeCollab": "Remove Collab"
+    "removeCollab": "Remove Collab",
+    "instagram": "Instagram Page",
+    "tiktok": "TikTok Page"
   },
   "reviews": {
     "reviewName": "Review Title",

@@ -186,11 +186,17 @@ switch (array_keys($_GET)[1]) {
         $returnData["color2"] = intval($userData[5]);
         $returnData["glow"] = $userData[6];
         $returnData["socials"] = [];
-        $socialIndexes = [0, 1, 2];
+        $socialIndexes = [0, 1, 2, 6, 7];
 
         $i = 0;
-        foreach ([$userData[15], $userData[30], $userData[31]] as $site) {
-            if ($site != "") array_push($returnData["socials"], [$socialIndexes[$i], "/" . $site]);
+        // youtube, twitter, twitch, instagram, tiktok
+        foreach ([$userData[15], $userData[30], $userData[31], $userData[32], $userData[33]] as $site) {
+            if ($site != "") {
+                if ($i == 4) // tiktok
+                    array_push($returnData["socials"], [$socialIndexes[$i], "/@" . $site]);
+                else
+                    array_push($returnData["socials"], [$socialIndexes[$i], "/" . $site]);
+            }
             $i += 1;
         }
         

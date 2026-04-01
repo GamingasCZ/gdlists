@@ -628,7 +628,9 @@
     "removeAll": "Smazáním poslední role se smaže collab!",
     "removeAllHelp": "Opravdu chceš pokračovat?",
     "bluesky": "Bluesky účet",
-    "removeCollab": "Smazat collab"
+    "removeCollab": "Smazat collab",
+    "instagram": "Instagram stránka",
+    "tiktok": "TikTok stránka"
   },
   "reviews": {
     "imgError": "Nepodařilo se načíst obrázek!",
