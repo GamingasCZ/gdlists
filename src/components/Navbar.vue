@@ -34,9 +34,14 @@ if (e.target.id == "settingsOpener") return
 const showNotifs = () => {
   if (notifDropdownShown.value) return closeNotifs2()
 
-  notifDropdownShown.value = true
-  closeSettings2()
-  document.body.addEventListener("click", closeNotifs, { capture: true })
+  if (SETTINGS.value.notifBehaviour) {
+    router.push("/notifications")
+  }
+  else {
+    notifDropdownShown.value = true
+    closeSettings2()
+    document.body.addEventListener("click", closeNotifs, { capture: true })
+  }
 };
 
 const closeSettings2 = () => {
@@ -56,6 +61,8 @@ const closeNotifs = (e: MouseEvent) => closeDialog(e, "#notifMenu", closeNotifs2
 const closeDialog = (m: MouseEvent, elementID: string, fun: any) => {
   if (m.x == 0) return // Clicking on settings menu content fricks up mouse pos
   let settingsMenu = document.querySelector(elementID) as HTMLDivElement
+  if (!settingsMenu) return
+  
   let left = settingsMenu.offsetLeft!
   let top = settingsMenu.offsetTop!
   let width = settingsMenu.offsetWidth!

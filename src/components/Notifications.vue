@@ -4,11 +4,13 @@ import NotificationCard from './global/NotificationCard.vue';
 import { notificationCache } from '@/Editor';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
+import type { NotificationContent } from '@/interfaces';
 
 document.title = `${i18n.global.t('navbar.notifs')} | ${i18n.global.t('other.websiteName')}`
 
 const allNotifs = ref<NotificationContent[]>([])
 const postNames = ref<NotificationContent[]>([])
+const currentUnread = ref(0)
 function fetchNotifications(force = false) {
     if (!force && notificationCache.value) {
         allNotifs.value = notificationCache.value[0]
