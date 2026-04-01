@@ -59,7 +59,7 @@ function getCreator(e: SubmitEvent) {
     let searchUsername = (e.target as HTMLFormElement)?.elements?.[0]?.value!
     axios.get(
         import.meta.env.VITE_API+"/rubLevelData.php",
-        {params: {userDataFetch: '', username: searchUsername}}
+        {params: {username: searchUsername, userDataFetch: ''}}
     ).then(res => {
         let userData: userDataFetchResponse = res.data
         // User not found

@@ -172,9 +172,9 @@ switch (array_keys($_GET)[1]) {
     case "userDataFetch": {
         $accountIDReq = post("https://www.boomlings.com/database/getGJUsers20.php", ["secret"=>"Wmfd2893gb7","str"=>$_GET["username"]], []);
         if ($accountIDReq == "-1") die("-1");
-
+        
         $accountIDData = explode(":", $accountIDReq);
-        $userReq = post("https://www.boomlings.com/database/getGJUserInfo20.php", ["secret"=>"Wmfd2893gb7","targetAccountID"=>$accountIDData[21]], []);
+        $userReq = post("https://www.boomlings.com/database/getGJUserInfo20.php", ["secret"=>"Wmfd2893gb7","targetAccountID"=>$accountIDData[23]], []);
         $userData = explode(":", $userReq);
         for ($i=0; $i < sizeof($userData); $i++) { 
             array_splice($userData, $i, 1);
