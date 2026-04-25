@@ -43,7 +43,7 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 <template>
     <Transition name="fade" >
         <Teleport to="body" :disabled="noTeleport">
-            <div ref="dropdown" @mousedown.prevent="" role="tooltip" class="z-50 shadow-drop" data-popper-placement>
+            <div ref="dropdown" @mousedown.prevent="" role="tooltip" id="tooltip" class="z-50 shadow-drop" data-popper-placement>
                 <div
                 class="flex flex-col max-w-max bg-opacity-90 rounded-md min-w-40 bg-lof-200" id="tooltip">
                     <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
@@ -61,15 +61,5 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 </template>
 
 <style>
-#arrow,
-#arrow::before {@apply absolute w-4 h-4 bg-inherit -translate-y-2}
-
-#arrow {@apply invisible}
-
-#arrow::before {@apply visible content-[''] rotate-45;}
-
-#tooltip[data-popper-placement^='top'] > #arrow {@apply -bottom-4; }
-#tooltip[data-popper-placement^='bottom'] > #arrow {@apply -top-4; }
-#tooltip[data-popper-placement^='left'] > #arrow {@apply -right-4; }
-#tooltip[data-popper-placement^='right'] > #arrow {@apply -left-4; }
+#tooltip[data-popper-placement^='top'] #arrow {@apply -bottom-4; }
 </style>
