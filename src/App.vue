@@ -125,7 +125,7 @@ const debugMenuOpen = ref(false)
 
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
 
-    <div class="fixed top-1 left-14 z-50 p-1 text-black bg-yellow-100 rounded-md" @click="debugMenuOpen = true" v-if="debugModeEnabled">
+    <div class="fixed bottom-1 left-1 z-50 p-1 text-black rounded-md bg-yellow-100/20" @click="debugMenuOpen = true" v-if="debugModeEnabled">
       <span class="opacity-40">Debug</span>
       <component @close-popup="debugMenuOpen = false" v-if="debugMenuOpen" :is="debugMenu">
       </component>
