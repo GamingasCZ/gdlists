@@ -92,11 +92,11 @@ const getImgSrc = (image: string) => {
 }
 
 const removeConfirmationOpen = ref(-1)
-const startRemoval = (index: number) => {
+const startRemoval = (index: number, force = false) => {
     if (currentTab.value == Tabs.External)
         return removeImage(externalImages.value[index], true)
 
-    if (holdingShift.value) removeImage(images.value[index], false)
+    if (force) removeImage(images.value[index], false)
     else removeConfirmationOpen.value = index
 }
 const removeImage = (hash: string, external: boolean) => {
@@ -403,12 +403,12 @@ const dragInImage = (e: DragEvent) => {
 const imageOptsShown = ref<HTMLButtonElement | false>(false)
 const imageHovering = ref(-1)
 
-const imageAction = (id: number, external: boolean, val: string | number) => {
+const imageAction = (id: number, external: boolean, val: string | number, force = false) => {
     previewImage.value = false
     switch (id) {
         case 0: // Remove
             if (external) removeImage(externalImages.value[val], true);
-            else startRemoval(val);
+            else startRemoval(val, force);
             break;
         case 1:
             downloadImage(val, external); break
@@ -433,12 +433,10 @@ const focusContent = (by: number) => {
     if (content) content.focus()
 }
 
-const holdingShift = ref(false)
 const modifierHeld = (e: KeyboardEvent) => {
     if (removeConfirmationOpen.value != -1) return
     if (creatingNewFolder.value) return
 
-    holdingShift.value = e.shiftKey
     switch (e.key) {
         case 'ArrowUp':
         case 'ArrowDown':
@@ -1036,8 +1034,8 @@ onMounted(() => {
             <!-- Images -->
             <button v-for="(image, index) in (currentTab ? externalImages : images)"
                 v-memo="[imageHovering == index, imageOptsShown, folderMoveMode, selectedImages.length]"
-                @click.exact="pickImage(index, currentTab == Tabs.External, $event)" @click.right.exact.prevent=""
-                @click.ctrl="selectImage(index)" @click.middle.exact="startRemoval(index)"
+                @click.exact="pickImage(index, currentTab == Tabs.External, $event)" @click.right.exact.prevent="imageOptsShown = index"
+                @click.ctrl="selectImage(index)" @click.middle="startRemoval(index, $event.shiftKey)"
                 @mouseenter="imageHovering = index" @mouseleave="imageHovering = -1" :key="image"
                 class="relative h-24 bg-center rounded-sm transition-all duration-75 cursor-pointer border-lof-400 focus-within:outline-4 focus-within:outline focus-within:outline-lof-400 shadow-drop min-w-5 hover:bg-black hover:bg-opacity-80 hover:z-10"
                 :class="{ 'opacity-20 pointer-events-none': folderMoveMode && !isSelected(index), '!border-4': isSelected(index) }" :data-ind="index + (currentTab == Tabs.External ? extImgFolders.length : folders.length)">
@@ -1048,7 +1046,9 @@ onMounted(() => {
                     <img src="@/images/more.svg" class="p-1 invert">
 
                     <Dropdown :button="button" @close="imageOptsShown = -1"
-                        @picked-option="imageAction($event, currentTab == Tabs.External, index)" v-if="imageOptsShown === index"
+                        v-if="imageOptsShown === index"
+                        @picked-option="imageAction($event, currentTab == Tabs.External, index)"
+                        @picked-option-shift="imageAction($event, currentTab == Tabs.External, index, true)"
                         :options="[$t('editor.remove'), $t('other.download'), $t('other.move')]"
                         :title="$t('other.options')" no-teleport />
                 </button>
