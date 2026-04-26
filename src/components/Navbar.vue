@@ -179,93 +179,98 @@ const open = (to: string) => {
     :class="{'-translate-y-14': navbarHidden}"
     class="box-border sticky top-0 z-30 transition-transform bg-greenGradient">
 
-    <div class="max-w-[100rem] flex justify-between mx-auto">
-          <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
-      :class="{ 'opacity-50 pointer-events-none': !isOnline }">
+    <div class="max-w-[100rem] flex relative justify-between mx-auto">
+      <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
+        :class="{ 'opacity-50 pointer-events-none': !isOnline }">
+        
+        <!-- Home link -->
+        <RouterLink to="/" class="relative ml-2 websiteLink">
+          <Logo class="w-10 h-10 button"
+            :class="{'stroke-lof-400 fill-lof-200': scrollerInd == NAV_SEL.Home, 'fill-lof-300 brightness-125 stroke-lof-200': scrollerInd != NAV_SEL.Home}"
+          />
+        </RouterLink>
       
-      <!-- Home link -->
-      <RouterLink to="/" class="relative ml-2 websiteLink">
-        <Logo class="w-10 h-10 button"
-          :class="{'stroke-lof-400 fill-lof-200': scrollerInd == NAV_SEL.Home, 'fill-lof-300 brightness-125 stroke-lof-200': scrollerInd != NAV_SEL.Home}"
-        />
-      </RouterLink>
+
+        <!-- Lists -->
+        <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+          :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists, 'opacity-20': editorDropdownOpen != 1 && editorDropdownOpen != 0}"
+        >
+            <List class="w-4 h-4" />{{ $t('help.Lists') }}
     
+            <Transition name="fadeSlide">
+              <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 1" :is-review="false" />
+            </Transition>
+        </button>
 
-      <!-- Lists -->
-       <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists, 'opacity-20': editorDropdownOpen != 1 && editorDropdownOpen != 0}"
-       >
-          <List class="w-4 h-4" />{{ $t('help.Lists') }}
-   
-          <Transition name="fadeSlide">
-            <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 1" :is-review="false" />
-          </Transition>
-       </button>
+        <!-- Reviews -->
+        <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+          :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews, 'opacity-20': editorDropdownOpen != 2 && editorDropdownOpen != 0}"
+        >
+            <Review class="w-4 h-4" />{{ $t('reviews.review') }}
+    
+            <Transition name="fadeSlide">
+              <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 2" :is-review="true" />
+            </Transition>
+        </button>
 
-      <!-- Reviews -->
-      <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-        :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews, 'opacity-20': editorDropdownOpen != 2 && editorDropdownOpen != 0}"
-      >
-          <Review class="w-4 h-4" />{{ $t('reviews.review') }}
-   
-          <Transition name="fadeSlide">
-            <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 2" :is-review="true" />
-          </Transition>
-      </button>
+        <!-- Levels -->
+        <RouterLink
+          to="/browse/levels"
+          :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Levels, 'fill-white stroke-white': scrollerInd != NAV_SEL.Levels, 'opacity-20': editorDropdownOpen != 0}"
+          class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        ><LevelIcon class="w-4 h-4" />{{ $t('editor.levels') }}</RouterLink>
+        
+        <!-- Saved -->
+        <RouterLink
+          to="/saved"
+          :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Saved, 'fill-white stroke-white': scrollerInd != NAV_SEL.Saved, 'opacity-20': editorDropdownOpen != 0}"
+          class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
+      </section>
 
-      <!-- Levels -->
-      <RouterLink
-        to="/browse/levels"
-        :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Levels, 'fill-white stroke-white': scrollerInd != NAV_SEL.Levels, 'opacity-20': editorDropdownOpen != 0}"
-        class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-      ><LevelIcon class="w-4 h-4" />{{ $t('editor.levels') }}</RouterLink>
-      
-      <!-- Saved -->
-      <RouterLink
-        to="/saved"
-        :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Saved, 'fill-white stroke-white': scrollerInd != NAV_SEL.Saved, 'opacity-20': editorDropdownOpen != 0}"
-        class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
-      ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
-    </section>
+      <section class="flex relative gap-7 items-center px-2 min-h-full">
+        <!-- Notification button -->
+        <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
+          <img src="../images/notifs.svg" alt=""
+          class="w-5" />
+          <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black motion-safe:animate-ping bg-lof-400 aspect-square"></div>
+          <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black bg-lof-400 aspect-square"></div>
+        </button>
 
-    <section class="flex relative gap-7 items-center px-2 min-h-full">
-      <!-- Notification button -->
-      <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
-        <img src="../images/notifs.svg" alt=""
-        class="w-5" />
-        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black motion-safe:animate-ping bg-lof-400 aspect-square"></div>
-        <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black bg-lof-400 aspect-square"></div>
-      </button>
+        <!-- Logged out -->
+        <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
+          class="px-1 w-10 h-10 button" />
+    
+        <!-- Loading response from accounts.php -->
+        <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
+          class="mr-1 w-6 animate-spin aspect-square" />
+        
+        <!-- Logged in, settings -->
+        <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
+          <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
+          <ProfilePicture
+            :uid="currentUID"
+            :cutout="currentCutout"
+            :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
+            class="absolute right-0 button top-0 z-20 w-9 h-9 shadow-drop motion-safe:transition-all duration-[10ms]"
+            id="profilePicture"
+          />
+        </div>
+        <div v-else></div>
+      </section>
 
-      <!-- Logged out -->
-      <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
-        class="px-1 w-10 h-10 button" />
-  
-      <!-- Loading response from accounts.php -->
-      <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
-        class="mr-1 w-6 animate-spin aspect-square" />
-      
-      <!-- Logged in, settings -->
-      <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
-        <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
-        <ProfilePicture
-          :uid="currentUID"
-          :cutout="currentCutout"
-          :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-          class="absolute right-0 button top-0 z-20 w-9 h-9 shadow-drop motion-safe:transition-all duration-[10ms]"
-          id="profilePicture"
-        />
-      </div>
-      <div v-else></div>
-    </section>
+      <!-- Settings -->
+      <Transition name="fadeSlide">
+        <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"
+          v-if="localStorg" @open-notifs="showNotifs()" />
+      </Transition>
+
+          <!-- Notification Dropdown -->
+      <Transition name="fadeSlide">
+        <NotificationDropdown id="notifMenu" v-if="notifDropdownShown" @selected="showNotifs" @close="closeNotifs2()" />
+      </Transition>
+
     </div>
-
-
-
-    <Transition name="fadeSlide">
-      <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"
-        v-if="localStorg" @open-notifs="showNotifs()" />
-    </Transition>
 
     <!-- Loading bar -->
     <div class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 -z-30"
@@ -279,11 +284,6 @@ const open = (to: string) => {
         :class="{ 'duration-0': loadingProgress == 0, 'duration-200': loadingProgress == 100, 'duration-[10s]': loadingProgress == 99 }"
       ></div>
     </div>
-
-    <!-- Notification Dropdown -->
-    <Transition name="fadeSlide">
-      <NotificationDropdown id="notifMenu" v-if="notifDropdownShown" @selected="showNotifs" @close="closeNotifs2()" />
-    </Transition>
   </nav>
 </template>
 

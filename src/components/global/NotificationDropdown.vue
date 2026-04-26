@@ -40,7 +40,7 @@ onMounted(() => fetchNotifications(false))
 </script>
 
 <template>
-    <section class="fixed z-10 text-white sm:rounded-md sm:w-96 sm:right-2 max-sm:inset-0 sm:top-12 shadow-drop bg-greenGradient">
+    <section class="absolute z-10 text-white sm:rounded-md sm:w-96 sm:right-2 max-sm:inset-0 sm:top-12 shadow-drop bg-greenGradient">
         <header class="flex justify-between items-center p-2">
             <button :title="$t('other.refresh')" @click.stop="fetchNotifications(true)" class="p-1 bg-black bg-opacity-40 rounded-md bg-blend-saturation button"><img src="@/images/replay.svg" class="w-5" alt=""></button>
             <RouterLink to="/notifications">
