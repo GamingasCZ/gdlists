@@ -14,6 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "pickedOption", opt: number): void
+    (e: "pickedOptionShift", opt: number): void
     (e: "close"): void
 }>()
 
@@ -51,6 +52,7 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
                     <button
                             v-for="(sort, index) in options"
                             @click.stop="emit('pickedOption', index); emit('close')"
+                            @click.shift.stop="emit('pickedOptionShift', index); emit('close')"
                             :style="{backgroundImage: `url(${icons?.[index] ?? ''})`, backgroundSize: '1.25rem', backgroundPosition: '5px center'}"
                             class="pl-8 block bg-no-repeat text-left p-1 text-white hover:bg-lof-300 transition-colors duration-75 rounded-md m-1 focus-visible:!outline focus-visible:!outline-current">{{ sort }}</button>
                     <slot name="footer" />
@@ -61,5 +63,6 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 </template>
 
 <style>
+#tooltip[data-popper-placement=''] #arrow {@apply top-8; }
 #tooltip[data-popper-placement^='top'] #arrow {@apply -bottom-4; }
 </style>
