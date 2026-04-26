@@ -75,7 +75,7 @@ const rateBG = computed(() => {
             <div class="grid grid-cols-2 grid-rows-2 w-full text-left">
                 <span class="text-2xl">{{ allRatings[settings.show].name || $t('other.unnamesd') }}</span>
                 <span v-if="toShow > -1" class="w-full text-4xl font-bold text-right">{{ toShow }}/10</span>
-                <span v-else class="w-full text-4xl font-bold text-right text-red-600">!</span>
+                <span v-else class="w-full text-4xl font-bold text-right text-blue-600">?</span>
                 <div class="relative col-span-2 h-6 overflow-clip bg-black bg-opacity-40 rounded-md">
                     <div :style="{width: `${toShow*10}%`, background: `linear-gradient(180deg, ${getCol(allRatings[settings.show].color)}, ${getCol(allRatings[settings.show].color, 1)})`}" class="absolute inset-0 h-full"></div>
                     <div :style="{width: `${toShow*10}%`, background: `url(${base}/rateBGs/${rateBG}.webp)`, backgroundSize: '6rem', animation: 'scroll 10s infinite linear'}" class="absolute inset-0 z-10 h-full mix-blend-soft-light"></div>

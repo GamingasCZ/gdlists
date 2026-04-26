@@ -98,7 +98,7 @@ const base = import.meta.env.BASE_URL
 
         <div class="flex relative items-center px-2 pr-6 max-sm:hidden ratingContainer" :style="{background: `${chroma.hsl(...col).desaturate().darken(2).css()}`}">
             <span v-if="value > -1" class="text-4xl font-black text-white -translate-y-2 min-w-14">{{ props.value }}</span>
-            <span v-else class="text-4xl font-black text-red-600 -translate-y-2 min-w-14">!</span>
+            <span v-else class="text-4xl font-black text-blue-600 -translate-y-2 min-w-14">?</span>
             <span class="absolute bottom-2 right-4 text-xl font-black text-white text-opacity-30">/10</span>
         </div>
         

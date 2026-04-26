@@ -27,6 +27,7 @@ onMounted(() => {
 })
 
 const closeDropdown = (e: MouseEvent) => {
+    if (!dropdown.value) return
     if (!dropdown.value.contains(e?.target as HTMLElement)) {
         emit('close')
         document.body.removeEventListener("click", closeDropdown, {capture: true})
