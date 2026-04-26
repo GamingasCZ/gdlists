@@ -650,7 +650,7 @@ provide("fullscreenLevel", levelImageFullscreen)
         </LevelCardTableTable>
       </div>
       
-      <div ref="postContent" v-else v-show="!commentsShowing && !reviewLevelsOpen">
+      <div ref="postContent" v-if="isReview" v-show="!commentsShowing && !reviewLevelsOpen">
         <WriterViewer :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
       </div>
 
