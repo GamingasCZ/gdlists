@@ -143,6 +143,8 @@ onBeforeUnmount(() => {
                     <label :for="key">{{ containers[type].settings[index].title }}</label>
                     <select class="px-2 py-1 bg-white bg-opacity-20 rounded-md border-2 border-white border-opacity-40" :name="key" :value="settingsArr[key]" @change="settingsArr[key] = $event.target.value">
                         <option :value="-1">{{ $t('other.all') }}</option>
+                        <option :value="-2">{{ $t('other.allMain') }}</option>
+                        <option :value="-3">{{ $t('other.allCustom') }}</option>
                         <option v-for="(rating, index) in DEFAULT_RATINGS.concat(postData.ratings)" :value="index">{{ rating.name || $t('other.unnamed2') }}</option>
                     </select>
                 </div>

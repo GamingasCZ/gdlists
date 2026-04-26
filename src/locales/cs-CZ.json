@@ -441,7 +441,9 @@
     "andMore": "a další",
     "showMore": "Zobrazit další",
     "noNotifs": "Nic nového zatím nepřišlo!",
-    "copyLink": "Zkopírovat odkaz"
+    "copyLink": "Zkopírovat odkaz",
+    "allMain": "Jen hlavní",
+    "allCustom": "Jen vlastní"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -637,6 +639,7 @@
     "addTagline": "Přidat tagline",
     "addParagraph": "Textové pole",
     "rating": "Hodnocení",
+    "hideUnrated": "Skrýt nehodnocené",
     "reviewName": "Titulek recenze",
     "noLevelsYet": "Zatím jsi nepřidal žádné levely.",
     "addLevel": "Přidat level",
@@ -827,7 +830,8 @@
     "uploadingMedia": "Nahrávání médií",
     "titEditor": "Editor nadpisu",
     "dragUpload": "Upusť pro nahrání",
-    "replImg": "Nahradit obrázek"
+    "replImg": "Nahradit obrázek",
+    "notRated": "Level není ohodnocený!"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

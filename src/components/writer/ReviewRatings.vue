@@ -22,28 +22,29 @@ const props = defineProps<{
 
 const postData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
 
-watch(props, () => {
-    switch (props.buttonState) {
-        case "pick": props.settings.level = false; break;
-    }
-    emit("clearButton")
-
-    selectedLevel.value = props.settings.level == -1 ? 0 : props.settings.level
-})
-
 const available = computed(() => postData?.[0].length)
 const getCol = (col: number[], darken = 0) => {
     return chroma.hsl(...col).darken(darken).css()
 }
 
-const allRatings = computed(() => DEFAULT_RATINGS.concat(postData[1]))
+const allRatings = computed(() => {
+    switch (+props.settings.show) {
+        case -2:
+            return DEFAULT_RATINGS
+        case -3:
+            return postData[1]
+        default:
+            return DEFAULT_RATINGS.concat(postData[1])
+    }
+})
 const levelRatings = computed(() => {
     if (available.value) return postData[0]?.[selectedLevel.value!]?.ratings
 })
 const errMessage = computed(() => {
     if (!postData?.[0].length) return i18n.global.t('reviews.noLevelsYet')
+    return ""
 })
-const selectedLevel = ref(props.settings.level == -1 ? 0 : props.settings.level)
+const selectedLevel = computed(() => props.settings.level == -1 ? 0 : props.settings.level)
 
 const base = import.meta.env.BASE_URL
 const toShow = computed(() => levelRatings.value[Math.floor(props.settings.show / 4)][props.settings.show % 4])
@@ -52,6 +53,30 @@ const rateBG = computed(() => {
     else if (toShow.value < 4) return "sad"
     else if (toShow.value > 7) return "nice"
     else return "mid"
+})
+
+const allRates = computed(() => {
+    if (!levelRatings.value) return []
+    
+    let rates: number[]
+    switch (+props.settings.show) {
+        case -1:
+            rates = levelRatings.value[0].concat(levelRatings.value[1]); break;
+        case -2:
+            rates = levelRatings.value[0]; break;
+        case -3:
+            rates = levelRatings.value[1]; break;
+        default:
+            rates = []; break;
+    }
+    let hasRatings = rates.filter(x => x > -1)
+    if (hasRatings.length)
+        if (props.settings.hideUnrated)
+            return rates.map(x => x == -1 ? undefined : x)
+        else
+            return rates
+    else
+        return []
 })
 </script>
 
@@ -71,7 +96,7 @@ const rateBG = computed(() => {
         </div>
 
         <!-- Single rating -->
-        <div v-if="settings.show != -1" class="w-[40rem] max-w-full">
+        <div v-if="settings.show > -1" class="w-[40rem] max-w-full">
             <div class="grid grid-cols-2 grid-rows-2 w-full text-left">
                 <span class="text-2xl">{{ allRatings[settings.show].name || $t('other.unnamesd') }}</span>
                 <span v-if="toShow > -1" class="w-full text-4xl font-bold text-right">{{ toShow }}/10</span>
@@ -86,14 +111,22 @@ const rateBG = computed(() => {
         <div v-else>
             <!-- All ratings -->
             <div class="grid grid-rows-4 grid-flow-col gap-x-4">
-                <div v-for="(rating, index) in levelRatings[0].concat(levelRatings[1])" class="min-w-[min(30vw,_10rem)] grid grid-cols-2 grid-rows-2 text-left">
-                    <span>{{ allRatings[index].name || $t('other.unnamesd') }}</span>
-                    <span v-if="rating > -1" class="text-xl font-bold text-right">{{ rating }}/10</span>
-                    <span v-else class="w-full text-2xl font-bold text-right text-red-600">!</span>
-                    <div class="relative col-span-2 h-2 overflow-clip bg-black bg-opacity-40 rounded-md">
-                        <div :style="{width: `${rating*10}%`, backgroundColor: getCol(allRatings[index].color)}" class="absolute inset-0 h-full"></div>
-                    </div>
+                <div v-if="!allRates.length" class="flex flex-col row-span-4 items-center my-auto text-sm opacity-40">
+                    <img src="@/images/more.svg" alt="" class="w-8">
+                    <span>{{ $t('reviews.notRated') }}</span>
                 </div>
+                <template v-else>
+                    <template v-for="(rating, index) in allRates" :key="selectedLevel">
+                        <div v-if="rating != undefined" class="min-w-[min(30vw,_10rem)] grid grid-cols-2 grid-rows-2 text-left">
+                            <span>{{ allRatings[index].name || $t('other.unnamesd') }}</span>
+                            <span v-if="rating > -1" class="text-xl font-bold text-right">{{ rating }}/10</span>
+                            <span v-else class="w-full text-2xl font-bold text-right text-blue-600">?</span>
+                            <div class="relative col-span-2 h-2 overflow-clip bg-black bg-opacity-40 rounded-md">
+                                <div :style="{width: `${rating*10}%`, backgroundColor: getCol(allRatings[index].color)}" class="absolute inset-0 h-full"></div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
             </div>
         </div>
     </section>

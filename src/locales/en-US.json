@@ -456,7 +456,9 @@
     "andMore": "and more",
     "showMore": "Show More",
     "noNotifs": "Nothing new's arrived yet!",
-    "copyLink": "Copy Link"
+    "copyLink": "Copy Link",
+    "allMain": "Main Only",
+    "allCustom": "CustomOnly"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -634,6 +636,7 @@
   "reviews": {
     "reviewName": "Review Title",
     "rating": "Ratings",
+    "hideUnrated": "Hide Unrated",
     "addTagline": "Add a tagline",
     "addParagraph": "Text Box",
     "imgError": "Failed to load the image!",
@@ -826,7 +829,8 @@
     "uploadingMedia": "Uploading Media",
     "titEditor": "Title Editor",
     "dragUpload": "Drop the file to upload it",
-    "replImg": "Replace Image"
+    "replImg": "Replace Image",
+    "notRated": "Level not rated!"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
