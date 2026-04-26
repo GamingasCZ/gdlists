@@ -374,37 +374,21 @@ defineExpose({
 
 <template>
       <!-- Saved collabs-->
-      <Dialog :open="savedSidebarOpen" @close-popup="savedSidebarOpen = false" :title="$t('navbar.saved')" :width="dialog.small">
+      <Dialog :open="savedSidebarOpen" @close-popup="savedSidebarOpen = false" :action="saveCollab" :side-button-disabled="(typeof collab == 'string')" :title="$t('navbar.saved')" :width="dialog.large" :side-button-text="'Uložit'">
+          <template #icon>
+            <img src="@/images/symbolicSave.svg" class="w-5" alt="">
+          </template>
           <main
-            class="bg-[url(@/images/fade.svg)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[46rem]">
-            <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
-              :disabled="(typeof collab == 'string')" @click="saveCollab()">
-            <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
-            {{ $t('collabTools.saveCollab') }}
-          </button>
+            class="bg-[url(@/images/fade.svg)] bg-repeat-x grid grid-cols-2 gap-2 p-2 w-full overflow-y-auto overflow-x-clip max-h-[46rem]">
+              <SavedCollabVue v-for="(save, index) in savedCollabs" :save="save" :collIndex="index"
+              :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
+              @load-collab="loadCollab" @remove-collab="removeCollab" small />
 
             <article v-if="!savedCollabs?.length"
               class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
-            <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
-            {{ $t('collabTools.savedHelp') }}
-          </article>
-
-            <!-- Currently editing -->
-            <div v-if="currentlyUsedSaved != -1" class="mb-4">
-              <SectionDivider :text="$t('collabTools.beingEdited')" />
-              <SavedCollabVue :on-saves-page="false" :save="savedCollabs![currentlyUsedSaved]" :coll-index="currentlyUsedSaved"
-                :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
-            </div>
-            
-            <!-- All collabs -->
-            <div>
-              <SectionDivider :text="$t('collabTools.allCollabs')" v-if="savedCollabs?.length" />
-              <div class="flex flex-col gap-2">
-                  <SavedCollabVue v-for="(save, index) in savedCollabs" :save="save" :collIndex="index"
-                    :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
-                    @load-collab="loadCollab" @remove-collab="removeCollab" />
-              </div>
-            </div>
+              <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
+              {{ $t('collabTools.savedHelp') }}
+            </article>
         </main>
       </Dialog>
 

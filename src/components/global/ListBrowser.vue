@@ -435,7 +435,7 @@ defineExpose({
           :is="component"
           v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
           class="min-w-full listPreviews"
-          :key="list?.name ?? list?.levelName ?? list?.comID ?? PAGE"
+          :key="list?.name ?? list?.levelName ?? list?.comID ?? list?.timestamp ?? PAGE"
           :in-use="false"
           :on-saves-page="true"
           :coll-index="index"

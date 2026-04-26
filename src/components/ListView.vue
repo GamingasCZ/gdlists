@@ -259,14 +259,14 @@ const tryJumping = (ind: number, forceJump = false) => {
     let jumpedToCard = document.querySelectorAll(".levelCard");
 
     let to: HTMLDivElement = jumpedToCard[
-        Math.max(0, parseInt(isJumpingFromFaves) - 2)
+      Math.max(0, parseInt(isJumpingFromFaves) - 2)
     ];
     if (!isNaN(parseInt(isJumpingFromFaves))) {
       if (to) {
         to.scrollIntoView();
         (jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
-    ).style.animation = "flash 0.8s linear forwards";
-  }
+        ).style.animation = "flash 0.8s linear forwards";
+      }
     }
   }
 };
@@ -418,7 +418,7 @@ const saveCollab = (ind: number) => {
       memberCount: c[2].length,
       timestamp: Date.now(),
       collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
-      listID: [NONPRIVATE_LIST.value ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
+      listID: [NONPRIVATE_LIST.value ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind, props.isReview]
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)
@@ -652,7 +652,6 @@ provide("fullscreenLevel", levelImageFullscreen)
             :guessing-now="cardGuessing == index"
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
             :uploader-uid="LIST_CREATORDATA?.discord_id"
-            @vue:mounted="tryJumping(index)"
             @next-guess="doNextGuess($event)"
             @open-tags="tagViewerOpened = $event"
             @open-collab="openCollabTools"

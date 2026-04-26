@@ -44,7 +44,7 @@ const customColor = ref("")
       :online-type="browser"
       @switch-browser="browser = $event" 
       :browser-name="$t('other.savedLevels')"
-      :display-in-rows="browser == 'collabs'" />
+      />
   </section>
 
   <Teleport to="body">
