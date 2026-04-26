@@ -44,6 +44,7 @@ import { i18n } from "@/locales";
 import WriterViewer from "./writer/WriterViewer.vue";
 import TemporaryList from "./global/TemporaryList.vue";
 import ShareSection from "./levelViewer/ShareSection.vue";
+import { nextTick } from "vue";
 
 const props = defineProps<{
   listID?: string
@@ -66,6 +67,15 @@ const loadContent = async () => {
     randomData = (await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})).data
   }
   props.isReview ? await loadReview(randomData) : await loadList(randomData)
+  
+  if (isJumpingFromFaves != null) {
+    if (!isNaN(parseInt(isJumpingFromFaves))) {
+      if (props.isReview)
+        reviewLevelsOpen.value = true
+      nextTick(() => tryJumping(+isJumpingFromFaves, true))
+    }
+  }
+
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", (e: MouseEvent) => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1 || !loggedIn.value) return
@@ -248,14 +258,16 @@ const tryJumping = (ind: number, forceJump = false) => {
     cardGuessing.value = -1
     let jumpedToCard = document.querySelectorAll(".levelCard");
 
-    if (parseInt(isJumpingFromFaves) > 1) {
-      jumpedToCard[
+    let to: HTMLDivElement = jumpedToCard[
         Math.max(0, parseInt(isJumpingFromFaves) - 2)
-      ].scrollIntoView();
-    }
-    (
-      jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
+    ];
+    if (!isNaN(parseInt(isJumpingFromFaves))) {
+      if (to) {
+        to.scrollIntoView();
+        (jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
     ).style.animation = "flash 0.8s linear forwards";
+  }
+    }
   }
 };
 
