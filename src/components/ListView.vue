@@ -667,7 +667,7 @@ provide("fullscreenLevel", levelImageFullscreen)
         @replay-list="guesses = []; cardGuessing = 0"
       />
 
-      <ShareSection v-if="LIST_DATA.name != undefined && !nonexistentList" :share-text="getURL()" :review="isReview" />
+      <ShareSection v-if="LIST_DATA.name != undefined && !nonexistentList && !commentsShowing" :share-text="getURL()" :review="isReview" />
 
       <CommentSection
         v-if="LIST_DATA?.id != undefined"
