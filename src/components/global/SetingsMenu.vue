@@ -66,6 +66,10 @@ const Help = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
+const Sett = defineAsyncComponent({
+  loader: () => import("@/components/global/SiteSettings.vue"),
+  loadingComponent: LoadingBlock
+})
 
 const refresh = () => window.location.reload()
 const refreshLangShown = ref(false)
@@ -89,6 +93,10 @@ const currLang = SETTINGS.value.language
   
       <Dialog class="z-40" v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
         <Gallery unselectable />
+      </Dialog>
+
+      <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
+        <Sett />
       </Dialog>
     </Teleport>
 
@@ -145,6 +153,12 @@ const currLang = SETTINGS.value.language
       </button>
     </section>
 
+    <button
+      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
+      @click="dialogs.settings = true"
+    >
+      <img src="@/images/gear.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.settings') }}
+    </button>
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
       @click="dialogs.gallery = true"

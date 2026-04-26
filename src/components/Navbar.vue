@@ -162,12 +162,6 @@ modifyNavbarScroll()
 const navbarHidden = ref(false)
 watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
 
-const Sett = defineAsyncComponent({
-  loader: () => import("@/components/global/SiteSettings.vue"),
-  loadingComponent: LoadingBlock
-})
-const settingsOpen = ref(false)
-
 const open = (to: string) => {
   editorDropdownOpen.value = 0
   if (SETTINGS.value.navDClick)
@@ -179,18 +173,14 @@ const open = (to: string) => {
 </script>
 
 <template>
-  <Teleport to="body">
-      <Dialog v-if="settingsOpen" :open="settingsOpen" :title="$t('other.settings')" :width="dialog.medium" @close-popup="settingsOpen = false">
-        <Sett />
-      </Dialog>
-  </Teleport>
-
   <nav
     role="navigation"
     id="navbar"
     :class="{'-translate-y-14': navbarHidden}"
-    class="box-border flex sticky top-0 max-w-[100rem] mx-auto z-30 justify-between m-2 transition-transform">
-    <section class="flex backdrop-blur-md text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
+    class="box-border sticky top-0 z-30 transition-transform bg-greenGradient">
+
+    <div class="max-w-[100rem] flex justify-between mx-auto">
+          <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
       :class="{ 'opacity-50 pointer-events-none': !isOnline }">
       
       <!-- Home link -->
@@ -238,18 +228,13 @@ const open = (to: string) => {
       ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
     </section>
 
-    <section class="flex relative gap-7 items-center px-2 min-h-full bg-opacity-40 backdrop-blur-md">
+    <section class="flex relative gap-7 items-center px-2 min-h-full">
       <!-- Notification button -->
       <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
         <img src="../images/notifs.svg" alt=""
         class="w-5" />
         <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black motion-safe:animate-ping bg-lof-400 aspect-square"></div>
         <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-2 border-black bg-lof-400 aspect-square"></div>
-      </button>
-
-      <button @click="settingsOpen = true" class="button max-sm:hidden">
-        <img src="../images/gear.svg" alt=""
-        class="w-5" />
       </button>
 
       <!-- Logged out -->
@@ -273,6 +258,9 @@ const open = (to: string) => {
       </div>
       <div v-else></div>
     </section>
+    </div>
+
+
 
     <Transition name="fadeSlide">
       <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"
