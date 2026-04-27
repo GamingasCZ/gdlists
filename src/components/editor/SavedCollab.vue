@@ -89,7 +89,7 @@ const postLink = computed(() => {
         <template v-for="icon in creators">
             <img v-if="icon == null" src="@/images/unknownCube.svg" class="w-12" alt="">
             <PlayerIcon v-else
-                :icon="icon[0]" :col1="icon[1]" :col2="icon[2]" :glow="icon[3]" :quality="1"
+                :icon="icon[0]" :col1="icon[2]" :col2="icon[1]" :glow="icon[3] | 0" :quality="1"
                 class="inline-block mr-2 w-12 h-12 align-middle"
             />
         </template>
@@ -139,7 +139,7 @@ const postLink = computed(() => {
         <!-- <ProfilePicture class="w-11" :uid="creatorData?.discord_id ?? -2" :cutout="creatorData.pfp_cutout" /> -->
         <img v-if="host == null" src="@/images/unknownCube.svg" class="w-9" alt="">
         <PlayerIcon v-else
-            :icon="host[0]" :col1="host[1]" :col2="host[2]" :glow="host[3]" :quality="1"
+            :icon="host[0]" :col1="host[2]" :col2="host[1]" :glow="host[3]" :quality="1"
             class="inline-block w-9 h-9 align-middle"
         />
         <div>

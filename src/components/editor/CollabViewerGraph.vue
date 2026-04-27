@@ -29,7 +29,7 @@ let roles = props.humans.filter(h => h.role == props.allRoles.indexOf(props.role
             <div v-if="hovering != null && allRoles[hovering.role] == roleName" class="flex gap-2 items-center">
                 <PlayerIcon
                     v-if="hovering.verified[1]"
-                    :icon="hovering.verified[0]" :col1="hovering.verified[1].toString()" :col2="hovering.verified[2].toString()" :glow="hovering.verified[3]" :quality="1.5"
+                    :icon="hovering.verified[0]" :col1="hovering.verified[2].toString()" :col2="hovering.verified[1].toString()" :glow="hovering.verified[3]" :quality="1.5"
                     class="w-6 h-6"
                 />
                 <h2>{{ hovering.name }}</h2>

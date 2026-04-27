@@ -58,7 +58,7 @@ const closeHostSocials = (m: Event) => {
   <section v-show="collab[2].length">
     <h2 class="z-10 mb-3 text-xl font-black text-center align-middle">
       <span>{{ collabRole }}: </span>
-      <PlayerIcon v-if="collabIcon()" :icon="collabIcon()[0]" :col1="collabIcon()[1].toString()" :col2="collabIcon()[2].toString()" :glow="collabIcon()[3] | 0" class="inline mx-3 w-10 h-10" :quality="1"/>
+      <PlayerIcon v-if="collabIcon()" :icon="collabIcon()[0]" :col1="collabIcon()[2].toString()" :col2="collabIcon()[1].toString()" :glow="collabIcon()[3] | 0" class="inline mx-3 w-10 h-10" :quality="1"/>
       <span class="inline-flex relative justify-center">
         <span @click="showHostSocials" class="opener" :class="{'py-1 px-2 bg-black rounded-md cursor-pointer hover:bg-opacity-70 transition-colors bg-opacity-40': hostHasSocials}">{{ collabHost }}</span>
         <Transition name="fade">
@@ -83,7 +83,7 @@ const closeHostSocials = (m: Event) => {
     >
       <div v-for="person in collab[2]" class="flex items-center">
         <PlayerIcon
-          :icon="person.verified[0]" :col1="person.verified[1]" :col2="person.verified[2]" :glow="person.verified[3]" :quality="1"
+          :icon="person.verified[0]" :col1="person.verified[2]" :col2="person.verified[1]" :glow="person.verified[3]" :quality="1"
           class="inline-block mr-2 w-8 h-8 align-middle"
           v-if="person.verified != 0"
         />
