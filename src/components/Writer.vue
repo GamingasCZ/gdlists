@@ -148,6 +148,7 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
                     editDraftExists.value = key
             }
 
+            modifyPostName()
             fetchEmbeds()
             modifyListBG(POST_DATA.value.pageBGcolor, false)
             containerLastAdded.value = Date.now()
@@ -921,6 +922,7 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
     POST_DATA.value = JSON.parse(JSON.stringify(draft.reviewData))
     reviewSave.value.backupID = draft.createDate
     reviewSave.value.lastSaved = draft.saveDate
+    modifyPostName()
     fetchEmbeds()
     modifyListBG(draft.reviewData.pageBGcolor, false)
     containerLastAdded.value = Date.now()
@@ -944,6 +946,7 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewin
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = previewData
     previewID = previewIDSaved
+    modifyPostName()
     fetchEmbeds(true)
     modifyListBG(previewData.pageBGcolor, false)
     setPreviewMode(false)
@@ -961,6 +964,7 @@ const exitPreview = () => {
     modifyListBG(previewHold[0].pageBGcolor, false)
     previewHold = null
 
+    modifyPostName()
     setPreviewMode(true)
     disableEdits.value = false
     if (!outsideDrafts)
@@ -1113,6 +1117,14 @@ const addPreset = (ind: number) => {
 
 const collabEditor = ref<HTMLDialogElement>()
 
+const modifyPostName = () => {
+    let titleTag = document.querySelector("title")!
+    if (POST_DATA.value.reviewName.length)
+        titleTag.innerText = `${i18n.global.t('editor.editor')}: ${POST_DATA.value.reviewName} | ${i18n.global.t("other.websiteName")}`
+    else
+        titleTag.innerText = `${WRITER.value.general.tabTitle} | ${i18n.global.t("other.websiteName")}`
+}
+
 </script>
 
 <template>
@@ -1215,7 +1227,7 @@ const collabEditor = ref<HTMLDialogElement>()
             <!-- Hero -->
             <div v-show="!zenMode" class="flex flex-col items-center mt-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
-                <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing"
+                <input v-model="POST_DATA.reviewName" @input="modifyPostName" type="text" :maxlength="40" :disabled="editing"
                     :placeholder="WRITER.general.titlePlaceholder"
                     class="text-6xl max-sm:text-5xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" @click="tagline = true"
