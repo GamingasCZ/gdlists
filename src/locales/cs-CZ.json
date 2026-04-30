@@ -179,7 +179,7 @@
     "collabToolsSoon": "Collab nástroje ti umožňují vizuálně zobrazit části collabu. Pokud to nedofailíš, v seznamu se objeví graf s délkami částí, a co člen v collabu dělal, jeho GD ikonka a sociální sítě.<br>\nCollaby se vytvářejí v editoru. Dostaneš se k ním pomocí ikonky vedle pole pro zadání tvůrce levelu.<br>\nNový collab vytvoříš tlačítkem \"Vytvořit collab\". Po vytvoření se otevře se panel, kde se nastavují role. Předchystané role jsou v šipečce vpravo nahoře.<br>\nPro přidání člena klikni na zelené plus. Po přidání bude automaticky zaměřeno pole s jménem. Po napsání jména člena můžeš zmáčknout Enter nebo kliknout na lupu. Tím se automaticky vyplní ikonka a sociální sítě z GD profilu. Po vyhledání bude zaměřeno tlačítko na přidání člena. Můžeš tedy rovnou zmáčknout Enter a přidá se další člen. Zbytek vygómeš sám, megamysle :D",
     "collabTools": "Collab nástroje",
     "levelSearchHelp": "# Hledání podle ID\n*Lupa vedle pole s ID levelu najde level podle zadaného ID levelu \n# Hlednání podle jména/tvůrce \nLupa mezi polem se jménem levelu a tvůrcem najde buďto \n*Nejstahovanější level se **zadaným jménem** \n*Nejnovější level od **zadaného tvůrce** \n*Pokud jsou vyplněna obě pole, **level od zadaného tvůrce**.",
-    "collabText": "{0} + {1} dalších",
+    "collabText": "{0} a {1} dalších",
     "collabNoPhones": "Collab editor není dostupný na telefonech!",
     "levelColorTitle": "Barva levelu",
     "removeTitle": "Smazat level",

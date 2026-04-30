@@ -4,6 +4,7 @@ import type { SavedCollab } from '@/interfaces'
 import chroma, { type Color } from 'chroma-js';
 import { computed, inject, reactive, ref } from 'vue'
 import PlayerIcon from '../global/PlayerIcon.vue';
+import { i18n } from '@/locales';
 
 
 const props = defineProps<{
@@ -34,9 +35,9 @@ const getGradient = () =>
 
 const uploadDate = reactive(new Date(props.save.timestamp!));
 const creatorsText = computed(() => {
-    let host = props.save.collabHost || "Nepojmenovaný"
+    let host = props.save.collabHost || i18n.global.t("other.unnamesd")
     if (props.save.memberCount > 0)
-        host += ` a ${props.save.memberCount} dalších`
+        host = i18n.global.t("editor.collabText", [props.save.collabHost, props.save.memberCount])
     return host
 })
 
