@@ -922,6 +922,7 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
     POST_DATA.value = JSON.parse(JSON.stringify(draft.reviewData))
     reviewSave.value.backupID = draft.createDate
     reviewSave.value.lastSaved = draft.saveDate
+    setDraftUrl(reviewSave.value.backupID.toString())
     modifyPostName()
     fetchEmbeds()
     modifyListBG(draft.reviewData.pageBGcolor, false)
@@ -981,6 +982,14 @@ const previewApply = () => {
     previewID = null
 }
 
+const setDraftUrl = (draftID: string) => {
+    let url = new URL(location.href)
+    if (url.searchParams.get("draft") != draftID) {
+        url.searchParams.set("draft", draftID)
+        history.pushState({}, "", url)
+    }
+}
+
 const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
 const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | boolean = false) => {
     if (!WRITER.value.drafts.draftabilityConstraint(POST_DATA.value)) return
@@ -1030,6 +1039,9 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
         if (editing)
             drafts.value[reviewSave.value.backupID].editing = editing
     }
+
+    setDraftUrl(backupID.toString())
+
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
     reviewSave.value = { backupID: backupID, lastSaved: now }
 }
