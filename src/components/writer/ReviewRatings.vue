@@ -20,9 +20,10 @@ const props = defineProps<{
     buttonState: string
 }>()
 
-const postData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
+const ratingsData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
+const postData = inject<Ref<PostData>>("postData")
 
-const available = computed(() => postData?.[0].length)
+const available = computed(() => ratingsData?.[0].length)
 const getCol = (col: number[], darken = 0) => {
     return chroma.hsl(...col).darken(darken).css()
 }
@@ -32,16 +33,16 @@ const allRatings = computed(() => {
         case -2:
             return DEFAULT_RATINGS
         case -3:
-            return postData[1]
+            return ratingsData[1]
         default:
-            return DEFAULT_RATINGS.concat(postData[1])
+            return DEFAULT_RATINGS.concat(ratingsData[1])
     }
 })
 const levelRatings = computed(() => {
-    if (available.value) return postData[0]?.[selectedLevel.value!]?.ratings
+    if (available.value) return ratingsData[0]?.[selectedLevel.value!]?.ratings
 })
 const errMessage = computed(() => {
-    if (!postData?.[0].length) return i18n.global.t('reviews.noLevelsYet')
+    if (!ratingsData?.[0].length) return i18n.global.t('reviews.noLevelsYet')
     return ""
 })
 const selectedLevel = computed(() => props.settings.level == -1 ? 0 : props.settings.level)
@@ -87,12 +88,12 @@ const allRates = computed(() => {
         :help-content="errMessage">
     </ContainerHelp>
     
-    <section :class="{'pt-10': settings.level == -1, '!max-w-[40rem]': settings.show != -1}" class="relative px-3 py-1 font-[poppins] bg-black m-2 bg-opacity-40 rounded-md overflow-x-hidden" v-else>
+    <section :class="{'pt-10': settings.level == -1, '!max-w-[40rem]': settings.show != -1, 'bg-opacity-5': postData?.whitePage, 'bg-opacity-30': !postData?.whitePage}" class="relative px-3 py-1 font-[poppins] bg-black m-2 rounded-md overflow-x-hidden" v-else>
         <!-- Tabbar -->
         <div v-if="settings.level == -1" class="flex absolute top-1 left-1/2 gap-4 justify-between w-max text-xl text-center border-b-2 -translate-x-1/2 bg-lof-200 border-lof-400">
-            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == 0}" class="text-right text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-l from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.max(0, selectedLevel - 1)">{{ postData.levels?.[selectedLevel - 1]?.levelName || $t('other.unnamesd') }}</button>
-            <button class="my-1 whitespace-nowrap rounded-md bg-lof-300 min-w-36">{{ postData[0][selectedLevel].levelName || $t('other.unnamesd') }}</button>
-            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == postData[0].length - 1}" class="text-left text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-r from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.min(selectedLevel + 1, postData.levels.length - 1)">{{ postData.levels?.[selectedLevel + 1]?.levelName || $t('other.unnamesd')}}</button>
+            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == 0}" class="text-right text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-l from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.max(0, selectedLevel - 1)">{{ ratingsData.levels?.[selectedLevel - 1]?.levelName || $t('other.unnamesd') }}</button>
+            <button class="my-1 whitespace-nowrap rounded-md bg-lof-300 min-w-36">{{ ratingsData[0][selectedLevel].levelName || $t('other.unnamesd') }}</button>
+            <button :class="{'to-15%': settings.show == -1, '!opacity-0': selectedLevel == ratingsData[0].length - 1}" class="text-left text-transparent whitespace-nowrap bg-clip-text bg-gradient-to-r from-white to-transparent opacity-60 min-w-64" @click="selectedLevel = Math.min(selectedLevel + 1, ratingsData.levels.length - 1)">{{ ratingsData.levels?.[selectedLevel + 1]?.levelName || $t('other.unnamesd')}}</button>
         </div>
 
         <!-- Single rating -->
