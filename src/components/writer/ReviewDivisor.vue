@@ -19,14 +19,13 @@ const postData = inject<Ref<PostData>>("postData")
 const bg = computed(() => `url(${base}/divThemes/${props.settings?.style ?? 0}.svg)`)
 const color = computed(() => {
     switch (+props?.settings?.color) {
-        case NaN: return postData?.value?.whitePage ? '#00000080' : '#FFFFFF50'
         case 0: return postData?.value?.whitePage ? '#00000080' : '#FFFFFF50'
         case 1: return postData?.value?.whitePage ? '#000000' : '#FFFFFF'
         case 2: return 'var(--brightGreen)'
         case 3:
             let to = chroma((postData?.value.pageBGcolor as number[])[0], 0.53, 0.63, 'hsl').set('hsl.h', '+90')
             return `linear-gradient(90deg, var(--brightGreen), ${to})`
-        default: return 'var(--brightGreen)'
+        default: return postData?.value?.whitePage ? '#00000080' : '#FFFFFF50'
     }
 })
 
