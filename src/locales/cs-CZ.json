@@ -443,7 +443,10 @@
     "noNotifs": "Nic nového zatím nepřišlo!",
     "copyLink": "Zkopírovat odkaz",
     "allMain": "Jen hlavní",
-    "allCustom": "Jen vlastní"
+    "allCustom": "Jen vlastní",
+    "style": "Styl",
+    "color": "Barva",
+    "gradient2": "Přechod"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -831,9 +834,13 @@
     "titEditor": "Editor nadpisu",
     "dragUpload": "Upusť pro nahrání",
     "replImg": "Nahradit obrázek",
-    "notRated": "Level není ohodnocený!"
+    "notRated": "Level není ohodnocený!",
+    "vibrant": "Výrazná"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
+  },
+  "review": {
+    "colorful": "Barevná"
   }
 }

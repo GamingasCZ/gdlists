@@ -17,15 +17,20 @@ const error = (ind: number, msg = 0) => {
 }
 
 // containerSettings inputs
-enum ControlType {
-    Hidden = -1,
-    Text = 0,
-    Button = 1,
-    Checkbox = 2,
-    LevelPicker = 4,
-    RatingPicker = 5,
-    Picker = 6
+export enum ControlType {
+    Hidden,
+    Text,
+    Button,
+    Checkbox,
+    LevelPicker,
+    RatingPicker,
+    Picker,
+    ImagePicker,
+    Spinbox
 }
+
+const base = import.meta.env.BASE_URL
+const divisorStyles = [...Array(8).keys()].map(x => `${base}/divThemes/${x}.svg`)
 
 const containers: Containers = {
     default: {
@@ -94,6 +99,18 @@ const containers: Containers = {
                 type: [ControlType.Hidden],
                 default: 32,
                 valueRange: [16, 250]
+            },
+            {
+                key: "style",
+                title: i18n.global.t('other.style'),
+                type: [ControlType.ImagePicker].concat(divisorStyles),
+                default: 0,
+            },
+            {
+                key: "color",
+                title: i18n.global.t('other.color'),
+                type: [ControlType.Picker, i18n.global.t('settingsMenu.qMed'), i18n.global.t('reviews.vibrant'), i18n.global.t('review.colorful'), i18n.global.t('other.gradient2')],
+                default: 0,
             },
         ]
     },
@@ -406,7 +423,7 @@ export type cDefault = {noMD: boolean, size: number, indent: boolean}
 export type cHeading1 = {}
 export type cHeading2 = {}
 export type cHeading3 = {}
-export type cDivisor = {sizeY: number, visible: boolean}
+export type cDivisor = {sizeY: number, visible: boolean, style: number, color: number}
 export type cShowImage = {url: string, width: number, pick: number, alt: string, description: string, link: string}
 export type caddVideo = {width: number, url: string, description: string}
 export type cShowRating = {level: number, show: number, hideUnrated: boolean}

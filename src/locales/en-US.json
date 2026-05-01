@@ -458,7 +458,10 @@
     "noNotifs": "Nothing new's arrived yet!",
     "copyLink": "Copy Link",
     "allMain": "Main Only",
-    "allCustom": "CustomOnly"
+    "allCustom": "CustomOnly",
+    "style": "Style",
+    "color": "Color",
+    "gradient2": "Gradient"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -830,9 +833,13 @@
     "titEditor": "Title Editor",
     "dragUpload": "Drop the file to upload it",
     "replImg": "Replace Image",
-    "notRated": "Level not rated!"
+    "notRated": "Level not rated!",
+    "vibrant": "Bold"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
+  },
+  "review": {
+    "colorful": "Colorful"
   }
 }
