@@ -18,6 +18,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "clicked", event: MouseEvent)
   (e: "auxclicked", event: MouseEvent)
+  (e: "dragging")
 }>()
 
 const base = import.meta.env.BASE_URL
@@ -57,7 +58,7 @@ const settingsOpen = ref(false)
 </script>
 
 <template>
-  <button ref="tagDiv" @click="settable ? openSettings() : emit('clicked', $event)" @auxclick="emit('auxclicked', $event)" class="flex gap-1 items-center pr-2 text-xs bg-black bg-opacity-40 rounded-full border-2 border-black border-opacity-50 focus-within:outline-white group min-w-4 sm:text-sm"
+  <button ref="tagDiv" @click="settable ? openSettings() : emit('clicked', $event)" @auxclick="emit('auxclicked', $event)" @dragstart="settable && emit('dragging')" :draggable="settable ? 'true' : 'false'" class="flex gap-1 items-center pr-2 text-xs bg-black bg-opacity-40 rounded-full border-2 border-black border-opacity-50 focus-within:outline-white group min-w-4 sm:text-sm"
     :class="{'opacity-60 hover:opacity-100': isExample, 'button': selectable && !tagSettingsOpen}"
   >
     <div class="inline relative align-middle">

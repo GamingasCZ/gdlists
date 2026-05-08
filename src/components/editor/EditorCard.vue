@@ -404,8 +404,7 @@ const cardDropdown = ref<HTMLDivElement>()
 
 var imageDraggingIndex = -1
 var imageDraggingOver = -1
-const allLevelMedia = ref<HTMLDivElement[]>([])
-const imageReorderDrop = (el: DragEvent) => {
+const imageReorderDrop = () => {
   // dragging over itself; no other way around sorry
   if (imageDraggingIndex != imageDraggingOver) {
     if (!(levelMedia.value[imageDraggingOver][0] & (LevelImage.IMAGE | LevelImage.VIDEO))) return
@@ -416,7 +415,16 @@ const imageReorderDrop = (el: DragEvent) => {
     media.splice(imageDraggingOver, 0, tmp)
     props.levelArray.levels[props.index].screenshots = media.filter(x => x[0] & (LevelImage.IMAGE | LevelImage.VIDEO))
   }
-  
+}
+
+const tagReorderDrop = () => {
+  if (imageDraggingIndex != imageDraggingOver) {
+    let tags = props.levelArray.levels[props.index].tags
+    let tmp = tags[imageDraggingIndex]
+    tags.splice(imageDraggingIndex, 1)
+    tags.splice(imageDraggingOver, 0, tmp)
+    document.activeElement?.blur()
+  }
 }
 
 </script>
@@ -535,10 +543,12 @@ const imageReorderDrop = (el: DragEvent) => {
           <div class="px-1 pr-0">
             <img src="@/images/levelID.svg" alt="" class="w-10 min-w-10" />
           </div>
-          <div class="flex flex-wrap gap-1 grow">
+          <div class="flex flex-wrap gap-1 grow" @drop.prevent="tagReorderDrop">
             <EditorTag
               v-for="(tag, ind) in levelArray.levels[index].tags"
               @auxclicked="removeTag(ind)"
+              @dragstart="imageDraggingIndex = ind"
+              @dragover.prevent="imageDraggingOver = ind"
               :tag="tag"
               selectable
               gear
@@ -587,7 +597,6 @@ const imageReorderDrop = (el: DragEvent) => {
             <div
               v-for="(image, ind) in levelMedia"
               :data-ind="ind"
-              ref="allLevelMedia"
               @dragstart="imageDraggingIndex = ind"
               @dragover.prevent="imageDraggingOver = ind"
               v-show="!pickingColor"
