@@ -4,10 +4,8 @@ import type { Color } from "chroma-js";
 import { computed, inject, onErrorCaptured, ref } from "vue";
 import { doFavoriteLevel, fixBrokenColors } from "./levelCard";
 import DifficultyIcon from "./DifficultyIcon.vue";
-import { DEFAULT_RATINGS } from "@/Reviews";
-import chroma from "chroma-js";
-import Dropdown from "../ui/Dropdown.vue";
 import CardTheme from "../levelViewer/CardTheme.vue";
+import LevelRatingDropdown from "./LevelRatingDropdown.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -52,10 +50,6 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const listData = inject("levelsRatingsData")()
-
-const rateDropdownButton = ref<HTMLImageElement>()
-const ratingsShowing = ref(false)
 const textCol = computed(() => {
   return CARD_COL.value.luminance() > 0.5 ? 'black' : 'white'
 })
@@ -86,7 +80,7 @@ const textCol = computed(() => {
               <div class="flex gap-2">
                 <span class="font-black">{{ levelName || $t('other.unnamesd') }}</span>
                 <img class="w-6" v-if="platf" title="Platformer" src="@/images/platformer.svg" alt="">
-                <img @click.stop="ratingsShowing = true" class="w-6 button" ref="rateDropdownButton" v-if="ratings && !hideRatings" :title="$t('reviews.rating')" src="@/images/rating.svg" alt="">
+                <LevelRatingDropdown v-if="ratings && !hideRatings" :level-index="levelIndex" />
                 <button class="w-6 button focus-within:outline-current max-sm:hidden" v-if="tags && tags.length > 0" @click="emit('openTags', levelIndex)"><img src="@/images/levelID.svg" alt=""></button>
               </div>
               <div>
@@ -123,21 +117,6 @@ const textCol = computed(() => {
       :class="{ disabled: isFavorited }" v-if="favorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars">
       <img src="@/images/star.svg" class="w-6" alt="" />
     </button>
-
-    <!-- Level review ratings -->
-    <Dropdown v-if="ratingsShowing" @close="ratingsShowing = false" :title="$t('reviews.rating')" :options="[]" :button="rateDropdownButton">
-      <template #header>
-        <div v-for="(rating, index) in DEFAULT_RATINGS.concat(listData[1])" class="flex flex-col gap-1 p-1">
-          <div class="flex justify-between text-white">
-            <h3 class="overflow-hidden max-w-full text-sm text-ellipsis">{{ rating.name }}</h3>
-            <span class="text-sm font-bold">{{ listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]  }}/10</span>
-          </div>
-          <div class="relative w-full h-1 bg-black bg-opacity-40">
-            <div :style="{background: chroma.hsl(...rating.color).hex(), width: `${10*listData[0][levelIndex].ratings[Math.floor(index / 4)][index % 4]}%`}" class="absolute h-full"></div>
-          </div>
-        </div>
-      </template>
-    </Dropdown>
 
   </section>
 </template>
