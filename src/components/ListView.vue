@@ -323,6 +323,11 @@ watch(router.currentRoute, () => {
       backToReview.value = viewedReview
       localStorage.removeItem("reviewScroll")
     } else backToReview.value = false
+
+    // change pin icon when clicking on embed
+    let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem('viewedPinArray')!)
+    if (vpArr?.pinned)
+      listPinned.value = vpArr.pinned[+props.isReview].includes(props.listID!)
 })
 
 const listActions = (action: string) => {
