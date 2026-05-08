@@ -227,7 +227,8 @@
     "thumbStyle": "Styl náhledu",
     "lastUsed": "Poslední",
     "commPlaceholder": "Zde můžeš k levelu napsat krátký komentář...",
-    "noDuplicates": "Nelze mít duplicitní levely!"
+    "noDuplicates": "Nelze mít duplicitní levely!",
+    "dragReorder": "Táhni pro přeskupení"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",

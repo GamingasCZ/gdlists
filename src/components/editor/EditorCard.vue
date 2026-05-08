@@ -5,7 +5,7 @@ import chroma, { type Color } from "chroma-js";
 import { computed, inject, nextTick, onMounted, type Ref, ref } from "vue";
 import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
-import LevelTags from "./LevelTags.vue";
+import DragArea from "../../images/dragArea.svg?raw"
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
@@ -19,6 +19,7 @@ import EditorCardTagDropdown from "./EditorCardTagDropdown.vue";
 import { TagName } from "@/assets/tags";
 import CircularRating from "../ui/CircularRating.vue";
 import { Limit } from "@/assets/limits";
+import Tooltip from "../ui/Tooltip.vue";
 
 const props = defineProps<{
   levelArray: PostData
@@ -253,7 +254,7 @@ const levelMedia = computed(() => {
     allMedia.push([LevelImage.THUMBNAIL,bgImage,""])
 
   if (screenshots)
-  allMedia = allMedia.concat(screenshots)
+    allMedia = allMedia.concat(screenshots)
 
   return allMedia
 })
@@ -400,6 +401,23 @@ const avgRating = computed(() => {
 })
 
 const cardDropdown = ref<HTMLDivElement>()
+
+var imageDraggingIndex = -1
+var imageDraggingOver = -1
+const allLevelMedia = ref<HTMLDivElement[]>([])
+const imageReorderDrop = (el: DragEvent) => {
+  // dragging over itself; no other way around sorry
+  if (imageDraggingIndex != imageDraggingOver) {
+    if (!(levelMedia.value[imageDraggingOver][0] & (LevelImage.IMAGE | LevelImage.VIDEO))) return
+
+    let media = levelMedia.value.slice()
+    let tmp = media[imageDraggingIndex]
+    media.splice(imageDraggingIndex, 1)
+    media.splice(imageDraggingOver, 0, tmp)
+    props.levelArray.levels[props.index].screenshots = media.filter(x => x[0] & (LevelImage.IMAGE | LevelImage.VIDEO))
+  }
+  
+}
 
 </script>
 
@@ -565,9 +583,18 @@ const cardDropdown = ref<HTMLDivElement>()
             </p>
           </template>
 
-          <div class="flex overflow-auto gap-2">
-            <div v-show="!pickingColor" v-for="(image, ind) in levelMedia" class="relative duration-200 aspect-video group">
-  
+          <div @drop.prevent="imageReorderDrop" class="flex overflow-auto gap-2">
+            <div
+              v-for="(image, ind) in levelMedia"
+              :data-ind="ind"
+              ref="allLevelMedia"
+              @dragstart="imageDraggingIndex = ind"
+              @dragover.prevent="imageDraggingOver = ind"
+              v-show="!pickingColor"
+              draggable="true"
+              class="relative duration-200 levelImages aspect-video group"
+            >
+
               <!-- Video indicator -->
               <img v-if="image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO)" src="@/images/play.svg" class="absolute invert-[0.2] sepia hue-rotate-30 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12" alt="">
   
@@ -580,13 +607,21 @@ const cardDropdown = ref<HTMLDivElement>()
               
               <!-- Settings overlay -->
               <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <!-- Drag area -->
+                <div v-if="image[0] & (LevelImage.VIDEO | LevelImage.IMAGE)" :title="$t('editor.dragReorder')" v-html="DragArea" ref="dragHelp" class="absolute top-1 left-1 w-6 opacity-80 cursor-move">
+                </div>
+
+                <!-- Media settings -->
                 <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
                   <img src="@/images/gear.svg" class="w-5" alt="">
                 </button>
+
                 <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
                   <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
                   {{ $t('reviews.setThumb') }}
                 </button>
+
+                <!-- Remove media -->
                 <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
                   <img src="@/images/trash.svg" class="w-5" alt="">
                 </button>
