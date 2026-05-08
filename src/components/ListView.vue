@@ -668,11 +668,11 @@ provide("fullscreenLevel", levelImageFullscreen)
       />
 
       <CommentSection
-        v-if="LIST_DATA?.id != undefined"
+        v-if="listID != undefined"
         v-show="commentsShowing || scrolledToEnd"
         @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
-        :list-i-d="LIST_DATA?.id"
+        :list-i-d="listID"
         :hidden-i-d="LIST_DATA.hidden"
         :showing="commentsShowing || scrolledToEnd"
         :comments-disabled="LIST_DATA.data.disComments"

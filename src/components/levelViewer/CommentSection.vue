@@ -22,7 +22,7 @@ const emit = defineEmits<{
 const browser = ref<HTMLDivElement>()
 
 const localStrg = ref(hasLocalStorage())
-const amount = ref(props.commAmount)
+const amount = computed(() => props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
 const showingOnce = ref(false)
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
@@ -53,7 +53,7 @@ watch(props, () => { // only refresh comments once
         <ListBrowser
             v-if="showingOnce && !noNoCommsIfDisabledComments"
             ref="browser"
-            v-memo="[showingOnce]"
+            v-memo="[showingOnce, listID]"
             :component="CommentPreview"
             :display-in-rows="true"
             :online-browser="true"
