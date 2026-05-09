@@ -661,7 +661,7 @@ const tagReorderDrop = () => {
                   <img :src="`${base}/formatting/addVideo.svg`" class="mr-1 w-6 pointer-events-none" alt="">
                   <span>{{ $t('reviews.addVideo') }}</span>
                 </div>
-                <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" placeholder="Vlož odkaz na YouTube video">
+                <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" :placeholder="$t('editor.addYTLink')">
               </div>
   
             </div>
