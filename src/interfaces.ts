@@ -366,6 +366,7 @@ export interface ImageStorage {
   filecount: number
   maxFilecount: number
   maxUploadSize: number
+  newImage?: string[]
 }
 
 export interface ImageFolder {

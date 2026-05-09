@@ -315,16 +315,6 @@ const unsetThumb = () => {
   imageSettingsOpen.value = -1
 }
 
-const removeScreenshot = (type: LevelImage, ind: number) => {
-  let arr = props.levelArray.levels[props.index]
-  if (type == LevelImage.THUMBNAIL) {
-    arr.BGimage.image[0] = ""
-  }
-  else {
-    arr.screenshots?.splice(ind-1, 1)
-  }
-}
-
 const tagbox = ref<HTMLInputElement>()
 const nameInput = ref<HTMLInputElement>()
 onMounted(() => {
@@ -425,6 +415,44 @@ const tagReorderDrop = () => {
     tags.splice(imageDraggingOver, 0, tmp)
     document.activeElement?.blur()
   }
+}
+// levelMedia is made up of multiple different arrays
+const popLevelMedia = (ind: number) => {
+  let media = levelMedia.value.slice()
+  let removeType: LevelImage = media[ind][0]
+  console.log("aaa")
+
+  switch (removeType) {
+    case LevelImage.IMAGE:
+    case LevelImage.VIDEO:
+      media.splice(ind, 1)
+      props.levelArray.levels[props.index].screenshots = media.filter(x => x[0] & (LevelImage.IMAGE | LevelImage.VIDEO))
+      break;
+    case LevelImage.THUMBNAIL:
+      props.levelArray.levels[props.index].BGimage.image[0] = ""
+      break;
+    case LevelImage.OLD_VIDEO:
+      props.levelArray.levels[props.index].video = ""
+      break;
+  }
+}
+
+const highlightVideo = (videoIndex: number) => {
+  imageSettingsOpen.value = -1
+  let link = levelMedia.value[videoIndex][1]
+  popLevelMedia(videoIndex)
+  props.levelArray.levels[props.index].video = link
+}
+
+const unhighlightVideo = () => {
+  let level = props.levelArray.levels[props.index]
+  level.screenshots?.push([
+    LevelImage.VIDEO,
+    level.video,
+    ""
+  ])
+  level.video = ""
+  imageSettingsOpen.value = -1
 }
 
 </script>
@@ -600,7 +628,7 @@ const tagReorderDrop = () => {
               @dragstart="imageDraggingIndex = ind"
               @dragover.prevent="imageDraggingOver = ind"
               v-show="!pickingColor"
-              draggable="true"
+              :draggable="image[0] & (LevelImage.IMAGE | LevelImage.VIDEO) ? 'true' : 'false'"
               class="relative duration-200 levelImages aspect-video group"
             >
 
@@ -625,13 +653,18 @@ const tagReorderDrop = () => {
                   <img src="@/images/gear.svg" class="w-5" alt="">
                 </button>
 
-                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute left-0 bottom-1 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
                   <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
                   {{ $t('reviews.setThumb') }}
                 </button>
 
+                <button v-if="image[0] == LevelImage.VIDEO" @click="highlightVideo(ind)" class="flex absolute left-0 bottom-1 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                  <img src="@/images/play.svg" class="mr-2 w-5" alt="">  
+                  Zvýraznit
+                </button>
+
                 <!-- Remove media -->
-                <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
+                <button @click="popLevelMedia(ind)" class="absolute right-1 bottom-1">
                   <img src="@/images/trash.svg" class="w-5" alt="">
                 </button>
               </div>
@@ -727,6 +760,10 @@ const tagReorderDrop = () => {
         <input type="text" v-model="levelMedia[imageSettingsOpen][2]" maxlength="20" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
       </section>
       <section v-else class="p-2 text-white">
+        <button @click="unhighlightVideo()" class="flex gap-2 justify-center items-center mb-2 w-full text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
+          <img class="w-5" src="@/images/del2.svg" alt="">
+          {{ $t('editor.cancelHL') }}
+        </button>
         <p class="text-lg">{{ $t('other.link') }}</p>
         <input type="text" :value="levelArray.levels[index].video" @change="levelArray.levels[index].video = shortenYTLink($event.target.value)" maxlength="80" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
       </section>
