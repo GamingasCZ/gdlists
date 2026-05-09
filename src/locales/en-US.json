@@ -118,7 +118,8 @@
     "lastUsed": "Last Used",
     "commPlaceholder": "Feel free to provide a short comment on the level...",
     "noDuplicates": "You cannot have multiples of the same level!",
-    "dragReorder": "Drag to Reorder"
+    "dragReorder": "Drag to Reorder",
+    "addYTLink": "Paste the YouTube link"
   },
   "homepage": {
     "clear": "Clear",

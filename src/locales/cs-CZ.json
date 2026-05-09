@@ -228,7 +228,8 @@
     "lastUsed": "Poslední",
     "commPlaceholder": "Zde můžeš k levelu napsat krátký komentář...",
     "noDuplicates": "Nelze mít duplicitní levely!",
-    "dragReorder": "Táhni pro přeskupení"
+    "dragReorder": "Táhni pro přeskupení",
+    "addYTLink": "Vlož odkaz na YouTube video"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
