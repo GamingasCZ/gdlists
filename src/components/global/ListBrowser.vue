@@ -431,6 +431,13 @@ defineExpose({
           </button>
         </div>
 
+        <!-- Highlighted comment -->
+        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
+          <h3 class="my-3 text-lg text-center">{{ $t('listViewer.highlighted') }}</h3>
+          <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
+          <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
+        </section>
+
         <component
           :is="component"
           v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
@@ -456,12 +463,6 @@ defineExpose({
           @remove-collab="removeCollab"
           @favorite="favoriteLevel"
         />
-
-        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
-          <h3 class="my-3 text-xl">{{ $t('listViewer.highlighted') }}</h3>
-          <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
-          <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
-        </section>
 
         </main>
         <!-- Page Switcher -->
