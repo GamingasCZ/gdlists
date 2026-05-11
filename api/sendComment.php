@@ -62,7 +62,7 @@ if (is_array($result) && array_key_exists("error", $result)) die("2");
 
 $id = doRequest($mysqli, "SELECT LAST_INSERT_ID() as 'id'", [], "");
 
-createNotification($mysqli, $discord_id, $list["uid"], 1, intval(isset($DATA["reviewID"]))+1, $fuckupData[2], $id["id"]);
+createNotification($mysqli, $discord_id["id"], $list["uid"], 1, intval(isset($DATA["reviewID"]))+1, $fuckupData[2], $id["id"]);
 echo "6";
 $mysqli->close();
 
