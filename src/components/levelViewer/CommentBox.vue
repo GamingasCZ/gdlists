@@ -218,12 +218,12 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
                 <button 
                     :style="{backgroundColor: cannotSendComment ? darkParsedColor : parsedColor, borderColor: parsedColor}"
                     class="box-border flex relative gap-2 items-center px-1 ml-1 w-max font-bold overflow-clip rounded-sm border transition-opacity duration-75 disabled:opacity-50"
-                    :class="{'!text-black': !cannotSendComment && listColor[2] > 7}"
+                    :class="{'!text-black': !cannotSendComment && listColor[2] > 24}"
                     :disabled="cannotSendComment"
                     @click="sendComment()"
                 >
                     <div :style="{backgroundImage: lengthPie}" class="absolute right-0 bottom-0 left-0 h-1" v-show="commentLength > 1"></div>
-                    <img src="@/images/send.svg" class="w-7" :class="{'invert': !cannotSendComment  && listColor[2] > 7}" alt="">
+                    <img src="@/images/send.svg" class="w-7" :class="{'invert': !cannotSendComment  && listColor[2] > 24}" alt="">
                     <p>{{ $t('other.send') }}</p>
                 </button>
             </div>
