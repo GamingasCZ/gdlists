@@ -3,7 +3,7 @@ import { currentUID, lastUsedTags, newCardBG, shortenYTLink, TAG_COUNT } from "@
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, inject, nextTick, onMounted, type Ref, ref } from "vue";
-import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData } from "../../interfaces";
+import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData, type ImageStorage } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
 import DragArea from "../../images/dragArea.svg?raw"
 import { useI18n } from "vue-i18n";
@@ -20,6 +20,8 @@ import { TagName } from "@/assets/tags";
 import CircularRating from "../ui/CircularRating.vue";
 import { Limit } from "@/assets/limits";
 import Tooltip from "../ui/Tooltip.vue";
+import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
+import { summonNotification, uploadImages } from "../imageUpload";
 
 const props = defineProps<{
   levelArray: PostData
@@ -287,8 +289,13 @@ const setAsThumb = (srcshotIndex: number) => {
   colorizeViaThumb()
 }
 
-const addVideo = (e: ClipboardEvent) => {
-  let link = e.clipboardData?.getData("Text")
+const addVideo = (e: ClipboardEvent | string) => {
+  let link: string
+  if (typeof e == 'string')
+    link = e
+  else
+    link = e.clipboardData?.getData("Text")
+
   if (!link) return
 
   let shortened = shortenYTLink(link, true)
@@ -301,7 +308,8 @@ const addVideo = (e: ClipboardEvent) => {
   ])
 
   addingVideo.value = false
-  videoInput.value.value = ""
+  if (videoInput.value)
+    videoInput.value.value = ""
 }
 
 const unsetThumb = () => {
@@ -416,11 +424,43 @@ const tagReorderDrop = () => {
     document.activeElement?.blur()
   }
 }
+
+const draggingOverImageArea = ref(false)
+const imageAreaDragHelp = (e: DragEvent) => {
+  if (e.dataTransfer?.items.length)
+    draggingOverImageArea.value = true
+}
+
+var currentlyUploading = false
+const uploadDraggedImages = async (files: DragEvent) => {
+  if (currentlyUploading) return
+
+  draggingOverImageArea.value = false
+  if (files?.dataTransfer?.items.length) {
+    summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
+    
+    // youtube link
+    if (files.dataTransfer.items[0].kind == 'string') {
+      return files.dataTransfer.items[0].getAsString(addVideo)
+    }
+
+    currentlyUploading = true
+    uploadImages(files.dataTransfer.files, false).then((images: ImageStorage | string) => {
+      currentlyUploading = false
+      images.newImage?.forEach(x => {
+        let arr = props.levelArray.levels[props.index]
+        arr.screenshots.push([LevelImage.IMAGE,x,""])
+      })
+    }).catch(() => {
+      currentlyUploading = false
+    })
+  }
+}
+
 // levelMedia is made up of multiple different arrays
 const popLevelMedia = (ind: number) => {
   let media = levelMedia.value.slice()
   let removeType: LevelImage = media[ind][0]
-  console.log("aaa")
 
   switch (removeType) {
     case LevelImage.IMAGE:
@@ -609,7 +649,15 @@ const unhighlightVideo = () => {
         </div>
   
         <!-- Screenshot carousel & Color Picker -->
-        <div class="grid overflow-auto p-2 bg-black bg-opacity-20">
+        <div @dragover.prevent="imageAreaDragHelp" @dragleave.prevent="draggingOverImageArea = false" @drop.stop.prevent="uploadDraggedImages" class="grid overflow-auto relative p-2 bg-black bg-opacity-20">
+          <Transition name="fade">
+            <div v-if="draggingOverImageArea" class="flex absolute inset-0 z-10 flex-col gap-2 justify-center items-center text-xl bg-black bg-opacity-60">
+              <img src="@/images/plus.svg" class="w-10" alt="">
+              <span>{{ $t('reviews.dragUpload') }}...</span>
+              <HiddenFileUploader multiple @data="uploadDraggedImages" />
+            </div>
+          </Transition>
+
           <template v-if="levelMedia.length && (levelMedia.length != 1 || levelMedia[0][0] != LevelImage.THUMBNAIL)">
             <form @submit.prevent="editingImageSectionName = false" v-if="editingImageSectionName" class="flex gap-2 items-center mb-2">
               <input ref="sectionNameInput" type="text" maxlength="20" v-model="levelArray.levels[index].scShotSecName" class="p-1 bg-transparent outline-none focus-within:border-b-2" :placeholder="$t('reviews.sectionName')">
