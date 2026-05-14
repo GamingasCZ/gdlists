@@ -196,7 +196,11 @@ export interface LevelBackground {
   scrolling: 0 | 1 | 2
 }
 
-export type LevelScreenshot = [LevelImage, string, string]
+export type LevelScreenshot = [
+  LevelImage, // type
+  string, // link
+  string, // description
+]
 
 export interface Level {
   levelName: string;
