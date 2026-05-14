@@ -166,6 +166,7 @@ interface HumanSocialLink {
 export interface ListCreatorInfo {
   username: string;
   discord_id: string;
+  pfp_cutout: number
 }
 
 export interface LevelBackup {

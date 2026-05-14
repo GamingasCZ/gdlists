@@ -230,7 +230,8 @@
     "noDuplicates": "Nelze mít duplicitní levely!",
     "dragReorder": "Táhni pro přeskupení",
     "addYTLink": "Vlož odkaz na YouTube video",
-    "cancelHL": "Zrušit zvýraznění"
+    "cancelHL": "Zrušit zvýraznění",
+    "browsePreview": "Náhled při procházení"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -353,7 +354,7 @@
     "picture": "Obrázek",
     "moveUp": "Posunout výš",
     "moveDown": "Posunout níž",
-    "levels": "{n} level | {n} levely | {n} levelů",
+    "levels": "Bez levelů | {n} levely | {n} levelů",
     "words": "{n} slov | {n} slovo | {n} slov",
     "post": "Post",
     "long": "dlouhé",

@@ -304,3 +304,38 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
     let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(',')}}).then(res => res.data)
     return postData
 }
+
+export function parseLocalReviewRatings(reviewData: PostData) {
+    let ratings = [{
+        level_count: 0,
+        reviewID: 69,
+        gameplay: [],
+        decoration: [],
+        difficulty: [],
+        overall: []
+    }]
+    for (let i = 0; i < reviewData.levels.length; i++) {
+        let levelID = reviewData.levels[i].levelID
+        if (levelID && (isNaN(parseInt(levelID)) || levelID < 128 || levelID > 200000000)) continue
+
+        ratings[0].level_count++
+        let levelRatings = reviewData.levels[i].ratings?.[0]
+        if (levelRatings) {
+            if (levelRatings[0] > -1)
+                ratings[0].gameplay.push(levelRatings[0])
+            if (levelRatings[1] > -1)
+                ratings[0].decoration.push(levelRatings[1])
+            if (levelRatings[2] > -1)
+                ratings[0].difficulty.push(levelRatings[2])
+            if (levelRatings[3] > -1)
+                ratings[0].overall.push(levelRatings[3])
+        }
+    }
+    let rateCounts = Object.values(ratings[0]).filter(x => typeof x != "number").map(x => x.length)
+    ratings[0].gameplay = ratings[0].gameplay.reduce((a,b) => a+b, 0)/rateCounts[0]
+    ratings[0].decoration = ratings[0].decoration.reduce((a,b) => a+b, 0)/rateCounts[1]
+    ratings[0].difficulty = ratings[0].difficulty.reduce((a,b) => a+b, 0)/rateCounts[2]
+    ratings[0].overall = ratings[0].overall.reduce((a,b) => a+b, 0)/rateCounts[3]
+    console.log(ratings)
+    return ratings as unknown as ReviewDetailsResponse[]
+}

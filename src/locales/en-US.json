@@ -120,7 +120,8 @@
     "noDuplicates": "You cannot have multiples of the same level!",
     "dragReorder": "Drag to Reorder",
     "addYTLink": "Paste the YouTube link",
-    "cancelHL": "Remove Highlight"
+    "cancelHL": "Remove Highlight",
+    "browsePreview": "Browser Preview"
   },
   "homepage": {
     "clear": "Clear",

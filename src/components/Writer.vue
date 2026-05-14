@@ -42,6 +42,7 @@ import containers from "./writer/containers";
 import ZenModeHelp from "./writer/ZenModeHelp.vue";
 import { Limit } from "@/assets/limits";
 import { lastVisitedPath } from "./global/imageCache";
+import PostThumbnailPreview from "./writer/PostThumbnailPreview.vue";
 
 const props = defineProps<{
     type: number
@@ -179,7 +180,8 @@ const openDialogs = reactive({
     userAdder: [false, 0],
     drafts: false,
     shortcuts: false,
-    zenHelp: false
+    zenHelp: false,
+    thumbPreview: false
 })
 
 const previewMode = ref(true)
@@ -1233,6 +1235,10 @@ const modifyPostName = () => {
 
         <DialogVue :open="openDialogs.zenHelp && !viewedPopups.zenModeHelp" :width="dialog.medium" header-disabled>
             <ZenModeHelp @close="openDialogs.zenHelp = false" />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.thumbPreview" @close-popup="openDialogs.thumbPreview = false" :title="$t('editor.browsePreview')" :width="dialog.medium">
+            <PostThumbnailPreview :data="POST_DATA" :is-list="type == 0" />
         </DialogVue>
 
         <section class="max-w-[90rem] flex flex-col gap-y-16 mx-auto">
