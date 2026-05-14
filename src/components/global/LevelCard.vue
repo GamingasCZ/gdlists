@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { LevelImage, type Level } from "@/interfaces";
 import chroma, { type Color } from "chroma-js";
-import { inject, onErrorCaptured, ref } from "vue";
+import { inject, onErrorCaptured, reactive, ref } from "vue";
 import CollabPreview from "../levelViewer/CollabPreview.vue";
 import Tag from "../levelViewer/Tag.vue";
 import DifficultyGuesserContainer from "../levelViewer/DifficultyGuesserContainer.vue";
@@ -87,6 +87,8 @@ const hasPlatTag = (() => {
     return props.tags.find(x => x[0] == TagName.PLATFORMER) !== undefined
   return false
 })()
+
+const videoLoaded = reactive([])
 
 </script>
 
@@ -195,18 +197,21 @@ const hasPlatTag = (() => {
       <!-- Screenshots -->
       <h2 v-if="scShotSecName && screenshots?.length" class="mt-3 text-2xl font-bold leading-none">{{ scShotSecName }}</h2>
       <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 w-full">
-        <figure v-for="(img, ind) in screenshots" class="flex flex-col">
+        <figure v-for="(img, ind) in screenshots" class="flex relative flex-col">
           <iframe
               v-if="img[0] == LevelImage.VIDEO"
+              @load="videoLoaded[ind] = true"
               height="144" width="255"
               :src="`https://www.youtube-nocookie.com/embed/${img[1]}`"
               title="YouTube video player" frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
-              class="rounded-md"
+              class="bg-black bg-opacity-60 rounded-md"
               >
           </iframe>
           <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="object-cover object-center max-h-36 rounded-md aspect-video inter shadow-drop" alt="">
+
+          <img v-if="img[0] == LevelImage.VIDEO && !videoLoaded[ind]" src="@/images/loading.webp" class="absolute left-[44%] opacity-60 w-8 animate-spin top-[39%]" alt="">
           <figcaption class="text-center text-inherit">{{ img[2] }}</figcaption>
         </figure>
       </section>
