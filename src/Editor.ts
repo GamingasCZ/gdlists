@@ -339,3 +339,13 @@ export const lastUsedTags = ref<number[]>([])
 
 export var lastPostPickerTab = [0, 0]
 export const modLastPPTab = (x: [0 | 1 | 2, 0 | 1 | 2]) => lastPostPickerTab = x
+
+// from: https://stackoverflow.com/a/7616484
+export const generateHash = (string: string) => {
+  let hash = 0;
+  for (const char of string) {
+    hash = (hash << 5) - hash + char.charCodeAt(0);
+    hash |= 0; // Constrain to 32bit integer
+  }
+  return hash;
+};

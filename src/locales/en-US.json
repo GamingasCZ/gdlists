@@ -238,7 +238,10 @@
     "pickedLevels": "{count} level selected | {count} levels selected",
     "noContents": "No contents available!",
     "contents": "Contents",
-    "highlighted": "Highlighted Comment"
+    "highlighted": "Highlighted Comment",
+    "changes": "You've made changes to the post.",
+    "failUpdate": "Failed to update the post!",
+    "postUpdated": "Post Updated!"
   },
   "navbar": {
     "editor": "Create",
@@ -466,7 +469,8 @@
     "style": "Style",
     "color": "Color",
     "gradient2": "Gradient",
-    "revert": "Revert"
+    "revert": "Revert",
+    "discard": "Discard"
   },
   "settingsMenu": {
     "asOff": "Off",

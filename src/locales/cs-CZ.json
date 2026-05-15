@@ -451,7 +451,8 @@
     "style": "Styl",
     "color": "Barva",
     "gradient2": "Přechod",
-    "revert": "Zahodit změny"
+    "revert": "Zahodit změny",
+    "discard": "Zahodit"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -517,7 +518,10 @@
     "addToList": "Přidat do seznamu",
     "pickedLevels": "Vybráno {count} levelů | Vybrán {count} level | Vybrány {count} levely",
     "noContents": "Obsah není dostupný!",
-    "contents": "Obsah"
+    "contents": "Obsah",
+    "changes": "Změnil jsi obsah příspěvku.",
+    "postUpdated": "Příspěvek aktualizován!",
+    "failUpdate": "Nepovedlo se aktualizovat příspěvek!"
   },
   "level": {
     "levelID": "ID levelu",

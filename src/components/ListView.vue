@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios, { all, type AxiosResponse } from "axios";
+import axios, { type AxiosResponse } from "axios";
 import type {
   ListFetchResponse,
   ListPreview,
@@ -13,9 +13,8 @@ ViewedPinArray,
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncComponent } from "vue";
-import { modifyListBG, selectedLevels } from "@/Editor";
-import chroma, { hsl } from "chroma-js";
+import { ref, onMounted, watch, provide, computed, defineAsyncComponent } from "vue";
+import { generateHash, modifyListBG, selectedLevels } from "@/Editor";
 import PickerPopup from "./global/PickerPopup.vue";
 import router, { timeLastRouteChange } from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
@@ -30,12 +29,10 @@ import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
 import CONTAINERS from "./writer/containers";
 import { dialog } from "./ui/sizes";
-import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, resetIndentation } from "@/Reviews";
+import { getEmbeds, parseReviewContainers, resetIndentation } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
-import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
 import ImageViewer from "./global/ImageViewer.vue";
 import LevelCardTableTable from "./global/LevelCardTableTable.vue";
@@ -161,6 +158,7 @@ async function loadList(loadedData: LevelList | null) {
 
 const REVIEW_CONTENTS = ref<[number, string][]>([])
 const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchResponse]>([])
+var originalListData: ListFetchResponse
 provide("batchEmbeds", embedsContent)
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
@@ -180,6 +178,13 @@ async function loadReview(loadedData: ReviewList | null) {
 
     let indicies = [0,0,0,0,0,0]
     LIST_DATA.value = res[0];
+    originalHashes = {}
+    let cont = Array.from(res[0].data.containers)
+    let hashes = cont.map(x => generateHash(JSON.stringify(x)))
+    let ids = cont.map(x => x.id)
+    for (let i = 0; i < hashes.length; i++)
+      originalHashes[ids[i]] = hashes[i]
+
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
     REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers, indicies)
 
@@ -509,6 +514,51 @@ const levelImageFullscreen = (imgIndex: number, levelIndex: number) => {
 }
 provide("fullscreenLevel", levelImageFullscreen)
 
+const postMadeChanges = ref(false)
+var originalHashes: {[containerID: number]: number} = {}
+var postChanges: {[containerID: string]: ReviewContainer} = {}
+const UpdateConfirmer = defineAsyncComponent(() =>
+  import("./levelViewer/ListViewPushChanges.vue")
+)
+
+// brings up changed popup, if changed container has a different hash, that its original hash
+const doModifyPost = (changedContainer: ReviewContainer) => {
+  if (postChanges[changedContainer.id]) {
+    let changedHash = generateHash(JSON.stringify(changedContainer))
+    if (changedHash == originalHashes[changedContainer.id])
+      delete postChanges[changedContainer.id]
+    else
+    postChanges[changedContainer.id] = changedContainer
+  }
+  else
+    postChanges[changedContainer.id] = changedContainer
+  
+  postMadeChanges.value = Object.keys(postChanges).length > 0
+}
+// todo add discarding
+const updatingPost = ref(false)
+const sendChangedComponents = () => {
+  updatingPost.value = true
+  axios.post(import.meta.env.VITE_API+"/updateList.php", {
+    type: props.isReview ? 'review' : 'list',
+    id: props.listID,
+    isNowHidden: +!NONPRIVATE_LIST.value,
+    hidden: +!NONPRIVATE_LIST.value,
+    components: postChanges
+  }).then(res => {
+    postChanges = {}
+    postMadeChanges.value = false
+    setTimeout(() => updatingPost.value = false, 250)
+    if (res.data == "8")
+      summonNotification(i18n.global.t('listViewer.postUpdated'), "", 'check')
+    else
+      summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.failUpdate'), 'error')
+  }).catch(() => {
+    postMadeChanges.value = false
+    setTimeout(() => updatingPost.value = false, 250)
+    summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.failUpdate'), 'error')
+  })
+}
 </script>
 
 <template> 
@@ -614,6 +664,10 @@ provide("fullscreenLevel", levelImageFullscreen)
       </div>
     </section>
 
+    <Transition name="fade">
+      <UpdateConfirmer v-if="postMadeChanges" @confirm="sendChangedComponents" :updating="updatingPost" :owns-post="true" />
+    </Transition>
+
     <main v-if="!nonexistentList && !listErrorLoading" class="flex flex-col gap-4">
       <!-- Back to review from link -->
       <RouterLink v-if="backToReview" @click="$router.go(-1)" to="" class="flex gap-2 p-2 mx-auto w-max rounded-md bg-greenGradient">
@@ -662,7 +716,7 @@ provide("fullscreenLevel", levelImageFullscreen)
       </div>
       
       <div ref="postContent" v-if="isReview" v-show="!commentsShowing && !reviewLevelsOpen">
-        <WriterViewer :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
+        <WriterViewer @forced-update="doModifyPost" :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
       </div>
 
       <!-- Guessing bottom padding -->
