@@ -54,7 +54,6 @@ const togglePreview = () => {
 
 const checkCheckbox = (index: number | number[], toggled: boolean | boolean[]) => {
 	// todo: router.currentRoute.value.name != 'reviewViewer'
-	console.log(index, toggled)
 	let text = props.text
 	let splitText = text.split(/- \[.\]/g)
 	let allCheckboxed = text.match(/- \[.\]/g)!

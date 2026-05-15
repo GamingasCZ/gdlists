@@ -317,31 +317,27 @@ export const makeTogglableCheckboxes = (parentContainer: HTMLParagraphElement, c
             for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i] === cbox) {
                     // check the parent check, if child checks are checked; uncheck parent check, if 1 or more checks unchecked
-                    let paraHasNestCheckboxes = parentContainer.querySelectorAll("ul > li > ul") // finds all nested checklists
                     let toCheck: number[] = []
                     let checkParams: boolean[] = []
-                    if (paraHasNestCheckboxes) {
-                        // find if the current check is a part of a nested checklist
-                        for (let j = 0; j < paraHasNestCheckboxes.length; j++) {
-                            // get all the checkboxes in a nested checklist
-                            let subCheckboxes = paraHasNestCheckboxes.item(j).querySelectorAll("input")
-                            let checkStatus = Array(subCheckboxes.length).fill(false)
-                            let isPartOfThisNestChecklist = false
-                            for (let k = 0; k < subCheckboxes.length; k++) {
-                                checkStatus[k] = subCheckboxes.item(k).checked
-                                if (subCheckboxes[k] === cbox)
-                                    isPartOfThisNestChecklist = true
-                            }
-                            if (isPartOfThisNestChecklist) {
-                                let parentList = paraHasNestCheckboxes[j].parentElement?.querySelector("input")!
-                                if (checkStatus.includes(false))
-                                    parentList.checked = false
-                                else
-                                    parentList.checked = true
-                                toCheck = [+parentList.dataset.index!, i]
-                                checkParams = [parentList.checked, cbox.checked]
+                    let currBox = cbox
+                    while (true) {
+                        let closest = currBox.closest("ul")
+                        if (closest?.parentElement?.tagName == 'P') // is a top-level check
+                            break
+
+                        let listItems = closest?.children
+                        let parentCheckbox = closest?.parentElement?.querySelector("input")!
+                        currBox = parentCheckbox
+                        parentCheckbox.checked = true
+                        for (let i = 0; i < listItems?.length; i++) {
+                            if (!listItems[i].querySelector("input")?.checked) {
+                                parentCheckbox.checked = false
+                                break
                             }
                         }
+
+                        toCheck.push(+parentCheckbox.dataset.index)
+                        checkParams.push(parentCheckbox.checked)
                     }
 
                     // checking the checkbox above a nested checklist
