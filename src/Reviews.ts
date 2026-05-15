@@ -318,11 +318,13 @@ export const makeTogglableCheckboxes = (parentContainer: HTMLParagraphElement, c
                 if (checkboxes[i] === cbox) {
                     // check the parent check, if child checks are checked; uncheck parent check, if 1 or more checks unchecked
                     let paraHasNestCheckboxes = parentContainer.querySelectorAll("ul > li > ul") // finds all nested checklists
+                    let toCheck: number[] = []
+                    let checkParams: boolean[] = []
                     if (paraHasNestCheckboxes) {
                         // find if the current check is a part of a nested checklist
                         for (let j = 0; j < paraHasNestCheckboxes.length; j++) {
                             // get all the checkboxes in a nested checklist
-                            let subCheckboxes = paraHasNestCheckboxes.item(j).querySelectorAll("input[type='checkbox']")
+                            let subCheckboxes = paraHasNestCheckboxes.item(j).querySelectorAll("input")
                             let checkStatus = Array(subCheckboxes.length).fill(false)
                             let isPartOfThisNestChecklist = false
                             for (let k = 0; k < subCheckboxes.length; k++) {
@@ -336,7 +338,8 @@ export const makeTogglableCheckboxes = (parentContainer: HTMLParagraphElement, c
                                     parentList.checked = false
                                 else
                                     parentList.checked = true
-                                return checkFun([+parentList.dataset.index!, i], [parentList.checked, cbox.checked])
+                                toCheck = [+parentList.dataset.index!, i]
+                                checkParams = [parentList.checked, cbox.checked]
                             }
                         }
                     }
@@ -344,16 +347,17 @@ export const makeTogglableCheckboxes = (parentContainer: HTMLParagraphElement, c
                     // checking the checkbox above a nested checklist
                     let nestList = cbox.nextElementSibling
                     if (nestList && nestList?.tagName == 'UL') {
-                        let checkArr: number[] = Array(nestList.children.length).fill(i+1)
-                        for (let j = 0; j < nestList.children.length; j++) {
-                            nestList.children[j].querySelector("input").checked = cbox.checked
+                        let sub = nestList.querySelectorAll("input")
+                        let checkArr: number[] = Array(sub.length).fill(i+1)
+                        for (let j = 0; j < sub.length; j++) {
+                            sub[j].checked = cbox.checked
                             checkArr[j] += j
                         }
                         checkArr.push(i)
-                        return checkFun(checkArr, cbox.checked)
+                        return checkFun(checkArr.concat(toCheck), Array(checkArr.length).fill(cbox.checked).concat(checkParams))
                     }
 
-                    checkFun(i, cbox.checked)
+                    checkFun([i].concat(toCheck), [cbox.checked].concat(checkParams))
                 }
             }
         }
