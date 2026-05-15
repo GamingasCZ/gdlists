@@ -50,7 +50,7 @@ const showSettings = () => {
                 window.addEventListener("resize", positionFloating)
                 positionFloating()
             }
-            nextTick(() => containerSettings.value?.[3]?.focus())
+            nextTick(() => containerSettings.value?.[4]?.focus())
         })
     })
 }
@@ -101,15 +101,17 @@ const isControl = (ind: number, which: ControlType) => containers[props.type].se
 
 <template>
     <Teleport :disabled="shown != 2" to="body">
-        <form ref="containerSettings" @keydown.prevent.esc="forceHide()" @submit.prevent="" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] -right-1 z-20 rounded-md rounded-tr-none bg-greenGradient">
-            <div class="flex flex-col gap-1 p-1 mr-1 bg-black bg-opacity-40 rounded-r-md">
-                <button @click="emit('move', -1)" class="p-1 button aspect-square">
+        <form ref="containerSettings" @keydown.prevent.esc="forceHide()" @submit.prevent="forceHide()" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] -right-1 z-20 rounded-md rounded-tr-none bg-greenGradient">
+            <button type="submit" class="hidden"></button>
+
+            <div class="flex flex-col gap-1 p-1 mr-1 bg-black bg-opacity-40 rounded-l-md">
+                <button type="button" @click="emit('move', -1)" class="p-1 button aspect-square">
                     <img src="@/images/moveUp.svg" class="w-6" alt="">
                 </button>
-                <button @click="emit('move', 1)" class="p-1 button aspect-square">
+                <button type="button" @click="emit('move', 1)" class="p-1 button aspect-square">
                     <img src="@/images/moveDown.svg" class="w-6" alt="">
                 </button>
-                <button @click="emit('remove')" class="flex gap-1 items-center p-1 mt-auto bg-red-400 rounded-md">
+                <button type="button" @click="emit('remove')" class="flex gap-1 items-center p-1 mt-auto bg-red-400 rounded-md">
                     <img src="@/images/del.svg" alt="" class="w-6">
                 </button>
             </div>
@@ -123,7 +125,7 @@ const isControl = (ind: number, which: ControlType) => containers[props.type].se
                     </div>
                     
                     <!-- Button -->
-                    <button v-if="isControl(index, ControlType.Button)" @click.stop="emit('pressedButton', key); forceHide()" class="px-4 py-1 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
+                    <button type="button" v-if="isControl(index, ControlType.Button)" @click.stop="emit('pressedButton', key); forceHide()" class="px-4 py-1 mx-auto w-max text-lg bg-black bg-opacity-40 rounded-md focus-within:outline-current button">{{ containers[type].settings[index].title }}</button>
                     
                     <!-- Checkbox -->
                     <div v-if="isControl(index, ControlType.Checkbox)" class="flex justify-between">
