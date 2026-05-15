@@ -1,6 +1,6 @@
-import { type Ref, ref } from "vue"
+import { nextTick, type Ref, ref } from "vue"
 import { DEFAULT_LEVEL, DEFAULT_LEVELLIST, modernizeLevels } from "./Editor"
-import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewList, ReviewRating } from "./interfaces"
+import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewDetailsResponse, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -303,6 +303,61 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
 
     let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(',')}}).then(res => res.data)
     return postData
+}
+
+export const makeTogglableCheckboxes = (parentContainer: HTMLParagraphElement, checkFun: (i: number | number[], togg: boolean | boolean[])=> void) => {
+    let checkboxes: NodeListOf<HTMLInputElement> = parentContainer.querySelectorAll("input[type='checkbox']")
+    var indicies = 0
+    checkboxes.forEach(cbox => {
+        cbox.disabled = false
+        cbox.classList.add("button")
+        cbox.dataset.index = indicies++
+
+        cbox.oninput = async () => {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i] === cbox) {
+                    // check the parent check, if child checks are checked; uncheck parent check, if 1 or more checks unchecked
+                    let paraHasNestCheckboxes = parentContainer.querySelectorAll("ul > li > ul") // finds all nested checklists
+                    if (paraHasNestCheckboxes) {
+                        // find if the current check is a part of a nested checklist
+                        for (let j = 0; j < paraHasNestCheckboxes.length; j++) {
+                            // get all the checkboxes in a nested checklist
+                            let subCheckboxes = paraHasNestCheckboxes.item(j).querySelectorAll("input[type='checkbox']")
+                            let checkStatus = Array(subCheckboxes.length).fill(false)
+                            let isPartOfThisNestChecklist = false
+                            for (let k = 0; k < subCheckboxes.length; k++) {
+                                checkStatus[k] = subCheckboxes.item(k).checked
+                                if (subCheckboxes[k] === cbox)
+                                    isPartOfThisNestChecklist = true
+                            }
+                            if (isPartOfThisNestChecklist) {
+                                let parentList = paraHasNestCheckboxes[j].parentElement?.querySelector("input")!
+                                if (checkStatus.includes(false))
+                                    parentList.checked = false
+                                else
+                                    parentList.checked = true
+                                return checkFun([+parentList.dataset.index!, i], [parentList.checked, cbox.checked])
+                            }
+                        }
+                    }
+
+                    // checking the checkbox above a nested checklist
+                    let nestList = cbox.nextElementSibling
+                    if (nestList && nestList?.tagName == 'UL') {
+                        let checkArr: number[] = Array(nestList.children.length).fill(i+1)
+                        for (let j = 0; j < nestList.children.length; j++) {
+                            nestList.children[j].querySelector("input").checked = cbox.checked
+                            checkArr[j] += j
+                        }
+                        checkArr.push(i)
+                        return checkFun(checkArr, cbox.checked)
+                    }
+
+                    checkFun(i, cbox.checked)
+                }
+            }
+        }
+    })
 }
 
 export function parseLocalReviewRatings(reviewData: PostData) {

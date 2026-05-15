@@ -86,6 +86,7 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
             :index="index"
             :nest-index="[ind, subIndex]"
             :focused="selectedNestContainer[1] == subIndex && ind == selectedContainer[0] && editable"
+            :id="container.id"
         >
             <component
                 v-for="elements in CONTAINERS[container.type].additionalComponents"

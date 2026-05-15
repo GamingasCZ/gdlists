@@ -77,6 +77,8 @@ onUnmounted(() => {
     document.body.removeEventListener("click", unfocusContainer)
 })
 
+const doUpdate = ref(Date.now())
+
 </script>
 
 <template>
@@ -102,7 +104,7 @@ onUnmounted(() => {
         <slot name="header" />
 
         <DataContainer v-for="(container, index) in writerData.containers"
-            v-memo="[editable, containerLastAdded, selectedContainer, selectedNestContainer]"
+            v-memo="[doUpdate, editable, containerLastAdded, selectedContainer, selectedNestContainer]"
             v-bind="CONTAINERS[container.type]"
             @remove-container="emit('callCommand', {command: DataContainerAction.Remove, data: [index]})"
             @move-container="emit('callCommand', {command: DataContainerAction.Move, data: [index, $event]})"
@@ -110,6 +112,7 @@ onUnmounted(() => {
             @settings-button="buttonState = [$event, selectedContainer[0]]"
             @add-paragraph="emit('callCommand', {command: DataContainerAction.MakeParagraph, data: [index]})"
             @text-modified="container.data = $event"
+            @force-update="doUpdate = Date.now()"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type]?.styling ?? '']"
@@ -120,6 +123,7 @@ onUnmounted(() => {
             :editable="editable"
             :align="container.align"
             :text="container.data"
+            :id="container.id"
         >
             <component
                 v-for="(elements, subIndex) in
