@@ -48,9 +48,10 @@ const focusUse = () => useButton.value.focus()
                 <h2>{{ draft.previewTitle }}</h2>
                 <p class="text-xs text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent regularParsing" v-html="parseText(draft.previewParagraph)"></p>
             </div>
-            <div v-if="inUse" class="grid grid-cols-2 gap-2 p-1">
-                <button :disabled="justSaved" @click.stop="emit('action', DraftAction.Save); justSaved = true" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img class="w-6" src="@/images/symbolicSave.svg">{{ $t('other.save') }}</button>
-                <button @click.stop="emit('action', DraftAction.Clone)" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img class="w-6" src="@/images/copy.svg">{{ $t('other.duplicate') }}</button>
+            <div v-if="inUse" class="grid grid-cols-3 gap-2 p-1">
+                <button :disabled="justSaved" @click.stop="emit('action', DraftAction.Save); justSaved = true" class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20"><img class="w-6" src="@/images/symbolicSave.svg">{{ $t('other.save') }}</button>
+                <button @click.stop="emit('action', DraftAction.Clone)" class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md"><img class="w-6" src="@/images/copy.svg">{{ $t('other.duplicate') }}</button>
+                <button @click.stop="emit('action', DraftAction.Load)" class="flex gap-2 items-center p-1 bg-black bg-opacity-40 rounded-md"><img class="w-6" src="@/images/replay.svg">{{ $t('other.revert') }}</button>
             </div>
             <div v-else-if="isOpen" class="grid grid-cols-3 gap-2 p-1">
                 <button @click.stop="emit('action', DraftAction.Remove)" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md outline-2 focus:outline outline-lof-400"><img class="w-6" src="@/images/trash.svg">{{ $t('editor.remove') }}</button>

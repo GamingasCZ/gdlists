@@ -465,7 +465,8 @@
     "allCustom": "CustomOnly",
     "style": "Style",
     "color": "Color",
-    "gradient2": "Gradient"
+    "gradient2": "Gradient",
+    "revert": "Revert"
   },
   "settingsMenu": {
     "asOff": "Off",

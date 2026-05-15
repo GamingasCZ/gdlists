@@ -450,7 +450,8 @@
     "allCustom": "Jen vlastní",
     "style": "Styl",
     "color": "Barva",
-    "gradient2": "Přechod"
+    "gradient2": "Přechod",
+    "revert": "Zahodit změny"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
