@@ -5,6 +5,7 @@ import NotificationCard from './NotificationCard.vue';
 import type { NotificationContent } from '@/interfaces';
 import { currentUnread, notificationCache } from '@/Editor';
 import { RouterLink } from 'vue-router';
+import NotifIcon from "../../images/notifs.svg?raw"
 
 const unreadAmount = ref(0)
 let lastFetch = -1
@@ -53,7 +54,7 @@ onMounted(() => fetchNotifications(false))
         </header>
         <main class="flex flex-col min-h-60 bg-repeat-x p-2 gap-2 bg-[url(@/images/fade.svg)] h-full max-h-[min(80svh,_40rem)] overflow-y-auto">
             <section v-if="!allNotifs.length" class="flex flex-col items-center my-auto text-center opacity-40 pointer-events-none">
-                <img src="@/images/notifs.svg" class="w-24" alt="">
+                <div class="w-24 fill-white id" v-html="NotifIcon"></div>
                 <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
             </section>
 

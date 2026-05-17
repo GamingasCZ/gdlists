@@ -437,3 +437,9 @@ export interface NotificationContent {
   count: number
   id: number
 }
+
+export enum HoverFileAction {
+  DragOver,
+  DragLeave,
+  Drop
+}

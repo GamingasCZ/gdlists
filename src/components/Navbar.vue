@@ -18,6 +18,7 @@ import List from "@/svgs/List.vue";
 import LevelIcon from "@/svgs/LevelIcon.vue";
 import Review from "@/svgs/Review.vue";
 import Saved from "@/svgs/Saved.vue";
+import NotifIcon from "../images/notifs.svg?raw"
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -228,12 +229,11 @@ const open = (to: string) => {
         ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
       </section>
 
-      <section class="flex relative gap-7 items-center px-2 min-h-full">
+      <section class="flex relative gap-5 items-center px-2 min-h-full">
         <!-- Notification button -->
         <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
-          <img src="../images/notifs.svg" alt=""
-          class="w-5" />
-          <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-4 rounded-full border-4 border-black brightness-150 saturate-150 bg-lof-400 aspect-square"></div>
+          <div v-html="NotifIcon" class="w-6" style="--col: var(--brightGreen)" />
+          <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-[18px] rounded-full border-4 border-black brightness-150 saturate-150 bg-lof-400 aspect-square"></div>
         </button>
 
         <!-- Logged out -->

@@ -470,7 +470,8 @@
     "color": "Color",
     "gradient2": "Gradient",
     "revert": "Revert",
-    "discard": "Discard"
+    "discard": "Discard",
+    "oldest": "Oldest"
   },
   "settingsMenu": {
     "asOff": "Off",

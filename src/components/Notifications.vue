@@ -5,6 +5,7 @@ import { notificationCache } from '@/Editor';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
 import type { NotificationContent } from '@/interfaces';
+import NotifsIcon from "../images/notifs.svg?raw"
 
 document.title = `${i18n.global.t('navbar.notifs')} | ${i18n.global.t('other.websiteName')}`
 
@@ -51,6 +52,10 @@ const selectedNotifs = ref([])
             </section>
         </header>
         <main class="flex overflow-y-auto flex-col gap-2">
+            <div v-if="!allNotifs.length" class="flex flex-col items-center mx-auto opacity-20">
+                <div v-html="NotifsIcon" class="w-32"></div>
+                <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
+            </div>
             <NotificationCard @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
         </main>
     </section>
