@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HoverFileAction } from '@/interfaces';
 import { nextTick, ref } from 'vue';
 
 
@@ -6,6 +7,10 @@ defineProps<{
     icon: string
     helpContent: string
     unclickable?: boolean
+}>()
+
+const emit = defineEmits<{
+    (e: "fileAction", action: HoverFileAction, ev: DragEvent): void
 }>()
 
 const BASE_URL = import.meta.env.BASE_URL
@@ -21,7 +26,17 @@ const doFocus = () => {
     })
 }
 
-defineExpose({doFocus})
+const hoverAction = () => {
+    main.value?.addEventListener("dragover", e => emit('fileAction', HoverFileAction.DragOver, e))
+    main.value?.addEventListener("dragleave", e => emit('fileAction', HoverFileAction.DragLeave, e))
+    main.value?.addEventListener("drop", e => {
+        e.stopPropagation()
+        e.preventDefault()
+        emit('fileAction', HoverFileAction.Drop, e)
+    })
+}
+
+defineExpose({doFocus, hoverAction})
 
 
 </script>
