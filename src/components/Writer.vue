@@ -1345,7 +1345,7 @@ const modifyPostName = () => {
                     />
                 </template>
                 <template #footer>
-                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 text-lg sm:grid-cols-3">
+                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid font-[poppins] grid-cols-2 mt-4 text-lg sm:grid-cols-3">
                         <button @click="saveDraft(false)" class="py-1 text-base text-white rounded-md opacity-20 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                             <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
                             <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
