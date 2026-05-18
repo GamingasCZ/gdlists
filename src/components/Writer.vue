@@ -929,10 +929,6 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
     fetchEmbeds()
     modifyListBG(draft.reviewData.pageBGcolor, false)
     containerLastAdded.value = Date.now()
-
-    // Flicker preview mode to refresh text in dataContainers
-    previewMode.value = false
-    nextTick(() => previewMode.value = true)
 }
 
 let previewHold: [ReviewList, object] | null

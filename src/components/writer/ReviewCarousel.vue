@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { inject, nextTick, onMounted, ref } from 'vue';
 import ContainerHelp from './ContainerHelp.vue';
 import { watch } from 'vue';
 import ReviewImage from './ReviewImage.vue';
 import ReviewVideo from './ReviewVideo.vue';
 import Resizer from '../global/Resizer.vue';
 import { flexNames } from '@/Reviews';
-import containers, { type cAddCarousel } from './containers';
+import containers, { type ContainerNames, type cAddCarousel } from './containers';
+import { HoverFileAction, type ReviewContainer, type ImageStorage } from '@/interfaces';
+import { summonNotification, uploadImages } from '../imageUpload';
+import { i18n } from '@/locales';
+import { currentUID } from '@/Editor';
 
 const props = defineProps<{
     index: number
@@ -46,7 +50,27 @@ const modHeight = (newHeight: number) => {
     })
 }
 
+onMounted(() => {
+    if (props.editable) {
+        carousel.value?.parentElement.addEventListener("dragover", e => {
+            e.preventDefault()
+            e.stopPropagation()
+            fileDragover.value = true
+        })
+        carousel.value?.parentElement.addEventListener("dragleave", e => {
+            fileDragover.value = false
+        })
+        carousel.value?.parentElement.addEventListener("drop", e => {
+            e.stopPropagation()
+            e.preventDefault()
+            doUpload(e, e.layerX > e.target.clientWidth/2)
+            fileDragover.value = false
+        })
+    }
+})
+
 const openDialogs = inject("openedDialogs")
+const addContainer = inject<(key: ContainerNames, addTo: any, returnOnly: boolean, above: boolean) => ReviewContainer>("addContainer")
 
 const carousel = ref<HTMLDivElement>()
 const end = ref(1)
@@ -78,10 +102,66 @@ const hovering = ref(false)
 const size = containers.addCarousel.settings[1].valueRange
 const mountedOnce = ref(false)
 
+const fileDragover = ref(false)
+const cHelp = ref<HTMLButtonElement & {hoverAction: () => HoverFileAction}>()
+
+var currentlyUploading = false
+const containerFileAction = (e: HoverFileAction, files: DragEvent) => {
+    if (currentlyUploading) return
+    switch (e) {
+        case HoverFileAction.DragLeave:
+            fileDragover.value = false; break;
+        case HoverFileAction.DragOver:
+            fileDragover.value = true; break;
+        case HoverFileAction.Drop:
+            doUpload(e, true)
+            break;
+    }
+}
+
+function doUpload(files: DragEvent, toEnd: boolean) {
+    summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
+    fileDragover.value = false
+    if (files?.dataTransfer?.items.length) {
+        currentlyUploading = true
+        uploadImages(files.dataTransfer.files, false).then((images: ImageStorage | string) => {
+            currentlyUploading = false
+            if (typeof images != 'string' && images?.newImage) {
+                images.newImage?.forEach(x => {
+                    let image = addContainer('showImage', false, true, false)
+                    image.settings.url = `${import.meta.env.VITE_USERCONTENT}/userContent/${currentUID.value}/${x}.webp`
+                    image.settings.height = props.settings.height
+                    if (toEnd) {
+                        props.settings.components.push(image)
+                        nextTick(() =>
+                            carousel.value?.scrollTo({left:9999, behavior:'smooth'})
+                        )
+                    }
+                    else {
+                        props.settings.components.splice(0, 0, image)
+                        nextTick(() =>
+                            carousel.value?.scrollTo({left:0, behavior:'smooth'})
+                        )
+                    }
+                })
+            }
+        }).catch(() => currentlyUploading = false)
+    }
+}
+
 </script>
 
 <template>
-    <ContainerHelp v-if="!settings.components.length" ref="cHelp" @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click.stop="openDialogs.carouselPicker = [true, index]" icon="addCarousel" :help-content="$t('reviews.carouselHelp')" />
+    <ContainerHelp
+        v-if="!settings.components.length"
+        ref="cHelp"
+        @vue:mounted="cHelp?.hoverAction(); !mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))"
+        @file-action="containerFileAction"
+        @click.stop="openDialogs.carouselPicker = [true, index]"
+        :icon="fileDragover ? 'dropfile' : 'addCarousel'"
+        :help-content="fileDragover ? $t('reviews.dragUpload') : $t('reviews.carouselHelp')"
+    />
+
     <section
         v-else
         @mouseenter="hovering = true"
@@ -115,7 +195,23 @@ const mountedOnce = ref(false)
                 <img src="@/images/showComms.svg" class="w-3 invert translate-x-0.5" alt="">
             </button>
         </Transition>
+
     </section>
+
+    <!-- Dragging add image -->
+    <Transition name="fade">
+        <div v-if="editable && fileDragover && settings.components.length" class="flex absolute inset-0 z-20 gap-3 p-3 w-full text-center pointer-events-none">
+            <div :class="{'flex-col': settings.height > 64}" class="flex gap-4 justify-center items-center w-full h-full bg-black bg-opacity-80 active:bg-amber-400 grow">
+                <img src="@/images/plus.svg" class="w-10" alt="">
+                <span>{{ $t('reviews.toBeginn') }}</span>
+            </div>
+            <div :class="{'flex-col': settings.height > 64}" class="flex gap-4 justify-center items-center w-full bg-black bg-opacity-80 grow">
+                <img src="@/images/plus.svg" class="w-10" alt="">
+                <span>{{ $t('reviews.toEnd') }}</span>
+            </div>
+        </div>
+    </Transition>
+
 </template>
 
 <style>

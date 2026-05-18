@@ -844,7 +844,9 @@
     "dragUpload": "Drop the file to upload it",
     "replImg": "Replace Image",
     "notRated": "Level not rated!",
-    "vibrant": "Bold"
+    "vibrant": "Bold",
+    "toEnd": "Add to End",
+    "toBeginn": "Add to Beginning"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

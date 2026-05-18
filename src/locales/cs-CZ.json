@@ -844,7 +844,9 @@
     "dragUpload": "Upusť pro nahrání",
     "replImg": "Nahradit obrázek",
     "notRated": "Level není ohodnocený!",
-    "vibrant": "Výrazná"
+    "vibrant": "Výrazná",
+    "toBeginn": "Na začátek",
+    "toEnd": "Na konec"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
