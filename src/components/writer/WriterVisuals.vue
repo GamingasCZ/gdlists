@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PostData } from '@/interfaces';
-import { inject, reactive, ref } from 'vue';
+import { inject, onMounted, reactive, ref } from 'vue';
 import ColorPicker from '../global/ColorPicker.vue';
 import { modifyListBG } from '@/Editor';
 import { getDominantColor } from '@/Reviews';
@@ -8,6 +8,8 @@ import { FONTS } from '@/writers/Writer';
 import WriterTitleEditor from './WriterTitleEditor.vue';
 import Dialog from '../global/Dialog.vue';
 import { dialog } from '../ui/sizes';
+import Tooltip from '../ui/Tooltip.vue';
+import PickerIcon from '../../images/picker2.svg?raw'
 
 const props = defineProps<{
     postData: PostData
@@ -23,6 +25,7 @@ const mainRolledOut = ref(true)
 const colorPickerOpen = ref(false)
 const pageDetailsOpen = ref(false)
 const titleEditorOpen = ref(false)
+const base = import.meta.env.BASE_URL
 
 const modifyColor = (newColor: number[]) => {
     props.postData.pageBGcolor = newColor
@@ -45,6 +48,18 @@ const resetColor = () => {
 const dragOver = reactive({
     bg: false,
     thumb: false
+})
+
+const hoveredButton = ref<HTMLButtonElement | null>(null)
+const tintEl = ref<HTMLButtonElement>()
+const hovering = ref(false)
+const buttonHover = (el: HTMLButtonElement) => hoveredButton.value = el
+const buttonClear = (el: HTMLButtonElement) => hoveredButton.value = null
+
+onMounted(() => {
+    let buts = document.querySelectorAll(".fontButtonsHover")
+    buts.forEach(el => el.addEventListener("mouseenter", buttonHover))
+    buts.forEach(el => el.addEventListener("mouseleave", buttonClear))
 })
 
 </script>
@@ -109,6 +124,9 @@ const dragOver = reactive({
                         <img src="@/images/reviews/thumbnail.svg" alt="" class="w-10 opacity-40">
                         <p class="text-xl text-white text-opacity-40">{{ $t('reviews.thumbnail') }}</p>
                     </button>
+                    <button v-show="postData?.thumbnail?.[0].length" @click.stop="openDialogs.thumbPreview = true" class="flex absolute top-1 left-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
+                        <img src="@/images/view.svg" class="w-6" alt="">
+                    </button>
                     <button v-show="postData?.thumbnail?.[0].length" @click.stop="openDialogs.BGpicker[1] = 2; openDialogs.BGpicker[0] = true" class="flex absolute top-1 right-1 gap-2 p-1 opacity-40 hover:opacity-80 button">
                         <img src="@/images/gear.svg" class="w-6" alt="">
                     </button>
@@ -124,9 +142,9 @@ const dragOver = reactive({
                 </template>
             </button>
             
-            <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow disabled:opacity-20 hover:bg-opacity-80">
+            <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md aspect-video disabled:opacity-20 hover:bg-opacity-80">
                 <button class="flex flex-col gap-2 items-center p-1 button">
-                    <img src="@/images/page.svg" alt="" class="w-8 opacity-40">
+                    <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
                 </button>
             </button>
@@ -150,21 +168,21 @@ const dragOver = reactive({
         </div>
 
         <div v-show="mainRolledOut && pageDetailsOpen" class="flex flex-col gap-2 p-4 text-xl">
-            <section class="flex overflow-auto gap-8 justify-between items-center">
-                <div class="flex gap-2">
-                    <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
-                        <p class="text-5xl opacity-20 pointer-events-none">Aa</p>
-                        <span>{{ $t('reviews.font') }}</span>
-                        <select class="text-base" v-model="postData.font" name="" id="">
-                            <option v-for="font in FONTS" :value="font[1]">{{ font[0] }}</option>
-                        </select>
-                    </label>
-                    
-                    <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
-                        <img src="@/images/picker.svg" class="my-1 w-7 opacity-20 pointer-events-none" alt="">
-                        <span>{{ $t('reviews.tintFont') }}</span>
-                        <input v-model="postData.fontTint" type="checkbox" class="!m-0 button" name="" id="">
-                    </label>
+          <section class="flex overflow-auto gap-8 justify-between items-center">
+                <div class="p-2 bg-black bg-opacity-40 rounded-md">
+                    <span class="mr-4 w-10 text-3xl opacity-20 pointer-events-none">Aa</span>
+                    <span>{{ $t('reviews.font') }}</span>
+                    <p class="my-2 text-center">{{ FONTS[postData.font][0] }}</p>
+                    <div class="flex gap-2 items-center">
+                        <button v-for="font in FONTS" @click="postData.font = font[1]" :class="{'border-2 border-lof-400': postData.font == font[1]}" class="h-10 bg-black bg-opacity-40 rounded-full button fontButtonsHover aspect-square" :value="font[1]">
+                            <img :src="`${base}/fontPreviews/${font[1]}.svg`" class="mx-auto w-6" alt="">
+                        </button>
+                        <hr class="inline-block mx-2 w-0.5 h-5 bg-white bg-opacity-20 border-none">
+                        <button ref="tintEl" @mouseover="hovering = true" @mouseleave="hovering = false" @click="postData.fontTint = !postData.fontTint ?? true" :class="{'border-2 border-lof-400': postData.fontTint}" class="relative h-10 bg-black bg-opacity-40 rounded-full button fontButtonsHover aspect-square">
+                            <div class="mx-auto w-3.5" style="fill: color-mix(var(--brightGreen) 80%, white)" v-html="PickerIcon"></div>
+                        </button>
+                    </div>
+                    <Tooltip v-if="hovering" :text="$t('reviews.tintFont')" :button="tintEl" />
                 </div>
 
                 <div class="flex gap-2">
@@ -179,6 +197,7 @@ const dragOver = reactive({
                             </button> -->
                         </div>
                     </label>
+                    
                     <label class="flex flex-col gap-1 items-center p-2 bg-black bg-opacity-40 rounded-md">
                         <img src="@/images/opacity.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('other.opacity') }}</span>
@@ -190,9 +209,7 @@ const dragOver = reactive({
                             <button @click="postData.transparentPage = 1" :class="{'outline': postData.transparentPage == 1}" :title="$t('reviews.transparent')" class="w-9 h-9 rounded-md border outline-2 outline-lof-400 border-lof-300"></button>
                         </div>
                     </label>
-                </div>
-
-                <div class="flex gap-2">                 
+                    
                     <label class="flex flex-col gap-1 items-center p-2 min-w-max bg-black bg-opacity-40 rounded-md">
                         <img src="@/images/fullscreen.svg" class="my-1 w-9 opacity-20 pointer-events-none" alt="">
                         <span>{{ $t('reviews.wide') }}</span>

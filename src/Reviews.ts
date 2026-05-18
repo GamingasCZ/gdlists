@@ -221,7 +221,7 @@ export function parseReviewContainers(containers: object[], indicies: number[]) 
 }
 
 export const pickFont = (ind: number) => {
-    let fonts = ['Poppins', 'serif', 'sans-serif', 'monospace', 'system-ui', 'Pusab']
+    let fonts = ['poppins', 'domine', 'outfit', 'oswald', 'martianmono', 'Pusab']
     return fonts[ind]
 }
 
