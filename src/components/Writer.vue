@@ -785,7 +785,7 @@ onUnmounted(() => {
     shortcutUnload()
 })
 
-var dropAllowed = false
+var dropAllowed = true
 const toggleFileDrop = (e: DragEvent) => {
     dropAllowed = e.dataTransfer?.items?.length > 0
     if (dropAllowed) {
@@ -828,6 +828,7 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent, extra?: any) => {
         fileCount = e.clipboardData?.files.length
 
     if (fileCount) {
+        let holdingShift = e?.shiftKey ?? false
         e.preventDefault()
         summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
 
@@ -879,11 +880,11 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent, extra?: any) => {
             }
 
             if (fileCount == 1) {
-                let el = addContainer("showImage")
+                let el = addContainer("showImage", 0, false, holdingShift)
                 el.settings.url = base+e.newImage[0]+".webp"
             }
             else {
-                let el = addContainer("addCarousel")
+                let el = addContainer("addCarousel", 0, false, holdingShift)
                 e.newImage.forEach(f => {
                     let im = addContainer("showImage", 0, true)
                     im.settings.url = base+f+".webp"
