@@ -139,10 +139,17 @@ const checkPaste = (e: Event) => {
         <div id="carp_inputs" class="flex flex-col p-2">
             <label v-show="dialogType == 2" for="car_url">{{ $t('reviews.ytLink') }}</label>
             <input v-show="dialogType == 2" @paste.stop="closePopup" ref="youtubeInput" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="postData.containers[index].settings.components[textDialogOpen].settings.url" type="text" id="car_url">
+            
             <label v-show="dialogType != 2" for="car_desc">{{ $t('other.desc') }}</label>
             <input v-show="dialogType != 2" class="p-1 bg-white bg-opacity-10 rounded-md" v-model="postData.containers[index].settings.components[textDialogOpen].settings.description" type="text" id="car_desc">
+            
             <label v-show="dialogType == 1" class="mt-4" for="car_alt">{{ $t('reviews.alttext') }}</label>
             <textarea v-show="dialogType == 1" class="p-1 bg-white bg-opacity-10 rounded-md resize-none" v-model="postData.containers[index].settings.components[textDialogOpen].settings.alt" name="" id="car_alt"></textarea>
+            
+            <div class="flex justify-between items-center mt-4">
+                <label v-show="dialogType == 1" class="grow" for="car_deco">{{ $t('reviews.decoOnly') }}</label>
+                <input type="checkbox" class="button" v-show="dialogType == 1" v-model="postData.containers[index].settings.components[textDialogOpen].settings.onlyDeco" name="" id="car_deco">
+            </div>
         </div>
     </Dialog>
 
