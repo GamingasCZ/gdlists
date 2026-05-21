@@ -289,7 +289,7 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
     else {
         if (key == "twoColumns") { // Adding a column to a nest container
             POST_DATA.value.containers[selectedNestContainer.value[0]].extraComponents += 1
-            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
+            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [false])
         }
         else {
             if (selectedContainer.value[2] == -1) {
