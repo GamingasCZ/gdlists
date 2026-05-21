@@ -236,8 +236,8 @@ const pickingColor = ref(false)
 const changeCardColors = (newColors: [number, number, number]) =>
 (props.levelArray.levels[props.index!].color = [
   newColors[0],
-  parseFloat((newColors[1] / 32).toFixed(2)),
-  parseFloat((newColors[2] / 32).toFixed(2)),
+  0.5,
+  parseFloat((newColors[2] / 64).toFixed(2)),
 ]);
 
 const addingVideo = ref(false)
@@ -748,7 +748,7 @@ const unhighlightVideo = () => {
             </div>
   
             <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
-            :saturation="levelArray.levels[index!].color[1] * 32" :lightness="levelArray.levels[index!].color[2] * 32" />
+            :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
           </div>
         </div>
         
