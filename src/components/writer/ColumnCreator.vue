@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, nextTick, onMounted, ref } from 'vue';
 import ColumnPreview from './ColumnPreview.vue';
 import { i18n } from '@/locales';
 
@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const add = inject("addContainer")!
+const keyActivated = inject("keyActivated")
 
 const create = (count: number, widths: boolean[], align: string) => {
     add(`twoColumns`, [count, widths, align])
@@ -32,8 +33,6 @@ const alignText = [
 const highlightedAlign = ref(-1)
 
 const pickedColumns = ref(false)
-const pickedMaxContent = ref(false)
-const playing = ref([false,false])
 
 const pickColAmount = (amount: number) => {
     if (amount < 2) return
@@ -45,21 +44,79 @@ const pickColAmount = (amount: number) => {
 
 const colWidths = ref<boolean[]>([])
 
+const formColWidths = () => {
+    let cols = colText.value.match(/^[ef]+/g)
+    if (!cols) {
+        colWidths.value = []
+        return
+    }
+
+    colWidths.value = cols[0].split("").map(x => x == 'e')
+        
+
+    let align = ['l', 'c', 'r', 'j'].indexOf(colText.value.slice(colWidths.value.length))
+    if (align == -1) align = 4
+    colAlign.value = ['left', 'center', 'right', 'justify', ''][align]
+    
+}
+
+const keyboardCreate = () => {
+    let amount = colWidths.value.length
+    if (amount <= 1 || amount > 10) return
+
+    return create(amount, colWidths.value, colAlign.value)
+}
+
+const colInput = ref<HTMLInputElement>()
+const colText = ref("")
+const colAlign = ref('')
+onMounted(() => {
+    if (colInput.value)
+        colInput.value.focus()
+})
+
 </script>
 
 <template>
     <section class="p-2 w-80 text-white">
         
         <div v-if="!pickedColumns">
-            <h2 v-if="highlightedCreateColumns == -1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols') }}</h2>
+            <h2 v-if="colText.length" class="mb-2 text-2xl opacity-40">Náhled sloupců</h2>
+            <h2 v-else-if="highlightedCreateColumns == -1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols') }}</h2>
             <h2 v-else-if="highlightedCreateColumns <= 1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols1') }}</h2>
             <h2 v-else class="mb-2 text-2xl opacity-80">{{ $t('reviews.colsSelected', highlightedCreateColumns) }}</h2>
             <button class="w-full overflow-clip rounded-lg bg-lof-100">
-                <div class="p-2">
-                    <ColumnPreview @click="pickColAmount(highlightedCreateColumns)" v-model="highlightedCreateColumns" :playing="false" :col-amount="8" />
+                <div class="flex p-2" :class="{'justify-center': colAlign == 'center', 'justify-end': colAlign == 'right'}">
+                    <ColumnPreview v-if="colWidths.length > 1" :shrink="colAlign != '' && colAlign != 'justify' && !colWidths.includes(false)" :spread="colAlign == 'justify'" :col-widths="colWidths" :clickable="false" :col-amount="colWidths.length" />
+                    <span v-else-if="colWidths.length == 1" class="my-1 w-full text-center">{{ $t('reviews.cHelp5') }}</span>
+                    <ColumnPreview v-else @click="pickColAmount(highlightedCreateColumns)" v-model="highlightedCreateColumns" :playing="false" :col-amount="8" />
                 </div>
             </button>
-            <p class="relative py-2 pl-8 mt-4 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
+
+            <!-- Help/Input -->
+            <form v-if="keyActivated" @submit.prevent="keyboardCreate()">
+                <hr class="my-4 rounded-md border-2 border-white border-opacity-10">
+                <input ref="colInput" v-model="colText" @input="formColWidths" @invalid.prevent="" pattern="^[ef]+[lcrj]$" autocomplete="off" maxlength="9" class="px-2 py-1 w-full bg-black bg-opacity-40 rounded-md invalid:bg-red-500 invalid:bg-opacity-40" :placeholder="$t('reviews.cHelp6')+'...'" type="text">
+                <p @click.stop.capture="" class="relative py-2 pr-2 pl-8 mt-4 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
+                    <img src="@/images/info.svg" class="absolute top-2 left-2 w-4 opacity-50" alt="">
+                    {{ $t('reviews.cKHelp1') }}
+                    <hr :class="{'border-lof-400': colWidths.length < 2, 'opacity-20': colWidths.length >= 2}">
+                    <p class="mt-2 mb-2"><kbd>e</kbd> - {{ $t('reviews.cKHelp2') }}</p>
+                    <p class="mb-4"><kbd>f</kbd> - {{ $t('reviews.cKHelp3') }}<br></p>
+                    {{ $t('reviews.cKHelp4') }}
+                    <div class="mt-4">{{$t('reviews.ckhelp5')}}<br>
+                        <hr :class="{'border-lof-400': colWidths.length >= 2 && colAlign == '', 'opacity-20': colWidths.length < 2 || colAlign != ''}">
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <span><kbd>l</kbd> - {{ $t('reviews.left') }}</span>
+                            <span><kbd>c</kbd> - {{ $t('reviews.center') }}</span>
+                            <span><kbd>r</kbd> - {{ $t('reviews.right') }}</span>
+                            <span><kbd>j</kbd> - {{ $t('reviews.justify') }}</span>
+                        </div>
+                    </div>
+
+                </p>
+            </form>
+            <p v-else @click.stop.capture="" class="relative py-2 pl-8 mt-4 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
                 <img src="@/images/info.svg" class="absolute top-2 left-2 w-4 opacity-50" alt="">
                 {{ $t('reviews.colHelp') }}
             </p>

@@ -425,6 +425,9 @@ const doFormatting = (ind: number) => {
 const containerSettingsShown = ref([0, -1, -1])
 provide("containerSettingsShown", containerSettingsShown)
 
+const keyActivated = ref(false)
+provide("keyActivated", keyActivated)
+
 function doAction(action: FormattingAction | EditorAction, param: any, holdingShift = false) {
 	switch (action) {
 		case 'add':
@@ -444,6 +447,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             break;
 		case 'columnCreate':
 			let columnButton = document.querySelector("#columnCreatorButton") as HTMLButtonElement
+            keyActivated.value = true
             if (columnButton)
                 columnButton.click()
             break;

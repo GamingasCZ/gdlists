@@ -807,7 +807,15 @@
     "cHelp1": "Columns either <b>fill available space</b>...",
     "cHelp2": "...or they <b>size to their content</b>.",
     "cHelp3": "Useful, if you'd like to place text side-by-side.",
-    "cHelp4": "Useful, if you'd like to surround text with images."
+    "cHelp4": "Useful, if you'd like to surround text with images.",
+    "colError": "Columns can only be created using 'e' and 'f' characters, plus an alignment character!",
+    "cKHelp1": "Add columns using 'e' and 'f' keys.",
+    "cKHelp3": "Fill Width Column",
+    "cKHelp2": "Expanding Column",
+    "cKHelp4": "For every letter, a column is created.",
+    "ckhelp5": "End the sequence by aligning columns:",
+    "cHelp5": "Create more than one column.",
+    "cHelp6": "Type out the columns"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -808,7 +808,15 @@
     "cHelp1": "Sloupce mouhou buď <b>vyplnit prostor</b>...",
     "cHelp2": "...nebo se mohou šířkou <b>přizpůsobit obsahu</b>.",
     "cHelp3": "To se hodí, chceš-li položit text vedle sebe.",
-    "cHelp4": "To se hodí, chceš-li obložit text obrázkem."
+    "cHelp4": "To se hodí, chceš-li obložit text obrázkem.",
+    "colError": "Sloupce můžeš tvořit jen znaky 'e' a 'f', a zarovnávacím znakem!",
+    "cKHelp1": "Sloupce se přidávají klávesami 'e' a 'f'.",
+    "cKHelp2": "Sloupec široký podle obsahu",
+    "cKHelp3": "Vyplňující sloupec",
+    "cKHelp4": "Každé písmeno odpovídá jednomu sloupci.",
+    "ckhelp5": "Zakonči sekvenci zarovnáním sloupců:",
+    "cHelp5": "Vytvoř víc než jeden sloupec.",
+    "cHelp6": "Zadej strukturu sloupců"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

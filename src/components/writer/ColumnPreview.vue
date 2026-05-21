@@ -9,6 +9,7 @@ const props = defineProps<{
     spread?: boolean
     shrink?: boolean
     clickable: boolean
+    colWidths?: boolean[]
 }>()
 
 const emit = defineEmits<{
@@ -42,7 +43,10 @@ const playPreview = () => {
 if (props.playing)
     playPreview()
 
-const maxAmount = ref(Array(props.colAmount).fill(false))
+const maxAmount = ref<boolean[]>(props.colWidths ?? Array(props.colAmount).fill(false))
+watch(() => props.colWidths, () => {
+    maxAmount.value = props.colWidths!
+})
 
 const click = (ind: number) => {
     if (props.clickable) {
