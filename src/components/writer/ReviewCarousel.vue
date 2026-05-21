@@ -179,7 +179,7 @@ function doUpload(files: DragEvent, toEnd: boolean) {
 
 
         <div v-if="editable" class="absolute inset-0 z-10 w-full">
-            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" gizmo-pos="vertical" :min-size="size[0]" :max-size="size[1]" :editable="editable"></Resizer>
+            <Resizer @resize="modHeight" :style="{height: '100%', width: '100%'}" :curr-height="settings.height" gizmo-pos="slider" :min-size="size[0]" :max-size="size[1]" :editable="editable"></Resizer>
         </div>
 
         <section class="flex gap-2 items-center" :style="{'justify-content': flexNames[align]}" :class="{'flex-wrap': settings.overflow, 'w-max': !settings.overflow}">

@@ -319,7 +319,7 @@ const containers: Containers = {
                 type: [ControlType.Hidden],
                 required: true,
                 default: 192,
-                valueRange: [48, 960]
+                valueRange: [48, 720]
             },
             {
                 key: "pick",
