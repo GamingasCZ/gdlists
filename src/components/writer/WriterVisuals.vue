@@ -172,7 +172,7 @@ onMounted(() => {
                 <div class="p-2 bg-black bg-opacity-40 rounded-md">
                     <span class="mr-4 w-10 text-3xl opacity-20 pointer-events-none">Aa</span>
                     <span>{{ $t('reviews.font') }}</span>
-                    <p class="my-2 text-center">{{ FONTS[postData.font][0] }}</p>
+                    <p class="my-2 text-center">{{ FONTS?.[postData?.font]?.[0] }}</p>
                     <div class="flex gap-2 items-center">
                         <button v-for="font in FONTS" @click="postData.font = font[1]" :class="{'border-2 border-lof-400': postData.font == font[1]}" class="h-10 bg-black bg-opacity-40 rounded-full button fontButtonsHover aspect-square" :value="font[1]">
                             <img :src="`${base}/fontPreviews/${font[1]}.svg`" class="mx-auto w-6" alt="">

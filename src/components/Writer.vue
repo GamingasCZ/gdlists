@@ -291,6 +291,16 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
                 .splice(selectedContainer.value[0] + +(!above), 0, containerData)
             selectedContainer.value[0] += 1
         }
+
+        let ele = selectedContainer.value[0]
+        if (key == 'twoColumns') {
+            nextTick(() => {
+                let elements = document.querySelectorAll("#reviewText > div")
+                let e = elements[ele].querySelector("article")
+                setTimeout(() =>
+                    e.click(), 10); // this will end in disaster one day
+            })
+        }
     }
     // Adding into a nested container
     else {

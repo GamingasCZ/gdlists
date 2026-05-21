@@ -96,7 +96,7 @@ onMounted(() => {
             <!-- Help/Input -->
             <form v-if="keyActivated" @submit.prevent="keyboardCreate()">
                 <hr class="my-4 rounded-md border-2 border-white border-opacity-10">
-                <input ref="colInput" v-model="colText" @input="formColWidths" @invalid.prevent="" pattern="^[ef]+[lcrj]$" autocomplete="off" maxlength="9" class="px-2 py-1 w-full bg-black bg-opacity-40 rounded-md invalid:bg-red-500 invalid:bg-opacity-40" :placeholder="$t('reviews.cHelp6')+'...'" type="text">
+                <input ref="colInput" @keyup.esc="emit('close')" v-model="colText" @input="formColWidths" @invalid.prevent="" pattern="^[ef]+[lcrj]$" autocomplete="off" maxlength="9" class="px-2 py-1 w-full bg-black bg-opacity-40 rounded-md invalid:bg-red-500 invalid:bg-opacity-40" :placeholder="$t('reviews.cHelp6')+'...'" type="text">
                 <p @click.stop.capture="" class="relative py-2 pr-2 pl-8 mt-4 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
                     <img src="@/images/info.svg" class="absolute top-2 left-2 w-4 opacity-50" alt="">
                     {{ $t('reviews.cKHelp1') }}
