@@ -232,7 +232,7 @@ const open = (to: string) => {
       <section class="flex relative gap-5 items-center px-2 min-h-full">
         <!-- Notification button -->
         <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
-          <div v-html="NotifIcon" class="w-6" style="--col: var(--brightGreen)" />
+          <div v-html="NotifIcon" class="w-[22px]" style="--col: var(--brightGreen)" />
           <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-[18px] rounded-full border-4 border-black brightness-150 saturate-150 bg-lof-400 aspect-square"></div>
         </button>
 

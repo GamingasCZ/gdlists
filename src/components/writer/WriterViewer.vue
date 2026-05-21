@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PostData } from '@/interfaces';
+import type { PostData, ReviewContainer } from '@/interfaces';
 import { DataContainerAction } from '@/interfaces';
 import CONTAINERS from './containers';
 import { flexNames, pickFont } from '@/Reviews';
@@ -17,6 +17,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "callCommand", data: {command: DataContainerAction, data: any[] }): void
+    (e: "forcedUpdate", newData: ReviewContainer)
 }>()
 
 const selectedContainer = inject<any[]>("selectedContainer", [-1, 0])
@@ -112,7 +113,7 @@ const doUpdate = ref(Date.now())
             @settings-button="buttonState = [$event, selectedContainer[0]]"
             @add-paragraph="emit('callCommand', {command: DataContainerAction.MakeParagraph, data: [index]})"
             @text-modified="container.data = $event"
-            @force-update="doUpdate = Date.now()"
+            @force-update="doUpdate = Date.now(); emit('forcedUpdate', container)"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type]?.styling ?? '']"
