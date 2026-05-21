@@ -217,6 +217,13 @@ const containerLastTextChange = ref(0)
 const setLastChange = () => containerLastTextChange.value = Date.now()
 provide("lastTextChange", setLastChange)
 
+/** Function that creates a container object, 
+ * 
+ * @param key {string} Container to be added
+ * @param addTo {[count, widths, align]} Parameter for creating (count) columns, with an array of (width) types and (align)
+ * @param returnOnly {boolean} The container doesn't get added into the review.
+ * @param above {boolean} Container gets added above the currently selected element, instead of below.
+ */
 const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly = false, above = false) => {
     if (!previewMode.value) return
 
@@ -265,12 +272,12 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
 
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
-        if (key == "twoColumns") {
+        if (key == "twoColumns" && addTo) {
             containerData.extraComponents = addTo[0]-2
             
             containerData.settings.components = []
             for (let i = 0; i < addTo[0]; i++)
-                containerData.settings.components.push([addTo[1]])
+                containerData.settings.components.push([addTo[1][i]])
 
             containerData.align = addTo[2]
         }

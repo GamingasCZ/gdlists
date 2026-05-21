@@ -846,7 +846,14 @@
     "notRated": "Level není ohodnocený!",
     "vibrant": "Výrazná",
     "toBeginn": "Na začátek",
-    "toEnd": "Na konec"
+    "toEnd": "Na konec",
+    "colHelp": "Sloupce umožňují pokládat prvky vedle sebe.",
+    "colWTitle": "Výběr šířky sloupců",
+    "colClick": "Klikni na sloupec pro přepnutí rozšiřování.",
+    "cHelp1": "Sloupce mouhou buď <b>vyplnit prostor</b>...",
+    "cHelp2": "...nebo se mohou šířkou <b>přizpůsobit obsahu</b>.",
+    "cHelp3": "To se hodí, chceš-li položit text vedle sebe.",
+    "cHelp4": "To se hodí, chceš-li obložit text obrázkem."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

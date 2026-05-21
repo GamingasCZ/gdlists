@@ -846,7 +846,14 @@
     "notRated": "Level not rated!",
     "vibrant": "Bold",
     "toEnd": "Add to End",
-    "toBeginn": "Add to Beginning"
+    "toBeginn": "Add to Beginning",
+    "colHelp": "Columns let elements sit side-by-side.",
+    "colWTitle": "Set Column Widths",
+    "colClick": "Tap columns to set the way they expand.",
+    "cHelp1": "Columns either <b>fill available space</b>...",
+    "cHelp2": "...or they <b>size to their content</b>.",
+    "cHelp3": "Useful, if you'd like to place text side-by-side.",
+    "cHelp4": "Useful, if you'd like to surround text with images."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
