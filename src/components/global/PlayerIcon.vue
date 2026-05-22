@@ -49,14 +49,12 @@ function placeImage(image:HTMLImageElement | null) {
     const data = imageData.data;
 
     if (imageIndex != 3 && SETTINGS.value.iconQuality > 0) { // Extras are always white
-        let newCol;
+        let col = colors[[props.glow | 0, props.col1, props.col2][imageIndex]].map(x => x/255)
         // Recoloring icon parts
         for (let j = 0; j < data.length; j += 4) {
-            if (j % 4 == 0) // Optimization
-                newCol = chroma.blend(chroma.rgb(data[j], data[j+1], data[j+2]), colors[[props.glow | 0, props.col1, props.col2][imageIndex]], 'multiply').rgb()
-            data[j] = newCol[0];
-            data[j + 1] = newCol[1]
-            data[j + 2] = newCol[2]
+            data[j] *= col[0]
+            data[j + 1] *= col[1]
+            data[j + 2] *= col[2]
         }
     }
 
