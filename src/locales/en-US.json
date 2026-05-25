@@ -457,7 +457,9 @@
     "gradient2": "Gradient",
     "revert": "Revert",
     "discard": "Discard",
-    "oldest": "Oldest"
+    "oldest": "Oldest",
+    "copy": "Copy",
+    "backToGDL": "Back to GD Lists"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -531,7 +533,9 @@
     "navDClick": "Double-clicking Navigation",
     "browsing": "Browsing",
     "creating": "Creating",
-    "navDClickHelp": "Double-clicking \"Lists\" or \"Reviews\" in the navbar can trigger a selected action."
+    "navDClickHelp": "Double-clicking \"Lists\" or \"Reviews\" in the navbar can trigger a selected action.",
+    "notifHelp": "If enabled, the site will periodically check for new notifications.",
+    "notif": "Auto-check Notifications"
   },
   "help": {
     "Lists": "Lists",

@@ -19,6 +19,7 @@ import LevelIcon from "@/svgs/LevelIcon.vue";
 import Review from "@/svgs/Review.vue";
 import Saved from "@/svgs/Saved.vue";
 import NotifIcon from "../images/notifs.svg?raw"
+import { URIHideUIOptions } from "@/interfaces";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -124,6 +125,13 @@ const modifyNavbarScroll = () => {
     window.onscroll = null
 
 }
+onMounted(() => {
+  let url = new URL(window.location.href).searchParams
+  if (url.has("ui")) {
+    if (parseInt(url.get("ui"), 2) & URIHideUIOptions.Navigation)
+      navHidden.value = true
+  }
+})
 
 router.afterEach(newP => {
   navbarHidden.value = false
@@ -177,6 +185,7 @@ const open = (to: string) => {
   <nav
     role="navigation"
     id="navbar"
+    v-show="!navHidden"
     :class="{'-translate-y-14': navbarHidden}"
     class="box-border sticky top-0 z-30 transition-transform bg-greenGradient">
 

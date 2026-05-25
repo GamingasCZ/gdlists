@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import axios, { type AxiosResponse } from "axios";
-import type {
-  ListFetchResponse,
-  ListPreview,
-SavedCollab,
-CollabData,
-LevelList,
-ReviewList,
-ReviewContainer,
-ViewedPinArray,
+import {
+  type ListFetchResponse,
+  type ListPreview,
+  type SavedCollab,
+type CollabData,
+type LevelList,
+type ReviewList,
+type ReviewContainer,
+type ViewedPinArray,
+URIHideUIOptions,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, provide, computed, defineAsyncComponent } from "vue";
-import { generateHash, modifyListBG, selectedLevels } from "@/Editor";
+import { ref, onMounted, watch, provide, computed, defineAsyncComponent, inject, type Ref } from "vue";
+import { generateHash, modifyListBG, navHidden, selectedLevels } from "@/Editor";
 import PickerPopup from "./global/PickerPopup.vue";
 import router, { timeLastRouteChange } from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
@@ -57,7 +58,16 @@ watch(timeLastRouteChange, () => {
 
 let lastScroll = 0
 const postContent = ref<HTMLDivElement>()
+const ShareUIHide = ref<URIHideUIOptions>(URIHideUIOptions.None)
 const loadContent = async () => {
+  let uri = new URL(window.location.href)
+  if (uri.searchParams.has("ui")) {
+    let opts = uri.searchParams.get("ui")!.split("").map(x => +x)
+    if (!opts.includes(NaN) && opts.length == URIHideUIOptions.Length) {
+      ShareUIHide.value = parseInt(uri.searchParams.get("ui")!, 2)
+    }
+  }
+
   let randomData = null
   let forceType: number | boolean = +props.isReview
   if (props.randomList) {
@@ -87,7 +97,8 @@ const loadContent = async () => {
     })
   }
 
-  if (window.location.search.includes("comment")) commentsShowing.value = true
+  if (uri.searchParams.has("comment"))
+    commentsShowing.value = true
 }
 
 onMounted(loadContent)
@@ -559,6 +570,12 @@ const sendChangedComponents = () => {
     summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.failUpdate'), 'error')
   })
 }
+
+const cancelHidingOptions = () => {
+  ShareUIHide.value = URIHideUIOptions.None
+  navHidden.value = false
+}
+
 </script>
 
 <template> 
@@ -616,10 +633,17 @@ const sendChangedComponents = () => {
     />
   </DialogVue>
 
+  <Teleport defer to="#backToGDLSection">
+    <button v-if="ShareUIHide > 0" @click="cancelHidingOptions" id="contactButton" class="p-1 underline rounded-md opacity-80">
+      {{ $t('other.backToGDL') }}
+    </button>
+  </Teleport>
+
   <section class="mt-12 text-white">
     <header>
       <ListDescription
         v-if="LIST_DATA.name != undefined && !nonexistentList"
+        v-show="!(ShareUIHide & URIHideUIOptions.Description)"
         class="mb-8"
         v-bind="LIST_DATA"
         @do-list-action="listActions"
@@ -633,6 +657,7 @@ const sendChangedComponents = () => {
         :ratings="LIST_RATING"
         :hidden="LIST_DATA.hidden"
         :color="LIST_COL"
+        :comms-hidden="ShareUIHide & URIHideUIOptions.Comments"
       />
     </header>
 
@@ -732,11 +757,11 @@ const sendChangedComponents = () => {
         @replay-list="guesses = []; cardGuessing = 0"
       />
 
-      <ShareSection v-if="LIST_DATA.name != undefined && !nonexistentList && !commentsShowing" :share-text="getURL()" :review="isReview" />
+      <ShareSection v-if="LIST_DATA.name != undefined && !(ShareUIHide & URIHideUIOptions.Sharing) && !nonexistentList && !commentsShowing" :share-text="getURL()" :review="isReview" />
 
       <CommentSection
         v-if="LIST_DATA?.id != undefined"
-        v-show="commentsShowing || scrolledToEnd"
+        v-show="!(ShareUIHide & URIHideUIOptions.Comments) && (commentsShowing || scrolledToEnd)"
         @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
         :list-i-d="LIST_DATA?.id"

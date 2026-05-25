@@ -438,7 +438,9 @@
     "color": "Barva",
     "gradient2": "Přechod",
     "revert": "Zahodit změny",
-    "discard": "Zahodit"
+    "discard": "Zahodit",
+    "copy": "Kopírovat",
+    "backToGDL": "Zpět do GD Seznamů"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -507,7 +509,12 @@
     "contents": "Obsah",
     "changes": "Změnil jsi obsah příspěvku.",
     "postUpdated": "Příspěvek aktualizován!",
-    "failUpdate": "Nepovedlo se aktualizovat příspěvek!"
+    "failUpdate": "Nepovedlo se aktualizovat příspěvek!",
+    "hUi1": "Skrýt {0}",
+    "hUi2": "navigaci",
+    "hUi3": "popisek",
+    "hUi4": "sdílení",
+    "hUi5": "komentáře"
   },
   "level": {
     "levelID": "ID levelu",

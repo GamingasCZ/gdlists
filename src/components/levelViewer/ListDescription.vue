@@ -27,6 +27,7 @@ const props = defineProps<{
   ratings: [number, number, number]
   hidden: string
   color: number[]
+  commsHidden: number
 }>();
 
 const emit = defineEmits<{
@@ -215,7 +216,7 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
 
         <!-- Comments button -->
         <div class="md:ml-9">
-          <button class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
+          <button v-show="!commsHidden" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
             <div class="mr-2 w-6 h-6" :class="{'[&_.glasa]:fill-black': openDialogs[0]}" :style="{
               fill: openDialogs[0] ? 'white' : 'none'
               }" v-html="CommentsIcon">

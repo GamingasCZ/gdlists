@@ -349,3 +349,5 @@ export const generateHash = (string: string) => {
   }
   return hash;
 };
+
+export const navHidden = ref(false)

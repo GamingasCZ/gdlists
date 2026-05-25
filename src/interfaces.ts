@@ -11,6 +11,14 @@ export interface ListPreview {
   isPinned?: boolean
 }
 
+export enum URIHideUIOptions {
+    None = 0,
+    Length = 4,
+    Navigation = 0b1000,
+    Description = 0b0100,
+    Sharing = 0b0010,
+    Comments = 0b0001
+}
 
 /**
  * Return data after picking a post from the review post showcase container
