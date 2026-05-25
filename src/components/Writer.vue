@@ -837,10 +837,14 @@ enum UploadTypes {
 const uploadPasteImage = (e: ClipboardEvent | DragEvent, extra?: any) => {
     if (!dropAllowed) return
 
-    e.preventDefault()
-
     if (document.querySelector(".modalDialog"))
         return
+
+    let active = document.activeElement
+    if (active !== document.body && active?.closest("#reviewText") == null)
+        return
+
+    e.preventDefault()
 
     let fileCount
     if (e.type == "drop")
