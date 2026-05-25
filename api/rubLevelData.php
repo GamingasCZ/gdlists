@@ -90,7 +90,7 @@ switch (array_keys($_GET)[1]) {
         $playerID = explode(":", $accountIDReq)[3];
 
         list($returnData, $pages) = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5, "str"=>$playerID], []), true);
-        for ($i=0; $i < ceil($pages[0]/$pages[2]) - 1; $i++) { 
+        for ($i=1; $i < ceil($pages[0]/$pages[2]) - 1; $i++) { 
             $returnData = array_merge($returnData, parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5,"page"=>($i), "str"=>$playerID], []), false));
         }
         break;
