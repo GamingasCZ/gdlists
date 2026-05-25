@@ -29,7 +29,7 @@ const findByIDList = (ids: string) => {
 
   page.value = 1
   axios
-    .get(import.meta.env.VITE_API + "/rubLevelData.php?idList&list=" + (idArray?.join(",")) + ',')
+    .get(import.meta.env.VITE_API + `/rubLevelData.php?&list=${(idArray?.join(",")) + ','}&idList`)
     .then(async (response: AxiosResponse) => {
       LEVELS.value = response.data;
       for (let i = 0; i < LEVELS.value.length; i++) {
@@ -47,7 +47,7 @@ const findIngame = (searchUser:boolean, listID: string) => {
   importError.value = 3
   page.value = 1
   let reqUrl: string
-  if (!searchUser) reqUrl = `/rubLevelData.php?list&id=` + listID
+  if (!searchUser) reqUrl = `/rubLevelData.php?id=${listID}&list`
   else reqUrl = `/rubLevelData.php?username=${listID}&userAll` 
 
   axios
