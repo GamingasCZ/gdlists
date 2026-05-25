@@ -145,15 +145,15 @@ function refreshBrowser() {
     if (props?.onlineType) fetchQuery[props.onlineType] = 1
   }
   else {
-    fetchURI = `${import.meta.env.VITE_API}/getComments.php`
+    fetchURI = `${import.meta.env.VITE_API}/comments.php`
     fetchQuery = {
       page: PAGE.value,
       startID: 999999,
-      path: "/getComments.php",
       fetchAmount: LISTS_ON_PAGE,
     }
-    if (props.commentID.type == "list") fetchQuery.listID = props.commentID.objectID
-    else fetchQuery.reviewID = props.commentID.objectID
+    fetchQuery.postID = props.commentID.objectID
+    fetchQuery.postType = +(props.commentID.type == "review")
+
     if (props.highlight) fetchQuery.highlight = props.highlight
   }
 
@@ -312,8 +312,16 @@ watch(props, (newBrowser) => {
 
 onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
 
+const modifyData = (newData: [any[], ListCreatorInfo[], any[]]) => {
+  LISTS.value = newData[0]
+  USERS.value = newData[1]
+  maxPages.value = newData[2]["maxPage"]
+  PAGE.value = newData[2]["page"]
+}
+
 defineExpose({
-  doRefresh
+  doRefresh,
+  modifyData
 })
 
 </script>

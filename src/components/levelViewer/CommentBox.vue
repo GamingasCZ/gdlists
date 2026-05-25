@@ -10,11 +10,16 @@ import LoginButton from '../global/LoginButton.vue'
 import { useI18n } from 'vue-i18n'
 import { SETTINGS } from '@/siteSettings'
 import ProfilePicture from '../global/ProfilePicture.vue'
+import type { CommentFetchResponse } from '@/interfaces'
 
 const props = defineProps<{
     listID: string
     hidden: string
     isReview: boolean
+}>()
+
+const emit = defineEmits<{
+    (e: "newData", data: [CommentFetchResponse[], any[], any]): void
 }>()
 
 const MIN_COMMENT_LEN = 10
@@ -135,18 +140,15 @@ function sendComment(com = "") {
         comment: parsedComment,
         comType: "0",
         comColor: parsedColor.value,
-    }
-    if (props.isReview) postData.reviewID = props.listID
-    else {
-        postData.listID = props.listID
-        postData.hidden = props.hidden
+        postID: props.listID,
+        postType: +props.isReview
     }
 
-    axios.post(import.meta.env.VITE_API+"/sendComment.php", postData).then((res: AxiosResponse) => {
+    axios.post(import.meta.env.VITE_API+"/comments.php", postData).then((res: AxiosResponse) => {
         // Comment sent!
-        if (res.data == 6) {
-            (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
+        if (res.data.length > 2) {
             placeholderActive.value = true
+            emit('newData', res.data)
         }
         else {
             document.getElementById("commentBox").innerHTML = oldComment

@@ -19,7 +19,7 @@ const emit = defineEmits<{
     (e: "updateCommentAmount", count: number): void
 }>()
 
-const browser = ref<HTMLDivElement>()
+const browser = ref<HTMLDivElement & {modifyData: ((data: any) => void), doRefresh: (() => void)}>()
 
 const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
@@ -38,7 +38,7 @@ watch(router.currentRoute, () => {
 
 <template>
     <main class="mt-10">
-        <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
+        <CommentBox @new-data="emit('updateCommentAmount', $event[2]['commAmount']); browser?.modifyData($event);" :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
         
         <!-- Comments disabled info -->
         <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">
