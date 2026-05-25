@@ -5,7 +5,6 @@ import chroma from 'chroma-js'
 import ColorPicker from '../global/ColorPicker.vue'
 import Editor from 'pure-editor'
 import axios, { type AxiosResponse } from 'axios'
-import cookier from 'cookier'
 import LoginButton from '../global/LoginButton.vue'
 import { useI18n } from 'vue-i18n'
 import { SETTINGS } from '@/siteSettings'
@@ -83,10 +82,13 @@ onMounted(() => {
             },
         },
         submit: {
+            will: keyboardSend,
             done: sendComment,
         },
     })
 })
+
+const keyboardSend = (e: KeyboardEvent) => e.ctrlKey && e.key == "Enter"
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
@@ -126,7 +128,10 @@ const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.va
 
 const commentError = ref(false)
 function sendComment(com = "") {
-    if (parseComment(COMMENT_BOX.value.getValues()).length < MIN_COMMENT_LEN) return
+    let comm;
+    if (com.length) comm = com 
+    else comm = COMMENT_BOX.value.getValues()
+    if (parseComment(comm).length < MIN_COMMENT_LEN) return
 
     let oldComment = document.getElementById("commentBox")?.innerHTML
     let comment: Array<string | {id: string}>
