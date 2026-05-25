@@ -823,7 +823,8 @@
     "cKHelp4": "Každé písmeno odpovídá jednomu sloupci.",
     "ckhelp5": "Zakonči sekvenci zarovnáním sloupců:",
     "cHelp5": "Vytvoř víc než jeden sloupec.",
-    "cHelp6": "Zadej strukturu sloupců"
+    "cHelp6": "Zadej strukturu sloupců",
+    "invertSel": "Invertovat výběr"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

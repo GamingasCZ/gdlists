@@ -819,7 +819,8 @@
     "cKHelp4": "For every letter, a column is created.",
     "ckhelp5": "End the sequence by aligning columns:",
     "cHelp5": "Create more than one column.",
-    "cHelp6": "Type out the columns"
+    "cHelp6": "Type out the columns",
+    "invertSel": "Invert Selection"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
