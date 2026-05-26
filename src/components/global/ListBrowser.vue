@@ -331,20 +331,22 @@ defineExpose({
     <main>
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
-          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
-            :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
+          <RouterLink :to="`/browse/${onlineSubtype}`" class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+            :class="{ 'bg-lof-300': onlineType == '' }">
             {{ $t('other.newest') }}
-          </button>
-          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+          </RouterLink>
+          <RouterLink :to="`/browse/${onlineSubtype}?type=user`" 
+            class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             v-show="onlineSubtype != 'levels'"
-            :class="{ 'bg-lof-300': onlineType == 'user' }" @click="emit('switchBrowser', 'user')">
+            :class="{ 'bg-lof-300': onlineType == 'user' }">
             {{ $t('other.myLists', [onlineSubtype == 'lists' ? $t('other.lists') : $t('other.reviews')]) }}
-          </button>
-          <button class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
+          </RouterLink>
+          <RouterLink :to="`/browse/${onlineSubtype}?type=hidden`"
+            class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
             v-show="onlineSubtype != 'levels'"
-            :class="{ 'bg-lof-300': onlineType == 'hidden' }" @click="emit('switchBrowser', 'hidden')">
+            :class="{ 'bg-lof-300': onlineType == 'hidden' }">
             <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
-          </button>
+          </RouterLink>
         </header>
         <header class="flex gap-3 justify-center mb-3" v-if="!onlineBrowser">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"

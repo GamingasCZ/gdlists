@@ -57,11 +57,11 @@ const editLink = (key: string, isEdit: number | undefined) => {
                 <Browse class="h-7 fill-lof-400" />
                 {{ $t('navbar.lists') }}
             </RouterLink>
-            <RouterLink :to="`/browse/${path}?type=user`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+            <RouterLink :to="`/browse/${path2}?type=user`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
                 <img src="@/images/view.svg" class="h-6" alt="">
                 {{ $t('other.mine') }}
             </RouterLink>
-            <RouterLink :to="`/browse/${path}?type=hidden`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+            <RouterLink :to="`/browse/${path2}?type=hidden`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
                 <img src="@/images/hidden.svg" class="h-6" alt="">
                 {{ $t('other.private') }}
             </RouterLink>

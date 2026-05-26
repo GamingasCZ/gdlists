@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 import ListPreview from "./global/ListPreview.vue";
 import ReviewPreview from "./global/ReviewPreview.vue";
 import { useI18n } from "vue-i18n";
@@ -27,7 +27,7 @@ const CONTENTS = ['lists', 'reviews', 'levels', 'saved']
 
 const defaultContentType = () => {
   if (hasLocalStorage()) { 
-    let route = CONTENTS.indexOf(useRouter().currentRoute.value.path.split("/")[2])
+    let route = CONTENTS.indexOf(useRoute().path.split("/")[2])
     if (lastTab[0] != null) return lastTab[0]
     else return route == -1 ? 0 : route
   } else return 0
@@ -35,10 +35,11 @@ const defaultContentType = () => {
 
 
 const contentType = ref<Content>(defaultContentType())
-const userLists = ref<"" | "user" | "hidden" | "collabs">(lastTab[1] ?? props.onlineType);
-const modifyContentType = (to: Content) => {
+type TypeUserLists = ("" | "user" | "hidden" | "collabs") 
+const userLists = ref<TypeUserLists>(lastTab[1] ?? props.onlineType);
+const modifyContentType = (to: Content, type: TypeUserLists = '') => {
   contentType.value = to
-  userLists.value = ''
+  userLists.value = type
   if (hasLocalStorage()) {
     modLastTab([contentType.value, userLists.value])
   }
@@ -49,17 +50,11 @@ const switchUserLists = (user: string) => {
   modLastTab([contentType.value, userLists.value])
 }
 
-watch(router.currentRoute, (path) => {
-  let pName = path.path.match(/\w+$/)?.[0]
-  if (pName == null)
-    modifyContentType(0)
-  else {
-    let ind = CONTENTS.indexOf(pName)
-    if (ind == -1)
-      modifyContentType(0)
-    else
-      modifyContentType(ind as Content)
-  }
+onBeforeRouteUpdate(route => {
+  console.log(route.path)
+  let path = route.path.split("/")?.[2] || 'lists'
+  let query = route.query?.type ?? ""
+  modifyContentType(CONTENTS.indexOf(path), query)
 })
 
 </script>
