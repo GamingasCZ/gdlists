@@ -207,7 +207,7 @@ const open = (to: string) => {
       
 
         <!-- Lists -->
-        <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
           :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists, 'opacity-20': editorDropdownOpen != 1 && editorDropdownOpen != 0}"
         >
             <List class="w-4 h-4" />{{ $t('help.Lists') }}
@@ -218,7 +218,7 @@ const open = (to: string) => {
         </button>
 
         <!-- Reviews -->
-        <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex relative flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
           :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews, 'opacity-20': editorDropdownOpen != 2 && editorDropdownOpen != 0}"
         >
             <Review class="w-4 h-4" />{{ $t('reviews.review') }}
@@ -246,7 +246,7 @@ const open = (to: string) => {
       <section class="flex relative gap-5 items-center px-2 min-h-full">
         <!-- Notification button -->
         <button @click="showNotifs" v-if="isLoggedIn" class="relative mx-3 button max-sm:hidden">
-          <div v-html="NotifIcon" class="w-[22px]" :class="{'fill-transparent': !notifDropdownShown && currentUnread > 0, 'fill-white': notifDropdownShown || currentUnread == 0, '!fill-lof-400': scrollerInd == NAV_SEL.Notifications}" />
+          <div v-html="NotifIcon" class="w-[22px] stroke-2 stroke-white" :class="{'fill-transparent': !notifDropdownShown && currentUnread > 0, 'fill-white': notifDropdownShown || currentUnread == 0, '!fill-lof-400 !stroke-lof-400': scrollerInd == NAV_SEL.Notifications}" />
           <div v-if="currentUnread > 0" class="absolute bottom-1 -right-1.5 px-0.5 h-5 text-base font-black leading-none text-black rounded-md border-2 border-black contrast-20 bg-lof-400">{{ currentUnread }}</div>
         </button>
         <!-- Logged out -->

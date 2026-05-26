@@ -118,7 +118,8 @@
     "dragReorder": "Drag to Reorder",
     "addYTLink": "Paste the YouTube link",
     "cancelHL": "Remove Highlight",
-    "browsePreview": "Browser Preview"
+    "browsePreview": "Browser Preview",
+    "ratings": "Likes"
   },
   "homepage": {
     "clear": "Clear",

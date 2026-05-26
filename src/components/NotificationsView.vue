@@ -24,7 +24,7 @@ if (!allNotifs.value.length)
     fetchNotifications(true)
 
 const sorting = ref(0)
-const type = ref(0)
+const type = ref(-1)
 const base = import.meta.env.BASE_URL
 
 const selectedNotifs = ref([])
@@ -58,7 +58,7 @@ const selectedNotifs = ref([])
         </header>
         <main class="flex overflow-y-auto flex-col gap-2">
             <div v-if="!allNotifs.length" class="flex flex-col items-center mx-auto opacity-20">
-                <div v-html="NotifsIcon" class="w-32 fill-transparent"></div>
+                <div v-html="NotifsIcon" class="w-32 stroke-white fill-transparent"></div>
                 <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
             </div>
             <NotificationCard :key="notif.id" @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
