@@ -10,6 +10,7 @@ type ReviewList,
 type ReviewContainer,
 type ViewedPinArray,
 URIHideUIOptions,
+type PostData,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -169,7 +170,7 @@ async function loadList(loadedData: LevelList | null) {
 
 const REVIEW_CONTENTS = ref<[number, string][]>([])
 const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchResponse]>([])
-var originalListData: ListFetchResponse
+var originalListData: PostData
 provide("batchEmbeds", embedsContent)
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
@@ -189,6 +190,7 @@ async function loadReview(loadedData: ReviewList | null) {
 
     let indicies = [0,0,0,0,0,0]
     LIST_DATA.value = res[0];
+    originalListData = structuredClone(res[0].data)
     originalHashes = {}
     let cont = Array.from(res[0].data.containers)
     let hashes = cont.map(x => generateHash(JSON.stringify(x)))
@@ -546,6 +548,17 @@ const doModifyPost = (changedContainer: ReviewContainer) => {
   
   postMadeChanges.value = Object.keys(postChanges).length > 0
 }
+
+const revertPostEdits = () => {
+  console.log(originalListData)
+  LIST_DATA.value.data.containers = []
+  nextTick(() => {
+    LIST_DATA.value.data.containers = structuredClone(originalListData.containers)
+  })
+  postMadeChanges.value = false
+  postChanges = {}
+}
+
 // todo add discarding
 const updatingPost = ref(false)
 const sendChangedComponents = () => {
@@ -690,7 +703,7 @@ const cancelHidingOptions = () => {
     </section>
 
     <Transition name="fade">
-      <UpdateConfirmer v-if="postMadeChanges" @confirm="sendChangedComponents" :updating="updatingPost" :owns-post="true" />
+      <UpdateConfirmer v-if="postMadeChanges" @confirm="sendChangedComponents" @discard="revertPostEdits" :updating="updatingPost" :owns-post="true" />
     </Transition>
 
     <main v-if="!nonexistentList && !listErrorLoading" class="flex flex-col gap-4">
