@@ -1,12 +1,9 @@
 {
-    "i18n-ally.localesPaths": [
-        "src/locales"
-    ],
-    "i18n-ally.keystyle": "nested",
-    "i18n-ally.extract.autoDetect": true,
+    "i18n-ally-next.keystyle": "nested",
+    "i18n-ally-next.extract.autoDetect": true,
     "window.density.editorTabHeight": "compact",
-    "i18n-ally.sourceLanguage": "cs-CZ",
-    "i18n-ally.keysInUse": [
+    "i18n-ally-next.sourceLanguage": "cs-CZ",
+    "i18n-ally-next.keysInUse": [
         "editor.tags[0]",
         "editor.tags[1]",
         "editor.tags[2]",
@@ -64,5 +61,8 @@
     },
     "extensions.autoCheckUpdates": false,
     "extensions.autoUpdate": false,
-    "search.followSymlinks": false
+    "search.followSymlinks": false,
+    "i18n-ally-next.localesPaths": [
+        "src/locales"
+    ]
 }
