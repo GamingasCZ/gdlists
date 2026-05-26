@@ -79,7 +79,9 @@
     "navDClick": "Dvojklik v navbaru",
     "browsing": "Procházení",
     "creating": "Vytváření",
-    "navDClickHelp": "Dvojklik na \"Seznamy\" a \"Recenze\" v navigaci rychle zvolí vybranou možnost."
+    "navDClickHelp": "Dvojklik na \"Seznamy\" a \"Recenze\" v navigaci rychle zvolí vybranou možnost.",
+    "notif": "Sledovat notifikace",
+    "notifHelp": "Je-li zapnuto, stránka bude samovolně kontrolovat, zda nepřišly nové notifikace."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

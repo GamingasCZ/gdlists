@@ -26,6 +26,7 @@ export const SETTINGS = ref({
   disableBGs: false,
   notifBehaviour: 0,
   navDClick: 0,
+  checkNotifs: true
 });
 
 watch(SETTINGS, () => {

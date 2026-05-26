@@ -77,6 +77,21 @@ if (hasLocalStorage()) {
             control="cbox"
         >
         </Option>
+        <Option
+            v-model="SETTINGS.checkNotifs"
+            :name="$t('settingsMenu.notif')"
+            :desc="$t('settingsMenu.notifHelp')"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-model="SETTINGS.notifBehaviour"
+            :name="$t('settingsMenu.notifBehave')"
+            :desc="$t('settingsMenu.notifBeHelp')"
+            control="dropdown"
+            :control-options="[[$t('navbar.dropdown'), 0], [$t('navbar.fullscreen'), 1]]"
+        >
+        </Option>
         <SectionDivider :text="$t('editor.editor')" />
         <Option
             v-model="SETTINGS.compactToolbar"
@@ -105,14 +120,6 @@ if (hasLocalStorage()) {
             :name="$t('settingsMenu.saveThumbs')"
             :desc="$t('settingsMenu.saveThumbsHelp')"
             control="cbox"
-        >
-        </Option>
-        <Option
-            v-model="SETTINGS.notifBehaviour"
-            :name="$t('settingsMenu.notifBehave')"
-            :desc="$t('settingsMenu.notifBeHelp')"
-            control="dropdown"
-            :control-options="[[$t('navbar.dropdown'), 0], [$t('navbar.fullscreen'), 1]]"
         >
         </Option>
         <SectionDivider :text="$t('settingsMenu.access')" />

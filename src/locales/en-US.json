@@ -238,7 +238,12 @@
     "highlighted": "Highlighted Comment",
     "changes": "You've made changes to the post.",
     "failUpdate": "Failed to update the post!",
-    "postUpdated": "Post Updated!"
+    "postUpdated": "Post Updated!",
+    "hUi1": "Hide {0}",
+    "hUi2": "navigation",
+    "hUi3": "description",
+    "hUi4": "sharing",
+    "hUi5": "comments"
   },
   "navbar": {
     "lists": "Browse",

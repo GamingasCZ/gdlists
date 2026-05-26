@@ -1,7 +1,7 @@
 <?php
 
-require("globals.php");
-require("notifications.php");
+require_once("globals.php");
+require_once("notifications.php");
 header('Content-type: application/json'); // Return as JSON
 
 /* Return codes:
@@ -16,8 +16,8 @@ header('Content-type: application/json'); // Return as JSON
     8 - Comments disabled
 */
 function sendComment($mysqli, $text, $userID, $postID, $postType, $color) {
-    $column = isset($postType) ? "reviews" : "lists";
-    $type = isset($postType) ? "reviewID" : "listID";
+    $column = $postType ? "reviews" : "lists";
+    $type = $postType ? "reviewID" : "listID";
     $time = new DateTime();
 
     // Checking comment and user string length
@@ -40,7 +40,7 @@ function sendComment($mysqli, $text, $userID, $postID, $postType, $color) {
 
     $id = doRequest($mysqli, "SELECT LAST_INSERT_ID() as 'id'", [], "");
 
-    createNotification($mysqli, $userID, $list["uid"], 1, intval(isset($DATA["reviewID"]))+1, $fuckupData[2], $id["id"]);
+    createNotification($mysqli, $userID, $list["uid"], 1, $postType+1, $postID, $id["id"]);
     return ["id" => $id["id"]];
 }
 
@@ -101,7 +101,7 @@ function getComments($mysqli, $postID, $postType, $page = 0, $startID = 999999, 
         $template = sprintf("SELECT DISTINCT username,discord_id,pfp_cutout
                         FROM users
                         LEFT JOIN profiles ON users.discord_id = profiles.uid
-                        WHERE discord_id IN (%s)
+                        WHERE discord_id IN %s
                         ", $in[0]);
 
         $users = doRequest($mysqli, $template, $uniqueUsers, $in[1], true);

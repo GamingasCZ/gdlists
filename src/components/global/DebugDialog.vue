@@ -5,7 +5,7 @@ import { ref } from 'vue';
 
 
 const from = ref()
-const to = ref()
+const to = ref("336373548526469120")
 const post = ref()
 const type = ref()
 
@@ -19,7 +19,7 @@ axios.get(import.meta.env.VITE_API + "/debug.php", {params: {posts: 1}}).then(re
 })
 
 const postNotif = (postType: number) => {
-    axios.post(import.meta.env.VITE_API + "/debug.php", [from.value, to.value, Math.floor(post.value / 10), posts.value[post.value].id, type.value]).then(res => {
+    axios.post(import.meta.env.VITE_API + "/debug.php", [from.value, "336373548526469120", Math.floor(post.value / 10), posts.value[post.value].id, type.value]).then(res => {
         
     })
 }
@@ -33,10 +33,10 @@ const postNotif = (postType: number) => {
         <select v-model="from" id="d_from">
             <option v-for="user in users" :value="user?.discord_id">{{ user?.username }} - {{ user?.discord_id }}</option>
         </select>
-        <label for="d_to">to</label>
-        <select v-model="to" id="d_to">
+        <!-- <label for="d_to">to</label> -->
+        <!-- <select v-model="to" id="d_to">
             <option v-for="user in users" :value="user?.discord_id">{{ user?.username }} - {{ user?.discord_id }}</option>
-        </select>
+        </select> -->
         <label for="d_post">post</label>
         <select v-model="post" id="d_post">
             <optgroup label="list">
@@ -51,6 +51,6 @@ const postNotif = (postType: number) => {
             <option :value="1">rate</option>
             <option :value="2">other</option>
         </select>
-        <button class="bg-lof-400" @click="postNotif">POST</button>
+        <button class="m-2 text-2xl text-black rounded-md bg-lof-400" @click="postNotif">POST</button>
     </Dialog>
 </template>

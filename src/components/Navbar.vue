@@ -3,7 +3,7 @@ import { RouterLink } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
-import { currentCutout, currentUID, isOnline, profileCutouts, currentUnread, navHidden } from "@/Editor";
+import { currentCutout, currentUID, isOnline, profileCutouts, navHidden } from "@/Editor";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress, timeLastRouteChange } from "@/router";
@@ -20,6 +20,7 @@ import Review from "@/svgs/Review.vue";
 import Saved from "@/svgs/Saved.vue";
 import NotifIcon from "../images/notifs.svg?raw"
 import { URIHideUIOptions } from "@/interfaces";
+import { currentUnread } from "./global/notifications.js";
 
 const props = defineProps<{
   isLoggedIn: boolean;
@@ -89,6 +90,7 @@ enum NAV_SEL {
   Reviews,
   Levels,
   Saved,
+  Notifications,
   None
 }
 const scrollerInd = ref(NAV_SEL.Home)
@@ -160,6 +162,9 @@ router.afterEach(newP => {
 
     case 'savedBrowser':
       scrollerInd.value = NAV_SEL.Saved; break;
+
+    case 'notifications':
+      scrollerInd.value = NAV_SEL.Notifications; break;
       
     default:
       scrollerInd.value = NAV_SEL.None; break;
@@ -240,11 +245,10 @@ const open = (to: string) => {
 
       <section class="flex relative gap-5 items-center px-2 min-h-full">
         <!-- Notification button -->
-        <button @click="showNotifs" v-if="isLoggedIn" class="button max-sm:hidden">
-          <div v-html="NotifIcon" class="w-[22px]" style="--col: var(--brightGreen)" />
-          <div v-if="currentUnread > 0" class="absolute -right-1 -bottom-1 w-[18px] rounded-full border-4 border-black brightness-150 saturate-150 bg-lof-400 aspect-square"></div>
+        <button @click="showNotifs" v-if="isLoggedIn" class="relative mx-3 button max-sm:hidden">
+          <div v-html="NotifIcon" class="w-[22px]" :class="{'fill-transparent': !notifDropdownShown && currentUnread > 0, 'fill-white': notifDropdownShown || currentUnread == 0, '!fill-lof-400': scrollerInd == NAV_SEL.Notifications}" />
+          <div v-if="currentUnread > 0" class="absolute bottom-1 -right-1.5 px-0.5 h-5 text-base font-black leading-none text-black rounded-md border-2 border-black contrast-20 bg-lof-400">{{ currentUnread }}</div>
         </button>
-
         <!-- Logged out -->
         <img v-if="isLoggedIn == false && localStorg" @click="showSettings" src="../images/user.svg" alt=""
           class="px-1 w-10 h-10 button" />
@@ -294,5 +298,3 @@ const open = (to: string) => {
     </div>
   </nav>
 </template>
-
-<style></style>

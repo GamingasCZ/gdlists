@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import axios from 'axios';
 import NotificationCard from './global/NotificationCard.vue';
-import { notificationCache } from '@/Editor';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
-import type { NotificationContent } from '@/interfaces';
 import NotifsIcon from "../images/notifs.svg?raw"
+import { allNotifs, notificationCache, postNames, removeNotifs } from './global/notifications';
 
 document.title = `${i18n.global.t('navbar.notifs')} | ${i18n.global.t('other.websiteName')}`
 
-const allNotifs = ref<NotificationContent[]>([])
-const postNames = ref<NotificationContent[]>([])
 const currentUnread = ref(0)
 function fetchNotifications(force = false) {
     if (!force && notificationCache.value) {
@@ -34,8 +31,15 @@ const selectedNotifs = ref([])
 
 <template>
     <section class="text-white mx-auto max-w-[60rem] p-2">
-        <header class="mb-4">
-            <h1 class="text-3xl">{{ $t('navbar.notifs') }}</h1>
+        <header class="my-4">
+            <div class="flex gap-2 items-center">
+                <h1 class="text-3xl">{{ $t('navbar.notifs') }}</h1>
+                <hr class="h-0.5 bg-white opacity-20 grow">
+                <button @click="removeNotifs()" class="flex p-2 bg-black bg-opacity-40 rounded-md button">
+                    <img src="@/images/trash.svg" class="mr-2 w-5" alt="">
+                    {{ $t('homepage.clear') }}
+                </button>
+            </div>
             <section class="grid grid-cols-2 grid-rows-2 grid-flow-col justify-items-center">
                 <h4>{{ $t('other.type') }}</h4>
                 <div class="border-collapse">
@@ -53,7 +57,7 @@ const selectedNotifs = ref([])
         </header>
         <main class="flex overflow-y-auto flex-col gap-2">
             <div v-if="!allNotifs.length" class="flex flex-col items-center mx-auto opacity-20">
-                <div v-html="NotifsIcon" class="w-32"></div>
+                <div v-html="NotifsIcon" class="w-32 fill-transparent"></div>
                 <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
             </div>
             <NotificationCard @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />

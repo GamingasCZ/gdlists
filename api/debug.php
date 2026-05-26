@@ -1,7 +1,7 @@
 <?php
 
-require_once("globals.php");
 require_once("notifications.php");
+require_once("comments.php");
 
 header("Content-Type: application/json"); // Return as JSON
 
@@ -15,17 +15,34 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 
 $DATA = json_decode(file_get_contents("php://input"));
+enum D: int {
+    case From = 0;
+    case To = 1;
+    case PostType = 2;
+    case PostID = 3;
+    case NotifType = 4;
+}
 switch ($_SERVER["REQUEST_METHOD"]) {
     case 'GET':
         if (isset($_GET["users"])) {
-            die(json_encode(doRequest($mysqli, "SELECT username,discord_id from users LIMIT 20", [], "", true)));
+            die(json_encode(doRequest($mysqli, "SELECT username,discord_id from users WHERE username LIKE 'test%' LIMIT 20", [], "", true)));
         }
         if (isset($_GET["posts"])) {
             die(json_encode(doRequest($mysqli, "SELECT name,id from lists UNION SELECT name,id from reviews LIMIT 20", [], "", true)));
         }
         break;
     case 'POST':
-        createNotification($mysqli, $DATA[0], $DATA[1], $DATA[4]+1, $DATA[2]+1, $DATA[3]);
+        if ($DATA[D::NotifType->value] == 0)
+            sendComment($mysqli, "Dobrá recenza", $DATA[D::From->value], $DATA[D::PostID->value], $DATA[D::PostType->value], "#FF0000");
+        else {
+            createNotification(
+                $mysqli,
+                $DATA[D::From->value],
+                $DATA[D::To->value],
+                $DATA[D::NotifType->value]+1,
+                $DATA[D::PostType->value]+1,
+                $DATA[D::PostID->value]);
+        }
     
     default:
         # code...

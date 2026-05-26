@@ -185,6 +185,7 @@ export const prettyDate = (datePassed: number) => {
 }
 
 export function parseElapsed(secs: number) {
+  secs = Math.max(0, secs)
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
   else if (secs < 3600) return Math.round(secs / 60) + "m"; //m - minutes
   else if (secs < 86400) return Math.round(secs / 3600) + "h"; //h - hours
@@ -300,8 +301,6 @@ export const shortenYTLink = (link: string, disableParams = false) => {
 export const lastPFPchange = ref(Date.now())
 export const currentCutout = ref(0)
 export const currentUID = ref("0")
-export const currentUnread = ref(0)
-export const notificationCache = ref([[],[]])
 
 export const profileCutouts = [
   'circle()',
