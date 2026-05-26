@@ -78,3 +78,5 @@ export const homepageCache: {[section: string]: null | ListFetchResponse} = {
   uploads: null,
   recent: null
 }
+
+export const randomIsReview = ref(false)

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { ref } from "vue";
 import THEMES from "./themes";
-import { SETTINGS } from "./siteSettings";
+import { randomIsReview, SETTINGS } from "./siteSettings";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,6 +71,7 @@ const router = createRouter({
           review = 0
         else if (route.query?.review === null)
           review = 1
+        randomIsReview.value = review.toString()+Date.now().toString()
         return { randomList: true, isReview: review}
       },
       component: () => import("@/components/ListView.vue"),

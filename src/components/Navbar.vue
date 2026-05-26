@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { nextTick, onMounted, provide, ref, watch } from "vue";
 import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { currentCutout, currentUID, isOnline, profileCutouts, navHidden } from "@/Editor";
 import { useI18n } from "vue-i18n";
-import { hasLocalStorage, SETTINGS } from "@/siteSettings";
+import { hasLocalStorage, randomIsReview, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress, timeLastRouteChange } from "@/router";
 import ProfilePicture from "./global/ProfilePicture.vue";
 import NotificationDropdown from "./global/NotificationDropdown.vue";
@@ -165,6 +165,9 @@ router.afterEach(newP => {
 
     case 'notifications':
       scrollerInd.value = NAV_SEL.Notifications; break;
+
+    case 'random':
+      break;
       
     default:
       scrollerInd.value = NAV_SEL.None; break;
@@ -172,6 +175,12 @@ router.afterEach(newP => {
   }
 })
 modifyNavbarScroll()
+
+watch(randomIsReview, () => {
+  console.log(router.currentRoute.value)
+  if (router.currentRoute.value?.name == "random")
+    scrollerInd.value = randomIsReview.value[0] == "1" ? NAV_SEL.Reviews : NAV_SEL.Lists;
+})
 
 const navbarHidden = ref(false)
 watch(() => SETTINGS.value.scrollNavbar, modifyNavbarScroll)
