@@ -9,7 +9,7 @@ export const unreadAmount = ref<number>([])
 export const currentUnread = ref(0)
 export const notificationCache = ref([[],[]])
 
-export function fetchNotifications(force = false) {
+export function fetchNotifications(force = false, sorting = 0, type = -1) {
     if (!force && notificationCache.value[0].length) {
         allNotifs.value = notificationCache.value[0]
         allNotifs.value.forEach(x => x.unread = false)
@@ -18,7 +18,13 @@ export function fetchNotifications(force = false) {
         return
     }
 
-    axios.get(import.meta.env.VITE_API + "/notifications.php", {params: {all: 1}}).then(res => {
+    let params = {all: 1}
+    if (sorting > 0)
+        params.sort = sorting
+    if (type > -1)
+        params.type = type
+
+    axios.get(import.meta.env.VITE_API + "/notifications.php", {params: params}).then(res => {
         if (res == null) unreadAmount.value = 0
         allNotifs.value = res.data[0]
         postNames.value = res.data[1]
