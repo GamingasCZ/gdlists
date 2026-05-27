@@ -24,11 +24,9 @@ type Content = 0 | 1 | 2 | 3
 const CONTENTS = ['lists', 'reviews', 'levels', 'saved']
 
 const defaultContentType = () => {
-  if (hasLocalStorage()) { 
-    let route = CONTENTS.indexOf(useRoute().path.split("/")[2])
-    if (lastTab[0] != null) return lastTab[0]
-    else return route == -1 ? 0 : route
-  } else return 0
+  let route = CONTENTS.indexOf(useRoute().path.split("/")[2])
+  if (lastTab[0] != null) return lastTab[0]
+  else return route == -1 ? 0 : route
 }
 
 
