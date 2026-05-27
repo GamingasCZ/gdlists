@@ -98,6 +98,7 @@ const scrollerInd = ref(NAV_SEL.Home)
 const localStorg = ref(hasLocalStorage())
 const editorDropdownOpen = ref(0)
 const openEditorDropdown = (e: MouseEvent, ind: number) => {
+  if (!localStorg.value) return
   if (editorDropdownOpen.value) return
   e.preventDefault()
   editorDropdownOpen.value = ind
@@ -203,7 +204,7 @@ const open = (to: string) => {
     :class="{'-translate-y-14': navbarHidden}"
     class="box-border sticky top-0 z-30 transition-transform bg-greenGradient">
 
-    <div class="max-w-[100rem] flex relative justify-between mx-auto">
+    <div class="max-w-[90rem] flex relative justify-between mx-auto">
       <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
         :class="{ 'opacity-50 pointer-events-none': !isOnline }">
         
@@ -216,7 +217,7 @@ const open = (to: string) => {
       
 
         <!-- Lists -->
-        <button @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        <component :is="localStorg ? 'button' : 'RouterLink'" to="/browse/lists" @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
           :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists, 'opacity-20': editorDropdownOpen != 1 && editorDropdownOpen != 0}"
         >
             <List class="w-4 h-4" />{{ $t('help.Lists') }}
@@ -224,10 +225,10 @@ const open = (to: string) => {
             <Transition name="fadeSlide">
               <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 1" :is-review="false" />
             </Transition>
-        </button>
+        </component :is="localStorg ? 'button' : 'RouterLink'">
 
         <!-- Reviews -->
-        <button @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        <component :is="localStorg ? 'button' : 'RouterLink'" to="/browse/reviews" @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
           :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews, 'opacity-20': editorDropdownOpen != 2 && editorDropdownOpen != 0}"
         >
             <Review class="w-4 h-4" />{{ $t('reviews.review') }}
@@ -235,7 +236,7 @@ const open = (to: string) => {
             <Transition name="fadeSlide">
               <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 2" :is-review="true" />
             </Transition>
-        </button>
+        </component :is="localStorg ? 'button' : 'RouterLink'">
 
         <!-- Levels -->
         <RouterLink
@@ -247,6 +248,7 @@ const open = (to: string) => {
         <!-- Saved -->
         <RouterLink
           to="/saved"
+          v-if="localStorg"
           :class="{'fill-lof-400 stroke-lof-400 text-lof-400': scrollerInd == NAV_SEL.Saved, 'fill-white stroke-white': scrollerInd != NAV_SEL.Saved, 'opacity-20': editorDropdownOpen != 0}"
           class="flex flex-col gap-2 items-center px-4 transition-opacity max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
         ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>

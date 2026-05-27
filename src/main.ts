@@ -4,7 +4,7 @@ import router from "./router";
 import { i18n, setLanguage } from "./locales"
 
 import "./assets/input.css";
-import { SETTINGS } from "./siteSettings";
+import { hasLocalStorage, SETTINGS } from "./siteSettings";
 import { changeTheme, checkSeasonalTheme, saveTheme } from "./themes";
 import { listenForNotifications } from "./components/global/notifications";
 

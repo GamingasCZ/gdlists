@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ReviewDraft } from '@/interfaces';
+import { hasLocalStorage } from '@/siteSettings';
 import Browse from '@/svgs/Browse.vue';
 import Create from '@/svgs/Create.vue';
 import { onMounted, ref } from 'vue';
@@ -24,6 +25,8 @@ interface navDraft {
 const hasDrafts = ref(false)
 const draftsList = ref<navDraft[]>([])
 onMounted(() => {
+    if (!hasLocalStorage()) return
+
     let drafts = JSON.parse(localStorage.getItem(path+"Drafts")!)
     if (drafts) {
         let draftKeys = Object.keys(drafts).sort((a,b) => (+b) - (+a))

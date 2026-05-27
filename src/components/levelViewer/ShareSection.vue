@@ -47,7 +47,7 @@ const extShareOpts = ref(Array(extShareOptions.length).fill(false))
     <span class="text-3xl font-bold" >{{ $t('other.share') }}</span>
     <hr class="w-full border opacity-20">
     <div class="flex gap-4 items-center min-w-max">
-        <div class="flex gap-2 items-center rounded-md hover:bg-black hover:bg-opacity-40">
+        <div class="flex gap-2 items-center p-1 rounded-md hover:bg-black hover:bg-opacity-40">
             <button @click="copyLink" class="button" :title="$t('other.copyLink')"><img class="h-6" src="@/images/link.svg" alt=""></button>
             <button @click="shareExtrasOpen = true" ref="shareExtras" class="px-1 button" :title="$t('other.copyLink')"><img class="w-2 rotate-180" src="@/images/genericRate.svg" alt=""></button>
             <Dropdown v-if="shareExtrasOpen" :button="shareExtras" @close="shareExtrasOpen = false">

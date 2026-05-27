@@ -29,12 +29,6 @@ export const SETTINGS = ref({
   checkNotifs: true
 });
 
-watch(SETTINGS, () => {
-  if (localStorage) {
-    localStorage.setItem("settings", JSON.stringify(SETTINGS.value))
-  }
-}, {deep: true})
-
 export const hasLocalStorage = () => {
   try {
     return localStorage != null
@@ -44,8 +38,16 @@ export const hasLocalStorage = () => {
   }
 }
 
+const hasLS = hasLocalStorage()
+
+watch(SETTINGS, () => {
+  if (hasLS) {
+    localStorage.setItem("settings", JSON.stringify(SETTINGS.value))
+  }
+}, {deep: true})
+
 export var viewedPopups: viewedPopup;
-if (hasLocalStorage()) {
+if (hasLS) {
   localStorage.getItem("settings") ??
     localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
 

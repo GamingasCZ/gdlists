@@ -38,7 +38,7 @@ const feeds = ref()
 
 const getFeeds = async () => {
   let defFeed = DEF_FEED_RESULT()
-  if (localStorg) {
+  if (localStorg.value) {
     let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem("viewedPinArray")!)
 
     if (vpArr !== null) {
@@ -91,7 +91,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
   <header :style="{backgroundImage: headerBG}" class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-center">
     <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
       <div class="relative">
-        <input type="text" name="q"
+        <input type="text" name="q" size="25"
           class="px-1 py-2 pr-10 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
           :placeholder="$t('homepage.searchLists')" />
 
@@ -99,7 +99,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
           <img src="../images/dice.svg" alt="" class="w-6" />
         </RouterLink>
 
-        <div class="flex gap-2 pt-2 w-full text-base text-white">
+        <div v-if="localStorg" class="flex gap-2 pt-2 w-full text-base text-white">
           <RouterLink to="/make/list" class="flex gap-4 items-center px-2 py-3 w-full min-w-max rounded-md grow button bg-lof-300 selectOutline">
             <img src="../images/browseMobHeader.svg" alt="" class="w-6" />{{
               $t("homepage.createList")

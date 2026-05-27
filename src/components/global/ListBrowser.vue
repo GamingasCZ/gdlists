@@ -294,7 +294,11 @@ onMounted(() => {
     pagesArray.value = listScroll();
   }
 
-  let gotoPage = JSON.parse(sessionStorage.getItem("pageLast")!) ?? [0, 'unknown']
+  let gotoPage;
+  if (hasLocalStorage())
+    gotoPage = JSON.parse(sessionStorage.getItem("pageLast")!) ?? [0, 'unknown']
+  else
+    gotoPage = [0, 'unknown']
   if (props.onlineType == gotoPage[1]) PAGE.value = gotoPage[0]
 
   refreshBrowser();
@@ -310,7 +314,10 @@ watch(props, (newBrowser) => {
   refreshBrowser();
 });
 
-onUnmounted(() => sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType])))
+onUnmounted(() => {
+  if (hasLocalStorage())
+    sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType]))
+})
 
 const modifyData = (newData: [any[], ListCreatorInfo[], any[]]) => {
   LISTS.value = newData[0]

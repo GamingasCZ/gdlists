@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref } from "vue";
 import ListBrowser from "./global/ListBrowser.vue";
 import { onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
-import ListPreview from "./global/ListPreview.vue";
 import ReviewPreview from "./global/ReviewPreview.vue";
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage } from "@/siteSettings";
@@ -11,7 +10,6 @@ import TemporaryList from "./global/TemporaryList.vue";
 import { Teleport } from "vue";
 import { lastTab, modLastTab, selectedLevels } from "@/Editor";
 import SavedCollab from "./editor/SavedCollab.vue";
-import router from "@/router";
 
 document.title = `${useI18n().t('listViewer.communityLists')} | ${useI18n().t('other.websiteName')}`
 
@@ -51,7 +49,6 @@ const switchUserLists = (user: string) => {
 }
 
 onBeforeRouteUpdate(route => {
-  console.log(route.path)
   let path = route.path.split("/")?.[2] || 'lists'
   let query = route.query?.type ?? ""
   modifyContentType(CONTENTS.indexOf(path), query)

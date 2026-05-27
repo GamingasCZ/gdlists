@@ -5,6 +5,7 @@ import CommentBox from './CommentBox.vue';
 import CommentPreview from './CommentPreview.vue';
 import { isOnline } from '@/Editor';
 import router from '@/router';
+import { hasLocalStorage } from '@/siteSettings.js';
 
 const props = defineProps<{
     listID: number
@@ -25,6 +26,7 @@ const amount = ref(props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
 const highlight = ref(window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null)
 const showingOnce = ref(false)
+const hasLG = hasLocalStorage()
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
 watch(props, () => { // only refresh comments once
     if (!showingOnce.value) showingOnce.value = true
@@ -38,7 +40,7 @@ watch(router.currentRoute, () => {
 
 <template>
     <main class="mt-10">
-        <CommentBox @new-data="emit('updateCommentAmount', $event[2]['commAmount']); browser?.modifyData($event);" :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled"/>
+        <CommentBox @new-data="emit('updateCommentAmount', $event[2]['commAmount']); browser?.modifyData($event);" :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled && hasLG"/>
         
         <!-- Comments disabled info -->
         <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">

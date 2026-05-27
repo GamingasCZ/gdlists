@@ -14,7 +14,7 @@ const confirm = () => {
     localStorage.setItem("popupsViewed", JSON.stringify(viewedPopups))
 }
 
-const shown = ref(!viewedPopups.pickedStyling)
+const shown = ref(!viewedPopups?.pickedStyling)
 const base = import.meta.env.BASE_URL
 
 </script>
