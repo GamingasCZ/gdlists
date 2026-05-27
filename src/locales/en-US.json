@@ -244,7 +244,11 @@
     "hUi2": "navigation",
     "hUi3": "description",
     "hUi4": "sharing",
-    "hUi5": "comments"
+    "hUi5": "comments",
+    "changes2": "Changes are only saved locally.",
+    "changes3": "Cannot save without cookies enabled!",
+    "changes4": "You've made changes to this post before.",
+    "viewingNew": "You're viewing the original post."
   },
   "navbar": {
     "lists": "Browse",
@@ -465,7 +469,8 @@
     "discard": "Discard",
     "oldest": "Oldest",
     "copy": "Copy",
-    "backToGDL": "Back to GD Lists"
+    "backToGDL": "Back to GD Lists",
+    "hide": "Hide"
   },
   "settingsMenu": {
     "asOff": "Off",

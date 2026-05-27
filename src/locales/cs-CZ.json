@@ -443,7 +443,8 @@
     "revert": "Zahodit změny",
     "discard": "Zahodit",
     "copy": "Kopírovat",
-    "backToGDL": "Zpět do GD Seznamů"
+    "backToGDL": "Zpět do GD Seznamů",
+    "hide": "Skrýt"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -517,7 +518,11 @@
     "hUi2": "navigaci",
     "hUi3": "popisek",
     "hUi4": "sdílení",
-    "hUi5": "komentáře"
+    "hUi5": "komentáře",
+    "changes2": "Změny se uloží jen lokálně.",
+    "changes3": "Nelze ukládat bez zapnutých cookies!",
+    "changes4": "V tomto příspěvku jsi v minulosti provedl úpravy.",
+    "viewingNew": "Takto vypadá původní příspěvek."
   },
   "level": {
     "levelID": "ID levelu",

@@ -15,8 +15,8 @@ type PostData,
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, provide, computed, defineAsyncComponent, inject, type Ref } from "vue";
-import { generateHash, modifyListBG, navHidden, selectedLevels } from "@/Editor";
+import { ref, onMounted, watch, provide, computed, defineAsyncComponent, inject, type Ref, toRaw } from "vue";
+import { currentUID, generateHash, modifyListBG, navHidden, selectedLevels } from "@/Editor";
 import PickerPopup from "./global/PickerPopup.vue";
 import router, { timeLastRouteChange } from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
@@ -29,7 +29,7 @@ import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import TagViewerPopup from "./levelViewer/TagViewerPopup.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
-import CONTAINERS from "./writer/containers";
+import CONTAINERS, { type Container } from "./writer/containers";
 import { dialog } from "./ui/sizes";
 import { getEmbeds, parseReviewContainers, resetIndentation } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
@@ -168,8 +168,20 @@ async function loadList(loadedData: LevelList | null) {
   }
 }
 
+const createPostHashes = (post: any) => {
+  let originalHashes = {}
+  let cont = Array.from(post.data.containers)
+  let hashes = cont.map(x => generateHash(JSON.stringify(x)))
+  let ids = cont.map(x => x.id)
+  for (let i = 0; i < hashes.length; i++)
+    originalHashes[ids[i]] = hashes[i]
+
+  return originalHashes
+}
+
 const REVIEW_CONTENTS = ref<[number, string][]>([])
 const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchResponse]>([])
+const showChecklistsUsed = ref(false)
 var originalListData: PostData
 provide("batchEmbeds", embedsContent)
 async function loadReview(loadedData: ReviewList | null) {
@@ -191,7 +203,9 @@ async function loadReview(loadedData: ReviewList | null) {
     let indicies = [0,0,0,0,0,0]
     LIST_DATA.value = res[0];
     originalListData = structuredClone(res[0].data)
-    originalHashes = {}
+    showChecklistsUsed.value = loadLocalChecklists(LIST_DATA.value.data)
+
+    originalHashes = createPostHashes(res[0])
     let cont = Array.from(res[0].data.containers)
     let hashes = cont.map(x => generateHash(JSON.stringify(x)))
     let ids = cont.map(x => x.id)
@@ -529,7 +543,9 @@ provide("fullscreenLevel", levelImageFullscreen)
 
 const postMadeChanges = ref(false)
 var originalHashes: {[containerID: number]: number} = {}
-var postChanges: {[containerID: string]: ReviewContainer} = {}
+type SavedChecklist = {[containerID: number]: ReviewContainer}
+type AllSavedChecklists = {[postID: string]: SavedChecklist}
+var postChanges: SavedChecklist = {}
 const UpdateConfirmer = defineAsyncComponent(() =>
   import("./levelViewer/ListViewPushChanges.vue")
 )
@@ -547,21 +563,89 @@ const doModifyPost = (changedContainer: ReviewContainer) => {
     postChanges[changedContainer.id] = changedContainer
   
   postMadeChanges.value = Object.keys(postChanges).length > 0
+  showChecklistsUsed.value = false
+}
+
+const loadLocalChecklists = (currentListData: PostData) => {
+  if (!hasLocalStorage()) return false
+
+  let savedChecklists: AllSavedChecklists | null = JSON.parse(localStorage.getItem("localChecklists")!)
+  if (savedChecklists == null) return false
+
+  let thisListChecklists = savedChecklists?.[LIST_DATA.value.id]
+  if (!thisListChecklists) return false
+
+  for (const key in thisListChecklists) {
+    currentListData.containers.forEach(c => {
+      if (c.id == key)
+        c.data = thisListChecklists[key].data
+    })
+  }
+  return true
+}
+
+const saveLocalChecklists = () => {
+  if (!hasLocalStorage()) return
+
+  let savedChecklists = JSON.parse(localStorage.getItem("localChecklists")!) ?? {}
+  if (savedChecklists == null) return
+
+  originalHashes = createPostHashes(LIST_DATA.value)
+  savedChecklists[LIST_DATA.value.id] = postChanges
+  localStorage.setItem("localChecklists", JSON.stringify(savedChecklists))
+  postChanges = {}
+  postMadeChanges.value = false
 }
 
 const revertPostEdits = () => {
-  console.log(originalListData)
   LIST_DATA.value.data.containers = []
   nextTick(() => {
     LIST_DATA.value.data.containers = structuredClone(originalListData.containers)
   })
+  originalHashes = createPostHashes(LIST_DATA.value)
   postMadeChanges.value = false
   postChanges = {}
+}
+
+var tempListData: Container[]
+const hideChecklistEditsViewing = ref(false)
+const hideLocalChecklistEdits = () => {
+  if (hideChecklistEditsViewing.value) {
+    LIST_DATA.value.data.containers = []
+    nextTick(() => {
+      LIST_DATA.value.data.containers = JSON.parse(JSON.stringify(tempListData))
+      tempListData = undefined
+    }).then(() =>
+        nextTick(() => document.querySelectorAll("#reviewText input[type='checkbox']").forEach(x => x.disabled = false))
+    )
+  }
+  else {
+    tempListData = JSON.parse(JSON.stringify(LIST_DATA.value.data.containers))
+    LIST_DATA.value.data.containers = []
+    nextTick(() =>
+      LIST_DATA.value.data.containers = JSON.parse(JSON.stringify(originalListData.containers))
+    ).then(() =>
+        nextTick(() => document.querySelectorAll("#reviewText input[type='checkbox']").forEach(x => x.disabled = true))
+    )
+  }
+  hideChecklistEditsViewing.value = !hideChecklistEditsViewing.value
+}
+
+const discardLocalChecklistEdits = () => {
+  revertPostEdits()
+  showChecklistsUsed.value = false
+  let savedChecklists = JSON.parse(localStorage.getItem("localChecklists")!)
+  delete savedChecklists[LIST_DATA.value.id]
+  localStorage.setItem("localChecklists", JSON.stringify(savedChecklists))
 }
 
 // todo add discarding
 const updatingPost = ref(false)
 const sendChangedComponents = () => {
+  // save locally on post you don't own
+  if (LIST_DATA.value.uid != currentUID.value) return saveLocalChecklists()
+  if (hideChecklistEditsViewing.value) return
+
   updatingPost.value = true
   axios.post(import.meta.env.VITE_API+"/updateList.php", {
     type: props.isReview ? 'review' : 'list',
@@ -572,6 +656,8 @@ const sendChangedComponents = () => {
   }).then(res => {
     postChanges = {}
     postMadeChanges.value = false
+    originalHashes = createPostHashes(LIST_DATA.value)
+
     setTimeout(() => updatingPost.value = false, 250)
     if (res.data == "8")
       summonNotification(i18n.global.t('listViewer.postUpdated'), "", 'check')
@@ -703,8 +789,24 @@ const cancelHidingOptions = () => {
     </section>
 
     <Transition name="fade">
-      <UpdateConfirmer v-if="postMadeChanges" @confirm="sendChangedComponents" @discard="revertPostEdits" :updating="updatingPost" :owns-post="true" />
+      <UpdateConfirmer v-if="postMadeChanges" @confirm="sendChangedComponents" @discard="revertPostEdits" :updating="updatingPost" :owns-post="LIST_DATA.uid == currentUID" />
     </Transition>
+
+    <div v-if="showChecklistsUsed" class="bg-greenGradient gap-2 flex my-4 rounded-md p-2 max-sm:flex-col w-full max-w-[40rem] mx-auto">
+      <span v-if="hideChecklistEditsViewing" @click="hideLocalChecklistEdits" class="grow">
+        <img src="@/images/view.svg" class="inline mr-2 w-6" alt="">
+        {{ $t('listViewer.viewingNew') }}
+      </span>
+      <span v-else class="grow">
+        <img src="@/images/edit.svg" class="inline mr-2 w-6" alt="">
+        {{ $t('listViewer.changes4') }}
+      </span>
+      <button v-if="hideChecklistEditsViewing" @click="hideLocalChecklistEdits" class="p-1 mx-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/back.svg" class="inline mr-2 w-5" alt="">{{ $t('other.back') }}</button>
+      <div class="" v-else>
+        <button @click="hideLocalChecklistEdits" class="p-1 mx-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/view.svg" class="inline mr-2 w-5" alt="">{{ $t('other.hide') }}</button>
+        <button @click="discardLocalChecklistEdits" class="p-1 mx-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/trash.svg" class="inline mr-2 w-5" alt="">{{ $t('other.discard') }}</button>
+      </div>
+    </div>
 
     <main v-if="!nonexistentList && !listErrorLoading" class="flex flex-col gap-4">
       <!-- Back to review from link -->
