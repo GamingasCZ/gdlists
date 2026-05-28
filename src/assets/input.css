@@ -197,6 +197,12 @@ dialog {
 #reviewText[data-white-page=true] p,figcaption {
   color: black
 }
+#reviewText[data-white-page=true] input[type="checkbox"] {
+  filter: invert(0.8);
+}
+#reviewText[data-white-page=true] blockquote {
+  @apply bg-opacity-10 border-l-lof-300;
+}
 #reviewText[data-white-page=true] {
   transition: background 0.25s;
   background: #ece6d9;
