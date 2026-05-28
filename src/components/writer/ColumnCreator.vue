@@ -75,6 +75,8 @@ onMounted(() => {
         colInput.value.focus()
 })
 
+const alText = ['left', 'center', 'right', 'justify']
+
 </script>
 
 <template>
@@ -136,8 +138,11 @@ onMounted(() => {
             <div v-else class="flex justify-between items-center px-2 text-left" @mouseleave="highlightedAlign = -1">
                 <p class="text-lg text-center">{{ highlightedAlign > -1 ? alignText[highlightedAlign] : $t('other.alignment') }}</p>
                 <div class="flex">
-                    <button @click="create(highlightedCreateColumns, colWidths, ['left', 'center', 'right', 'justify'][ind])" class="p-1 mx-1 rounded-md button hover:bg-black hover:bg-opacity-40" @mouseenter="highlightedAlign = ind" v-for="(align, ind) in [$t('reviews.left'), $t('reviews.center'), $t('reviews.right'), $t('reviews.justify')]">
-                        <img :src="`${BASE}/formatting/align${align}.svg`" class="w-5" alt="">
+                    <button @click="create(highlightedCreateColumns, colWidths, alText[ind])" class="p-1 mx-1 rounded-md button hover:bg-black hover:bg-opacity-40"
+                            @mouseenter="highlightedAlign = ind"
+                            v-for="(_, ind) in [$t('reviews.left'), $t('reviews.center'), $t('reviews.right'), $t('reviews.justify')]"
+                    >
+                        <img :src="`${BASE}/formatting/align${alText[ind][0].toUpperCase()}${alText[ind].slice(1)}.svg`" class="w-5" alt="">
                     </button>
                 </div>
             </div>
