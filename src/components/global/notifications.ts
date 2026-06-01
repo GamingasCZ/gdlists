@@ -1,4 +1,5 @@
 import type { NotificationContent } from "@/interfaces"
+import { loggedIn } from "@/siteSettings"
 import axios from "axios"
 import { ref } from "vue"
 
@@ -63,7 +64,8 @@ export function listenForNotifications() {
     }
 
     notifTimeout = setTimeout(() => {
-        startNotifRead()
+        if (loggedIn.value)
+            startNotifRead()
     }, MINUTE);
 }
 
