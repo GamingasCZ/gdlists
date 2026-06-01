@@ -75,7 +75,7 @@ function getComments($mysqli, $postID, $postType, $page = 0, $startID = 999999, 
 
     // No comments
     if ($commAmount == 0)
-        return json_encode(array([],[],$dbInfo));
+        return json_encode(array([],[],["page" => 0, "maxPage" => 0, "startID" => 999999, "commAmount" => 0]));
 
     $maxpage = ceil($commAmount / $limit);
     $comments = doRequest($mysqli, $template, [$startID, $postID, $limit, $dbSlice], "iiii", true);
