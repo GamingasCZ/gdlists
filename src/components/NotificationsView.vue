@@ -3,7 +3,7 @@ import NotificationCard from './global/NotificationCard.vue';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
 import NotifsIcon from "../images/notifs.svg?raw"
-import { allNotifs, fetchNotifications, postNames, removeNotifs } from './global/notifications.js';
+import { allNotifs, fetchNotifications, NotifState, postNames, removeNotifs } from './global/notifications.js';
 
 const props = defineProps<{
     noHeader: boolean
@@ -15,12 +15,19 @@ if (!props.noHeader)
 const changeFilters = () => {
     loadingState.value = LoadingState.Loading
     fetchNotifications(true, sorting.value, type.value)
-        .then(() => loadingState.value = LoadingState.Loaded)
+        .then((more: NotifState) => {
+            moreAvailable.value = more == NotifState.MoreAvailable
+            loadingState.value = LoadingState.Loaded
+            }
+        )
         .catch(() => loadingState.value = LoadingState.Error)
 }
 
 const changeType = (to: number) => {
     if (loadingState.value != LoadingState.Loaded) return
+
+    allNotifs.value = []
+    postNames.value = []
 
     if (type.value == to) {
         type.value = -1
@@ -42,17 +49,30 @@ enum LoadingState {
     Error
 }
 
+const moreAvailable = ref(false)
 const refreshing = ref(false)
 const loadingState = ref(LoadingState.Loading)
-const refreshNotifs = () => {
+const currentPage = ref(0)
+const refreshNotifs = (resetPage = true) => {
     loadingState.value = LoadingState.Loading
-    fetchNotifications(true)
-        .then(() => loadingState.value = LoadingState.Loaded)
+    if (resetPage)
+        currentPage.value = 0
+    fetchNotifications(true, sorting.value, type.value, false, currentPage.value)
+        .then((more: NotifState) => {
+            moreAvailable.value = more == NotifState.MoreAvailable
+            loadingState.value = LoadingState.Loaded
+        }
+        )
         .catch(() => loadingState.value = LoadingState.Error)
     refreshing.value = true
     setTimeout(() => {
         refreshing.value = false
     }, 5000);
+}
+
+const fetchNextPage = () => {
+    currentPage.value++
+    refreshNotifs(false)
 }
 
 if (!allNotifs.value.length)
@@ -110,6 +130,8 @@ defineExpose({
             <template v-if="loadingState == LoadingState.Loaded">
                 <NotificationCard :key="notif.id" @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
             </template>
+
+            <button @click="fetchNextPage" v-if="moreAvailable" class="mx-auto mt-3 w-max text-xl opacity-40 outline-none focus-within:opacity-100 hover:opacity-100">{{ $t('other.showMore') }}</button>
         </main>
     </section>
 </template>

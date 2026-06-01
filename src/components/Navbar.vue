@@ -255,9 +255,9 @@ const open = (to: string) => {
         ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
       </section>
 
-      <section class="flex relative gap-2 items-center px-2 min-h-full bg-black bg-opacity-40">
+      <section class="flex relative gap-2 items-center px-2 min-h-full bg-opacity-20 bg-gradient-to-r to-transparent from-black/40">
         <!-- Notification button -->
-        <button @click="showNotifs" v-if="isLoggedIn" class="relative mx-3 button max-sm:hidden">
+        <button @click="showNotifs" v-if="isLoggedIn" class="relative mr-3 ml-1 button max-sm:hidden">
           <div v-html="NotifIcon" class="w-[22px] stroke-2 stroke-white" :class="{'fill-transparent': !notifDropdownShown && currentUnread > 0, 'fill-white': notifDropdownShown || currentUnread == 0, '!fill-lof-400 !stroke-lof-400': scrollerInd == NAV_SEL.Notifications}" />
           <div v-if="currentUnread > 0" class="absolute bottom-1 -right-1.5 px-0.5 h-5 text-base font-black leading-none text-black rounded-md border-2 border-black contrast-20 bg-lof-400">{{ currentUnread }}</div>
         </button>

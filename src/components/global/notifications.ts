@@ -9,16 +9,23 @@ export const postNames = ref<NotificationContent[]>([])
 export const currentUnread = ref(0)
 export const notificationCache = ref([[],[]])
 
-export async function fetchNotifications(force = false, sorting = 0, type = -1, isPing = false) {
+export enum NotifState {
+    Error,
+    MoreAvailable,
+    AtEnd,
+    Nothing
+}
+
+export async function fetchNotifications(force = false, sorting = 0, type = -1, isPing = false, page=0) {
     if (!force && notificationCache.value[0].length) {
         allNotifs.value = notificationCache.value[0]
         allNotifs.value.forEach(x => x.unread = false)
         postNames.value = notificationCache.value[1]
         currentUnread.value = 0
-        return
+        return NotifState.Nothing
     }
 
-    let params = {}
+    let params = {page: page}
     if (sorting > 0)
         params.sort = sorting
     if (type > -1)
@@ -32,21 +39,42 @@ export async function fetchNotifications(force = false, sorting = 0, type = -1, 
     if (isPing) {
         if (!isNaN(parseInt(res.data)))
             currentUnread.value = res.data
-        return
+        return NotifState.Nothing
     }
-    if (res.data == "1") return false
+    if (res.data == "1") return NotifState.MoreAvailable // why i add this?
 
-    allNotifs.value = res.data[0]
-    postNames.value = res.data[1]
-    notificationCache.value = res.data
+    // no new notifications
+    if (res.data == "2") return NotifState.AtEnd
+
+    if (page > 0) {
+        allNotifs.value.push(...res.data[0])
+        postNames.value.push(...res.data[1])
+    }
+    else {
+        allNotifs.value = res.data[0]
+        postNames.value = res.data[1]
+        notificationCache.value = res.data    
+    }
     currentUnread.value = res.data[2].c
-    return true
+    if (res.data[2]?.lastPage)
+        return NotifState.AtEnd
+    else
+        return NotifState.MoreAvailable
 }
 
 export var notifTimeout: number | null = null
+export const clearNotifListed = () => {
+    if (notifTimeout != null) {
+        clearTimeout(notifTimeout)
+        notifTimeout = null
+    }
+}
 export function listenForNotifications() {
-    const MINUTE = 6000
+    const MINUTE = 60000
     const HALF_MINUTE = MINUTE/2
+
+    if (notifTimeout != null)
+        clearNotifListed()
 
     // increase offset, if no new notifs arrive
     // if something arrives, nullify offset

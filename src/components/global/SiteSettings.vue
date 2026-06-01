@@ -6,6 +6,7 @@ import SectionDivider from '../ui/SectionDivider.vue';
 import HoldButton from '../ui/HoldButton.vue';
 import { ref } from 'vue';
 import cookier from "cookier"
+import { clearNotifListed, listenForNotifications, notifTimeout } from './notifications.ts';
 
 const removeCookies = () => {
     if (!hasLocalStorage()) return
@@ -22,6 +23,14 @@ const removeStorage = () => {
 }
 
 const storageSize = ref(0)
+
+const toggleNotifRead = (enabled: boolean) => {
+    if (enabled)
+        listenForNotifications()
+    else
+        clearNotifListed()
+}
+
 if (hasLocalStorage()) {
     for (let i = 0; i < localStorage.length; i++)
         storageSize.value += localStorage.getItem(localStorage.key(i)).length
@@ -80,6 +89,7 @@ if (hasLocalStorage()) {
         </Option>
         <Option
             v-if="loggedIn"
+            @update:model-value="toggleNotifRead"
             v-model="SETTINGS.checkNotifs"
             :name="$t('settingsMenu.notif')"
             :desc="$t('settingsMenu.notifHelp')"
