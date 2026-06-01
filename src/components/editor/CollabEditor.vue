@@ -379,13 +379,13 @@ defineExpose({
             <img src="@/images/symbolicSave.svg" class="w-5" alt="">
           </template>
           <main
-            class="bg-[url(@/images/fade.svg)] bg-repeat-x grid grid-cols-2 gap-2 p-2 w-full overflow-y-auto overflow-x-clip max-h-[46rem]">
-              <SavedCollabVue v-for="(save, index) in savedCollabs" :save="save" :collIndex="index"
+            class="bg-[url(@/images/fade.svg)] bg-repeat-x grid sm:grid-cols-2 gap-2 p-2 w-full overflow-y-auto overflow-x-clip max-h-[46rem]">
+              <SavedCollabVue v-for="(save, index) in savedCollabs" :key="save.timestamp" :save="save" :collIndex="index"
               :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
-              @load-collab="loadCollab" @remove-collab="removeCollab" small />
+              @load-collab="loadCollab" @remove-collab="removeCollab(index)" small />
 
             <article v-if="!savedCollabs?.length"
-              class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
+              class="flex flex-col col-span-2 gap-3 justify-center items-center px-6 mx-auto w-full h-full text-xl text-center opacity-20">
               <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
               {{ $t('collabTools.savedHelp') }}
             </article>
