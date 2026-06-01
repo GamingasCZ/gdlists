@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { ref } from "vue";
 import THEMES from "./themes";
-import { randomIsReview, SETTINGS } from "./siteSettings";
+import { hasLocalStorage, randomIsReview, SETTINGS } from "./siteSettings";
+import { currentUID } from "./Editor";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -84,6 +85,10 @@ const router = createRouter({
     {
       path: "/notifications",
       name: "notifications",
+      beforeEnter: () => {
+        if (!hasLocalStorage() || !localStorage.getItem("account_info"))
+          return {path: "/"}
+      },
       component: () => import("@/components/NotificationsView.vue")
     },
   ],
