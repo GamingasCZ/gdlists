@@ -5,7 +5,7 @@ import Logo from "../svgs/Logo.vue";
 import SetingsMenu from "./global/SetingsMenu.vue";
 import { currentCutout, currentUID, isOnline, profileCutouts, navHidden } from "@/Editor";
 import { useI18n } from "vue-i18n";
-import { hasLocalStorage, randomIsReview, SETTINGS } from "@/siteSettings";
+import { hasLocalStorage, loggedIn, randomIsReview, SETTINGS } from "@/siteSettings";
 import router, { loadingProgress, timeLastRouteChange } from "@/router";
 import ProfilePicture from "./global/ProfilePicture.vue";
 import NotificationDropdown from "./global/NotificationDropdown.vue";
@@ -99,6 +99,7 @@ const localStorg = ref(hasLocalStorage())
 const editorDropdownOpen = ref(0)
 const openEditorDropdown = (e: MouseEvent, ind: number) => {
   if (!localStorg.value) return
+  if (!loggedIn.value) return
   if (editorDropdownOpen.value) return
   e.preventDefault()
   editorDropdownOpen.value = ind
@@ -217,7 +218,7 @@ const open = (to: string) => {
       
 
         <!-- Lists -->
-        <component :is="localStorg ? 'button' : 'RouterLink'" to="/browse/lists" @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        <component :is="(localStorg && loggedIn) ? 'button' : 'RouterLink'" to="/browse/lists" @click.stop="openEditorDropdown($event, 1)" @dblclick="open('lists')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
           :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Lists, 'fill-white': scrollerInd != NAV_SEL.Lists, 'opacity-20': editorDropdownOpen != 1 && editorDropdownOpen != 0}"
         >
             <List class="w-4 h-4" />{{ $t('help.Lists') }}
@@ -225,10 +226,10 @@ const open = (to: string) => {
             <Transition name="fadeSlide">
               <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 1" :is-review="false" />
             </Transition>
-        </component :is="localStorg ? 'button' : 'RouterLink'">
+        </component>
 
         <!-- Reviews -->
-        <component :is="localStorg ? 'button' : 'RouterLink'" to="/browse/reviews" @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
+        <component :is="(localStorg && loggedIn) ? 'button' : 'RouterLink'" to="/browse/reviews" @click.stop="openEditorDropdown($event, 2)" @dblclick="open('reviews')" class="flex flex-col gap-2 items-center px-4 transition-opacity sm:relative max-sm:pt-1 max-sm:gap-1 max-sm:pb-1 hover:bg-opacity-40 md:flex-row websiteLink"
           :class="{'fill-lof-400 text-lof-400': scrollerInd == NAV_SEL.Reviews, 'fill-white': scrollerInd != NAV_SEL.Reviews, 'opacity-20': editorDropdownOpen != 2 && editorDropdownOpen != 0}"
         >
             <Review class="w-4 h-4" />{{ $t('reviews.review') }}
@@ -236,7 +237,7 @@ const open = (to: string) => {
             <Transition name="fadeSlide">
               <NavbarDropdown @close="editorDropdownOpen = 0" v-show="editorDropdownOpen == 2" :is-review="true" />
             </Transition>
-        </component :is="localStorg ? 'button' : 'RouterLink'">
+        </component>
 
         <!-- Levels -->
         <RouterLink
@@ -254,7 +255,7 @@ const open = (to: string) => {
         ><Saved class="w-4 h-4" />{{ $t('navbar.saved') }}</RouterLink>
       </section>
 
-      <section class="flex relative gap-5 items-center px-2 min-h-full">
+      <section class="flex relative gap-2 items-center px-2 min-h-full bg-black bg-opacity-40">
         <!-- Notification button -->
         <button @click="showNotifs" v-if="isLoggedIn" class="relative mx-3 button max-sm:hidden">
           <div v-html="NotifIcon" class="w-[22px] stroke-2 stroke-white" :class="{'fill-transparent': !notifDropdownShown && currentUnread > 0, 'fill-white': notifDropdownShown || currentUnread == 0, '!fill-lof-400 !stroke-lof-400': scrollerInd == NAV_SEL.Notifications}" />
