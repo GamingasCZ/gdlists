@@ -708,7 +708,7 @@ const unhighlightVideo = () => {
 
                 <button v-if="image[0] == LevelImage.VIDEO" @click="highlightVideo(ind)" class="flex absolute left-0 bottom-1 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
                   <img src="@/images/play.svg" class="mr-2 w-5" alt="">  
-                  Zvýraznit
+                  {{ $t('other.highlight') }}
                 </button>
 
                 <!-- Remove media -->
