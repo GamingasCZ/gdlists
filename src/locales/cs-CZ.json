@@ -524,7 +524,8 @@
     "changes2": "Změny se uloží jen lokálně.",
     "changes3": "Nelze ukládat bez zapnutých cookies!",
     "changes4": "V tomto příspěvku jsi v minulosti provedl úpravy.",
-    "viewingNew": "Takto vypadá původní příspěvek."
+    "viewingNew": "Takto vypadá původní příspěvek.",
+    "highlighted": "Zvýrazněný komentář"
   },
   "level": {
     "levelID": "ID levelu",
