@@ -71,8 +71,9 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.ind
                 </RouterLink></b>
             </div>
             
-            <button v-if="props.count > 1 && props.type == 'rating'" @click="toggleDropdown">
-                <img src="@/images/genericRate.svg" class="w-3 rotate-180" alt="">
+            <button v-if="props.count > 1 && props.type == 'rating'" class="flex gap-2 p-2 opacity-40 hover:opacity-100" @click="toggleDropdown">
+                <img src="@/images/genericRate.svg" class="w-3" :class="{'rotate-180': !ratingsDropdownOpen}" alt="">
+                <span>{{ ratingsDropdownOpen ? $t('other.hide') : $t('other.showMore') }}</span>
             </button>
 
             <section v-if="ratingsDropdownOpen" class="flex flex-col gap-2 p-1">

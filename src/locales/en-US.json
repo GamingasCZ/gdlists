@@ -470,7 +470,9 @@
     "oldest": "Oldest",
     "copy": "Copy",
     "backToGDL": "Back to GD Lists",
-    "hide": "Hide"
+    "hide": "Hide",
+    "highlight": "Highlight",
+    "notifFail": "Failed to load notifications!"
   },
   "settingsMenu": {
     "asOff": "Off",

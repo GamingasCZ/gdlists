@@ -444,7 +444,9 @@
     "discard": "Zahodit",
     "copy": "Kopírovat",
     "backToGDL": "Zpět do GD Seznamů",
-    "hide": "Skrýt"
+    "hide": "Skrýt",
+    "highlight": "Zvýraznit",
+    "notifFail": "Nepodařilo se načíst notifikace!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
