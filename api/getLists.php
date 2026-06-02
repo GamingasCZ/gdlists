@@ -38,7 +38,9 @@ $selLevelRange = "
       avg(gameplay) as A_gameplay,
       avg(decoration) as A_decoration,
       avg(levels_ratings.difficulty) as A_difficulty,
-      avg(overall) as A_overall";
+      avg(overall) as A_overall,
+      images.hash as BGhash,
+      images.uploaderID as BGuploader";
 
 $listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
