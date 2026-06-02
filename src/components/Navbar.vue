@@ -205,7 +205,7 @@ const open = (to: string) => {
     :class="{'-translate-y-14': navbarHidden}"
     class="box-border sticky top-0 z-30 transition-transform bg-greenGradient">
 
-    <div class="max-w-[90rem] flex relative justify-between mx-auto">
+    <div class="max-w-[100rem] flex relative justify-between mx-auto">
       <section class="flex text-xs relative font-bold text-white md:text-xl min-h-[2.5rem]"
         :class="{ 'opacity-50 pointer-events-none': !isOnline }">
         

@@ -2,8 +2,8 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "compilerOptions": {
-    "lib": ["ES2017", "DOM"],
-    "baseUrl": ".",
+    "lib": ["ES2025", "DOM"],
+    "target": "es2025",
     "paths": {
       "@/*": ["./src/*"]
     },
