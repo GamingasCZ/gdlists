@@ -209,7 +209,7 @@ const videoLoaded = reactive([])
               class="bg-black bg-opacity-60 rounded-md"
               >
           </iframe>
-          <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-thumb.webp`" class="object-cover object-center max-h-36 rounded-md aspect-video inter shadow-drop" alt="">
+          <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-mthumb.webp`" class="object-cover object-center max-h-32 rounded-md aspect-video inter shadow-drop" alt="">
 
           <img v-if="img[0] == LevelImage.VIDEO && !videoLoaded[ind]" src="@/images/loading.webp" class="absolute left-[44%] opacity-60 w-8 animate-spin top-[39%]" alt="">
           <figcaption class="text-center text-inherit">{{ img[2] }}</figcaption>
