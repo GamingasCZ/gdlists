@@ -3,9 +3,9 @@ import { currentUID, lastUsedTags, newCardBG, shortenYTLink, TAG_COUNT } from "@
 import axios, { type AxiosResponse } from "axios";
 import chroma, { type Color } from "chroma-js";
 import { computed, inject, nextTick, onMounted, type Ref, ref } from "vue";
-import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData } from "../../interfaces";
+import { LevelImage, type LevelScreenshot, WriterGallery, type Level, type LevelSearchResponse, type PostData, type ImageStorage } from "../../interfaces";
 import ColorPicker from "../global/ColorPicker.vue";
-import LevelTags from "./LevelTags.vue";
+import DragArea from "../../images/dragArea.svg?raw"
 import { useI18n } from "vue-i18n";
 import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
@@ -19,6 +19,9 @@ import EditorCardTagDropdown from "./EditorCardTagDropdown.vue";
 import { TagName } from "@/assets/tags";
 import CircularRating from "../ui/CircularRating.vue";
 import { Limit } from "@/assets/limits";
+import Tooltip from "../ui/Tooltip.vue";
+import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
+import { summonNotification, uploadImages } from "../imageUpload";
 
 const props = defineProps<{
   levelArray: PostData
@@ -255,7 +258,7 @@ const levelMedia = computed(() => {
     allMedia.push([LevelImage.THUMBNAIL,bgImage,""])
 
   if (screenshots)
-  allMedia = allMedia.concat(screenshots)
+    allMedia = allMedia.concat(screenshots)
 
   return allMedia
 })
@@ -288,8 +291,13 @@ const setAsThumb = (srcshotIndex: number) => {
   colorizeViaThumb()
 }
 
-const addVideo = (e: ClipboardEvent) => {
-  let link = e.clipboardData?.getData("Text")
+const addVideo = (e: ClipboardEvent | string) => {
+  let link: string
+  if (typeof e == 'string')
+    link = e
+  else
+    link = e.clipboardData?.getData("Text")
+
   if (!link) return
 
   let shortened = shortenYTLink(link, true)
@@ -302,7 +310,8 @@ const addVideo = (e: ClipboardEvent) => {
   ])
 
   addingVideo.value = false
-  videoInput.value.value = ""
+  if (videoInput.value)
+    videoInput.value.value = ""
 }
 
 const unsetThumb = () => {
@@ -314,16 +323,6 @@ const unsetThumb = () => {
   ])
   arr.BGimage.image[0] = ""
   imageSettingsOpen.value = -1
-}
-
-const removeScreenshot = (type: LevelImage, ind: number) => {
-  let arr = props.levelArray.levels[props.index]
-  if (type == LevelImage.THUMBNAIL) {
-    arr.BGimage.image[0] = ""
-  }
-  else {
-    arr.screenshots?.splice(ind-1, 1)
-  }
 }
 
 const tagbox = ref<HTMLInputElement>()
@@ -402,6 +401,101 @@ const avgRating = computed(() => {
 })
 
 const cardDropdown = ref<HTMLDivElement>()
+
+var imageDraggingIndex = -1
+var imageDraggingOver = -1
+const imageReorderDrop = () => {
+  // dragging over itself; no other way around sorry
+  if (imageDraggingIndex != imageDraggingOver) {
+    if (!(levelMedia.value[imageDraggingOver][0] & (LevelImage.IMAGE | LevelImage.VIDEO))) return
+
+    let media = levelMedia.value.slice()
+    let tmp = media[imageDraggingIndex]
+    media.splice(imageDraggingIndex, 1)
+    media.splice(imageDraggingOver, 0, tmp)
+    props.levelArray.levels[props.index].screenshots = media.filter(x => x[0] & (LevelImage.IMAGE | LevelImage.VIDEO))
+  }
+}
+
+const tagReorderDrop = () => {
+  if (imageDraggingIndex != imageDraggingOver) {
+    let tags = props.levelArray.levels[props.index].tags
+    let tmp = tags[imageDraggingIndex]
+    tags.splice(imageDraggingIndex, 1)
+    tags.splice(imageDraggingOver, 0, tmp)
+    document.activeElement?.blur()
+  }
+}
+
+const draggingOverImageArea = ref(false)
+const imageAreaDragHelp = (e: DragEvent) => {
+  if (e.dataTransfer?.items.length)
+    draggingOverImageArea.value = true
+}
+
+var currentlyUploading = false
+const uploadDraggedImages = async (files: DragEvent) => {
+  if (currentlyUploading) return
+
+  draggingOverImageArea.value = false
+  if (files?.dataTransfer?.items.length) {
+    summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
+    
+    // youtube link
+    if (files.dataTransfer.items[0].kind == 'string') {
+      return files.dataTransfer.items[0].getAsString(addVideo)
+    }
+
+    currentlyUploading = true
+    uploadImages(files.dataTransfer.files, false).then((images: ImageStorage | string) => {
+      currentlyUploading = false
+      images.newImage?.forEach(x => {
+        let arr = props.levelArray.levels[props.index]
+        arr.screenshots.push([LevelImage.IMAGE,x,""])
+      })
+    }).catch(() => {
+      currentlyUploading = false
+    })
+  }
+}
+
+// levelMedia is made up of multiple different arrays
+const popLevelMedia = (ind: number) => {
+  let media = levelMedia.value.slice()
+  let removeType: LevelImage = media[ind][0]
+
+  switch (removeType) {
+    case LevelImage.IMAGE:
+    case LevelImage.VIDEO:
+      media.splice(ind, 1)
+      props.levelArray.levels[props.index].screenshots = media.filter(x => x[0] & (LevelImage.IMAGE | LevelImage.VIDEO))
+      break;
+    case LevelImage.THUMBNAIL:
+      props.levelArray.levels[props.index].BGimage.image[0] = ""
+      break;
+    case LevelImage.OLD_VIDEO:
+      props.levelArray.levels[props.index].video = ""
+      break;
+  }
+}
+
+const highlightVideo = (videoIndex: number) => {
+  imageSettingsOpen.value = -1
+  let link = levelMedia.value[videoIndex][1]
+  popLevelMedia(videoIndex)
+  props.levelArray.levels[props.index].video = link
+}
+
+const unhighlightVideo = () => {
+  let level = props.levelArray.levels[props.index]
+  level.screenshots?.push([
+    LevelImage.VIDEO,
+    level.video,
+    ""
+  ])
+  level.video = ""
+  imageSettingsOpen.value = -1
+}
 
 </script>
 
@@ -519,10 +613,12 @@ const cardDropdown = ref<HTMLDivElement>()
           <div class="px-1 pr-0">
             <img src="@/images/levelID.svg" alt="" class="w-10 min-w-10" />
           </div>
-          <div class="flex flex-wrap gap-1 grow">
+          <div class="flex flex-wrap gap-1 grow" @drop.prevent="tagReorderDrop">
             <EditorTag
               v-for="(tag, ind) in levelArray.levels[index].tags"
               @auxclicked="removeTag(ind)"
+              @dragstart="imageDraggingIndex = ind"
+              @dragover.prevent="imageDraggingOver = ind"
               :tag="tag"
               selectable
               gear
@@ -555,7 +651,15 @@ const cardDropdown = ref<HTMLDivElement>()
         </div>
   
         <!-- Screenshot carousel & Color Picker -->
-        <div class="grid overflow-auto p-2 bg-black bg-opacity-20">
+        <div @dragover.prevent="imageAreaDragHelp" @dragleave.prevent="draggingOverImageArea = false" @drop.stop.prevent="uploadDraggedImages" class="grid overflow-auto relative p-2 bg-black bg-opacity-20">
+          <Transition name="fade">
+            <div v-if="draggingOverImageArea" class="flex absolute inset-0 z-10 flex-col gap-2 justify-center items-center text-xl bg-black bg-opacity-60">
+              <img src="@/images/plus.svg" class="w-10" alt="">
+              <span>{{ $t('reviews.dragUpload') }}...</span>
+              <HiddenFileUploader multiple @data="uploadDraggedImages" />
+            </div>
+          </Transition>
+
           <template v-if="levelMedia.length && (levelMedia.length != 1 || levelMedia[0][0] != LevelImage.THUMBNAIL)">
             <form @submit.prevent="editingImageSectionName = false" v-if="editingImageSectionName" class="flex gap-2 items-center mb-2">
               <input ref="sectionNameInput" type="text" maxlength="20" v-model="levelArray.levels[index].scShotSecName" class="p-1 bg-transparent outline-none focus-within:border-b-2" :placeholder="$t('reviews.sectionName')">
@@ -567,29 +671,50 @@ const cardDropdown = ref<HTMLDivElement>()
             </p>
           </template>
 
-          <div class="flex overflow-auto gap-2">
-            <div v-show="!pickingColor" v-for="(image, ind) in levelMedia" class="relative duration-200 aspect-video group">
-  
+          <div @drop.prevent="imageReorderDrop" class="flex overflow-auto gap-2">
+            <div
+              v-for="(image, ind) in levelMedia"
+              :data-ind="ind"
+              @dragstart="imageDraggingIndex = ind"
+              @dragover.prevent="imageDraggingOver = ind"
+              v-show="!pickingColor"
+              :draggable="image[0] & (LevelImage.IMAGE | LevelImage.VIDEO) ? 'true' : 'false'"
+              class="relative duration-200 levelImages aspect-video group"
+            >
+
               <!-- Video indicator -->
               <img v-if="image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO)" src="@/images/play.svg" class="absolute invert-[0.2] sepia hue-rotate-30 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12" alt="">
   
               <!-- Image / Video thumbnail -->
-              <img v-if="!(image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO))" class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
-              <img v-else class="object-cover object-center w-full h-28 rounded-md transition-all group-hover:brightness-50 shadow-drop" :src="`https://img.youtube.com/vi/${image[1]}/0.jpg`" alt="">
+              <img v-if="!(image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO))" class="object-cover object-center h-28 rounded-md transition-all aspect-video group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+              <img v-else class="object-cover object-center h-28 rounded-md transition-all aspect-video group-hover:brightness-50 shadow-drop" :src="`https://img.youtube.com/vi/${image[1]}/0.jpg`" alt="">
               
               <!-- Thumbail indicator -->
               <img v-if="image[0] == LevelImage.THUMBNAIL" src="@/images/image.svg" class="absolute invert-[0.2] sepia hue-rotate-30 bottom-2 left-1 w-5 shadow-drop" alt="">
               
               <!-- Settings overlay -->
               <div class="absolute inset-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <!-- Drag area -->
+                <div v-if="image[0] & (LevelImage.VIDEO | LevelImage.IMAGE)" :title="$t('editor.dragReorder')" v-html="DragArea" ref="dragHelp" class="absolute top-1 left-1 w-6 opacity-80 cursor-move">
+                </div>
+
+                <!-- Media settings -->
                 <button ref="gearElement" @click="imageSettingsOpen = ind" class="absolute top-1 right-1">
                   <img src="@/images/gear.svg" class="w-5" alt="">
                 </button>
-                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute bottom-0 left-0 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+
+                <button v-if="image[0] == LevelImage.IMAGE" @click="setAsThumb(ind)" class="flex absolute left-0 bottom-1 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
                   <img src="@/images/plus.svg" class="mr-2 w-5" alt="">
                   {{ $t('reviews.setThumb') }}
                 </button>
-                <button @click="removeScreenshot(image[0], ind)" class="absolute right-1 bottom-1">
+
+                <button v-if="image[0] == LevelImage.VIDEO" @click="highlightVideo(ind)" class="flex absolute left-0 bottom-1 p-1 text-sm rounded-md hover:bg-black hover:bg-opacity-80">
+                  <img src="@/images/play.svg" class="mr-2 w-5" alt="">  
+                  {{ $t('other.highlight') }}
+                </button>
+
+                <!-- Remove media -->
+                <button @click="popLevelMedia(ind)" class="absolute right-1 bottom-1">
                   <img src="@/images/trash.svg" class="w-5" alt="">
                 </button>
               </div>
@@ -619,7 +744,7 @@ const cardDropdown = ref<HTMLDivElement>()
                   <img :src="`${base}/formatting/addVideo.svg`" class="mr-1 w-6 pointer-events-none" alt="">
                   <span>{{ $t('reviews.addVideo') }}</span>
                 </div>
-                <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" :placeholder="$t('editor.ytLink')">
+                <input @paste="addVideo" @vue:mounted="videoInput.focus()" ref="videoInput" type="text" class="px-2 py-1 w-64 bg-black bg-opacity-80 rounded-md" :placeholder="$t('editor.addYTLink')">
               </div>
   
             </div>
@@ -647,7 +772,7 @@ const cardDropdown = ref<HTMLDivElement>()
   <!-- Thumbnail / Media options -->
   <Dropdown v-if="imageSettingsOpen >= 0" @close="imageSettingsOpen = -1" :button="gearElement[imageSettingsOpen]">
     <template #header>
-      <section v-if="levelMedia[imageSettingsOpen][0] == LevelImage.THUMBNAIL" class="flex flex-col gap-1 p-2 text-white">
+      <section @mousedown.stop="" v-if="levelMedia[imageSettingsOpen][0] == LevelImage.THUMBNAIL" class="flex flex-col gap-1 p-2 text-white">
 				<button @click="openDialogs.BGpicker = [true, 1, index]; imageSettingsOpen = -1" class="p-2 text-xl bg-black bg-opacity-40 rounded-md button">
 					<img src="@/images/move.svg" alt="" class="inline mr-2 w-5">
 					<span>{{ $t('reviews.setPos') }}</span>
@@ -685,6 +810,10 @@ const cardDropdown = ref<HTMLDivElement>()
         <input type="text" v-model="levelMedia[imageSettingsOpen][2]" maxlength="20" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
       </section>
       <section v-else class="p-2 text-white">
+        <button @click="unhighlightVideo()" class="flex gap-2 justify-center items-center mb-2 w-full text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
+          <img class="w-5" src="@/images/del2.svg" alt="">
+          {{ $t('editor.cancelHL') }}
+        </button>
         <p class="text-lg">{{ $t('other.link') }}</p>
         <input type="text" :value="levelArray.levels[index].video" @change="levelArray.levels[index].video = shortenYTLink($event.target.value)" maxlength="80" class="px-2 py-1 mt-1 bg-white bg-opacity-10 rounded-md">
       </section>

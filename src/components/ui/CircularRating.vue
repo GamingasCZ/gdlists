@@ -29,8 +29,8 @@ const hovering = ref(false)
                 <span>{{ value }}</span>
                 <span class="text-xs text-white text-opacity-40">/10</span>
             </p>
-            <p v-else class="mt-3 text-lg font-bold text-red-500">
-                <span>!</span>
+            <p v-else class="mt-3 text-lg font-bold text-blue-500">
+                <span>?</span>
             </p>
         </div>
     </div>

@@ -97,7 +97,7 @@ const postData = inject("postData")
 <template>
 	<section @click.stop="" :style="{ top: barPos }"
 		:class="{'!bg-[#ECE6D9]': postData.whitePage, 'bg-lof-200': !postData.whitePage}"
-		class="flex rounded-md thinScrollbar transition-[top] bg-lof-200 sticky max-md:overflow-x-auto z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
+		class="flex font-[poppins] rounded-md thinScrollbar transition-[top] bg-lof-200 sticky max-md:overflow-x-auto z-20 items-center justify-between p-1 mb-2 text-3xl text-white">
 		<div v-for="(side) in Object.keys(writer.toolbar[currentToolbar])" class="flex gap-1 items-center" :class="{'invert-[0.9]': postData.whitePage}">
 			<FormattingButton v-for="button in getToolbarButtons(side)" :button="button"
 				@clicked="doAction(button.action[0], $event.action, $event.shift)" :disabled="barDisabled && button?.action?.[0] != 'preview'" />

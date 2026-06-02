@@ -27,7 +27,7 @@ const base = import.meta.env.BASE_URL
 </script>
 
 <template>
-	<div class="grid text-base thinScrollbar font-[poppins] py-4 w-full gap-y-5">
+	<div class="grid text-white text-base thinScrollbar font-[poppins] py-4 w-full gap-y-5">
 
 		<section v-if="drafts && draftsValues.length">
 			<h2 class="ml-2 text-3xl font-black text-lof-400">{{ $t('reviews.drafts2') }}</h2>

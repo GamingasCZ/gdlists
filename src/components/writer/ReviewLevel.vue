@@ -30,11 +30,12 @@ const postData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
 const doFullscreen = inject<() => void>("fullscreenLevel", () => {})
 const levelHashes = inject("levelHashes", 0)!
 let indPicked = ref(0)
+const mountedOnce = ref(false)
 
 </script>
 
 <template>
-    <ContainerHelp unclickable v-if="settings.pickedIndex == -1 || !postData[0]?.[settings.pickedIndex]" icon="showLevel" :help-content="postData[0].length > 0 ? $t('reviews.pickShowcase') : $t('reviews.noLevelsAddedYet')">
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" unclickable v-if="settings.pickedIndex == -1 || !postData[0]?.[settings.pickedIndex]" icon="showLevel" :help-content="postData[0].length > 0 ? $t('reviews.pickShowcase') : $t('reviews.noLevelsAddedYet')">
         <form v-show="postData[0].length > 0" class="flex gap-1 justify-center w-full" @submit.prevent="settings.pickedIndex = indPicked">
             <select @keyup.enter="settings.pickedIndex = indPicked" v-model.lazy="indPicked" class="p-2 bg-white bg-opacity-10 rounded-md">
                 <option :value="index" v-for="(level, index) in postData[0]">{{ level.levelName || $t('other.unnamesd') }}</option>

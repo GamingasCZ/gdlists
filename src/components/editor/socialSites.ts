@@ -8,6 +8,8 @@ export const socialMedia = [
     {'name': i18n.global.t('collabTools.dis'), 'icon': "discord", 'baseUrl': "Discord", 'color': "#5865F2", 'index': 3},
     {'name': i18n.global.t('collabTools.customLink'), 'icon': "link", 'baseUrl': "Custom", 'color': "#2C2F33", 'index': 4},
     {'name': i18n.global.t('collabTools.bluesky'), 'icon': "bluesky", 'baseUrl': "bsky.app", 'color': "#3982FE", 'index': 5},
+    {'name': i18n.global.t('collabTools.instagram'), 'icon': "instagram", 'baseUrl': "instagram.com", 'color': "#C044B4", 'index': 6},
+    {'name': i18n.global.t('collabTools.tiktok'), 'icon': "tiktok", 'baseUrl': "tiktok.com", 'color': "#4F5970", 'index': 7},
   ]
   
 export const socialMediaImages = ref({})

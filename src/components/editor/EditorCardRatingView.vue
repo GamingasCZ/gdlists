@@ -129,7 +129,7 @@ const rateCol = computed(() => chroma.hsl(...DEFAULT_RATINGS[selectedDefRate.val
             <span class="mr-2 text-xl font-bold">{{ rating.name }}</span>
 
             <span v-if="ratings?.[0]?.[i] != -1" class="inline-block min-w-6">{{ ratings?.[0]?.[i] }}</span>
-            <span v-else class="inline-block font-black text-red-500 min-w-6">!</span>
+            <span v-else class="inline-block font-black text-blue-500 min-w-6">?</span>
             
             <div
                 :style="{width: `${(ratings?.[0]?.[i] ?? 0)/10*100}%`, background: chroma.hsl(...rating.color).hex()}"

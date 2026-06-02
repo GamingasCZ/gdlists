@@ -8,6 +8,8 @@ import { useI18n } from "vue-i18n";
 import Tooltip from "../ui/Tooltip.vue";
 import ProfilePicture from "../global/ProfilePicture.vue";
 import chroma from "chroma-js";
+import CommentsIcon from "@/images/comment.svg?raw"
+import LevelsIcon from "@/images/levels.svg?raw"
 
 const props = defineProps<{
   name: string;
@@ -25,6 +27,7 @@ const props = defineProps<{
   ratings: [number, number, number]
   hidden: string
   color: number[]
+  commsHidden: number
 }>();
 
 const emit = defineEmits<{
@@ -213,8 +216,12 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
 
         <!-- Comments button -->
         <div class="md:ml-9">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[0]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
-            <img src="@/images/comment.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{
+          <button v-show="!commsHidden" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
+            <div class="mr-2 w-6 h-6" :class="{'[&_.glasa]:fill-black': openDialogs[0]}" :style="{
+              fill: openDialogs[0] ? 'white' : 'none'
+              }" v-html="CommentsIcon">
+            </div>
+            <label class="max-md:hidden">{{
               $t('level.comments') }}</label>
             <label
               v-show="commAmount > 0"
@@ -225,8 +232,12 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
 
         <!-- Review level ratings button -->
         <div class="ml-2" v-if="review && data.levels.length > 0">
-          <button :class="{'border-b-4 border-lof-400': openDialogs[1]}" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
-            <img src="@/images/rating.svg" class="inline w-6 md:mr-2" /><label class="max-md:hidden">{{ $t('editor.levels') }}</label>
+          <button class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'reviewLevels')">
+            <div class="mr-2 w-6 h-6" :style="{
+              fill: openDialogs[1] ? 'white' : 'none'
+              }" v-html="LevelsIcon">
+            </div>
+            <label class="max-md:hidden">{{ $t('editor.levels') }}</label>
             <label
             class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 data.levels.length }}</label>
@@ -235,12 +246,6 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
       </div>
 
       <div class="flex gap-2 max-md:hidden">
-        <!-- Share popup -->
-        <button :style="{backgroundColor: descColor}" :title="$t('other.share')" @click="emit('doListAction', 'sharePopup')"
-          class="p-2.5 rounded-md button aspect-square">
-          <img class="w-5" src="@/images/share.svg" alt="" />
-        </button>
-
         <!-- Jump to popup -->
         <button :style="{backgroundColor: descColor}" :title="$t('listViewer.contents')" @click="emit('doListAction', 'jumpPopup')"
           class="p-2.5 rounded-md button aspect-square">

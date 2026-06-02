@@ -24,11 +24,12 @@ const videoLoading = ref(-2)
 if (props.settings.url) videoLoading.value = 0
 
 const size = containers.addVideo.settings[1].valueRange
+const mountedOnce = ref(false)
 
 </script>
 
 <template>
-    <ContainerHelp v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? $t('reviews.loadVideoFail') : $t('reviews.setVideo')">
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" v-if="videoLoading != 0" icon="addVideo" :help-content="videoLoading == -1 ? $t('reviews.loadVideoFail') : $t('reviews.setVideo')">
         <form @submit.prevent="">
             <input type="text" v-model="settings.url" class="p-1 bg-white bg-opacity-10 rounded-md" :placeholder="$t('reviews.ytLink')">
         </form>

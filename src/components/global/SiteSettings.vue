@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import Option from '../ui/Option.vue';
-import { hasLocalStorage, SETTINGS } from "@/siteSettings";
+import { hasLocalStorage, loggedIn, SETTINGS } from "@/siteSettings";
 import RadioPicker from '../ui/RadioPicker.vue';
 import SectionDivider from '../ui/SectionDivider.vue';
 import HoldButton from '../ui/HoldButton.vue';
 import { ref } from 'vue';
 import cookier from "cookier"
+import { clearNotifListed, listenForNotifications, notifTimeout } from './notifications.ts';
 
 const removeCookies = () => {
     if (!hasLocalStorage()) return
@@ -22,6 +23,14 @@ const removeStorage = () => {
 }
 
 const storageSize = ref(0)
+
+const toggleNotifRead = (enabled: boolean) => {
+    if (enabled)
+        listenForNotifications()
+    else
+        clearNotifListed()
+}
+
 if (hasLocalStorage()) {
     for (let i = 0; i < localStorage.length; i++)
         storageSize.value += localStorage.getItem(localStorage.key(i)).length
@@ -56,6 +65,15 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
+            v-if="loggedIn"
+            v-model="SETTINGS.navDClick"
+            :name="$t('settingsMenu.navDClick')"
+            :desc="$t('settingsMenu.navDClickHelp')"
+            control="dropdown"
+            :control-options="[[$t('settingsMenu.browsing'), 0], [$t('settingsMenu.creating'), 1]]"
+            >
+        </Option>
+        <Option
             v-model="SETTINGS.autoComments"
             :name="$t('settingsMenu.loadCom')"
             :desc="$t('settingsMenu.loadCHelp')"
@@ -69,8 +87,27 @@ if (hasLocalStorage()) {
             control="cbox"
         >
         </Option>
-        <SectionDivider :text="$t('editor.editor')" />
         <Option
+            v-if="loggedIn"
+            @update:model-value="toggleNotifRead"
+            v-model="SETTINGS.checkNotifs"
+            :name="$t('settingsMenu.notif')"
+            :desc="$t('settingsMenu.notifHelp')"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-if="loggedIn"
+            v-model="SETTINGS.notifBehaviour"
+            :name="$t('settingsMenu.notifBehave')"
+            :desc="$t('settingsMenu.notifBeHelp')"
+            control="dropdown"
+            :control-options="[[$t('navbar.dropdown'), 0], [$t('navbar.fullscreen'), 1]]"
+        >
+        </Option>
+        <SectionDivider v-if="loggedIn" :text="$t('editor.editor')" />
+        <Option
+            v-if="loggedIn"
             v-model="SETTINGS.compactToolbar"
             :name="$t('settingsMenu.compToolbar')"
             :desc="$t('settingsMenu.compactHelp')"
@@ -78,6 +115,7 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
+            v-if="loggedIn"
             v-model="SETTINGS.colorization"
             :name="$t('settingsMenu.colorize')"
             :desc="$t('settingsMenu.colorizeHelp')"
@@ -85,6 +123,7 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
+            v-if="loggedIn"
             v-model="SETTINGS.autosave"
             :name="$t('settingsMenu.autosave')"
             :desc="$t('settingsMenu.autosaveHelp')"
@@ -144,8 +183,9 @@ if (hasLocalStorage()) {
             control="cbox"
             >
         </Option>
-        <SectionDivider :text="$t('settingsMenu.savedData')" />
+        <SectionDivider v-if="loggedIn" :text="$t('settingsMenu.savedData')" />
         <Option
+            v-if="loggedIn"
             :name="$t('settingsMenu.delCookies')"
             :desc="$t('settingsMenu.delCookHelp')"
             control="inline-slot"
@@ -153,6 +193,7 @@ if (hasLocalStorage()) {
             <HoldButton @pushed="removeCookies" :text="$t('editor.remove')" />
         </Option>
         <Option
+            v-if="loggedIn"
             :name="$t('settingsMenu.delData')"
             :desc="$t('settingsMenu.delDataHelp')"
             control="inline-slot"

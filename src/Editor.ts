@@ -13,6 +13,8 @@ export const EMOJI_COUNT = 18;
 export const diffScaleOffsets = [1.085, 1.11, 0.95, 1.15, 1.25]
 export const diffTranslateOffsets = [0, 0, "0 -0.05rem", "0 -0.05rem", "0 -0.09rem"]
 
+export const DEFAULT_TITLEDATA = () => ({theme: 0, tagline: true, size: 1, colors: [true, []], followFont: true, outline: false, shadow: 0, align: 0})
+
 export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   reviewName: "",
   description: "",
@@ -24,6 +26,7 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   levels: [],
   tagline: "",
   thumbnail: ["", 0, 33, 1, true],
+  titleData: DEFAULT_TITLEDATA()
 }}
 
 export const DEFAULT_LEVEL: () => Level = () => ({
@@ -182,6 +185,7 @@ export const prettyDate = (datePassed: number) => {
 }
 
 export function parseElapsed(secs: number) {
+  secs = Math.max(0, secs)
   if (secs < 60) return Math.round(secs) + "s"; //s - seconds
   else if (secs < 3600) return Math.round(secs / 60) + "m"; //m - minutes
   else if (secs < 86400) return Math.round(secs / 3600) + "h"; //h - hours
@@ -297,6 +301,7 @@ export const shortenYTLink = (link: string, disableParams = false) => {
 export const lastPFPchange = ref(Date.now())
 export const currentCutout = ref(0)
 export const currentUID = ref("0")
+
 export const profileCutouts = [
   'circle()',
   '',
@@ -330,3 +335,18 @@ export var lastTab: (number | string | null)[] = [null, null]
 export const modLastTab = (x: [number, string]) => lastTab = x
 
 export const lastUsedTags = ref<number[]>([])
+
+export var lastPostPickerTab = [0, 0]
+export const modLastPPTab = (x: [0 | 1 | 2, 0 | 1 | 2]) => lastPostPickerTab = x
+
+// from: https://stackoverflow.com/a/7616484
+export const generateHash = (string: string) => {
+  let hash = 0;
+  for (const char of string) {
+    hash = (hash << 5) - hash + char.charCodeAt(0);
+    hash |= 0; // Constrain to 32bit integer
+  }
+  return hash;
+};
+
+export const navHidden = ref(false)

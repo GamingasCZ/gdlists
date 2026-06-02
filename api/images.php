@@ -81,7 +81,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     $filesize = strlen($binaryData);
     if ($filesize > MAX_UPLOADSIZE) die("-4");
-    if ($filesize < 2049) die("-4");
+    if ($filesize < 2049) die("-11");
 
     // Create directory for user
     if (!is_dir($userPath)) {
@@ -123,7 +123,7 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     
     // Save image
     $compressedFilesize;
-    imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 60);
+    imagewebp($maxsize, $userPath . "/" . $imageHash . ".webp", 80);
     $compressedFilesize = filesize($userPath . "/" . $imageHash . ".webp");
     if (MAX_STORAGE - $galleryDetails["used"] - $compressedFilesize <= 0) {
         imagedestroy($img);
@@ -133,12 +133,16 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     }
 
     
-    // Create thumbnail
+    // Create thumbnails
     if ($makeThumb) {
-        $thumbnail = imagescale($img, 240);
+        $thumbnail = imagescale($img, 384);
         imagesavealpha($thumbnail, true);
-        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-thumb.webp", 50);
+        imagewebp($thumbnail, $userPath . "/" . $imageHash . "-mthumb.webp", 80);
 
+        $thumbnailS = imagescale($thumbnail, 192);
+        imagewebp($thumbnailS, $userPath . "/" . $imageHash . "-thumb.webp", 40);
+
+        imagedestroy($thumbnailS);
         imagedestroy($thumbnail);
     }
 
@@ -281,6 +285,9 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             if (array_key_exists("error", $res)) die('-5'); // Image is in use
             
             foreach ($_GET["hash"] as $singleHash) {
+                if (is_file($userPath . "/" . $singleHash . "-mthumb.webp"))
+                    unlink($userPath . "/" . $singleHash . "-mthumb.webp");
+
                 if (is_file($userPath . "/" . $singleHash . ".webp")) {
                     unlink($userPath . "/" . $singleHash . ".webp");
                     unlink($userPath . "/" . $singleHash . "-thumb.webp");

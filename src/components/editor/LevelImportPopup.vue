@@ -15,6 +15,9 @@ const tab = ref(0) // 0 - main, 1 - loading, 2 - error, 3 - results
 
 
 const LEVELS = ref<LevelSearchResponse[]>([])
+
+const invertSelection = () => LEVELS.value.forEach(x => x.selected = !x.selected)
+
 const findByIDList = (ids: string) => {
   importError.value = 3
   let idArray = (ids.match(/\d+/g) ?? []).slice(0, 50)
@@ -26,7 +29,7 @@ const findByIDList = (ids: string) => {
 
   page.value = 1
   axios
-    .get(import.meta.env.VITE_API + "/rubLevelData.php?idList&list=" + (idArray?.join(",")) + ',')
+    .get(import.meta.env.VITE_API + `/rubLevelData.php?&list=${(idArray?.join(",")) + ','}&idList`)
     .then(async (response: AxiosResponse) => {
       LEVELS.value = response.data;
       for (let i = 0; i < LEVELS.value.length; i++) {
@@ -44,8 +47,8 @@ const findIngame = (searchUser:boolean, listID: string) => {
   importError.value = 3
   page.value = 1
   let reqUrl: string
-  if (!searchUser) reqUrl = `/rubLevelData.php?list&id=` + listID
-  else reqUrl = `/rubLevelData.php?userAll&username=` + listID
+  if (!searchUser) reqUrl = `/rubLevelData.php?id=${listID}&list`
+  else reqUrl = `/rubLevelData.php?username=${listID}&userAll` 
 
   axios
   .get(import.meta.env.VITE_API + reqUrl)
@@ -95,8 +98,8 @@ const gdInput = ref<HTMLInputElement>()
 
 <template>
     <!-- Main -->
-    <TabBar @switched-tab="tab = $event" :tab-names="[$t('editor.iglists'), $t('editor.idlist')]" />
     <main v-if="page == 0" id="importForm" class="relative w-full h-80">
+      <TabBar @switched-tab="tab = $event" :default-tab="0" :tab-names="[$t('editor.iglists'), $t('editor.idlist')]" />
       <!-- In-game lists -->
       <div v-if="tab == 0">
         <h2 class="mt-2 text-xl font-bold text-center">{{ $t('editor.ingame') }}</h2>
@@ -134,7 +137,7 @@ const gdInput = ref<HTMLInputElement>()
         </Transition>
       </div>
 
-      <button @click="submitForm" class="absolute right-0 bottom-0 px-3 py-1 m-2 font-black text-black rounded-md bg-lof-400 button">{{ $t('other.import') }}</button>
+      <button @click="submitForm" class="absolute right-0 bottom-0 px-3 py-2 m-2 font-black text-black rounded-md bg-lof-400 button">{{ $t('other.import') }}</button>
         
       <!-- CSV import -->
       <!-- <div class="">
@@ -184,8 +187,11 @@ const gdInput = ref<HTMLInputElement>()
         <div class="sticky inset-full w-full h-12 bg-gradient-to-t from-black to-transparent opacity-20"></div>
       </div>
       <div class="flex justify-between px-2 pb-2 mt-2 w-full">
-        <button class="px-3 text-xl rounded-md border-2 border-white border-opacity-20" @click="goBack">{{ $t('other.back') }}</button>
-        <button :disabled="LEVELS.length == 0" class="flex gap-2 items-center px-3 text-xl font-bold text-black rounded-md disabled:grayscale disabled:opacity-40 bg-lof-400" @click="addLevels"><img src="@/images/check.svg" class="w-5 translate-y-0.5" alt=""> {{ $t('other.add') }}</button>
+        <button class="px-2 text-lof-400" @click="goBack">{{ $t('other.back') }}</button>
+        <button class="px-2 bg-black bg-opacity-40 rounded-md button" @click="invertSelection">
+          <img src="@/images/opacity.svg" class="inline mr-1 w-5" alt="">
+          {{ $t('reviews.invertSel') }}</button>
+        <button :disabled="LEVELS.length == 0" class="flex gap-2 items-center px-3 py-1 text-xl font-bold text-black rounded-md disabled:grayscale disabled:opacity-40 bg-lof-400" @click="addLevels"><img src="@/images/check.svg" class="w-5 translate-y-0.5" alt=""> {{ $t('other.add') }}</button>
       </div>
     </main>
 </template>

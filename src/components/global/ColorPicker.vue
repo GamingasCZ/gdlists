@@ -52,18 +52,34 @@ onMounted(() => {
       />
     </div>
 
-    <div>
-      <div :style="{background: `linear-gradient(90deg, black, transparent)`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
-      <input
-        type="range"
-        class="w-full colorPickerSlider"
-        min="0"
-        max="32"
-        step="1"
-        :value="colors[2]"
-        @input="modColors(2, parseInt($event.target?.value))"
-      />
-    </div>
+    <!-- <div class="flex flex-wrap gap-2">       -->
+      <!-- <div class="grow min-w-84">
+        <div :style="{background: `linear-gradient(90deg, white, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <input
+          type="range"
+          class="w-full colorPickerSlider"
+          min="0"
+          max="32"
+          step="1"
+          :value="colors[1]"
+          @input="modColors(1, parseInt($event.target?.value))"
+        />
+      </div> -->
+  
+      <div class="grow min-w-96">
+        <div :style="{background: `linear-gradient(90deg, black, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <input
+          type="range"
+          class="w-full colorPickerSlider"
+          min="0"
+          max="32"
+          step="1"
+          :value="colors[2]"
+          @input="modColors(2, parseInt($event.target?.value))"
+        />
+      </div>
+    <!-- </div> -->
+
     <div class="flex gap-2" v-if="SETTINGS.disableColors">
       <div :style="{background: colorsHex}" class="w-10 h-10 rounded-full"></div>
       <div>

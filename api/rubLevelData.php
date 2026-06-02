@@ -90,7 +90,7 @@ switch (array_keys($_GET)[1]) {
         $playerID = explode(":", $accountIDReq)[3];
 
         list($returnData, $pages) = parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5, "str"=>$playerID], []), true);
-        for ($i=0; $i < ceil($pages[0]/$pages[2]) - 1; $i++) { 
+        for ($i=1; $i < ceil($pages[0]/$pages[2]) - 1; $i++) { 
             $returnData = array_merge($returnData, parseLevelList(post("https://www.boomlings.com/database/getGJLevels21.php", ["secret"=>"Wmfd2893gb7","type"=>5,"page"=>($i), "str"=>$playerID], []), false));
         }
         break;
@@ -172,9 +172,9 @@ switch (array_keys($_GET)[1]) {
     case "userDataFetch": {
         $accountIDReq = post("https://www.boomlings.com/database/getGJUsers20.php", ["secret"=>"Wmfd2893gb7","str"=>$_GET["username"]], []);
         if ($accountIDReq == "-1") die("-1");
-
+        
         $accountIDData = explode(":", $accountIDReq);
-        $userReq = post("https://www.boomlings.com/database/getGJUserInfo20.php", ["secret"=>"Wmfd2893gb7","targetAccountID"=>$accountIDData[21]], []);
+        $userReq = post("https://www.boomlings.com/database/getGJUserInfo20.php", ["secret"=>"Wmfd2893gb7","targetAccountID"=>$accountIDData[23]], []);
         $userData = explode(":", $userReq);
         for ($i=0; $i < sizeof($userData); $i++) { 
             array_splice($userData, $i, 1);
@@ -186,11 +186,17 @@ switch (array_keys($_GET)[1]) {
         $returnData["color2"] = intval($userData[5]);
         $returnData["glow"] = $userData[6];
         $returnData["socials"] = [];
-        $socialIndexes = [0, 1, 2];
+        $socialIndexes = [0, 1, 2, 6, 7];
 
         $i = 0;
-        foreach ([$userData[15], $userData[30], $userData[31]] as $site) {
-            if ($site != "") array_push($returnData["socials"], [$socialIndexes[$i], "/" . $site]);
+        // youtube, twitter, twitch, instagram, tiktok
+        foreach ([$userData[15], $userData[30], $userData[31], $userData[32], $userData[33]] as $site) {
+            if ($site != "") {
+                if ($i == 4) // tiktok
+                    array_push($returnData["socials"], [$socialIndexes[$i], "/@" . $site]);
+                else
+                    array_push($returnData["socials"], [$socialIndexes[$i], "/" . $site]);
+            }
             $i += 1;
         }
         

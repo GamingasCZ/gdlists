@@ -16,6 +16,22 @@ const error = (ind: number, msg = 0) => {
     return {success: false, error: message[msg], index: ind}
 }
 
+// containerSettings inputs
+export enum ControlType {
+    Hidden,
+    Text,
+    Button,
+    Checkbox,
+    LevelPicker,
+    RatingPicker,
+    Picker,
+    ImagePicker,
+    Spinbox
+}
+
+const base = import.meta.env.BASE_URL
+const divisorStyles = [...Array(8).keys()].map(x => `${base}/divThemes/${x}.svg`)
+
 const containers: Containers = {
     default: {
         placeholder: i18n.global.t('reviews.paragraph'),
@@ -25,32 +41,32 @@ const containers: Containers = {
         settings: [{
             key: "noMD",
             title: i18n.global.t('reviews.disMD'),
-            type: [2],
+            type: [ControlType.Checkbox],
             default: false,
         },
         {
             key: "size",
             title: i18n.global.t('reviews.fontSize'),
-            type: [6, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 18, 20, 22, 24, 32, 36, 48, 64],
+            type: [ControlType.Picker, i18n.global.t('settingsMenu.qMed'), 8, 12, 14, 16, 18, 20, 22, 24, 32, 36, 48, 64],
             default: 0,
         },
         {
             key: "indent",
             title: i18n.global.t('reviews.indent'),
-            type: [2],
+            type: [ControlType.Checkbox],
             default: false,
         },
     ]
     },
     heading1: {
-        placeholder: i18n.global.t('reviews.title', [1]),
+        placeholder: i18n.global.t('reviews.title', [ControlType.Button]),
         styling: "text-5xl font-bold leading-10 mt-3 mb-1",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
-        placeholder: i18n.global.t('reviews.title', [2]),
+        placeholder: i18n.global.t('reviews.title', [ControlType.Checkbox]),
         styling: "text-4xl font-bold leading-8 mt-3 mb-1",
         nestable: true,
         canEditText: true,
@@ -74,15 +90,27 @@ const containers: Containers = {
             {
                 key: "visible",
                 title: i18n.global.t('other.visible'),
-                type: [2],
+                type: [ControlType.Checkbox],
                 default: true,
             },
             {
                 key: "sizeY",
                 title: "",
-                type: [-1],
+                type: [ControlType.Hidden],
                 default: 32,
                 valueRange: [16, 250]
+            },
+            {
+                key: "style",
+                title: i18n.global.t('other.style'),
+                type: [ControlType.ImagePicker].concat(divisorStyles),
+                default: 0,
+            },
+            {
+                key: "color",
+                title: i18n.global.t('other.color'),
+                type: [ControlType.Picker, i18n.global.t('settingsMenu.qMed'), i18n.global.t('reviews.vibrant'), i18n.global.t('review.colorful'), i18n.global.t('other.gradient2')],
+                default: 0,
             },
         ]
     },
@@ -95,44 +123,44 @@ const containers: Containers = {
             {
                 key: "url",
                 title: i18n.global.t('reviews.imgUrl'),
-                type: [-1],
+                type: [ControlType.Hidden],
                 default: "",
             },
             {
                 key: "width",
                 title: "",
-                type: [-1],
+                type: [ControlType.Hidden],
                 default: 0,
                 valueRange: [64, 960]
             },
             {
                 key: "pick",
                 title: i18n.global.t('reviews.pick'),
-                type: [1],
+                type: [ControlType.Button],
                 default: 0
             },
             {
                 key: "alt",
                 title: i18n.global.t('reviews.alttext'),
-                type: [0],
+                type: [ControlType.Text],
                 default: ""
             },
             {
                 key: "description",
                 title: i18n.global.t('reviews.imageDesc'),
-                type: [0],
+                type: [ControlType.Text],
                 default: ""
             },
             {
                 key: "link",
                 title: i18n.global.t('other.link'),
-                type: [0],
+                type: [ControlType.Text],
                 default: ""
             },
             {
                 key: "onlyDeco",
                 title: i18n.global.t('reviews.decoOnly'),
-                type: [2],
+                type: [ControlType.Checkbox],
                 default: false
             },
         ],
@@ -147,21 +175,21 @@ const containers: Containers = {
             {
                 key: "url",
                 title: i18n.global.t('reviews.ytLink'),
-                type: [0],
+                type: [ControlType.Text],
                 required: true,
                 default: ""
             },
             {
                 key: "width",
                 title: "",
-                type: [-1],
+                type: [ControlType.Hidden],
                 default: 320,
                 valueRange: [104, 720]
             },
             {
                 key: "description",
                 title: i18n.global.t('reviews.videoDesc'),
-                type: [0],
+                type: [ControlType.Text],
                 default: ""
             }
         ],
@@ -175,14 +203,20 @@ const containers: Containers = {
             {
                 key: "level",
                 title: i18n.global.t('other.level'),
-                type: [4],
+                type: [ControlType.LevelPicker],
                 default: 0
             },
             {
                 key: "show",
                 title: i18n.global.t('reviews.rating'),
-                type: [5],
+                type: [ControlType.RatingPicker],
                 default: -1
+            },
+            {
+                key: "hideUnrated",
+                title: i18n.global.t('reviews.hideUnrated'),
+                type: [ControlType.Checkbox],
+                default: false
             }
         ]
 
@@ -195,26 +229,26 @@ const containers: Containers = {
             {
                 key: "pickedIndex",
                 title: i18n.global.t('other.level'),
-                type: [-1],
+                type: [ControlType.Hidden],
                 required: true,
                 default: -1
             },
             {
                 key: "pickLevel",
                 title: i18n.global.t('reviews.pickLevel'),
-                type: [1],
+                type: [ControlType.Button],
                 default: 0
             },
             {
                 key: "showCollab",
                 title: i18n.global.t('reviews.dispCollab'),
-                type: [2],
+                type: [ControlType.Checkbox],
                 default: true
             },
             {
                 key: "description",
                 title: i18n.global.t('reviews.levelDesc'),
-                type: [0],
+                type: [ControlType.Text],
                 default: ""
             }
         ],
@@ -229,20 +263,20 @@ const containers: Containers = {
             {
                 key: "post",
                 title: i18n.global.t('other.post'),
-                type: [-1],
+                type: [ControlType.Hidden],
                 required: true,
                 default: false
             },
             {
                 key: "postType",
                 title: i18n.global.t('other.post'),
-                type: [-1],
+                type: [ControlType.Hidden],
                 default: 0
             },
             {
                 key: "pick",
                 title: i18n.global.t('reviews.pickList'),
-                type: [1],
+                type: [ControlType.Button],
                 default: 0
             }
         ],
@@ -256,7 +290,7 @@ const containers: Containers = {
         settings: [{
             key: "components",
             title: i18n.global.t('reviews.columns'),
-            type: [-1],
+            type: [ControlType.Hidden],
             default: [[], []]
         },
         {
@@ -281,34 +315,34 @@ const containers: Containers = {
             {
                 key: "components",
                 title: i18n.global.t('reviews.carousel'),
-                type: [-1],
+                type: [ControlType.Hidden],
                 required: true,
                 default: []
             },
             {
                 key: "height",
                 title: '',
-                type: [-1],
+                type: [ControlType.Hidden],
                 required: true,
                 default: 192,
-                valueRange: [48, 960]
+                valueRange: [48, 720]
             },
             {
                 key: "pick",
                 title: i18n.global.t('reviews.pickMedia'),
-                type: [1],
+                type: [ControlType.Button],
                 default: 0
             },
             {
                 key: "overflow",
                 title: i18n.global.t('reviews.overflow'),
-                type: [2],
+                type: [ControlType.Checkbox],
                 default: false
             },
             {
                 key: "crop",
                 title: i18n.global.t('reviews.cropWidth'),
-                type: [2],
+                type: [ControlType.Checkbox],
                 default: false
             },
         ],
@@ -325,20 +359,20 @@ const containers: Containers = {
         {
             key: "users",
             title: i18n.global.t('other.users'),
-            type: [-1],
+            type: [ControlType.Hidden],
             required: true,
             default: []
         },
         {
             key: "pick",
             title: i18n.global.t('reviews.editMembers'),
-            type: [1],
+            type: [ControlType.Button],
             default: 0
         },
         {
             key: "colums",
             title: i18n.global.t('reviews.displayColumns'),
-            type: [2],
+            type: [ControlType.Checkbox],
             default: false
         }]
     }
@@ -395,10 +429,10 @@ export type cDefault = {noMD: boolean, size: number, indent: boolean}
 export type cHeading1 = {}
 export type cHeading2 = {}
 export type cHeading3 = {}
-export type cDivisor = {sizeY: number, visible: boolean}
+export type cDivisor = {sizeY: number, visible: boolean, style: number, color: number}
 export type cShowImage = {url: string, width: number, pick: number, alt: string, description: string, link: string}
 export type caddVideo = {width: number, url: string, description: string}
-export type cShowRating = {level: number, show: number}
+export type cShowRating = {level: number, show: number, hideUnrated: boolean}
 export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
 export type cShowList = {post: boolean, postType: number, pick: number}
 export type cTwoColumns = {components: (Containers | boolean)[], gaps: boolean}

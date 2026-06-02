@@ -11,6 +11,14 @@ export interface ListPreview {
   isPinned?: boolean
 }
 
+export enum URIHideUIOptions {
+    None = 0,
+    Length = 4,
+    Navigation = 0b1000,
+    Description = 0b0100,
+    Sharing = 0b0010,
+    Comments = 0b0001
+}
 
 /**
  * Return data after picking a post from the review post showcase container
@@ -166,6 +174,7 @@ interface HumanSocialLink {
 export interface ListCreatorInfo {
   username: string;
   discord_id: string;
+  pfp_cutout: number
 }
 
 export interface LevelBackup {
@@ -184,6 +193,7 @@ export interface LevelList {
   translucent: boolean;
   disComments: boolean;
   levels: Level[];
+  titleData?: TitleData
 }
 
 export interface LevelBackground {
@@ -194,7 +204,11 @@ export interface LevelBackground {
   scrolling: 0 | 1 | 2
 }
 
-export type LevelScreenshot = [LevelImage, string, string]
+export type LevelScreenshot = [
+  LevelImage, // type
+  string, // link
+  string, // description
+]
 
 export interface Level {
   levelName: string;
@@ -290,6 +304,7 @@ export interface ReviewList {
   ratings: ReviewRating[]
   defaultRatings: ReviewRating[]
   settings: ReviewSettings
+  disabledRatings: number
   private: boolean
   transparentPage: 0 | 1 | 2
   language: number
@@ -297,6 +312,18 @@ export interface ReviewList {
   readerMode: boolean
   font: number
   fontTint: boolean
+  titleData?: TitleData
+}
+
+export interface TitleData {
+  theme: number
+  tagline: boolean
+  colors: any[]
+  size: number
+  outline: boolean
+  shadow: number
+  followFont: boolean
+  align: number
 }
 
 export interface ReviewDraft {
@@ -352,6 +379,7 @@ export interface ImageStorage {
   filecount: number
   maxFilecount: number
   maxUploadSize: number
+  newImage?: string[]
 }
 
 export interface ImageFolder {
@@ -365,7 +393,7 @@ export interface ImageFolder {
 export interface LocalNotification {
   title: string
   text: string
-  icon: 'save' | 'error' | 'check'
+  icon: 'save' | 'error' | 'check' | 'loading'
   stamp?: any
 }
 
@@ -401,4 +429,25 @@ export interface FormattingButton {
 	tooltip?: string
 	splitAfter?: boolean
 	bold?: boolean
+}
+
+export interface NotificationContent {
+  to: string
+  from: string
+  from_user: string
+  type: 'comment' | 'rating' | 'other'
+  unread: boolean
+  time: string
+  postType: 'list' | 'review' | 'other'
+  objectID: number
+  otherID: number | null
+  comment: string | null
+  count: number
+  id: number
+}
+
+export enum HoverFileAction {
+  DragOver,
+  DragLeave,
+  Drop
 }

@@ -5,9 +5,15 @@ import { ref, watch } from 'vue';
 const props = defineProps<{
     colAmount: number
     fixedAmount?: number
-    maxContent?: boolean
     playing: boolean
     spread?: boolean
+    shrink?: boolean
+    clickable: boolean
+    colWidths?: boolean[]
+}>()
+
+const emit = defineEmits<{
+    (e: "changedWidth", newArray: boolean[]): void
 }>()
 
 const hoveringAmount = defineModel({default: -1})
@@ -37,18 +43,30 @@ const playPreview = () => {
 if (props.playing)
     playPreview()
 
+const maxAmount = ref<boolean[]>(props.colWidths ?? Array(props.colAmount).fill(false))
+watch(() => props.colWidths, () => {
+    maxAmount.value = props.colWidths!
+})
+
+const click = (ind: number) => {
+    if (props.clickable) {
+        maxAmount.value[ind] = !maxAmount.value[ind]; emit('changedWidth', maxAmount.value)
+    } 
+}
+
 </script>
 
 <template>
-    <table :class="{'w-full': !maxContent || spread}" class="border-collapse" @mouseout="hoveringAmount = -1">
-        <tr :class="{'flex justify-between': spread}">
+    <table :class="{'w-full': !shrink}" @mouseout="hoveringAmount = -1">
+        <tr class="flex" :class="{'justify-between': spread}">
             <td
-                v-for="i in Math.max(0, colAmount)"
+                v-for="(i, ind) in Math.max(0, colAmount)"
                 @mouseover="hoveringAmount = fixedAmount ?? i"
-                :class="{'!bg-lof-300 cursor-pointer': hoveringAmount >= i && !fixedAmount}"
-                class="px-2 h-8 border-2 min-w-4 border-lof-400 first:rounded-l-md last:rounded-r-md"
+                @click="click(ind)"
+                :class="{'!bg-lof-300 cursor-pointer': hoveringAmount >= i && !fixedAmount, 'grow': !maxAmount[ind], 'border-r-0': !spread}"
+                class="px-2 h-8 border-2 transition-all duration-75 cursor-pointer hover:bg-lof-300 min-w-8 border-lof-400 last:border-r-2 first:rounded-l-md last:rounded-r-md"
             >
-                <div v-if="animStep == i" :class="{'w-8': maxContent}" class="h-3 gridEx bg-lof-300"></div>
+                <!-- <div v-if="animStep == i" class="h-3 gridEx bg-lof-300"></div> -->
             </td>
         </tr>
     </table>

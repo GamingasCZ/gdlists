@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
     maxSize?: number
     minSize?: number
-    gizmoPos: 'corner' | 'vertical'
+    gizmoPos: 'corner' | 'vertical' | 'slider'
     editable: boolean
     alwaysVisible: boolean
+    currHeight?: number
 }>()
 
 const emit = defineEmits<{
@@ -76,14 +77,44 @@ const autoResize = () => {
     emit('resize', imageScale.value)
 }
 
+const perc = computed(() => {
+    let curr = props.currHeight ?? 1
+    let min = props.minSize ?? 1
+    let max = props.maxSize ?? 1
+    let ratio = (curr - min) / (max - min)
+    return `${Math.floor(ratio*100)}%`
+})
+
 </script>
 
 <template>
     <div ref="self" class="relative rounded-lg group" :class="{'border-2 border-transparent group-hover:!border-blue-400 h-full': editable, 'border-blue-400': alwaysVisible}">
         <slot :width="width" />
         
-        <button v-if="editable" tabindex="-1" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
+        <button v-if="editable && gizmoPos != 'slider'" tabindex="-1" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
         :class="{'-right-1': gizmoPos == 'corner', 'left-1/2': gizmoPos == 'vertical'}"
         ></button>
+        <input v-else-if="editable" @input="emit('resize', $event.target.value)" tabindex="-1" :value="currHeight" type="range" :min="minSize ?? 96" :max="maxSize ?? 1024" id="resizerSlider" class="absolute -top-3 invisible w-full bg-transparent appearance-none group-hover:visible">
     </div>
 </template>
+
+<style>
+#resizerSlider::-webkit-slider-thumb {
+  @apply border-black bg-blue-100 p-2 w-7 h-7 -translate-y-2.5 border-2 border-solid appearance-none rounded-full
+}
+#resizerSlider::-moz-range-thumb {
+  @apply border-black scale-125 bg-blue-100 rounded-full
+}
+
+#resizerSlider::-webkit-slider-runnable-track {
+  @apply border-2 border-blue-400 border-solid h-3 translate-y-2 rounded-full;
+  --range: v-bind(perc);
+  background: linear-gradient(90deg, #61A3F6 var(--range),black var(--range))
+}
+#resizerSlider::-moz-range-track {
+  @apply bg-black border-2 border-blue-400 border-solid h-2 rounded-full
+}
+#resizerSlider::-moz-range-progress {
+  @apply bg-blue-400 h-2 rounded-full
+}
+</style>

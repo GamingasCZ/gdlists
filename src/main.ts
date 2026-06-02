@@ -4,8 +4,9 @@ import router from "./router";
 import { i18n, setLanguage } from "./locales"
 
 import "./assets/input.css";
-import { SETTINGS } from "./siteSettings";
+import { hasLocalStorage, SETTINGS } from "./siteSettings";
 import { changeTheme, checkSeasonalTheme, saveTheme } from "./themes";
+import { listenForNotifications } from "./components/global/notifications";
 
 
 const app = createApp(App);
@@ -19,5 +20,8 @@ else changeTheme(SETTINGS.value.selectedTheme || 0)
 
 if (SETTINGS.value.language == -1) SETTINGS.value.language =  +["cz", "sk"].includes(navigator.language)
 await setLanguage(SETTINGS.value.language)
+
+if (SETTINGS.value.checkNotifs)
+    listenForNotifications()
 
 app.mount("#app");

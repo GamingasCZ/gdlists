@@ -47,8 +47,8 @@ const isDiscordServer = computed(() => {
 <section class="p-1 bg-black bg-opacity-40 rounded-md min-w-[8rem] max-w-[12rem] grow transition-opacity" :class="{'opacity-50': hovering != null && hovering != human}" @mouseenter="hiddenRole || (hovering = human)" @mouseleave="hovering = null">
     <div class="flex relative gap-3 justify-center items-center">
         <PlayerIcon
-            v-if="human.verified?.[1]"
-            :icon="human.verified[0]" :col1="human.verified[1].toString()" :col2="human.verified[2].toString()" :glow="human.verified[3] | 0" :quality="1"
+            v-if="human.verified"
+            :icon="human.verified[0]" :col1="human.verified[2]" :col2="human.verified[1]" :glow="human.verified[3] | 0" :quality="1"
             class="z-10 w-10 h-10"
         />
         <img v-else :src="emoji" alt="" class="w-10 h-10">

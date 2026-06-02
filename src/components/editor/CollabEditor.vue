@@ -374,37 +374,21 @@ defineExpose({
 
 <template>
       <!-- Saved collabs-->
-      <Dialog :open="savedSidebarOpen" @close-popup="savedSidebarOpen = false" :title="$t('navbar.saved')" :width="dialog.small">
+      <Dialog :open="savedSidebarOpen" @close-popup="savedSidebarOpen = false" :action="saveCollab" :side-button-disabled="(typeof collab == 'string')" :title="$t('navbar.saved')" :width="dialog.large" :side-button-text="'Uložit'">
+          <template #icon>
+            <img src="@/images/symbolicSave.svg" class="w-5" alt="">
+          </template>
           <main
-            class="bg-[url(@/images/fade.svg)] bg-repeat-x flex flex-col gap-2 p-2 w-full overflow-y-auto overflow-x-clip h-[46rem]">
-            <button v-if="localStrg" class="py-2 m-1 bg-black bg-opacity-40 rounded-md button disabled:opacity-40"
-              :disabled="(typeof collab == 'string')" @click="saveCollab()">
-            <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
-            {{ $t('collabTools.saveCollab') }}
-          </button>
+            class="bg-[url(@/images/fade.svg)] bg-repeat-x grid sm:grid-cols-2 gap-2 p-2 w-full overflow-y-auto overflow-x-clip max-h-[46rem]">
+              <SavedCollabVue v-for="(save, index) in savedCollabs" :key="save.timestamp" :save="save" :collIndex="index"
+              :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
+              @load-collab="loadCollab" @remove-collab="removeCollab(index)" small />
 
             <article v-if="!savedCollabs?.length"
-              class="flex flex-col gap-3 justify-center items-center px-6 w-full h-full text-xl text-center opacity-20">
-            <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
-            {{ $t('collabTools.savedHelp') }}
-          </article>
-
-            <!-- Currently editing -->
-            <div v-if="currentlyUsedSaved != -1" class="mb-4">
-              <SectionDivider :text="$t('collabTools.beingEdited')" />
-              <SavedCollabVue :on-saves-page="false" :save="savedCollabs![currentlyUsedSaved]" :coll-index="currentlyUsedSaved"
-                :in-use="true" @do-save="saveAllCollabs" @load-collab="loadCollab" @remove-collab="removeCollab" />
-            </div>
-            
-            <!-- All collabs -->
-            <div>
-              <SectionDivider :text="$t('collabTools.allCollabs')" v-if="savedCollabs?.length" />
-              <div class="flex flex-col gap-2">
-                  <SavedCollabVue v-for="(save, index) in savedCollabs" :save="save" :collIndex="index"
-                    :in-use="currentlyUsedSaved == index" :on-saves-page="false" @do-save="saveAllCollabs"
-                    @load-collab="loadCollab" @remove-collab="removeCollab" />
-              </div>
-            </div>
+              class="flex flex-col col-span-2 gap-3 justify-center items-center px-6 mx-auto w-full h-full text-xl text-center opacity-20">
+              <img src="@/images/savedMobHeader.svg" class="w-28" alt="">
+              {{ $t('collabTools.savedHelp') }}
+            </article>
         </main>
       </Dialog>
 
@@ -448,7 +432,7 @@ defineExpose({
             v-if="(typeof collab != 'string')" @click="addMember()" id="addCollabMember"
                   :disabled="typeof collab != 'string' && (noRoles || collab[2].length >= 100)"
             :class="{ 'disabled': typeof collab != 'string' && (noRoles || collab[2].length >= 100) }">
-                    <img src="@/images/addLevel.svg" alt="">
+                    <img src="@/images/plus.svg" alt="">
                 </button>
             </div>
             
@@ -510,7 +494,7 @@ defineExpose({
             <h1 class="opacity-60">{{ $t('collabTools.addSomeMembers') }}</h1>
             <div class="flex gap-2 mx-auto mt-2 mb-8 w-max text-base">
               <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="addMember">
-                <img src="../../images/addLevel.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
+                <img src="../../images/plus.svg" alt="" class="box-border inline p-0.5 mr-2 w-8">
                 {{ $t('collabTools.addMemberTitle') }}
               </button>
               <button class="p-1 bg-black bg-opacity-40 rounded-md button" @click="deleteCollab">

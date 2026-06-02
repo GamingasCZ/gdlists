@@ -18,6 +18,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "clicked", event: MouseEvent)
   (e: "auxclicked", event: MouseEvent)
+  (e: "dragging")
 }>()
 
 const base = import.meta.env.BASE_URL
@@ -25,81 +26,39 @@ const base = import.meta.env.BASE_URL
 const tagSettingsOpen = ref(false)
 const editingLink = ref(false)
 
-const contentDiv = ref<HTMLDivElement>()
-
-const getName = () => [-1, ''].includes(props.tag[1]) ? i18n.global.t(`editor.tags[${props.tag[0]}]`) : props.tag[1]
-
-const moveCaretToEnd = () => {
-  let sel = window.getSelection()!
-  if (sel.type != 'Caret') return
-  
-  let range = document.createRange()
-  range.setStart(sel.focusNode, sel.focusNode?.childNodes.length)
-  sel.removeAllRanges()
-  sel.addRange(range)
-}
-
+const tagDiv = ref<HTMLButtonElement>()
+const nameInput = ref<HTMLInputElement>()
 const openSettings = () => {
-  if (props.settable && !tagSettingsOpen.value) {
-    tagSettingsOpen.value = true
-    nextTick(() => {
-      contentDiv.value?.focus()
-      contentDiv.value.textContent = getName()
-      moveCaretToEnd()
-    })
-  }
+  settingsOpen.value = true
+  nextTick(() => nameInput.value?.focus())
 }
 
-const modTagName = (to: string, close = true) => {
-  if (tagInputEmpty.value) return
+const closeSettings = (andFocus = true) => {
+  checkUrl()
+  settingsOpen.value = false
+  if (andFocus)
+    tagDiv.value?.focus()
+}
 
-  if (!editingLink.value)
-    props.tag[1] = to
-  else {
+const modTagName = (newName: string) =>
+    props.tag[1] = newName == '' ? -1 : newName
+
+const checkUrl = () => {
     try {
-      let isUrl = new URL(to)
-      props.tag[2] = to
+      new URL(props.tag[2])
     }
-    catch (_) {}
-  }
-
-  if (close) {
-    tagSettingsOpen.value = false
-    editingLink.value = false
-  }
-}
-
-const editLink = () => {
-  modTagName(contentDiv.value?.textContent, false)
-  
-  editingLink.value = !editingLink.value
-  contentDiv.value.textContent = editingLink.value ? props.tag[2] : getName()
-  contentDiv.value?.focus()
-  moveCaretToEnd()
-  
-  tagInputEmpty.value = contentDiv.value.textContent.length == 0
+    catch (_) {
+      props.tag[2] = ""
+    }
 }
 
 const tagInputEmpty = ref(false)
-const placeholderText = computed(() => `'${tagInputEmpty.value ? (editingLink.value ? i18n.global.t('other.link') : i18n.global.t('other.title')) : ''}'`)
-
-const handleInput = (e: InputEvent) => {
-  nextTick(() => {
-    let len = e.target.textContent.length
-    let maxlen = editingLink.value ? Limit.MAX_TAG_LINKLEN : Limit.MAX_TAG_TEXTLEN
-
-    if (len > maxlen) {
-      e.target.textContent = e.target.textContent.slice(0, maxlen)
-      moveCaretToEnd()
-    }
-    tagInputEmpty.value = len == 0
-  })
-}
+const settingsOpen = ref(false)
 
 </script>
 
 <template>
-  <div ref="tagDiv" @click="settable ? openSettings() : emit('clicked', $event)" @auxclick="emit('auxclicked', $event)" class="flex gap-1 items-center pr-2 text-xs bg-black bg-opacity-40 rounded-full border-2 border-black border-opacity-50 group min-w-4 sm:text-sm"
+  <button ref="tagDiv" @click="settable ? openSettings() : emit('clicked', $event)" @auxclick="emit('auxclicked', $event)" @dragstart="settable && emit('dragging')" :draggable="settable ? 'true' : 'false'" class="flex gap-1 items-center pr-2 text-xs bg-black bg-opacity-40 rounded-full border-2 border-black border-opacity-50 focus-within:outline-white group min-w-4 sm:text-sm"
     :class="{'opacity-60 hover:opacity-100': isExample, 'button': selectable && !tagSettingsOpen}"
   >
     <div class="inline relative align-middle">
@@ -116,15 +75,7 @@ const handleInput = (e: InputEvent) => {
       />
     </div>
 
-    <div v-if="tagSettingsOpen" class="flex">
-      <div contenteditable="true" ref="contentDiv" @input="handleInput" @keydown.enter.prevent="$nextTick(() => modTagName(contentDiv?.textContent))" class="mr-2 outline-none tagTextInput tagEditName min-w-8 focus-within:border-b-2">
-        
-      </div>
-
-      <button @click.stop="editLink" class="mx-1 button" :class="{'invert-[0.4] sepia': editingLink}"><img src="@/images/link.svg" class="w-4" alt=""></button>
-      <button :disabled="tagInputEmpty" @click.stop="modTagName(contentDiv?.textContent)" class="mx-1 disabled:opacity-20 button"><img src="@/images/checkThick.svg" class="w-4" alt=""></button>
-    </div>
-    <div v-else>
+    <div>
       <a
         class="text-blue-300 underline"
         v-if="tag[2]"
@@ -135,17 +86,24 @@ const handleInput = (e: InputEvent) => {
       }}</span>
     </div>
 
-    <button v-if="plus" class="pl-2 ml-auto">
+    <span v-if="plus" class="pl-2 ml-auto">
       <img src="@/images/plus.svg" class="w-3" alt="">
-    </button>
-  </div>
+    </span>
+
+    <Dropdown v-if="settingsOpen && settable" :button="tagDiv" @close="closeSettings(false)">
+      <template #header>
+        <form @submit.prevent="closeSettings" @keyup.esc="closeSettings" class="flex flex-col p-1 text-white">
+          <button type="button" class="flex gap-2 justify-center items-center p-1 text-red-400 bg-black bg-opacity-40 rounded-md button" @click="emit('auxclicked', $event); settingsOpen = false">
+            <img src="@/images/del2.svg" class="mb-1 w-5" alt="">
+            {{ $t('editor.remove') }}
+          </button>
+          <label class="mt-2 text-xl" for="tagEditText">Text</label>
+          <input @input="modTagName($event.target.value)" :value="tag[1] == -1 ? '' : tag[1]" autocomplete="off" :placeholder="$t(`editor.tags[${tag[0]}]`)" @click.stop="$event.target.focus()" ref="nameInput" :maxlength="Limit.MAX_TAG_TEXTLEN" class="p-1 bg-white bg-opacity-10 rounded-md" type="text" id="tagEditText">
+          <label class="mt-4 text-xl" for="tagEditLink">{{ $t('other.link') }}</label>
+          <input v-model="tag[2]" @click.stop="$event.target.focus()" :maxlength="Limit.MAX_TAG_LINKLEN" autocomplete="off" class="p-1 bg-white bg-opacity-10 rounded-md" type="url" name="" id="tagEditLink">
+          <button class="hidden"></button>
+        </form>
+      </template>
+    </Dropdown>
+  </button>
 </template>
-
-<style>
-
-.tagEditName::before {
-  content: v-bind(placeholderText);
-  @apply text-white absolute w-max text-opacity-40;
-}
-
-</style>

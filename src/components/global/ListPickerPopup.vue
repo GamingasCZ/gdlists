@@ -9,6 +9,7 @@ import ReviewPreview from "./ReviewPreview.vue";
 import FavoritePreview from "./FavoritePreview.vue";
 import ListBrowser from "./ListBrowser.vue";
 import LevelPreview from "./LevelPreview.vue";
+import { lastPostPickerTab, modLastPPTab } from "@/Editor";
 
 const props = defineProps<{
     data: any[]
@@ -22,16 +23,17 @@ const emit = defineEmits<{
 
 const query = ref("")
 const state = ref(0) // -3 - Loading, -2 - Error, -1 - No results, 0 - Nothing, 1 - Has lists
-const tab = ref(0)
+const tab = ref(lastPostPickerTab[0])
 
 const switchTab = (newTab: number) => {
     tab.value = newTab
     state.value = 0
     query.value = ""
-    listingLevels.value = false 
+    listingLevels.value = false
+    modLastPPTab([newTab, contentType.value])
 }
 
-const contentType = ref(0)
+const contentType = ref(lastPostPickerTab[1])
 const listingLevels = ref<boolean | 2>(false)
 const levelsFetched = ref([])
 
@@ -97,7 +99,7 @@ const closeLevels = () => {
 <template>
     <div class="flex gap-2 items-center mx-2">
         <input autofocus type="text" @input="adjustQuery($event.target.value)" :placeholder="$t('other.search')" class="px-2 py-1 my-3 bg-black bg-opacity-40 rounded-md grow">
-        <select v-show="tab != 2" v-model="contentType">
+        <select v-show="tab != 2" v-model="contentType" @change="modLastPPTab([tab, contentType])">
             <option :value="0">{{ $t('other.all') }}</option>
             <option :value="1">{{ $t('other.mine') }}</option>
             <option :value="2">{{ $t('other.private') }}</option>
@@ -105,7 +107,7 @@ const closeLevels = () => {
 
     </div>
 
-    <TabBar @switched-tab="switchTab" :tab-names="[$t('help.Lists'), $t('reviews.review'), $t('editor.levels')]" />
+    <TabBar @switched-tab="switchTab" :default-tab="tab" :tab-names="[$t('help.Lists'), $t('reviews.review'), $t('editor.levels')]" />
 
     <div
         tabindex="-1"

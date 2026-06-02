@@ -6,11 +6,17 @@ import { SETTINGS } from "@/siteSettings";
 import { dialog } from "../ui/sizes";
 import LoadingBlock from "../global/LoadingBlock.vue"
 import axios from "axios";
+import { currentUnread } from "./notifications.js";
+import NotifsIcon from "@/images/notifs.svg?raw"
 
 defineProps<{
   isLoggedIn: boolean;
   username: string;
 }>();
+
+const emit = defineEmits<{
+  (e: "openNotifs"): void
+}>()
 
 let loggingOut = false
 function logout() {
@@ -41,11 +47,6 @@ const Gallery = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
-const Sett = defineAsyncComponent({
-  loader: () => import("@/components/global/SiteSettings.vue"),
-  loadingComponent: LoadingBlock
-})
-
 const AvatarEditor = defineAsyncComponent({
   loader: () => import("@/components/global/ProfiePicturePicker.vue"),
   loadingComponent: LoadingBlock
@@ -66,6 +67,11 @@ const Help = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
+const Sett = defineAsyncComponent({
+  loader: () => import("@/components/global/SiteSettings.vue"),
+  loadingComponent: LoadingBlock
+})
+
 const refresh = () => window.location.reload()
 const refreshLangShown = ref(false)
 const currLang = SETTINGS.value.language
@@ -74,13 +80,10 @@ const currLang = SETTINGS.value.language
 
 <template> 
   <div
-  class="flex fixed right-2 top-16 flex-col gap-2 p-2 text-white rounded-md bg-greenGradient sm:top-12"
+  class="flex absolute right-2 top-16 flex-col gap-2 p-2 text-white rounded-md -z-10 bg-greenGradient sm:top-12"
+  id="settingsMenu"
   >
-    <Teleport to="body">
-      <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
-        <Sett />
-      </Dialog>
-  
+    <Teleport to="#app">
       <Dialog v-if="dialogs.help" :open="dialogs.help" @close-popup="dialogs.help = false" :title="$t('other.help')">
         <Help />
       </Dialog>
@@ -89,13 +92,17 @@ const currLang = SETTINGS.value.language
         <AvatarEditor @open-gallery="dialogs.gallery = true" @close-popup="dialogs.avatar = false" />
       </Dialog>
   
-      <Dialog v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
+      <Dialog class="z-40" v-if="dialogs.gallery" :open="dialogs.gallery" :title="$t('other.gallery')" :width="dialog.large" @close-popup="dialogs.gallery = false">
         <Gallery unselectable />
+      </Dialog>
+
+      <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
+        <Sett />
       </Dialog>
     </Teleport>
 
     <Transition name="fadeSlide">
-      <Teleport to="body">
+      <Teleport to="#app">
         <div v-if="dialogs.themes" class="z-30">
             <Themes @close="dialogs.themes = false" />
         </div>
@@ -122,6 +129,14 @@ const currLang = SETTINGS.value.language
       </button>
     </section>
 
+    <button
+      class="flex relative items-center px-2 py-1 text-left bg-black bg-opacity-40 rounded-md sm:hidden button"
+      @click="emit('openNotifs')"
+    >
+      <div v-if="currentUnread > 0" class="absolute -top-1 -left-1 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
+      <div v-html="NotifsIcon" class="mr-3 w-5 h-5 fill-white"></div>{{ $t('navbar.notifs') }}
+    </button>
+  
     <section
       class="flex flex-col gap-1 py-2 w-36 bg-black bg-opacity-50 rounded-md"
     >

@@ -25,10 +25,10 @@ const LANGUAGES = [[i18n.global.t('settingsMenu.czech'), "cs"],
                    [i18n.global.t('other.other'), "ot"]]
 
 export const FONTS: [string, number][] = [["Sofia Sans", 0],
-               ["Serif", 1],
-               ["Sans-Serif", 2],
-               ["Monospace", 3],
-               [i18n.global.t('reviews.systemFont'), 4]]
+               ["Domine", 1],
+               ["Outfit", 2],
+               ["Oswald", 3],
+               ["Martian Mono", 4]]
 export type Post = 'list' | 'review'
 type PostKeys = keyof (ReviewList & LevelList)
 export type ToolbarAction = 'add' | 'preview' | 'align' | 'add' | 'column' | 'format' | 'splitParagraph' | 'columnCreate'

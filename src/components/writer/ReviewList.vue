@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
-import ListPreview from '../global/ListPreview.vue';
 import ContainerHelp from './ContainerHelp.vue';
 import { hasLocalStorage } from '@/siteSettings';
-import router from '@/router';
-import { nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import ReviewPreview from '../global/ReviewPreview.vue';
-import LevelCard from '../global/LevelCard.vue';
 import LevelPreview from '../global/LevelPreview.vue';
 import { type cShowList } from './containers';
 
@@ -56,21 +52,26 @@ const getList = async () => {
     if (levels.value == -1) return
     if (!levels.value?.[props.settings.postType]) return
     
-    let post;
+    let post = null;
     if (props.settings.postType == 2) {
-        post = levels.value[props.settings.postType][0].filter(x => x.levelID == props.settings.post)[0]
+        if (levels?.value?.[props.settings.postType]?.[0])
+            post = levels?.value?.[props.settings.postType]?.[0].filter(x => x.levelID == props.settings.post)[0]
     }
     else {
-        post = levels.value[props.settings.postType][0].filter(x => x.id == props.settings.post || x.hidden == props.settings.post)[0]
+        if (levels?.value?.[props.settings.postType]?.[0])
+            post = levels?.value?.[props.settings.postType]?.[0].filter(x => x.id == props.settings.post || x.hidden == props.settings.post)[0]
 
     }
     pp.value = post?.id
-    postData.value = [post, levels.value?.[props.settings.postType]?.[1], levels.value?.[props.settings.postType]?.[4]]
+    if (post)
+        postData.value = [post, levels.value?.[props.settings.postType]?.[1], levels.value?.[props.settings.postType]?.[4]]
+
 }
 watch(levels, getList)
 getList()
 
 const dialogs = inject("openedDialogs")
+const mountedOnce = ref(false)
 </script>
 
 <template>
@@ -78,10 +79,10 @@ const dialogs = inject("openedDialogs")
         <span class="text-sm leading-none opacity-50">{{ $t('reviews.embeddedHelp') }}</span>
     </ContainerHelp>
 
-    <ContainerHelp @click="dialogs.lists = [true, index, 0]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click="dialogs.lists = [true, index, 0]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
     </ContainerHelp>
 
-    <ContainerHelp unclickable v-else-if="settings.post && postData?.[0] === undefined && typeof postData?.[1] == 'object'" icon="view" :help-content="$t('reviews.deletedPost')">
+    <ContainerHelp unclickable v-else-if="settings.post && ((postData?.[0] === undefined && typeof postData?.[1] == 'object') || !postData)" icon="view" :help-content="$t('reviews.deletedPost')">
     </ContainerHelp>
 
     <component

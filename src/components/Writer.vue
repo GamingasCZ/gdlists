@@ -4,7 +4,8 @@ import DialogVue from "./global/Dialog.vue";
 import WriterSettings from "./writer/WriterSettings.vue";
 import WriterLevels from "./writer/WriterLevels.vue";
 import FormattingBar from "./writer/FormattingBar.vue"
-import CONTAINERS, { type ContainerNames } from "./writer/containers";
+import CONTAINERS from "./writer/containers";
+import type {ContainerNames, Container} from "./writer/containers";
 import CollabEditor from "./editor/CollabEditor.vue";
 import ListPickerPopup from "./global/ListPickerPopup.vue";
 import ImageBrowser from "./global/ImageBrowser.vue";
@@ -30,7 +31,7 @@ import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
 import { addCEFormatting, deleteCESelection } from "./global/parseEditorFormatting";
 import LevelCard from "./global/LevelCard.vue";
-import { ImgFail, notifyError } from "./imageUpload";
+import { ImgFail, notifyError, summonNotification, uploadImages } from "./imageUpload";
 import WriterViewer from "./writer/WriterViewer.vue";
 import WriterVisuals from "./writer/WriterVisuals.vue";
 import { LIST, REVIEW } from "@/writers/Writer";
@@ -40,12 +41,15 @@ import ShortcutsPopup from "./writer/ShortcutsPopup.vue";
 import containers from "./writer/containers";
 import ZenModeHelp from "./writer/ZenModeHelp.vue";
 import { Limit } from "@/assets/limits";
+import { lastVisitedPath } from "./global/imageCache";
+import PostThumbnailPreview from "./writer/PostThumbnailPreview.vue";
 
 const props = defineProps<{
     type: number
     postID?: string
     isLoggedIn: boolean
     editing?: boolean
+    editDraft?: string
 }>()
 
 const WRITER = ref([LIST, REVIEW][props.type])
@@ -60,15 +64,30 @@ watch(() => props.type, () => {
 
 var loadEditDraft: ReviewDraft | null = null
 watch(timeLastRouteChange, () => {
+    let ptype = ['list', 'review'][props.type]
+    if (ptype != WRITER.value.general.postType) {
+        WRITER.value = [LIST, REVIEW][props.type]
+        drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
+    }
+    
     if (props.editing) {
-        if (loadEditDraft)
+        if (props.editDraft) {
+            loadDraft(drafts.value[props.editDraft])
+        }
+        else if (loadEditDraft)
             loadOnlineEdit(loadEditDraft)
+        else resetPost()
     }
     else
-        if (loadEditDraft)
-            loadDraft(loadEditDraft)
-        else
-            resetPost()
+        if (props.editDraft) {
+            loadDraft(drafts.value[props.editDraft])
+        }
+        else {
+            if (loadEditDraft)
+                loadDraft(loadEditDraft)
+            else
+                resetPost()
+        }
 })
 
 document.title = `${WRITER.value.general.tabTitle} | ${i18n.global.t('other.websiteName')}`
@@ -111,7 +130,7 @@ const resetPost = () => {
 }
 
 const editDraftExists = ref<null | string>(null)
-const loadingEditDraft = ref(false)
+const loadingOnlineEdit = ref(false)
 const loadOnlineEdit = (feedData?: ReviewDraft) => {
     editDraftExists.value = null
     loadEditDraft = null
@@ -120,12 +139,12 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
         loadDraft(feedData, true)
         return
     }
-    loadingEditDraft.value = true
     
+    loadingOnlineEdit.value = true
     axios.post(import.meta.env.VITE_API + "/pwdCheckAction.php", { id: props.postID, type: WRITER.value.general.postType }).then(res => {
+        loadingOnlineEdit.value = false
         if (res.data?.data) {
             isNowHidden = res.data.hidden != 0
-            loadingEditDraft.value = false
 
             if (props.type == 0)
                 POST_DATA.value = modernizeList(res.data)
@@ -137,6 +156,7 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
                     editDraftExists.value = key
             }
 
+            modifyPostName()
             fetchEmbeds()
             modifyListBG(POST_DATA.value.pageBGcolor, false)
             containerLastAdded.value = Date.now()
@@ -144,7 +164,10 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
         else {
             openDialogs.editError = true
         }
-    }).catch(() => openDialogs.editError = true)
+    }).catch(() => {
+        loadingOnlineEdit.value = false
+        openDialogs.editError = true
+    })
 }
 
 const openDialogs = reactive({
@@ -164,7 +187,8 @@ const openDialogs = reactive({
     userAdder: [false, 0],
     drafts: false,
     shortcuts: false,
-    zenHelp: false
+    zenHelp: false,
+    thumbPreview: false
 })
 
 const previewMode = ref(true)
@@ -200,6 +224,13 @@ const containerLastTextChange = ref(0)
 const setLastChange = () => containerLastTextChange.value = Date.now()
 provide("lastTextChange", setLastChange)
 
+/** Function that creates a container object, 
+ * 
+ * @param key {string} Container to be added
+ * @param addTo {[count, widths, align]} Parameter for creating (count) columns, with an array of (width) types and (align)
+ * @param returnOnly {boolean} The container doesn't get added into the review.
+ * @param above {boolean} Container gets added above the currently selected element, instead of below.
+ */
 const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly = false, above = false) => {
     if (!previewMode.value) return
 
@@ -248,12 +279,12 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
 
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
-        if (key == "twoColumns") {
+        if (key == "twoColumns" && addTo) {
             containerData.extraComponents = addTo[0]-2
             
             containerData.settings.components = []
             for (let i = 0; i < addTo[0]; i++)
-                containerData.settings.components.push([addTo[1]])
+                containerData.settings.components.push([addTo[1][i]])
 
             containerData.align = addTo[2]
         }
@@ -267,12 +298,22 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
                 .splice(selectedContainer.value[0] + +(!above), 0, containerData)
             selectedContainer.value[0] += 1
         }
+
+        let ele = selectedContainer.value[0]
+        if (key == 'twoColumns') {
+            nextTick(() => {
+                let elements = document.querySelectorAll("#reviewText > div")
+                let e = elements[ele].querySelector("article")
+                setTimeout(() =>
+                    e.click(), 10); // this will end in disaster one day
+            })
+        }
     }
     // Adding into a nested container
     else {
         if (key == "twoColumns") { // Adding a column to a nest container
             POST_DATA.value.containers[selectedNestContainer.value[0]].extraComponents += 1
-            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
+            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [false])
         }
         else {
             if (selectedContainer.value[2] == -1) {
@@ -286,6 +327,7 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
         }
     }
     containerLastAdded.value = Date.now()
+    return containerData
 }
 
 provide("addContainer", addContainer)
@@ -376,7 +418,10 @@ const columnCommand = (index: number) => {
             break;
         case 8: moveContainer(selectedNestContainer.value[0], -1); break;
         case 9: moveContainer(selectedNestContainer.value[0], 1); break;
-        case 10: removeContainer(selectedNestContainer.value[0], true); break;
+        case 10:
+            removeContainer(selectedNestContainer.value[0], true);
+            nextTick(() => selectedNestContainer.value = [-1,-1,-1])
+            break;
         case 11: column[11] = 0; break;
         case 12: column[11] = 1; break;
         case 13: column[11] = 2; break;
@@ -397,6 +442,9 @@ const doFormatting = (ind: number) => {
 const containerSettingsShown = ref([0, -1, -1])
 provide("containerSettingsShown", containerSettingsShown)
 
+const keyActivated = ref(false)
+provide("keyActivated", keyActivated)
+
 function doAction(action: FormattingAction | EditorAction, param: any, holdingShift = false) {
 	switch (action) {
 		case 'add':
@@ -416,6 +464,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
             break;
 		case 'columnCreate':
 			let columnButton = document.querySelector("#columnCreatorButton") as HTMLButtonElement
+            keyActivated.value = true
             if (columnButton)
                 columnButton.click()
             break;
@@ -545,7 +594,6 @@ const splitParagraph = () => {
     let newPos = selectedContainer.value[0] + 1
     let newParagraph = addContainer("default", 0, true)
     newParagraph.data = selectedText[1]
-    console.log(selectedText)
     POST_DATA.value.containers[selectedContainer.value[0]].data = selectedText[0]?.toString()
     POST_DATA.value.containers.splice(newPos, 0, newParagraph)
 }
@@ -742,10 +790,17 @@ const updateReview = () => {
 let autosaveInterval: number
 onMounted(() => {
     if (props.editing) {
-        loadOnlineEdit()
+        if (props.editDraft)
+            loadOnlineEdit(drafts.value[props.editDraft])
+        else
+            loadOnlineEdit()
     }
-    else 
-        POST_DATA.value = WRITER.value.general.postObject()
+    else {
+        if (props.editDraft)
+            loadDraft(drafts.value[props.editDraft])
+        else
+            POST_DATA.value = WRITER.value.general.postObject()
+    }
 
     // Add lavels from saved
     if (predefinedLevelList.value.length) {
@@ -773,12 +828,136 @@ onMounted(() => {
 
     shortcutListen(WRITER.value.toolbar, doAction)
     document.documentElement.addEventListener("fullscreenchange", toggleZenMode)
+
+    document.documentElement.addEventListener("paste", uploadPasteImage)
+    window.addEventListener("drop", uploadPasteImage)
+    window.addEventListener("dragover", toggleFileDrop);
 })
 
 onUnmounted(() => {
     document.documentElement.removeEventListener("fullscreenchange", toggleZenMode)
+    document.documentElement.removeEventListener("paste", uploadPasteImage)
+    window.removeEventListener("drop", uploadPasteImage)
+    window.removeEventListener("dragover", toggleFileDrop)
     shortcutUnload()
 })
+
+var dropAllowed = true
+const toggleFileDrop = (e: DragEvent) => {
+    dropAllowed = e.dataTransfer?.items?.length > 0
+    if (dropAllowed) {
+        dropAllowed = false
+        let len = e.dataTransfer?.items?.length ?? 0
+        for (let i = 0; i < len; i++) {
+            if (e.dataTransfer?.items[i].kind == "file") {
+                e.preventDefault()
+                dropAllowed = true
+                break
+            }
+        }
+    }
+}
+
+const specialUploadProgress = reactive({
+    bg: false,
+    thumb: false
+})
+
+enum UploadTypes {
+    ADD_IMAGE,
+    SET_BACKGROUND,
+    SET_THUMBNAIL,
+    REPL_IMAGE
+}
+
+const uploadPasteImage = (e: ClipboardEvent | DragEvent, extra?: any) => {
+    if (!dropAllowed) return
+
+    if (document.querySelector(".modalDialog"))
+        return
+
+    let active = document.activeElement
+    if (active !== document.body && active?.closest("#reviewText") == null)
+        return
+
+    e.preventDefault()
+
+    let fileCount
+    if (e.type == "drop")
+        fileCount = e.dataTransfer?.items.length
+    else
+        fileCount = e.clipboardData?.files.length
+
+    if (fileCount) {
+        let holdingShift = e?.shiftKey ?? false
+        e.preventDefault()
+        summonNotification(i18n.global.t('reviews.uploadingMedia')+"...", "", "loading")
+
+        let uploadType = UploadTypes.ADD_IMAGE
+        let files: FileList;
+        if (e.type == "drop") {
+            files = e.dataTransfer?.files
+
+            if (e.target) {
+                if ((e.target as HTMLElement).classList.contains("backgroundPicker")) {
+                    specialUploadProgress.bg = true
+                    uploadType = UploadTypes.SET_BACKGROUND
+                }
+                else if ((e.target as HTMLElement).classList.contains("thumbnailPicker")) {
+                    specialUploadProgress.thumb = true
+                    uploadType = UploadTypes.SET_THUMBNAIL
+                }
+                else if ((e.target as HTMLElement).classList.contains("imgContainer")) {
+                    uploadType = UploadTypes.REPL_IMAGE
+                }
+            }
+        }
+        else
+            files = e.clipboardData?.files           
+
+        let lastFolderID = lastVisitedPath.tree[lastVisitedPath.subfolder][1]
+        uploadImages(files, fileCount == 1 || uploadType != 0, lastFolderID).then(e => {
+            specialUploadProgress.bg = false
+            specialUploadProgress.thumb = false
+            if (typeof e == "number")
+                return;
+
+            let base = import.meta.env.VITE_USERCONTENT+"/userContent/"+currentUID.value+"/"
+            if (uploadType == UploadTypes.SET_BACKGROUND) {
+                openDialogs.imagePicker[1] = WriterGallery.ReviewBackground
+                return modifyImageURL(base+e.newImage[0]+".webp")
+            }
+            if (uploadType == UploadTypes.SET_THUMBNAIL) {
+                openDialogs.imagePicker[1] = WriterGallery.ReviewThumbnail
+                return modifyImageURL(e.newImage[0])
+            }
+            if (uploadType == UploadTypes.REPL_IMAGE) {
+                let link = base+e.newImage[0]+".webp"
+                if (typeof extra == "number")
+                    POST_DATA.value.containers[extra].settings.url = link
+                else
+                    POST_DATA.value.containers[extra[0]].settings.components[extra[1]][extra[2]].settings.url = link
+                return
+            }
+
+            if (fileCount == 1) {
+                let el = addContainer("showImage", 0, false, holdingShift)
+                el.settings.url = base+e.newImage[0]+".webp"
+            }
+            else {
+                let el = addContainer("addCarousel", 0, false, holdingShift)
+                e.newImage.forEach(f => {
+                    let im = addContainer("showImage", 0, true)
+                    im.settings.url = base+f+".webp"
+                    el.settings.components.push(im)
+                })
+            }
+            containerLastAdded.value = Date.now()
+        })
+    }
+}
+
+provide("replImage", uploadPasteImage)
 
 const preUpload = ref([false, [0, 0, 0]])
 
@@ -807,13 +986,11 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
     POST_DATA.value = JSON.parse(JSON.stringify(draft.reviewData))
     reviewSave.value.backupID = draft.createDate
     reviewSave.value.lastSaved = draft.saveDate
+    setDraftUrl(reviewSave.value.backupID.toString())
+    modifyPostName()
     fetchEmbeds()
     modifyListBG(draft.reviewData.pageBGcolor, false)
     containerLastAdded.value = Date.now()
-
-    // Flicker preview mode to refresh text in dataContainers
-    previewMode.value = false
-    nextTick(() => previewMode.value = true)
 }
 
 let previewHold: [ReviewList, object] | null
@@ -833,6 +1010,7 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewin
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = previewData
     previewID = previewIDSaved
+    modifyPostName()
     fetchEmbeds(true)
     modifyListBG(previewData.pageBGcolor, false)
     setPreviewMode(false)
@@ -850,6 +1028,7 @@ const exitPreview = () => {
     modifyListBG(previewHold[0].pageBGcolor, false)
     previewHold = null
 
+    modifyPostName()
     setPreviewMode(true)
     disableEdits.value = false
     if (!outsideDrafts)
@@ -864,6 +1043,14 @@ const previewApply = () => {
     previewHold = null
     loadDraft(drafts.value[previewID!])
     previewID = null
+}
+
+const setDraftUrl = (draftID: string) => {
+    let url = new URL(location.href)
+    if (url.searchParams.get("draft") != draftID) {
+        url.searchParams.set("draft", draftID)
+        history.pushState({}, "", url)
+    }
 }
 
 const drafts = ref<{[draftKey: string]: ReviewDraft}>(JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {})
@@ -915,6 +1102,9 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
         if (editing)
             drafts.value[reviewSave.value.backupID].editing = editing
     }
+
+    setDraftUrl(backupID.toString())
+
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
     reviewSave.value = { backupID: backupID, lastSaved: now }
 }
@@ -1015,9 +1205,23 @@ const endShortcutEdit = () => {
     editingShortcut.value = false
 }
 
+const modifyPostName = () => {
+    let titleTag = document.querySelector("title")!
+    if (POST_DATA.value.reviewName.length)
+        titleTag.innerText = `${i18n.global.t('editor.editor')}: ${POST_DATA.value.reviewName} | ${i18n.global.t("other.websiteName")}`
+    else
+        titleTag.innerText = `${WRITER.value.general.tabTitle} | ${i18n.global.t("other.websiteName")}`
+}
+
 </script>
 
 <template>
+    <section v-if="loadingOnlineEdit"
+        class="flex flex-col gap-8 items-center mt-10 text-center text-white opacity-40">
+        <img class="w-32 animate-spin" src="@/images/loading.webp" alt="">
+        <span class="text-2xl">{{ $t('other.loading') }}...</span>
+    </section>
+
     <section v-if="openDialogs.editError"
         class="flex flex-col gap-3 items-center mt-10 text-center text-white opacity-40">
         <img class="w-64" src="@/images/listError.svg" alt="">
@@ -1033,7 +1237,7 @@ const endShortcutEdit = () => {
         <h1 class="max-w-sm text-2xl text-center text-white opacity-20">{{ $t('editor.cookDisabled') }}</h1>
     </div>
 
-    <main v-else-if="POST_DATA" v-show="!loadingEditDraft" class="p-2">
+    <main v-else-if="POST_DATA" v-show="!loadingOnlineEdit" class="px-2">
         <ErrorPopup :error-text="errorText" :previewing="false" :stamp="errorStamp" />
 
         <ListBackground v-if="openDialogs.bgPreview" :image-data="POST_DATA.titleImg"
@@ -1108,11 +1312,15 @@ const endShortcutEdit = () => {
             <ZenModeHelp @close="openDialogs.zenHelp = false" />
         </DialogVue>
 
+        <DialogVue :open="openDialogs.thumbPreview" @close-popup="openDialogs.thumbPreview = false" :title="$t('editor.browsePreview')" :width="dialog.medium">
+            <PostThumbnailPreview :data="POST_DATA" :is-list="type == 0" />
+        </DialogVue>
+
         <section class="max-w-[90rem] flex flex-col gap-y-16 mx-auto">
             <!-- Hero -->
             <div v-show="!zenMode" class="flex flex-col items-center mt-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
-                <input v-model="POST_DATA.reviewName" type="text" :maxlength="40" :disabled="editing || disableEdits"
+                <input v-model="POST_DATA.reviewName" @input="modifyPostName" type="text" :maxlength="40" :disabled="editing || disableEdits"
                     :placeholder="WRITER.general.titlePlaceholder"
                     class="text-6xl max-sm:text-5xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
                 <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" :disabled="disableEdits" @click="tagline = true"
@@ -1212,7 +1420,7 @@ const endShortcutEdit = () => {
                     />
                 </template>
                 <template #footer>
-                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid grid-cols-2 mt-4 text-lg sm:grid-cols-3">
+                    <section v-if="!disableEdits && POST_DATA.containers.length" :class="{'invert': POST_DATA.whitePage}" class="grid font-[poppins] grid-cols-2 mt-4 text-lg sm:grid-cols-3">
                         <button @click="saveDraft(false)" class="py-1 text-base text-white rounded-md opacity-20 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                             <img src="@/images/symbolicSave.svg" class="inline mr-3 w-6" alt="">
                             <span v-if="reviewSave.backupID == 0">{{ $t('other.save') }}</span>
@@ -1231,7 +1439,13 @@ const endShortcutEdit = () => {
             </WriterViewer>
                 
             <!-- Decoration -->
-            <WriterVisuals v-show="!zenMode" :disabled="disableEdits" :writer-enabled="WRITER.general.allowWriter" :postData="POST_DATA" />
+            <WriterVisuals
+                v-show="!zenMode"
+                :disabled="disableEdits"
+                :writer-enabled="WRITER.general.allowWriter"
+                :postData="POST_DATA"
+                :uploading="specialUploadProgress"
+            />
 
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">

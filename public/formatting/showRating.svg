@@ -1,10 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-<svg width="32" height="32" version="1.1" viewBox="0 0 8.4667 8.4667" xmlns="http://www.w3.org/2000/svg">
- <g transform="translate(0 .63819)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width=".92605">
-  <path d="m1.1832 7.097v-6.9282"/>
-  <path d="m3.2166 7.1174v-3.5522"/>
-  <path d="m5.2501 7.1378v-5.4125"/>
-  <path d="m7.2835 7.0766v-1.9099"/>
- </g>
-</svg>
+<svg width="32" height="32" version="1.1" viewBox="0 0 8.4667 8.4667" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><g stroke-width=".92605"><path d="m2.4188 2.4581h3.7154"/><path d="m2.4007 4.256h1.5031"/><path d="m2.3827 6.054h0.91612"/></g><rect x=".7576" y=".7576" width="6.9515" height="6.9515" stroke-width=".92605"/></g><path transform="matrix(1.0951 -.051901 .051901 1.0951 -.41986 -.1777)" d="m6.505 5.0953c0.018355 0.068502-0.56686 0.45353-0.59227 0.51973-0.025415 0.066208 0.15185 0.74392 0.092375 0.78255-0.059477 0.038625-0.6065-0.39897-0.67732-0.40268-0.070821-0.0037115-0.66059 0.3743-0.7157 0.32967-0.055114-0.04463 0.19202-0.7001 0.17367-0.7686-0.018355-0.068502-0.56012-0.51259-0.5347-0.5788 0.025415-0.066208 0.72517-0.033719 0.78465-0.072344s0.31441-0.6911 0.38524-0.68739c0.070821 0.00371 0.25616 0.67926 0.31127 0.72389 0.055114 0.04463 0.75444 0.085464 0.77279 0.15397z" fill="#fff" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width=".13128"/></svg>

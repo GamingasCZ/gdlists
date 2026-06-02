@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { ref } from "vue";
 import THEMES from "./themes";
-import { SETTINGS } from "./siteSettings";
+import { hasLocalStorage, randomIsReview, SETTINGS } from "./siteSettings";
+import { currentUID } from "./Editor";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,13 +16,13 @@ const router = createRouter({
       path: "/make/list",
       name: "editor",
       component: () => import("@/components/Writer.vue"),
-      props: {type: 0}
+      props: (route) => ({type: 0, editDraft: route.query.draft ?? false})
     },
     {
       path: "/make/review",
       name: "writer",
       component: () => import("@/components/Writer.vue"),
-      props: {type: 1}
+      props: (route) => ({type: 1, editDraft: route.query.draft ?? false})
     },
     {
       path: "/browse/:type",
@@ -53,20 +54,25 @@ const router = createRouter({
     {
       path: "/edit/list/:id",
       name: "editing",
-      props: (route) => ({ type: 0, postID: route.params.id, editing: true }),
+      props: (route) => ({ type: 0, postID: route.params.id, editing: true, editDraft: route.query.draft ?? false }),
       component: () => import("@/components/Writer.vue")
     },
     {
       path: "/edit/review/:id",
       name: "editingReview",
-      props: (route) => ({ type: 1, postID: route.params.id, editing: true }),
+      props: (route) => ({ type: 1, postID: route.params.id, editing: true, editDraft: route.query.draft ?? false }),
       component: () => import("@/components/Writer.vue")
     },
     {
       path: "/random",
       name: "random",
-      props: () => {
+      props: (route) => {
         let review = Math.random() > 0.5 | 0
+        if (route.query?.list === null)
+          review = 0
+        else if (route.query?.review === null)
+          review = 1
+        randomIsReview.value = review.toString()+Date.now().toString()
         return { randomList: true, isReview: review}
       },
       component: () => import("@/components/ListView.vue"),
@@ -75,6 +81,15 @@ const router = createRouter({
       path: "/:pathMatch(.*)*",
       name: "404",
       component: () => import("@/components/404.vue"),
+    },
+    {
+      path: "/notifications",
+      name: "notifications",
+      beforeEnter: () => {
+        if (!hasLocalStorage() || !localStorage.getItem("account_info"))
+          return {path: "/"}
+      },
+      component: () => import("@/components/NotificationsView.vue")
     },
   ],
 });
@@ -105,19 +120,13 @@ router.beforeEach(async (to, from) => {
     
     // Do not reset color when updating a post
     if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
-    
       document.documentElement.style.setProperty("--siteBackground", THEMES[SETTINGS.value.selectedTheme || 0].colors.siteBackground);
-      document.querySelector("nav")?.classList.add("slidingNavbar");
   
       setTimeout(() => {
         document.documentElement.style.setProperty("--primaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor);
         document.documentElement.style.setProperty("--secondaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.secondaryColor);
         document.documentElement.style.setProperty("--brightGreen", THEMES[SETTINGS.value.selectedTheme || 0].colors.brightGreen);
       }, 150);
-  
-      setTimeout(() => {
-        document.querySelector("nav")?.classList.remove("slidingNavbar");
-      }, 300);
     }
 });
 

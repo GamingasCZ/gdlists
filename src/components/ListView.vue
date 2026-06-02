@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import axios, { all, type AxiosResponse } from "axios";
-import type {
-  ListFetchResponse,
-  ListPreview,
-SavedCollab,
-CollabData,
-LevelList,
-ReviewList,
-ReviewContainer,
-ViewedPinArray,
+import axios, { type AxiosResponse } from "axios";
+import {
+  type ListFetchResponse,
+  type ListPreview,
+  type SavedCollab,
+type CollabData,
+type LevelList,
+type ReviewList,
+type ReviewContainer,
+type ViewedPinArray,
+URIHideUIOptions,
+type PostData,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
-import SharePopup from "./global/SharePopup.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
-import { ref, onMounted, watch, onUnmounted, provide, computed, defineAsyncComponent } from "vue";
-import { modifyListBG, selectedLevels } from "@/Editor";
-import chroma, { hsl } from "chroma-js";
+import { ref, onMounted, watch, provide, computed, defineAsyncComponent, inject, type Ref, toRaw } from "vue";
+import { currentUID, generateHash, modifyListBG, navHidden, selectedLevels } from "@/Editor";
 import PickerPopup from "./global/PickerPopup.vue";
-import router from "@/router";
+import router, { timeLastRouteChange } from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
 import { useI18n } from "vue-i18n";
 import ListBackground from "./global/ListBackground.vue";
@@ -29,14 +29,12 @@ import ListUploadedDialog from "./levelViewer/ListUploadedDialog.vue";
 import TagViewerPopup from "./levelViewer/TagViewerPopup.vue";
 import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
-import CONTAINERS from "./writer/containers";
+import CONTAINERS, { type Container } from "./writer/containers";
 import { dialog } from "./ui/sizes";
-import DataContainer from "./writer/DataContainer.vue";
-import { DEFAULT_REVIEWDATA, flexNames, getEmbeds, parseReviewContainers, pickFont, resetIndentation } from "@/Reviews";
+import { getEmbeds, parseReviewContainers, resetIndentation } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
-import Notification from "./global/Notification.vue";
 import LevelCardCompact from "./global/LevelCardCompact.vue";
 import ImageViewer from "./global/ImageViewer.vue";
 import LevelCardTableTable from "./global/LevelCardTableTable.vue";
@@ -44,6 +42,8 @@ import { summonNotification } from "./imageUpload";
 import { i18n } from "@/locales";
 import WriterViewer from "./writer/WriterViewer.vue";
 import TemporaryList from "./global/TemporaryList.vue";
+import ShareSection from "./levelViewer/ShareSection.vue";
+import { nextTick } from "vue";
 
 const props = defineProps<{
   listID?: string
@@ -53,14 +53,37 @@ const props = defineProps<{
 
 let gdlists = useI18n().t('other.websiteName')
 
+watch(timeLastRouteChange, () => {
+  loadContent()
+})
+
 let lastScroll = 0
 const postContent = ref<HTMLDivElement>()
+const ShareUIHide = ref<URIHideUIOptions>(URIHideUIOptions.None)
 const loadContent = async () => {
+  let uri = new URL(window.location.href)
+  if (uri.searchParams.has("ui")) {
+    let opts = uri.searchParams.get("ui")!.split("").map(x => +x)
+    if (!opts.includes(NaN) && opts.length == URIHideUIOptions.Length) {
+      ShareUIHide.value = parseInt(uri.searchParams.get("ui")!, 2)
+    }
+  }
+
   let randomData = null
+  let forceType: number | boolean = +props.isReview
   if (props.randomList) {
     randomData = (await axios.get(import.meta.env.VITE_API+"/getLists.php", {params: {random: props.isReview}})).data
   }
   props.isReview ? await loadReview(randomData) : await loadList(randomData)
+  
+  if (isJumpingFromFaves != null) {
+    if (!isNaN(parseInt(isJumpingFromFaves))) {
+      if (props.isReview)
+        reviewLevelsOpen.value = true
+      nextTick(() => tryJumping(+isJumpingFromFaves, true))
+    }
+  }
+
   if (SETTINGS.value.autoComments) {
     window.addEventListener("scroll", (e: MouseEvent) => {
       if (nonexistentList.value || listErrorLoading.value || reviewLevelsOpen.value || cardGuessing.value > -1 || !loggedIn.value) return
@@ -74,9 +97,11 @@ const loadContent = async () => {
       lastScroll = currentScroll
     })
   }
+
+  if (uri.searchParams.has("comment"))
+    commentsShowing.value = true
 }
 
-watch(props, loadContent)
 onMounted(loadContent)
 
 const NONPRIVATE_LIST = computed<boolean>(() => {
@@ -105,6 +130,7 @@ async function loadList(loadedData: LevelList | null) {
   let listURL = `${!NONPRIVATE_LIST.value ? "pid" : "id"}=${props?.listID}`;
 
   nonexistentList.value = false
+  cardGuessing.value = -1
 
   let res: LevelList | number;
   if (loadedData) res = loadedData
@@ -142,8 +168,21 @@ async function loadList(loadedData: LevelList | null) {
   }
 }
 
+const createPostHashes = (post: any) => {
+  let originalHashes = {}
+  let cont = Array.from(post.data.containers)
+  let hashes = cont.map(x => generateHash(JSON.stringify(x)))
+  let ids = cont.map(x => x.id)
+  for (let i = 0; i < hashes.length; i++)
+    originalHashes[ids[i]] = hashes[i]
+
+  return originalHashes
+}
+
 const REVIEW_CONTENTS = ref<[number, string][]>([])
 const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchResponse]>([])
+const showChecklistsUsed = ref(false)
+var originalListData: PostData
 provide("batchEmbeds", embedsContent)
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
@@ -163,6 +202,16 @@ async function loadReview(loadedData: ReviewList | null) {
 
     let indicies = [0,0,0,0,0,0]
     LIST_DATA.value = res[0];
+    originalListData = structuredClone(res[0].data)
+    showChecklistsUsed.value = loadLocalChecklists(LIST_DATA.value.data)
+
+    originalHashes = createPostHashes(res[0])
+    let cont = Array.from(res[0].data.containers)
+    let hashes = cont.map(x => generateHash(JSON.stringify(x)))
+    let ids = cont.map(x => x.id)
+    for (let i = 0; i < hashes.length; i++)
+      originalHashes[ids[i]] = hashes[i]
+
     LIST_DATA.value.name = decodeURIComponent(LIST_DATA.value.name).replaceAll("+", " ")
     REVIEW_CONTENTS.value = parseReviewContainers(LIST_DATA.value.data.containers, indicies)
 
@@ -217,6 +266,8 @@ function postExtrasApply() {
     
     if (LIST_COL.value != undefined && !isNaN(LIST_COL.value[0]))
       modifyListBG(LIST_COL.value);
+    else
+      modifyListBG([0,0,0], true)
 
     LEVEL_COUNT.value = LIST_DATA.value.data.levels.length
 }
@@ -239,14 +290,16 @@ const tryJumping = (ind: number, forceJump = false) => {
     cardGuessing.value = -1
     let jumpedToCard = document.querySelectorAll(".levelCard");
 
-    if (parseInt(isJumpingFromFaves) > 1) {
-      jumpedToCard[
-        Math.max(0, parseInt(isJumpingFromFaves) - 2)
-      ].scrollIntoView();
+    let to: HTMLDivElement = jumpedToCard[
+      Math.max(0, parseInt(isJumpingFromFaves) - 2)
+    ];
+    if (!isNaN(parseInt(isJumpingFromFaves))) {
+      if (to) {
+        to.scrollIntoView();
+        (jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
+        ).style.animation = "flash 0.8s linear forwards";
+      }
     }
-    (
-      jumpedToCard[Math.max(0, parseInt(isJumpingFromFaves))] as HTMLDivElement
-    ).style.animation = "flash 0.8s linear forwards";
   }
 };
 
@@ -295,7 +348,6 @@ const getURL = () => {
   if (props.isReview) return base + 'review/' + window.location.pathname.split("/").toReversed()[0]
   else return base + (!NONPRIVATE_LIST.value ? LIST_DATA.value?.hidden! : LIST_DATA.value?.id!)
 }
-const sharePopupOpen = ref(false);
 const jumpToPopupOpen = ref(false);
 const scrolledToEnd = ref(false)
 const commentsShowing = ref(false)
@@ -403,7 +455,7 @@ const saveCollab = (ind: number) => {
       memberCount: c[2].length,
       timestamp: Date.now(),
       collabHost: c[0]?.[0]?.name ? c[0][0].name : c[0][0],
-      listID: [NONPRIVATE_LIST.value ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind]
+      listID: [NONPRIVATE_LIST.value ? LIST_DATA.value.id : LIST_DATA.value.hidden, ind, props.isReview]
     }
     currSaved.push(collab)
     currSavedIDs.push(collab.levelID as string)
@@ -493,13 +545,143 @@ const levelImageFullscreen = (imgIndex: number, levelIndex: number) => {
 }
 provide("fullscreenLevel", levelImageFullscreen)
 
+const postMadeChanges = ref(false)
+var originalHashes: {[containerID: number]: number} = {}
+type SavedChecklist = {[containerID: number]: ReviewContainer}
+type AllSavedChecklists = {[postID: string]: SavedChecklist}
+var postChanges: SavedChecklist = {}
+const UpdateConfirmer = defineAsyncComponent(() =>
+  import("./levelViewer/ListViewPushChanges.vue")
+)
+
+// brings up changed popup, if changed container has a different hash, that its original hash
+const doModifyPost = (changedContainer: ReviewContainer) => {
+  if (postChanges[changedContainer.id]) {
+    let changedHash = generateHash(JSON.stringify(changedContainer))
+    if (changedHash == originalHashes[changedContainer.id])
+      delete postChanges[changedContainer.id]
+    else
+    postChanges[changedContainer.id] = changedContainer
+  }
+  else
+    postChanges[changedContainer.id] = changedContainer
+  
+  postMadeChanges.value = Object.keys(postChanges).length > 0
+  showChecklistsUsed.value = false
+}
+
+const loadLocalChecklists = (currentListData: PostData) => {
+  if (!hasLocalStorage()) return false
+
+  let savedChecklists: AllSavedChecklists | null = JSON.parse(localStorage.getItem("localChecklists")!)
+  if (savedChecklists == null) return false
+
+  let thisListChecklists = savedChecklists?.[LIST_DATA.value.id]
+  if (!thisListChecklists) return false
+
+  for (const key in thisListChecklists) {
+    currentListData.containers.forEach(c => {
+      if (c.id == key)
+        c.data = thisListChecklists[key].data
+    })
+  }
+  return true
+}
+
+const saveLocalChecklists = () => {
+  if (!hasLocalStorage()) return
+
+  let savedChecklists = JSON.parse(localStorage.getItem("localChecklists")!) ?? {}
+  if (savedChecklists == null) return
+
+  originalHashes = createPostHashes(LIST_DATA.value)
+  savedChecklists[LIST_DATA.value.id] = postChanges
+  localStorage.setItem("localChecklists", JSON.stringify(savedChecklists))
+  postChanges = {}
+  postMadeChanges.value = false
+}
+
+const revertPostEdits = () => {
+  LIST_DATA.value.data.containers = []
+  nextTick(() => {
+    LIST_DATA.value.data.containers = structuredClone(originalListData.containers)
+  })
+  originalHashes = createPostHashes(LIST_DATA.value)
+  postMadeChanges.value = false
+  postChanges = {}
+}
+
+var tempListData: Container[]
+const hideChecklistEditsViewing = ref(false)
+const hideLocalChecklistEdits = () => {
+  if (hideChecklistEditsViewing.value) {
+    LIST_DATA.value.data.containers = []
+    nextTick(() => {
+      LIST_DATA.value.data.containers = JSON.parse(JSON.stringify(tempListData))
+      tempListData = undefined
+    }).then(() =>
+        nextTick(() => document.querySelectorAll("#reviewText input[type='checkbox']").forEach(x => x.disabled = false))
+    )
+  }
+  else {
+    tempListData = JSON.parse(JSON.stringify(LIST_DATA.value.data.containers))
+    LIST_DATA.value.data.containers = []
+    nextTick(() =>
+      LIST_DATA.value.data.containers = JSON.parse(JSON.stringify(originalListData.containers))
+    ).then(() =>
+        nextTick(() => document.querySelectorAll("#reviewText input[type='checkbox']").forEach(x => x.disabled = true))
+    )
+  }
+  hideChecklistEditsViewing.value = !hideChecklistEditsViewing.value
+}
+
+const discardLocalChecklistEdits = () => {
+  revertPostEdits()
+  showChecklistsUsed.value = false
+  let savedChecklists = JSON.parse(localStorage.getItem("localChecklists")!)
+  delete savedChecklists[LIST_DATA.value.id]
+  localStorage.setItem("localChecklists", JSON.stringify(savedChecklists))
+}
+
+// todo add discarding
+const updatingPost = ref(false)
+const sendChangedComponents = () => {
+  // save locally on post you don't own
+  if (LIST_DATA.value.uid != currentUID.value) return saveLocalChecklists()
+  if (hideChecklistEditsViewing.value) return
+
+  updatingPost.value = true
+  axios.post(import.meta.env.VITE_API+"/updateList.php", {
+    type: props.isReview ? 'review' : 'list',
+    id: props.listID,
+    isNowHidden: +!NONPRIVATE_LIST.value,
+    hidden: +!NONPRIVATE_LIST.value,
+    components: postChanges
+  }).then(res => {
+    postChanges = {}
+    postMadeChanges.value = false
+    originalHashes = createPostHashes(LIST_DATA.value)
+
+    setTimeout(() => updatingPost.value = false, 250)
+    if (res.data == "8")
+      summonNotification(i18n.global.t('listViewer.postUpdated'), "", 'check')
+    else
+      summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.failUpdate'), 'error')
+  }).catch(() => {
+    postMadeChanges.value = false
+    setTimeout(() => updatingPost.value = false, 250)
+    summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.failUpdate'), 'error')
+  })
+}
+
+const cancelHidingOptions = () => {
+  ShareUIHide.value = URIHideUIOptions.None
+  navHidden.value = false
+}
+
 </script>
 
-<template>
-  <DialogVue :open="sharePopupOpen" @close-popup="sharePopupOpen = false" :title="$t('other.share')" :width="dialog.medium">
-    <SharePopup :share-text="getURL()" :review="isReview" />
-  </DialogVue>
-  
+<template> 
   <DialogVue :open="jumpToPopupOpen" @close-popup="jumpToPopupOpen = false" :title="$t('listViewer.contents')">
     <PickerPopup v-model="jumpSearch">
       <template v-if="cardGuessing > -1 && cardGuessing < LEVEL_COUNT" #error>
@@ -554,10 +736,17 @@ provide("fullscreenLevel", levelImageFullscreen)
     />
   </DialogVue>
 
+  <Teleport defer to="#backToGDLSection">
+    <button v-if="ShareUIHide > 0" @click="cancelHidingOptions" id="contactButton" class="p-1 underline rounded-md opacity-80">
+      {{ $t('other.backToGDL') }}
+    </button>
+  </Teleport>
+
   <section class="mt-12 text-white">
     <header>
       <ListDescription
         v-if="LIST_DATA.name != undefined && !nonexistentList"
+        v-show="!(ShareUIHide & URIHideUIOptions.Description)"
         class="mb-8"
         v-bind="LIST_DATA"
         @do-list-action="listActions"
@@ -571,6 +760,7 @@ provide("fullscreenLevel", levelImageFullscreen)
         :ratings="LIST_RATING"
         :hidden="LIST_DATA.hidden"
         :color="LIST_COL"
+        :comms-hidden="ShareUIHide & URIHideUIOptions.Comments"
       />
     </header>
 
@@ -601,6 +791,26 @@ provide("fullscreenLevel", levelImageFullscreen)
         </RouterLink>
       </div>
     </section>
+
+    <Transition name="fade">
+      <UpdateConfirmer v-if="postMadeChanges" @confirm="sendChangedComponents" @discard="revertPostEdits" :updating="updatingPost" :owns-post="LIST_DATA.uid == currentUID" />
+    </Transition>
+
+    <div v-if="showChecklistsUsed" class="bg-greenGradient gap-2 flex my-4 rounded-md p-2 max-sm:flex-col w-full max-w-[40rem] mx-auto">
+      <span v-if="hideChecklistEditsViewing" @click="hideLocalChecklistEdits" class="grow">
+        <img src="@/images/view.svg" class="inline mr-2 w-6" alt="">
+        {{ $t('listViewer.viewingNew') }}
+      </span>
+      <span v-else class="grow">
+        <img src="@/images/edit.svg" class="inline mr-2 w-6" alt="">
+        {{ $t('listViewer.changes4') }}
+      </span>
+      <button v-if="hideChecklistEditsViewing" @click="hideLocalChecklistEdits" class="p-1 mx-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/back.svg" class="inline mr-2 w-5" alt="">{{ $t('other.back') }}</button>
+      <div class="" v-else>
+        <button @click="hideLocalChecklistEdits" class="p-1 mx-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/view.svg" class="inline mr-2 w-5" alt="">{{ $t('other.hide') }}</button>
+        <button @click="discardLocalChecklistEdits" class="p-1 mx-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/trash.svg" class="inline mr-2 w-5" alt="">{{ $t('other.discard') }}</button>
+      </div>
+    </div>
 
     <main v-if="!nonexistentList && !listErrorLoading" class="flex flex-col gap-4">
       <!-- Back to review from link -->
@@ -640,7 +850,6 @@ provide("fullscreenLevel", levelImageFullscreen)
             :guessing-now="cardGuessing == index"
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
             :uploader-uid="LIST_CREATORDATA?.discord_id"
-            @vue:mounted="tryJumping(index)"
             @next-guess="doNextGuess($event)"
             @open-tags="tagViewerOpened = $event"
             @open-collab="openCollabTools"
@@ -650,8 +859,8 @@ provide("fullscreenLevel", levelImageFullscreen)
         </LevelCardTableTable>
       </div>
       
-      <div ref="postContent" v-else v-show="!commentsShowing && !reviewLevelsOpen">
-        <WriterViewer :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
+      <div ref="postContent" v-if="isReview" v-show="!commentsShowing && !reviewLevelsOpen">
+        <WriterViewer @forced-update="doModifyPost" :writer-data="LIST_DATA.data" :editable="false" :zen-mode="false" />
       </div>
 
       <!-- Guessing bottom padding -->
@@ -667,9 +876,11 @@ provide("fullscreenLevel", levelImageFullscreen)
         @replay-list="guesses = []; cardGuessing = 0"
       />
 
+      <ShareSection v-if="LIST_DATA.name != undefined && !(ShareUIHide & URIHideUIOptions.Sharing) && !nonexistentList && !commentsShowing" :share-text="getURL()" :review="isReview" />
+
       <CommentSection
         v-if="listID != undefined"
-        v-show="commentsShowing || scrolledToEnd"
+        v-show="!(ShareUIHide & URIHideUIOptions.Comments) && (commentsShowing || scrolledToEnd)"
         @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
         :list-i-d="listID"

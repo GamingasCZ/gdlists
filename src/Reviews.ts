@@ -1,6 +1,6 @@
-import { type Ref, ref } from "vue"
+import { nextTick, type Ref, ref } from "vue"
 import { DEFAULT_LEVEL, DEFAULT_LEVELLIST, modernizeLevels } from "./Editor"
-import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewList, ReviewRating } from "./interfaces"
+import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewDetailsResponse, ReviewList, ReviewRating } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -221,7 +221,7 @@ export function parseReviewContainers(containers: object[], indicies: number[]) 
 }
 
 export const pickFont = (ind: number) => {
-    let fonts = ['Poppins', 'serif', 'sans-serif', 'monospace', 'system-ui', 'Pusab']
+    let fonts = ['poppins', 'domine', 'outfit', 'oswald', 'martianmono', 'Pusab']
     return fonts[ind]
 }
 
@@ -305,4 +305,92 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
     return postData
 }
 
+export const makeTogglableCheckboxes = (parentContainer: HTMLParagraphElement, checkFun: (i: number | number[], togg: boolean | boolean[])=> void) => {
+    let checkboxes: NodeListOf<HTMLInputElement> = parentContainer.querySelectorAll("input[type='checkbox']")
+    var indicies = 0
+    checkboxes.forEach(cbox => {
+        cbox.disabled = false
+        cbox.classList.add("button")
+        cbox.dataset.index = indicies++
+
+        cbox.oninput = async () => {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i] === cbox) {
+                    // check the parent check, if child checks are checked; uncheck parent check, if 1 or more checks unchecked
+                    let toCheck: number[] = []
+                    let checkParams: boolean[] = []
+                    let currBox = cbox
+                    while (true) {
+                        let closest = currBox.closest("ul")
+                        if (closest?.parentElement?.tagName == 'P') // is a top-level check
+                            break
+
+                        let listItems = closest?.children
+                        let parentCheckbox = closest?.parentElement?.querySelector("input")!
+                        currBox = parentCheckbox
+                        parentCheckbox.checked = true
+                        for (let i = 0; i < listItems?.length; i++) {
+                            if (!listItems[i].querySelector("input")?.checked) {
+                                parentCheckbox.checked = false
+                                break
+                            }
+                        }
+
+                        toCheck.push(+parentCheckbox.dataset.index)
+                        checkParams.push(parentCheckbox.checked)
+                    }
+
+                    // checking the checkbox above a nested checklist
+                    let nestList = cbox.nextElementSibling
+                    if (nestList && nestList?.tagName == 'UL') {
+                        let sub = nestList.querySelectorAll("input")
+                        let checkArr: number[] = Array(sub.length).fill(i+1)
+                        for (let j = 0; j < sub.length; j++) {
+                            sub[j].checked = cbox.checked
+                            checkArr[j] += j
+                        }
+                        checkArr.push(i)
+                        return checkFun(checkArr.concat(toCheck), Array(checkArr.length).fill(cbox.checked).concat(checkParams))
+                    }
+
+                    checkFun([i].concat(toCheck), [cbox.checked].concat(checkParams))
+                }
+            }
+        }
+    })
+}
+
+export function parseLocalReviewRatings(reviewData: PostData) {
+    let ratings = [{
+        level_count: 0,
+        reviewID: 69,
+        gameplay: [],
+        decoration: [],
+        difficulty: [],
+        overall: []
+    }]
+    for (let i = 0; i < reviewData.levels.length; i++) {
+        let levelID = reviewData.levels[i].levelID
+        if (levelID && (isNaN(parseInt(levelID)) || levelID < 128 || levelID > 200000000)) continue
+
+        ratings[0].level_count++
+        let levelRatings = reviewData.levels[i].ratings?.[0]
+        if (levelRatings) {
+            if (levelRatings[0] > -1)
+                ratings[0].gameplay.push(levelRatings[0])
+            if (levelRatings[1] > -1)
+                ratings[0].decoration.push(levelRatings[1])
+            if (levelRatings[2] > -1)
+                ratings[0].difficulty.push(levelRatings[2])
+            if (levelRatings[3] > -1)
+                ratings[0].overall.push(levelRatings[3])
+        }
+    }
+    let rateCounts = Object.values(ratings[0]).filter(x => typeof x != "number").map(x => x.length)
+    ratings[0].gameplay = ratings[0].gameplay.reduce((a,b) => a+b, 0)/rateCounts[0]
+    ratings[0].decoration = ratings[0].decoration.reduce((a,b) => a+b, 0)/rateCounts[1]
+    ratings[0].difficulty = ratings[0].difficulty.reduce((a,b) => a+b, 0)/rateCounts[2]
+    ratings[0].overall = ratings[0].overall.reduce((a,b) => a+b, 0)/rateCounts[3]
+    return ratings as unknown as ReviewDetailsResponse[]
+}
 export const containerSettingsOpen = ref(false)

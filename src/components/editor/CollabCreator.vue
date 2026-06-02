@@ -59,7 +59,7 @@ function getCreator(e: SubmitEvent) {
     let searchUsername = (e.target as HTMLFormElement)?.elements?.[0]?.value!
     axios.get(
         import.meta.env.VITE_API+"/rubLevelData.php",
-        {params: {userDataFetch: '', username: searchUsername}}
+        {params: {username: searchUsername, userDataFetch: ''}}
     ).then(res => {
         let userData: userDataFetchResponse = res.data
         // User not found
@@ -157,7 +157,7 @@ const roleInput = ref<HTMLInputElement[]>()
         <main class="flex flex-wrap gap-2 items-center my-auto w-full" :class="{'justify-between': !host}">
             <form @submit.native.prevent="getCreator" class="flex gap-1 items-center" :class="{'shake': noResults}">
                 <img src="@/images/unknownCube.svg" class="w-10" alt="" v-if="!verified">
-                <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[1].toString()" :col2="verified[2].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
+                <PlayerIcon v-else-if="typeof verified == 'object'" :icon="verified[0]" :col1="verified[2].toString()" :col2="verified[1].toString()" :glow="verified[3]" class="w-10 h-10" :quality="1"/>
                 <div class="flex flex-col gap-1">
                     <input type="text" maxlength="15" class="px-1 w-[min(11rem,30vw)] max-sm:py-1 bg-black bg-opacity-40 rounded-sm" :value="name" @change="writeName" :placeholder="$t('collabTools.memberName')">
                     <section class="grid grid-cols-6 gap-1">

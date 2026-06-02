@@ -19,7 +19,7 @@ const scrollTop = () => window.scrollTo({top: 0, behavior: "smooth"})
 
   <footer
     id="footer"
-    class="flex relative flex-col justify-center items-center mt-20 w-full h-24 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
+    class="flex relative flex-col justify-center items-center mt-20 w-full py-3 text-white bg-lof-200 bg-[url(@/images/headerBG.webp)]"
   >
     <div class="flex items-center">
       <img
@@ -33,7 +33,7 @@ const scrollTop = () => window.scrollTo({top: 0, behavior: "smooth"})
         <p class="text-[0.6rem] opacity-40">2021 - 2026 • commit {{ currentCommit }}</p>
       </div>
     </div>
-    <div class="flex gap-4 text-sm">
+    <div class="flex gap-4 mt-3 text-sm">
       <a target="_blank" href="https://github.com/GamingasCZ/gdlists">
         <button class="p-1 underline rounded-md opacity-80">
           {{ $t('other.sourceCod') }}
@@ -42,6 +42,10 @@ const scrollTop = () => window.scrollTo({top: 0, behavior: "smooth"})
       <button id="contactButton" class="p-1 underline rounded-md opacity-80" @click="contactMenuOpen = true">
         {{ $t('other.contact') }}
       </button>
+    </div>
+
+    <!-- Link gets added when a post has ui hiding query -->
+    <div id="backToGDLSection">
     </div>
 
     <button :title="$t('other.toTop')" @click="scrollTop">

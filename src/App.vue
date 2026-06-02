@@ -13,6 +13,7 @@ import NotificationStack from "./components/global/NotificationStack.vue";
 import { summonNotification } from "./components/imageUpload";
 import { dialog } from "./components/ui/sizes";
 import Dialog from "./components/global/Dialog.vue";
+import { currentUnread } from "./components/global/notifications.js";
 
 if (hasLocalStorage()) {
   localStorage.getItem("favoriteIDs") ??
@@ -34,6 +35,8 @@ if (hasLocalStorage()) {
     router.replace(loginRoute);
   }
 }
+
+const debugModeEnabled = ref(false)
 
 const returnedFromLogin = ref<boolean>(false);
 const firstTimeUser = ref<boolean>(false);
@@ -87,6 +90,8 @@ else {
         );
         currentUID.value = res.data.account_id
         currentCutout.value = res.data.cutout
+        currentUnread.value = res.data.unread_notif
+        if (res.data.debug) debugModeEnabled.value = true
       } else {
         localStorage.removeItem("account_info");
       }
@@ -101,6 +106,9 @@ else {
 // document.body.addEventListener("keydown", (e) => {
 //   if (e.altKey && e.key == "Control") tabbarOpen.value = true;
 // });
+
+const debugMenu = defineAsyncComponent({loader: () => import('@/components/global/DebugDialog.vue')})
+const debugMenuOpen = ref(false)
 </script>
 
 <template>
@@ -116,9 +124,13 @@ else {
       <component :is="LoggedInPopup" @close-popup="firstTimeUser = false" :username="returnfromLoginName" :pfplink="returnfromLoginPFP" />
     </Dialog>
 
-    <Suspense>
-      <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
-    </Suspense>
+    <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
+
+    <div class="fixed bottom-1 left-1 z-50 p-1 text-black rounded-md bg-yellow-100/20" @click="debugMenuOpen = true" v-if="debugModeEnabled">
+      <span class="opacity-40">Debug</span>
+      <component @close-popup="debugMenuOpen = false" v-if="debugMenuOpen" :is="debugMenu">
+      </component>
+    </div>
   </main>
   <NotificationStack />
   <Footer />

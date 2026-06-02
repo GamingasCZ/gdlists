@@ -1,9 +1,9 @@
 {
     "recommendations": [
-        "lokalise.i18n-ally",
         "bradlc.vscode-tailwindcss",
         "vue.vscode-typescript-vue-plugin",
         "vue.volar",
-        "heybourn.headwind"
+        "heybourn.headwind",
+        "lydanne.i18n-ally-next"
     ]
 }

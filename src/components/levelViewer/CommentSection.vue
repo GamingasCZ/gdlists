@@ -4,6 +4,7 @@ import ListBrowser from '../global/ListBrowser.vue';
 import CommentBox from './CommentBox.vue';
 import CommentPreview from './CommentPreview.vue';
 import { isOnline } from '@/Editor';
+import router from '@/router';
 import { hasLocalStorage } from '@/siteSettings';
 
 const props = defineProps<{
@@ -19,22 +20,27 @@ const emit = defineEmits<{
     (e: "updateCommentAmount", count: number): void
 }>()
 
-const browser = ref<HTMLDivElement>()
+const browser = ref<HTMLDivElement & {modifyData: ((data: any) => void), doRefresh: (() => void)}>()
 
 const localStrg = ref(hasLocalStorage())
 const amount = computed(() => props.commAmount)
 const commentType = computed(() => props.isReview ? "review" : "list")
+const highlight = ref(window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null)
 const showingOnce = ref(false)
 const noNoCommsIfDisabledComments = computed(() => props.commAmount == 0 && props.commentsDisabled)
 watch(props, () => { // only refresh comments once
     if (!showingOnce.value) showingOnce.value = true
 })
 
+watch(router.currentRoute, () => {
+    highlight.value = window.location.search.includes("comment") ? window.location.search.match(/comment=(\d+)/)?.[1] : null
+})
+
 </script>
 
 <template>
     <main class="mt-10">
-        <CommentBox :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled && localStrg"/>
+        <CommentBox @new-data="emit('updateCommentAmount', $event[2]['commAmount']); browser?.modifyData($event);" :is-review="isReview" :list-i-d="listID.toString()" :hidden="hiddenID" v-if="!commentsDisabled && localStrg"/>
         
         <!-- Comments disabled info -->
         <div class="flex gap-2 items-center p-1 mx-auto mt-4 w-max max-w-[95vw] rounded-md bg-greenGradient" v-if="commentsDisabled">
@@ -62,6 +68,7 @@ watch(props, () => { // only refresh comments once
             class="p-2"
             :comment-i-d="{type: commentType, objectID: listID}"
             :refreshButton="!commentsDisabled"
+            :highlight="highlight"
             @refreshed-browser="amount = $event; emit('updateCommentAmount', $event)"
         />
     </main>

@@ -28,6 +28,7 @@ const props = defineProps<{
   component: object
   picking: false | 1 | 2
   displayInRows: boolean
+  highlight?: number
 }>()
 
 // Page title
@@ -113,8 +114,8 @@ function doSearch() {
 
 function refreshBrowser() {
   if (!props.onlineBrowser) {
-    let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][filtered != undefined | 0]
-    let ind = props.onlineType == "collabs" | 0
+    let hasSearch = [[favoriteLevels, favoriteCollabs], filtered][+(filtered != undefined)]
+    let ind = +(props.onlineType == "collabs")
     LISTS.value = hasSearch[ind].slice(
       LISTS_ON_PAGE * PAGE.value!,
       LISTS_ON_PAGE * PAGE.value! + LISTS_ON_PAGE
@@ -144,15 +145,16 @@ function refreshBrowser() {
     if (props?.onlineType) fetchQuery[props.onlineType] = 1
   }
   else {
-    fetchURI = `${import.meta.env.VITE_API}/getComments.php`
+    fetchURI = `${import.meta.env.VITE_API}/comments.php`
     fetchQuery = {
       page: PAGE.value,
       startID: 999999,
-      path: "/getComments.php",
       fetchAmount: LISTS_ON_PAGE,
     }
-    if (props.commentID.type == "list") fetchQuery.listID = props.commentID.objectID
-    else fetchQuery.reviewID = props.commentID.objectID
+    fetchQuery.postID = props.commentID.objectID
+    fetchQuery.postType = +(props.commentID.type == "review")
+
+    if (props.highlight) fetchQuery.highlight = props.highlight
   }
 
   axios
@@ -292,12 +294,11 @@ onMounted(() => {
     pagesArray.value = listScroll();
   }
 
-  let gotoPage = [0, 'unknown']
-  if (hasLocalStorage()) {
-    let pageLast = JSON.parse(sessionStorage.getItem("pageLast")!)
-    if (pageLast)
-      gotoPage = pageLast
-  }
+  let gotoPage;
+  if (hasLocalStorage())
+    gotoPage = JSON.parse(sessionStorage.getItem("pageLast")!) ?? [0, 'unknown']
+  else
+    gotoPage = [0, 'unknown']
   if (props.onlineType == gotoPage[1]) PAGE.value = gotoPage[0]
 
   refreshBrowser();
@@ -318,8 +319,16 @@ onUnmounted(() => {
     sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType]))
 })
 
+const modifyData = (newData: [any[], ListCreatorInfo[], any[]]) => {
+  LISTS.value = newData[0]
+  USERS.value = newData[1]
+  maxPages.value = newData[2]["maxPage"]
+  PAGE.value = newData[2]["page"]
+}
+
 defineExpose({
-  doRefresh
+  doRefresh,
+  modifyData
 })
 
 </script>
@@ -329,20 +338,22 @@ defineExpose({
     <main>
       <div v-if="!hideTabs" class="flex justify-between items-center max-sm:flex-col">
         <header class="flex gap-3 justify-center mb-2" v-show="onlineBrowser" v-if="isLoggedIn">
-          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
-            :class="{ 'bg-lof-300': onlineType == '' }" @click="emit('switchBrowser', '')">
+          <RouterLink :to="`/browse/${onlineSubtype}`" class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+            :class="{ 'bg-lof-300': onlineType == '' }">
             {{ $t('other.newest') }}
-          </button>
-          <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+          </RouterLink>
+          <RouterLink :to="`/browse/${onlineSubtype}?type=user`" 
+            class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
             v-show="onlineSubtype != 'levels'"
-            :class="{ 'bg-lof-300': onlineType == 'user' }" @click="emit('switchBrowser', 'user')">
+            :class="{ 'bg-lof-300': onlineType == 'user' }">
             {{ $t('other.myLists', [onlineSubtype == 'lists' ? $t('other.lists') : $t('other.reviews')]) }}
-          </button>
-          <button class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
+          </RouterLink>
+          <RouterLink :to="`/browse/${onlineSubtype}?type=hidden`"
+            class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
             v-show="onlineSubtype != 'levels'"
-            :class="{ 'bg-lof-300': onlineType == 'hidden' }" @click="emit('switchBrowser', 'hidden')">
+            :class="{ 'bg-lof-300': onlineType == 'hidden' }">
             <img class="p-1 w-7" src="@/images/hidden.svg" alt="" />
-          </button>
+          </RouterLink>
         </header>
         <header class="flex gap-3 justify-center mb-3" v-if="!onlineBrowser">
           <button class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
@@ -437,11 +448,18 @@ defineExpose({
           </button>
         </div>
 
+        <!-- Highlighted comment -->
+        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
+          <h3 class="my-3 text-lg text-center">{{ $t('listViewer.highlighted') }}</h3>
+          <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
+          <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
+        </section>
+
         <component
           :is="component"
-          v-for="(list, index) in LISTS" v-bind="list"
+          v-for="(list, index) in LISTS.slice(highlight ? 1 : 0)" v-bind="list"
           class="min-w-full listPreviews"
-          :key="list?.name ?? list?.levelName ?? list?.comID ?? PAGE"
+          :key="list?.name ?? list?.levelName ?? list?.comID ?? list?.timestamp ?? PAGE"
           :in-use="false"
           :on-saves-page="true"
           :coll-index="index"

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {inject, nextTick, onMounted, onUpdated, ref, watch } from 'vue';
+import {inject, nextTick, onMounted, ref, watch } from 'vue';
 import type { Container } from './containers';
 import ContainerSettings from './ContainerSettings.vue';
 import parseMD from "../global/parseEditorFormatting";
-import striptags from 'striptags';
-import { flexNames } from '@/Reviews';
+import { flexNames, makeTogglableCheckboxes } from '@/Reviews';
+import router from '@/router';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -14,6 +14,7 @@ const emit = defineEmits<{
 	(e: "settingsButton", key: string): void
 	(e: "lostFocus"): void
 	(e: "addParagraph", inNest: boolean): void
+	(e: "forceUpdate"): void
 }>()
 
 interface Extras {
@@ -25,13 +26,14 @@ interface Extras {
 	index?: number
 	align: string
 	nestIndex?: number
+	id: number
 }
 
 const props = defineProps<Container & Extras>()
 const fontSizes = ['', '8px', '12px', '14px', '16px', '18px', '20px', '22px', '24px', '32px', '36px', '48px', '64px']
 const doShowSettings = inject<boolean | number>("containerSettingsShown")
-const lastTextChange = inject<() => void>("lastTextChange")!
-const mainText = ref<HTMLTextAreaElement>()
+const lastTextChange = inject<() => void>("lastTextChange", (() => {}))
+const mainText = ref<HTMLParagraphElement>()
 const textParent = ref<HTMLDivElement>()
 
 const togglePreview = () => {
@@ -40,8 +42,48 @@ const togglePreview = () => {
 	if (props.type == "twoColumns") return
 	
 	let textToParse = props.currentSettings?.noMD ? props.text.replaceAll("\n", "<br>") : props.text
-	if (!props.editable) mainText.value.innerHTML = parseMD(textToParse, true, props.currentSettings?.noMD)
+	if (!props.editable) {
+		mainText.value.innerHTML = parseMD(textToParse, true, props.currentSettings?.noMD)
+		
+		if (props.canEditText) {
+			nextTick(() => makeTogglableCheckboxes(mainText.value, checkCheckbox))
+		}
+	}
 	else mainText.value.innerText = textToParse
+}
+
+const checkCheckbox = (index: number | number[], toggled: boolean | boolean[]) => {
+	// todo: router.currentRoute.value.name != 'reviewViewer'
+	let text = props.text
+	let splitText = text.split(/- \[.\]/g)
+	let allCheckboxed = text.match(/- \[.\]/g)!
+	if (typeof index == 'number') {
+		if (typeof toggled == 'boolean')
+			allCheckboxed[index] = toggled ? '- [X]' : '- [ ]'
+		else {
+			toggled.forEach(x => allCheckboxed[index] = x ? '- [X]' : '- [ ]')
+		}
+	}
+	else {
+		if (typeof toggled == 'boolean')
+			index.forEach(i => allCheckboxed[i] = toggled ? '- [X]' : '- [ ]')
+		else {
+			for (let i = 0; i < index.length; i++)
+				allCheckboxed[index[i]] = toggled[i] ? '- [X]' : '- [ ]'
+		}
+		
+	}
+
+	let finalText = ""
+	for (let i = 0; i < splitText.length; i++) {
+		finalText += splitText[i]
+		if (i < splitText.length-1)
+			finalText += allCheckboxed[Math.min(i)]
+	}
+
+	// lastTextChange()
+	emit('textModified', finalText)
+	emit('forceUpdate')
 }
 
 watch(() => props.editable, togglePreview)
@@ -70,6 +112,7 @@ const doFocusText = (setFocus = true) => {
 const checkHasText = () => (((mainText.value?.innerText || props.text) ?? "")?.trim() ?? "").length > 0
 
 const modifyText = (e: InputEvent) => {
+	if (e.target?.type == "checkbox") return
 	lastTextChange()
 	emit('textModified', e?.target.outerText)
 	hasText.value = checkHasText()
@@ -178,8 +221,8 @@ const settings = ref<HTMLDialogElement>()
 		</p>
 			
 		<slot></slot>
-		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] -right-[38px] box-border max-sm:right-0">
-			<button @click="settings?.showSettings()" tabindex="-1" @auxclick="emit('removeContainer')" :class="{'!opacity-100': focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
+		<div v-if="!dependentOnChildren && editable" class="absolute z-10 flex flex-col top-[-2px] box-border max-sm:right-0" :class="{'-right-[38px]': !nestIndex, '-right-1': nestIndex}">
+			<button @click="settings?.showSettings()" tabindex="-1" @auxclick.prevent="emit('removeContainer')" :class="{'!opacity-100': focused}" class="flex flex-col items-center p-1 text-sm font-bold text-center text-black opacity-0 bg-lof-400">
 				<img src="@/images/gear.svg" class="w-7 invert">
 			</button>
 		</div>

@@ -2,7 +2,7 @@
 import ListSection from "./homepage/ListSection.vue";
 import LoginButton from "./global/LoginButton.vue";
 import { computed, ref, watch } from "vue";
-import { SETTINGS, hasLocalStorage, loggedIn, viewedPopups } from "@/siteSettings";
+import { SETTINGS, hasLocalStorage, homepageCache, loggedIn, viewedPopups } from "@/siteSettings";
 import THEMES, { selectedBeforeSave } from "@/themes";
 import axios from "axios";
 import { i18n } from "@/locales";
@@ -47,20 +47,34 @@ const getFeeds = async () => {
     }
   }
 
-
   if (loggedIn.value == null) return DEF_FEED_RESULT
-  let f = await axios.get(api + "/getLists.php", {
-    params: {
-      homepage: 1, feeds: [1,1, +loggedIn.value].join(','), extra: JSON.stringify([defFeed.pinned, defFeed.recent])}
-    }
-  )
+
+  let getParams = {homepage: 1, feeds: [1,1, +(loggedIn.value && !homepageCache.uploads)].join(',')}
+  if (homepageCache.pinned === null && homepageCache.recent === null)
+    getParams.extra = JSON.stringify([defFeed.pinned, defFeed.recent])
+  
+  let f = await axios.get(api + "/getLists.php", {params: getParams})
   
   if (f.status == 200) {
     let hp = f.data
-    hp.pinned = mergeBatchFeed(hp.pinned)
-    if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
-    hp.recent = mergeBatchFeed(hp.recent)
-    if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
+    if (homepageCache.uploads)
+      hp.user = homepageCache.uploads
+
+    if (homepageCache.pinned)
+      hp.pinned = homepageCache.pinned
+    else {
+      hp.pinned = mergeBatchFeed(hp.pinned)
+      if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
+      homepageCache.pinned = hp.pinned
+    }
+
+    if (homepageCache.recent)
+      hp.recent = homepageCache.recent
+    else {
+      hp.recent = mergeBatchFeed(hp.recent)
+      if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
+      homepageCache.recent = hp.recent
+    }
 
     // replace uids with users
     for (const row in hp) {
@@ -70,6 +84,9 @@ const getFeeds = async () => {
       for (let i = 0; i < hp[row][1].length; i++)
         hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
     }
+
+    if (hp.user)
+      homepageCache.uploads = hp.user
 
     return hp
   }
@@ -85,8 +102,8 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
   <header :style="{backgroundImage: headerBG}" class="flex flex-col h-[256px] justify-end items-center bg-no-repeat bg-center">
     <form action="./browse/lists" method="get" class="flex relative gap-2 items-start text-white">
       <div class="relative">
-        <input type="text" name="q"
-          class="px-1 py-2 pr-10 w-full rounded-md border-4 min-w-80 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
+        <input type="text" name="q" size="25"
+          class="px-1 py-2 pr-10 w-full rounded-md border-4 border-lof-300 bg-greenGradient outline-transparent placeholder:text-xl"
           :placeholder="$t('homepage.searchLists')" />
 
         <RouterLink to="/random" class="absolute top-3 right-3 z-10 min-w-max button selectOutline">

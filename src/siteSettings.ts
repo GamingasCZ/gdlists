@@ -1,5 +1,5 @@
 import { ref, watch } from "vue";
-import type { viewedPopup } from "./interfaces";
+import type { ListFetchResponse, viewedPopup } from "./interfaces";
 
 export const SETTINGS = ref({
   scrolling: 1,
@@ -23,15 +23,13 @@ export const SETTINGS = ref({
   colorization: true,
   flipControls: true,
   saveThumbs: true,
+  disableBGs: false,
+  notifBehaviour: 0,
+  navDClick: 0,
+  checkNotifs: true,
   shortcutProfile: -1, // will properly select itself based on browser
   fsZenMode: false,
 });
-
-watch(SETTINGS, () => {
-  if (localStorage) {
-    localStorage.setItem("settings", JSON.stringify(SETTINGS.value))
-  }
-}, {deep: true})
 
 export const hasLocalStorage = () => {
   try {
@@ -42,8 +40,16 @@ export const hasLocalStorage = () => {
   }
 }
 
+const hasLS = hasLocalStorage()
+
+watch(SETTINGS, () => {
+  if (hasLS) {
+    localStorage.setItem("settings", JSON.stringify(SETTINGS.value))
+  }
+}, {deep: true})
+
 export var viewedPopups: viewedPopup;
-if (hasLocalStorage()) {
+if (hasLS) {
   localStorage.getItem("settings") ??
     localStorage.setItem("settings", JSON.stringify(SETTINGS.value));
 
@@ -69,4 +75,12 @@ if (hasLocalStorage()) {
   }
 }
 
-export const loggedIn = ref<boolean | null>(null); 
+export const loggedIn = ref<boolean | null>(null);
+
+export const homepageCache: {[section: string]: null | ListFetchResponse} = {
+  pinned: null,
+  uploads: null,
+  recent: null
+}
+
+export const randomIsReview = ref(false)

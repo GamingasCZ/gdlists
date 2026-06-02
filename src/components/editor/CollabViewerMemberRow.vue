@@ -48,8 +48,8 @@ const isDiscordServer = computed(() => {
     <div class="grid grid-cols-[0.5fr_0.75fr_0.5fr_1fr] gap-2 items-center">
         <div class="flex gap-2 items-center">
             <PlayerIcon
-            v-if="human.verified?.[1]"
-            :icon="human.verified[0]" :col1="human.verified[1].toString()" :col2="human.verified[2].toString()" :glow="human.verified[3] | 0" :quality="1"
+            v-if="human.verified"
+            :icon="human.verified[0]" :col1="human.verified[2].toString()" :col2="human.verified[1].toString()" :glow="human.verified[3] | 0" :quality="1"
             class="w-10 h-10"
         />
             <img v-else :src="emoji" alt="" class="w-10 h-10">

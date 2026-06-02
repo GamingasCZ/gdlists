@@ -5,23 +5,23 @@
 
 @font-face {
   font-family: poppins;
-  src: url("../assets/SofiaSans-VariableFont_wght.ttf");
+  src: url("/gdlists/fonts/SofiaSans.woff2");
 }
-
-@keyframes navbarSlide {
-  0% {
-    translate: 0;
-  }
-  50% {
-    translate: 0 -100%;
-  }
-  100% {
-    translate: 0;
-  }
+@font-face {
+  font-family: outfit;
+  src: url("/gdlists/fonts/Outfit.woff2");
 }
-
-.slidingNavbar {
-  animation: navbarSlide 300ms;
+@font-face {
+  font-family: domine;
+  src: url("/gdlists/fonts/Domine.woff2");
+}
+@font-face {
+  font-family: oswald;
+  src: url("/gdlists/fonts/Oswald.woff2");
+}
+@font-face {
+  font-family: martianmono;
+  src: url("/gdlists/fonts/MartianMono.woff2");
 }
 
 :root {
@@ -196,6 +196,12 @@ dialog {
 
 #reviewText[data-white-page=true] p,figcaption {
   color: black
+}
+#reviewText[data-white-page=true] input[type="checkbox"] {
+  filter: invert(0.8);
+}
+#reviewText[data-white-page=true] blockquote {
+  @apply bg-opacity-10 border-l-lof-300;
 }
 #reviewText[data-white-page=true] {
   transition: background 0.25s;

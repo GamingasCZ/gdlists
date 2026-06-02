@@ -5,16 +5,20 @@ import chroma from 'chroma-js'
 import ColorPicker from '../global/ColorPicker.vue'
 import Editor from 'pure-editor'
 import axios, { type AxiosResponse } from 'axios'
-import cookier from 'cookier'
 import LoginButton from '../global/LoginButton.vue'
 import { useI18n } from 'vue-i18n'
 import { hasLocalStorage, SETTINGS } from '@/siteSettings'
 import ProfilePicture from '../global/ProfilePicture.vue'
+import type { CommentFetchResponse } from '@/interfaces'
 
 const props = defineProps<{
     listID: string
     hidden: string
     isReview: boolean
+}>()
+
+const emit = defineEmits<{
+    (e: "newData", data: [CommentFetchResponse[], any[], any]): void
 }>()
 
 const MIN_COMMENT_LEN = 10
@@ -78,10 +82,13 @@ onMounted(() => {
             },
         },
         submit: {
+            will: keyboardSend,
             done: sendComment,
         },
     })
 })
+
+const keyboardSend = (e: KeyboardEvent) => e.ctrlKey && e.key == "Enter"
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
@@ -121,7 +128,10 @@ const modCommentLength = () => commentLength.value = parseComment(COMMENT_BOX.va
 
 const commentError = ref(false)
 function sendComment(com = "") {
-    if (parseComment(COMMENT_BOX.value.getValues()).length < MIN_COMMENT_LEN) return
+    let comm;
+    if (com.length) comm = com 
+    else comm = COMMENT_BOX.value.getValues()
+    if (parseComment(comm).length < MIN_COMMENT_LEN) return
 
     let oldComment = document.getElementById("commentBox")?.innerHTML
     let comment: Array<string | {id: string}>
@@ -135,18 +145,15 @@ function sendComment(com = "") {
         comment: parsedComment,
         comType: "0",
         comColor: parsedColor.value,
-    }
-    if (props.isReview) postData.reviewID = props.listID
-    else {
-        postData.listID = props.listID
-        postData.hidden = props.hidden
+        postID: props.listID,
+        postType: +props.isReview
     }
 
-    axios.post(import.meta.env.VITE_API+"/sendComment.php", postData).then((res: AxiosResponse) => {
+    axios.post(import.meta.env.VITE_API+"/comments.php", postData).then((res: AxiosResponse) => {
         // Comment sent!
-        if (res.data == 6) {
-            (document.getElementById("listRefreshButton") as HTMLButtonElement).click()
+        if (res.data.length > 2) {
             placeholderActive.value = true
+            emit('newData', res.data)
         }
         else {
             document.getElementById("commentBox").innerHTML = oldComment
@@ -180,12 +187,11 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
             :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}"
             :contenteditable="loggedIn"
             id="commentBox"
-            class="overflow-y-auto break-all whitespace-normal font-[poppins] box-border p-1 rounded-sm border-l-4 text-lg border-solid min-h-16 sm:h-24"
-            :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}">
-        </pre>
+            class="overflow-y-auto break-all whitespace-normal font-[poppins] p-1 rounded-sm border-l-4 text-lg border-solid min-h-16 sm:h-24"
+            :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
         
         <!-- placeholder text -->
-        <p class="absolute top-2 left-4 opacity-30" v-if="placeholderActive && commentLength == 0 && loggedIn">{{ placeholder }}</p>
+        <p class="absolute top-2 left-4 opacity-30 pointer-events-none" v-if="placeholderActive && commentLength == 0 && loggedIn">{{ placeholder }}</p>
 
         <!-- Not logged in notification -->
         <section v-if="!loggedIn" class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
@@ -219,12 +225,12 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
                 <button 
                     :style="{backgroundColor: cannotSendComment ? darkParsedColor : parsedColor, borderColor: parsedColor}"
                     class="box-border flex relative gap-2 items-center px-1 ml-1 w-max font-bold overflow-clip rounded-sm border transition-opacity duration-75 disabled:opacity-50"
-                    :class="{'!text-black': !cannotSendComment && listColor[2] > 7}"
+                    :class="{'!text-black': !cannotSendComment && listColor[2] > 24}"
                     :disabled="cannotSendComment"
                     @click="sendComment()"
                 >
                     <div :style="{backgroundImage: lengthPie}" class="absolute right-0 bottom-0 left-0 h-1" v-show="commentLength > 1"></div>
-                    <img src="@/images/send.svg" class="w-7" :class="{'invert': !cannotSendComment  && listColor[2] > 7}" alt="">
+                    <img src="@/images/send.svg" class="w-7" :class="{'invert': !cannotSendComment  && listColor[2] > 24}" alt="">
                     <p>{{ $t('other.send') }}</p>
                 </button>
             </div>
