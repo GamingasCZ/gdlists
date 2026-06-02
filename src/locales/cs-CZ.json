@@ -81,7 +81,9 @@
     "creating": "Vytváření",
     "navDClickHelp": "Dvojklik na \"Seznamy\" a \"Recenze\" v navigaci rychle zvolí vybranou možnost.",
     "notif": "Sledovat notifikace",
-    "notifHelp": "Je-li zapnuto, stránka bude samovolně kontrolovat, zda nepřišly nové notifikace."
+    "notifHelp": "Je-li zapnuto, stránka bude samovolně kontrolovat, zda nepřišly nové notifikace.",
+    "zenFS": "Celoobrazovkový mód Zen",
+    "zenFSHelp": "Zda-li se prohlížeč se přepne do režimu celé obrazovky v módu Zen."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
@@ -355,7 +357,7 @@
     "post": "Post",
     "long": "dlouhé",
     "short": "krátké",
-    "name": "jméno",
+    "name": "Jméno",
     "creator": "tvůrce",
     "backTO": "Zpět na",
     "points": "Odrážka",
@@ -446,7 +448,33 @@
     "backToGDL": "Zpět do GD Seznamů",
     "hide": "Skrýt",
     "highlight": "Zvýraznit",
-    "notifFail": "Nepodařilo se načíst notifikace!"
+    "notifFail": "Nepodařilo se načíst notifikace!",
+    "deselect": "Zneaktivnit prvek",
+    "profiles": "Profily",
+    "custom": "Vlastní",
+    "ksSingle": "Jednoklávesové",
+    "ksCtrl": "Control-ové",
+    "ksAlt": "Alt-ové",
+    "badSh": "Nepoužitelná zkratka",
+    "badShHelp": "Tato akce nebude fungovat, pokud je použita jednoklávesová zkratka.",
+    "shortcutsExported": "Zkratky exportovány!",
+    "success": "Úspěch",
+    "kbLoaded": "Zkratky byly načteny!",
+    "kbFail": "Toto není platný soubor se zkratkami",
+    "kbInUse": "Zkratka je již použitá",
+    "kbInUseHelp": "Vyber prosím jinou.",
+    "rImgAdd": "Přidávání rozsahu obrázků",
+    "from": "Od",
+    "to": "Po",
+    "zeroPad": "Výplň nulami",
+    "flipVals": "Obrátit pořadí",
+    "rImgHelp": "Tímto nástrojem můžeš přidat vícero obrázků zaráz. Jména obrázků v adrese musí být očíslovaná.<br><br>Symbol <b><b>$</b></b> se v adrese nahradí vybraným číselným intervalem.",
+    "rImgFin": "Takto budou adresy vypadat",
+    "rImgErr1": "Toto není platná adresa!",
+    "rImgErr2": "V adrese není zástupný znak!",
+    "rImgErr3": "Není vyplněn číselný interval!",
+    "rImgErr4": "Interval není platný!",
+    "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -835,7 +863,12 @@
     "ckhelp5": "Zakonči sekvenci zarovnáním sloupců:",
     "cHelp5": "Vytvoř víc než jeden sloupec.",
     "cHelp6": "Zadej strukturu sloupců",
-    "invertSel": "Invertovat výběr"
+    "invertSel": "Invertovat výběr",
+    "colGaps": "Mezery",
+    "enterCombo": "Stiskni novou kombinaci",
+    "kbWarn1": "Tento profil nemusí fungovat ve Firefoxu.",
+    "kbWarn2": "Tento profil nemusí fungovat, pokud je prohlížeč na celou obrazovku (např. v Zen Módu).",
+    "rouletteFail": "Nepodařilo se získat levely!"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

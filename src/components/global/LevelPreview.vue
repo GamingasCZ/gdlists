@@ -171,7 +171,7 @@ const selectLevel = () => {
       <a @click.stop="" :href="`https://gdbrowser.com/${levelID}`" target="_blank" class="p-2 py-1 m-2 text-left bg-black bg-opacity-40 rounded-md transition-colors hover:bg-opacity-60"><img src="@/images/modGDB.svg" class="inline mr-2 w-8">{{ $t('listViewer.dispOnGDB') }}</a>
     </div>
 
-    <button v-if="!disableFave" @click.stop="favoriteLevel" :class="{'disabled': favorited}" class="absolute top-1 right-1 z-10 button">
+    <button v-if="!disableFave && loggedIn" @click.stop="favoriteLevel" :class="{'disabled': favorited}" class="absolute top-1 right-1 z-10 button">
       <img src="@/images/star.svg" class="w-7" alt="">
     </button>
 

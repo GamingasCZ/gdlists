@@ -42,8 +42,8 @@ const getFeeds = async () => {
     let vpArr: ViewedPinArray = JSON.parse(localStorage.getItem("viewedPinArray")!)
 
     if (vpArr !== null) {
-      defFeed.pinned = vpArr.pinned
-      defFeed.recent = vpArr.viewed
+      defFeed.pinned = (!vpArr.pinned[0].length && !vpArr.pinned[1].length) ? false : vpArr.pinned
+      defFeed.recent = (!vpArr.viewed[0].length && !vpArr.viewed[1].length) ? false : vpArr.viewed
     }
   }
 
@@ -59,19 +59,30 @@ const getFeeds = async () => {
     let hp = f.data
     if (homepageCache.uploads)
       hp.user = homepageCache.uploads
-    
+
     if (homepageCache.pinned)
       hp.pinned = homepageCache.pinned
     else {
       hp.pinned = mergeBatchFeed(hp.pinned)
+      if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
       homepageCache.pinned = hp.pinned
     }
-    
+
     if (homepageCache.recent)
       hp.recent = homepageCache.recent
     else {
       hp.recent = mergeBatchFeed(hp.recent)
+      if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
       homepageCache.recent = hp.recent
+    }
+
+    // replace uids with users
+    for (const row in hp) {
+      if (row == "users") continue;
+      if (hp[row] === false) continue;
+
+      for (let i = 0; i < hp[row][1].length; i++)
+        hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
     }
 
     if (hp.user)
@@ -116,7 +127,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
     </form>
   </header>
 
-  <section class="flex justify-center">
+  <section class="relative left-1/2 w-max -translate-x-1/2">
     <div v-if="isLoggedIn == false && localStorg"
       class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
@@ -127,7 +138,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
       <LoginButton class="ml-auto" />
     </div>
     <div v-if="!localStorg"
-      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
+      class="flex gap-3 justify-center items-center px-2 py-1 mt-6 w-max text-white rounded-md -translate-x-7 mx bg-greenGradient">
       <img src="../images/disCookies.svg" alt="" class="w-6" />
       <div>
         <p class="max-sm:text-xs">{{ $t('homepage.cookies1') }}</p>
@@ -138,7 +149,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
 
   <main id="homepageSections" class="flex flex-col overflow-clip items-start sm:px-2 mx-auto max-w-[100.5rem]">
     <ListSection :header-name="$t('homepage.pinned')" :empty-text="$t('homepage.noListsPinned')"
-      :force-content="feeds?.['pinned']" :list-type="2" />
+      :force-content="feeds?.['pinned'] ?? false" :list-type="2" />
     <ListSection :header-name="$t('homepage.newestReviews')" :extra-text="$t('homepage.more')" extra-icon="more"
         :empty-text="$t('homepage.listsUnavailable', [$t('homepage.reviews')])" extra-action="/browse/reviews" :force-content="feeds?.['reviews']" :list-type="2" />
     

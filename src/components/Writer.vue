@@ -12,7 +12,7 @@ import ImageBrowser from "./global/ImageBrowser.vue";
 import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction, LevelImage } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
-import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview } from "@/Reviews";
+import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview, containerSettingsOpen } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -54,6 +54,13 @@ const props = defineProps<{
 
 const WRITER = ref([LIST, REVIEW][props.type])
 const POST_DATA = ref<PostData>(WRITER.value.general.postObject())
+watch(() => props.type, () => {
+    WRITER.value = [LIST, REVIEW][props.type]
+    drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
+    shortcutUnload()
+    shortcutListen(WRITER.value.toolbar, doAction)
+    resetPost()
+})
 
 var loadEditDraft: ReviewDraft | null = null
 watch(timeLastRouteChange, () => {
@@ -509,13 +516,42 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
         case 'addLevel':
             addReviewLevel(POST_DATA)
             break;
-	}
+        case 'deselect':
+            if (selectedContainer.value[0] > -1
+                && document.querySelector(".modalDialog") == null    
+                && document.activeElement != null
+                && containerSettingsOpen.value == false
+            ) {
+                selectedContainer.value = [-1]
+                document?.activeElement?.blur()
+            }
+            break;
+        }
 }
 provide("writerAction", doAction)
 
+const getContainerSelectedElement = () => {
+    return document.querySelector("[data-selected=true]")
+}
+
+var prePreviewScrollTop = 0
 const setPreviewMode = (preview: boolean) => {
+    let currSelectedElement = getContainerSelectedElement()
     previewMode.value = preview
-    // nextTick(() => dataContainers.value.forEach(c => c.togglePreview()))
+
+    // Resets scroll when exiting preview
+    if (!previewMode.value) {
+        prePreviewScrollTop = document.documentElement.scrollTop
+
+        // Scrolls to currently selected element
+        if (currSelectedElement != null)
+            nextTick(() => currSelectedElement?.scrollIntoView())
+    }
+    else {
+        if (prePreviewScrollTop != 0) {
+            document.documentElement.scrollTop = prePreviewScrollTop
+        }
+    }
 }
 
 const previewingLevels = ref(false)
@@ -961,6 +997,9 @@ let previewHold: [ReviewList, object] | null
 const disableEdits = ref(false)
 var outsideDrafts = false
 var previewID: string | null = null
+
+const containerHelpDisabled = computed(() => disableEdits.value)
+provide("containerHelpDisabled", containerHelpDisabled)
 const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewingOutsideDrafts = false) => {
     if (!previewData) {
         errorStamp.value = Date.now()
@@ -1092,8 +1131,10 @@ const listPickerPick = (level: Level | Level[]) => {
 const goFullscreen = () => {
     if (document.fullscreenElement)
         document.exitFullscreen()
-    else
+    else if (SETTINGS.value.fsZenMode)
         document.documentElement.requestFullscreen({navigationUI: "hide"})
+    else
+        toggleZenMode()
 }
 
 const zenMode = ref(false)
@@ -1152,6 +1193,17 @@ const addPreset = (ind: number) => {
 }
 
 const collabEditor = ref<HTMLDialogElement>()
+const shortcutsPopup = ref<HTMLDialogElement>()
+const editingShortcut = ref(false)
+
+const doShortcutEdit = () => {
+    shortcutUnload()
+    editingShortcut.value = true
+}
+const endShortcutEdit = () => {
+    shortcutListen(WRITER.value.toolbar, doAction)
+    editingShortcut.value = false
+}
 
 const modifyPostName = () => {
     let titleTag = document.querySelector("title")!
@@ -1237,9 +1289,10 @@ const modifyPostName = () => {
                 @load="loadDraft" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
         </DialogVue>
 
-        <DialogVue :open="openDialogs.shortcuts" @close-popup="openDialogs.shortcuts = false" :title="$t('reviews.keysh')"
-            :width="dialog.medium">
-            <ShortcutsPopup />
+        <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"
+            :width="dialog.medium" :side-button-text="$t('other.profiles')" :action="shortcutsPopup?.profilePopupOpen">
+            <template #icon><img src="@/images/key.svg" id="shortcutPopupButton" alt="" class="-mr-1 w-5"></template>
+            <ShortcutsPopup ref="shortcutsPopup" @editing="doShortcutEdit" @finished-edit="endShortcutEdit" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.collabs[0]" @close-popup="openDialogs.collabs[0] = false" :title="$t('collabTools.funny1')" :width="dialog.xl" :side-button-text="$t('navbar.saved')" :action="collabEditor?.openSaved">
@@ -1267,19 +1320,19 @@ const modifyPostName = () => {
             <!-- Hero -->
             <div v-show="!zenMode" class="flex flex-col items-center mt-8 text-center"
                 :class="{ 'pointer-events-none opacity-20': disableEdits }">
-                <input v-model="POST_DATA.reviewName" @input="modifyPostName" type="text" :maxlength="40" :disabled="editing"
+                <input v-model="POST_DATA.reviewName" @input="modifyPostName" type="text" :maxlength="40" :disabled="editing || disableEdits"
                     :placeholder="WRITER.general.titlePlaceholder"
                     class="text-6xl max-sm:text-5xl text-center disabled:opacity-70 disabled:cursor-not-allowed max-w-[85vw] font-black text-white bg-transparent border-b-2 border-b-transparent focus-within:border-b-lof-400 outline-none">
-                <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" @click="tagline = true"
+                <button v-if="!(POST_DATA?.tagline ?? '').length && !tagline" :disabled="disableEdits" @click="tagline = true"
                     class="flex gap-2 justify-center items-center mt-3 font-bold text-white">
                     <img src="@/images/plus.svg" class="w-6" alt="">
                     <span>{{ $t('reviews.addTagline') }}</span>
                 </button>
                 <div v-else class="flex gap-2 items-center w-2/5 text-white group">
-                    <input type="text" v-once :maxlength="60" v-model="POST_DATA.tagline" autofocus
+                    <input type="text" v-once :maxlength="60" v-model="POST_DATA.tagline" autofocus :disabled="disableEdits"
                         class="text-lg italic text-center bg-transparent border-b-2 outline-none grow border-b-transparent focus-within:border-lof-400"
                         :placeholder="WRITER.general.placeholderTaglines[Math.floor(Math.random() * WRITER.general.placeholderTaglines.length)]">
-                    <button @click="POST_DATA.tagline = ''; tagline = false">
+                    <button @click="POST_DATA.tagline = ''; tagline = false" :disabled="disableEdits">
                         <img src="@/images/trash.svg" alt=""
                             class="hidden p-1 w-6 bg-black bg-opacity-40 rounded-md min-w-6 group-focus-within:block button">
                     </button>
@@ -1397,17 +1450,17 @@ const modifyPostName = () => {
             <!-- Footer buttons (upload, settings...) -->
             <div v-show="!zenMode" class="flex gap-3 justify-center items-center mt-8 text-xl">
 
-                <button @click="openDialogs.settings = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
+                <button @click="openDialogs.settings = true" :disabled="disableEdits" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
                     <span>{{ $t('other.settings') }}</span>
                 </button>
 
-                <button :disabled="uploadInProgress" v-if="!editing" @click="startUpload()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                <button :disabled="uploadInProgress || disableEdits" v-if="!editing" @click="startUpload()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
                     <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                     <img v-else src="@/images/upload.svg" alt="" class="w-7">
                     <span>{{ $t('editor.upload') }}</span>
                 </button>
                 <div class="flex gap-2" v-else>
-                    <button :disabled="uploadInProgress" @click="updateReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
+                    <button :disabled="uploadInProgress || disableEdits" @click="updateReview()" class="flex gap-4 px-3 py-2 font-bold text-black rounded-md button bg-lof-400">
                         <img v-if="uploadInProgress" src="@/images/loading.webp" class="my-auto w-4 h-4 animate-spin" alt="">
                         <img v-else src="@/images/upload.svg" alt="" class="w-7">
                         <span class="max-sm:hidden">{{ $t('editor.update') }}</span>
@@ -1417,7 +1470,7 @@ const modifyPostName = () => {
                     </HoldButton>
                 </div>
 
-                <button @click="openDialogs.drafts = true" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
+                <button @click="openDialogs.drafts = true" :disabled="disableEdits" class="flex gap-2 px-2 py-1 rounded-md text-lof-400 hover:underline">
                     <span >{{ $t('reviews.drafts') }}</span>
                 </button>
 

@@ -26,7 +26,9 @@ export const SETTINGS = ref({
   disableBGs: false,
   notifBehaviour: 0,
   navDClick: 0,
-  checkNotifs: true
+  checkNotifs: true,
+  shortcutProfile: -1, // will properly select itself based on browser
+  fsZenMode: false,
 });
 
 export const hasLocalStorage = () => {

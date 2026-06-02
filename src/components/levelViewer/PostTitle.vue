@@ -23,7 +23,6 @@ const getColors = computed(() => {
         if (props.titleData.colors[0])
             return `linear-gradient(30deg, var(--brightGreen), white 40%)`
         else {
-            console.log(props.titleData.colors[1])
             let col1 = chroma.hsl(props.titleData.colors[1].theme[0][0], props.titleData.colors[1].theme[0][1]/32, props.titleData.colors[1].theme[0][2]/32).css()
             let col2 = chroma.hsl(props.titleData.colors[1].theme[1][0], props.titleData.colors[1].theme[1][1]/32, props.titleData.colors[1].theme[1][2]/32).css()
 

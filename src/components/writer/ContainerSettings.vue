@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import { ControlType, type Containers, type ContainerSettings } from './containers';
-import { DEFAULT_RATINGS } from '@/Reviews';
 import type { PostData } from '@/interfaces';
+import { containerSettingsOpen, DEFAULT_RATINGS } from '@/Reviews';
 
 const emit = defineEmits<{
     (e: "remove"): void
@@ -42,6 +42,7 @@ const settingsShown = ref(false)
 
 const showSettings = () => {
     nextTick(() => {
+        containerSettingsOpen.value = true
         settingsShown.value = true
         document.body.addEventListener("mousedown", closeSettings, { capture: true })
         document.body.addEventListener("contextmenu", closeSettings, { capture: true })
@@ -64,6 +65,7 @@ const forceHide = () => {
     document.body.removeEventListener("mousedown", closeSettings, { capture: true })
     document.body.removeEventListener("contextmenu", closeSettings, { capture: true })
     emit('hidSettings')
+    setTimeout(() => containerSettingsOpen.value = false, 20) // not good
 }
 
 const closeSettings = (m: MouseEvent) => {

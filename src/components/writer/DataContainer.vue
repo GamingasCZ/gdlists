@@ -109,7 +109,7 @@ const doFocusText = (setFocus = true) => {
 	emit('hasFocus')
 }
 
-const checkHasText = () => ((mainText.value?.innerText || props.text) ?? "").trim().length > 0
+const checkHasText = () => (((mainText.value?.innerText || props.text) ?? "")?.trim() ?? "").length > 0
 
 const modifyText = (e: InputEvent) => {
 	if (e.target?.type == "checkbox") return
@@ -194,12 +194,14 @@ const settings = ref<HTMLDialogElement>()
 
 <template>
 	<div
-		class="flex relative flex-wrap w-full outline-none scroll-mt-24 min-w-48 reviewContainer min-h-4"
+		class="flex relative flex-wrap w-full outline-none scroll-mt-24 reviewContainer min-h-4"
+		:class="{'min-w-12': !canEditText, 'min-w-64': canEditText}"
 		:style="{ justifyContent: flexNames[align] }"
 		:data-type="type"
 		ref="textParent"
 		:tabindex="(canEditText || !editable || dependentOnChildren) ? -1 : 0"
 		@focusin="!dependentOnChildren && doFocusText(false)"
+		:data-selected="focus && focused"
 	>
 		<hr class="absolute z-10 right-[-6px] border-lof-400 h-full border-r-4" v-if="!dependentOnChildren && focus && focused">
 		<p

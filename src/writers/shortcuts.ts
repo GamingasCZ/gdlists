@@ -9,73 +9,197 @@ import ResizeIcon from "@/images/resizer.svg?url"
 import MoveUpIcon from "@/images/moveUp.svg?url"
 import MoveDownIcon from "@/images/moveDown.svg?url"
 import AddIcon from "@/images/plus.svg?url"
+import RemoveIcon from "@/images/close.svg?url"
 import { ref } from "vue";
+import { hasLocalStorage, SETTINGS } from "@/siteSettings";
+
+export var defaultShortcuts = [
+    {
+        "save": [Key.Ctrl, 'S'],
+        "containerOptions": [Key.Alt, 'P', false],
+        "containerDelete": [Key.Alt | Key.Shift, 'Q', false],
+        "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
+        "drafts": [Key.Ctrl, 'O'],
+        "addLevel": [Key.Alt, 'L'],
+        "resizeSmaller": [Key.Alt, '-', false],
+        "resizeBigger": [Key.Alt, '+', false],
+        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp', false],
+        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown', false],
+        "deselect": [Key.None, 'Escape', false],
+
+        "add.default": [Key.Alt | Key.Shift, 'F'],
+        "preview.1": [Key.Alt | Key.Shift, 'J'],                
+        "add.heading1": [Key.Alt, 'Digit1'],
+        "add.heading2": [Key.Alt, 'Digit2'],
+        "add.heading3": [Key.Alt, 'Digit3'],
+        "align.left": [Key.Alt, 'L'],
+        "align.center": [Key.Alt, 'E'],
+        "align.right": [Key.Alt, 'R'],
+        "align.justify": [Key.Alt, 'J'],
+        "add.showImage": [Key.Alt | Key.Shift, 'I'],
+        "add.addVideo": [Key.Alt | Key.Shift, 'V'],
+        "add.addCarousel": [Key.Alt | Key.Shift, 'C'],
+        "add.divisor": [Key.Alt | Key.Shift, 'S'],
+        "add.showLevel": [Key.Alt | Key.Shift, 'L'],
+        "add.showRating": [Key.Alt | Key.Shift, 'R'],
+        "add.showList": [Key.Alt | Key.Shift, 'E'],
+        "columnCreate": [Key.Alt | Key.Shift, 'D'],
+        "format.0": [Key.Ctrl, 'B', false],
+        "format.1": [Key.Ctrl, 'I', false],
+        "format.2": [Key.Ctrl, 'D', false],
+        "format.3": [Key.Ctrl, 'L', false],
+        "format.4": [Key.Ctrl, 'B', false],
+        "format.5": [Key.Ctrl, 'M', false],
+        "format.6": [Key.Ctrl, 'L', false],
+        "splitParagraph": [Key.Ctrl | Key.Alt, 'S', false]
+    },
+    {
+        "save": [Key.Ctrl, 'S'],
+        "containerOptions": [Key.Ctrl, 'P'],
+        "containerDelete": [Key.Ctrl | Key.Shift, 'Q'],
+        "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
+        "drafts": [Key.Ctrl, 'O'],
+        "addLevel": [Key.Ctrl | Key.Shift, 'L'],
+        "resizeSmaller": [Key.Alt, '-'],
+        "resizeBigger": [Key.Alt, '+'],
+        "moveUp": [Key.Ctrl | Key.Shift, 'ArrowUp'],
+        "moveDown": [Key.Ctrl | Key.Shift, 'ArrowDown'],
+        "deselect": [Key.None, 'Escape'],
+
+        "add.default": [Key.Ctrl | Key.Shift, 'F'],
+        "preview.1": [Key.Ctrl | Key.Shift, 'J'],                
+        "add.heading1": [Key.Ctrl, 'Digit1', true],
+        "add.heading2": [Key.Ctrl, 'Digit2', true],
+        "add.heading3": [Key.Ctrl, 'Digit3', true],
+        "align.left": [Key.Ctrl, 'L'],
+        "align.center": [Key.Ctrl, 'E'],
+        "align.right": [Key.Ctrl, 'R'],
+        "align.justify": [Key.Ctrl, 'J'],
+        "add.showImage": [Key.Ctrl | Key.Shift, 'I'],
+        "add.addVideo": [Key.Ctrl | Key.Shift, 'V'],
+        "add.addCarousel": [Key.Ctrl | Key.Shift, 'C'],
+        "add.divisor": [Key.Ctrl | Key.Shift, 'S'],
+        "add.showLevel": [Key.Ctrl | Key.Shift, 'L'],
+        "add.showRating": [Key.Ctrl | Key.Shift, 'R'],
+        "add.showList": [Key.Ctrl | Key.Shift, 'E'],
+        "columnCreate": [Key.Ctrl | Key.Shift, 'D'],
+        "format.0": [Key.Ctrl, 'B'],
+        "format.1": [Key.Ctrl, 'I'],
+        "format.2": [Key.Ctrl, 'D'],
+        "format.3": [Key.Ctrl, 'L'],
+        "format.4": [Key.Ctrl, 'B'],
+        "format.5": [Key.Ctrl, 'M'],
+        "format.6": [Key.Ctrl, 'L'],
+        "splitParagraph": [Key.Ctrl | Key.Alt, 'S']
+    },
+    {
+        "save": [Key.Ctrl, 'S'],
+        "containerOptions": [Key.Ctrl, 'P'],
+        "containerDelete": [Key.Ctrl | Key.Shift, 'Q'],
+        "shortcutsMenu": [Key.Ctrl | Key.Alt, 'K'],
+        "drafts": [Key.Ctrl, 'O'],
+        "addLevel": [Key.Alt, 'L'],
+        "resizeSmaller": [Key.Alt, '-'],
+        "resizeBigger": [Key.Alt, '+'],
+        "moveUp": [Key.Alt | Key.Shift, 'ArrowUp'],
+        "moveDown": [Key.Alt | Key.Shift, 'ArrowDown'],
+        "deselect": [Key.None, 'Escape'],
+
+        "add.default": [Key.None, 'P'],
+        "preview.1": [Key.Shift, 'P'],
+        "add.heading1": [Key.None, 'Digit1', true],
+        "add.heading2": [Key.None, 'Digit2', true],
+        "add.heading3": [Key.None, 'Digit3', true],
+        "align.left": [Key.Ctrl, 'L'],
+        "align.center": [Key.Ctrl, 'E'],
+        "align.right": [Key.Ctrl, 'R'],
+        "align.justify": [Key.Ctrl, 'J'],
+        "add.showImage": [Key.None, 'I'],
+        "add.addVideo": [Key.None, 'V'],
+        "add.addCarousel": [Key.None, 'C'],
+        "add.divisor": [Key.None, 'S'],
+        "add.showLevel": [Key.None, 'L'],
+        "add.showRating": [Key.None, 'R'],
+        "add.showList": [Key.None, 'E'],
+        "columnCreate": [Key.None, 'D'],
+        "format.0": [Key.Ctrl, 'B'],
+        "format.1": [Key.Ctrl, 'I'],
+        "format.2": [Key.Ctrl, 'D'],
+        "format.3": [Key.Ctrl, 'L'],
+        "format.4": [Key.Ctrl, 'B'],
+        "format.5": [Key.Ctrl, 'M'],
+        "format.6": [Key.Ctrl, 'L'],
+        "splitParagraph": [Key.Ctrl | Key.Alt, 'S']
+    },
+]
 
 const writerShortcuts = [
     {
-        shortcut: [Key.Ctrl, 'S'],
         action: ["save"],
         title: i18n.global.t('other.save'),
         icon: SaveIcon
     },
     {
-        shortcut: [Key.Alt | Key.Shift, 'P'],
         action: ["containerOptions"],
         title: i18n.global.t('reviews.elemSettings'),
         icon: GearIcon
     },
     {
-        shortcut: [Key.Alt | Key.Shift, 'Q'],
         action: ["containerDelete"],
         title: i18n.global.t('reviews.rmElem'),
         icon: TrashIcon
     },
     {
-        shortcut: [Key.Ctrl | Key.Alt, 'K'],
         action: ["shortcutsMenu"],
         title: i18n.global.t('reviews.keysh'),
         icon: KeyIcon
     },
     {
-        shortcut: [Key.Ctrl, 'O'],
         action: ["drafts"],
         title: i18n.global.t('reviews.drafts'),
         icon: EditIcon
     },
     {
-        shortcut: [Key.Alt, 'L'],
         action: ["addLevel"],
         title: i18n.global.t('reviews.addLevel'),
         icon: AddIcon
     },
     {
-        shortcut: [Key.Alt, '-'],
         action: ["resizeSmaller"],
         title: i18n.global.t('reviews.decSize'),
         icon: ResizeIcon
     },
     {
-        shortcut: [Key.Alt, '+'],
         action: ["resizeBigger"],
         title: i18n.global.t('reviews.incSize'),
         icon: ResizeIcon
     },
     {
-        shortcut: [Key.Alt | Key.Shift, 'ArrowUp'],
         action: ["moveUp"],
         title: i18n.global.t('reviews.elUp'),
         icon: MoveUpIcon
     },
     {
-        shortcut: [Key.Alt | Key.Shift, 'ArrowDown'],
         action: ["moveDown"],
         title: i18n.global.t('reviews.elDown'),
         icon: MoveDownIcon
     },
+    {
+        action: ["deselect"],
+        title: i18n.global.t('other.deselect'),
+        icon: RemoveIcon
+    }
 ]
 
 var actionsFun
 export const shortcutListen = (toolbar, actions) => {
+    if (SETTINGS.value.shortcutProfile == -1) {
+        if (isFirefox)
+            SETTINGS.value.shortcutProfile = 1 // ctrl shortcuts bcus of firefox bug
+        else
+            SETTINGS.value.shortcutProfile = 0 // chromium ctrl shortcuts
+    }
+
     window.addEventListener("keydown", blockNativeShortcuts)
     window.addEventListener("keyup", checkForShortcut)
 
@@ -88,35 +212,58 @@ export const shortcutUnload = () => {
     window.removeEventListener("keyup", checkForShortcut)
 }
 
+// forms a key string from action
+export const getShortcut = (action?: any[]) => {
+    let text = (action ?? Array()).join(".")
+    let profile = defaultShortcuts[SETTINGS.value.shortcutProfile]
+    let shortcut: [[Key, string], 0|1];
+    if (!profile) {// load custom
+        if (customShortcuts[text])
+            shortcut = [customShortcuts[text], 1]
+        else
+            shortcut = [defaultShortcuts[0][text], 0]
+    }
+    else // pick from profile
+        shortcut = [profile[text], 0]
+    return shortcut
+}
 
+var customShortcuts = {}
 export var keyShortcuts: [Key, any[]][] = []
 const BASE = import.meta.env.BASE_URL
 const getShortcuts = (toolbar) => {
     keyShortcuts = []
-    writerShortcuts.forEach(button => 
-        keyShortcuts.push([button.shortcut, button.action, button.title, button.icon]))
+    if (hasLocalStorage()) {
+        customShortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}
+    }
+
+    writerShortcuts.forEach(button => {
+        let sh = getShortcut(button.action)
+        keyShortcuts.push([sh[0], button.action, button.title, button.icon, sh[1]])
+    })
 
     for (const key in toolbar) {
         for (const key2 in toolbar[key]) {
             for (const button of toolbar[key][key2]) {
-
-                if (button?.shortcut) {
-                    if (typeof button.shortcut?.[0] == 'object') {
-                        for (let i = 0; i < button.shortcut.length; i++) {
-                            let icon = `${BASE}/formatting/${button.icon[i]}.svg`
-                            keyShortcuts.push([button.shortcut[i], [button.action[0], button.action[1][i]], button?.dropdownText?.[i], icon])
-                        }
-                    }
-                    else {
-                        let icon = `${BASE}/formatting/${typeof button?.icon == 'object' ? button.icon[0] : button.icon}.svg`
-                        keyShortcuts.push([button.shortcut, button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon])
+                let icon = `${BASE}/formatting/${typeof button?.icon == 'object' ? button.icon[0] : button.icon}.svg`
+                if (typeof button.action?.[1] == 'object') {
+                    for (let i = 0; i < button.action[1].length; i++) {
+                        let icon = `${BASE}/formatting/${button.icon[i]}.svg`
+                        let act = [button.action[0], button.action[1][i]]
+                        let sh = getShortcut(act)
+                        keyShortcuts.push([sh[0], act, button?.dropdownText?.[i], icon, sh[1]])
                     }
                 }
-    
-                // Fixed shortcuts apply only if a given toolbar is active
-                // TODO
-                // if (button?.shortcutFixed && true)
-                //     keyShortcuts.push([button?.shortcutFixed, button?.action, button.title || button?.tooltip, icon])
+                else {
+                    let shortcut = getShortcut(button.action)
+                    if (shortcut)
+                        keyShortcuts.push([shortcut[0], button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon, shortcut[1]])
+                }
+
+            // Fixed shortcuts apply only if a given toolbar is active
+            // TODO
+            // if (button?.shortcutFixed && true)
+            //     keyShortcuts.push([button?.shortcutFixed, button?.action, button.title || button?.tooltip, icon])
             }
         }
     }
@@ -156,8 +303,14 @@ function checkForShortcut(e: KeyboardEvent) {
 	let currCombo = getCombo(e)
     comboHeld.value = currCombo
 
+    // do not check for shortcuts without modifiers when an element is selected
+    let actEl = document.activeElement
+    let nonEditing = actEl == null || (actEl.nodeName != "INPUT" && actEl.nodeName != "P")
+    let comboChecking = nonEditing && document.querySelector(".modalDialog") == null
+                        ? true : (comboHeld.value != Key.None || e.key == 'Escape')
+
 	let f: string[] | boolean;
-	if (currCombo != Key.None && (f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
+	if (comboChecking && (f = isValidShortcut(currCombo, e.key.toUpperCase(), e.code)))
         actionsFun(...f)
 
 }
@@ -171,7 +324,10 @@ const overrides = {
     'Digit2': '2',
     'Digit3': '3',
     'ArrowUp': '▲',
-    'ArrowDown': '▼'
+    'ArrowDown': '▼',
+    'ArrowLeft': '◀',
+    'ArrowRight': '▶',
+    ' ': 'Space'
 }
 
 export const doOverride = (key: string) => {

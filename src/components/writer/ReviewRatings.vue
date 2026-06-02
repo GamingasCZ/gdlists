@@ -24,6 +24,18 @@ const ratingsData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")
 const postData = inject<Ref<PostData>>("postData")
 
 const available = computed(() => ratingsData?.[0].length)
+watch(props, () => {
+    if (!props?.buttonState) return
+    if (props.buttonState[1] != props.index) return
+    
+    switch (props.buttonState) {
+        case "pick": props.settings.level = false; break;
+    }
+    emit("clearButton")
+
+    selectedLevel.value = props.settings.level == -1 ? 0 : props.settings.level
+})
+
 const getCol = (col: number[], darken = 0) => {
     return chroma.hsl(...col).darken(darken).css()
 }

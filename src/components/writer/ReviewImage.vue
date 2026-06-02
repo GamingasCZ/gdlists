@@ -24,6 +24,7 @@ const props = defineProps<{
     editable: boolean
     id: number
     nestIndex?: [number, number]
+    align: string
 }>()
 
 const image = ref<HTMLImageElement>()
@@ -34,6 +35,7 @@ const fileDragover = ref(false)
 
 type replFunc = (e: Event, extra?: any) => void | undefined
 const replaceImageFunc = inject<replFunc>("replImage")
+const minWidth = ref(16)
 
 onMounted(() => {
     image.value?.addEventListener("loadstart", () => imageLoading.value = 1)
@@ -42,6 +44,7 @@ onMounted(() => {
 
         // Default - image width, overriden by epic dasher set width :)
         props.settings.width = props.settings.width || Math.min(image.value?.width, document.body.clientWidth * 0.4)
+        minWidth.value = image.value?.width!
 
     })
     image.value?.addEventListener("error", () => {
@@ -157,15 +160,14 @@ const containerFileAction = (e: HoverFileAction, files: DragEvent) => {
         </div>
     </Transition>
 
-    <figure v-show="imageLoading == 0" @click="fullscreenImage" ref="figure" class="max-w-full imgContainer">
+    <figure v-show="imageLoading == 0" @click="fullscreenImage" ref="figure" class="max-w-full imgContainer" :style="{'align-items': align}">
         <div class="flex relative group min-h-[48px] my-1 max-w-fit imgContainer" :style="{width: settings?.height ? 'auto' : `${settings.width}px`}">
-
             <Resizer :min-size="size[0]" :max-size="size[1]" gizmo-pos="corner" :editable="editable" @resize="settings.width = $event; settings.width = $event" class="imgContainer">
                 <img
                     ref="image"
-                    class="text-xl text-white rounded-md border-transparent pointer-events-none min-w-8"
+                    class="text-xl text-white rounded-md border-transparent pointer-events-none max-h-auto min-w-8"
                     :class="{'min-w-max': settings?.height, 'aspect-video object-cover': settings?.crop}"
-                    :style="{height: settings?.height ? `${settings.height}px` : ''}"
+                    :style="{height: settings?.height ? `${settings.height}px` : '', width: settings?.height ? '' : `${settings.width}px`}"
                     :src="settings.url"
                     :alt="settings.alt"
                     :title="settings.alt"

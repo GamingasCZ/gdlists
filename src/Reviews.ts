@@ -109,7 +109,7 @@ export function checkReview(post: ReviewList) {
     let allLevelIDs: string[] = []
     post.levels.forEach((level: Level) => {
         i += 1
-        if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name')])
+        if (!level.levelName.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.name').toLowerCase()])
         if (!level.creator.length) error.mess = i18n.global.t('reviews.levelNo', [i, i18n.global.t('other.creator')]) // COLLABY TOD
         if (!level.levelID && level.levelID?.match(/\d+/)) error.mess = i18n.global.t('reviews.levelNo', [i, 'ID'])
         if (level.levelID) allLevelIDs.push(level.levelID)
@@ -391,6 +391,6 @@ export function parseLocalReviewRatings(reviewData: PostData) {
     ratings[0].decoration = ratings[0].decoration.reduce((a,b) => a+b, 0)/rateCounts[1]
     ratings[0].difficulty = ratings[0].difficulty.reduce((a,b) => a+b, 0)/rateCounts[2]
     ratings[0].overall = ratings[0].overall.reduce((a,b) => a+b, 0)/rateCounts[3]
-    console.log(ratings)
     return ratings as unknown as ReviewDetailsResponse[]
 }
+export const containerSettingsOpen = ref(false)
