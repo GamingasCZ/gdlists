@@ -107,8 +107,8 @@ else {
 //   if (e.altKey && e.key == "Control") tabbarOpen.value = true;
 // });
 
-const debugMenu = defineAsyncComponent({loader: () => import('@/components/global/DebugDialog.vue')})
-const debugMenuOpen = ref(false)
+// const debugMenu = defineAsyncComponent({loader: () => import('@/components/global/DebugDialog.vue')})
+// const debugMenuOpen = ref(false)
 </script>
 
 <template>
@@ -126,11 +126,11 @@ const debugMenuOpen = ref(false)
 
     <RouterView :is-logged-in="loggedIn" class="min-h-[90vh]" />
 
-    <div class="fixed bottom-1 left-1 z-50 p-1 text-black rounded-md bg-yellow-100/20" @click="debugMenuOpen = true" v-if="debugModeEnabled">
+    <!-- <div class="fixed bottom-1 left-1 z-50 p-1 text-black rounded-md bg-yellow-100/20" @click="debugMenuOpen = true" v-if="debugModeEnabled">
       <span class="opacity-40">Debug</span>
       <component @close-popup="debugMenuOpen = false" v-if="debugMenuOpen" :is="debugMenu">
       </component>
-    </div>
+    </div> -->
   </main>
   <NotificationStack />
   <Footer />
