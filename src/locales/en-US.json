@@ -497,7 +497,8 @@
     "rImgErr1": "This is not a valid address!",
     "rImgErr3": "The range below hasn't been set!",
     "rImgErr4": "The interval isn't valid!",
-    "rImgErr2": "The wildcard character is missing!"
+    "rImgErr2": "The wildcard character is missing!",
+    "words": "words"
   },
   "settingsMenu": {
     "asOff": "Off",
