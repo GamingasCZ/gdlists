@@ -110,7 +110,7 @@ function getComments($mysqli, $postID, $postType, $isHidden, $page = 0, $startID
         return json_encode(array([],[],["page" => 0, "maxPage" => 0, "startID" => 999999, "commAmount" => 0]));
 
     $maxpage = ceil($commAmount / $limit);
-    $comments = doRequest($mysqli, $template, [$startID, $postID, $limit, $dbSlice], "iiii", true);
+    $comments = doRequest($mysqli, $template, [$startID, $postID, $limit, $dbSlice], "isii", true);
     if (!is_null($highlight))
         $comments = array_merge([$highlight], $comments);
 
