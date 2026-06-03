@@ -79,7 +79,7 @@ const parsedComment = ref((() => {
             </div>
             <div class="p-1 w-7 bg-black bg-opacity-40 rounded-md"><img :src="icon" alt=""></div>
         </div>
-        <div class="flex flex-col">
+        <div class="flex flex-col w-full">
             <div>
                 <span class="inline pr-1 w-max" v-html="formText"></span>
                 <b><RouterLink :to="link" class="inline hover:underline">
@@ -105,7 +105,7 @@ const parsedComment = ref((() => {
 
             <div v-if="props.comment" class="text-sm">
                 <hr class="w-full opacity-20">
-                <p v-html="parsedComment"></p>
+                <p class="overflow-auto max-h-36" v-html="parsedComment"></p>
             </div>
             <p :title="`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`" class="absolute top-1 right-1 w-max text-xs leading-none text-white text-opacity-40 cursor-help grow">{{ parseElapsed((Date.now() - date)/1000) }}</p>
         </div>

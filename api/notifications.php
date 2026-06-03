@@ -14,7 +14,7 @@ const NOTIFS_PER_REQ = 10;
 function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $otherID = null) {
     // type: 0 - comment, 1 - rating, 2 - other
     // postType: 1 - list, 2 - review, 3 - other
-    // if ($from == $to) return; // Do not send notifications to yourself
+    if ($from == $to) return; // Do not send notifications to yourself
 
     $res = doRequest($mysqli,
               "INSERT INTO `notifications`(`to_user`, `from_user`, `type`, `postType`, `objectID`, `otherID`) VALUES (?,?,?,?,?,?)",
