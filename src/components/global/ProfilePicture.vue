@@ -37,6 +37,7 @@ watch(currentCutout, () => {
     if (props.uid == currentUID.value)
         currCutout.value = currentCutout.value
 })
+watch(() => props.uid, load)
 </script>
 
 <template>
