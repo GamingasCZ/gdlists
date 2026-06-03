@@ -87,14 +87,14 @@ function getComments($mysqli, $postID, $postType, $isHidden, $page = 0, $startID
                       LIMIT ?
                       OFFSET ?";
 
-    $hiddenCheck = "$type=? AND $column.`hidden`='0'";
+    $hiddenCheck = "`id`=? AND `hidden`='0'";
     if ($isHidden)
-        $hiddenCheck = "$column.`hidden`=?";
+        $hiddenCheck = "`hidden`=?";
 
     $commAmount = doRequest($mysqli,
-        "SELECT `id`, COUNT(`id`) as commAmount
-         FROM `comments`
-         LEFT JOIN $column ON $column.`id`=comments.`$type`
+        "SELECT isnull(`id`) as 'id', COUNT(`comment`) as commAmount
+         FROM $column
+         LEFT JOIN comments ON $column.`id`=comments.`$type`
          WHERE $hiddenCheck", [$postID], "s");
 
     // id is null, if post doesn't exist
