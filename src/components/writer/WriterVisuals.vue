@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PostData } from '@/interfaces';
-import { inject, onMounted, reactive, ref } from 'vue';
+import { inject, onMounted, reactive, ref, watch } from 'vue';
 import ColorPicker from '../global/ColorPicker.vue';
 import { modifyListBG } from '@/Editor';
 import { getDominantColor } from '@/Reviews';
@@ -62,6 +62,8 @@ onMounted(() => {
     buts.forEach(el => el.addEventListener("mouseleave", buttonClear))
 })
 
+watch(() => props.disabled, () => pageDetailsOpen.value = false)
+
 </script>
 
 <template>    
@@ -80,7 +82,7 @@ onMounted(() => {
         </header>
 
         <div v-show="mainRolledOut && !(colorPickerOpen || pageDetailsOpen)" class="flex overflow-x-auto gap-4 py-4 mx-4 max-w-full">
-            <button @click="openDialogs.imagePicker = [true, -1]" @dragenter="dragOver.bg = true" @dragleave="dragOver.bg = false" @drop="dragOver.bg = false" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md backgroundPicker hover:bg-opacity-80 aspect-video">
+            <button @click="openDialogs.imagePicker = [true, -1]" :disabled="disabled" @dragenter="dragOver.bg = true" @dragleave="dragOver.bg = false" @drop="dragOver.bg = false" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md backgroundPicker hover:bg-opacity-80 aspect-video">
                 <template v-if="uploading.bg">
                     <button class="flex flex-col gap-2 items-center p-2 pointer-events-none button">
                         <img src="@/images/loading.webp" alt="" class="w-10 opacity-40 animate-spin">
@@ -111,7 +113,7 @@ onMounted(() => {
                 </template>
             </button>
 
-            <button @click="openDialogs.imagePicker = [true, -2]" @dragenter="dragOver.thumb = true" @dragleave="dragOver.thumb = false" @drop="dragOver.thumb = false" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md thumbnailPicker hover:bg-opacity-80 aspect-video">
+            <button @click="openDialogs.imagePicker = [true, -2]" :disabled="disabled" @dragenter="dragOver.thumb = true" @dragleave="dragOver.thumb = false" @drop="dragOver.thumb = false" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md thumbnailPicker hover:bg-opacity-80 aspect-video">
                 <template v-if="uploading.thumb">
                     <button class="flex flex-col gap-2 items-center p-2 pointer-events-none button">
                         <img src="@/images/loading.webp" alt="" class="w-10 opacity-40 animate-spin">
@@ -142,7 +144,7 @@ onMounted(() => {
                 </template>
             </button>
             
-            <button :disabled="!writerEnabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md aspect-video disabled:opacity-20 hover:bg-opacity-80">
+            <button :disabled="!writerEnabled || disabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md aspect-video disabled:opacity-20 hover:bg-opacity-80">
                 <button class="flex flex-col gap-2 items-center p-1 button">
                     <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
@@ -159,7 +161,7 @@ onMounted(() => {
                 </button>
             </div> -->
 
-            <button @click="colorPickerOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow hover:bg-opacity-80">
+            <button @click="colorPickerOpen = true" :disabled="disabled" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow hover:bg-opacity-80">
                 <button class="flex flex-col gap-2 items-center p-2 button">
                     <img src="@/images/color.svg" alt="" class="w-10 opacity-40">
                     <p class="text-xl text-white text-opacity-40">{{ $t('editor.bgColor') }}</p>

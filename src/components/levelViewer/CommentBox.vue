@@ -149,6 +149,9 @@ function sendComment(com = "") {
         postType: +props.isReview
     }
 
+    if (props.hidden != "0")
+        postData.isHidden = 1
+
     axios.post(import.meta.env.VITE_API+"/comments.php", postData).then((res: AxiosResponse) => {
         // Comment sent!
         if (res.data.length > 2) {
@@ -235,7 +238,6 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
                 </button>
             </div>
         </footer>
-
         <!-- Color Picker -->
         <div :style="{backgroundColor: darkParsedColor}" class="box-border p-2 my-1 rounded-sm" v-show="dropdownOpen == 0">
             <ColorPicker @colors-modified="listColor = $event" :hue="listColor[0]" :saturation="listColor[1]" :lightness="listColor[2]"/>

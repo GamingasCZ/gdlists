@@ -57,24 +57,10 @@ const getFeeds = async () => {
   
   if (f.status == 200) {
     let hp = f.data
-    if (homepageCache.uploads)
-      hp.user = homepageCache.uploads
-
-    if (homepageCache.pinned)
-      hp.pinned = homepageCache.pinned
-    else {
-      hp.pinned = mergeBatchFeed(hp.pinned)
-      if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
-      homepageCache.pinned = hp.pinned
-    }
-
-    if (homepageCache.recent)
-      hp.recent = homepageCache.recent
-    else {
-      hp.recent = mergeBatchFeed(hp.recent)
-      if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
-      homepageCache.recent = hp.recent
-    }
+    hp.pinned = mergeBatchFeed(hp.pinned)
+    if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
+    hp.recent = mergeBatchFeed(hp.recent)
+    if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
 
     // replace uids with users
     for (const row in hp) {
@@ -84,9 +70,6 @@ const getFeeds = async () => {
       for (let i = 0; i < hp[row][1].length; i++)
         hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
     }
-
-    if (hp.user)
-      homepageCache.uploads = hp.user
 
     return hp
   }

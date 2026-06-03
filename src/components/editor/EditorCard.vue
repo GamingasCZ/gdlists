@@ -686,7 +686,7 @@ const unhighlightVideo = () => {
               <img v-if="image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO)" src="@/images/play.svg" class="absolute invert-[0.2] sepia hue-rotate-30 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12" alt="">
   
               <!-- Image / Video thumbnail -->
-              <img v-if="!(image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO))" class="object-cover object-center h-28 rounded-md transition-all aspect-video group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}.webp`" alt="">
+              <img v-if="!(image[0] & (LevelImage.VIDEO | LevelImage.OLD_VIDEO))" class="object-cover object-center h-28 rounded-md transition-all aspect-video group-hover:brightness-50 shadow-drop" :src="`${userContent}/userContent/${currentUID}/${image[1]}-mthumb.webp`" alt="">
               <img v-else class="object-cover object-center h-28 rounded-md transition-all aspect-video group-hover:brightness-50 shadow-drop" :src="`https://img.youtube.com/vi/${image[1]}/0.jpg`" alt="">
               
               <!-- Thumbail indicator -->

@@ -23,7 +23,7 @@ const props = defineProps<{
   isLoggedIn: boolean
   hideSearch: boolean
   hideTabs: boolean
-  commentID: {type: 'list' | 'review', objectID: number}
+  commentID: {type: 'list' | 'review', objectID: number, isHidden: boolean}
   refreshButton: boolean
   component: object
   picking: false | 1 | 2
@@ -153,6 +153,8 @@ function refreshBrowser() {
     }
     fetchQuery.postID = props.commentID.objectID
     fetchQuery.postType = +(props.commentID.type == "review")
+    if (props.commentID.isHidden != "0")
+      fetchQuery.isHidden = 1
 
     if (props.highlight) fetchQuery.highlight = props.highlight
   }
@@ -449,7 +451,7 @@ defineExpose({
         </div>
 
         <!-- Highlighted comment -->
-        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
+        <section class="mb-3 w-full" v-if="LISTS?.[0]?.isHighlight">
           <h3 class="my-3 text-lg text-center">{{ $t('listViewer.highlighted') }}</h3>
           <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
           <hr class="h-0.5 bg-white rounded-full border-none opacity-10">

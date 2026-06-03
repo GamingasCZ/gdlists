@@ -239,7 +239,7 @@
       "Jestli se nepříhlásíš, nevydám 2.3 :D!",
       "Tři kliky k přihlášení? Tolik?!",
       "vskutku vysoce epické >:)",
-      "Je to nějaké složité všecko :|",
+      "Je to nějaké složité všecko D:",
       "jím banán",
       "Chybí tomu přihlašování bossfight :/",
       "aaaaaaaaaaaaaaaaaaaa"
@@ -474,7 +474,8 @@
     "rImgErr2": "V adrese není zástupný znak!",
     "rImgErr3": "Není vyplněn číselný interval!",
     "rImgErr4": "Interval není platný!",
-    "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!"
+    "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!",
+    "words": "slov"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

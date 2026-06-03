@@ -29,10 +29,10 @@ function sanitizeInput($inputArray)
 
     $i = 0;
     foreach ($inputArray as $post) {
-        if ($post === "") {
-            echo "1";
-            exit();
-        }
+        if (!isset($post))
+            die("1");
+        if ($post === "")
+            die("1");
         $inputArray[$i] = htmlspecialchars(strip_tags(htmlspecialchars_decode($post)));
         $i += 1;
     }
@@ -388,7 +388,7 @@ function addLevelsToDatabase($mysqli, $levels, $listID, $userID, $isReview) {
 
         if (!is_null($bgHash) && strlen($bgHash) > 5) {
             $imgID = doRequest($mysqli, "SELECT id FROM images WHERE `hash`=?", [$bgHash], "s");
-            if (array_key_exists("error", $imgID)) die(json_encode([-1, 8]));
+            if (!is_null($imgID) && array_key_exists("error", $imgID)) die(json_encode([-1, 8]));
     
             $bgHash = $imgID["id"];
         }
