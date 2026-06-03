@@ -62,7 +62,7 @@ function getUser() {
   
   let listCreator: ListCreatorInfo = [];
   props.userArray.forEach((user) => {
-    if (props.uid == user.discord_id) listCreator = user;
+    if (props.uid == user?.discord_id) listCreator = user;
   });
   return listCreator;
 }
