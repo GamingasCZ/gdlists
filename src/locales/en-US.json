@@ -498,7 +498,9 @@
     "rImgErr3": "The range below hasn't been set!",
     "rImgErr4": "The interval isn't valid!",
     "rImgErr2": "The wildcard character is missing!",
-    "words": "words"
+    "words": "words",
+    "loginFuckup": "Session is not valid!",
+    "rImgErr5": "You can only import up to 30 images at once!"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -574,7 +576,9 @@
     "creating": "Creating",
     "navDClickHelp": "Double-clicking \"Lists\" or \"Reviews\" in the navbar can trigger a selected action.",
     "notifHelp": "If enabled, the site will periodically check for new notifications.",
-    "notif": "Auto-check Notifications"
+    "notif": "Auto-check Notifications",
+    "zenFS": "Fullscreen Zen Mode",
+    "zenFSHelp": "If enabled, the browser will fullscreen itself in Zen Mode."
   },
   "help": {
     "Lists": "Lists",
@@ -859,7 +863,12 @@
     "ckhelp5": "End the sequence by aligning columns:",
     "cHelp5": "Create more than one column.",
     "cHelp6": "Type out the columns",
-    "invertSel": "Invert Selection"
+    "invertSel": "Invert Selection",
+    "colGaps": "Gaps",
+    "enterCombo": "Enter the new shortcut",
+    "kbWarn1": "This profile may not work in Firefox.",
+    "kbWarn2": "This profile may not work if the browser is fullscreened (e.g. in Zen Mode).",
+    "rouletteFail": "Failed to fetch levels!"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
