@@ -6,6 +6,7 @@ import { parseElapsed, prettyDate } from '@/Editor';
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
 import { i18n } from '@/locales';
+import striptags from 'striptags';
 
 const props = defineProps<NotificationContent & {postNames: any[], selected: boolean}>()
 const types = ['comment', 'rating', 'other']
@@ -50,6 +51,23 @@ const date = computed(() => new Date(props.time))
 const link = computed(() => `${props.postType == 'list' ? '' : '/review'}/${props.objectID}${props.otherID ? '?comment='+props.otherID : ''}`)
 const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.indexOf(props.type)]}.svg`)
 
+const parsedComment = ref((() => {
+    if (!props.comment) return
+
+    let sanitized = striptags(props.comment);
+    let emojis = sanitized.match(/&(\d{2})/g) // Match any emojis and spaces
+    let isEmojisOnly = (emojis ?? []).join("") == sanitized
+    if (emojis != null) {
+        emojis.forEach(async emoji => {
+            let emojiLink = `${import.meta.env.BASE_URL}/emoji/${emoji.slice(1)}.webp`
+            sanitized = sanitized.replaceAll(emoji, `<img class="inline ${isEmojisOnly ? 'w-10' : 'w-6'} pointer-events-none" src="${emojiLink}" alt="">`)
+        });
+    }
+    sanitized = sanitized.replace(/\n/g, "<br>")
+
+    return sanitized
+})())
+
 </script>
 
 <template>
@@ -85,10 +103,10 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.ind
                 <button @click="getRatingUsers" class="text-sm text-left opacity-40 hover:opacity-100" v-if="ratingsAllShown == 1">{{ $t('other.showMore') }}</button>
             </section>
 
-            <p v-if="props.comment" class="text-sm">
+            <div v-if="props.comment" class="text-sm">
                 <hr class="w-full opacity-20">
-                {{ decodeURIComponent(props.comment) }}
-            </p>
+                <p v-html="parsedComment"></p>
+            </div>
             <p :title="`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`" class="absolute top-1 right-1 w-max text-xs leading-none text-white text-opacity-40 cursor-help grow">{{ parseElapsed((Date.now() - date)/1000) }}</p>
         </div>
     </div>

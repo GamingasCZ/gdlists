@@ -33,7 +33,7 @@ switch ($_SERVER["REQUEST_METHOD"]) {
         break;
     case 'POST':
         if ($DATA[D::NotifType->value] == 0)
-            sendComment($mysqli, "Dobrá recenza", $DATA[D::From->value], $DATA[D::PostID->value], $DATA[D::PostType->value], "#FF0000");
+            sendComment($mysqli, "Dobrá ==/*:'@ &09", $DATA[D::From->value], $DATA[D::PostID->value], $DATA[D::PostType->value], "#FF0000", false);
         else {
             createNotification(
                 $mysqli,

@@ -14,7 +14,7 @@ const NOTIFS_PER_REQ = 10;
 function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $otherID = null) {
     // type: 0 - comment, 1 - rating, 2 - other
     // postType: 1 - list, 2 - review, 3 - other
-    if ($from == $to) return; // Do not send notifications to yourself
+    // if ($from == $to) return; // Do not send notifications to yourself
 
     $res = doRequest($mysqli,
               "INSERT INTO `notifications`(`to_user`, `from_user`, `type`, `postType`, `objectID`, `otherID`) VALUES (?,?,?,?,?,?)",
@@ -117,9 +117,14 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     "ss", true);
             }
 
+            // print_r($notifs);
+
             $postIDs = [[0], [0]];
+            $i = 0;
             foreach ($notifs as $n) {
+                $notifs[$i]["comment"] = htmlspecialchars_decode($n["comment"]);
                 array_push($postIDs[intval($n["postType"] == 'review')], $n["objectID"]);
+                $i += 1;
             }
             
             $postNames = doRequest($mysqli,
