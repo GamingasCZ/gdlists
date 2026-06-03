@@ -50,7 +50,7 @@ const editLink = (key: string, isEdit: number | undefined) => {
 </script>
 
 <template>
-    <section @click.stop="" class="absolute text-white top-9 bg-opacity-80 w-[30rem] rounded-md max-sm:left-0 max-sm:right-0 -left-4 p-3 text-base font-normal bg-black">
+    <section @click.stop="" class="absolute text-white backdrop-blur-sm top-9 bg-opacity-90 w-[30rem] rounded-md max-sm:left-0 max-sm:right-0 -left-4 p-3 text-base font-normal bg-black">
         <div class="flex flex-wrap gap-4 items-center">
             <RouterLink :to="`/make/${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-base font-bold rounded-md border text-lof-400 border-lof-400">
                 <Create class="h-7 fill-lof-400" />
