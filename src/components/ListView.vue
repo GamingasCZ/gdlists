@@ -883,11 +883,11 @@ const cancelHidingOptions = () => {
       <ShareSection v-if="LIST_DATA.name != undefined && !(ShareUIHide & URIHideUIOptions.Sharing) && !nonexistentList && !commentsShowing" :share-text="getURL()" :review="isReview" />
 
       <CommentSection
-        v-if="listID != undefined"
+        v-if="LIST_DATA?.id"
         v-show="!(ShareUIHide & URIHideUIOptions.Comments) && (commentsShowing || scrolledToEnd)"
         @update-comment-amount="LIST_DATA.commAmount = $event"
         :comm-amount="LIST_DATA.commAmount"
-        :list-i-d="listID"
+        :list-i-d="LIST_DATA.id"
         :hidden-i-d="LIST_DATA.hidden"
         :showing="commentsShowing || scrolledToEnd"
         :comments-disabled="LIST_DATA.data.disComments"
