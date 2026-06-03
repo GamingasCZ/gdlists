@@ -43,6 +43,11 @@ watch(() => props.settings.crop, () => {
     })
 })
 
+watch(() => props.settings.components, () => {
+    if (props.editable && props.settings.components.length)
+        enableFileDrag()
+}, {deep: true})
+
 const modHeight = (newHeight: number) => {
     props.settings.height = newHeight
     props.settings.components.forEach(m => {
@@ -50,8 +55,11 @@ const modHeight = (newHeight: number) => {
     })
 }
 
-onMounted(() => {
+var fileDragEnabled = false
+const enableFileDrag = () => {
     if (props.editable) {
+        if (!carousel.value?.parentElement || fileDragEnabled) return
+
         carousel.value?.parentElement.addEventListener("dragover", e => {
             e.preventDefault()
             e.stopPropagation()
@@ -66,7 +74,12 @@ onMounted(() => {
             doUpload(e, e.layerX > e.target.clientWidth/2)
             fileDragover.value = false
         })
+        fileDragEnabled = true
     }
+}
+
+onMounted(() => {
+    enableFileDrag()
 })
 
 const openDialogs = inject("openedDialogs")
@@ -114,7 +127,7 @@ const containerFileAction = (e: HoverFileAction, files: DragEvent) => {
         case HoverFileAction.DragOver:
             fileDragover.value = true; break;
         case HoverFileAction.Drop:
-            doUpload(e, true)
+            doUpload(files, true)
             break;
     }
 }
