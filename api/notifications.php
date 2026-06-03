@@ -75,7 +75,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 $unreadCount["lastPage"] = true;
 
             $ratings = function($sort, $max) {return sprintf(
-               "SELECT * FROM (SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, `id`, `type`, max(`unread`) as `unread`, max(`time`) as `time`, `postType`, `objectID`, `otherID`, `comment`,count(objectID) as `count`, unix_timestamp(`time`) as 'ut'
+               "SELECT * FROM (SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, max(`unread`) as `unread`, max(`time`) as `time`, `postType`, `objectID`, `otherID`, `comment`,count(objectID) as `count`, unix_timestamp(`time`) as 'ut'
                 FROM `notifications` n
                 LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
                 LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
@@ -84,7 +84,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 GROUP BY objectID
                 ORDER BY %s) tb WHERE tb.ut BETWEEN %s AND %s", $sort, $max["min"], $max["max"]);};
 
-            $comments = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, `id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`,1 as `count`, unix_timestamp(`time`)
+            $comments = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`,1 as `count`, unix_timestamp(`time`)
                 FROM `notifications` n
                 LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
                 LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
@@ -92,7 +92,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 WHERE `to_user`=? AND `type`='comment' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
                 ORDER BY %s", $max["min"], $max["max"], $sort);};
 
-            $other = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, `id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`,1 as `count`, unix_timestamp(`time`)
+            $other = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`,1 as `count`, unix_timestamp(`time`)
                 FROM `notifications` n
                 LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
                 LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
