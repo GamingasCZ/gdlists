@@ -50,7 +50,8 @@ function sendComment($mysqli, $text, $userID, $postID, $postType, $color, $hidde
 
     $id = doRequest($mysqli, "SELECT LAST_INSERT_ID() as 'id'", [], "");
 
-    createNotification($mysqli, $userID, $list["uid"], 1, $postType+1, $postID, $id["id"]);
+    if ($list["uid"])
+        createNotification($mysqli, $userID, $list["uid"], 1, $postType+1, $postID, $id["id"]);
     return ["id" => $id["id"]];
 }
 

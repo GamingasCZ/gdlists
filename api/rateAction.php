@@ -50,7 +50,8 @@ switch ($method) {
             if (is_array($rowQuery) && array_key_exists("error", $rowQuery)) $result["result"] = "error";
             else {
                 $result["result"] = "added";
-                createNotification($mysqli, $accountCheck, $creator["uid"], 2, intval(isset($DATA["review_id"]))+1, $objectID);
+                if ($creator["uid"])
+                    createNotification($mysqli, $accountCheck, $creator["uid"], 2, intval(isset($DATA["review_id"]))+1, $objectID);
             };
         }
         elseif ($checkRate["rate"] != $rating) { // Change rating
