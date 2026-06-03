@@ -126,7 +126,7 @@ const alText = ['left', 'center', 'right', 'justify']
         
         <div v-if="pickedColumns">
             <div class="mb-2 text-2xl">
-                <button @click="pickedColumns = false"><img src="@/images/back.svg" class="mx-2 w-4 opacity-60 hover:opacity-100 button" alt=""></button>
+                <button @click="colWidths = []; pickedColumns = false"><img src="@/images/back.svg" class="mx-2 w-4 opacity-60 hover:opacity-100 button" alt=""></button>
                 <span class="opacity-40">{{ $t('reviews.colWTitle') }}</span>
             </div>
             <div class="w-full overflow-clip rounded-lg bg-lof-100 border-lof-400">
