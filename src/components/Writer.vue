@@ -949,6 +949,7 @@ const uploadPasteImage = (e: ClipboardEvent | DragEvent, extra?: any) => {
                 e.newImage.forEach(f => {
                     let im = addContainer("showImage", 0, true)
                     im.settings.url = base+f+".webp"
+                    im.settings.height = el?.settings.height
                     el.settings.components.push(im)
                 })
             }
