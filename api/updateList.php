@@ -31,7 +31,10 @@ $IS_LIST = $DATA["type"] == "list";
 $changingComponents = false;
 if (isset($DATA["components"])) {
     $changingComponents = true;
-    $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [intval($DATA["id"])], "i");
+    if ($DATA["isNowHidden"])
+        $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE `hidden` = ?", [($DATA["id"])], "s");
+    else
+        $listData = doRequest($mysqli, "SELECT * FROM `reviews` WHERE id = ?", [intval($DATA["id"])], "i");
     goto ownershipCheck; // sorry
 }
 
@@ -83,8 +86,12 @@ if ($changingComponents) {
     $compressedData = base64_encode(gzcompress(json_encode($list)));
     if ($IS_LIST)
         $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ? WHERE `id` = ?", [$compressedData, $DATA["id"]], "si");
+    else {
+    if ($DATA["isNowHidden"])
+        $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ? WHERE `hidden` = ?", [$compressedData, $DATA["id"]], "ss");
     else
         $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ? WHERE id = ?", [$compressedData, $DATA["id"]], "si");
+    }
 
     $mysqli->close();
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
