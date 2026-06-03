@@ -190,7 +190,7 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
             :class="{'pointer-events-none': !loggedIn, 'opacity-25': !loggedIn}"
             :contenteditable="loggedIn"
             id="commentBox"
-            class="overflow-y-auto break-all whitespace-normal font-[poppins] p-1 rounded-sm border-l-4 text-lg border-solid min-h-16 sm:h-24"
+            class="overflow-y-auto break-all whitespace-break-spaces font-[poppins] p-1 rounded-sm border-l-4 text-lg border-solid min-h-16 sm:h-24"
             :style="{borderColor: parsedColor, backgroundColor: darkParsedColor}"></pre>
         
         <!-- placeholder text -->
