@@ -67,25 +67,26 @@ function getComments($mysqli, $postID, $postType, $isHidden, $page = 0, $startID
     if ($isHidden)
         $hiddenCheck = "`comID`<=? AND $column.`hidden`=?";
 
-    $highlight = "";
+    $highlight = null;
     if ($highlightID != -1) {
-        $highlight = sprintf(
-            "SELECT * FROM `comments`
-             WHERE `comID`=%s
-             AND `%s`=%s
-             UNION ALL ", intval($highlightID), $type, $postID);
+        $h = doRequest($mysqli,
+            "SELECT *,1 as 'isHighlight' FROM `comments`
+             WHERE $type=? AND `comID`=?
+            ", [$postID, $highlightID], "ii");
+        if (!is_null($h) && !array_key_exists("error", $h))
+            $highlight = $h;
     }
 
     // How many comments should be fetched and the offset (page)
     $limit = clamp(intval($fetchAmount), 2, 15);
     $dbSlice = $limit * intval($page);
     $template = 
-        $highlight . "SELECT username,comment,comType,bgcolor,listID,reviewID,comID,verified,comments.`timestamp`,comments.`uid` FROM `comments`
-                      LEFT JOIN $column on $column.`id`=comments.$type
-                      WHERE $hiddenCheck
-                      ORDER BY `comID` DESC
-                      LIMIT ?
-                      OFFSET ?";
+        "SELECT username,comment,comType,bgcolor,listID,reviewID,comID,verified,comments.`timestamp`,comments.`uid` FROM `comments`
+        LEFT JOIN $column on $column.`id`=comments.$type
+        WHERE $hiddenCheck
+        ORDER BY `comID` DESC
+        LIMIT ?
+        OFFSET ?";
 
     $hiddenCheck = "`id`=? AND `hidden`='0'";
     if ($isHidden)
@@ -109,6 +110,8 @@ function getComments($mysqli, $postID, $postType, $isHidden, $page = 0, $startID
 
     $maxpage = ceil($commAmount / $limit);
     $comments = doRequest($mysqli, $template, [$startID, $postID, $limit, $dbSlice], "iiii", true);
+    if (!is_null($highlight))
+        $comments = array_merge([$highlight], $comments);
 
     $dbInfo["maxPage"] = $maxpage;
     $dbInfo["startID"] = sizeof($comments) ? $comments[0]["comID"] : null;

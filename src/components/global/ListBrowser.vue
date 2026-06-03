@@ -451,7 +451,7 @@ defineExpose({
         </div>
 
         <!-- Highlighted comment -->
-        <section class="mb-3 w-full" v-if="highlight && LISTS?.[0]">
+        <section class="mb-3 w-full" v-if="LISTS?.[0]?.isHighlight">
           <h3 class="my-3 text-lg text-center">{{ $t('listViewer.highlighted') }}</h3>
           <component :is="component" class="mb-8 min-w-full listPreviews" v-bind="LISTS[0]" :user-array="USERS" />
           <hr class="h-0.5 bg-white rounded-full border-none opacity-10">
