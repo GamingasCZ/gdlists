@@ -658,6 +658,10 @@ const sendChangedComponents = () => {
     hidden: +!NONPRIVATE_LIST.value,
     components: postChanges
   }).then(res => {
+    for (const key in postChanges) {
+      let cnt = originalListData.containers.find(x => x.id == postChanges[key].id);
+      cnt.data = postChanges[key].data
+    }
     postChanges = {}
     postMadeChanges.value = false
     originalHashes = createPostHashes(LIST_DATA.value)
