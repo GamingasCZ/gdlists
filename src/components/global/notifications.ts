@@ -87,7 +87,6 @@ export function listenForNotifications() {
             offset = Math.min(offset + Math.ceil(HALF_MINUTE / 2), 5*MINUTE)
         else
             offset = 0
-        console.log(offset, notifTimeout)
         notifTimeout = setTimeout(startNotifRead, HALF_MINUTE+offset)
     }
 

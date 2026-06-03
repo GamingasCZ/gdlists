@@ -179,7 +179,6 @@ router.afterEach(newP => {
 modifyNavbarScroll()
 
 watch(randomIsReview, () => {
-  console.log(router.currentRoute.value)
   if (router.currentRoute.value?.name == "random")
     scrollerInd.value = randomIsReview.value[0] == "1" ? NAV_SEL.Reviews : NAV_SEL.Lists;
 })
