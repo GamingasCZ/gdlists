@@ -29,10 +29,10 @@ function sanitizeInput($inputArray)
 
     $i = 0;
     foreach ($inputArray as $post) {
-        if ($post === "") {
-            echo "1";
-            exit();
-        }
+        if (!isset($post))
+            die("1");
+        if ($post === "")
+            die("1");
         $inputArray[$i] = htmlspecialchars(strip_tags(htmlspecialchars_decode($post)));
         $i += 1;
     }

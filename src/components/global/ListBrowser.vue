@@ -23,7 +23,7 @@ const props = defineProps<{
   isLoggedIn: boolean
   hideSearch: boolean
   hideTabs: boolean
-  commentID: {type: 'list' | 'review', objectID: number}
+  commentID: {type: 'list' | 'review', objectID: number, isHidden: boolean}
   refreshButton: boolean
   component: object
   picking: false | 1 | 2
@@ -153,6 +153,8 @@ function refreshBrowser() {
     }
     fetchQuery.postID = props.commentID.objectID
     fetchQuery.postType = +(props.commentID.type == "review")
+    if (props.commentID.isHidden != "0")
+      fetchQuery.isHidden = 1
 
     if (props.highlight) fetchQuery.highlight = props.highlight
   }

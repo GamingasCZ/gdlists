@@ -66,7 +66,7 @@ watch(router.currentRoute, () => {
             :hide-search="true"
             online-type="comments"
             class="p-2"
-            :comment-i-d="{type: commentType, objectID: listID}"
+            :comment-i-d="{type: commentType, objectID: listID, isHidden: hiddenID}"
             :refreshButton="!commentsDisabled"
             :highlight="highlight"
             @refreshed-browser="amount = $event; emit('updateCommentAmount', $event)"

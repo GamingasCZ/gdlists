@@ -15,7 +15,7 @@ header('Content-type: application/json'); // Return as JSON
     7 - Not logged in!!
     8 - Comments disabled
 */
-function sendComment($mysqli, $text, $userID, $postID, $postType, $color) {
+function sendComment($mysqli, $text, $userID, $postID, $postType, $color, $hidden) {
     $column = $postType ? "reviews" : "lists";
     $type = $postType ? "reviewID" : "listID";
     $time = new DateTime();
@@ -26,9 +26,19 @@ function sendComment($mysqli, $text, $userID, $postID, $postType, $color) {
     // Is color valid?
     if (preg_match("/^#[a-f0-9]{6}$/i", $color) == 0) return ["error" => "4"];
 
+    $hiddenCheck = "`id`=? AND `hidden`=0";
+    if ($hidden)
+        $hiddenCheck = "`hidden`=?";
+
     // Disabled comments
-    $list = doRequest($mysqli, sprintf("SELECT `commDisabled`,`uid` FROM `%s` WHERE `id` = ?", $column), [$postID], "i");
+    $list = doRequest($mysqli, sprintf(
+        "SELECT `commDisabled`,`uid`,`id`
+        FROM `%s`
+        WHERE %s", $column, $hiddenCheck), [$postID], "s");
+    if (is_null($list)) return ["error" => 3];
     if ($list["commDisabled"] == 1) return ["error" => "8"];
+
+    $postID = $list["id"];
 
     $template = sprintf(
         "INSERT INTO `comments` (`username`,`comment`,`comType`,`bgcolor`,`%s`,`verified`,`timestamp`,`uid`)
@@ -49,8 +59,13 @@ function sendComment($mysqli, $text, $userID, $postID, $postType, $color) {
     1 - Empty/bad request
     3 - Bad list ID
 */
-function getComments($mysqli, $postID, $postType, $page = 0, $startID = 999999, $highlightID = -1, $fetchAmount = 15) {
+function getComments($mysqli, $postID, $postType, $isHidden, $page = 0, $startID = 999999, $highlightID = -1, $fetchAmount = 15) {
+    $column = $postType ? "reviews" : "lists";
     $type = $postType ? "reviewID" : "listID";
+
+    $hiddenCheck = "$column.`hidden`='0' AND `comID`<=? AND $type=?";
+    if ($isHidden)
+        $hiddenCheck = "`comID`<=? AND $column.`hidden`=?";
 
     $highlight = "";
     if ($highlightID != -1) {
@@ -64,14 +79,29 @@ function getComments($mysqli, $postID, $postType, $page = 0, $startID = 999999, 
     // How many comments should be fetched and the offset (page)
     $limit = clamp(intval($fetchAmount), 2, 15);
     $dbSlice = $limit * intval($page);
-    $template = sprintf(
-        $highlight . "SELECT * FROM `comments`
-                      WHERE `comID`<=? AND %s=?
+    $template = 
+        $highlight . "SELECT username,comment,comType,bgcolor,listID,reviewID,comID,verified,comments.`timestamp`,comments.`uid` FROM `comments`
+                      LEFT JOIN $column on $column.`id`=comments.$type
+                      WHERE $hiddenCheck
                       ORDER BY `comID` DESC
                       LIMIT ?
-                      OFFSET ?", $type);
+                      OFFSET ?";
 
-    $commAmount = intval(doRequest($mysqli, sprintf("SELECT COUNT(*) as commAmount from `comments` WHERE %s=?", $type), [$postID], "i")["commAmount"]);
+    $hiddenCheck = "$type=? AND $column.`hidden`='0'";
+    if ($isHidden)
+        $hiddenCheck = "$column.`hidden`=?";
+
+    $commAmount = doRequest($mysqli,
+        "SELECT `id`, COUNT(`id`) as commAmount
+         FROM `comments`
+         LEFT JOIN $column ON $column.`id`=comments.`$type`
+         WHERE $hiddenCheck", [$postID], "s");
+
+    // id is null, if post doesn't exist
+    if (is_null($commAmount["id"]))
+        die("3");
+
+    $commAmount = intval($commAmount["commAmount"]);
 
     // No comments
     if ($commAmount == 0)
@@ -120,7 +150,17 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     switch ($method) {
         case 'GET':
 
-            $comments = getComments($mysqli, intval($_GET["postID"]), intval($_GET["postType"]), $_GET["page"], $_GET["startID"], isset($_GET["highlight"]) ? $_GET["highlight"] : -1, $_GET["fetchAmount"]);
+            $fupD = sanitizeInput([
+                $_GET["postID"],
+                $_GET["postType"],
+                isset($_GET["isHidden"]),
+                $_GET["page"],
+                $_GET["startID"],
+                isset($_GET["highlight"]) ? $_GET["highlight"] : -1,
+                $_GET["fetchAmount"]
+            ]);
+
+            $comments = getComments($mysqli, $fupD[0], intval($fupD[1]), $fupD[2], $fupD[3], $fupD[4], $fupD[5], $fupD[6]);
             echo $comments;
             break;
 
@@ -137,9 +177,9 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             $discord = checkAccount($mysqli);
             if (!$discord) die("7");
 
-            $comment = sendComment($mysqli, $fuckupData[0], $discord["id"], intval($DATA["postID"]), intval($DATA["postType"]), $fuckupData[1]);
+            $comment = sendComment($mysqli, $fuckupData[0], $discord["id"], $DATA["postID"], intval($DATA["postType"]), $fuckupData[1], isset($DATA["isHidden"]));
             if (!array_key_exists("error", $comment))
-                echo getComments($mysqli, $DATA["postID"], $DATA["postType"]);
+                echo getComments($mysqli, $DATA["postID"], $DATA["postType"], isset($DATA["isHidden"]));
             else
                 echo $comment["error"];
 
