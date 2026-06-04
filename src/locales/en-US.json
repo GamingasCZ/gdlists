@@ -498,7 +498,7 @@
     "rImgErr3": "The range below hasn't been set!",
     "rImgErr4": "The interval isn't valid!",
     "rImgErr2": "The wildcard character is missing!",
-    "words": "words",
+    "words": "No words | {n} word | {n} words",
     "loginFuckup": "Session is not valid!",
     "rImgErr5": "You can only import up to 30 images at once!"
   },

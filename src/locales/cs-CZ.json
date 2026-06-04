@@ -475,7 +475,7 @@
     "rImgErr3": "Není vyplněn číselný interval!",
     "rImgErr4": "Interval není platný!",
     "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!",
-    "words": "slov"
+    "words": "Beze slov | {n} slovo | {n} slov"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
