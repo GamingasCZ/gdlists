@@ -28,6 +28,7 @@ async function load() {
         img.onerror = () => err()
     })
 
+    currentCutout.value = props.cutout
     PFP.value = await l.then(res => res).catch(err => `${base}/pfps/defaultPFP.webp`)
 }
 load()
