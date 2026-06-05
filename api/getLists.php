@@ -24,7 +24,11 @@ $selReviewRange = "name, reviews.uid, timestamp, reviews.id, views, hidden, thum
 define("selConcatRange", "name, id, timestamp, hidden, uid, views, hidden, thumbnail, thumbProps, tagline, 0 as type");
 define("selConcatRangeRev", "name, id, unix_timestamp(timestamp) as timestamp, hidden, uid, views, hidden, thumbnail, thumbProps, tagline, 1 as type");
 
-$selLevelRange = "
+function selLevelRange($includeImage = true) {
+  $images = "";
+  if ($includeImage)
+    $images = ",images.hash as BGhash, images.uploaderID as BGuploader";
+  return "
       levelName,
       creator,
       collabMemberCount,
@@ -38,9 +42,9 @@ $selLevelRange = "
       avg(gameplay) as A_gameplay,
       avg(decoration) as A_decoration,
       avg(levels_ratings.difficulty) as A_difficulty,
-      avg(overall) as A_overall,
-      images.hash as BGhash,
-      images.uploaderID as BGuploader";
+      avg(overall) as A_overall
+      $images";
+}
 
 $listRatings = "ifnull(ifnull(sum(ratings.rate), 0) / ifnull(count(ratings.rate), 1), -1) AS rate_ratio";
 $reviewRatings = "ifnull(ifnull(sum(rate), 0) / ifnull(count(rate), 1), -1) AS rate_ratio";
@@ -220,7 +224,7 @@ if (count($_GET) <= 3 && !isset($_GET["batch"])) {
 
   } elseif (in_array("randomLevel", array_keys($_GET))) {
     // Picking a random list or review
-    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", $selLevelRange), [intval($_GET["randomLevel"])], "i", true);
+    $result = doRequest($mysqli, sprintf("SELECT levelName,creator,levels.levelID,difficulty,rating FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID ORDER BY RAND() LIMIT ?", selLevelRange()), [intval($_GET["randomLevel"])], "i", true);
     echo json_encode(parseResult($result));
 
   } elseif (in_array("homepage", array_keys($_GET))) {
@@ -278,7 +282,7 @@ elseif (isset($_GET["batch"])) {
 }
 
 function selectBatch($data, $noUserFetch = false) {
-  global $listRatings, $reviewRatings, $selRange, $selReviewRange, $selLevelRange, $mysqli;
+  global $listRatings, $reviewRatings, $selRange, $selReviewRange,$mysqli;
   $types = ["lists", "reviews", "levels"];
   $postData = [[],[],[]];
   for ($type=0; $type < 3; $type++) {
@@ -286,7 +290,7 @@ function selectBatch($data, $noUserFetch = false) {
     if (!sizeof($data[$type])) continue;
 
     $ratings = [$listRatings, $reviewRatings][$type];
-    $range = [$selRange, $selReviewRange, $selLevelRange][$type];
+    $range = [$selRange, $selReviewRange, selLevelRange(false)][$type];
 
     $res;
     if ($type == 2) {
@@ -397,7 +401,7 @@ function selectBatch($data, $noUserFetch = false) {
       GROUP BY levels_uploaders.levelID
       ORDER BY levels.id DESC
       LIMIT %s
-      OFFSET %s", $selLevelRange, clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
+      OFFSET %s", selLevelRange(), clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
     $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels WHERE `levelName` LIKE '%%%s%%' AND levels.id<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
 
