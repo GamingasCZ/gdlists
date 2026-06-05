@@ -222,7 +222,7 @@ const isSearching = ref(false)
                     />
                 </template>
             </div>
-            <div class="flex sticky bottom-0 z-20 gap-2 justify-center items-center rounded-b-md bg-lof-200 max-sm:justify-end">
+            <div class="flex sticky bottom-0 z-20 gap-2 justify-end justify-center items-center rounded-b-md bg-lof-200">
 
                 <!-- Save draft -->
                 <button v-if="POST_DATA.levels.length && drafts !== null && !disabled" @click="emit('saveDraft')" class="absolute left-2 p-2 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
