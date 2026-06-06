@@ -17,7 +17,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "callCommand", data: {command: DataContainerAction, data: any[] }): void
-    (e: "forcedUpdate", newData: ReviewContainer)
+    (e: "forcedUpdate", newData: ReviewContainer | [ReviewContainer, number, number])
 }>()
 
 const selectedContainer = inject<any[]>("selectedContainer", [-1, 0])
@@ -138,6 +138,7 @@ const doUpdate = ref(Date.now())
                 @remove-subcontainer="container.extraComponents -= 1"
                 @remove="emit('callCommand', {command: 1, data: [index]})"
                 @add-paragraph="emit('callCommand', {command: DataContainerAction.MakeParagraph, data: [index]})"
+                @update-content="doUpdate = Date.now(); emit('forcedUpdate', [$event, index, subIndex])"
                 :button-state="buttonState"
                 :settings="container.settings"
                 :index="index"

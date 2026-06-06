@@ -6,7 +6,7 @@ import { flexNames } from '@/Reviews';
 import { computed } from 'vue';
 import chroma from 'chroma-js';
 import { watch } from 'vue';
-import type { PostData } from '@/interfaces';
+import type { PostData, ReviewContainer } from '@/interfaces';
 import type { cTwoColumns } from './containers';
 
 const props = defineProps<{
@@ -20,6 +20,7 @@ const emit = defineEmits<{
     (e: "remove"): void
     (e: "removeSubcontainer"): void
     (e: "addParagraph"): void
+    (e: "updateContent", container: ReviewContainer): void
 }>()
 
 const selectedNestContainer = inject<number[]>("selectedNestContainer", [-1, -1, -1])!
@@ -76,6 +77,7 @@ const removeInnerContainer = inject<(ind: number) => void>("removeContainer")!
             @settings-button="buttonState = [$event, ind]"
             @text-modified="container.data = $event"
             @add-paragraph="emit('addParagraph')"
+            @force-update="emit('updateContent', container)"
             :type="container.type"
             :current-settings="container.settings"
             :class="[CONTAINERS[container.type].styling ?? '']"

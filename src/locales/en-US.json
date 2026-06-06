@@ -248,7 +248,8 @@
     "changes2": "Changes are only saved locally.",
     "changes3": "Cannot save without cookies enabled!",
     "changes4": "You've made changes to this post before.",
-    "viewingNew": "You're viewing the original post."
+    "viewingNew": "You're viewing the original post.",
+    "manyCompErr": "You're updating too many components at once!"
   },
   "navbar": {
     "lists": "Browse",

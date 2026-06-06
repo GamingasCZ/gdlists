@@ -555,7 +555,13 @@ const UpdateConfirmer = defineAsyncComponent(() =>
 )
 
 // brings up changed popup, if changed container has a different hash, that its original hash
-const doModifyPost = (changedContainer: ReviewContainer) => {
+const doModifyPost = (changedContainer: ReviewContainer | [ReviewContainer, number, number]) => {
+  let isInColumn = changedContainer?.[2] != undefined
+  if (isInColumn) {
+    changedContainer[0].column = [changedContainer[1], changedContainer[2]]
+    changedContainer = changedContainer[0]
+  }
+
   if (postChanges[changedContainer.id]) {
     let changedHash = generateHash(JSON.stringify(changedContainer))
     if (changedHash == originalHashes[changedContainer.id])
@@ -659,7 +665,11 @@ const sendChangedComponents = () => {
     components: postChanges
   }).then(res => {
     for (const key in postChanges) {
-      let cnt = originalListData.containers.find(x => x.id == postChanges[key].id);
+      let cnt;
+      if (postChanges[key].column)
+        cnt = originalListData.containers[postChanges[key].column[0]].settings.components[postChanges[key].column[1]].find(x => x.id == postChanges[key].id)
+      else
+        cnt = originalListData.containers.find(x => x.id == postChanges[key].id);
       cnt.data = postChanges[key].data
     }
     postChanges = {}
@@ -669,6 +679,8 @@ const sendChangedComponents = () => {
     setTimeout(() => updatingPost.value = false, 250)
     if (res.data == "8")
       summonNotification(i18n.global.t('listViewer.postUpdated'), "", 'check')
+    else if (res.data == "9")
+      summonNotification(i18n.global.t("other.error"), i18n.global.t('listViewer.manyCompErr'), 'error')
     else
       summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.failUpdate'), 'error')
   }).catch(() => {

@@ -554,7 +554,8 @@
     "changes3": "Nelze ukládat bez zapnutých cookies!",
     "changes4": "V tomto příspěvku jsi v minulosti provedl úpravy.",
     "viewingNew": "Takto vypadá původní příspěvek.",
-    "highlighted": "Zvýrazněný komentář"
+    "highlighted": "Zvýrazněný komentář",
+    "manyCompErr": "Aktualizuješ až moc prvků zaráz!"
   },
   "level": {
     "levelID": "ID levelu",

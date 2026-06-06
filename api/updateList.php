@@ -10,6 +10,7 @@ Return codes:
 6 - Invalid list parameters
 7 - Bad request
 8 - Component successful update
+9 - Updating too many components at once
 */
 
 require("globals.php");
@@ -74,14 +75,39 @@ if (!$checkUser) {
 if ($changingComponents) {
     $list = json_decode(htmlspecialchars_decode(gzuncompress(base64_decode($listData["data"]))), true);
     $componentsToUpdate = $DATA["components"];
-    $compKeys = array_keys($componentsToUpdate);
-    // print_r($list);
-    // echo "---";
+    $compKeys = [];
+    $compColumnValues = [];
+    $compColumnKeys = [];
+    
+    if (sizeof($componentsToUpdate) > 10)
+        die("9");
+
+    foreach($componentsToUpdate as $key => $upd) {
+        if (isset($upd["column"])) {
+            array_push($compColumnKeys, $key);
+            array_push($compColumnValues, $upd);
+        }
+        else
+            array_push($compKeys, $key);
+    }
+
     $compCount = sizeof($list["containers"]);
     for ($i = 0; $i < $compCount; $i++) {
-        if (in_array($list["containers"][$i]["id"], $compKeys))
+        if (in_array($list["containers"][$i]["id"], $compKeys)) {
             $list["containers"][$i]["data"] = $componentsToUpdate[$list["containers"][$i]["id"]]["data"];
+        }
     }
+
+    foreach ($compColumnValues as $value) {
+        $column = &$list["containers"][$value["column"][0]]["settings"]["components"][$value["column"][1]];
+        $compCount = sizeof($column);
+        for ($i = 0; $i < $compCount; $i++) {
+            if (in_array($column[$i]["id"], $compColumnKeys)) {
+                $column[$i]["data"] = $componentsToUpdate[$column[$i]["id"]]["data"];
+            }
+        }
+    }
+
     // print_r($list);
     $compressedData = base64_encode(gzcompress(json_encode($list)));
     if ($IS_LIST)
