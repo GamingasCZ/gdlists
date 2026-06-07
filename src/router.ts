@@ -94,6 +94,9 @@ const router = createRouter({
 });
 
 export const timeLastRouteChange = ref(Date.now())
+export const forceUpdateLastRouteChage = () =>
+  timeLastRouteChange.value = Date.now()
+
 router.afterEach(() => {
   window.scrollTo(0,0)
   timeLastRouteChange.value = Date.now()
