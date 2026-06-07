@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import type { FavoritedLevel, Level, ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
+import type { FavoritedLevel, ListCreatorInfo, ListPreview, ReviewDetailsResponse, SavedCollab, selectedList } from "@/interfaces";
 import axios, { type AxiosResponse } from "axios";
 import { ref, onMounted, watch } from "vue";
 import cookier from "cookier";
-import { hasLocalStorage, SETTINGS } from "@/siteSettings";
+import { hasLocalStorage } from "@/siteSettings";
 import { useI18n } from "vue-i18n";
-import { isOnline, makeColor } from "@/Editor";
-import { onUnmounted } from "vue";
 
 const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden" | "collabs"): void;
@@ -296,11 +294,7 @@ onMounted(() => {
     pagesArray.value = listScroll();
   }
 
-  let gotoPage;
-  if (hasLocalStorage())
-    gotoPage = JSON.parse(sessionStorage.getItem("pageLast")!) ?? [0, 'unknown']
-  else
-    gotoPage = [0, 'unknown']
+  let gotoPage = [0, 'unknown']
   if (props.onlineType == gotoPage[1]) PAGE.value = gotoPage[0]
 
   refreshBrowser();
@@ -315,11 +309,6 @@ watch(props, (newBrowser) => {
   filtered = undefined
   refreshBrowser();
 });
-
-onUnmounted(() => {
-  if (hasLocalStorage())
-    sessionStorage.setItem("pageLast", JSON.stringify([PAGE.value, props.onlineType]))
-})
 
 const modifyData = (newData: [any[], ListCreatorInfo[], any[]]) => {
   LISTS.value = newData[0]

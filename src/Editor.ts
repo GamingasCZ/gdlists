@@ -331,9 +331,6 @@ export const getListPreview = (postData: PostData) => {
   return {title: '', preview: levels.join("\n"), counter: i}
 }
 
-export var lastTab: (number | string | null)[] = [null, null]
-export const modLastTab = (x: [number, string]) => lastTab = x
-
 export const lastUsedTags = ref<number[]>([])
 
 export var lastPostPickerTab = [0, 0]

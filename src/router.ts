@@ -27,11 +27,10 @@ const router = createRouter({
     {
       path: "/browse/:type",
       name: "browser",
-      props: (route) => ({
-        query: route.query.q ?? "",
-        onlineType: route.query.type ?? "",
-        browserType: route
-      }),
+      props: (route) => {
+        return {
+          query: route.query.q ?? "",
+        }},
       component: () => import("@/components/CommunityLists.vue"),
     },
     {
