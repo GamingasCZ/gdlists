@@ -196,8 +196,8 @@ const videoLoaded = reactive([])
 
       <!-- Screenshots -->
       <h2 v-if="scShotSecName && screenshots?.length" class="mt-3 text-2xl font-bold leading-none">{{ scShotSecName }}</h2>
-      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 w-full">
-        <figure v-for="(img, ind) in screenshots" class="flex relative flex-col">
+      <section v-if="screenshots?.length" class="flex overflow-auto z-10 gap-2 pb-3 w-full">
+        <figure v-for="(img, ind) in screenshots" class="flex relative flex-col h-36 aspect-video">
           <iframe
               v-if="img[0] == LevelImage.VIDEO"
               @load="videoLoaded[ind] = true"
@@ -209,7 +209,7 @@ const videoLoaded = reactive([])
               class="bg-black bg-opacity-60 rounded-md"
               >
           </iframe>
-          <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-mthumb.webp`" class="object-cover object-center max-h-32 rounded-md aspect-video inter shadow-drop" alt="">
+          <img v-else @click="emit('fullscreenImage', ind)" :src="`${userContent}/userContent/${uploaderUid}/${img[1]}-mthumb.webp`" class="object-cover object-center h-36 rounded-md aspect-video inter shadow-drop" alt="">
 
           <img v-if="img[0] == LevelImage.VIDEO && !videoLoaded[ind]" src="@/images/loading.webp" class="absolute left-[44%] opacity-60 w-8 animate-spin top-[39%]" alt="">
           <figcaption class="text-center text-inherit">{{ img[2] }}</figcaption>
