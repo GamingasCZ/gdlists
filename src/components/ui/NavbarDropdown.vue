@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { ReviewDraft } from '@/interfaces';
-import { hasLocalStorage } from '@/siteSettings';
+import { draftsList, updateNavbarDrafts } from '@/Editor';
 import Browse from '@/svgs/Browse.vue';
 import Create from '@/svgs/Create.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
+import { draftsReviews } from '../../Editor';
 
 const props = defineProps<{
     isReview: boolean
@@ -16,29 +16,10 @@ const emit = defineEmits<{
 const path = props.isReview ? 'review' : 'list'
 const path2 = props.isReview ? 'reviews' : 'lists'
 
-interface navDraft {
-    name: string
-    isEdit: number | undefined
-    key: string
-}
+const draftArr = props.isReview ? draftsReviews : draftsList
 
-const hasDrafts = ref(false)
-const draftsList = ref<navDraft[]>([])
-onMounted(() => {
-    if (!hasLocalStorage()) return
-
-    let drafts = JSON.parse(localStorage.getItem(path+"Drafts")!)
-    if (drafts) {
-        let draftKeys = Object.keys(drafts).sort((a,b) => (+b) - (+a))
-        let maxLen = Math.min(draftKeys.length, 3)
-        for (let i = 0; i < maxLen; i++) {
-            let draft: ReviewDraft = drafts[draftKeys[i]]
-            draftsList.value.push({name: draft.name, isEdit: draft.editing, key: draftKeys[i]})
-        }
-        hasDrafts.value = true
-    }
-    else hasDrafts.value = false
-})
+const hasDrafts = computed(() => draftArr.value.length)
+onMounted(() => updateNavbarDrafts(props.isReview))
 
 const editLink = (key: string, isEdit: number | undefined) => {
     if (isEdit)
@@ -77,7 +58,7 @@ const editLink = (key: string, isEdit: number | undefined) => {
             <div class="mb-2 border-b-2 grow border-lof-400">
                 <span class="font-bold">{{ $t('reviews.drafts') }}:</span>
             </div>
-            <RouterLink @click.stop="emit('close')" :to="editLink(draft.key, draft.isEdit)" v-for="draft in draftsList" class="flex items-center p-1 mx-2 mr-0 rounded-md hover:bg-opacity-10 hover:bg-white">
+            <RouterLink @click.stop="emit('close')" :to="editLink(draft.key, draft.isEdit)" v-for="draft in draftArr" class="flex items-center p-1 mx-2 mr-0 rounded-md hover:bg-opacity-10 hover:bg-white">
                 <img v-if="draft.isEdit" class="inline mr-1 w-3" src="@/images/edit.svg" alt="">
                 {{ draft.name }}
                 

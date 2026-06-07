@@ -1,7 +1,7 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBackground } from "./interfaces";
-import { SETTINGS } from "./siteSettings";
+import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBackground, ReviewDraft } from "./interfaces";
+import { hasLocalStorage, SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
 // import { DEFAULT_RATINGS } from "./Reviews";
@@ -347,3 +347,34 @@ export const generateHash = (string: string) => {
 };
 
 export const navHidden = ref(false)
+
+interface navDraft {
+    name: string
+    isEdit: number | undefined
+    key: string
+}
+
+export const draftsList = ref<navDraft[]>([])
+export const draftsReviews = ref<navDraft[]>([])
+export const updateNavbarDrafts = (isReview: boolean, draftData?: ReviewDraft) => {
+  if (!hasLocalStorage()) return
+
+    const path = isReview ? 'review' : 'list'
+    const draftArr = isReview ? draftsReviews : draftsList
+    draftArr.value = []
+
+    let drafts: ReviewDraft;
+    if (draftData)
+      drafts = draftData
+    else
+      drafts = JSON.parse(localStorage.getItem(path+"Drafts")!)
+
+    if (drafts) {
+        let draftKeys = Object.keys(drafts).sort((a,b) => (+b) - (+a))
+        let maxLen = Math.min(draftKeys.length, 3)
+        for (let i = 0; i < maxLen; i++) {
+            let draft: ReviewDraft = drafts[draftKeys[i]]
+            draftArr.value.push({name: draft.name, isEdit: draft.editing, key: draftKeys[i]})
+        }
+    }
+}

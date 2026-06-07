@@ -17,7 +17,7 @@ import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
 import axios from "axios";
-import { currentUID, modernizeList, modifyListBG, predefinedLevelList, prettyDate } from "@/Editor";
+import { currentUID, modernizeList, modifyListBG, predefinedLevelList, prettyDate, updateNavbarDrafts } from "@/Editor";
 import { onUnmounted } from "vue";
 import router, { timeLastRouteChange } from "@/router";
 import ErrorPopup from "./editor/errorPopup.vue";
@@ -1106,6 +1106,7 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
 
     setDraftUrl(backupID.toString())
 
+    updateNavbarDrafts(props.type == 1, drafts.value)
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
     reviewSave.value = { backupID: backupID, lastSaved: now }
 }
@@ -1115,6 +1116,7 @@ const removeDraft = (key: number) => {
 
     if (key == reviewSave.value.backupID) reviewSave.value = { backupID: 0, lastSaved: 0 }
     delete drafts.value[key]
+    updateNavbarDrafts(props.type == 1, drafts.value)
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
 }
 
