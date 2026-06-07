@@ -1062,7 +1062,7 @@ onMounted(() => {
                     <label class="place-self-end text-lg" for="ma_to">{{ $t('other.to') }}:</label>
                     <input v-model.number="multiInpForm.to" autocomplete="off" @input="$nextTick(validateMultiInp)" size="4" inputmode="numeric" min="0" maxlength="10" placeholder="10" class="place-self-start p-1 ml-2 bg-black bg-opacity-40 rounded-md" id="ma_to" type="text">
                     <label class="place-self-end mb-1" for="ma_fill">{{ $t('other.zeroPad') }}:</label>
-                    <input v-model.number="multiInpForm.pad" autocomplete="off" @input="$nextTick(validateMultiInp)" size="4" inputmode="numeric" min="0" max="10" value="0" class="place-self-start p-1 ml-2 bg-black bg-opacity-40 rounded-md" id="ma_fill" type="text">
+                    <input v-model.number="multiInpForm.pad" autocomplete="off" @input="$nextTick(validateMultiInp)" size="4" inputmode="numeric" min="0" maxlength="1" value="0" class="place-self-start p-1 ml-2 bg-black bg-opacity-40 rounded-md" id="ma_fill" type="text">
                     <label class="place-self-end" for="ma_reverse">{{ $t('other.flipVals') }}: </label>
                     <input v-model="multiInpForm.reverse" @input="$nextTick(validateMultiInp)" id="ma_reverse" class="mt-1.5 ml-2" type="checkbox">
                 </div>
