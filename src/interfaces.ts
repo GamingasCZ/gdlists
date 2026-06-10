@@ -20,6 +20,20 @@ export enum URIHideUIOptions {
     Comments = 0b0001
 }
 
+export interface HomepageFetchResponse {
+  lists: ListFetchResponse[];
+  reviews: ListFetchResponse[];
+  user: ListFetchResponse[];
+  pinned: ListFetchResponse[] | false;
+  recent: ListFetchResponse[] | false;
+  pinned_lists?: ListFetchResponse[];
+  pinned_reviews?: ListFetchResponse[];
+  recent_lists?: ListFetchResponse[];
+  recent_reviews?: ListFetchResponse[];
+  users: ListCreatorInfo[];
+  level_ratings: {lists: ReviewDetailsResponse[], reviews: ReviewDetailsResponse[]};
+}
+
 /**
  * Return data after picking a post from the review post showcase container
  *
@@ -30,7 +44,8 @@ export enum URIHideUIOptions {
 export interface selectedList {option: 0|1, postID: number, postType: 0|1|2}
 
 export interface ReviewDetailsResponse {
-  reviewID: string
+  listRatingID?: number
+  reviewID?: number
   level_count: string
   gameplay: string
   decoration: string

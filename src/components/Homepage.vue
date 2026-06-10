@@ -6,7 +6,7 @@ import { SETTINGS, hasLocalStorage, homepageCache, loggedIn, viewedPopups } from
 import THEMES, { selectedBeforeSave } from "@/themes";
 import axios from "axios";
 import { i18n } from "@/locales";
-import type { ViewedPinArray } from "@/interfaces";
+import type { HomepageFetchResponse, ViewedPinArray } from "@/interfaces";
 
 document.title = `${i18n.global.t('other.homepage')} | ${i18n.global.t("other.websiteName")}`;
 
@@ -23,9 +23,11 @@ const mergeBatchFeed = (data: any[]) => {
   delete data[2]
   data[0][0] ??= []
   data[0][1] ??= []
+  data[0][4] ??= []
   data[0][0].forEach(x => x.type = 0) // make into review
   data[0][0] = (data[0][0]).concat(data[1][0] ?? [])
   data[0][1] = (data[0][1]).concat(data[1][1] ?? [])
+  data[0][4] = (data[0][4]).concat(data[1][4] ?? [])
   delete data[1]
   return data[0]
 }
@@ -56,21 +58,35 @@ const getFeeds = async () => {
   let f = await axios.get(api + "/getLists.php", {params: getParams})
   
   if (f.status == 200) {
-    let hp = f.data
-    hp.pinned = mergeBatchFeed(hp.pinned)
-    if (!hp.pinned[0].length && !hp.pinned[1].length) hp.pinned = false
-    hp.recent = mergeBatchFeed(hp.recent)
-    if (!hp.recent[0].length && !hp.recent[1].length) hp.recent = false
+    let hp: HomepageFetchResponse = f.data
 
     // replace uids with users
     for (const row in hp) {
-      if (row == "users") continue;
+      if (row == "users" || row == "level_ratings") continue;
       if (hp[row] === false) continue;
 
-      for (let i = 0; i < hp[row][1].length; i++)
+      for (let i = 0; i < hp[row][1].length; i++) {
         hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
+
+        if (row.endsWith('lists'))
+          hp[row][4][i] = hp.level_ratings.lists.find(x => x.listRatingID == hp[row][0][i].id)
+        else if (row.endsWith('reviews'))
+          hp[row][4][i] = hp.level_ratings.reviews.find(x => x.reviewID == hp[row][0][i].id)
+        else if (row == 'user') {
+          if (hp[row][i].type == 1)
+            hp[row][4][i] = hp.level_ratings.reviews.find(x => x.reviewID == hp[row][0][i].id)
+          else
+            hp[row][4][i] = hp.level_ratings.lists.find(x => x.listRatingID == hp[row][0][i].id)
+        }
+      }
     }
 
+    if (hp.pinned_lists && hp.pinned_reviews)
+      hp.pinned = mergeBatchFeed([hp.pinned_lists, hp.pinned_reviews])
+    if (hp.recent_lists && hp.recent_reviews)
+      hp.recent = mergeBatchFeed([hp.recent_lists, hp.recent_reviews])
+
+    console.log(hp)
     return hp
   }
   return DEF_FEED_RESULT
