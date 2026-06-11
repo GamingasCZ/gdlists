@@ -46,14 +46,20 @@ const refreshContent = () => {
       lists.value = data.slice(0, props.maxItems);
     }
     if (!lists.value.length) empty.value = true
-  } else if (props.contentType == "oldLists") {
-    lists.value = oldLists;
-  } else if (props.forceContent) {
-    lists.value = props.forceContent[0]
-    users.value = props.forceContent[1]
-    reviewDetails.value = props.forceContent?.[4]
+  }
+  else if (props.contentType == "oldLists") {
+      lists.value = oldLists;
+  }
+  else if (props.forceContent) {
+      if (!props.forceContent?.[0]?.length) {
+        empty.value = true
+        return
+      }
+      lists.value = props.forceContent[0]
+      users.value = props.forceContent[1]
+      reviewDetails.value = props.forceContent?.[4]
   } else {
-    lists.value = [];
+      lists.value = [];
   }
 }
 
@@ -65,6 +71,7 @@ const clearViewed = () => {
   if (!vpArr) return
   vpArr.viewed = [[],[]]
   localStorage.setItem("viewedPinArray", JSON.stringify(vpArr))
+  empty.value = true
   lists.value = [];
 };
 </script>

@@ -63,7 +63,7 @@ const getFeeds = async () => {
     // replace uids with users
     for (const row in hp) {
       if (row == "users" || row == "level_ratings") continue;
-      if (hp[row] === false) continue;
+      if (!hp[row].length || !hp[row]) continue;
 
       for (let i = 0; i < hp[row][1].length; i++) {
         hp[row][1][i] = hp.users.find(x => x.discord_id == hp[row][1][i])
@@ -86,7 +86,6 @@ const getFeeds = async () => {
     if (hp.recent_lists && hp.recent_reviews)
       hp.recent = mergeBatchFeed([hp.recent_lists, hp.recent_reviews])
 
-    console.log(hp)
     return hp
   }
   return DEF_FEED_RESULT
