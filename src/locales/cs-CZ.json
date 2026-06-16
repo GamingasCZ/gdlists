@@ -83,7 +83,9 @@
     "notif": "Sledovat notifikace",
     "notifHelp": "Je-li zapnuto, stránka bude samovolně kontrolovat, zda nepřišly nové notifikace.",
     "zenFS": "Celoobrazovkový mód Zen",
-    "zenFSHelp": "Zda-li se prohlížeč se přepne do režimu celé obrazovky v módu Zen."
+    "zenFSHelp": "Zda-li se prohlížeč se přepne do režimu celé obrazovky v módu Zen.",
+    "rClWriter": "Pravé kliknutí otevře menu prvku",
+    "rClWriterHelp": "Mění, zda pravé kliknutí otevře nabídku prohlížeče, nebo menu prvku v editoru. CTRL zvolí druhou možnost."
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",

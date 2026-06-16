@@ -29,6 +29,7 @@ export const SETTINGS = ref({
   checkNotifs: true,
   shortcutProfile: -1, // will properly select itself based on browser
   fsZenMode: false,
+  rClickWriter: true
 });
 
 export const hasLocalStorage = () => {

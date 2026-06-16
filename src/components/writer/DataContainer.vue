@@ -5,6 +5,7 @@ import ContainerSettings from './ContainerSettings.vue';
 import parseMD from "../global/parseEditorFormatting";
 import { flexNames, makeTogglableCheckboxes } from '@/Reviews';
 import router from '@/router';
+import { SETTINGS } from '@/siteSettings.ts';
 
 const emit = defineEmits<{
 	(e: "removeContainer"): void
@@ -172,9 +173,14 @@ const mount = () => {
 
 	textParent.value?.addEventListener("contextmenu", e => {
 		if (!props.editable) return
-		e.preventDefault()
-		doFocusText()
-		nextTick(() => rmbSettingOpen(e))
+
+		// this is essentialy an xor
+		if (SETTINGS.value.rClickWriter !== e.ctrlKey) {
+			e.preventDefault()
+			doFocusText()
+			nextTick(() => rmbSettingOpen(e))
+		}
+
 	})
 }
 

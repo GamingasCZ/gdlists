@@ -580,7 +580,9 @@
     "notifHelp": "If enabled, the site will periodically check for new notifications.",
     "notif": "Auto-check Notifications",
     "zenFS": "Fullscreen Zen Mode",
-    "zenFSHelp": "If enabled, the browser will fullscreen itself in Zen Mode."
+    "zenFSHelp": "If enabled, the browser will fullscreen itself in Zen Mode.",
+    "rClWriter": "Right-click Element Menu",
+    "rClWriterHelp": "Modifies, if right-clicking opens the browser menu, or highlighted element's settings. CTRL to use other option."
   },
   "help": {
     "Lists": "Lists",

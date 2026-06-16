@@ -132,6 +132,7 @@ const currLang = SETTINGS.value.language
     <button
       class="flex relative items-center px-2 py-1 text-left bg-black bg-opacity-40 rounded-md sm:hidden button"
       @click="emit('openNotifs')"
+      v-if="isLoggedIn"
     >
       <div v-if="currentUnread > 0" class="absolute -top-1 -left-1 w-3 rounded-md border-2 border-black bg-lof-400 aspect-square"></div>
       <div v-html="NotifsIcon" class="mr-3 w-5 h-5 fill-white"></div>{{ $t('navbar.notifs') }}
