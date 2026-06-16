@@ -597,8 +597,10 @@ const splitParagraph = () => {
     let newPos = selectedContainer.value[0] + 1
     let newParagraph = JSON.parse(JSON.stringify(POST_DATA.value.containers[selectedContainer.value[0]]))
     newParagraph.data = selectedText[1]
+    newParagraph.id = newID()
     POST_DATA.value.containers[selectedContainer.value[0]].data = selectedText[0]?.toString()
     POST_DATA.value.containers.splice(newPos, 0, newParagraph)
+    containerLastAdded.value = Date.now()
 }
 
 const tagline = ref(false)
