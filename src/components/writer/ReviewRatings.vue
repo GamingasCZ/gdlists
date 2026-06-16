@@ -123,7 +123,7 @@ const allRates = computed(() => {
 
         <div v-else>
             <!-- All ratings -->
-            <div class="grid grid-rows-4 grid-flow-col gap-x-4">
+            <div class="grid grid-flow-col gap-x-4" :style="{gridTemplateRows: `repeat(${Math.min(4, settings.hideUnrated ? allRates.filter(x => x > -1).length : 4)}, minmax(0, 1fr))`}">
                 <div v-if="!allRates.length" class="flex flex-col row-span-4 items-center my-auto text-sm opacity-40">
                     <img src="@/images/more.svg" alt="" class="w-8">
                     <span>{{ $t('reviews.notRated') }}</span>
