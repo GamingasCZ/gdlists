@@ -501,7 +501,8 @@
     "rImgErr2": "The wildcard character is missing!",
     "words": "No words | {n} word | {n} words",
     "loginFuckup": "Session is not valid!",
-    "rImgErr5": "You can only import up to 30 images at once!"
+    "rImgErr5": "You can only import up to 30 images at once!",
+    "column": "column"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -756,7 +757,7 @@
     "deletedPost": "Removed Post",
     "embedded": "Embedded Post",
     "embeddedHelp": "Load the review to display this post",
-    "vertAlign": "Vertical Align",
+    "vertAlign": "Content",
     "makeCarousel": "Add Carousel",
     "carouselHelp": "Click to add images and videos",
     "noAddedYet": "You haven't added anything yet...",
@@ -804,7 +805,7 @@
     "elDown": "Move Element Down",
     "imgCount": "{count} image | {count} images",
     "decoOnly": "Decoration Only",
-    "columnSetting": "{0} column",
+    "columnSetting": "{0}",
     "desc": "Review Description",
     "colsSelected": "Selected {n} columns",
     "zmHelp1": "Welcome to Zen Mode!",
@@ -869,7 +870,11 @@
     "enterCombo": "Enter the new shortcut",
     "kbWarn1": "This profile may not work in Firefox.",
     "kbWarn2": "This profile may not work if the browser is fullscreened (e.g. in Zen Mode).",
-    "rouletteFail": "Failed to fetch levels!"
+    "rouletteFail": "Failed to fetch levels!",
+    "dupColumn": "Duplicate Column",
+    "cContent": "positioning",
+    "fill": "Fill",
+    "expand": "Expand"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

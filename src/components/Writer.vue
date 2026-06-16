@@ -425,6 +425,9 @@ const columnCommand = (index: number) => {
         case 11: column[11] = 0; break;
         case 12: column[11] = 1; break;
         case 13: column[11] = 2; break;
+        case 14: // gaps
+            let settings = POST_DATA.value.containers[selectedNestContainer.value[0]].settings
+            settings.gaps = !settings.gaps
     }
     // setTimeout(() => selectedNestContainer.value = nestAttay, 5); // great coding, gamingaaaas (body click event unselects containers, need to offset this)
 }

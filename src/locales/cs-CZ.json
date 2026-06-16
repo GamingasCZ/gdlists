@@ -475,7 +475,8 @@
     "rImgErr3": "Není vyplněn číselný interval!",
     "rImgErr4": "Interval není platný!",
     "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!",
-    "words": "Beze slov | {n} slovo | {n} slov"
+    "words": "Beze slov | {n} slovo | {n} slov",
+    "column": "sloupec"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -805,7 +806,7 @@
     "elDown": "Prvek dolů",
     "imgCount": "{count} obrázek | {count} obrázků",
     "decoOnly": "Pouze dekorativní",
-    "columnSetting": "{0} sloupec",
+    "columnSetting": "{0}",
     "desc": "Popis recenze",
     "colsSelected": "Vybráno {n} sloupců",
     "zmHelp1": "Vítej v módu Zen!",
@@ -870,7 +871,11 @@
     "enterCombo": "Stiskni novou kombinaci",
     "kbWarn1": "Tento profil nemusí fungovat ve Firefoxu.",
     "kbWarn2": "Tento profil nemusí fungovat, pokud je prohlížeč na celou obrazovku (např. v Zen Módu).",
-    "rouletteFail": "Nepodařilo se získat levely!"
+    "rouletteFail": "Nepodařilo se získat levely!",
+    "dupColumn": "Duplikovat sloupec",
+    "cContent": "obsahu",
+    "expand": "Dle obsahu",
+    "fill": "Vyplnit"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
