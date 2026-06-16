@@ -595,7 +595,7 @@ const moveContainer = (index: number, by: number) => {
 const splitParagraph = () => {
     let selectedText = deleteCESelection(document.activeElement)
     let newPos = selectedContainer.value[0] + 1
-    let newParagraph = addContainer("default", 0, true)
+    let newParagraph = JSON.parse(JSON.stringify(POST_DATA.value.containers[selectedContainer.value[0]]))
     newParagraph.data = selectedText[1]
     POST_DATA.value.containers[selectedContainer.value[0]].data = selectedText[0]?.toString()
     POST_DATA.value.containers.splice(newPos, 0, newParagraph)
