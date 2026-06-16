@@ -132,6 +132,7 @@ if (hasLocalStorage()) {
             >
         </Option>
         <Option
+            v-if="loggedIn"
             v-model="SETTINGS.saveThumbs"
             :name="$t('settingsMenu.saveThumbs')"
             :desc="$t('settingsMenu.saveThumbsHelp')"
@@ -139,9 +140,18 @@ if (hasLocalStorage()) {
         >
         </Option>
         <Option
+            v-if="loggedIn"
             v-model="SETTINGS.fsZenMode"
             :name="$t('settingsMenu.zenFS')"
             :desc="$t('settingsMenu.zenFSHelp')"
+            control="cbox"
+        >
+        </Option>
+        <Option
+            v-if="loggedIn"
+            v-model="SETTINGS.rClickWriter"
+            :name="$t('settingsMenu.rClWriter')"
+            :desc="$t('settingsMenu.rClWriterHelp')"
             control="cbox"
         >
         </Option>
