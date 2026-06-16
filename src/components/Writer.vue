@@ -64,7 +64,6 @@ watch(() => props.type, () => {
 
 var loadEditDraft: ReviewDraft | null = null
 watch(timeLastRouteChange, () => {
-    console.log("zmeneno", timeLastRouteChange)
     let ptype = ['list', 'review'][props.type]
     if (ptype != WRITER.value.general.postType) {
         WRITER.value = [LIST, REVIEW][props.type]
