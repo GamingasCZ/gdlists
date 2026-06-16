@@ -123,6 +123,7 @@ onMounted(() => {
                 @editedName="editName($event, draft)"
                 @startNameEdit="editingName = draft"
                 @open="optionsOpen = index"
+                @close="optionsOpen = -1"
                 @action="doAction($event, draft, drafts[filteredDrafts[index]])"
                 :is-open="optionsOpen == index"
                 :in-use="false"

@@ -2,7 +2,7 @@
 import { prettyDate } from '@/Editor';
 import type { ReviewDraft } from '@/interfaces';
 import { DraftAction } from '@/interfaces';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import parseText from '../global/parseEditorFormatting';
 
 const props = defineProps<{
@@ -19,6 +19,7 @@ const emit = defineEmits<{
     (e: 'editedName', newName: string): void
     (e: 'startNameEdit'): void
     (e: 'open'): void
+    (e: 'close'): void
     (e: 'action', a: DraftAction): void
 }>()
 
@@ -27,10 +28,20 @@ const justSaved = ref(false)
 const useButton = ref<HTMLButtonElement>()
 const focusUse = () => useButton.value.focus()
 
+const doOpen = () => {
+    if (props.isOpen) {
+        emit('close')
+    }
+    else {
+        emit('open')
+        nextTick(focusUse)
+    }
+}
+
 </script>
 
 <template>
-    <div @click="emit('open')" v-if="!hide" @keyup.enter="emit('open'); $nextTick(focusUse)" tabindex="0" class="w-full bg-black bg-opacity-40 rounded-md transition-transform focus:outline outline-2 draftCard outline-lof-400" :class="{'hover:translate-x-1 active:translate-x-2': !isOpen, 'border-l-4 border-lof-400 ': inUse}">
+    <div @click="doOpen()" v-if="!hide" @keyup.enter="doOpen()" tabindex="0" class="w-full bg-black bg-opacity-40 rounded-md transition-transform focus:outline outline-2 draftCard outline-lof-400" :class="{'hover:translate-x-1 active:translate-x-2': !isOpen, 'border-l-4 border-lof-400 ': inUse}">
         <div class="flex flex-col justify-between p-2">
             <div class="">
                 <input v-if="editingName" type="text" maxlength="40" :value="draft.name" @click.stop="" @change="emit('editedName', $event.target.value!)" class="px-2 bg-transparent bg-white bg-opacity-0 border-b-2 focus-within:outline-none focus-within:bg-opacity-10" autocomplete="off" @mouseover="$event.target.focus()" :placeholder="$t('reviews.reviewName')">
