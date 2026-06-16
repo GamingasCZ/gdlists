@@ -370,11 +370,10 @@ export const updateNavbarDrafts = (isReview: boolean, draftData?: ReviewDraft) =
       drafts = JSON.parse(localStorage.getItem(path+"Drafts")!)
 
     if (drafts) {
-        let draftKeys = Object.keys(drafts).sort((a,b) => (+b) - (+a))
+        let draftKeys = Object.entries(drafts).sort((a,b) => (b[1].saveDate) - (a[1].saveDate))
         let maxLen = Math.min(draftKeys.length, 3)
         for (let i = 0; i < maxLen; i++) {
-            let draft: ReviewDraft = drafts[draftKeys[i]]
-            draftArr.value.push({name: draft.name, isEdit: draft.editing, key: draftKeys[i]})
+            draftArr.value.push({name: draftKeys[i][1].name, isEdit: draftKeys[i][1].editing, key: draftKeys[i][0]})
         }
     }
 }

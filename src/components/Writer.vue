@@ -26,7 +26,7 @@ import { i18n } from "@/locales";
 import { SETTINGS, hasLocalStorage, viewedPopups } from "@/siteSettings";
 import NotLoggedInDialog from "./global/NotLoggedInDialog.vue";
 import { onMounted } from "vue";
-import { onBeforeRouteLeave, type RouteLocationAsPathGeneric } from "vue-router";
+import { onBeforeRouteLeave, useRoute, type RouteLocationAsPathGeneric } from "vue-router";
 import ReviewDrafts from "./writer/ReviewDrafts.vue";
 import CarouselPicker from "./writer/CarouselPicker.vue";
 import { addCEFormatting, deleteCESelection } from "./global/parseEditorFormatting";
@@ -64,6 +64,7 @@ watch(() => props.type, () => {
 
 var loadEditDraft: ReviewDraft | null = null
 watch(timeLastRouteChange, () => {
+    console.log("zmeneno", timeLastRouteChange)
     let ptype = ['list', 'review'][props.type]
     if (ptype != WRITER.value.general.postType) {
         WRITER.value = [LIST, REVIEW][props.type]
@@ -1052,8 +1053,7 @@ const previewApply = () => {
 const setDraftUrl = (draftID: string) => {
     let url = new URL(location.href)
     if (url.searchParams.get("draft") != draftID) {
-        url.searchParams.set("draft", draftID)
-        history.pushState({}, "", url)
+        router.push(`/make/${WRITER.value.general.postType}?draft=${draftID}`)
     }
 }
 
@@ -1096,22 +1096,41 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
         // if (containerLastAdded.value < now-SETTINGS.value.autosave*1000 || containerLastTextChange.value < now-SETTINGS.value.autosave*1000)
         //     return
 
-        drafts.value[reviewSave.value.backupID].reviewData = POST_DATA.value,
-        drafts.value[reviewSave.value.backupID].saveDate = now
-        drafts.value[reviewSave.value.backupID].wordCount = preview.counter
-        drafts.value[reviewSave.value.backupID].previewTitle = preview.title
-        drafts.value[reviewSave.value.backupID].previewParagraph = preview.preview
         backupID = reviewSave.value.backupID
+        let newDrafts: {[stamp: string]: ReviewDraft} = {}
+
+        for (const [key, el] of Object.entries(drafts.value)) {
+            if (key == backupID) continue
+
+            newDrafts[key] = el
+        }
+
+        // move current saved draft to top
+        newDrafts[backupID] = drafts.value[backupID]
+
+        newDrafts[backupID].reviewData = POST_DATA.value
+        newDrafts[backupID].saveDate = now
+        newDrafts[backupID].wordCount = preview.counter
+        newDrafts[backupID].previewTitle = preview.title
+        newDrafts[backupID].previewParagraph = preview.preview
+
+        // rename unnamed draft
+        if (newDrafts[backupID].name == i18n.global.t('editor.unnamedReview'))
+            newDrafts[backupID].name = POST_DATA.value.reviewName
 
         if (editing)
-            drafts.value[reviewSave.value.backupID].editing = editing
+            newDrafts[backupID].editing = editing
+
+        drafts.value = newDrafts
     }
 
+    reviewSave.value = { backupID: backupID, lastSaved: now }
     setDraftUrl(backupID.toString())
 
     updateNavbarDrafts(props.type == 1, drafts.value)
+    // TODO: if saving drafts in multiple browser tabs, changes will override each other
+    // since we're only fetching drafts on page load
     localStorage.setItem(WRITER.value.drafts.storageKey, JSON.stringify(drafts.value))
-    reviewSave.value = { backupID: backupID, lastSaved: now }
 }
 
 const removeDraft = (key: number) => {
@@ -1292,7 +1311,7 @@ const modifyPostName = () => {
             :width="dialog.medium">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
-                @load="loadDraft" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
+                @load="setDraftUrl($event.createDate.toString())" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"
@@ -1376,7 +1395,7 @@ const modifyPostName = () => {
                 v-if="!zenMode"
                 @toggle-preview="toggleLevelPreview()"
                 @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
-                @load-draft="loadDraft(drafts[$event])"
+                @load-draft="setDraftUrl(drafts[$event].createDate.toString())"
                 @save-draft="saveDraft(false, false)"
                 :subtext="WRITER.general.levelsSubtext"
                 :max-levels="WRITER.general.maxLevels"
@@ -1416,7 +1435,7 @@ const modifyPostName = () => {
                         v-if="!POST_DATA.containers.length"
                         
                         @preview-draft="previewDraft(drafts?.[$event]?.reviewData, $event, true)"
-                        @load-draft="loadDraft(drafts?.[$event])"
+                        @load-draft="setDraftUrl(drafts?.[$event].createDate.toString())"
                         @preset="addPreset"
 
                         :inverted="POST_DATA.whitePage"
