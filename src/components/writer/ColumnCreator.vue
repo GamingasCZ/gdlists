@@ -2,6 +2,7 @@
 import { inject, nextTick, onMounted, ref } from 'vue';
 import ColumnPreview from './ColumnPreview.vue';
 import { i18n } from '@/locales';
+import type { Ref } from 'vue';
 
 interface ColumnDetails {
     amount: number
@@ -15,10 +16,16 @@ const emit = defineEmits<{
 
 const add = inject("addContainer")!
 const keyActivated = inject("keyActivated")
+const selElement = inject<Ref<number[]>>("selectedContainer", ref([-1]))
+const beforeSelectedElement = selElement.value[0]
 
 const create = (count: number, widths: boolean[], align: string) => {
-    add(`twoColumns`, [count, widths, align])
-    emit('close')
+    // clicking in the column creator would cause elements to deselect
+    selElement.value[0] = beforeSelectedElement
+    nextTick(() => {
+        add(`twoColumns`, [count, widths, align])
+        emit('close')
+    })
 }
 
 const highlightedCreateColumns = ref(-1)
