@@ -94,7 +94,7 @@ const perc = computed(() => {
         <button v-if="editable && gizmoPos != 'slider'" tabindex="-1" ref="gizmo" @mousedown.left="startScale" @auxclick="autoResize" @touchstart="startScale" class="isolate absolute -right-3 -bottom-3 z-20 w-6 h-6 bg-white rounded-full scale-0 group-hover:scale-100"
         :class="{'-right-1': gizmoPos == 'corner', 'left-1/2': gizmoPos == 'vertical'}"
         ></button>
-        <input v-else-if="editable" @input="emit('resize', $event.target.value)" tabindex="-1" :value="currHeight" type="range" :min="minSize ?? 96" :max="maxSize ?? 1024" id="resizerSlider" class="absolute -top-3 invisible w-full bg-transparent appearance-none group-hover:visible">
+        <input v-else-if="editable" @input="emit('resize', $event.target.value)" tabindex="-1" :value="currHeight" type="range" :min="minSize ?? 96" :max="maxSize ?? 1024" id="resizerSlider" class="absolute right-0 left-0 -top-3 invisible w-full bg-transparent appearance-none group-hover:visible">
     </div>
 </template>
 
