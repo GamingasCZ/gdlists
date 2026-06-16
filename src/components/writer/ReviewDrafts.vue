@@ -4,6 +4,7 @@ import { DraftAction } from "@/interfaces";
 import { computed, nextTick, onMounted, ref } from "vue";
 import DraftCard from "./DraftCard.vue";
 import type { Writer } from "@/writers/Writer";
+import { i18n } from "@/locales.ts";
 
 const props = defineProps<{
     inUseID: number
@@ -20,6 +21,9 @@ const emit = defineEmits<{
 }>()
 
 const editName = (newName: string, key: string) => {
+    if (!newName.length)
+        newName = props.drafts[key]?.reviewData?.reviewName || i18n.global.t('editor.unnamedReview')
+
     props.drafts[key].name = newName
     editingName.value = -1
     localStorage.setItem(props.writer.drafts.storageKey, JSON.stringify(props.drafts))
