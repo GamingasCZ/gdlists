@@ -117,7 +117,11 @@ const isControl = (ind: number, which: ControlType) => containers[props.type].se
                     <img src="@/images/del.svg" alt="" class="w-6">
                 </button>
             </div>
-            <div class="flex flex-col gap-2 p-2 text-base text-left min-w-56 min-h-36">
+            <div class="flex flex-col gap-2 p-2 text-base text-left min-w-56 min-h-40">
+                <div v-if="!containers[type].settings.length" class="flex flex-col gap-2 justify-center items-center h-full text-base text-xl opacity-20">
+                    <img src="@/images/gear.svg" class="w-16" alt="">
+                    {{ $t('reviews.noSettings') }}
+                </div>
                 <template v-for="(_, key, index) in settingsArr" :class="{'py-1': containers[type].settings[index].type[0] > -1}">
 
                     <!-- Text input -->
