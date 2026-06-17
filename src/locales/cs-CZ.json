@@ -885,7 +885,8 @@
     "colPrev": "Náhled sloupců",
     "moveHelp": "Přidej <kbd>$</kbd> za sloupec, pro přesunutí obsahu.",
     "cHelp7": "Obsah může být jen v jednom sloupci!",
-    "chelp8": "Špatné použitý přesuvný znak!"
+    "chelp8": "Špatné použitý přesuvný znak!",
+    "moveToCont": "Klikni na sloupec, kam chceš přesunout obsah."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

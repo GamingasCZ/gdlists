@@ -884,7 +884,8 @@
     "colPrev": "Column Preview",
     "moveHelp": "Add <kbd>$</kbd> before a column, to move content into it.",
     "cHelp7": "Content can only be in one column!",
-    "chelp8": "Bad use of move character!"
+    "chelp8": "Bad use of move character!",
+    "moveToCont": "Click the column you'd like to move content into."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

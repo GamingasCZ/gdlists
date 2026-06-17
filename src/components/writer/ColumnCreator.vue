@@ -225,7 +225,7 @@ const textColCreateError = computed(() => {
                     <ColumnPreview clickable :shrink="highlightedAlign != -1 && highlightedAlign != 3" @changed-width="clickColumn" :spread="highlightedAlign == 3" :fixed-amount="highlightedCreateColumns" :col-amount="highlightedCreateColumns" />
                 </div>
             </div>
-            <p v-if="movingContentStage" class="pb-1 text-center text-balance">Klikni na sloupec, kam chceš přesunout obsah.</p>
+            <p v-if="movingContentStage" class="pb-1 text-center text-balance">{{ $t('reviews.moveToCont') }}</p>
             <p v-else-if="colWidths.includes(false)" class="pb-1 text-center">{{ $t('reviews.colClick') }}</p>
             <div v-else class="flex justify-between items-center px-2 text-left" @mouseleave="highlightedAlign = -1">
                 <p class="text-lg text-center">{{ highlightedAlign > -1 ? alignText[highlightedAlign] : $t('other.alignment') }}</p>
