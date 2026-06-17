@@ -4,7 +4,6 @@ import Browse from '@/svgs/Browse.vue';
 import Create from '@/svgs/Create.vue';
 import { computed, onMounted } from 'vue';
 import { draftsReviews } from '../../Editor';
-import { forceUpdateLastRouteChage } from '@/router';
 
 const props = defineProps<{
     isReview: boolean
@@ -23,7 +22,6 @@ const hasDrafts = computed(() => draftArr.value.length)
 onMounted(() => updateNavbarDrafts(props.isReview))
 
 const editLink = (key: string, isEdit: number | undefined) => {
-    forceUpdateLastRouteChage()
     if (isEdit)
         return `/edit/${path}/${isEdit}?draft=${key}`
     else
