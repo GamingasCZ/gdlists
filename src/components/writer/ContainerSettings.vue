@@ -136,7 +136,7 @@ const isControl = (ind: number, which: ControlType) => containers[props.type].se
                     <!-- Checkbox -->
                     <div v-if="isControl(index, ControlType.Checkbox)" class="flex justify-between">
                         <label :for="key">{{ containers[type].settings[index].title }}</label>
-                        <input :name="key" :checked="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="py-0.5 !mr-0 bg-white bg-opacity-10 rounded-md button" type="checkbox">
+                        <input :name="key" :checked="settingsArr[key]" @change="settingsArr[key] = !settingsArr[key]" class="py-0.5 !invert-0 !mr-0 bg-white bg-opacity-10 rounded-md button" type="checkbox">
                     </div>
     
                     <!-- Number selector -->
