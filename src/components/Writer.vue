@@ -409,7 +409,7 @@ const columnCommand = (index: number) => {
         case 7:
             if (nest.settings.components.length == 2) {
                 let columnData = JSON.parse(JSON.stringify(nest.settings.components[1 - selectedNestContainer.value[1]]))
-                removeContainer(selectedNestContainer.value[0])
+                removeContainer(selectedNestContainer.value[0], true)
                 POST_DATA.value.containers.splice(selectedNestContainer.value[0], 0, ...columnData.filter(x => x === Object(x)))
             }
             else {
