@@ -24,8 +24,15 @@ watch(selectedNest, () => {
 const columnButton = ref<HTMLButtonElement>()
 
 const clickAction = () => {
+    isMovingElement.value = false
     columnOptionsShown.value = true
 }
+
+const isMovingElement = inject<Ref<boolean>>("isMovingElement", ref(false))
+watch(isMovingElement, () => {
+    if (isMovingElement.value)
+        columnOptionsShown.value = true
+})
 
 defineExpose({
     clickAction
@@ -40,7 +47,7 @@ defineExpose({
         @close="columnOptionsShown = false"
     >
         <template #header>
-            <ColumnEdit @close="columnOptionsShown = false" />
+            <ColumnEdit @close="columnOptionsShown = false; isMovingElement = false" />
         </template>
     </Dropdown>
     <Dropdown
@@ -49,7 +56,7 @@ defineExpose({
         @close="columnOptionsShown = false"
     >
         <template #header>
-            <ColumnCreator @close="columnOptionsShown = false" />
+            <ColumnCreator @close="columnOptionsShown = false; isMovingElement = false" :movingAnElement="isMovingElement" />
         </template>
     </Dropdown>
 

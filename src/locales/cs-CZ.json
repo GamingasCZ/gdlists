@@ -478,7 +478,8 @@
     "rImgErr4": "Interval není platný!",
     "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!",
     "words": "Beze slov | {n} slovo | {n} slov",
-    "column": "sloupec"
+    "column": "sloupec",
+    "continue": "Pokračovat"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -877,7 +878,14 @@
     "dupColumn": "Duplikovat sloupec",
     "cContent": "obsahu",
     "expand": "Dle obsahu",
-    "fill": "Vyplnit"
+    "fill": "Vyplnit",
+    "moveToCol": "Přesunout do sloupce",
+    "moveCont": "Přesouvání obsahu",
+    "noSettings": "Není co nastavit",
+    "colPrev": "Náhled sloupců",
+    "moveHelp": "Přidej <kbd>$</kbd> za sloupec, pro přesunutí obsahu.",
+    "cHelp7": "Obsah může být jen v jednom sloupci!",
+    "chelp8": "Špatné použitý přesuvný znak!"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

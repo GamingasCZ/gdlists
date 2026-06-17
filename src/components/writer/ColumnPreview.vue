@@ -10,10 +10,11 @@ const props = defineProps<{
     shrink?: boolean
     clickable: boolean
     colWidths?: boolean[]
+    contentPreview?: number
 }>()
 
 const emit = defineEmits<{
-    (e: "changedWidth", newArray: boolean[]): void
+    (e: "changedWidth", newArray: {new: boolean[], ind: number}): void
 }>()
 
 const hoveringAmount = defineModel({default: -1})
@@ -50,7 +51,7 @@ watch(() => props.colWidths, () => {
 
 const click = (ind: number) => {
     if (props.clickable) {
-        maxAmount.value[ind] = !maxAmount.value[ind]; emit('changedWidth', maxAmount.value)
+        maxAmount.value[ind] = !maxAmount.value[ind]; emit('changedWidth', {new: maxAmount.value, ind: ind})
     } 
 }
 
@@ -66,6 +67,9 @@ const click = (ind: number) => {
                 :class="{'!bg-lof-300 cursor-pointer': hoveringAmount >= i && !fixedAmount, 'grow': !maxAmount[ind], 'border-r-0': !spread}"
                 class="px-2 h-8 border-2 transition-all duration-75 cursor-pointer hover:bg-lof-300 min-w-8 border-lof-400 last:border-r-2 first:rounded-l-md last:rounded-r-md"
             >
+                <div v-if="contentPreview == ind" class="p-1 m-0.5 rounded-md bg-lof-300">
+                    <img src="@/images/formatting/alignLeft.svg" class="w-4" alt="">
+                </div>
                 <!-- <div v-if="animStep == i" class="h-3 gridEx bg-lof-300"></div> -->
             </td>
         </tr>

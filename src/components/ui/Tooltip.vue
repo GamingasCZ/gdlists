@@ -27,7 +27,7 @@ onBeforeUnmount(() => popper.destroy())
         <div ref="dropdown" role="tooltip" class="flex z-50 gap-2 items-center bg-lof-200" data-popper-placement>
             <div
             class="p-2 text-sm text-white rounded-md shadow-drop" id="tooltip">
-                <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
+                <div data-popper-arrow class="-z-10 bg-lof-200" id="arrow" alt=""></div>    
                 <p>{{ text }}</p>
             </div>
             <slot name="after" />
@@ -36,15 +36,6 @@ onBeforeUnmount(() => popper.destroy())
 </template>
 
 <style>
-#arrow,
-#arrow::before {@apply absolute w-4 h-4 bg-inherit -translate-y-2}
-
-#arrow {@apply invisible}
-
-#arrow::before {@apply visible content-[''] rotate-45;}
-
-#tooltip[data-popper-placement^='top'] > #arrow {@apply -bottom-4; }
-#tooltip[data-popper-placement^='bottom'] > #arrow {@apply -top-4; }
-#tooltip[data-popper-placement^='left'] > #arrow {@apply -right-4; }
-#tooltip[data-popper-placement^='right'] > #arrow {@apply -left-4; }
+#tooltip[data-popper-placement=''] #arrow {@apply top-8; }
+#tooltip[data-popper-placement^='top'] #arrow {@apply -bottom-4; }
 </style>

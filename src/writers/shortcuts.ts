@@ -26,6 +26,7 @@ export var defaultShortcuts = [
         "moveUp": [Key.Alt | Key.Shift, 'ArrowUp', false],
         "moveDown": [Key.Alt | Key.Shift, 'ArrowDown', false],
         "deselect": [Key.None, 'Escape', false],
+        "moveToColumn": [Key.Alt | Key.Ctrl, 'D'],
 
         "add.default": [Key.Alt | Key.Shift, 'F'],
         "preview.1": [Key.Alt | Key.Shift, 'J'],                
@@ -65,6 +66,7 @@ export var defaultShortcuts = [
         "moveUp": [Key.Ctrl | Key.Shift, 'ArrowUp'],
         "moveDown": [Key.Ctrl | Key.Shift, 'ArrowDown'],
         "deselect": [Key.None, 'Escape'],
+        "moveToColumn": [Key.Ctrl | Key.Shift, 'M'],
 
         "add.default": [Key.Ctrl | Key.Shift, 'F'],
         "preview.1": [Key.Ctrl | Key.Shift, 'J'],                
@@ -104,6 +106,7 @@ export var defaultShortcuts = [
         "moveUp": [Key.Alt | Key.Shift, 'ArrowUp'],
         "moveDown": [Key.Alt | Key.Shift, 'ArrowDown'],
         "deselect": [Key.None, 'Escape'],
+        "moveToColumn": [Key.Ctrl | Key.Shift, 'D'],
 
         "add.default": [Key.None, 'P'],
         "preview.1": [Key.Shift, 'P'],
@@ -188,6 +191,11 @@ const writerShortcuts = [
         action: ["deselect"],
         title: i18n.global.t('other.deselect'),
         icon: RemoveIcon
+    },
+    {
+        action: ["moveToColumn"],
+        title: i18n.global.t('reviews.moveToCol'),
+        icon: AddIcon
     }
 ]
 

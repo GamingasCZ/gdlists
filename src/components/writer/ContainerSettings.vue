@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import { ControlType, type Containers, type ContainerSettings } from './containers';
+import containersBlueprint from './containers';
 import type { PostData } from '@/interfaces';
 import { containerSettingsOpen, DEFAULT_RATINGS } from '@/Reviews';
+import Tooltip from '../ui/Tooltip.vue';
 
 const emit = defineEmits<{
     (e: "remove"): void
@@ -10,6 +12,7 @@ const emit = defineEmits<{
     (e: "pressedButton", key: string): void
     (e: "hidSettings"): void
     (e: "resetPos"): void
+    (e: "columnize"): void
 }>()
 
 const props = defineProps<{
@@ -24,6 +27,7 @@ const props = defineProps<{
 const postData = inject<Ref<PostData>>("postData")!
 const containers = inject<Containers>("settingsTitles")!
 const shortcut = inject<Ref<number[]>>("containerSettingsShown", ref([0,-1]))
+const isMovingElement = inject<Ref<boolean>>("isMovingElement", ref(false))
 watch(shortcut, () => {
     // 3 = opened by shortcut
     if (shortcut.value[0] == 3 && shortcut.value[1] == props.index) {
@@ -99,6 +103,14 @@ onBeforeUnmount(() => {
 
 const isControl = (ind: number, which: ControlType) => containers[props.type].settings[ind].type[0] == which
 
+
+const tCTooltip = ref(false)
+const columnizeButton = ref<HTMLButtonElement>()
+const doColumnize = () => {
+    isMovingElement.value = true
+    forceHide()
+}
+
 </script>
 
 <template>
@@ -110,10 +122,14 @@ const isControl = (ind: number, which: ControlType) => containers[props.type].se
                 <button type="button" @click="emit('move', -1)" class="p-1 button aspect-square">
                     <img src="@/images/moveUp.svg" class="w-6" alt="">
                 </button>
-                <button type="button" @click="emit('move', 1)" class="p-1 button aspect-square">
+                <button type="button" @click="emit('move', 1)" class="p-1 mb-auto button aspect-square">
                     <img src="@/images/moveDown.svg" class="w-6" alt="">
                 </button>
-                <button type="button" @click="emit('remove')" class="flex gap-1 items-center p-1 mt-auto bg-red-400 rounded-md">
+                <button v-if="!nest && containersBlueprint[type].nestable" type="button" @click="doColumnize" ref="columnizeButton" @mouseover="tCTooltip = true" @mouseleave="tCTooltip = false" class="p-1 mx-auto button">
+                    <img src="@/images/twoColumns.svg" alt="" class="w-5">
+                    <Tooltip v-if="tCTooltip" :button="columnizeButton" :text="$t('reviews.moveToCol')" />
+                </button>
+                <button type="button" @click="emit('remove')" class="flex gap-1 items-center p-1 bg-red-400 rounded-md">
                     <img src="@/images/del.svg" alt="" class="w-6">
                 </button>
             </div>

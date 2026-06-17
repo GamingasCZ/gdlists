@@ -502,7 +502,8 @@
     "words": "No words | {n} word | {n} words",
     "loginFuckup": "Session is not valid!",
     "rImgErr5": "You can only import up to 30 images at once!",
-    "column": "column"
+    "column": "column",
+    "continue": "Continue"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -876,7 +877,14 @@
     "dupColumn": "Duplicate Column",
     "cContent": "positioning",
     "fill": "Fill",
-    "expand": "Expand"
+    "expand": "Expand",
+    "moveToCol": "Move into Column",
+    "moveCont": "Moving content",
+    "noSettings": "No settings available",
+    "colPrev": "Column Preview",
+    "moveHelp": "Add <kbd>$</kbd> before a column, to move content into it.",
+    "cHelp7": "Content can only be in one column!",
+    "chelp8": "Bad use of move character!"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -224,6 +224,9 @@ const containerLastTextChange = ref(0)
 const setLastChange = () => containerLastTextChange.value = Date.now()
 provide("lastTextChange", setLastChange)
 
+const isMovingElement = ref<boolean>(false)
+provide("isMovingElement", isMovingElement)
+
 /** Function that creates a container object, 
  * 
  * @param key {string} Container to be added
@@ -287,6 +290,13 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
                 containerData.settings.components.push([addTo[1][i]])
 
             containerData.align = addTo[2]
+
+            // moving selected container into a column
+            if (addTo?.[3] !== undefined) {
+                let selElem = selectedContainer.value[0]
+                containerData.settings.components[addTo[3]].splice(0,0,JSON.parse(JSON.stringify(POST_DATA.value.containers[selElem])))
+                POST_DATA.value.containers.splice(selElem, 1)
+            }
         }
 
         if (selectedContainer.value[0] == -1) {
@@ -529,6 +539,12 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
                 selectedContainer.value = [-1]
                 document?.activeElement?.blur()
             }
+            break;
+            
+        case 'moveToColumn':
+            if (!CONTAINERS[POST_DATA.value.containers[selectedContainer.value[0]].type].nestable) return
+            isMovingElement.value = true
+            keyActivated.value = true
             break;
         }
 }
