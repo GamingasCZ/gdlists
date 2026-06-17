@@ -357,7 +357,8 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
         POST_DATA.value.containers[index].align = alignment
     }
     else {
-        POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
+        let nestComp = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.filter(x => typeof x != 'boolean')
+        nestComp[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
     }
 
     containerLastAdded.value = Date.now()
