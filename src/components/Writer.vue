@@ -690,7 +690,8 @@ const modifyImageURL = (newUrl: string) => {
     // Image container in nested container
     else {
         let link = typeof newUrl == 'object' ? newUrl[0] : newUrl
-        POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]][selectedNestContainer.value[2]].settings.url = link
+        let comps = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].filter(x => typeof x != 'boolean')
+        comps[selectedNestContainer.value[2]].settings.url = link
     }
 }
 
