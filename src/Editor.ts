@@ -149,20 +149,20 @@ export const modifyListBG = (newColors: number[] | string, reset = false) => {
   );
   document.documentElement.style.setProperty(
     "--primaryColor",
-    chroma(chroma.hsl(newColors[0], 0.36, 0.167)).hex()
+    chroma.hsl(newColors[0], 0.36, 0.167).hex()
   );
   document.documentElement.style.setProperty(
     "--secondaryColor",
-    chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
+    chroma.hsl(newColors[0], 0.906, 0.049).hex()
   );
   document.documentElement.style.setProperty(
     "--brightGreen",
-    chroma(chroma.hsl(newColors[0], 0.535, 0.637)).hex()
+    chroma.hsl(newColors[0], 0.535, 0.637).hex()
   );
 
   (document.getElementById("siteTheme") as HTMLMetaElement).setAttribute(
     "theme-color",
-    chroma(chroma.hsl(newColors[0], 0.906, 0.049)).hex()
+    chroma.hsl(newColors[0], 0.906, 0.049).hex()
   );
 
   return [newColors[0], 0.36, newColors[2]] as [number, number, number]

@@ -97,8 +97,10 @@ export const timeLastRouteChange = ref(Date.now())
 export const forceUpdateLastRouteChage = () =>
   timeLastRouteChange.value = Date.now()
 
-router.afterEach(() => {
-  window.scrollTo(0,0)
+router.afterEach((to, from) => {
+  if (to.name != from.name)
+    window.scrollTo(0,0)
+  
   timeLastRouteChange.value = Date.now()
 })
 
@@ -124,11 +126,9 @@ router.beforeEach(async (to, from) => {
     if (["editor", "writer", "editing", "editingReview"].includes(from.name) && ["listViewer", "reviewViewer"].includes(to.name)) return
       document.documentElement.style.setProperty("--siteBackground", THEMES[SETTINGS.value.selectedTheme || 0].colors.siteBackground);
   
-      setTimeout(() => {
-        document.documentElement.style.setProperty("--primaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor);
-        document.documentElement.style.setProperty("--secondaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.secondaryColor);
-        document.documentElement.style.setProperty("--brightGreen", THEMES[SETTINGS.value.selectedTheme || 0].colors.brightGreen);
-      }, 150);
+      document.documentElement.style.setProperty("--primaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.primaryColor);
+      document.documentElement.style.setProperty("--secondaryColor", THEMES[SETTINGS.value.selectedTheme || 0].colors.secondaryColor);
+      document.documentElement.style.setProperty("--brightGreen", THEMES[SETTINGS.value.selectedTheme || 0].colors.brightGreen);
     }
 });
 

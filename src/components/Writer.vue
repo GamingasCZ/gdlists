@@ -54,22 +54,16 @@ const props = defineProps<{
 
 const WRITER = ref([LIST, REVIEW][props.type])
 const POST_DATA = ref<PostData>(WRITER.value.general.postObject())
-watch(() => props.type, () => {
-    WRITER.value = [LIST, REVIEW][props.type]
-    drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
-    shortcutUnload()
-    shortcutListen(WRITER.value.toolbar, doAction)
-    resetPost()
-})
 
 var loadEditDraft: ReviewDraft | null = null
-watch(timeLastRouteChange, () => {
-    let ptype = ['list', 'review'][props.type]
-    if (ptype != WRITER.value.general.postType) {
+watch(router.currentRoute, (to, from) => {
+    if (to.name != from.name) {
         WRITER.value = [LIST, REVIEW][props.type]
         drafts.value = JSON.parse(localStorage.getItem(WRITER.value.drafts.storageKey)!) ?? {}
+        shortcutUnload()
+        shortcutListen(WRITER.value.toolbar, doAction)
     }
-    
+
     if (props.editing) {
         if (props.editDraft) {
             loadDraft(drafts.value[props.editDraft])
@@ -230,7 +224,7 @@ provide("isMovingElement", isMovingElement)
 /** Function that creates a container object, 
  * 
  * @param key {string} Container to be added
- * @param addTo {[count, widths, align]} Parameter for creating (count) columns, with an array of (width) types and (align)
+ * @param addTo {[count, widths, align, moveContent?]} Parameter for creating (count) columns, with an array of (width) types and (align), also, can move selected content into nth column
  * @param returnOnly {boolean} The container doesn't get added into the review.
  * @param above {boolean} Container gets added above the currently selected element, instead of below.
  */
@@ -986,7 +980,6 @@ provide("replImage", uploadPasteImage)
 const preUpload = ref([false, [0, 0, 0]])
 
 const reviewSave = ref({ backupID: 0, lastSaved: 0 })
-const draftPopup = ref<HTMLDivElement>()
 const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
     if (!draft) {
         errorStamp.value = Date.now()
@@ -994,27 +987,31 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
         return
     }
 
-    if (draft.editing && !noEditCheck) {
-        loadEditDraft = draft
-        router.replace(`/edit/${WRITER.value.general.postType}/${draft.editing}`)
-        return
-    }
-    else if (!draft.editing) {
-        if (!["writer", "editor"].includes(router.currentRoute.value.name)) {
-            loadEditDraft = draft
-            router.replace(`/make/${WRITER.value.general.postType}`)
-            return
-        }
+    // TODO: might still not work fully
+    if (previewHold) {
+        exitPreview()
+        return nextTick(draft, noEditCheck)
     }
 
-    POST_DATA.value = JSON.parse(JSON.stringify(draft.reviewData))
+    editDraftExists.value = null
+    loadEditDraft = null
+
     reviewSave.value.backupID = draft.createDate
     reviewSave.value.lastSaved = draft.saveDate
-    setDraftUrl(reviewSave.value.backupID.toString())
-    modifyPostName()
-    fetchEmbeds()
-    modifyListBG(draft.reviewData.pageBGcolor, false)
-    containerLastAdded.value = Date.now()
+
+    // fixes text not being updated, when loading draft of the same post
+    let data = JSON.parse(JSON.stringify(draft.reviewData))
+    if (WRITER.value.general.postType == 'review')
+        POST_DATA.value.containers = []
+
+    nextTick(() => {
+        containerLastAdded.value = Date.now()
+        POST_DATA.value = data
+        modifyListBG(POST_DATA.value.pageBGcolor, false)
+        setDraftUrl(reviewSave.value.backupID.toString())
+        modifyPostName()
+        fetchEmbeds()
+    })
 }
 
 let previewHold: [ReviewList, object] | null
@@ -1032,7 +1029,7 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewin
     }
 
     previewHold = [POST_DATA.value, embedsContent.value]
-    POST_DATA.value = previewData
+    POST_DATA.value = JSON.parse(JSON.stringify(previewData))
     previewID = previewIDSaved
     modifyPostName()
     fetchEmbeds(true)
@@ -1065,14 +1062,18 @@ const previewApply = () => {
     disableEdits.value = false
     setPreviewMode(true)
     previewHold = null
-    loadDraft(drafts.value[previewID!])
+    setDraftUrl(previewID)
     previewID = null
 }
 
 const setDraftUrl = (draftID: string) => {
     let url = new URL(location.href)
     if (url.searchParams.get("draft") != draftID) {
-        router.push(`/make/${WRITER.value.general.postType}?draft=${draftID}`)
+        let editID = drafts.value[draftID].editing
+        if (editID)
+            router.push(`/edit/${WRITER.value.general.postType}/${editID}?draft=${draftID}`)
+        else
+            router.push(`/make/${WRITER.value.general.postType}?draft=${draftID}`)
     }
 }
 
@@ -1107,6 +1108,7 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
             drafts.value[now].editing = editing
 
         backupID = now
+        // setDraftUrl(backupID.toString())
     }
     else {
         // do not save without any recent changes
@@ -1144,7 +1146,6 @@ const saveDraft = (saveAs: boolean, leavingPage: RouteLocationAsPathGeneric | bo
     }
 
     reviewSave.value = { backupID: backupID, lastSaved: now }
-    setDraftUrl(backupID.toString())
 
     updateNavbarDrafts(props.type == 1, drafts.value)
     // TODO: if saving drafts in multiple browser tabs, changes will override each other
@@ -1330,7 +1331,7 @@ const modifyPostName = () => {
             :width="dialog.medium">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
-                @load="setDraftUrl($event.createDate.toString())" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
+                @load="setDraftUrl($event.createDate)" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"
@@ -1402,7 +1403,7 @@ const modifyPostName = () => {
                     <span class="text-xl font-bold">{{ $t('reviews.draftExists') }}...</span>
                     <p class="text-white text-opacity-40">{{ $t('reviews.lastEdited') }}: {{ prettyDate((Date.now() - drafts[editDraftExists].saveDate) / 1000) }}</p>
                     <div class="flex gap-2 mt-2 max-sm:flex-col">
-                        <button @click="loadOnlineEdit(drafts[editDraftExists])" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button grow"><img src="@/images/checkThick.svg" class="w-5" alt="">{{ $t('other.use') }}</button>
+                        <button @click="setDraftUrl(editDraftExists)" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button grow"><img src="@/images/checkThick.svg" class="w-5" alt="">{{ $t('other.use') }}</button>
                         <button @click="previewDraft(drafts[editDraftExists].reviewData, editDraftExists, true)" class="flex gap-2 p-2 button"><img src="@/images/view.svg" class="w-5" alt="">{{ $t('other.preview') }}</button>
                         <button @click="editDraftExists = null" class="flex gap-2 p-2 button"><img src="@/images/close.svg" class="w-4" alt="">{{ $t('other.cancel') }}</button>
                     </div>
@@ -1414,7 +1415,7 @@ const modifyPostName = () => {
                 v-if="!zenMode"
                 @toggle-preview="toggleLevelPreview()"
                 @preview-draft="previewDraft(drafts[$event].reviewData, $event, true)"
-                @load-draft="setDraftUrl(drafts[$event].createDate.toString())"
+                @load-draft="setDraftUrl"
                 @save-draft="saveDraft(false, false)"
                 :subtext="WRITER.general.levelsSubtext"
                 :max-levels="WRITER.general.maxLevels"
@@ -1454,7 +1455,7 @@ const modifyPostName = () => {
                         v-if="!POST_DATA.containers.length"
                         
                         @preview-draft="previewDraft(drafts?.[$event]?.reviewData, $event, true)"
-                        @load-draft="setDraftUrl(drafts?.[$event].createDate.toString())"
+                        @load-draft="setDraftUrl"
                         @preset="addPreset"
 
                         :inverted="POST_DATA.whitePage"
