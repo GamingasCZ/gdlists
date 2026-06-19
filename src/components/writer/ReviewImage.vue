@@ -144,7 +144,7 @@ const containerFileAction = (e: HoverFileAction, files: DragEvent) => {
         ref="conHelp"
         @file-action="containerFileAction"
         @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]"
-        v-if="editable || imageLoading != 0"
+        v-if="imageLoading != 0"
         :icon="fileDragover ? 'dropfile' : 'showImage'"
         :help-content="['', $t('other.loading'), $t('reviews.imgError')][text ?? 0]"
     >
