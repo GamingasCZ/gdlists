@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     uid: string | -2 | -3
@@ -8,7 +8,6 @@ const props = defineProps<{
 }>()
 
 const PFP = ref("")
-const currCutout = ref(props.cutout)
 const UC = import.meta.env.VITE_USERCONTENT
 const base = import.meta.env.BASE_URL
 async function load() {
@@ -28,16 +27,18 @@ async function load() {
         img.onerror = () => err()
     })
 
-    currentCutout.value = props.cutout
     PFP.value = await l.then(res => res).catch(err => `${base}/pfps/defaultPFP.webp`)
 }
 load()
 
-watch(lastPFPchange, load)
-watch(currentCutout, () => {
+const currCutout = computed(() => {
     if (props.uid == currentUID.value)
-        currCutout.value = currentCutout.value
+        return currentCutout.value
+    else
+        return props.cutout
 })
+
+watch(lastPFPchange, load)
 watch(() => props.uid, load)
 </script>
 
