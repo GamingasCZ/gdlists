@@ -276,6 +276,7 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
 
     // Adding regular container
     if (selectedNestContainer.value[0] == -1 || !CONTAINERS[key].nestable) {
+        let hasColumnizeElement = addTo?.[3] !== undefined
         if (key == "twoColumns" && addTo) {
             containerData.extraComponents = addTo[0]-2
             
@@ -286,14 +287,15 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
             containerData.align = addTo[2]
 
             // moving selected container into a column
-            if (addTo?.[3] !== undefined) {
+            if (hasColumnizeElement) {
                 let selElem = selectedContainer.value[0]
                 containerData.settings.components[addTo[3]].splice(0,0,JSON.parse(JSON.stringify(POST_DATA.value.containers[selElem])))
                 POST_DATA.value.containers.splice(selElem, 1)
+                above = true
             }
         }
 
-        if (selectedContainer.value[0] == -1) {
+        if (selectedContainer.value[0] == -1 && !hasColumnizeElement) {
             POST_DATA.value.containers
                 .push(containerData)
             selectedContainer.value[0] = POST_DATA.value.containers.length - 1
