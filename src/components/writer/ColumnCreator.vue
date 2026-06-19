@@ -222,7 +222,7 @@ const textColCreateError = computed(() => {
             </div>
             <div class="w-full overflow-clip rounded-lg bg-lof-100 border-lof-400">
                 <div class="flex p-2" :class="{'justify-center': highlightedAlign == 1, 'justify-end': highlightedAlign == 2}">
-                    <ColumnPreview clickable :shrink="highlightedAlign != -1 && highlightedAlign != 3" @changed-width="clickColumn" :spread="highlightedAlign == 3" :fixed-amount="highlightedCreateColumns" :col-amount="highlightedCreateColumns" />
+                    <ColumnPreview clickable :shrink="highlightedAlign != -1 && highlightedAlign != 3" @changed-width="clickColumn" :spread="highlightedAlign == 3" :fixed-amount="highlightedCreateColumns" :col-amount="highlightedCreateColumns" :no-wchange="movingContentStage" />
                 </div>
             </div>
             <p v-if="movingContentStage" class="pb-1 text-center text-balance">{{ $t('reviews.moveToCont') }}</p>

@@ -11,6 +11,7 @@ const props = defineProps<{
     clickable: boolean
     colWidths?: boolean[]
     contentPreview?: number
+    noWchange?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -50,9 +51,11 @@ watch(() => props.colWidths, () => {
 })
 
 const click = (ind: number) => {
-    if (props.clickable) {
+    if (props.clickable && !props.noWchange) {
         maxAmount.value[ind] = !maxAmount.value[ind]; emit('changedWidth', {new: maxAmount.value, ind: ind})
-    } 
+    }
+    else if (props.noWchange)
+        emit('changedWidth', {new: maxAmount.value, ind: ind})
 }
 
 </script>

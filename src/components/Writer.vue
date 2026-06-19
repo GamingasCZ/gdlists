@@ -309,9 +309,12 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
         if (key == 'twoColumns') {
             nextTick(() => {
                 let elements = document.querySelectorAll("#reviewText > div")
+                if (!elements) return
                 let e = elements[ele].querySelector("article")
-                setTimeout(() =>
-                    e.click(), 10); // this will end in disaster one day
+                if (e) {
+                    setTimeout(() =>
+                        e.click(), 10); // this will end in disaster one day
+                }
             })
         }
     }
