@@ -60,21 +60,24 @@ const containers: Containers = {
     },
     heading1: {
         placeholder: i18n.global.t('reviews.title', [1]),
-        styling: "text-5xl font-bold mt-10",
+        styling: "text-5xl font-bold",
+        innerStyling: "mt-4 leading-tight",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading2: {
         placeholder: i18n.global.t('reviews.title', [2]),
-        styling: "text-4xl font-bold mt-8",
+        styling: "text-4xl font-bold",
+        innerStyling: "mt-2 leading-tight",
         nestable: true,
         canEditText: true,
         settings: []
     },
     heading3: {
         placeholder: i18n.global.t('reviews.title', [3]),
-        styling: "text-3xl font-bold mt-6",
+        styling: "text-3xl font-bold",
+        innerStyling: "mt-1 leading-tight",
         nestable: true,
         canEditText: true,
         settings: []
@@ -404,7 +407,7 @@ export type Containers = {
 export type Container = {
     placeholder?: string,
     styling?: string,
-    childStyling?: string,
+    innerStyling?: string,
     dependentOnChildren?: boolean
     additionalComponents?: any[],
     componentProps?: Container,

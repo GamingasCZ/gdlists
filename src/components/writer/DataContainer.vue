@@ -223,7 +223,7 @@ const settings = ref<HTMLDialogElement>()
 			:placeholder="placeholder"
 			:contenteditable="editable"
 			:style="{textAlign: 'inherit', color: 'inherit', wordBreak: 'break-word', textIndent: currentSettings?.indent ? '2rem' : '', fontSize: fontSizes[currentSettings?.size ?? 0]}"
-			:class="childStyling || []">
+			:class="innerStyling || []">
 		</p>
 			
 		<slot></slot>

@@ -19,7 +19,7 @@ const emit = defineEmits<{
     >
         <h4 class="overflow-hidden text-xl font-bold leading-tight text-ellipsis text-nowrap">
             <img v-if="draft.editing" src="@/images/edit.svg" class="inline mr-1 w-4" alt="">
-            {{ draft.name }}
+            {{ draft.name || $t('editor.unnamedReview') }}
         </h4>
         <p class="text-sm text-white text-opacity-40">{{ prettyDate((Date.now() - draft.saveDate) / 1000) }}</p>
         <hr class="opacity-20">
