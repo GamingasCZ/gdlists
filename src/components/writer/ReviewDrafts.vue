@@ -16,6 +16,7 @@ const emit = defineEmits<{
     (e: "save", duplicate: boolean): void
     (e: "preview", data: ReviewList, id_saved: string): void
     (e: "load", draft: ReviewDraft): void
+    (e: "revert", draft: ReviewDraft): void
     (e: "remove", id: number): void
     (e: "close"): void
 }>()
@@ -65,8 +66,11 @@ const doAction = (action: DraftAction, key: string, draft: ReviewDraft) => {
             break;
         case DraftAction.Load:
             emit("load", draft)
-            emit("close", draft)
+            emit("close")
             break;
+        case DraftAction.Revert:
+            emit("revert", draft)
+            emit("close")
     }
 }
 

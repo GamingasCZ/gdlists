@@ -1337,7 +1337,11 @@ const modifyPostName = () => {
             :width="dialog.medium">
             <template #icon><img src="@/images/searchOpaque.svg" alt="" class="-mr-1 w-4"></template>
             <ReviewDrafts @save="saveDraft" :drafts="drafts" :in-use-i-d="reviewSave.backupID" ref="draftPopup" :writer="WRITER"
-                @load="setDraftUrl($event.createDate)" @preview="previewDraft" @remove="removeDraft" @close="openDialogs.drafts = false" />
+                @load="setDraftUrl($event.createDate.toString())"
+                @revert="loadDraft"
+                @preview="previewDraft"
+                @remove="removeDraft"
+                @close="openDialogs.drafts = false" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.shortcuts" @close-popup="!editingShortcut && (openDialogs.shortcuts = false)" :title="$t('reviews.keysh')"

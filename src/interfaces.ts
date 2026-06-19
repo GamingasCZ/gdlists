@@ -353,7 +353,7 @@ export interface ReviewDraft {
 }
 
 export enum DraftAction {
-  Remove, Preview, Load, Save, Clone, Disjoin
+  Remove, Preview, Load, Save, Clone, Disjoin, Revert
 }
 
 export enum DataContainerAction {
