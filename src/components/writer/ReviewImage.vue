@@ -140,12 +140,11 @@ const containerFileAction = (e: HoverFileAction, files: DragEvent) => {
 
 <template>
     <ContainerHelp
-        @vue:mounted="conHelp?.hoverAction(); !mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))"
+        @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))"
         ref="conHelp"
         @file-action="containerFileAction"
         @click.stop="dialogs.imagePicker = [WriterGallery.ImageContainer, index]"
-        v-show="imageLoading != 0"
-        v-if="editable"
+        v-if="editable || imageLoading != 0"
         :icon="fileDragover ? 'dropfile' : 'showImage'"
         :help-content="['', $t('other.loading'), $t('reviews.imgError')][text ?? 0]"
     >
