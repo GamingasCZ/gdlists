@@ -558,8 +558,9 @@ const setPreviewMode = (preview: boolean) => {
         prePreviewScrollTop = document.documentElement.scrollTop
 
         // Scrolls to currently selected element
-        if (currSelectedElement != null)
-            nextTick(() => currSelectedElement?.scrollIntoView())
+        // did more harm then good
+        // if (currSelectedElement != null)
+        //     nextTick(() => currSelectedElement?.scrollIntoView())
     }
     else {
         if (prePreviewScrollTop != 0) {
