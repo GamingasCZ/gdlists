@@ -45,25 +45,27 @@ onMounted(() => {
 
 const profiles = [i18n.global.t('other.ksAlt'), i18n.global.t('other.ksCtrl'), i18n.global.t('other.ksSingle'), i18n.global.t('other.custom')]
 const justChangedProfile = ref(Date.now())
-const changeProfile = (to: number) => {
-    if (isFirefox.value && to == 0) // firefox alt bug
-        warnMsg(1)
-
-    if (to == 2 && SETTINGS.value.fsZenMode) // single-key
-        warnMsg(0)
-
-    editingInd.value = -1
-    selectedProfile.value = to
-    SETTINGS.value.shortcutProfile = to
-    ppOpen.value = false
-    emit('editing')
-    nextTick(() => {
-        emit('finishedEdit')
+const changeProfile = (to: number) =>
+    new Promise((res,_) => {
+        if (isFirefox.value && to == 0) // firefox alt bug
+            warnMsg(1)
+    
+        if (to == 2 && SETTINGS.value.fsZenMode) // single-key
+            warnMsg(0)
+    
+        editingInd.value = -1
+        selectedProfile.value = to
+        SETTINGS.value.shortcutProfile = to
+        ppOpen.value = false
+        emit('editing')
         nextTick(() => {
-            justChangedProfile.value = Date.now()
+            emit('finishedEdit')
+            nextTick(() => {
+                justChangedProfile.value = Date.now()
+                res(true)
+            })
         })
     })
-}
 
 const listen = (e: KeyboardEvent) => {
     e.preventDefault()
@@ -86,11 +88,11 @@ const editShortcut = (which: number, reset: boolean) => {
     // Reset shortcut
     if (reset) {
         let shortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}
-        let key = keyShortcuts[which][1].join(".")
+        let key = keyShortcuts.value[which][1].join(".")
         delete shortcuts[key]
         localStorage.setItem("customShortcuts", JSON.stringify(shortcuts))
-        keyShortcuts[which][0] = defaultShortcuts[0][key]
-        keyShortcuts[which][4] = 0
+        keyShortcuts.value[which][0] = defaultShortcuts[0][key]
+        keyShortcuts.value[which][4] = 0
         justChangedProfile.value = Date.now()
 
         emit('editing')
@@ -104,7 +106,7 @@ const editShortcut = (which: number, reset: boolean) => {
 }
 const newCombo = ref<[Key, number] | null>(null)
 
-const saveNewCombo = (shortcut: any[]) => {
+const saveNewCombo = async (shortcut: any[]) => {
     if (newCombo == null) return
 
     // check if single-letter is allowed
@@ -112,19 +114,19 @@ const saveNewCombo = (shortcut: any[]) => {
     if (defaultShortcuts[0][action]?.[2] === false && (newCombo.value[0] == Key.None || newCombo.value[0] == Key.Shift))
         return summonNotification(i18n.global.t('other.badSh'), i18n.global.t('other.badShHelp'), "error")
 
+    // switch to custom
+    if (selectedProfile.value != profiles.length-1) {
+        await changeProfile(profiles.length-1)
+    }
+
     // check duplicates
     let dupl = false
-    keyShortcuts.forEach(k => {
+    keyShortcuts.value.forEach(k => {
         if (k[0][0] == newCombo.value[0] && k[0][1] == newCombo.value[1])
             dupl = true
     })
     if (dupl)
         return summonNotification(i18n.global.t('other.kbInUse'), i18n.global.t('other.kbInUseHelp'), "error")
-
-    // switch to custom
-    if (selectedProfile.value != profiles.length-1) {
-        changeProfile(profiles.length-1)
-    }
 
     if (hasLocalStorage()) {
         let shortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}

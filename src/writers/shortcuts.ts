@@ -237,17 +237,17 @@ export const getShortcut = (action?: any[]) => {
 }
 
 var customShortcuts = {}
-export var keyShortcuts: [Key, any[]][] = []
+export const keyShortcuts = ref<[Key, any[]][]>([])
 const BASE = import.meta.env.BASE_URL
 const getShortcuts = (toolbar) => {
-    keyShortcuts = []
+    keyShortcuts.value = []
     if (hasLocalStorage()) {
         customShortcuts = JSON.parse(localStorage.getItem("customShortcuts")!) ?? {}
     }
 
     writerShortcuts.forEach(button => {
         let sh = getShortcut(button.action)
-        keyShortcuts.push([sh[0], button.action, button.title, button.icon, sh[1]])
+        keyShortcuts.value.push([sh[0], button.action, button.title, button.icon, sh[1]])
     })
 
     for (const key in toolbar) {
@@ -259,32 +259,32 @@ const getShortcuts = (toolbar) => {
                         let icon = `${BASE}/formatting/${button.icon[i]}.svg`
                         let act = [button.action[0], button.action[1][i]]
                         let sh = getShortcut(act)
-                        keyShortcuts.push([sh[0], act, button?.dropdownText?.[i], icon, sh[1]])
+                        keyShortcuts.value.push([sh[0], act, button?.dropdownText?.[i], icon, sh[1]])
                     }
                 }
                 else {
                     let shortcut = getShortcut(button.action)
                     if (shortcut)
-                        keyShortcuts.push([shortcut[0], button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon, shortcut[1]])
+                        keyShortcuts.value.push([shortcut[0], button.action, button?.title || button?.tooltip || button?.titleSwitchable?.[0], icon, shortcut[1]])
                 }
 
             // Fixed shortcuts apply only if a given toolbar is active
             // TODO
             // if (button?.shortcutFixed && true)
-            //     keyShortcuts.push([button?.shortcutFixed, button?.action, button.title || button?.tooltip, icon])
+            //     keyShortcuts.value.push([button?.shortcutFixed, button?.action, button.title || button?.tooltip, icon])
             }
         }
     }
 }
 
 const isValidShortcut = (combo: number, key: string, code: string) => {
-    for (let i = 0; i < keyShortcuts.length; i++) {
-        if (keyShortcuts[i][0][0] == combo && (keyShortcuts[i][0][1] == key || keyShortcuts[i][0][1] == code))
-            return keyShortcuts[i][1]
-        if (typeof keyShortcuts[i][0][0] == 'object')
-            for (let j = 0; j < keyShortcuts[i][0].length; j++) {
-                if (keyShortcuts[i][0][j][0] == combo && (keyShortcuts[i][0][j][1] == key || keyShortcuts[i][0][j][1] == code))
-                    return [keyShortcuts[i][1][0], keyShortcuts[i][1][1][j]]
+    for (let i = 0; i < keyShortcuts.value.length; i++) {
+        if (keyShortcuts.value[i][0][0] == combo && (keyShortcuts.value[i][0][1] == key || keyShortcuts.value[i][0][1] == code))
+            return keyShortcuts.value[i][1]
+        if (typeof keyShortcuts.value[i][0][0] == 'object')
+            for (let j = 0; j < keyShortcuts.value[i][0].length; j++) {
+                if (keyShortcuts.value[i][0][j][0] == combo && (keyShortcuts.value[i][0][j][1] == key || keyShortcuts.value[i][0][j][1] == code))
+                    return [keyShortcuts.value[i][1][0], keyShortcuts.value[i][1][1][j]]
             }
     }
     return false
