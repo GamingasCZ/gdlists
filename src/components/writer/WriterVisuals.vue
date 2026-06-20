@@ -144,22 +144,21 @@ watch(() => props.disabled, () => pageDetailsOpen.value = false)
                 </template>
             </button>
             
-            <button :disabled="!writerEnabled || disabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center h-32 overflow-clip bg-black bg-opacity-40 rounded-md aspect-video disabled:opacity-20 hover:bg-opacity-80">
-                <button class="flex flex-col gap-2 items-center p-1 button">
-                    <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
-                    <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
-                </button>
-            </button>
-            <!--
-            TODO dalsi update
             <div class="flex flex-col gap-4 h-32 grow">
+                <button :disabled="!writerEnabled || disabled" @click="pageDetailsOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow disabled:opacity-20 hover:bg-opacity-80">
+                    <button class="flex gap-2 items-center p-1 button">
+                        <img src="@/images/page.svg" alt="" class="w-10 opacity-40">
+                        <p class="text-xl text-white text-opacity-40">{{ $t('reviews.page') }}</p>
+                    </button>
+                </button>
+
                 <button @click="titleEditorOpen = true" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow disabled:opacity-20 hover:bg-opacity-80">
                     <button class="flex gap-2 items-center p-1 button">
                         <img src="@/images/titleEdit.svg" alt="" class="w-8 opacity-40">
                         <p class="text-xl text-white text-opacity-40">{{ $t('reviews.heading') }}</p>
                     </button>
                 </button>
-            </div> -->
+            </div>
 
             <button @click="colorPickerOpen = true" :disabled="disabled" class="flex relative flex-col gap-2 justify-center items-center overflow-clip bg-black bg-opacity-40 rounded-md grow hover:bg-opacity-80">
                 <button class="flex flex-col gap-2 items-center p-2 button">
