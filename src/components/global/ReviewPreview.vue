@@ -149,7 +149,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
     <div class="relative w-full h-36 bg-cover">
       <img ref="thumb" @load="modListCol" @error="thumbLink = defaultThumb" :src="thumbLink" loading="lazy" alt="" :style="{objectPosition: `${xPos} ${background[1]}%`}" class="object-cover w-full h-36" :class="{'mix-blend-luminosity': (!thumbnail && !thumbnailLink) || SETTINGS.disableColors}">
       <div :style="{background: `linear-gradient(0deg, ${listColor.darken().hex()}, transparent)`}" class="absolute bottom-0 w-full h-8 transition-colors duration-200 group-hover:brightness-50"></div>
-      <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between text-base opacity-100 transition-opacity duration-75 group-hover:opacity-100">
+      <div v-if="!unrolledOptions" class="flex absolute top-2 right-2 left-2 gap-2 justify-between text-base opacity-0 transition-opacity duration-75 group-hover:opacity-100">
         <div v-if="views" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
             <img src="../../images/view.svg" alt="" class="inline mr-2 w-4" />
             <span>{{ views }}</span>
@@ -158,7 +158,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
             <ReviewRatingBar :rate="rate_ratio" />
         </div>
         <div v-if="levelCount" class="px-2 py-1 w-max bg-black bg-opacity-80 rounded-md backdrop-blur-sm h-max">
-            <span>{{ levelCount }} {{ $t('other.levels', [levelCount]) }}</span>
+            <span>{{ $t('other.levels', levelCount) }}</span>
         </div>
         <div v-if="levelCount" :class="{'left-1/2 -translate-x-1/2': !canEdit, 'left-0': canEdit}" class="absolute -bottom-24 w-72 max-w-full">
           <RatingContainer :ratings="levelRatings" compact />
