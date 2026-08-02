@@ -30,7 +30,7 @@ const props = defineProps<{
 const image = ref<HTMLImageElement>()
 const figure = ref<HTMLDivElement>()
 const conHelp = ref<HTMLDivElement & {hoverAction: (() => HoverFileAction)}>()
-const imageLoading = ref(-2)
+const imageLoading = ref(0)
 const fileDragover = ref(false)
 
 type replFunc = (e: Event, extra?: any) => void | undefined
@@ -61,6 +61,8 @@ onMounted(() => {
             replaceImageFunc(e, props.nestIndex ?? props.index)
             fileDragover.value = false
         })
+
+        imageLoading.value = -2
     }
 })
 
