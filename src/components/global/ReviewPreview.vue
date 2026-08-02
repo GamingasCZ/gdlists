@@ -161,7 +161,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
             <span>{{ $t('other.levels', levelCount) }}</span>
         </div>
         <div v-if="levelCount" :class="{'left-1/2 -translate-x-1/2': !canEdit, 'left-0': canEdit}" class="absolute -bottom-24 w-72 max-w-full">
-          <RatingContainer :ratings="levelRatings" compact />
+          <RatingContainer class="max-w-64" :ratings="levelRatings" compact />
         </div>
 
         <RouterLink
