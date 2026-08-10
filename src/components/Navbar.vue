@@ -29,7 +29,8 @@ const props = defineProps<{
 const settingsShown = ref(false);
 const notifDropdownShown = ref(false);
 const showSettings = (e: MouseEvent) => {
-if (e.target.id == "settingsOpener") return
+  if (e.target.id == "settingsOpener") return
+  
   settingsShown.value = true
   // closeNotifs2()
   document.body.addEventListener("click", closeSettings, { capture: true })
@@ -47,7 +48,7 @@ const showNotifs = () => {
   }
 };
 
-const closeSettings2 = () => {
+const closeSettings2 = (e: MouseEvent) => {
   settingsShown.value = false
   document.body.removeEventListener("click", closeSettings, { capture: true })
 }
@@ -65,6 +66,7 @@ const closeDialog = (m: MouseEvent, elementID: string, fun: any) => {
   if (m.x == 0) return // Clicking on settings menu content fricks up mouse pos
   let settingsMenu = document.querySelector(elementID) as HTMLDivElement
   if (!settingsMenu) return
+  if (m.target == document.getElementById("settingsOpener2")) return
   
   let left = settingsMenu.offsetLeft!
   let top = settingsMenu.offsetTop!
@@ -78,11 +80,13 @@ const closeDialog = (m: MouseEvent, elementID: string, fun: any) => {
 
 const loginInfo = ref<string[]>([]);
 
-watch(props, () => {
+const updateName = () => {
   if (localStorg.value && props.isLoggedIn) {
     loginInfo.value = JSON.parse(localStorage.getItem("account_info")!);
   }
-})
+}
+
+watch(props, updateName)
 
 enum NAV_SEL {
   Home,
@@ -194,6 +198,8 @@ const open = (to: string) => {
     router.push(`/browse/${to}`)
 }
 
+const settingsMenu = ref<HTMLElement>()
+
 </script>
 
 <template>
@@ -270,22 +276,40 @@ const open = (to: string) => {
         
         <!-- Logged in, settings -->
         <div v-else-if="localStorg" @click="showSettings" id="settingsOpener" class="box-border relative w-9 h-9">
-          <div class="absolute inset-0 z-10 bg-black bg-opacity-40" :style="{clipPath: profileCutouts[currentCutout]}"></div>
-          <ProfilePicture
-            :uid="currentUID"
-            :cutout="currentCutout"
+          <div class="absolute inset-0 z-10 bg-black bg-opacity-40 pointer-events-none" :style="{clipPath: profileCutouts[currentCutout]}"></div>
+          <button
+            @click="settingsMenu?.avatarChange()"
+            id="settingsOpener2"
+            class="absolute right-0 w-full group button top-0 z-20 motion-safe:transition-all duration-[10ms]"
             :class="{ 'right-16 top-8 !scale-[2]': settingsShown, '!border-orange-600': !isOnline }"
-            class="absolute right-0 button top-0 z-20 w-9 h-9 shadow-drop motion-safe:transition-all duration-[10ms]"
-            id="profilePicture"
-          />
+          >
+            <ProfilePicture
+              :uid="currentUID"
+              :cutout="currentCutout"
+              class="w-9 h-9 shadow-drop"
+              :class="{ 'group-hover:brightness-50': settingsShown }"
+              id="profilePicture"
+            />
+            <img src="@/images/edit.svg"
+            :class="{ 'group-hover:opacity-100': settingsShown }"
+            class="absolute top-1/2 left-1/2 z-30 w-3 opacity-0 transition-opacity -translate-x-1/2 -translate-y-1/2 pointer-events-none" alt="">
+          </button>
         </div>
         <div v-else></div>
       </section>
 
       <!-- Settings -->
       <Transition name="fadeSlide">
-        <SetingsMenu :username="loginInfo ? loginInfo[0] : ''" :is-logged-in="isLoggedIn" v-show="settingsShown"
-          v-if="localStorg" @open-notifs="showNotifs()" />
+        <SetingsMenu
+          v-if="localStorg" 
+          v-show="settingsShown"
+          ref="settingsMenu"
+          :open="settingsShown"
+          :username="loginInfo ? loginInfo[0] : ''" 
+          :is-logged-in="isLoggedIn" 
+          @open-notifs="showNotifs()"
+          @update-name="updateName()"
+        />
       </Transition>
 
           <!-- Notification Dropdown -->

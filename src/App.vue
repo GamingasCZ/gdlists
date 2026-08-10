@@ -58,6 +58,7 @@ else {
   }
   
   let loginCookie = cookier("logindata").get();
+  let ft = loginCookie?.[2];
   if (loginCookie != null) {
     returnedFromLogin.value = true;
   

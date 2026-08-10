@@ -503,7 +503,22 @@
     "loginFuckup": "Session is not valid!",
     "rImgErr5": "You can only import up to 30 images at once!",
     "column": "column",
-    "continue": "Continue"
+    "continue": "Continue",
+    "unChange": "Edit Username",
+    "curName": "Current Username",
+    "newUN": "New username",
+    "uCHelp1": "You can change your username only once every {0} days.",
+    "uChelp2": "Your previous usernames cannot be taken by others.",
+    "ucHelp3": "You're able to return to your previous usernames.",
+    "uCMess1": "Failed to retrive last username change. Try again later!",
+    "uCMess2": "Please wait {0} more days before making a new username!",
+    "uCMess3": "Your name must be at least {0} characters long.",
+    "uCChanged": "Username changed successfully!",
+    "ucChFail": "Failed to change username!",
+    "uCFail2": "Name contains disallowed characters.",
+    "ucHelp0": "Your name can only contain letters, numbers, hyphens and underscores.",
+    "uCinUse": "This name is already in use!",
+    "uCprev": "Previously used names"
   },
   "settingsMenu": {
     "asOff": "Off",

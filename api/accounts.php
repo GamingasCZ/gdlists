@@ -11,6 +11,7 @@ $local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVE
 header('Content-type: application/json'); // Return as JSON
 require("globals.php");
 require("images.php");
+require_once("username.php");
 
 
 // Error can happen when cancelling
@@ -67,10 +68,11 @@ if (sizeof($_GET) > 0) {
         $accCheck = checkAccount($mysqli);
         if (!$accCheck) die("0");
 
+        $username = doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
         $unread = doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$accCheck["id"]], "s");
         $profileData = ["status" => "logged_in",
-                        "account_name" => $accCheck["username"],
+                        "account_name" => $username["username"],
                         "account_id" => $accCheck["id"],
                         "cutout" => is_null($pfpCutout) ? 0 : $pfpCutout["pfp_cutout"],
                         "unread_notif" => $unread["amount_unread"]];
@@ -109,7 +111,7 @@ if (sizeof($_GET) > 0) {
 
     // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
     $fistTimeUser = is_null(doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$dcApiResponse["id"]], "s"));
-    doRequest($mysqli, "INSERT INTO `users` (`username`,`discord_id`,`refresh_token`,`access_token`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `username` = ?, `discord_id` = ?, `refresh_token` = ?, `access_token` = ?", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["username"], $dcApiResponse["id"],  $accessInfo["refresh_token"], $accessInfo["access_token"]], "ssssssss");
+    doRequest($mysqli, "INSERT INTO `users` (`username`,`discord_id`,`refresh_token`,`access_token`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `discord_id` = ?, `refresh_token` = ?, `access_token` = ?", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"],  $accessInfo["refresh_token"], $accessInfo["access_token"]], "sssssss");
 
     $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
@@ -123,6 +125,10 @@ if (sizeof($_GET) > 0) {
         if ($pfp !== false)
             saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
     }
+
+    // Save username
+    if ($fistTimeUser)
+        saveUsername($mysqli, $dcApiResponse["username"], $dcApiResponse["id"], true);
 
     $mysqli -> close();
     header("Location: " . $https . $local . '/gdlists');
