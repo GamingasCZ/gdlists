@@ -7,6 +7,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 const props = defineProps<{
     text: string
     button: HTMLElement
+    noTeleport?: boolean
 }>()
 
 const dropdown = ref<HTMLElement>()
@@ -23,8 +24,8 @@ onBeforeUnmount(() => popper.destroy())
 </script>
 
 <template>
-    <Teleport to="body">
-        <div ref="dropdown" role="tooltip" class="flex z-50 gap-2 items-center bg-lof-200" data-popper-placement>
+    <Teleport to="body" :disabled="noTeleport">
+        <div ref="dropdown" role="tooltip" class="flex z-50 gap-2 items-center w-max bg-lof-200" data-popper-placement>
             <div
             class="p-2 text-sm text-white rounded-md shadow-drop" id="tooltip">
                 <div data-popper-arrow class="-z-10 bg-lof-200" id="arrow" alt=""></div>    

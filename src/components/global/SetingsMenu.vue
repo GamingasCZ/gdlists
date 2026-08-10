@@ -9,13 +9,15 @@ import axios from "axios";
 import { currentUnread } from "./notifications.js";
 import NotifsIcon from "@/images/notifs.svg?raw"
 
-defineProps<{
+const props = defineProps<{
   isLoggedIn: boolean;
   username: string;
+  open: boolean
 }>();
 
 const emit = defineEmits<{
   (e: "openNotifs"): void
+  (e: "updateName"): void
 }>()
 
 let loggingOut = false
@@ -30,12 +32,15 @@ function logout() {
   }
 }
 
+const isFullyOpen = ref(false)
+
 const dialogs = ref({
   settings: false,
   gallery: false,
   avatar: false,
   help: false,
-  themes: false
+  themes: false,
+  usernameChange: false
 })
 
 const Dialog = defineAsyncComponent({
@@ -72,9 +77,32 @@ const Sett = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
+const Username = defineAsyncComponent({
+  loader: () => import("@/components/global/UsernameChange.vue"),
+  loadingComponent: LoadingBlock
+})
+
+const avatarChange = () => {
+  if (isFullyOpen.value)
+    dialogs.value.avatar = true
+}
+
 const refresh = () => window.location.reload()
 const refreshLangShown = ref(false)
 const currLang = SETTINGS.value.language
+
+defineExpose({
+  avatarChange
+})
+
+watch(() => props.open, () => {
+  if (props.open) {
+    setTimeout(() => { // fairly idiotic this
+      isFullyOpen.value = true
+    }, 100);
+  }
+  else isFullyOpen.value = false
+})
 
 </script>
 
@@ -99,6 +127,10 @@ const currLang = SETTINGS.value.language
       <Dialog v-if="dialogs.settings" :open="dialogs.settings" :title="$t('other.settings')" :width="dialog.medium" @close-popup="dialogs.settings = false">
         <Sett />
       </Dialog>
+
+      <Dialog v-if="dialogs.usernameChange" :open="dialogs.usernameChange" :title="$t('other.unChange')" :width="dialog.medium" @close-popup="dialogs.usernameChange = false">
+        <Username :curr-username="username" @close="dialogs.usernameChange = false; emit('updateName')" />
+      </Dialog>
     </Teleport>
 
     <Transition name="fadeSlide">
@@ -114,10 +146,10 @@ const currLang = SETTINGS.value.language
       class="flex flex-col gap-2 justify-center items-center py-2 w-36 bg-black bg-opacity-50 rounded-md max-sm:pt-6 sm:pt-9"
       v-else
     >
-      <h1 class="font-bold">{{ username }}</h1>
+      <h1 class="font-bold bg-lof-200">{{ username }}</h1>
       <button
         class="px-2 py-1 bg-white bg-opacity-10 rounded-md button"
-        @click="dialogs.avatar = true"
+        @click="dialogs.usernameChange = true"
       >
         <img src="@/images/edit.svg" class="inline mr-2 w-5" alt="" />{{ $t('level.edit') }}
       </button>

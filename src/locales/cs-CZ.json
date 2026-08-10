@@ -479,7 +479,22 @@
     "rImgErr5": "Naráz lze importovat maximálně 30 obrázků!",
     "words": "Beze slov | {n} slovo | {n} slov",
     "column": "sloupec",
-    "continue": "Pokračovat"
+    "continue": "Pokračovat",
+    "unChange": "Upravit uživatelské jméno",
+    "curName": "Nynější jméno",
+    "newUN": "Nové uživatelské jméno",
+    "uCHelp1": "Své uživ. jméno můžeš změnit jen jednou za {0} dní.",
+    "uChelp2": "Tvé původní jméno nepůjde použít nikým jiným.",
+    "ucHelp3": "K původně použitým jménům se můžeš vracet.",
+    "uCMess1": "Nepovedlo se načíst změny jmen. Zkus to znova později!",
+    "uCMess2": "Nové jméno můžeš vytvořit až za {0} dní!",
+    "uCMess3": "Tvé jméno musí být alespoň {0} znaky dlouhé.",
+    "uCChanged": "Uživatelské jméno bylo změněno!",
+    "ucChFail": "Nepodařilo se změnit jméno!",
+    "uCFail2": "Jméno obsahuje neplatné znaky.",
+    "ucHelp0": "Tvé jméno může obsahovat jen písmena, čísla, podtržítka a spojovníky.",
+    "uCinUse": "Toto jméno používá už někdo jiný!",
+    "uCprev": "Předešlá jména"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
