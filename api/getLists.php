@@ -442,7 +442,8 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
       ORDER BY levels.id DESC
       LIMIT %s
       OFFSET %s", selLevelRange(), clamp(intval($_GET["fetchAmount"]), 2, 15), $dbSlice);
-    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM levels WHERE `levelName` LIKE '%%%s%%' AND levels.id<=?", $_GET["searchQuery"]), [$_GET['startID']], "i");
+    $maxpageQuery = doRequest($mysqli, sprintf("
+    SELECT count(*) AS amount FROM (SELECT 'a' as amount FROM levels_uploaders INNER JOIN levels ON levels.levelID = levels_uploaders.levelID WHERE `levelName` LIKE '%%%s%%' AND levels.id<=? GROUP BY levels_uploaders.levelID) t;", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
 
   $maxpage = ceil($maxpageQuery["amount"] / clamp(intval($_GET["fetchAmount"]), 2, 15));
