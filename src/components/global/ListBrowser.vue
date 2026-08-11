@@ -58,6 +58,7 @@ const pagesArray = ref<number[]>(listScroll());
 const USERS = ref<ListCreatorInfo[]>([]);
 const LISTS = ref<ListPreview[]>([]);
 const REVIEW_DETAILS = ref<ReviewDetailsResponse[]>([]);
+const FOLLOWS = ref<string[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 const main = ref<HTMLDivElement>()
@@ -199,6 +200,7 @@ function refreshBrowser() {
       loading.value = false
       USERS.value = res.data[1];
       REVIEW_DETAILS.value = res.data[4]
+      FOLLOWS.value = res.data[5]
       loadFailed.value = false;
     })
     .catch(e => {
@@ -465,6 +467,7 @@ defineExpose({
           :favorited="favoriteLevelIDs.includes(list.levelID)"
           :is-list="onlineSubtype == 'lists'"
           :disable-fave="picking"
+          :is-followed="FOLLOWS"
           @clicked-option="emit('selectedPostOption', [$event, list.name])"
           @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           @remove-level="removeFavoriteLevel"

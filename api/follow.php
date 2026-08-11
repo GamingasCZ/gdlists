@@ -14,6 +14,8 @@ Error codes
 header('Content-type: application/json'); // Return as JSON
 require_once("globals.php");
 
+function getID($x) {return array_key_first($x)[0]. strval(array_values($x)[0]); }
+
 // postID can be an int, or an int array
 function isFollowed($mysqli, $postID, $postType, $uid) {
     $res;
@@ -36,7 +38,7 @@ function isFollowed($mysqli, $postID, $postType, $uid) {
         return false;
 
     if ($isPostList)
-        return $res;
+        return array_map("getID", $res);
     else
         return !is_null($res);
 }
