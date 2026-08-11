@@ -428,6 +428,9 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
+  // If browsing only followed posts
+  $checkFollowed = intval($_GET["followed"]) ? "RIGHT JOIN follows ON $type.id = follows.list_id" : "";
+
   // Lists/Reviews
   $maxFetch = clamp(intval($_GET["fetchAmount"]), 2, 50);
   $ratingKey = substr($type, 0, -1) . '_id';
@@ -435,12 +438,17 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   if ($type != "levels") {
     $query = "SELECT $range, $ratings FROM ratings
               RIGHT JOIN $type ON $type.id = ratings.$ratingKey
+              $checkFollowed
               WHERE $showHidden $type.id<=? AND `name` LIKE ? $addReq
               GROUP BY `name`
               ORDER BY hidden DESC, id DESC
               LIMIT $maxFetch
               OFFSET $dbSlice";
-    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
+    $maxpageQuery;
+    if ($checkFollowed == "")
+      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
+    else
+      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(`follows`.`id`) as amount FROM $type $checkFollowed WHERE $showHidden `name` LIKE '%%%s%%' AND $type.`id`<=? $addReq", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
   else {
     $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders

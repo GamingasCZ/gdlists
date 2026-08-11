@@ -341,6 +341,12 @@ defineExpose({
             :class="{ 'bg-lof-300': onlineType == 'user' }">
             {{ $t('other.myLists', [onlineSubtype == 'lists' ? $t('other.lists') : $t('other.reviews')]) }}
           </RouterLink>
+          <RouterLink :to="`/browse/${onlineSubtype}?type=followed`" 
+            class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+            v-show="onlineSubtype != 'levels'"
+            :class="{ 'bg-lof-300': onlineType == 'followed' }">
+            {{ $t('other.followed2') }}
+          </RouterLink>
           <RouterLink :to="`/browse/${onlineSubtype}?type=hidden`"
             class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
             v-show="onlineSubtype != 'levels'"

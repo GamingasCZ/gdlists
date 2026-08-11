@@ -83,11 +83,6 @@ const Username = defineAsyncComponent({
   loadingComponent: LoadingBlock
 })
 
-const FollowManager = defineAsyncComponent({
-  loader: () => import("@/components/global/FollowManager.vue"),
-  loadingComponent: LoadingBlock
-})
-
 const avatarChange = () => {
   if (isFullyOpen.value)
     dialogs.value.avatar = true
@@ -136,10 +131,6 @@ watch(() => props.open, () => {
 
       <Dialog v-if="dialogs.usernameChange" :open="dialogs.usernameChange" :title="$t('other.unChange')" :width="dialog.medium" @close-popup="dialogs.usernameChange = false">
         <Username :curr-username="username" @close="dialogs.usernameChange = false; emit('updateName')" />
-      </Dialog>
-
-      <Dialog v-if="dialogs.follows" :open="dialogs.follows" :title="$t('other.followed2')" :width="dialog.large" @close-popup="dialogs.follows = false">
-        <FollowManager />
       </Dialog>
     </Teleport>
 
@@ -202,13 +193,6 @@ watch(() => props.open, () => {
       @click="dialogs.settings = true"
     >
       <img src="@/images/gear.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.settings') }}
-    </button>
-    <button
-      class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
-      @click="dialogs.follows = true"
-      v-if="isLoggedIn"
-    >
-      <img src="@/images/browse.svg" class="inline mr-3 w-5" alt="" />{{ $t('other.followed2') }}
     </button>
     <button
       class="px-2 py-1 text-left bg-black bg-opacity-40 rounded-md button"
