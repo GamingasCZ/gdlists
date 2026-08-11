@@ -43,6 +43,7 @@ import ZenModeHelp from "./writer/ZenModeHelp.vue";
 import { Limit } from "@/assets/limits";
 import { lastVisitedPath } from "./global/imageCache";
 import PostThumbnailPreview from "./writer/PostThumbnailPreview.vue";
+import UpdateMessageDialog from "./writer/UpdateMessageDialog.vue";
 
 const props = defineProps<{
     type: number
@@ -123,6 +124,7 @@ const resetPost = () => {
     editDraftExists.value = null
 }
 
+const hasFollowers = ref(false)
 const editDraftExists = ref<null | string>(null)
 const loadingOnlineEdit = ref(false)
 const loadOnlineEdit = (feedData?: ReviewDraft) => {
@@ -149,6 +151,8 @@ const loadOnlineEdit = (feedData?: ReviewDraft) => {
                 if (drafts.value[key].editing && drafts.value[key].editing == props.postID)
                     editDraftExists.value = key
             }
+
+            hasFollowers.value = res.data.hasFollowers
 
             modifyPostName()
             fetchEmbeds()
@@ -182,7 +186,8 @@ const openDialogs = reactive({
     drafts: false,
     shortcuts: false,
     zenHelp: false,
-    thumbPreview: false
+    thumbPreview: false,
+    updateMessage: false
 })
 
 const previewMode = ref(true)
@@ -780,9 +785,14 @@ const removeReview = () => {
     })
 }
 
-const updateReview = () => {
+const updateReview = (message?: string) => {
     if (uploadInProgress.value) return
     if (!checkForErrors()) return
+
+    if (hasFollowers.value && message === undefined) {
+        openDialogs.updateMessage = true
+        return
+    }
 
     uploadInProgress.value = true
     axios.post(import.meta.env.VITE_API + "/updateList.php", {
@@ -1369,6 +1379,10 @@ const modifyPostName = () => {
 
         <DialogVue :open="openDialogs.thumbPreview" @close-popup="openDialogs.thumbPreview = false" :title="$t('editor.browsePreview')" :width="dialog.medium">
             <PostThumbnailPreview :data="POST_DATA" :is-list="type == 0" />
+        </DialogVue>
+
+        <DialogVue :open="openDialogs.updateMessage" @close-popup="openDialogs.updateMessage = false" :title="$t('reviews.updMess')" :width="dialog.medium">
+            <UpdateMessageDialog @update="openDialogs.updateMessage = false; updateReview($event)" :is-review="type == 1" :lang="POST_DATA.language" />
         </DialogVue>
 
         <section class="max-w-[90rem] flex flex-col gap-y-16 mx-auto">

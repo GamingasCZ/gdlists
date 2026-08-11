@@ -908,7 +908,11 @@
     "moveHelp": "Přidej <kbd>$</kbd> za sloupec, pro přesunutí obsahu.",
     "cHelp7": "Obsah může být jen v jednom sloupci!",
     "chelp8": "Špatné použitý přesuvný znak!",
-    "moveToCont": "Klikni na sloupec, kam chceš přesunout obsah."
+    "moveToCont": "Klikni na sloupec, kam chceš přesunout obsah.",
+    "updMess": "Zpráva o aktualizaci",
+    "folMess1": "Tvůj příspěvek má sledující!",
+    "folMess2": "Můžeš jim oznámit, co jsi provedl za změny.",
+    "folMess3": "Ze super epických změn bych mohl vyjmenovat..."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

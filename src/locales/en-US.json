@@ -907,7 +907,11 @@
     "moveHelp": "Add <kbd>$</kbd> before a column, to move content into it.",
     "cHelp7": "Content can only be in one column!",
     "chelp8": "Bad use of move character!",
-    "moveToCont": "Click the column you'd like to move content into."
+    "moveToCont": "Click the column you'd like to move content into.",
+    "updMess": "Update Message",
+    "folMess1": "Your post has followers!",
+    "folMess2": "Feel free to tell them, what you updated.",
+    "folMess3": "I updated many great things, such as..."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
