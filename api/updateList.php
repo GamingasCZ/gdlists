@@ -46,7 +46,7 @@ $decoded = json_decode($DATA["listData"], true);
 // $listCheck = checkList($DATA["listData"]);
 // if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
-$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"], is_int($DATA["updateMessage"]) ? "" : $DATA["updateMessage"]));
+$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"], $DATA["updateMessage"]));
 
 // Password check
 if ($IS_LIST) {
