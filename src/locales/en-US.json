@@ -520,7 +520,8 @@
     "uCinUse": "This name is already in use!",
     "uCprev": "Previously used names",
     "follow": "Follow",
-    "followed": "Followed"
+    "followed": "Followed",
+    "followed2": "Followed"
   },
   "settingsMenu": {
     "asOff": "Off",

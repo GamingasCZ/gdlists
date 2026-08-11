@@ -496,7 +496,8 @@
     "uCinUse": "Toto jméno používá už někdo jiný!",
     "uCprev": "Předešlá jména",
     "follow": "Sledovat",
-    "followed": "Sledováno"
+    "followed": "Sledováno",
+    "followed2": "Sledované"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
