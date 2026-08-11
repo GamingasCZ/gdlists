@@ -4,6 +4,8 @@ import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBa
 import { hasLocalStorage, SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
+import axios from "axios";
+import { summonNotification } from "./components/imageUpload";
 // import { DEFAULT_RATINGS } from "./Reviews";
 
 export const TAG_COUNT = 30;
@@ -376,4 +378,11 @@ export const updateNavbarDrafts = (isReview: boolean, draftData?: ReviewDraft) =
             draftArr.value.push({name: draftKeys[i][1].name, isEdit: draftKeys[i][1].editing, key: draftKeys[i][0]})
         }
     }
+}
+
+export const followPost = (postID: number) => {
+  return Math.random() > 0.5
+  axios.post(import.meta.env.VITE_API+"/follow.php", {postID: postID}).then(() => {
+    // summonNotification()
+  })
 }

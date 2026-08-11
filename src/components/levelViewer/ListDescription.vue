@@ -10,6 +10,7 @@ import ProfilePicture from "../global/ProfilePicture.vue";
 import chroma from "chroma-js";
 import CommentsIcon from "@/images/comment.svg?raw"
 import LevelsIcon from "@/images/levels.svg?raw"
+import WatchIcon from "@/images/viewLine.svg?raw"
 
 const props = defineProps<{
   name: string;
@@ -28,10 +29,11 @@ const props = defineProps<{
   hidden: string
   color: number[]
   commsHidden: number
+  following: boolean
 }>();
 
 const emit = defineEmits<{
-  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras" | "rateNotLoggedIn" | "reviewLevels"): void;
+  (e: "doListAction", action: "sharePopup" | "jumpPopup" | "pinList" | "editList" | "comments" | "mobileExtras" | "rateNotLoggedIn" | "reviewLevels" | "follow"): void;
   (e: "updateRatings", newRatings: [number, number, number]): void
 }>();
 
@@ -115,6 +117,8 @@ const listUploadDate = computed(() =>props.review ?
 
 const headerColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.39, 0.11, 0.8).css())
 const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16, 0.8).css())
+
+const canFollow = computed(() => true || props.uid != userUID.value && userUID.value)
 
 </script>
 
@@ -216,8 +220,8 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
 
         <!-- Comments button -->
         <div class="md:ml-9">
-          <button v-show="!commsHidden" class="flex relative items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
-            <div class="mr-2 w-6 h-6" :class="{'[&_.glasa]:fill-black': openDialogs[0]}" :style="{
+          <button v-show="!commsHidden" class="flex relative gap-2 items-center p-2 rounded-md button bg-greenGradient" @click="emit('doListAction', 'comments')">
+            <div class="w-6 h-6" :class="{'[&_.glasa]:fill-black': openDialogs[0]}" :style="{
               fill: openDialogs[0] ? 'white' : 'none'
               }" v-html="CommentsIcon">
             </div>
@@ -225,7 +229,7 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
               $t('level.comments') }}</label>
             <label
               v-show="commAmount > 0"
-              class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
+              class="p-1 my-auto ml-1 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 commAmount }}</label>
           </button>
         </div>
@@ -241,6 +245,15 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
             <label
             class="p-1 my-auto ml-3 text-lg font-bold leading-3 text-black rounded-sm bg-lof-400 max-md:absolute max-md:bottom-1 max-md:right-1">{{
                 data.levels.length }}</label>
+          </button>
+        </div>
+
+        <!-- Watch button -->
+        <div class="ml-2">
+          <button v-show="canFollow" :class="{'!bg-lof-400 text-black !border-lof-400': following}" class="flex relative gap-2 items-center p-1.5 bg-transparent rounded-md border-2 border-lof-300 button" @click="emit('doListAction', 'follow')">
+            <div class="w-8" :class="{'iconWatching': following}" v-html="WatchIcon">
+            </div>
+            <label class="max-md:hidden">{{ following ? $t('other.followed') : $t('other.follow') }}</label>
           </button>
         </div>
       </div>
@@ -283,3 +296,17 @@ const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16,
     </section>
   </section>
 </template>
+
+<style>
+
+.iconWatching {
+  path:nth-child(2) {
+    @apply stroke-lof-400;
+  }
+
+  g {
+    @apply fill-black stroke-black;
+  }
+}
+
+</style>

@@ -518,7 +518,9 @@
     "uCFail2": "Name contains disallowed characters.",
     "ucHelp0": "Your name can only contain letters, numbers, hyphens and underscores.",
     "uCinUse": "This name is already in use!",
-    "uCprev": "Previously used names"
+    "uCprev": "Previously used names",
+    "follow": "Follow",
+    "followed": "Followed"
   },
   "settingsMenu": {
     "asOff": "Off",

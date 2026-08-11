@@ -494,7 +494,9 @@
     "uCFail2": "Jméno obsahuje neplatné znaky.",
     "ucHelp0": "Tvé jméno může obsahovat jen písmena, čísla, podtržítka a spojovníky.",
     "uCinUse": "Toto jméno používá už někdo jiný!",
-    "uCprev": "Předešlá jména"
+    "uCprev": "Předešlá jména",
+    "follow": "Sledovat",
+    "followed": "Sledováno"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
