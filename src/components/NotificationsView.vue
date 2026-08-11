@@ -105,6 +105,7 @@ defineExpose({
                 <div class="border-collapse">
                     <button @click="changeType(0)" :class="{'bg-lof-300': type == 0}" :title="$t('editor.ratings')" class="p-1 rounded-l-md border border-lof-300"><img :src="`${base}/notifBadges/like.svg`" class="w-5" alt=""></button>
                     <button @click="changeType(1)" :class="{'bg-lof-300': type == 1}" :title="$t('level.comments')" class="p-1 border border-lof-300"><img :src="`${base}/notifBadges/comment.svg`" class="w-5" alt=""></button>
+                    <button @click="changeType(3)" :class="{'bg-lof-300': type == 3}" :title="$t('other.followed')" class="p-1 border border-lof-300"><img :src="`${base}/notifBadges/follow.svg`" class="w-5" alt=""></button>
                     <button @click="changeType(2)" :class="{'bg-lof-300': type == 2}" :title="$t('other.other2')" class="p-1 rounded-r-md border border-lof-300"><img :src="`${base}/notifBadges/other.svg`" class="w-5" alt=""></button>
                 </div>
                 <h4>{{ $t('other.sort') }}</h4>

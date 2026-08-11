@@ -450,7 +450,7 @@ export interface NotificationContent {
   to: string
   from: string
   from_user: string
-  type: 'comment' | 'rating' | 'other'
+  type: 'comment' | 'rating' | 'other' | 'watch'
   unread: boolean
   time: string
   postType: 'list' | 'review' | 'other'

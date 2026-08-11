@@ -12,7 +12,7 @@ const SORT_METHODS = ["`time` DESC", "`time` ASC"];
 const NOTIFS_PER_REQ = 10;
 
 function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $otherID = null) {
-    // type: 0 - comment, 1 - rating, 2 - other
+    // type: 1 - comment, 2 - rating, 3 - other, 4 - watch
     // postType: 1 - list, 2 - review, 3 - other
     if ($from == $to) return; // Do not send notifications to yourself
 
@@ -61,9 +61,9 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             
             // get timestamp range
             $sorting = isset($_GET["sort"]) ? min(max(0, intval($_GET["sort"])), 2) : 0;
-            $type = isset($_GET["type"]) ? min(max(-1, intval($_GET["type"])), 2) : -1;
+            $type = isset($_GET["type"]) ? min(max(-1, intval($_GET["type"])), 3) : -1;
             $page = intval($_GET["page"]);
-            $typeStr = $type == -1 ? '' : sprintf('AND `type`=%s', ["'rating'", "'comment'", "'other'"][$type]);
+            $typeStr = $type == -1 ? '' : sprintf('AND `type`=%s', ["'rating'", "'comment'", "'other'", "'watch'"][$type]);
             $maxTimestamp = doRequest($mysqli,
                 sprintf("SELECT max(time2) as 'max', min(time2) as 'min', count(time2) as 'cnt'
                 FROM (SELECT unix_timestamp(time) AS 'time2' FROM notifications WHERE `to_user`=? %s LIMIT ? OFFSET ?) t;", $typeStr),
@@ -75,11 +75,10 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 $unreadCount["lastPage"] = true;
 
             $ratings = function($sort, $max) {return sprintf(
-               "SELECT * FROM (SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, max(`unread`) as `unread`, max(`time`) as `time`, `postType`, `objectID`, `otherID`, `comment`,count(objectID) as `count`, unix_timestamp(`time`) as 'ut'
+               "SELECT * FROM (SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, max(`unread`) as `unread`, max(`time`) as `time`, `postType`, `objectID`, `otherID`, '' as 'comment',count(objectID) as `count`, unix_timestamp(`time`) as 'ut'
                 FROM `notifications` n
                 LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
                 LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
-                LEFT JOIN `comments` on otherID = comments.comID
                 WHERE `to_user`=? AND `type`='rating'
                 GROUP BY objectID
                 ORDER BY %s) tb WHERE tb.ut BETWEEN %s AND %s", $sort, $max["min"], $max["max"]);};
@@ -92,11 +91,18 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 WHERE `to_user`=? AND `type`='comment' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
                 ORDER BY %s", $max["min"], $max["max"], $sort);};
 
-            $other = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`,1 as `count`, unix_timestamp(`time`)
+            $follows = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `messsage` as 'comment',1 as `count`, unix_timestamp(`time`)
                 FROM `notifications` n
                 LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
                 LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
-                LEFT JOIN `comments` on otherID = comments.comID
+                LEFT JOIN `update_messages` on otherID = update_messages.id
+                WHERE `to_user`=? AND `type`='watch' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
+                ORDER BY %s", $max["min"], $max["max"], $sort);};
+
+            $other = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, '' as 'comment',1 as `count`, unix_timestamp(`time`)
+                FROM `notifications` n
+                LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
+                LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
                 WHERE `to_user`=? AND `type`='other' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
                 ORDER BY %s", $max["min"], $max["max"], $sort);};
 
@@ -110,11 +116,14 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 case 2: // other
                     $notifs = doRequest($mysqli, $other(SORT_METHODS[$sorting], $maxTimestamp), [$acc["id"]], "s", true);
                     break;
+                case 3: // follows
+                    $notifs = doRequest($mysqli, $follows(SORT_METHODS[$sorting], $maxTimestamp), [$acc["id"]], "s", true);
+                    break;
                 default: // none
-                    $notifs = doRequest($mysqli, sprintf("SELECT * FROM (%s) t UNION ALL SELECT * FROM (%s) t1 ORDER BY %s",
-                    $ratings(SORT_METHODS[0], $maxTimestamp), $comments(SORT_METHODS[0], $maxTimestamp), SORT_METHODS[$sorting]),
-                    [$acc["id"], $acc["id"]],
-                    "ss", true);
+                    $notifs = doRequest($mysqli, sprintf("SELECT * FROM (%s) t UNION ALL SELECT * FROM (%s) t1 UNION ALL SELECT * FROM (%s) t2 ORDER BY %s",
+                    $ratings(SORT_METHODS[0], $maxTimestamp), $comments(SORT_METHODS[0], $maxTimestamp), $follows(SORT_METHODS[0], $maxTimestamp), SORT_METHODS[$sorting]),
+                    [$acc["id"], $acc["id"], $acc["id"]],
+                    "sss", true);
             }
 
             // print_r($notifs);

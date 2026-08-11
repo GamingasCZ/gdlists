@@ -802,7 +802,8 @@ const updateReview = (message?: string) => {
         tagline: POST_DATA.value.tagline,
         hidden: POST_DATA.value.private | 0,
         isNowHidden: isNowHidden ? "true" : "false",
-        disComments: POST_DATA.value.disComments | 0
+        disComments: POST_DATA.value.disComments | 0,
+        updateMessage: message ?? 0
     })
         .then(res => {
             sessionStorage.setItem("uploadFinished", "2")

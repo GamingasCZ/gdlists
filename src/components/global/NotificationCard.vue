@@ -9,14 +9,22 @@ import { i18n } from '@/locales';
 import striptags from 'striptags';
 
 const props = defineProps<NotificationContent & {postNames: any[], selected: boolean}>()
-const types = ['comment', 'rating', 'other']
+const types = ['comment', 'rating', 'other', 'watch']
 const types2 = ['list', 'review']
 
 let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
 const formText = computed(() => {
-    let actionText = [i18n.global.t('other.liked'), i18n.global.t('other.commented')][+(props.type == 'comment')]
+    console.log(types.indexOf(props.type), props)
+    let actionText = [i18n.global.t('other.commented'), i18n.global.t('other.liked'), '', ''][types.indexOf(props.type)]
     let more = props.count > 1 ? `${i18n.global.t('other.andMore')} ` : ''
-    return `<b>${props.from}</b> ${more}${actionText}`
+    if (props.type == 'watch')
+        return `${actionText}`
+    else
+        return `<b>${props.from}</b> ${more}${actionText}`
+})
+const formTextAfter = computed(() => {
+    let actionText = ['', '', '', ' byl aktualizován'][types.indexOf(props.type)]
+    return `${actionText}`
 })
 
 const ratingsDropdownOpen = ref(false)
@@ -48,8 +56,20 @@ const getRatingUsers = () => {
 
 const base = import.meta.env.BASE_URL
 const date = computed(() => new Date(props.time))
-const link = computed(() => `${props.postType == 'list' ? '' : '/review'}/${props.objectID}${props.otherID ? '?comment='+props.otherID : ''}`)
-const icon = computed(() => `${base}/notifBadges/${['comment', 'like'][types.indexOf(props.type)]}.svg`)
+const link = computed(() => {
+    if (props.type == 'watch')
+        return `${props.postType == 'list' ? '' : '/review'}/${props.objectID}`
+    switch (props.postType) {
+        case 'list':
+            return `/${props.objectID}${props.otherID ? '?comment='+props.otherID : ''}`        
+        case 'review':
+            return `/review/${props.objectID}${props.otherID ? '?comment='+props.otherID : ''}`        
+    
+        default:
+            break;
+    }
+})
+const icon = computed(() => `${base}/notifBadges/${['comment', 'like', 'other', 'follow'][types.indexOf(props.type)]}.svg`)
 
 const parsedComment = ref((() => {
     if (!props.comment) return
@@ -83,10 +103,11 @@ const parsedComment = ref((() => {
             <div>
                 <span class="inline pr-1 w-max" v-html="formText"></span>
                 <b><RouterLink :to="link" class="inline hover:underline">
-                    <img v-if="postType == 'list'" src="@/images/browseMobHeader.svg" class="inline mr-1 mb-0.5 ml-2 w-3" alt="">
-                    <img v-else src="@/images/reviews.svg" class="inline mr-1 mb-0.5 ml-2 w-3" alt="">
+                    <img v-if="postType == 'list'" src="@/images/browseMobHeader.svg" class="inline mr-1 mb-0.5 w-3" :class="{'ml-2': props.type != 'watch'}" alt="">
+                    <img v-else src="@/images/reviews.svg" class="inline mr-1 mb-0.5 w-3" :class="{'ml-2': props.type != 'watch'}" alt="">
                     <span>{{ decodeURIComponent(props.postNames?.[postName]?.name ?? $t('other.removedPost')).replace("+", " ") }}</span>
                 </RouterLink></b>
+                <span class="inline pr-1 w-max" v-html="formTextAfter"></span>
             </div>
             
             <button v-if="props.count > 1 && props.type == 'rating'" class="flex gap-2 p-2 opacity-40 hover:opacity-100" @click="toggleDropdown">

@@ -15,6 +15,7 @@ Return codes:
 
 require("globals.php");
 require("contentValidator.php");
+require("notifications.php");
 header('Content-type: application/json'); // Return as JSON
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -45,7 +46,7 @@ $decoded = json_decode($DATA["listData"], true);
 // $listCheck = checkList($DATA["listData"]);
 // if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
-$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"]));
+$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"], is_int($DATA["updateMessage"]) ? "" : $DATA["updateMessage"]));
 
 // Password check
 if ($IS_LIST) {
@@ -129,6 +130,9 @@ $doHide = intval($DATA["hidden"]) == 1;
 $thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $retListID = $DATA["id"];
+$updateMessage = false;
+if (!is_int($DATA["updateMessage"]))
+    $updateMessage = substr($fuckupData[4], 0, 300);
 
 // Private list settings
 $compressedData = base64_encode(gzcompress($fuckupData[1]));
@@ -144,12 +148,32 @@ else {
 }
 
 // Return either ID or privateID
-$retListID = $doHide ? $hiddenID : $listData["id"];;
+$retListID = $doHide ? $hiddenID : $listData["id"];
 
 // Adding levels to database
 if ($fuckupData[3] == 0) {
     // // hope it's not an old list :D
     addLevelsToDatabase($mysqli, $decoded["levels"], $DATA["id"], $listData["uid"], !$IS_LIST);
+}
+
+// Add update message
+if ($updateMessage !== false) {
+    if ($IS_LIST) {
+        $res = doRequest($mysqli, "INSERT INTO `update_messages`(`list_id`, `messsage`) VALUES (?, ?)", [$listData["id"], $updateMessage], "is");
+        $followers = doRequest($mysqli, "SELECT `user` FROM `follows` WHERE `list_id`=?", [$listData["id"]], "i", true);
+        
+    }
+    else {
+        $res = doRequest($mysqli, "INSERT INTO `update_messages`(`review_id`, `messsage`) VALUES (?, ?)", [$listData["id"], $updateMessage], "is");
+        $followers = doRequest($mysqli, "SELECT `user` FROM `follows` WHERE `review_id`=?", [$listData["id"]], "i", true);
+    }
+    $lastID = doRequest($mysqli, "SELECT LAST_INSERT_ID() as 'id'", [], "");
+    if (array_key_exists("error", $res))
+        die("7");
+
+    foreach ($followers as $val) {
+        createNotification($mysqli, 302552053400600576, $val["user"], 4, intval(!$IS_LIST)+1, $listData["id"], $lastID['id']);
+    }
 }
 
 echo json_encode([$retListID]);

@@ -67,19 +67,19 @@ const messLen = computed(() => message.value.length)
 </script>
 
 <template>
-    <section class="flex flex-col gap-1 py-3 text-center">
+    <form @submit.prevent="emit('update', message)" class="flex flex-col gap-1 py-3 text-center">
         <h2 class="text-2xl">{{ $t('reviews.folMess1') }}</h2>
         <p>{{ $t('reviews.folMess2') }}</p>
-        <textarea @keydown.ctrl.a="$event.target.select()" rows="6" id="updateMessArea" :placeholder="$t('reviews.folMess3')" class="p-2 bg-black bg-opacity-40 resize-none" v-model="message"></textarea>
+        <textarea @keyup.ctrl.enter="emit('update', message)" @keydown.ctrl.a="$event.target.select()" :maxlength="300" rows="6" id="updateMessArea" :placeholder="$t('reviews.folMess3')" class="p-2 bg-black bg-opacity-40 resize-none" v-model="message"></textarea>
         <span class="mr-2 text-right">{{ messLen }}/300</span>
         <hr class="mx-4 opacity-20">
         <span class="ml-2 text-xl font-bold text-left">{{ $t('collabTools.examples') }}:</span>
         <ul class="flex flex-wrap gap-2 px-2">
             <li v-for="mess in examples" @click="applyExample(mess)" class="p-1 bg-black bg-opacity-40 rounded-md border-2 button border-lof-300">{{ mess.slice(0,-1) }}</li>
         </ul>
-        <button @click="emit('update', message)" class="flex gap-4 px-3 py-2 mx-auto w-max text-xl font-bold text-black rounded-md button bg-lof-400">
+        <button type="submit" class="flex gap-4 px-3 py-2 mx-auto w-max text-xl font-bold text-black rounded-md button bg-lof-400">
             <img src="@/images/upload.svg" alt="" class="w-7">
             <span>{{ $t('editor.update') }}</span>
         </button>
-    </section>
+    </form>
 </template>
