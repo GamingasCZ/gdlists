@@ -23,13 +23,13 @@ function isFollowed($mysqli, $postID, $postType, $uid) {
     $isPostList = is_array($postID);
     if ($isPostList) {
         $in = makeIN($postID);
-        if ($postID == 0)
+        if ($postType == 0)
             $res = doRequest($mysqli, sprintf("SELECT `list_id` FROM `follows` WHERE `list_id` IN %s AND `user`=?", $in[0]), [...$postID, $uid], $in[1]."i", true);
         else
             $res = doRequest($mysqli, sprintf("SELECT `review_id` FROM `follows` WHERE `review_id` IN %s AND `user`=?", $in[0]), [...$postID, $uid], $in[1]."i", true);
     }
     else {
-        if ($postID == 0)
+        if ($postType == 0)
             $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $uid], "ii");
         else
             $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $uid], "ii");
