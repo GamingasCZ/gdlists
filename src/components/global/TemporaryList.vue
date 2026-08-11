@@ -2,7 +2,8 @@
 import { predefinedLevelList, selectedLevels } from '@/Editor';
 import DifficultyIcon from './DifficultyIcon.vue';
 import router from '@/router';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import type { Level } from '@/interfaces.ts';
 
 const makeList = () => {
     predefinedLevelList.value = selectedLevels.value.slice(0)
@@ -21,6 +22,37 @@ const rollLevels = () => {
     unrolled.value = !unrolled.value
 }
 
+// fuck this crap
+const levelDifficulty = (level: Level) => {
+    if (level.difficulty) {
+        if (typeof level.difficulty[0] == 'object')
+            return level.difficulty[0][0]
+        else
+            return level.difficulty[0]
+    }
+    else if (level.levelDiff) {
+        if (level.levelDiff?.[1])
+            return level.levelDiff[0]
+        else
+            return level.levelDiff
+    }
+}
+
+const levelRating = (level: Level) => {
+    if (level.difficulty) {
+        if (typeof level.difficulty[0] == 'object')
+            return level.difficulty[0][1]
+        else
+            return level.difficulty[1]
+    }
+    else if (level.levelDiff) {
+        if (level.levelDiff?.[1])
+            return level.levelDiff[1]
+        else
+            return level.levelRating
+    }
+}
+
 </script>
 
 <template>
@@ -37,7 +69,7 @@ const rollLevels = () => {
         </div>
         <div v-show="unrolled" class="flex bg-[url(@/images/fade.svg)] bg-repeat-x flex-col max-h-44 overflow-y-auto gap-2 bg-lof-200">
             <div v-for="(level, index) in selectedLevels" class="flex items-center text-left">
-                <DifficultyIcon class="w-12" :difficulty="level.difficulty[0]" :rating="level.difficulty[1]" />
+                <DifficultyIcon class="w-12" :difficulty="levelDifficulty(level)" :rating="levelRating(level)" />
                 <div class="flex flex-col">
                     <span>{{ decodeURIComponent(level.levelName) }}</span>
                     <span class="text-xs text-white text-opacity-60">{{ level.creator }}</span>

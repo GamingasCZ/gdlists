@@ -11,7 +11,9 @@ import { oldLists } from "./officialLists";
 import { hasLocalStorage } from "@/siteSettings";
 import ReviewPreview from "../global/ReviewPreview.vue";
 import List from "../global/ListPreview.vue";
-import FavoritePreview from "../global/FavoritePreview.vue";
+import FavoritePreview from "../global/LevelPreview.vue";
+import TemporaryList from "../global/TemporaryList.vue";
+import { selectedLevels } from "@/Editor.ts";
 
 const props = defineProps({
   headerName: { type: String, required: true },
@@ -101,9 +103,16 @@ const clearViewed = () => {
         :user-array="users"
         :hide-remove="true"
         :review-details="reviewDetails"
+        :disable-fave="true"
         :is="[ReviewPreview, FavoritePreview, ReviewPreview, List][listType]"
         @unpin-list="lists.splice($event, 1)"
       />
     </div>
+
+    <Teleport to="body">
+      <Transition name="fadeSlide">
+        <TemporaryList v-if="listType == 1 && lists?.length && selectedLevels.length" />
+      </Transition>
+    </Teleport>
   </section>
 </template>
