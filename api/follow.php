@@ -43,6 +43,16 @@ function isFollowed($mysqli, $postID, $postType, $uid) {
         return !is_null($res);
 }
 
+function hasFollowers($mysqli, $postID, $postType) {
+    $res;
+    if ($postType == 0)
+        $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `list_id`=? LIMIT 1", [$postID], "i");
+    else
+        $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `review_id`=? LIMIT 1", [$postID], "i");
+    
+    return !is_null($res);
+}
+
 if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) die("0");
@@ -64,6 +74,8 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 
             $postID = intval($DATA["postID"]);
             $postType = intval(max(0, min(1, $DATA["postType"])));
+
+            // TODO: cannot follow own posts
 
             $res;
             $resp;

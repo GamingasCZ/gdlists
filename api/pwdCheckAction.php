@@ -9,6 +9,7 @@ Return codes:
 */
 
 require("globals.php");
+require_once("follow.php");
 header('Content-type: application/json'); // Return as JSON
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
@@ -55,6 +56,8 @@ if ($owner) {
     } else {
       $listData["data"] = json_decode(htmlspecialchars_decode($listData["data"]));
     }
+
+    $listData["hasFollowers"] = hasFollowers($mysqli, $DATA["id"], intval($DATA["type"] == 'review'));
     echo json_encode($listData);
 }
 elseif ($listData["hidden"] != '0') die('3'); // do not give away private list
