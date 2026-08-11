@@ -121,6 +121,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   $reviewDetails = [];
   $users = [];
   $allIDs = [];
+  $isFollowed = false;
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
@@ -146,6 +147,10 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
 
     $dbInfo["maxPage"] = $maxpage;
     $dbInfo["searchQuery"] = $search;
+
+    $uid = getLocalUserID();
+    if ($uid)
+      $isFollowed = isFollowed($mysqli, $allIDs, $review, $uid);
   } else {
     // Single list
     $decoded = base64_decode($rows["data"], true);
@@ -161,7 +166,9 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     }
     setcookie("lastViewed", $rows["id"], time()+300, "/");
 
-    $isFollowed = isFollowed($mysqli, $rows["id"], $review);
+    $uid = getLocalUserID();
+    if ($uid)
+      $isFollowed = isFollowed($mysqli, $rows["id"], $review, $uid);
 
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [$rows["id"]], "s");
@@ -169,7 +176,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $users = getUsersByID([$rows])[0][0];
 
     // Fetch ratings
-    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], true);
+    $ratings = getRatings($mysqli, $uid, $review ? "review_id" : "list_id", $rows["id"], true);
   }
 
   return array($rows, $users, $dbInfo, $ratings, $reviewDetails, $isFollowed);

@@ -386,9 +386,10 @@ export const followPost = async (postID: number, postType: 0|1) => {
   })
 
   if (res) {
-    if (res.data == "6") {
+    if (res.data == "6")
       return true
-    }
+    else if (res.data == "5")
+      return false
     else {
       summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.watchFail'), "error")
       return false
