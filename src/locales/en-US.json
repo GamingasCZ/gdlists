@@ -522,7 +522,10 @@
     "uCprev": "Previously used names",
     "follow": "Follow",
     "followed": "Followed",
-    "followed2": "Followed"
+    "followed2": "Followed",
+    "folHelp1": "You're not following anything yet!",
+    "folHelp3": "To follow a post, find one and tap",
+    "folHelp2": "When you follow a post, you get notified every time it gets updated!"
   },
   "settingsMenu": {
     "asOff": "Off",

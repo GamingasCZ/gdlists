@@ -497,7 +497,10 @@
     "uCprev": "Předešlá jména",
     "follow": "Sledovat",
     "followed": "Sledováno",
-    "followed2": "Sledované"
+    "followed2": "Sledované",
+    "folHelp1": "Zatím nic nesleduješ!",
+    "folHelp2": "Když sleduješ příspěvek, tak dostaneš notifikaci, pokaždé když je aktualizován!",
+    "folHelp3": "Pro sledování, klikni v příspěvku na"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

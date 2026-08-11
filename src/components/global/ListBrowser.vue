@@ -405,6 +405,19 @@ defineExpose({
           </RouterLink>
         </div>
 
+        <!-- No follows BG -->
+          <div class="flex flex-col gap-6 items-center text-center" v-else-if="onlineType == 'followed' && LISTS.length == 0 && !loading">
+            <img src="@/images/browse.svg" alt="" class="w-48 opacity-50" />
+            <h2 class="min-w-max text-2xl font-bold opacity-50">{{ $t('other.folHelp1') }}</h2>
+            <p class="opacity-50">{{ $t('other.folHelp3') }} <img class="inline mr-1" src="@/images/viewLine.svg"><b>{{ $t('other.follow') }}</b>.</p>
+            <p class="opacity-50">{{ $t('other.folHelp2') }}</p>
+            <RouterLink to="/random">
+              <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
+                <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
+              </button>
+            </RouterLink>
+          </div>
+
         <!-- No results BG -->
         <div v-else-if="searchNoResults && LISTS.length == 0 && !loading"
           class="flex absolute top-0 left-1/2 flex-col gap-3 justify-center items-center -translate-x-1/2">
