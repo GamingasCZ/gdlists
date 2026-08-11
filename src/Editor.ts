@@ -380,9 +380,18 @@ export const updateNavbarDrafts = (isReview: boolean, draftData?: ReviewDraft) =
     }
 }
 
-export const followPost = (postID: number) => {
-  return Math.random() > 0.5
-  axios.post(import.meta.env.VITE_API+"/follow.php", {postID: postID}).then(() => {
-    // summonNotification()
+export const followPost = async (postID: number, postType: 0|1) => {
+  let res = await axios.post(import.meta.env.VITE_API+"/follow.php", {postID: postID, postType: postType}).catch(() => {
+    
   })
+
+  if (res) {
+    if (res.data == "6") {
+      return true
+    }
+    else {
+      summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.watchFail'), "error")
+      return false
+    }
+  }
 }

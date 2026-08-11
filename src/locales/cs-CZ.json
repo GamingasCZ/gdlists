@@ -577,7 +577,8 @@
     "changes4": "V tomto příspěvku jsi v minulosti provedl úpravy.",
     "viewingNew": "Takto vypadá původní příspěvek.",
     "highlighted": "Zvýrazněný komentář",
-    "manyCompErr": "Aktualizuješ až moc prvků zaráz!"
+    "manyCompErr": "Aktualizuješ až moc prvků zaráz!",
+    "watchFail": "Nepovedlo se začít sledovat příspěvěk!"
   },
   "level": {
     "levelID": "ID levelu",

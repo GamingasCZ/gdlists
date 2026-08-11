@@ -158,6 +158,8 @@ async function loadList(loadedData: LevelList | null) {
         });
     }
 
+    postFollowing.value = res[5]
+
     postExtrasApply()
 
     // Set difficulty guessing
@@ -222,6 +224,8 @@ async function loadReview(loadedData: ReviewList | null) {
 
     // Fetch embeds
     embedsContent.value = await getEmbeds(LIST_DATA.value.data)
+
+    postFollowing.value = res[5]
 
     postExtrasApply()
   } catch (e) {
@@ -384,7 +388,7 @@ watch(router.currentRoute, () => {
 
 const postFollowing = ref(false)
 
-const listActions = (action: string) => {
+const listActions = async (action: string) => {
   switch (action) {
     case "comments":
       reviewLevelsOpen.value = false
@@ -417,7 +421,7 @@ const listActions = (action: string) => {
       reviewLevelsOpen.value = !reviewLevelsOpen.value
       break;
     case "follow":
-      postFollowing.value = followPost(LIST_DATA.value?.id!)
+      postFollowing.value = await followPost(LIST_DATA.value?.id!, +props.isReview)
       break;
   }
 };

@@ -250,7 +250,7 @@ const canFollow = computed(() => true || props.uid != userUID.value && userUID.v
 
         <!-- Watch button -->
         <div class="ml-2">
-          <button v-show="canFollow" :class="{'!bg-lof-400 text-black !border-lof-400': following}" class="flex relative gap-2 items-center p-1.5 bg-transparent rounded-md border-2 border-lof-300 button" @click="emit('doListAction', 'follow')">
+          <button v-show="canFollow" :class="{'!bg-lof-400 text-black !border-lof-400': following}" class="flex relative gap-2 items-center p-1.5 bg-transparent rounded-md border-2 backdrop-blur-md backdrop-brightness-50 border-lof-300 button" @click="emit('doListAction', 'follow')">
             <div class="w-8" :class="{'iconWatching': following}" v-html="WatchIcon">
             </div>
             <label class="max-md:hidden">{{ following ? $t('other.followed') : $t('other.follow') }}</label>

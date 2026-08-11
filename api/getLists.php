@@ -10,6 +10,7 @@ Return codes:
 
 header("Content-Type: application/json"); // Return as JSON
 require("globals.php");
+require_once("follow.php");
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli->connect_errno) {
@@ -160,6 +161,8 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     }
     setcookie("lastViewed", $rows["id"], time()+300, "/");
 
+    $isFollowed = isFollowed($mysqli, $rows["id"], $review);
+
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [$rows["id"]], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"];
@@ -169,7 +172,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], true);
   }
 
-  return array($rows, $users, $dbInfo, $ratings, $reviewDetails);
+  return array($rows, $users, $dbInfo, $ratings, $reviewDetails, $isFollowed);
 }
 
 function getHomepage($lists, $reviews, $user) {

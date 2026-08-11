@@ -249,7 +249,8 @@
     "changes3": "Cannot save without cookies enabled!",
     "changes4": "You've made changes to this post before.",
     "viewingNew": "You're viewing the original post.",
-    "manyCompErr": "You're updating too many components at once!"
+    "manyCompErr": "You're updating too many components at once!",
+    "watchFail": "Failed to start following the post!"
   },
   "navbar": {
     "lists": "Browse",
