@@ -118,7 +118,7 @@ const listUploadDate = computed(() =>props.review ?
 const headerColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.39, 0.11, 0.8).css())
 const descColor = computed(() => chroma.hsl(props.color?.[0] ?? 133, 0.27, 0.16, 0.8).css())
 
-const canFollow = computed(() => true || props.uid != userUID.value && userUID.value)
+const canFollow = computed(() => props.uid != userUID.value && userUID.value)
 
 </script>
 

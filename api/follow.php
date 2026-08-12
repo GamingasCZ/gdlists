@@ -1,6 +1,7 @@
 <?php
 /*
 Error codes
+-5 = trying to follow own pot
 -4 = following error
 -3 = invalid params
 -2 = login error
@@ -74,8 +75,15 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 
             $postID = intval($DATA["postID"]);
             $postType = intval(max(0, min(1, $DATA["postType"])));
+            $postTypeStr = $postType == 0 ? 'lists' : 'reviews';
 
-            // TODO: cannot follow own posts
+            $uid = doRequest($mysqli, "SELECT `uid` FROM $postTypeStr WHERE `id`=?", [$postID], 'i');
+            // 'tis possible the post gets deleted before following
+            if (is_null($uid["uid"]))
+                die("-4");
+            // Cannot follow own posts
+            if ($user["id"] == $uid["uid"])
+                die("-5");
 
             $res;
             $resp;
