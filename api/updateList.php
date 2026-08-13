@@ -171,9 +171,7 @@ if ($updateMessage !== false) {
     if (array_key_exists("error", $res))
         die("7");
 
-    foreach ($followers as $val) {
-        createNotification($mysqli, 302552053400600576, $val["user"], 4, intval(!$IS_LIST)+1, $listData["id"], $lastID['id']);
-    }
+    createNotification($mysqli, $listData["uid"], group_post_follow($IS_LIST, $listData["id"]), 4, intval(!$IS_LIST)+1, $listData["id"], $lastID['id']);
 }
 
 echo json_encode([$retListID]);

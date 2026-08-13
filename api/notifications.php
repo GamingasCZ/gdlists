@@ -17,7 +17,7 @@ function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $o
     if ($from == $to) return; // Do not send notifications to yourself
 
     $res = doRequest($mysqli,
-              "INSERT INTO `notifications`(`to_user`, `from_user`, `type`, `postType`, `objectID`, `otherID`) VALUES (?,?,?,?,?,?)",
+              "INSERT INTO `notifications`(`to_group`, `from_user`, `type`, `postType`, `objectID`, `otherID`) VALUES (?,?,?,?,?,?)",
               [$to, $from, $type, $postType, $objectID, $otherID],
               "ssiiii");
 }
@@ -27,6 +27,31 @@ function deleteNotification($mysqli, $toUID, $postType, $objectID) {
               "DELETE FROM `notifications` WHERE `to_user`=? AND `type`=? AND `objectID`=?",
               [$toUID, $postType, $objectID], "sii");
 }
+
+function getUnread() {
+    // doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$accCheck["id"]], "s");
+    return ['amount_unread' => 0]; // TODO
+}
+
+// -- group creators --
+
+// sends to an individual only
+function group_single_user($to) {
+    return 'u' . strval($to);
+}
+
+// sends to absolutely everyone
+function group_all() {
+    return 'all';
+}
+
+// sends to people, following the same post
+function group_post_follow($isList, $postID) {
+    $type = $isList ? 'l' : 'r';
+    return "fol$type$postID";
+}
+
+// -- the supercalifragilisticexpialidocious end of group functions
 
 if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $mysqli = new mysqli($hostname, $username, $password, $database);
