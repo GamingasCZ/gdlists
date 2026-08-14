@@ -55,7 +55,7 @@ export async function fetchNotifications(force = false, sorting = 0, type = -1, 
         postNames.value = res.data[1]
         notificationCache.value = res.data    
     }
-    currentUnread.value = res.data[2].c
+    currentUnread.value = res.data[2].amount_unread
     if (res.data[2]?.lastPage)
         return NotifState.AtEnd
     else
