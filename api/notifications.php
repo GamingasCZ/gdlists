@@ -34,7 +34,7 @@ function getUnread($mysqli, $user) {
        "SELECT count(`id`) AS 'amount_unread' FROM
             (SELECT notifications.`id` FROM notifications
             INNER JOIN `groups` ON groups.id=notifications.to_group
-            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
+            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user' AND gm.joined < notifications.time) t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id`
         WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
     return $res; // TODO
@@ -172,7 +172,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             WHERE NOT n.id IS NULL
                 AND NOT `type`='rating' $typeStr
             
-            ORDER BY $SORT_METHODS[$sorting]
+            ORDER BY unread DESC,$SORT_METHODS[$sorting]
             LIMIT 10
             OFFSET $offset
             
