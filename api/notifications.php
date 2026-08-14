@@ -102,7 +102,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 $notifs = doRequest($mysqli, 
                    "SELECT `username`,`discord_id`, `time`, `type` FROM `notifications`
                     LEFT JOIN `groups` ON groups.id=notifications.to_group
-                    INNER JOIN `group_members` ON group_members.`group_id`=groups.id AND `group_members`.user='$uid'
+                    INNER JOIN `group_members` ON group_members.`group_id`=groups.id AND `group_members`.user='$uid' AND `group_members`.joined < notifications.time 
                     LEFT JOIN `users` ON notifications.from_user = users.discord_id
 
                     WHERE `objectID`=? AND `postType`=? AND `type`='rating'
@@ -141,7 +141,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     tFrom.username as 'from', tTo.username as 'to', `to_group`,`from_user`, n.`id`, `type`, `time`, `postType`, `objectID`, `otherID`, rN.notif_id IS NULL as 'unread'
                 FROM `notifications` n
                 INNER JOIN `groups` ON groups.id=n.to_group
-                INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user=?
+                INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user=? AND gm.joined < n.time 
 
                 LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
                 LEFT JOIN `users` tTo ON gm.user=tTo.discord_id
@@ -161,7 +161,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 
             FROM `notifications` n
             INNER JOIN `groups` ON groups.id=n.to_group
-            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user=?
+            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user=? AND gm.joined < n.time 
 
             LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
             LEFT JOIN `users` tTo ON gm.user=tTo.discord_id
