@@ -203,7 +203,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             echo json_encode([$notifs, $postNames, $unreadCount]);
             break;
         case 'DELETE':
-            doRequest($mysqli, "DELETE FROM `notifications` WHERE `to_user`=?", [$acc["id"]], "s");
+            // doRequest($mysqli, "DELETE FROM `notifications` WHERE `to_user`=?", [$acc["id"]], "s");
             break;
         default:
             die("-1");
