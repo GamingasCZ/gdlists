@@ -198,7 +198,8 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             UNION SELECT name,id,1
             FROM reviews WHERE id in (%s)", implode(",", $postIDs[0]), implode(",", $postIDs[1])), [], "", true);
 
-            mark_notifs_read($mysqli, $acc["id"], $notifIDs);
+            if (sizeof($notifIDs) > 0)
+                mark_notifs_read($mysqli, $acc["id"], $notifIDs);
 
             echo json_encode([$notifs, $postNames, $unreadCount]);
             break;
