@@ -157,11 +157,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 tFrom.username as 'from',
                 tTo.username as 'to', `to_group`,
                 `from_user`, n.`id`, `type`, `time`, `postType`, `objectID`, `otherID`, rN.notif_id IS NULL as 'unread', 1 as rn,
-                (CASE
-                    WHEN `type`='comment' THEN (SELECT `comment` FROM `comments` WHERE `comID`=otherID)
-                    WHEN `type`='watch' THEN (SELECT `messsage` FROM `update_messages` WHERE `id`=otherID)
-                    ELSE NULL
-                END) as 'comment'
+                COALESCE(c.comment, um.messsage) as 'comment'
 
             FROM `notifications` n
             LEFT JOIN `groups` ON groups.id=n.to_group
@@ -170,6 +166,9 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
             LEFT JOIN `users` tTo ON t.user=tTo.discord_id
             LEFT JOIN `read_notifications` rN ON n.id=rN.notif_id
+            LEFT JOIN comments c ON n.type = 'comment' AND n.otherID = c.comID
+            LEFT JOIN update_messages um ON n.type = 'watch' AND n.otherID = um.id
+            
             WHERE NOT n.id IS NULL
                 AND NOT `type`='rating' $typeStr
             
