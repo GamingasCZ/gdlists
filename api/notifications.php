@@ -33,8 +33,8 @@ function getUnread($mysqli, $user) {
     $res = doRequest($mysqli,
        "SELECT count(`id`) AS 'amount_unread' FROM
             (SELECT notifications.`id` FROM notifications
-            RIGHT JOIN `groups` ON notifications.to_group=groups.id
-            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`='$user') t ON groups.id=t.group_id) t2
+            INNER JOIN `groups` ON groups.id=notifications.to_group
+            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id`
         WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
     return $res; // TODO
@@ -66,8 +66,8 @@ function mark_notifs_read($mysqli, $user, $notif_ids, $all = false) {
        "INSERT INTO `read_notifications`(`notif_id`, `user`)
         SELECT `id` AS 'notif_id','$user' as 'user' FROM
             (SELECT notifications.`id` FROM notifications
-            RIGHT JOIN `groups` ON notifications.to_group=groups.id
-            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`='$user') t ON (groups.id=t.group_id OR groups.id=0)) t2
+            INNER JOIN `groups` ON groups.id=notifications.to_group
+            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
         WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
     }
@@ -77,8 +77,8 @@ function mark_notifs_read($mysqli, $user, $notif_ids, $all = false) {
        "INSERT INTO `read_notifications`(`notif_id`, `user`)
         SELECT `id` AS 'notif_id','$user' as 'user' FROM
             (SELECT notifications.`id` FROM notifications
-            RIGHT JOIN `groups` ON notifications.to_group=groups.id
-            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`='$user') t ON (groups.id=t.group_id OR groups.id=0)) t2
+            INNER JOIN `groups` ON groups.id=notifications.to_group
+            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
         WHERE `notif_id` IS NULL AND `id` IN $in[0]", $notif_ids, $in[1]);
     }
@@ -140,11 +140,11 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 SELECT
                     tFrom.username as 'from', tTo.username as 'to', `to_group`,`from_user`, n.`id`, `type`, `time`, `postType`, `objectID`, `otherID`, rN.notif_id IS NULL as 'unread'
                 FROM `notifications` n
-                LEFT JOIN `groups` ON groups.id=n.to_group
-                RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`=?) t ON (groups.id=t.group_id OR (groups.id=0))
+                INNER JOIN `groups` ON groups.id=n.to_group
+                INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user=?
 
                 LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
-                LEFT JOIN `users` tTo ON t.user=tTo.discord_id
+                LEFT JOIN `users` tTo ON gm.user=tTo.discord_id
                 LEFT JOIN `read_notifications` rN ON n.id=rN.notif_id
                 WHERE `type`='rating' AND NOT n.id IS NULL $typeStr
                 ) t3
@@ -160,11 +160,11 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 COALESCE(c.comment, um.messsage) as 'comment'
 
             FROM `notifications` n
-            LEFT JOIN `groups` ON groups.id=n.to_group
-            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`=?) t ON (groups.id=t.group_id OR (groups.id=0))
+            INNER JOIN `groups` ON groups.id=n.to_group
+            INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user=?
 
             LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
-            LEFT JOIN `users` tTo ON t.user=tTo.discord_id
+            LEFT JOIN `users` tTo ON gm.user=tTo.discord_id
             LEFT JOIN `read_notifications` rN ON n.id=rN.notif_id
             LEFT JOIN comments c ON n.type = 'comment' AND n.otherID = c.comID
             LEFT JOIN update_messages um ON n.type = 'watch' AND n.otherID = um.id
@@ -197,6 +197,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             UNION SELECT name,id,1
             FROM reviews WHERE id in (%s)", implode(",", $postIDs[0]), implode(",", $postIDs[1])), [], "", true);
 
+            // FIXME: stacked notifications do not get marked as read!
             if (sizeof($notifIDs) > 0)
                 mark_notifs_read($mysqli, $acc["id"], $notifIDs);
 
