@@ -46,15 +46,21 @@ const selectedNotifs = ref([])
 enum LoadingState {
     Loaded,
     Loading,
-    Error
+    Error,
+    LoadingNext
 }
 
 const moreAvailable = ref(false)
 const refreshing = ref(false)
 const loadingState = ref(LoadingState.Loading)
 const currentPage = ref(0)
-const refreshNotifs = (resetPage = true) => {
-    loadingState.value = LoadingState.Loading
+const refreshNotifs = (resetPage = true, loadNext = false) => {
+    if (loadNext)
+        loadingState.value = LoadingState.LoadingNext
+    else
+        loadingState.value = LoadingState.Loading
+    moreAvailable.value = false
+
     if (resetPage)
         currentPage.value = 0
     fetchNotifications(true, sorting.value, type.value, false, currentPage.value)
@@ -72,7 +78,7 @@ const refreshNotifs = (resetPage = true) => {
 
 const fetchNextPage = () => {
     currentPage.value++
-    refreshNotifs(false)
+    refreshNotifs(false, true)
 }
 
 if (!allNotifs.value.length)
@@ -128,7 +134,7 @@ defineExpose({
                 <div v-html="NotifsIcon" class="w-32 stroke-white fill-transparent"></div>
                 <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
             </div>
-            <template v-if="loadingState == LoadingState.Loaded">
+            <template v-if="loadingState == LoadingState.Loaded || loadingState == LoadingState.LoadingNext">
                 <NotificationCard :key="notif.id" @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
             </template>
 
