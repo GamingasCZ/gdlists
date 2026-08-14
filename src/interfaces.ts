@@ -448,6 +448,7 @@ export interface FormattingButton {
 
 export interface NotificationContent {
   to: string
+  to_group: number
   from: string
   from_user: string
   type: 'comment' | 'rating' | 'other' | 'watch'
@@ -456,7 +457,7 @@ export interface NotificationContent {
   postType: 'list' | 'review' | 'other'
   objectID: number
   otherID: number | null
-  comment: string | null
+  comment: any
   count: number
   id: number
 }

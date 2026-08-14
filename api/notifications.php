@@ -7,9 +7,10 @@ Return codes:
 */
 header('Content-type: application/json'); // Return as JSON
 require_once("globals.php");
+require_once("groups.php");
 
-const SORT_METHODS = ["`time` DESC", "`time` ASC"];
-const NOTIFS_PER_REQ = 10;
+$SORT_METHODS = ["`time` DESC", "`time` ASC"];
+$NOTIFS_PER_REQ = 10;
 
 function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $otherID = null) {
     // type: 1 - comment, 2 - rating, 3 - other, 4 - watch
@@ -18,7 +19,7 @@ function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $o
 
     $res = doRequest($mysqli,
               "INSERT INTO `notifications`(`to_group`, `from_user`, `type`, `postType`, `objectID`, `otherID`) VALUES (?,?,?,?,?,?)",
-              [$to, $from, $type, $postType, $objectID, $otherID],
+              [group_exists($mysqli, $to), $from, $type, $postType, $objectID, $otherID],
               "ssiiii");
 }
 
@@ -28,9 +29,15 @@ function deleteNotification($mysqli, $toUID, $postType, $objectID) {
               [$toUID, $postType, $objectID], "sii");
 }
 
-function getUnread() {
-    // doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$accCheck["id"]], "s");
-    return ['amount_unread' => 0]; // TODO
+function getUnread($mysqli, $user) {
+    $res = doRequest($mysqli,
+       "SELECT count(`id`) AS 'amount_unread' FROM
+            (SELECT notifications.`id` FROM notifications
+            RIGHT JOIN `groups` ON notifications.to_group=groups.id
+            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`='$user') t ON groups.id=t.group_id) t2
+        LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id`
+        WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
+    return $res; // TODO
 }
 
 // -- group creators --
@@ -53,6 +60,30 @@ function group_post_follow($isList, $postID) {
 
 // -- the supercalifragilisticexpialidocious end of group functions
 
+function mark_notifs_read($mysqli, $user, $notif_ids, $all = false) {
+    if ($all) {
+        doRequest($mysqli,
+       "INSERT INTO `read_notifications`(`notif_id`, `user`)
+        SELECT `id` AS 'notif_id','$user' as 'user' FROM
+            (SELECT notifications.`id` FROM notifications
+            RIGHT JOIN `groups` ON notifications.to_group=groups.id
+            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`='$user') t ON (groups.id=t.group_id OR groups.id=0)) t2
+        LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
+        WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
+    }
+    else { // only selected notifs
+        $in = makeIN($notif_ids);
+        doRequest($mysqli,
+       "INSERT INTO `read_notifications`(`notif_id`, `user`)
+        SELECT `id` AS 'notif_id','$user' as 'user' FROM
+            (SELECT notifications.`id` FROM notifications
+            RIGHT JOIN `groups` ON notifications.to_group=groups.id
+            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`='$user') t ON (groups.id=t.group_id OR groups.id=0)) t2
+        LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
+        WHERE `notif_id` IS NULL AND `id` IN $in[0]", $notif_ids, $in[1]);
+    }
+}
+
 if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) {
@@ -66,97 +97,97 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $method = $_SERVER["REQUEST_METHOD"];
     switch ($method) {
         case 'GET':
-            if (isset($_GET["ratings"])) {
-                $notifs = doRequest($mysqli, "SELECT `username`, `discord_id`, max(`time`) as `time`, `type`
-                    FROM `notifications`
+            if (isset($_GET["ratings"])) { // TODO: fix
+                $uid = $acc["id"];
+                $notifs = doRequest($mysqli, 
+                   "SELECT `username`,`discord_id`, `time`, `type` FROM `notifications`
+                    LEFT JOIN `groups` ON groups.id=notifications.to_group
+                    INNER JOIN `group_members` ON group_members.`group_id`=groups.id AND `group_members`.user='$uid'
                     LEFT JOIN `users` ON notifications.from_user = users.discord_id
-                    WHERE `to_user`=? AND `objectID`=? AND `postType`=? AND `type`='rating'
+
+                    WHERE `objectID`=? AND `postType`=? AND `type`='rating'
                     GROUP BY discord_id
-                    ORDER BY `time` ASC
-                    LIMIT 5 OFFSET ?", [$acc["id"], intval($_GET["id"]), intval($_GET["postType"]), 1+intval($_GET["page"])*5], "siii", true);
+                    ORDER BY `time` DESC
+                    LIMIT 5 OFFSET ?;", [intval($_GET["id"]), intval($_GET["postType"]), 1+intval($_GET["page"])*5], "iii", true);
 
                 die(json_encode([$notifs, sizeof($notifs) < 5]));
             }
 
-            $unreadCount = doRequest($mysqli, "SELECT count(unread) as 'c', max(id) as 'recent' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$acc["id"]], "s");
+            $unreadCount = getUnread($mysqli, $acc["id"]);
             if (isset($_GET["np"])) {
-                echo $unreadCount["c"];
+                echo $unreadCount["amount_unread"];
                 die();
-                }
+            }
             
-            // get timestamp range
             $sorting = isset($_GET["sort"]) ? min(max(0, intval($_GET["sort"])), 2) : 0;
             $type = isset($_GET["type"]) ? min(max(-1, intval($_GET["type"])), 3) : -1;
             $page = intval($_GET["page"]);
             $typeStr = $type == -1 ? '' : sprintf('AND `type`=%s', ["'rating'", "'comment'", "'other'", "'watch'"][$type]);
-            $maxTimestamp = doRequest($mysqli,
-                sprintf("SELECT max(time2) as 'max', min(time2) as 'min', count(time2) as 'cnt'
-                FROM (SELECT unix_timestamp(time) AS 'time2' FROM notifications WHERE `to_user`=? %s LIMIT ? OFFSET ?) t;", $typeStr),
-                [$acc["id"], NOTIFS_PER_REQ, NOTIFS_PER_REQ*$page+$page], "sii");
 
-            // No more notifications
-            if ($maxTimestamp == null || $maxTimestamp["cnt"] == 0) die("2");
-            if ($maxTimestamp["cnt"] < NOTIFS_PER_REQ)
+            $filters = ["rating", "comment", "other", "follows"];
+            $filterQuery = $type == -1 ? '' : "WHERE `type`=$filters[$type]";
+
+            $offset = $NOTIFS_PER_REQ*$page;
+            
+            // this might be even worse, than the old query D:
+            $notifs = doRequest($mysqli,
+           "SELECT * FROM (
+            SELECT 
+                *,
+                ROW_NUMBER() OVER (PARTITION BY objectID ORDER BY time DESC) as rn,
+	            COUNT(*) OVER (PARTITION BY objectID) as comment
+            FROM (
+                SELECT
+                    tFrom.username as 'from', tTo.username as 'to', `to_group`,`from_user`, n.`id`, `type`, `time`, `postType`, `objectID`, `otherID`, rN.notif_id IS NULL as 'unread'
+                FROM `notifications` n
+                LEFT JOIN `groups` ON groups.id=n.to_group
+                RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`=?) t ON (groups.id=t.group_id OR (groups.id=0))
+
+                LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
+                LEFT JOIN `users` tTo ON t.user=tTo.discord_id
+                LEFT JOIN `read_notifications` rN ON n.id=rN.notif_id
+                WHERE `type`='rating' AND NOT n.id IS NULL $typeStr
+                ) t3
+            ) ranked
+            WHERE rn = 1
+            
+            UNION
+            
+            SELECT
+                tFrom.username as 'from',
+                tTo.username as 'to', `to_group`,
+                `from_user`, n.`id`, `type`, `time`, `postType`, `objectID`, `otherID`, rN.notif_id IS NULL as 'unread', 1 as rn,
+                (CASE
+                    WHEN `type`='comment' THEN (SELECT `comment` FROM `comments` WHERE `comID`=otherID)
+                    WHEN `type`='watch' THEN (SELECT `messsage` FROM `update_messages` WHERE `id`=otherID)
+                    ELSE NULL
+                END) as 'comment'
+
+            FROM `notifications` n
+            LEFT JOIN `groups` ON groups.id=n.to_group
+            RIGHT JOIN (SELECT * FROM `group_members` WHERE `user`=?) t ON (groups.id=t.group_id OR (groups.id=0))
+
+            LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
+            LEFT JOIN `users` tTo ON t.user=tTo.discord_id
+            LEFT JOIN `read_notifications` rN ON n.id=rN.notif_id
+            WHERE NOT n.id IS NULL
+                AND NOT `type`='rating' $typeStr
+            
+            ORDER BY $SORT_METHODS[$sorting]
+            LIMIT 10
+            OFFSET $offset
+            
+            ", [$acc["id"], $acc["id"]], "ss", true);
+
+            // Check if there are more notifs. Sadly not too effective.
+            if (sizeof($notifs) < $NOTIFS_PER_REQ)
                 $unreadCount["lastPage"] = true;
 
-            $ratings = function($sort, $max) {return sprintf(
-               "SELECT * FROM (SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, max(`unread`) as `unread`, max(`time`) as `time`, `postType`, `objectID`, `otherID`, '' as 'comment',count(objectID) as `count`, unix_timestamp(`time`) as 'ut'
-                FROM `notifications` n
-                LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
-                LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
-                WHERE `to_user`=? AND `type`='rating'
-                GROUP BY objectID
-                ORDER BY %s) tb WHERE tb.ut BETWEEN %s AND %s", $sort, $max["min"], $max["max"]);};
-
-            $comments = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `comment`,1 as `count`, unix_timestamp(`time`)
-                FROM `notifications` n
-                LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
-                LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
-                LEFT JOIN `comments` on otherID = comments.comID
-                WHERE `to_user`=? AND `type`='comment' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
-                ORDER BY %s", $max["min"], $max["max"], $sort);};
-
-            $follows = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, `messsage` as 'comment',1 as `count`, unix_timestamp(`time`)
-                FROM `notifications` n
-                LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
-                LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
-                LEFT JOIN `update_messages` on otherID = update_messages.id
-                WHERE `to_user`=? AND `type`='watch' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
-                ORDER BY %s", $max["min"], $max["max"], $sort);};
-
-            $other = function($sort, $max) {return sprintf("SELECT tFrom.username as 'from', tTo.username as 'to', `from_user`, n.`id`, `type`, `unread`, `time`, `postType`, `objectID`, `otherID`, '' as 'comment',1 as `count`, unix_timestamp(`time`)
-                FROM `notifications` n
-                LEFT JOIN `users` tTo on n.to_user = tTo.discord_id
-                LEFT JOIN `users` tFrom on n.from_user = tFrom.discord_id
-                WHERE `to_user`=? AND `type`='other' AND (unix_timestamp(`time`) BETWEEN %s AND %s)
-                ORDER BY %s", $max["min"], $max["max"], $sort);};
-
-            switch ($type) {
-                case 0: //ratings
-                    $notifs = doRequest($mysqli, $ratings(SORT_METHODS[$sorting], $maxTimestamp), [$acc["id"]], "s", true);
-                    break;
-                case 1: //comments
-                    $notifs = doRequest($mysqli, $comments(SORT_METHODS[$sorting], $maxTimestamp), [$acc["id"]], "s", true);
-                    break;
-                case 2: // other
-                    $notifs = doRequest($mysqli, $other(SORT_METHODS[$sorting], $maxTimestamp), [$acc["id"]], "s", true);
-                    break;
-                case 3: // follows
-                    $notifs = doRequest($mysqli, $follows(SORT_METHODS[$sorting], $maxTimestamp), [$acc["id"]], "s", true);
-                    break;
-                default: // none
-                    $notifs = doRequest($mysqli, sprintf("SELECT * FROM (%s) t UNION ALL SELECT * FROM (%s) t1 UNION ALL SELECT * FROM (%s) t2 ORDER BY %s",
-                    $ratings(SORT_METHODS[0], $maxTimestamp), $comments(SORT_METHODS[0], $maxTimestamp), $follows(SORT_METHODS[0], $maxTimestamp), SORT_METHODS[$sorting]),
-                    [$acc["id"], $acc["id"], $acc["id"]],
-                    "sss", true);
-            }
-
-            // print_r($notifs);
-
+            $notifIDs = [];
             $postIDs = [[0], [0]];
             $i = 0;
             foreach ($notifs as $n) {
-                $notifs[$i]["comment"] = htmlspecialchars_decode($n["comment"]);
+                array_push($notifIDs, $n["id"]);
                 array_push($postIDs[intval($n["postType"] == 'review')], $n["objectID"]);
                 $i += 1;
             }
@@ -167,8 +198,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             UNION SELECT name,id,1
             FROM reviews WHERE id in (%s)", implode(",", $postIDs[0]), implode(",", $postIDs[1])), [], "", true);
 
-            doRequest($mysqli, "UPDATE `notifications` SET `unread`=0
-            WHERE `unread`=1 AND `to_user`=?", [$acc["id"]], "s");
+            mark_notifs_read($mysqli, $acc["id"], $notifIDs);
 
             echo json_encode([$notifs, $postNames, $unreadCount]);
             break;

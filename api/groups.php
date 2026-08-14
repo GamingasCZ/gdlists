@@ -10,7 +10,7 @@ require_once("globals.php");
 
 // returns groupID
 function create_group($mysqli, $groupName) {
-    $alreadyExists = group_exists($groupName);
+    $alreadyExists = group_exists($mysqli, $groupName);
     if ($alreadyExists === -1) {
         $res = doRequest($mysqli, "INSERT INTO `groups`(`name`) VALUES (?)", [$groupName], "s");
         if (array_key_exists("error", $res))
@@ -43,6 +43,7 @@ function group_exists($mysqli, $groupName = false, $groupID = false) {
 
 }
 
+// returns false on failure, or groupID
 function add_to_group($mysqli, $user, $groupName, $authority = 0) {
     $gid = create_group($mysqli, $groupName);
     if ($gid === false) { // fail group creation
@@ -61,24 +62,11 @@ function add_to_group($mysqli, $user, $groupName, $authority = 0) {
     return $getID;
 }
 
-// if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
-//     $mysqli = new mysqli($hostname, $username, $password, $database);
-//     if ($mysqli -> connect_errno) die("0");
-    
-//     $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
-//     $method = $_SERVER["REQUEST_METHOD"];
-//     switch ($method) {
-//         case 'GET':
-//             break;
-            
-//         case 'POST':
-//             $DATA = json_decode(file_get_contents("php://input"), true);
-//             break;
-
-//         default:
-//             die("-1");
-//             break;
-//     }
-// }
+// returns false if the user isn't in the group, else true
+function remove_from_group($mysqli, $user, $groupName) {
+    $gid = group_exists($mysqli, $groupName);
+    if ($gid !== -1)
+        doRequest($mysqli, "DELETE FROM `group_members` WHERE `user`=? AND `group_id`=?", [$user, $gid], "si");
+}
 
 ?>

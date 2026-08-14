@@ -72,7 +72,7 @@ if (sizeof($_GET) > 0) {
 
         $username = doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
-        $unread = getUnread();
+        $unread = getUnread($mysqli, $accCheck["id"]);
         $profileData = ["status" => "logged_in",
                         "account_name" => $username["username"],
                         "account_id" => $accCheck["id"],

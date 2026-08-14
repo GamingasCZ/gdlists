@@ -14,9 +14,8 @@ const types2 = ['list', 'review']
 
 let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
 const formText = computed(() => {
-    console.log(types.indexOf(props.type), props)
     let actionText = [i18n.global.t('other.commented'), i18n.global.t('other.liked'), '', ''][types.indexOf(props.type)]
-    let more = props.count > 1 ? `${i18n.global.t('other.andMore')} ` : ''
+    let more = (props.type == 'rating' && props.comment > 1) ? `${i18n.global.t('other.andMore')} ` : ''
     if (props.type == 'watch')
         return `${actionText}`
     else
@@ -74,7 +73,7 @@ const icon = computed(() => `${base}/notifBadges/${['comment', 'like', 'other', 
 const parsedComment = ref((() => {
     if (!props.comment) return
 
-    let sanitized = striptags(props.comment);
+    let sanitized = striptags(String(props.comment));
     let emojis = sanitized.match(/&(\d{2})/g) // Match any emojis and spaces
     let isEmojisOnly = (emojis ?? []).join("") == sanitized
     if (emojis != null) {
@@ -93,11 +92,11 @@ const parsedComment = ref((() => {
 <template>
     <div :class="{'border-2 border-lof-400': selected, 'border-l-4 border-lof-400 from-lof-300 to-transparent bg-gradient-to-r': unread, 'bg-black bg-opacity-40': !unread}" class="flex relative gap-2 p-1 rounded-md">
         <div class="flex flex-col gap-2">
-            <div class="relative w-7 bg-opacity-40 rounded-md">
+            <div class="relative w-7 h-7 bg-opacity-40 rounded-md">
                 <ProfilePicture :uid="from_user" :cutout="0" />
-                <div v-if="props.count > 1" class="absolute -right-1 -bottom-1 p-0.5 py-0 w-max text-xs bg-red-600 rounded-md">+{{ props.count - 1 }}</div>
+                <div v-if="type == 'rating' && props.comment > 1" class="absolute -right-1 -bottom-1 p-0.5 py-0 w-max text-xs bg-red-600 rounded-md">+{{ props.comment - 1 }}</div>
             </div>
-            <div class="p-1 w-7 bg-black bg-opacity-40 rounded-md"><img :src="icon" alt=""></div>
+            <div class="p-1 w-7 h-7 bg-black bg-opacity-40 rounded-md"><img :src="icon" alt=""></div>
         </div>
         <div class="flex flex-col w-full">
             <div>
@@ -110,7 +109,7 @@ const parsedComment = ref((() => {
                 <span class="inline pr-1 w-max" v-html="formTextAfter"></span>
             </div>
             
-            <button v-if="props.count > 1 && props.type == 'rating'" class="flex gap-2 p-2 opacity-40 hover:opacity-100" @click="toggleDropdown">
+            <button v-if="props.comment > 1 && props.type == 'rating'" class="flex gap-2 p-2 opacity-40 hover:opacity-100" @click="toggleDropdown">
                 <img src="@/images/genericRate.svg" class="w-3" :class="{'rotate-180': !ratingsDropdownOpen}" alt="">
                 <span>{{ ratingsDropdownOpen ? $t('other.hide') : $t('other.showMore') }}</span>
             </button>
@@ -124,7 +123,7 @@ const parsedComment = ref((() => {
                 <button @click="getRatingUsers" class="text-sm text-left opacity-40 hover:opacity-100" v-if="ratingsAllShown == 1">{{ $t('other.showMore') }}</button>
             </section>
 
-            <div v-if="props.comment" class="text-sm">
+            <div v-if="type != 'rating' && props.comment" class="text-sm">
                 <hr class="w-full opacity-20">
                 <p class="overflow-auto max-h-36" v-html="parsedComment"></p>
             </div>
