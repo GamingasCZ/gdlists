@@ -101,10 +101,6 @@ defineExpose({
                     <img src="@/images/replay.svg" class="mr-2 w-5" alt="">
                     {{ $t('other.refresh') }}
                 </button>
-                <button :disabled="refreshing || !allNotifs.length" @click="removeNotifs()" class="flex p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
-                    <img src="@/images/trash.svg" class="mr-2 w-5" alt="">
-                    {{ $t('homepage.clear') }}
-                </button>
             </div>
             <section class="grid grid-cols-2 grid-rows-2 grid-flow-col justify-items-center">
                 <h4>{{ $t('other.type') }}</h4>
