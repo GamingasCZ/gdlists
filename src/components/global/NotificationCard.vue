@@ -1,22 +1,34 @@
 <script setup lang="ts">
-import type { NotificationContent } from '@/interfaces';
+import type { NotificationContent, OtherNotifData } from '@/interfaces';
 import { computed, ref } from 'vue';
 import ProfilePicture from './ProfilePicture.vue';
 import { parseElapsed, prettyDate } from '@/Editor';
 import { RouterLink } from 'vue-router';
 import axios from 'axios';
-import { i18n } from '@/locales';
+import { i18n, langIndex } from '@/locales';
 import striptags from 'striptags';
+import parseText from './parseEditorFormatting.ts';
 
 const props = defineProps<NotificationContent & {postNames: any[], selected: boolean}>()
 const types = ['comment', 'rating', 'other', 'watch']
 const types2 = ['list', 'review']
 
+const otherData = computed<OtherNotifData | null>(() => {
+    if (props.type == 'other') {
+        let text: OtherNotifData = JSON.parse(props.comment)
+        text.content[langIndex.value] = parseText(text.content[langIndex.value])
+        return text
+    }
+    else return null
+})
+
 let postName = props.postNames.findIndex(p => p.id == props.objectID && types2[p.type] == props.postType)
 const formText = computed(() => {
     let actionText = [i18n.global.t('other.commented'), i18n.global.t('other.liked'), '', ''][types.indexOf(props.type)]
     let more = (props.type == 'rating' && props.comment > 1) ? `${i18n.global.t('other.andMore')} ` : ''
-    if (props.type == 'watch')
+    if (props.type == 'other')
+        return `<span class="text-2xl">${otherData.value?.title[langIndex.value]}<span>`
+    else if (props.type == 'watch')
         return `${actionText}`
     else
         return `<b>${props.from}</b> ${more}${actionText}`
@@ -101,7 +113,7 @@ const parsedComment = ref((() => {
         <div class="flex flex-col w-full">
             <div>
                 <span class="inline pr-1 w-max" v-html="formText"></span>
-                <b><RouterLink :to="link" class="inline hover:underline">
+                <b v-if="postType != 'other'"><RouterLink :to="link" class="inline hover:underline">
                     <img v-if="postType == 'list'" src="@/images/browseMobHeader.svg" class="inline mr-1 mb-0.5 w-3" :class="{'ml-2': props.type != 'watch'}" alt="">
                     <img v-else src="@/images/reviews.svg" class="inline mr-1 mb-0.5 w-3" :class="{'ml-2': props.type != 'watch'}" alt="">
                     <span>{{ decodeURIComponent(props.postNames?.[postName]?.name ?? $t('other.removedPost')).replace("+", " ") }}</span>
@@ -125,7 +137,24 @@ const parsedComment = ref((() => {
 
             <div v-if="type != 'rating' && props.comment" class="text-sm">
                 <hr class="w-full opacity-20">
-                <p class="overflow-auto max-h-36" v-html="parsedComment"></p>
+                <p v-if="type == 'other'" class="overflow-auto max-h-36 regularParsing" v-html="otherData?.content[langIndex]"></p>
+                <p v-else class="overflow-auto max-h-36" v-html="parsedComment"></p>
+            </div>
+
+            <div v-if="type == 'other'" class="flex gap-2 mt-2">
+                <component
+                    v-for="but in otherData?.buttons"
+                    :is="but[2].includes('https') ? 'a' : 'RouterLink'"
+                    :to="but[2]"
+                    :href="but[2]"
+                    :target="but[2].includes('https') ? '_blank' : ''"
+                >
+                    <button class="flex flex-wrap gap-2 px-2 text-xl bg-opacity-20 rounded-md button bg-lof-200">
+                        <img v-if="but[2].includes('https')" class="w-5" src="@/images/link.svg" alt="">
+                        <img v-else class="w-5" src="@/images/browseMobHeader.svg" alt="">
+                        {{ but[langIndex] }}
+                    </button>
+                </component>
             </div>
             <p :title="`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`" class="absolute top-1 right-1 w-max text-xs leading-none text-white text-opacity-40 cursor-help grow">{{ parseElapsed((Date.now() - date)/1000) }}</p>
         </div>

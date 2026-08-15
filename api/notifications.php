@@ -12,6 +12,16 @@ require_once("groups.php");
 $SORT_METHODS = ["`time` DESC", "`time` ASC"];
 $NOTIFS_PER_REQ = 15;
 
+/* 'Other' notif structure
+ *
+ * {
+ *  title: [czech, english,...],
+ *  content: [czech, english,...]
+ *  buttons?: [[czech, english, link]]
+ * }
+ * link - (https://externallink.com OR /review/somegdlistslink)
+ */
+
 function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $otherID = null) {
     // type: 1 - comment, 2 - rating, 3 - other, 4 - watch
     // postType: 1 - list, 2 - review, 3 - other
@@ -156,7 +166,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 tFrom.username as 'from',
                 tTo.username as 'to', `to_group`,
                 `from_user`, n.`id`, `type`, `time`, `postType`, `objectID`, `otherID`, rN.notif_id IS NULL as 'unread', 1 as rn,
-                COALESCE(c.comment, um.messsage) as 'comment'
+                COALESCE(c.comment, um.messsage, o.content) as 'comment'
 
             FROM `notifications` n
             INNER JOIN `groups` ON groups.id=n.to_group
@@ -169,6 +179,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             /*notifications content*/
             LEFT JOIN comments c ON n.type = 'comment' AND n.otherID = c.comID
             LEFT JOIN update_messages um ON n.type = 'watch' AND n.otherID = um.id
+            LEFT JOIN other_notifications o ON n.type = 'other' AND n.otherID = o.id
             
             WHERE NOT n.id IS NULL
                 AND NOT `type`='rating' $typeStr
