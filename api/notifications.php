@@ -10,7 +10,7 @@ require_once("globals.php");
 require_once("groups.php");
 
 $SORT_METHODS = ["`time` DESC", "`time` ASC"];
-$NOTIFS_PER_REQ = 10;
+$NOTIFS_PER_REQ = 15;
 
 function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $otherID = null) {
     // type: 1 - comment, 2 - rating, 3 - other, 4 - watch
@@ -37,7 +37,7 @@ function getUnread($mysqli, $user) {
             INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user' AND gm.joined < notifications.time) t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id`
         WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
-    return $res; // TODO
+    return $res;
 }
 
 // -- group creators --
@@ -60,7 +60,7 @@ function group_post_follow($isList, $postID) {
 
 // -- the supercalifragilisticexpialidocious end of group functions
 
-function mark_notifs_read($mysqli, $user, $notif_ids, $all = false) {
+function mark_notifs_read($mysqli, $user, $after_date, $all = false) {
     if ($all) {
         doRequest($mysqli,
        "INSERT INTO `read_notifications`(`notif_id`, `user`)
@@ -72,15 +72,14 @@ function mark_notifs_read($mysqli, $user, $notif_ids, $all = false) {
         WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
     }
     else { // only selected notifs
-        $in = makeIN($notif_ids);
         doRequest($mysqli,
        "INSERT INTO `read_notifications`(`notif_id`, `user`)
         SELECT `id` AS 'notif_id','$user' as 'user' FROM
-            (SELECT notifications.`id` FROM notifications
+            (SELECT notifications.`id`,`time` FROM notifications
             INNER JOIN `groups` ON groups.id=notifications.to_group
             INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
-        WHERE `notif_id` IS NULL AND `id` IN $in[0]", $notif_ids, $in[1]);
+        WHERE `notif_id` IS NULL AND `time` >= '$after_date'", [], "");
     }
 }
 
@@ -172,8 +171,8 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             WHERE NOT n.id IS NULL
                 AND NOT `type`='rating' $typeStr
             
-            ORDER BY unread DESC,$SORT_METHODS[$sorting]
-            LIMIT 10
+            ORDER BY $SORT_METHODS[$sorting]
+            LIMIT $NOTIFS_PER_REQ
             OFFSET $offset
             
             ", [$acc["id"], $acc["id"]], "ss", true);
@@ -182,11 +181,10 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             if (sizeof($notifs) < $NOTIFS_PER_REQ)
                 $unreadCount["lastPage"] = true;
 
-            $notifIDs = [];
+            $oldestNotif = $notifs ? $notifs[array_key_last($notifs)] : null;
             $postIDs = [[0], [0]];
             $i = 0;
             foreach ($notifs as $n) {
-                array_push($notifIDs, $n["id"]);
                 array_push($postIDs[intval($n["postType"] == 'review')], $n["objectID"]);
                 $i += 1;
             }
@@ -197,9 +195,13 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             UNION SELECT name,id,1
             FROM reviews WHERE id in (%s)", implode(",", $postIDs[0]), implode(",", $postIDs[1])), [], "", true);
 
-            // FIXME: stacked notifications do not get marked as read!
-            if (sizeof($notifIDs) > 0)
-                mark_notifs_read($mysqli, $acc["id"], $notifIDs);
+            // FIXME: We're marking ALL notifs as read. All further loaded pages will appear read already
+            //        even if they weren't!!
+            //        mark_notifs_read marks individual notifications as read. Due to the stacking nature
+            //        of rating notifs, only the first notif in the group will be marked read. This causes
+            //        the unread counter to never clear. We really need to be using objectID's for this somehow.
+            if (!is_null($oldestNotif))
+                mark_notifs_read($mysqli, $acc["id"], $oldestNotif["time"]);
 
             echo json_encode([$notifs, $postNames, $unreadCount]);
             break;
