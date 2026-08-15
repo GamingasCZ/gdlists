@@ -467,3 +467,9 @@ export enum HoverFileAction {
   DragLeave,
   Drop
 }
+
+export interface OtherNotifData {
+    title: string[]
+    content: string[]
+    buttons: string[][]
+}
