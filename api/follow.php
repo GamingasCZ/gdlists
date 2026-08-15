@@ -33,9 +33,9 @@ function isFollowed($mysqli, $postID, $postType, $uid) {
     }
     else {
         if ($postType == 0)
-            $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $uid], "ii");
+            $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $uid], "ii");
         else
-            $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $uid], "ii");
+            $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $uid], "ii");
     }
     if (!is_null($res) && array_key_exists("error", $res))
         return false;
@@ -49,9 +49,9 @@ function isFollowed($mysqli, $postID, $postType, $uid) {
 function hasFollowers($mysqli, $postID, $postType) {
     $res;
     if ($postType == 0)
-        $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `list_id`=? LIMIT 1", [$postID], "i");
+        $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `list_id`=? LIMIT 1", [$postID], "i");
     else
-        $res = doRequest($mysqli, "SELECT `id` FROM `follows` WHERE `review_id`=? LIMIT 1", [$postID], "i");
+        $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `review_id`=? LIMIT 1", [$postID], "i");
     
     return !is_null($res);
 }
