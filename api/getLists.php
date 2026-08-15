@@ -419,6 +419,8 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
     $addReq = "AND " . $type . ".uid=" . $user . " AND `hidden` NOT LIKE 0";
     $showHidden = "";
   }
+  if (intval($_GET["followed"]))
+    $user = checkAccount($mysqli)["id"];
 
   $range = [$selRange, $selReviewRange][$type != "reviews" ? 0 : 1];
 
@@ -429,7 +431,8 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
   // If browsing only followed posts
-  $checkFollowed = intval($_GET["followed"]) ? "RIGHT JOIN follows ON $type.id = follows.list_id" : "";
+  $type2 = $type == 'lists' ? "list_id" : "review_id";
+  $checkFollowed = intval($_GET["followed"]) ? "RIGHT JOIN follows ON ($type.id = follows.$type2 AND follows.user='$user')" : "";
 
   // Lists/Reviews
   $maxFetch = clamp(intval($_GET["fetchAmount"]), 2, 50);
