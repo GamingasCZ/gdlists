@@ -165,6 +165,8 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             LEFT JOIN `users` tFrom ON n.from_user=tFrom.discord_id
             LEFT JOIN `users` tTo ON gm.user=tTo.discord_id
             LEFT JOIN `read_notifications` rN ON n.id=rN.notif_id
+
+            /*notifications content*/
             LEFT JOIN comments c ON n.type = 'comment' AND n.otherID = c.comID
             LEFT JOIN update_messages um ON n.type = 'watch' AND n.otherID = um.id
             
@@ -200,7 +202,14 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             //        mark_notifs_read marks individual notifications as read. Due to the stacking nature
             //        of rating notifs, only the first notif in the group will be marked read. This causes
             //        the unread counter to never clear. We really need to be using objectID's for this somehow.
-            if (!is_null($oldestNotif))
+
+            // marks ALL notifs as read, if on the last page, OR if the last notif is read (we can mostly assume
+            // that if there's a read notif, that other pages have already been read, it's not always the case tho)
+            // This should fix the issue above.
+            if (!is_null($oldestNotif) && ($oldestNotif["unread"] == 0 || isset($unreadCount["lastPage"])) && $unreadCount["amount_unread"] > 0)
+                mark_notifs_read($mysqli, $acc["id"], null, true); // mark all as read
+            // this occurs when all notifs on a page are unread; this will mark everything on the current page as read
+            elseif (!is_null($oldestNotif))
                 mark_notifs_read($mysqli, $acc["id"], $oldestNotif["time"]);
 
             echo json_encode([$notifs, $postNames, $unreadCount]);
