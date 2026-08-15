@@ -8,6 +8,7 @@ export const postNames = ref<NotificationContent[]>([])
 
 export const currentUnread = ref(0)
 export const notificationCache = ref([[],[]])
+export const moreAvailCache = ref(false)
 
 export enum NotifState {
     Error,

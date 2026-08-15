@@ -3,7 +3,7 @@ import NotificationCard from './global/NotificationCard.vue';
 import { ref } from 'vue';
 import { i18n } from '@/locales';
 import NotifsIcon from "../images/notifs.svg?raw"
-import { allNotifs, fetchNotifications, NotifState, postNames, removeNotifs } from './global/notifications.js';
+import { allNotifs, fetchNotifications, moreAvailCache, NotifState, postNames, removeNotifs } from './global/notifications.js';
 
 const props = defineProps<{
     noHeader: boolean
@@ -50,7 +50,7 @@ enum LoadingState {
     LoadingNext
 }
 
-const moreAvailable = ref(false)
+const moreAvailable = ref(moreAvailCache.value)
 const refreshing = ref(false)
 const loadingState = ref(LoadingState.Loading)
 const currentPage = ref(0)
@@ -66,6 +66,7 @@ const refreshNotifs = (resetPage = true, loadNext = false) => {
     fetchNotifications(true, sorting.value, type.value, false, currentPage.value)
         .then((more: NotifState) => {
             moreAvailable.value = more == NotifState.MoreAvailable
+            moreAvailCache.value = moreAvailable.value
             loadingState.value = LoadingState.Loaded
         }
         )
