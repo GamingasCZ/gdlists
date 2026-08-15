@@ -16,17 +16,18 @@ const notifView = ref<HTMLDivElement & {refreshing: Ref<boolean>, loadingState: 
                 <span class="text-xl cursor-pointer hover:underline">{{ $t('navbar.notifs') }}</span>
             </RouterLink>
             <div class="flex gap-2">
-                <button :disabled="notifView?.refreshing && notifView?.loadingState != 1" :title="$t('other.refresh')" @click.stop="notifView?.refreshNotifs()" class="max-sm:p-2 p-1 flex gap-2 bg-black bg-opacity-40 rounded-md bg-blend-saturation disabled:opacity-40 button">
+                <button :disabled="notifView?.refreshing && notifView?.loadingState != 1" :title="$t('other.refresh')" @click.stop="notifView?.refreshNotifs()" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md bg-blend-saturation max-sm:p-2 disabled:opacity-40 button">
                     <img src="@/images/replay.svg" class="w-6" alt="">
                     <span>{{ $t('other.refresh') }}</span>
                 </button>
-                <button @click.stop="emit('close')" class="sm:hidden button">
+                <button @click.stop="emit('close')" class="mx-2 sm:hidden button">
                     <img src="@/images/close.svg" class="w-6" alt="">
                 </button>
             </div>
         </header>
         <NotificationsView
             no-header
+            @close="emit('close')"
             ref="notifView"
             class="bg-[url(@/images/fade.svg)] bg-repeat-x"
         />

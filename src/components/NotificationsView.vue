@@ -1,23 +1,30 @@
 <script setup lang="ts">
 import NotificationCard from './global/NotificationCard.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { i18n } from '@/locales';
 import NotifsIcon from "../images/notifs.svg?raw"
 import { allNotifs, fetchNotifications, moreAvailCache, NotifState, postNames, removeNotifs } from './global/notifications.js';
+import router from '@/router.ts';
 
 const props = defineProps<{
     noHeader: boolean
 }>()
 
+const emit = defineEmits<{
+    (e: "close"): void
+}>()
+
 if (!props.noHeader)
     document.title = `${i18n.global.t('navbar.notifs')} | ${i18n.global.t('other.websiteName')}`
+
+const notifsToShow = computed(() => props.noHeader ? allNotifs.value.slice(0,5) : allNotifs.value)
 
 const changeFilters = () => {
     loadingState.value = LoadingState.Loading
     fetchNotifications(true, sorting.value, type.value)
         .then((more: NotifState) => {
-            moreAvailable.value = more == NotifState.MoreAvailable
-            loadingState.value = LoadingState.Loaded
+                moreAvailable.value = more == NotifState.MoreAvailable
+                loadingState.value = LoadingState.Loaded
             }
         )
         .catch(() => loadingState.value = LoadingState.Error)
@@ -50,7 +57,13 @@ enum LoadingState {
     LoadingNext
 }
 
-const moreAvailable = ref(moreAvailCache.value)
+const moreAvailable = computed(() => {
+    if (props.noHeader) {
+        return allNotifs.value.length > 5
+    }
+    else
+        return moreAvailCache.value
+})
 const refreshing = ref(false)
 const loadingState = ref(LoadingState.Loading)
 const currentPage = ref(0)
@@ -78,6 +91,10 @@ const refreshNotifs = (resetPage = true, loadNext = false) => {
 }
 
 const fetchNextPage = () => {
+    if (props.noHeader) {
+        emit('close')
+        return router.push("/notifications")
+    }
     currentPage.value++
     refreshNotifs(false, true)
 }
@@ -132,7 +149,7 @@ defineExpose({
                 <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
             </div>
             <template v-if="loadingState == LoadingState.Loaded || loadingState == LoadingState.LoadingNext">
-                <NotificationCard :key="notif.id" @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
+                <NotificationCard :key="notif.id" @click.stop="" v-for="notif in notifsToShow" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
             </template>
 
             <button @click="fetchNextPage" v-if="moreAvailable" class="mx-auto mt-3 w-max text-xl opacity-40 outline-none focus-within:opacity-100 hover:opacity-100">{{ $t('other.showMore') }}</button>
