@@ -199,6 +199,7 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             $postIDs = [[0], [0]];
             $i = 0;
             foreach ($notifs as $n) {
+                $notifs[$i]["comment"] = htmlspecialchars_decode($n["comment"]);
                 array_push($postIDs[intval($n["postType"] == 'review')], $n["objectID"]);
                 $i += 1;
             }
