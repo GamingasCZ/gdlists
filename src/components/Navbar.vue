@@ -68,10 +68,11 @@ const closeDialog = (m: MouseEvent, elementID: string, fun: any) => {
   if (!settingsMenu) return
   if (m.target == document.getElementById("settingsOpener2")) return
   
-  let left = settingsMenu.offsetLeft!
-  let top = settingsMenu.offsetTop!
-  let width = settingsMenu.offsetWidth!
-  let height = settingsMenu.offsetHeight!
+  let rect = settingsMenu.getBoundingClientRect()
+  let left = rect.x
+  let top = rect.y
+  let width = rect.width
+  let height = rect.height
   if (m.x < left || m.x > left + width || m.y < top || m.y > top + height) {
     fun()
   }

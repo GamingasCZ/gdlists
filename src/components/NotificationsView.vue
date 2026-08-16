@@ -72,13 +72,11 @@ const refreshNotifs = (resetPage = true, loadNext = false) => {
         loadingState.value = LoadingState.LoadingNext
     else
         loadingState.value = LoadingState.Loading
-    moreAvailable.value = false
 
     if (resetPage)
         currentPage.value = 0
     fetchNotifications(true, sorting.value, type.value, false, currentPage.value)
         .then((more: NotifState) => {
-            moreAvailable.value = more == NotifState.MoreAvailable
             moreAvailCache.value = moreAvailable.value
             loadingState.value = LoadingState.Loaded
         }
