@@ -16,7 +16,7 @@ import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
 import ListDescription from "./levelViewer/ListDescription.vue";
 import { ref, onMounted, watch, provide, computed, defineAsyncComponent, inject, type Ref, toRaw } from "vue";
-import { currentUID, generateHash, modifyListBG, navHidden, selectedLevels } from "@/Editor";
+import { currentUID, followPost, generateHash, modifyListBG, navHidden, selectedLevels } from "@/Editor";
 import PickerPopup from "./global/PickerPopup.vue";
 import router, { timeLastRouteChange } from "@/router";
 import MobileExtras from "./levelViewer/MobileExtras.vue";
@@ -158,6 +158,8 @@ async function loadList(loadedData: LevelList | null) {
         });
     }
 
+    postFollowing.value = res[5]
+
     postExtrasApply()
 
     // Set difficulty guessing
@@ -222,6 +224,8 @@ async function loadReview(loadedData: ReviewList | null) {
 
     // Fetch embeds
     embedsContent.value = await getEmbeds(LIST_DATA.value.data)
+
+    postFollowing.value = res[5]
 
     postExtrasApply()
   } catch (e) {
@@ -382,7 +386,9 @@ watch(router.currentRoute, () => {
       listPinned.value = vpArr.pinned[+props.isReview].includes(props.listID!)
 })
 
-const listActions = (action: string) => {
+const postFollowing = ref(false)
+
+const listActions = async (action: string) => {
   switch (action) {
     case "comments":
       reviewLevelsOpen.value = false
@@ -413,6 +419,9 @@ const listActions = (action: string) => {
     case "reviewLevels":
       commentsShowing.value = false
       reviewLevelsOpen.value = !reviewLevelsOpen.value
+      break;
+    case "follow":
+      postFollowing.value = await followPost(LIST_DATA.value?.id!, +props.isReview)
       break;
   }
 };
@@ -777,6 +786,7 @@ const cancelHidingOptions = () => {
         :hidden="LIST_DATA.hidden"
         :color="LIST_COL"
         :comms-hidden="ShareUIHide & URIHideUIOptions.Comments"
+        :following="postFollowing"
       />
     </header>
 

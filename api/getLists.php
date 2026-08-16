@@ -10,6 +10,7 @@ Return codes:
 
 header("Content-Type: application/json"); // Return as JSON
 require("globals.php");
+require_once("follow.php");
 
 $mysqli = new mysqli($hostname, $username, $password, $database);
 if ($mysqli->connect_errno) {
@@ -120,6 +121,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   $reviewDetails = [];
   $users = [];
   $allIDs = [];
+  $isFollowed = false;
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
@@ -145,6 +147,10 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
 
     $dbInfo["maxPage"] = $maxpage;
     $dbInfo["searchQuery"] = $search;
+
+    $uid = getLocalUserID();
+    if ($uid)
+      $isFollowed = isFollowed($mysqli, $allIDs, $review, $uid);
   } else {
     // Single list
     $decoded = base64_decode($rows["data"], true);
@@ -160,16 +166,20 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     }
     setcookie("lastViewed", $rows["id"], time()+300, "/");
 
+    $uid = getLocalUserID();
+    if ($uid)
+      $isFollowed = isFollowed($mysqli, $rows["id"], $review, $uid);
+
     // Fetch comment amount
     $commAmount = doRequest($mysqli, sprintf("SELECT COUNT(*) FROM comments WHERE %s = ?", $review ? "reviewID" : "listID"), [$rows["id"]], "s");
     $rows["commAmount"] = $commAmount["COUNT(*)"];
     $users = getUsersByID([$rows])[0][0];
 
     // Fetch ratings
-    $ratings = getRatings($mysqli, getLocalUserID(), $review ? "review_id" : "list_id", $rows["id"], true);
+    $ratings = getRatings($mysqli, $uid, $review ? "review_id" : "list_id", $rows["id"], true);
   }
 
-  return array($rows, $users, $dbInfo, $ratings, $reviewDetails);
+  return array($rows, $users, $dbInfo, $ratings, $reviewDetails, $isFollowed);
 }
 
 function getHomepage($lists, $reviews, $user) {
@@ -409,6 +419,8 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
     $addReq = "AND " . $type . ".uid=" . $user . " AND `hidden` NOT LIKE 0";
     $showHidden = "";
   }
+  if (intval($_GET["followed"]))
+    $user = checkAccount($mysqli)["id"];
 
   $range = [$selRange, $selReviewRange][$type != "reviews" ? 0 : 1];
 
@@ -418,6 +430,10 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   // 0 = descending, 1 = ascending
   $sorting = intval($_GET["sort"]) == 0 ? "DESC" : "ASC";
 
+  // If browsing only followed posts
+  $type2 = $type == 'lists' ? "list_id" : "review_id";
+  $checkFollowed = intval($_GET["followed"]) ? "RIGHT JOIN follows ON ($type.id = follows.$type2 AND follows.user='$user')" : "";
+
   // Lists/Reviews
   $maxFetch = clamp(intval($_GET["fetchAmount"]), 2, 50);
   $ratingKey = substr($type, 0, -1) . '_id';
@@ -425,12 +441,17 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   if ($type != "levels") {
     $query = "SELECT $range, $ratings FROM ratings
               RIGHT JOIN $type ON $type.id = ratings.$ratingKey
+              $checkFollowed
               WHERE $showHidden $type.id<=? AND `name` LIKE ? $addReq
               GROUP BY `name`
               ORDER BY hidden DESC, id DESC
               LIMIT $maxFetch
               OFFSET $dbSlice";
-    $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
+    $maxpageQuery;
+    if ($checkFollowed == "")
+      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
+    else
+      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(`follows`.`id`) as amount FROM $type $checkFollowed WHERE $showHidden `name` LIKE '%%%s%%' AND $type.`id`<=? $addReq", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
   else {
     $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders

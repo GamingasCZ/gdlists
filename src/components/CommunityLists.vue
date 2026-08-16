@@ -35,6 +35,9 @@ const applyRoute = route => {
     case 'hidden':
       userLists.value = 'hidden'
       break;
+    case 'followed':
+      userLists.value = 'followed'
+      break;
     default:
       userLists.value = ''
   }

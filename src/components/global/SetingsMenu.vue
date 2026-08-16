@@ -40,7 +40,8 @@ const dialogs = ref({
   avatar: false,
   help: false,
   themes: false,
-  usernameChange: false
+  usernameChange: false,
+  follows: false
 })
 
 const Dialog = defineAsyncComponent({

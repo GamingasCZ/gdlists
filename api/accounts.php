@@ -12,6 +12,8 @@ header('Content-type: application/json'); // Return as JSON
 require("globals.php");
 require("images.php");
 require_once("username.php");
+require_once("notifications.php");
+require_once("groups.php");
 
 
 // Error can happen when cancelling
@@ -70,7 +72,7 @@ if (sizeof($_GET) > 0) {
 
         $username = doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
-        $unread = doRequest($mysqli, "SELECT COUNT(`unread`) as 'amount_unread' FROM `notifications` WHERE `to_user`=? AND `unread`=1", [$accCheck["id"]], "s");
+        $unread = getUnread($mysqli, $accCheck["id"]);
         $profileData = ["status" => "logged_in",
                         "account_name" => $username["username"],
                         "account_id" => $accCheck["id"],
@@ -126,9 +128,11 @@ if (sizeof($_GET) > 0) {
             saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
     }
 
-    // Save username
-    if ($fistTimeUser)
+    // Save username add to notif group
+    if ($fistTimeUser) {
         saveUsername($mysqli, $dcApiResponse["username"], $dcApiResponse["id"], true);
+        add_to_group($mysqli, group_single_user($dcApiResponse["id"])); // hopefully this doesn't return false :)
+    }
 
     $mysqli -> close();
     header("Location: " . $https . $local . '/gdlists');

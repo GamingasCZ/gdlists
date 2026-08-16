@@ -494,7 +494,13 @@
     "uCFail2": "Jméno obsahuje neplatné znaky.",
     "ucHelp0": "Tvé jméno může obsahovat jen písmena, čísla, podtržítka a spojovníky.",
     "uCinUse": "Toto jméno používá už někdo jiný!",
-    "uCprev": "Předešlá jména"
+    "uCprev": "Předešlá jména",
+    "follow": "Sledovat",
+    "followed": "Sledováno",
+    "followed2": "Sledované",
+    "folHelp1": "Zatím nic nesleduješ!",
+    "folHelp2": "Když sleduješ příspěvek, tak dostaneš notifikaci, pokaždé když je aktualizován!",
+    "folHelp3": "Pro sledování, klikni v příspěvku na"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -574,7 +580,8 @@
     "changes4": "V tomto příspěvku jsi v minulosti provedl úpravy.",
     "viewingNew": "Takto vypadá původní příspěvek.",
     "highlighted": "Zvýrazněný komentář",
-    "manyCompErr": "Aktualizuješ až moc prvků zaráz!"
+    "manyCompErr": "Aktualizuješ až moc prvků zaráz!",
+    "watchFail": "Nepovedlo se začít sledovat příspěvěk!"
   },
   "level": {
     "levelID": "ID levelu",
@@ -901,7 +908,11 @@
     "moveHelp": "Přidej <kbd>$</kbd> za sloupec, pro přesunutí obsahu.",
     "cHelp7": "Obsah může být jen v jednom sloupci!",
     "chelp8": "Špatné použitý přesuvný znak!",
-    "moveToCont": "Klikni na sloupec, kam chceš přesunout obsah."
+    "moveToCont": "Klikni na sloupec, kam chceš přesunout obsah.",
+    "updMess": "Zpráva o aktualizaci",
+    "folMess1": "Tvůj příspěvek má sledující!",
+    "folMess2": "Můžeš jim oznámit, co jsi provedl za změny.",
+    "folMess3": "Ze super epických změn bych mohl vyjmenovat..."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

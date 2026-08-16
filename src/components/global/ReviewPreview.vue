@@ -29,6 +29,7 @@ const props = defineProps<{
   thumbProps: [number, number, number, boolean];
   reviewDetails: ReviewDetailsResponse[]
   creator: string
+  isFollowed?: string[]
 
   userArray: ListCreatorInfo[];
   disableLink?: boolean | 2
@@ -184,6 +185,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
       <div class="flex items-center">
         <h2 class="inline text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
         <img v-if="diffGuesser" class="inline ml-2 w-6" src="@/images/diffGuessSign.svg" alt="" />
+        <img v-if="isFollowed && isFollowed.includes(`${isList ? 'l' : 'r'}${id}`)" :title="$t('other.followed')" src="@/images/view.svg" class="ml-2 w-5" alt="">
       </div>
       <div class="overflow-hidden w-full text-ellipsis min-h-5">
         <q class="text-sm leading-none opacity-80" :class="{'after:hidden before:hidden': !(tagline ?? '').length}">{{ tagline }}</q>

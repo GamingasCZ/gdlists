@@ -15,31 +15,67 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `bgcolor` tinytext NOT NULL,
   `listID` int DEFAULT NULL,
   `reviewID` int UNSIGNED DEFAULT NULL,
-  `comID` int NOT NULL,
+  `comID` int NOT NULL AUTO_INCREMENT,
   `verified` tinyint(1) NOT NULL,
   `timestamp` tinytext NOT NULL,
-  `uid` varchar(40) DEFAULT NULL
+  `uid` varchar(40) DEFAULT NULL,
+  PRIMARY KEY (`comID`),
+  KEY `Review Comment ID` (`reviewID`),
+  KEY `Comment User` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
+CREATE TABLE IF NOT EXISTS `follows` (
+  `list_id` int DEFAULT NULL,
+  `review_id` int UNSIGNED DEFAULT NULL,
+  `user` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  KEY `Follow ListID` (`list_id`),
+  KEY `Follow ReviewID` (`review_id`),
+  KEY `Follow UserID` (`user`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` tinytext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `group_members` (
+  `user` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `group_id` int UNSIGNED NOT NULL,
+  `authority` tinyint NOT NULL,
+  `joined` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `hash` varchar(8) COLLATE utf8mb3_unicode_ci NOT NULL,
+  UNIQUE KEY `unique hash` (`hash`),
+  KEY `Member Group` (`group_id`),
+  KEY `Member UID` (`user`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `images` (
-  `id` int UNSIGNED NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `uploaderID` varchar(40) NOT NULL,
   `hash` varchar(40) DEFAULT NULL COMMENT 'link to the image',
   `filesize` int UNSIGNED NOT NULL,
-  `folder` int UNSIGNED DEFAULT NULL
+  `folder` int UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Image uploader` (`uploaderID`),
+  KEY `hash` (`hash`),
+  KEY `Image Path` (`folder`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `images_folders` (
-  `id` int UNSIGNED NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `base_path` int UNSIGNED DEFAULT NULL,
   `name` tinytext NOT NULL,
   `color` varchar(7) NOT NULL,
   `uid` varchar(40) NOT NULL,
-  `attributes` enum('Thumbnails') DEFAULT NULL
+  `attributes` enum('Thumbnails') DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Folder Creator` (`uid`),
+  KEY `Subfolder` (`base_path`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `levels` (
-  `id` int UNSIGNED NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `levelName` varchar(30) NOT NULL,
   `creator` varchar(20) NOT NULL,
   `collabMemberCount` tinyint UNSIGNED NOT NULL DEFAULT '0',
@@ -51,32 +87,45 @@ CREATE TABLE IF NOT EXISTS `levels` (
   `background` int UNSIGNED DEFAULT NULL,
   `uploaderID` varchar(40) NOT NULL,
   `uploadTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `hash` varchar(32) NOT NULL
+  `hash` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash` (`hash`),
+  KEY `User ID` (`uploaderID`),
+  KEY `levelID` (`levelID`),
+  KEY `Background ID` (`background`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `levels_ratings` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `levelID` int UNSIGNED DEFAULT NULL,
   `reviewID` int UNSIGNED DEFAULT NULL,
   `listRatingID` int DEFAULT NULL,
   `gameplay` decimal(3,1) UNSIGNED DEFAULT NULL,
   `decoration` decimal(3,1) UNSIGNED DEFAULT NULL,
   `difficulty` decimal(3,1) UNSIGNED DEFAULT NULL,
-  `overall` decimal(3,1) UNSIGNED DEFAULT NULL
+  `overall` decimal(3,1) UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Rating ReviewID` (`reviewID`),
+  KEY `Rating LevelID` (`levelID`),
+  KEY `Rating ListID` (`listRatingID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `levels_uploaders` (
-  `id` int UNSIGNED NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `levelID` int UNSIGNED DEFAULT NULL,
   `listID` int DEFAULT NULL,
-  `reviewID` int UNSIGNED DEFAULT NULL
+  `reviewID` int UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Level Review ID` (`reviewID`),
+  KEY `Level List ID` (`listID`),
+  KEY `Level ID` (`levelID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `lists` (
   `name` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `creator` tinytext NOT NULL,
   `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `timestamp` text NOT NULL,
   `hidden` text NOT NULL,
   `uid` varchar(40) DEFAULT NULL,
@@ -85,24 +134,38 @@ CREATE TABLE IF NOT EXISTS `lists` (
   `commDisabled` tinyint(1) NOT NULL DEFAULT '0',
   `tagline` tinytext NOT NULL,
   `thumbnail` varchar(40) DEFAULT NULL,
-  `thumbProps` tinytext
+  `thumbProps` tinytext,
+  PRIMARY KEY (`id`),
+  KEY `uid` (`uid`),
+  KEY `List Thumbnail` (`thumbnail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `notifications` (
-  `id` int NOT NULL,
-  `to_user` varchar(40) NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `to_group` int UNSIGNED DEFAULT NULL,
   `from_user` varchar(40) NOT NULL,
-  `type` enum('comment','rating','other') NOT NULL,
-  `unread` tinyint(1) NOT NULL DEFAULT '1',
+  `type` enum('comment','rating','other','watch') CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `postType` enum('list','review','other') NOT NULL,
   `objectID` int NOT NULL,
-  `otherID` int DEFAULT NULL
+  `otherID` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `From` (`from_user`),
+  KEY `To GID` (`to_group`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE IF NOT EXISTS `other_notifications` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `content` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `profiles` (
   `uid` varchar(40) NOT NULL,
-  `pfp_cutout` tinyint NOT NULL
+  `pfp_cutout` tinyint NOT NULL,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `uid` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `ratings` (
@@ -110,11 +173,22 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   `uid` varchar(40) NOT NULL,
   `list_id` int DEFAULT NULL,
   `review_id` int UNSIGNED DEFAULT NULL,
-  `id` int NOT NULL
+  `id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uid` (`uid`,`list_id`),
+  KEY `Rating List ID` (`list_id`),
+  KEY `Ratnig Review ID` (`review_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
+CREATE TABLE IF NOT EXISTS `read_notifications` (
+  `notif_id` int UNSIGNED NOT NULL,
+  `user` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  KEY `Read UID` (`user`),
+  KEY `Read NID` (`notif_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `reviews` (
-  `id` int UNSIGNED NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` tinytext NOT NULL,
   `uid` varchar(25) NOT NULL,
   `data` blob NOT NULL,
@@ -125,22 +199,40 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `commDisabled` tinyint(1) NOT NULL,
   `thumbnail` varchar(40) DEFAULT NULL,
   `thumbProps` tinytext,
-  `lang` enum('cs','en','de','es','ko','ru','ot') NOT NULL DEFAULT 'ot'
+  `lang` enum('cs','en','de','es','ko','ru','ot') NOT NULL DEFAULT 'ot',
+  PRIMARY KEY (`id`),
+  KEY `Review uploader` (`uid`),
+  KEY `Review Thumbnail` (`thumbnail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `sessions` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` varchar(40) NOT NULL,
   `session_data` tinytext NOT NULL,
   `session_index` tinyint NOT NULL DEFAULT '0',
-  `last_login` int NOT NULL
+  `last_login` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Session User` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
+CREATE TABLE IF NOT EXISTS `update_messages` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `list_id` int DEFAULT NULL,
+  `review_id` int UNSIGNED DEFAULT NULL,
+  `messsage` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `UM list_id` (`list_id`),
+  KEY `UM review_id` (`review_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `username_change` (
-  `id` int UNSIGNED NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` tinytext COLLATE utf8mb3_unicode_ci NOT NULL,
   `uid` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `UID changing` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `users` (
@@ -148,126 +240,24 @@ CREATE TABLE IF NOT EXISTS `users` (
   `discord_id` varchar(40) NOT NULL,
   `refresh_token` tinytext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `access_token` tinytext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci,
-  `id` int NOT NULL
+  `id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `discord_id` (`discord_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
-
-ALTER TABLE `comments`
-  ADD PRIMARY KEY (`comID`),
-  ADD KEY `Review Comment ID` (`reviewID`),
-  ADD KEY `Comment User` (`uid`);
-
-ALTER TABLE `images`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `Image uploader` (`uploaderID`),
-  ADD KEY `hash` (`hash`),
-  ADD KEY `Image Path` (`folder`);
-
-ALTER TABLE `images_folders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `Folder Creator` (`uid`),
-  ADD KEY `Subfolder` (`base_path`);
-
-ALTER TABLE `levels`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `hash` (`hash`),
-  ADD KEY `User ID` (`uploaderID`),
-  ADD KEY `levelID` (`levelID`),
-  ADD KEY `Background ID` (`background`);
-
-ALTER TABLE `levels_ratings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `Rating ReviewID` (`reviewID`),
-  ADD KEY `Rating LevelID` (`levelID`),
-  ADD KEY `Rating ListID` (`listRatingID`);
-
-ALTER TABLE `levels_uploaders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `Level Review ID` (`reviewID`),
-  ADD KEY `Level List ID` (`listID`),
-  ADD KEY `Level ID` (`levelID`);
-
-ALTER TABLE `lists`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `uid` (`uid`),
-  ADD KEY `List Thumbnail` (`thumbnail`);
-
-ALTER TABLE `notifications`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `From` (`from_user`),
-  ADD KEY `To` (`to_user`);
-
-ALTER TABLE `profiles`
-  ADD PRIMARY KEY (`uid`),
-  ADD UNIQUE KEY `uid` (`uid`);
-
-ALTER TABLE `ratings`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uid` (`uid`,`list_id`),
-  ADD KEY `Rating List ID` (`list_id`),
-  ADD KEY `Ratnig Review ID` (`review_id`);
-
-ALTER TABLE `reviews`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `Review uploader` (`uid`),
-  ADD KEY `Review Thumbnail` (`thumbnail`);
-
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `Session User` (`user_id`);
-
-ALTER TABLE `username_change`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `UID changing` (`uid`);
-
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `discord_id` (`discord_id`);
-
-
-ALTER TABLE `comments`
-  MODIFY `comID` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `images`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `images_folders`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `levels`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `levels_ratings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `levels_uploaders`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `lists`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `notifications`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `ratings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `reviews`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `sessions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `username_change`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 
 ALTER TABLE `comments`
   ADD CONSTRAINT `Comment User` FOREIGN KEY (`uid`) REFERENCES `users` (`discord_id`),
   ADD CONSTRAINT `Review Comment ID` FOREIGN KEY (`reviewID`) REFERENCES `reviews` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `follows`
+  ADD CONSTRAINT `Follow ListID` FOREIGN KEY (`list_id`) REFERENCES `lists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `Follow ReviewID` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `Follow UserID` FOREIGN KEY (`user`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `group_members`
+  ADD CONSTRAINT `Member Group` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `Member UID` FOREIGN KEY (`user`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `images`
   ADD CONSTRAINT `Image Path` FOREIGN KEY (`folder`) REFERENCES `images_folders` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -296,7 +286,7 @@ ALTER TABLE `lists`
 
 ALTER TABLE `notifications`
   ADD CONSTRAINT `From` FOREIGN KEY (`from_user`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `To` FOREIGN KEY (`to_user`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `To GID` FOREIGN KEY (`to_group`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `profiles`
   ADD CONSTRAINT `Profile UID` FOREIGN KEY (`uid`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -306,12 +296,20 @@ ALTER TABLE `ratings`
   ADD CONSTRAINT `Ratnig Review ID` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `User Rated` FOREIGN KEY (`uid`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+ALTER TABLE `read_notifications`
+  ADD CONSTRAINT `Read NID` FOREIGN KEY (`notif_id`) REFERENCES `notifications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `Read UID` FOREIGN KEY (`user`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 ALTER TABLE `reviews`
   ADD CONSTRAINT `Review Thumbnail` FOREIGN KEY (`thumbnail`) REFERENCES `images` (`hash`) ON UPDATE CASCADE,
   ADD CONSTRAINT `Review uploader` FOREIGN KEY (`uid`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `sessions`
   ADD CONSTRAINT `Session User` FOREIGN KEY (`user_id`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `update_messages`
+  ADD CONSTRAINT `UM list_id` FOREIGN KEY (`list_id`) REFERENCES `lists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `UM review_id` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `username_change`
   ADD CONSTRAINT `UID changing` FOREIGN KEY (`uid`) REFERENCES `users` (`discord_id`) ON DELETE CASCADE ON UPDATE CASCADE;

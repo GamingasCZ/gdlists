@@ -31,28 +31,36 @@ const editLink = (key: string, isEdit: number | undefined) => {
 </script>
 
 <template>
-    <section @click.stop="" class="absolute text-white backdrop-blur-sm top-9 bg-opacity-90 w-[30rem] rounded-md max-sm:left-0 max-sm:right-0 -left-4 p-3 text-base font-normal bg-black">
-        <div class="flex flex-wrap gap-4 items-center">
-            <RouterLink :to="`/make/${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-base font-bold rounded-md border text-lof-400 border-lof-400">
-                <Create class="h-7 fill-lof-400" />
-                {{ $t('other.create') }}
-            </RouterLink>
-            <RouterLink :to="`/browse/${path2}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 mr-3 text-base font-bold rounded-md border text-lof-400 border-lof-400">
-                <Browse class="h-7 fill-lof-400" />
-                {{ $t('navbar.lists') }}
-            </RouterLink>
-            <RouterLink :to="`/browse/${path2}?type=user`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
-                <img src="@/images/view.svg" class="h-6" alt="">
-                {{ $t('other.mine') }}
-            </RouterLink>
-            <RouterLink :to="`/browse/${path2}?type=hidden`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
-                <img src="@/images/hidden.svg" class="h-6" alt="">
-                {{ $t('other.private') }}
-            </RouterLink>
-            <RouterLink :to="`/random?${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
-                <img src="@/images/dice.svg" class="mb-1 h-5" alt="">
-                {{ $t('navbar.random') }}
-            </RouterLink>
+    <section @click.stop="" class="absolute text-white backdrop-blur-sm top-9 bg-opacity-90 w-[32rem] max-sm:w-min rounded-md max-sm:left-0 max-sm:right-0 -left-4 p-3 text-base font-normal bg-black">
+        <div class="flex flex-wrap gap-3 items-center">
+            <div class="flex gap-3 max-sm:grow">
+                <RouterLink :to="`/make/${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-base font-bold rounded-md border max-sm:grow text-lof-400 border-lof-400">
+                    <Create class="h-7 fill-lof-400" />
+                    {{ $t('other.create') }}
+                </RouterLink>
+                <RouterLink :to="`/browse/${path2}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 mr-3 text-base font-bold rounded-md border max-sm:grow text-lof-400 border-lof-400">
+                    <Browse class="h-7 fill-lof-400" />
+                    {{ $t('navbar.lists') }}
+                </RouterLink>
+            </div>
+            <div class="flex gap-3">
+                <RouterLink :to="`/browse/${path2}?type=user`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+                    <img src="@/images/view.svg" class="h-6" alt="">
+                    {{ $t('other.mine') }}
+                </RouterLink>
+                <RouterLink :to="`/browse/${path2}?type=hidden`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+                    <img src="@/images/hidden.svg" class="h-6" alt="">
+                    {{ $t('other.private') }}
+                </RouterLink>
+                <RouterLink :to="`/browse/${path2}?type=followed`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+                    <img src="@/images/browse.svg" class="h-6" alt="">
+                    {{ $t('other.followed2') }}
+                </RouterLink>
+                <RouterLink :to="`/random?${path}`" @click.stop="emit('close')" class="flex flex-col items-center px-2 pt-2 text-sm text-white opacity-60 hover:opacity-100">
+                    <img src="@/images/dice.svg" class="mb-1 h-5" alt="">
+                    {{ $t('navbar.random') }}
+                </RouterLink>
+            </div>
         </div>
         <div v-if="hasDrafts" class="mt-2 text-left">
             <div class="mb-2 border-b-2 grow border-lof-400">

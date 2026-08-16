@@ -58,6 +58,7 @@ const pagesArray = ref<number[]>(listScroll());
 const USERS = ref<ListCreatorInfo[]>([]);
 const LISTS = ref<ListPreview[]>([]);
 const REVIEW_DETAILS = ref<ReviewDetailsResponse[]>([]);
+const FOLLOWS = ref<string[]>([]);
 const SEARCH_QUERY = ref<String>(props.search ?? "");
 
 const main = ref<HTMLDivElement>()
@@ -199,6 +200,7 @@ function refreshBrowser() {
       loading.value = false
       USERS.value = res.data[1];
       REVIEW_DETAILS.value = res.data[4]
+      FOLLOWS.value = res.data[5]
       loadFailed.value = false;
     })
     .catch(e => {
@@ -339,6 +341,12 @@ defineExpose({
             :class="{ 'bg-lof-300': onlineType == 'user' }">
             {{ $t('other.myLists', [onlineSubtype == 'lists' ? $t('other.lists') : $t('other.reviews')]) }}
           </RouterLink>
+          <RouterLink :to="`/browse/${onlineSubtype}?type=followed`" 
+            class="button rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400 px-4 py-0.5"
+            v-show="onlineSubtype != 'levels'"
+            :class="{ 'bg-lof-300': onlineType == 'followed' }">
+            {{ $t('other.followed2') }}
+          </RouterLink>
           <RouterLink :to="`/browse/${onlineSubtype}?type=hidden`"
             class="button box-border rounded-md border-[0.1rem] border-solid border-lof-300 focus-within:border-lof-400"
             v-show="onlineSubtype != 'levels'"
@@ -396,6 +404,19 @@ defineExpose({
             </button>
           </RouterLink>
         </div>
+
+        <!-- No follows BG -->
+          <div class="flex flex-col gap-6 items-center text-center" v-else-if="onlineType == 'followed' && LISTS.length == 0 && !loading">
+            <img src="@/images/browse.svg" alt="" class="w-48 opacity-50" />
+            <h2 class="min-w-max text-2xl font-bold opacity-50">{{ $t('other.folHelp1') }}</h2>
+            <p class="opacity-50">{{ $t('other.folHelp3') }} <img class="inline mr-1" src="@/images/viewLine.svg"><b>{{ $t('other.follow') }}</b>.</p>
+            <p class="opacity-50">{{ $t('other.folHelp2') }}</p>
+            <RouterLink to="/random">
+              <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
+                <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
+              </button>
+            </RouterLink>
+          </div>
 
         <!-- No results BG -->
         <div v-else-if="searchNoResults && LISTS.length == 0 && !loading"
@@ -465,6 +486,7 @@ defineExpose({
           :favorited="favoriteLevelIDs.includes(list.levelID)"
           :is-list="onlineSubtype == 'lists'"
           :disable-fave="picking"
+          :is-followed="FOLLOWS"
           @clicked-option="emit('selectedPostOption', [$event, list.name])"
           @selected="unrolled = (unrolled == -1 || index != unrolled) ? index : -1"
           @remove-level="removeFavoriteLevel"

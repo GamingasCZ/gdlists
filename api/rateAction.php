@@ -51,7 +51,7 @@ switch ($method) {
             else {
                 $result["result"] = "added";
                 if ($creator["uid"])
-                    createNotification($mysqli, $accountCheck, $creator["uid"], 2, intval(isset($DATA["review_id"]))+1, $objectID);
+                    createNotification($mysqli, $accountCheck, group_single_user($creator["uid"]), 2, intval(isset($DATA["review_id"]))+1, $objectID);
             };
         }
         elseif ($checkRate["rate"] != $rating) { // Change rating
@@ -61,7 +61,7 @@ switch ($method) {
         elseif ($checkRate["rate"] == $rating) { // Remove rating
             doRequest($mysqli, sprintf("DELETE FROM ratings WHERE `uid`=? AND %s=?", $type), [$accountCheck, $objectID], "ii");
             $result["result"] = "deleted";
-            deleteNotification($mysqli, $creator["uid"], 2, $objectID);
+            deleteNotification($mysqli, group_single_user($creator["uid"]), 2, $objectID);
         }
         $result["ratings"] = getRatings($mysqli, $accountCheck, $type, $objectID);
         echo json_encode($result);

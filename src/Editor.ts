@@ -4,6 +4,8 @@ import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBa
 import { hasLocalStorage, SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
+import axios from "axios";
+import { summonNotification } from "./components/imageUpload";
 // import { DEFAULT_RATINGS } from "./Reviews";
 
 export const TAG_COUNT = 30;
@@ -376,4 +378,21 @@ export const updateNavbarDrafts = (isReview: boolean, draftData?: ReviewDraft) =
             draftArr.value.push({name: draftKeys[i][1].name, isEdit: draftKeys[i][1].editing, key: draftKeys[i][0]})
         }
     }
+}
+
+export const followPost = async (postID: number, postType: 0|1) => {
+  let res = await axios.post(import.meta.env.VITE_API+"/follow.php", {postID: postID, postType: postType}).catch(() => {
+    
+  })
+
+  if (res) {
+    if (res.data == "6")
+      return true
+    else if (res.data == "5")
+      return false
+    else {
+      summonNotification(i18n.global.t('other.error'), i18n.global.t('listViewer.watchFail'), "error")
+      return false
+    }
+  }
 }

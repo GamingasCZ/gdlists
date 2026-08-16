@@ -1,6 +1,7 @@
 <?php
 
 require_once("notifications.php");
+require_once("groups.php");
 require_once("comments.php");
 
 header("Content-Type: application/json"); // Return as JSON
@@ -38,7 +39,7 @@ switch ($_SERVER["REQUEST_METHOD"]) {
             createNotification(
                 $mysqli,
                 $DATA[D::From->value],
-                $DATA[D::To->value],
+                group_single_user($DATA[D::To->value]),
                 $DATA[D::NotifType->value]+1,
                 $DATA[D::PostType->value]+1,
                 $DATA[D::PostID->value]);

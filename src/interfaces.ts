@@ -448,15 +448,16 @@ export interface FormattingButton {
 
 export interface NotificationContent {
   to: string
+  to_group: number
   from: string
   from_user: string
-  type: 'comment' | 'rating' | 'other'
+  type: 'comment' | 'rating' | 'other' | 'watch'
   unread: boolean
   time: string
   postType: 'list' | 'review' | 'other'
   objectID: number
   otherID: number | null
-  comment: string | null
+  comment: any
   count: number
   id: number
 }
@@ -465,4 +466,10 @@ export enum HoverFileAction {
   DragOver,
   DragLeave,
   Drop
+}
+
+export interface OtherNotifData {
+    title: string[]
+    content: string[]
+    buttons: string[][]
 }

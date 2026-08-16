@@ -249,7 +249,8 @@
     "changes3": "Cannot save without cookies enabled!",
     "changes4": "You've made changes to this post before.",
     "viewingNew": "You're viewing the original post.",
-    "manyCompErr": "You're updating too many components at once!"
+    "manyCompErr": "You're updating too many components at once!",
+    "watchFail": "Failed to start following the post!"
   },
   "navbar": {
     "lists": "Browse",
@@ -518,7 +519,13 @@
     "uCFail2": "Name contains disallowed characters.",
     "ucHelp0": "Your name can only contain letters, numbers, hyphens and underscores.",
     "uCinUse": "This name is already in use!",
-    "uCprev": "Previously used names"
+    "uCprev": "Previously used names",
+    "follow": "Follow",
+    "followed": "Followed",
+    "followed2": "Followed",
+    "folHelp1": "You're not following anything yet!",
+    "folHelp3": "To follow a post, find one and tap",
+    "folHelp2": "When you follow a post, you get notified every time it gets updated!"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -900,7 +907,11 @@
     "moveHelp": "Add <kbd>$</kbd> before a column, to move content into it.",
     "cHelp7": "Content can only be in one column!",
     "chelp8": "Bad use of move character!",
-    "moveToCont": "Click the column you'd like to move content into."
+    "moveToCont": "Click the column you'd like to move content into.",
+    "updMess": "Update Message",
+    "folMess1": "Your post has followers!",
+    "folMess2": "Feel free to tell them, what you updated.",
+    "folMess3": "I updated many great things, such as..."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

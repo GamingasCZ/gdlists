@@ -1,23 +1,30 @@
 <script setup lang="ts">
 import NotificationCard from './global/NotificationCard.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { i18n } from '@/locales';
 import NotifsIcon from "../images/notifs.svg?raw"
-import { allNotifs, fetchNotifications, NotifState, postNames, removeNotifs } from './global/notifications.js';
+import { allNotifs, fetchNotifications, moreAvailCache, NotifState, postNames, removeNotifs } from './global/notifications.js';
+import router from '@/router.ts';
 
 const props = defineProps<{
     noHeader: boolean
 }>()
 
+const emit = defineEmits<{
+    (e: "close"): void
+}>()
+
 if (!props.noHeader)
     document.title = `${i18n.global.t('navbar.notifs')} | ${i18n.global.t('other.websiteName')}`
+
+const notifsToShow = computed(() => props.noHeader ? allNotifs.value.slice(0,5) : allNotifs.value)
 
 const changeFilters = () => {
     loadingState.value = LoadingState.Loading
     fetchNotifications(true, sorting.value, type.value)
         .then((more: NotifState) => {
-            moreAvailable.value = more == NotifState.MoreAvailable
-            loadingState.value = LoadingState.Loaded
+                moreAvailable.value = more == NotifState.MoreAvailable
+                loadingState.value = LoadingState.Loaded
             }
         )
         .catch(() => loadingState.value = LoadingState.Error)
@@ -46,20 +53,33 @@ const selectedNotifs = ref([])
 enum LoadingState {
     Loaded,
     Loading,
-    Error
+    Error,
+    LoadingNext
 }
 
-const moreAvailable = ref(false)
+const moreAvailable = computed(() => {
+    if (props.noHeader) {
+        return allNotifs.value.length > 5
+    }
+    else
+        return moreAvailCache.value
+})
 const refreshing = ref(false)
 const loadingState = ref(LoadingState.Loading)
 const currentPage = ref(0)
-const refreshNotifs = (resetPage = true) => {
-    loadingState.value = LoadingState.Loading
+const refreshNotifs = (resetPage = true, loadNext = false) => {
+    if (loadNext)
+        loadingState.value = LoadingState.LoadingNext
+    else
+        loadingState.value = LoadingState.Loading
+    moreAvailable.value = false
+
     if (resetPage)
         currentPage.value = 0
     fetchNotifications(true, sorting.value, type.value, false, currentPage.value)
         .then((more: NotifState) => {
             moreAvailable.value = more == NotifState.MoreAvailable
+            moreAvailCache.value = moreAvailable.value
             loadingState.value = LoadingState.Loaded
         }
         )
@@ -71,8 +91,12 @@ const refreshNotifs = (resetPage = true) => {
 }
 
 const fetchNextPage = () => {
+    if (props.noHeader) {
+        emit('close')
+        return router.push("/notifications")
+    }
     currentPage.value++
-    refreshNotifs(false)
+    refreshNotifs(false, true)
 }
 
 if (!allNotifs.value.length)
@@ -95,16 +119,13 @@ defineExpose({
                     <img src="@/images/replay.svg" class="mr-2 w-5" alt="">
                     {{ $t('other.refresh') }}
                 </button>
-                <button :disabled="refreshing || !allNotifs.length" @click="removeNotifs()" class="flex p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
-                    <img src="@/images/trash.svg" class="mr-2 w-5" alt="">
-                    {{ $t('homepage.clear') }}
-                </button>
             </div>
             <section class="grid grid-cols-2 grid-rows-2 grid-flow-col justify-items-center">
                 <h4>{{ $t('other.type') }}</h4>
                 <div class="border-collapse">
                     <button @click="changeType(0)" :class="{'bg-lof-300': type == 0}" :title="$t('editor.ratings')" class="p-1 rounded-l-md border border-lof-300"><img :src="`${base}/notifBadges/like.svg`" class="w-5" alt=""></button>
                     <button @click="changeType(1)" :class="{'bg-lof-300': type == 1}" :title="$t('level.comments')" class="p-1 border border-lof-300"><img :src="`${base}/notifBadges/comment.svg`" class="w-5" alt=""></button>
+                    <button @click="changeType(3)" :class="{'bg-lof-300': type == 3}" :title="$t('other.followed')" class="p-1 border border-lof-300"><img :src="`${base}/notifBadges/follow.svg`" class="w-5" alt=""></button>
                     <button @click="changeType(2)" :class="{'bg-lof-300': type == 2}" :title="$t('other.other2')" class="p-1 rounded-r-md border border-lof-300"><img :src="`${base}/notifBadges/other.svg`" class="w-5" alt=""></button>
                 </div>
                 <h4>{{ $t('other.sort') }}</h4>
@@ -127,8 +148,8 @@ defineExpose({
                 <div v-html="NotifsIcon" class="w-32 stroke-white fill-transparent"></div>
                 <h2 class="mt-4 text-xl">{{ $t('other.noNotifs') }}</h2>
             </div>
-            <template v-if="loadingState == LoadingState.Loaded">
-                <NotificationCard :key="notif.id" @click.stop="" v-for="notif in allNotifs" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
+            <template v-if="loadingState == LoadingState.Loaded || loadingState == LoadingState.LoadingNext">
+                <NotificationCard :key="notif.id" @click.stop="" v-for="notif in notifsToShow" :selected="selectedNotifs.includes(notif.id)" v-bind="notif" :post-names="postNames" />
             </template>
 
             <button @click="fetchNextPage" v-if="moreAvailable" class="mx-auto mt-3 w-max text-xl opacity-40 outline-none focus-within:opacity-100 hover:opacity-100">{{ $t('other.showMore') }}</button>
