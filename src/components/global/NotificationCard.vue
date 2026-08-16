@@ -34,7 +34,7 @@ const formText = computed(() => {
         return `<b>${props.from}</b> ${more}${actionText}`
 })
 const formTextAfter = computed(() => {
-    let actionText = ['', '', '', ' byl aktualizován'][types.indexOf(props.type)]
+    let actionText = ['', '', '', i18n.global.t('other.notifUpd')][types.indexOf(props.type)]
     return `${actionText}`
 })
 

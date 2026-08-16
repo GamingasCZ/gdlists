@@ -500,7 +500,8 @@
     "followed2": "Sledované",
     "folHelp1": "Zatím nic nesleduješ!",
     "folHelp2": "Když sleduješ příspěvek, tak dostaneš notifikaci, pokaždé když je aktualizován!",
-    "folHelp3": "Pro sledování, klikni v příspěvku na"
+    "folHelp3": "Pro sledování, klikni v příspěvku na",
+    "notifUpd": " byl aktualizován"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
