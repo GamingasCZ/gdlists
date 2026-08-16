@@ -149,7 +149,7 @@ const parsedComment = ref((() => {
                     :href="but[2]"
                     :target="but[2].includes('https') ? '_blank' : ''"
                 >
-                    <button class="flex flex-wrap gap-2 px-2 text-xl bg-opacity-20 rounded-md button bg-lof-200">
+                    <button class="flex flex-wrap gap-2 px-2 text-lg bg-opacity-20 rounded-md button bg-lof-200">
                         <img v-if="but[2].includes('https')" class="w-5" src="@/images/link.svg" alt="">
                         <img v-else class="w-5" src="@/images/browseMobHeader.svg" alt="">
                         {{ but[langIndex] }}

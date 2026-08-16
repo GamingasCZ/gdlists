@@ -51,7 +51,7 @@ switch ($method) {
             else {
                 $result["result"] = "added";
                 if ($creator["uid"])
-                    createNotification($mysqli, $accountCheck, $creator["uid"], 2, intval(isset($DATA["review_id"]))+1, $objectID);
+                    createNotification($mysqli, $accountCheck, group_single_user($creator["uid"]), 2, intval(isset($DATA["review_id"]))+1, $objectID);
             };
         }
         elseif ($checkRate["rate"] != $rating) { // Change rating
