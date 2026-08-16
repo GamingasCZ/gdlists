@@ -21,7 +21,6 @@ Rewritten with Vue, Typescipt and tailwind, the site should be less buggy and mo
 * User and text cards
 * Multiple moderators
 * Private server support
-* Subscribing to posts
 * Sidebars for lists
 * Importing levels CSV files
 * Improved background images, support for videos
