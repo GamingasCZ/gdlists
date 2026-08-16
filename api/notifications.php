@@ -33,10 +33,11 @@ function createNotification($mysqli, $from, $to, $type, $postType, $objectID, $o
               "ssiiii");
 }
 
-function deleteNotification($mysqli, $toUID, $postType, $objectID) {
+// please use this only for user groups!!
+function deleteNotification($mysqli, $toGroup, $postType, $objectID) {
     $res = doRequest($mysqli,
-              "DELETE FROM `notifications` WHERE `to_user`=? AND `type`=? AND `objectID`=?",
-              [$toUID, $postType, $objectID], "sii");
+              "DELETE FROM `notifications` WHERE `to_group`=? AND `type`=? AND `objectID`=?",
+              [group_exists($mysqli, $toGroup), $postType, $objectID], "sii");
 }
 
 function getUnread($mysqli, $user) {
