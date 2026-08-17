@@ -103,6 +103,7 @@ const closeLevels = () => {
             <option :value="0">{{ $t('other.all') }}</option>
             <option :value="1">{{ $t('other.mine') }}</option>
             <option :value="2">{{ $t('other.private') }}</option>
+            <option :value="3">{{ $t('other.followed2') }}</option>
         </select>
 
     </div>
@@ -117,7 +118,7 @@ const closeLevels = () => {
                 online-browser
                 :component="[ReviewPreview, ReviewPreview, LevelPreview][tab]"
                 :search="query"
-                :online-type="['', 'user', 'hidden'][contentType]"
+                :online-type="['', 'user', 'hidden', 'followed'][contentType]"
                 :online-subtype="['lists', 'reviews', 'levels'][tab]"
                 hide-search hide-tabs is-logged-in :picking="1 + (+onlyPickLevels)"
                 @switch-browser="contentType = $event"
