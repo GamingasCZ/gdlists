@@ -149,7 +149,8 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $dbInfo["searchQuery"] = $search;
 
     $uid = getLocalUserID();
-    if ($uid)
+    $isFollowed = [];
+    if ($uid && sizeof($allIDs))
       $isFollowed = isFollowed($mysqli, $allIDs, $review, $uid);
   } else {
     // Single list
