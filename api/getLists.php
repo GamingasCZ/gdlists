@@ -452,7 +452,7 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
     if ($checkFollowed == "")
       $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
     else
-      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(`follows`.`id`) as amount FROM $type $checkFollowed WHERE $showHidden `name` LIKE '%%%s%%' AND $type.`id`<=? $addReq", $_GET["searchQuery"]), [$_GET['startID']], "i");
+      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM $type $checkFollowed WHERE $showHidden `name` LIKE '%%%s%%' AND $type.`id`<=? $addReq", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
   else {
     $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders
