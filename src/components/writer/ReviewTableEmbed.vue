@@ -73,6 +73,7 @@ getList()
 
 const dialogs = inject("openedDialogs")
 const openCollab = inject("openCollab", (_,_2,_3) => {})
+const openTags = inject("openTags", (_,_2) => {})
 const mountedOnce = ref(false)
 </script>
 
@@ -101,22 +102,7 @@ const mountedOnce = ref(false)
             :list-name="postData.name"
             :favorited="favIDs.includes(level.levelID)"
             @open-collab="openCollab(ind, level.color, postData.data.levels[ind])"
+            @open-tags="openTags(ind, level)"
         />
     </LevelCardTableTable>
-
-    <!-- <component
-        v-else-if="postData"
-        :is="ReviewPreview"
-        @mousedown="saveScrolling"
-        :key="postData?.[0]?.id"
-        class="m-2"
-        v-bind="postData[0]"
-        :post="pp"
-        is-list
-        :disable-link="editable"
-        :user-array="postData[1]"
-        :review-details="postData[2]"
-        hide-remove
-        is-embed
-    /> -->
 </template>

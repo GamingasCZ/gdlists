@@ -712,6 +712,16 @@ const cancelHidingOptions = () => {
   navHidden.value = false
 }
 
+const extTagData = ref()
+const openTagViewer = (ind: number, tagData?: Level) => {
+  if (tagData) {
+    extTagData.value = tagData
+    return tagViewerOpened.value = -2
+  }
+  tagViewerOpened.value = ind
+}
+provide("openTags", openTagViewer)
+
 </script>
 
 <template> 
@@ -749,8 +759,8 @@ const cancelHidingOptions = () => {
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
   </DialogVue>
 
-  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
-    <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
+  <DialogVue :open="tagViewerOpened > -1 || tagViewerOpened == -2" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
+    <TagViewerPopup v-if="tagViewerOpened > -1  || tagViewerOpened == -2" @close-popup="tagViewerOpened = -1" :level-i-d="tagViewerOpened === -2 ? extTagData.levelID : LIST_DATA.data.levels[tagViewerOpened].levelID" :video="tagViewerOpened === -2 ? extTagData.video : LIST_DATA.data.levels[tagViewerOpened].video" :tags="tagViewerOpened === -2 ? extTagData.tags : LIST_DATA.data.levels[tagViewerOpened].tags"/>
   </DialogVue>
 
   <Teleport to="body">
@@ -885,7 +895,7 @@ const cancelHidingOptions = () => {
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
             :uploader-uid="LIST_CREATORDATA?.discord_id"
             @next-guess="doNextGuess($event)"
-            @open-tags="tagViewerOpened = $event"
+            @open-tags="openTagViewer"
             @open-collab="openCollabTools"
             @error="listErrorLoading = true"
             @fullscreen-image="levelImageFullscreen($event, index)"
