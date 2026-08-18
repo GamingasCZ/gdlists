@@ -735,7 +735,7 @@ const uploadInProgress = ref(false)
 const uploadReview = () => {
     if (uploadInProgress.value) return
 
-    if (!checkForErrors()) {
+    if (!checkForErrors().success) {
         openDialogs.settings = false
         return
     }
@@ -787,7 +787,7 @@ const removeReview = () => {
 
 const updateReview = (message?: string) => {
     if (uploadInProgress.value) return
-    if (!checkForErrors()) return
+    if (!checkForErrors().success) return
 
     if (hasFollowers.value && message === undefined) {
         openDialogs.updateMessage = true
