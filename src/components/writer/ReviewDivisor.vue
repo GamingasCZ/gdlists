@@ -23,7 +23,7 @@ const color = computed(() => {
         case 1: return postData?.value?.whitePage ? '#000000' : '#FFFFFF'
         case 2: return 'var(--brightGreen)'
         case 3:
-            let to = chroma((postData?.value.pageBGcolor as number[])[0], 0.53, 0.63, 'hsl').set('hsl.h', '+90')
+            let to = chroma((postData?.value?.pageBGcolor as number[])[0], 0.53, 0.63, 'hsl').set('hsl.h', '+90')
             return `linear-gradient(90deg, var(--brightGreen), ${to})`
         default: return postData?.value?.whitePage ? '#00000080' : '#FFFFFF50'
     }

@@ -186,6 +186,7 @@ const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchRespon
 const showChecklistsUsed = ref(false)
 var originalListData: PostData
 provide("batchEmbeds", embedsContent)
+provide("postData", computed(() => LIST_DATA.value.data))
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
 
