@@ -24,7 +24,7 @@ const props = defineProps<{
     align: string
 }>()
 
-const postData = ref<ListFetchResponse>()
+const postData = ref<ListFetchResponse | false | 2>(2)
 watch(props, async () => {
     if (props.buttonState[1] != props.index) return
 
@@ -45,6 +45,8 @@ const saveScrolling = () => {
     }
 }
 
+const favIDs = ref([])
+
 const embedData = inject<Ref<any[] | -1>>("batchEmbeds")
 const pp = ref()
 const getList = async () => {
@@ -58,6 +60,12 @@ const getList = async () => {
     else {
         list.data = modernizeList(list)
         postData.value = list
+
+        if (hasLocalStorage()) {
+            favIDs.value = JSON.parse(localStorage.getItem("favoriteIDs")!);
+            if (!favIDs.value)
+                favIDs.value = []
+        }
     }
 }
 watch(embedData, getList)
@@ -73,19 +81,24 @@ const mountedOnce = ref(false)
         <span class="text-sm leading-none opacity-50">{{ $t('reviews.embeddedHelp') }}</span>
     </ContainerHelp>
 
-    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click="dialogs.lists = [true, index, 0, true]" v-else-if="settings.post === false && !postData" icon="listTable" :help-content="$t('reviews.listEmbedShowcase')">
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click="dialogs.lists = [true, index, 0, true]" v-else-if="editable && !settings.post" icon="listTable" :help-content="$t('reviews.listEmbedShowcase')">
+    </ContainerHelp>
+
+    <ContainerHelp unclickable v-else-if="settings.post && postData === 2" icon="view" :help-content="$t('other.loading')+'...'">
     </ContainerHelp>
 
     <ContainerHelp unclickable v-else-if="settings.post && !postData" icon="view" :help-content="$t('reviews.deletedPost')">
     </ContainerHelp>
 
-    <LevelCardTableTable :active="true" v-else-if="postData" class="text-base my-2">
+    <LevelCardTableTable :active="true" v-else-if="postData !== 2" class="text-base my-2">
         <LevelCardTable
             v-for="(level, ind) in postData.data.levels"
+            :key="level.levelID"
             v-bind="level"
             :level-index="ind"
             :list-i-d="postData.data.id"
             :list-name="postData.name"
+            :favorited="favIDs.includes(level.levelID)"
         />
     </LevelCardTableTable>
 
