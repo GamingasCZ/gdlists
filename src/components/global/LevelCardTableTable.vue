@@ -5,7 +5,7 @@
 </script>
 
 <template>
-  <table v-if="active" class="max-w-[95vw] w-[70rem] overflow-auto mx-auto bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
+  <table v-if="active" class="max-w-[95vw] w-[70rem] text-center text-white overflow-auto mx-auto bg-gray-900 bg-opacity-80 rounded-md backdrop-blur-sm" >
     <th></th>
     <th>{{ $t('other.name') }}</th>
     <th>{{ $t('level.creator') }}</th>
