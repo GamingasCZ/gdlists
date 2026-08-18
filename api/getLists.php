@@ -359,7 +359,7 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
       $ids = implode(" OR ", $where);
 
       $res = doRequest($mysqli,
-      "SELECT * FROM `lists` WHERE $ids", array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
+      "SELECT `data`,`name`,`id`,`hidden` FROM `lists` WHERE $ids", array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
       foreach ($res as $list) {
         array_push($postData[$type], parseResult($list, true, noUserFetch: true, noRatingsFetch: true)[0]);
       }

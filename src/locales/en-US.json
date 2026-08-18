@@ -915,7 +915,8 @@
     "folMess3": "I updated many great things, such as...",
     "listEmbedShowcase": "Pick a list to display",
     "useReviews": "Use this review's levels",
-    "listTable": "Embed List"
+    "listTable": "Embed List",
+    "hideLink": "Hide Link"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

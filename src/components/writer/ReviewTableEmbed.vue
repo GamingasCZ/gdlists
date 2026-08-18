@@ -3,7 +3,6 @@ import { inject, type Ref, ref, watch } from 'vue';
 import ContainerHelp from './ContainerHelp.vue';
 import { hasLocalStorage } from '@/siteSettings';
 import { useRoute } from 'vue-router';
-import ReviewPreview from '../global/ReviewPreview.vue';
 import { type cListTable } from './containers';
 import LevelCardTableTable from '../global/LevelCardTableTable.vue';
 import LevelCardTable from '../global/LevelCardTable.vue';
@@ -48,7 +47,6 @@ const saveScrolling = () => {
 const favIDs = ref([])
 
 const embedData = inject<Ref<any[] | -1>>("batchEmbeds")
-const pp = ref()
 const getList = async () => {
     if (props.settings.post === false) return
     if (!embedData?.value || embedData.value == -1) return
@@ -92,7 +90,7 @@ const mountedOnce = ref(false)
     <ContainerHelp unclickable v-else-if="settings.post && !postData" icon="view" :help-content="$t('reviews.deletedPost')">
     </ContainerHelp>
 
-    <LevelCardTableTable :active="true" v-else-if="postData !== 2" class="text-base my-2">
+    <LevelCardTableTable :active="true" v-else-if="postData !== 2" class="text-base group relative my-2">
         <LevelCardTable
             v-for="(level, ind) in postData.data.levels"
             :key="level.levelID"
@@ -104,5 +102,11 @@ const mountedOnce = ref(false)
             @open-collab="openCollab(ind, level.color, postData.data.levels[ind])"
             @open-tags="openTags(ind, level)"
         />
+
+        <!-- Post link -->
+        <RouterLink v-if="!props.settings.useReviews && !props.settings.hideLink && !editable" @mousedown="saveScrolling" :to="`/${postData.hidden != '0' ? postData.hidden : postData.id}`" class="absolute border-b-4 border-lof-200 bg-greenGradient py-1 px-2 shadow-drop left-0 group-hover:opacity-100 transition-opacity duration-75 opacity-0 rounded-md -top-8">
+            <span class="opacity-40 mr-2">{{ $t('other.list') }}:</span> {{ postData.name }}
+            <img src="@/images/link.svg" class="inline w-4 ml-1" alt="">
+        </RouterLink>
     </LevelCardTableTable>
 </template>

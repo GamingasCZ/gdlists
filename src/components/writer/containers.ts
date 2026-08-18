@@ -376,6 +376,12 @@ const containers: Containers = {
                 title: i18n.global.t('reviews.useReviews'),
                 type: [ControlType.Checkbox],
                 default: false
+            },
+            {
+                key: "hideLink",
+                title: i18n.global.t('reviews.hideLink'),
+                type: [ControlType.Checkbox],
+                default: false
             }
         ],
         errorCheck: (settings: object) => settings.post ? success : error(0, 1)
@@ -468,7 +474,7 @@ export type caddVideo = {width: number, url: string, description: string}
 export type cShowRating = {level: number, show: number, hideUnrated: boolean}
 export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
 export type cShowList = {post: boolean, postType: number, pick: number}
-export type cListTable = {post: number, useRevies: boolean}
+export type cListTable = {post: number, useReviews: boolean, hideLink: boolean}
 export type cTwoColumns = {components: (Containers | boolean)[], gaps: boolean}
 export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
 

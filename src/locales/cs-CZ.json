@@ -915,8 +915,9 @@
     "folMess2": "Můžeš jim oznámit, co jsi provedl za změny.",
     "folMess3": "Ze super epických změn bych mohl vyjmenovat...",
     "listEmbedShowcase": "Vyber seznam pro zobrazení",
-    "useReviews": "Použít levely této recenze",
-    "listTable": "Vložit seznam"
+    "useReviews": "Použít levely recenze",
+    "listTable": "Vložit seznam",
+    "hideLink": "Skrýt odkaz"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
