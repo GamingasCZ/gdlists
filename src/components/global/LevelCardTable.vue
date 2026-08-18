@@ -35,7 +35,7 @@ const CARD_COL = ref<Color>(fixBrokenColors(props.color));
 const copyID = inject("idCopyTimestamp")
 
 const openCollab = () => {
-  if (!isCollab) return
+  if (!isCollab.value) return
   emit("openCollab", props.levelIndex, props.color)
 }
 

@@ -72,6 +72,7 @@ watch(embedData, getList)
 getList()
 
 const dialogs = inject("openedDialogs")
+const openCollab = inject("openCollab", (_,_2,_3) => {})
 const mountedOnce = ref(false)
 </script>
 
@@ -99,6 +100,7 @@ const mountedOnce = ref(false)
             :list-i-d="postData.data.id"
             :list-name="postData.name"
             :favorited="favIDs.includes(level.levelID)"
+            @open-collab="openCollab(ind, level.color, postData.data.levels[ind])"
         />
     </LevelCardTableTable>
 

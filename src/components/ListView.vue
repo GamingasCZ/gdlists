@@ -11,6 +11,7 @@ type ReviewContainer,
 type ViewedPinArray,
 URIHideUIOptions,
 type PostData,
+type Level,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -434,16 +435,22 @@ const collabData = ref({
   index: 0,
   levelID: 0
 })
-const openCollabTools = (ind: number, col: [number, number, number]) => {
-  if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
+const openCollabTools = (ind: number, col: [number, number, number], cData?: Level) => {
+  let data: Level;
+  if (cData)
+    data = cData
+  else
+    data = LIST_DATA.value?.data.levels[ind]
+  if (!cData && typeof data.creator == "string") return
 
-  collabData.value.levelName = LIST_DATA.value?.data.levels[ind].levelName
+  collabData.value.levelName = data.levelName
   collabData.value.levelColor = col
   collabData.value.index = ind
-  collabData.value.levelID = LIST_DATA.value?.data.levels[ind].levelID
-  collabData.value.collabData = LIST_DATA.value?.data.levels[ind].creator
-
+  collabData.value.levelID = data.levelID
+  collabData.value.collabData = data.creator
 }
+provide("openCollab", openCollabTools)
+
 const saveCollab = (ind: number) => {
   if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
   if (!hasLocalStorage()) return
