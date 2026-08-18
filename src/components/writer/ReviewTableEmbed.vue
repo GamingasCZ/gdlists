@@ -104,7 +104,7 @@ const mountedOnce = ref(false)
         />
 
         <!-- Post link -->
-        <RouterLink v-if="!props.settings.useReviews && !props.settings.hideLink && !editable" @mousedown="saveScrolling" :to="`/${postData.hidden != '0' ? postData.hidden : postData.id}`" class="absolute border-b-4 border-lof-200 bg-greenGradient py-1 px-2 shadow-drop left-0 group-hover:opacity-100 transition-opacity duration-75 opacity-0 rounded-md -top-8">
+        <RouterLink v-if="!props.settings.hideLink && !editable" @mousedown="saveScrolling" :to="`/${postData.hidden != '0' ? postData.hidden : postData.id}`" class="absolute border-b-4 border-lof-200 bg-greenGradient py-1 px-2 shadow-drop left-0 group-hover:opacity-100 transition-opacity duration-75 opacity-0 rounded-md -top-8">
             <span class="opacity-40 mr-2">{{ $t('other.list') }}:</span> {{ postData.name }}
             <img src="@/images/link.svg" class="inline w-4 ml-1" alt="">
         </RouterLink>

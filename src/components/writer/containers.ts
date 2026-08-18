@@ -372,12 +372,6 @@ const containers: Containers = {
                 default: 0
             },
             {
-                key: "useReviews",
-                title: i18n.global.t('reviews.useReviews'),
-                type: [ControlType.Checkbox],
-                default: false
-            },
-            {
                 key: "hideLink",
                 title: i18n.global.t('reviews.hideLink'),
                 type: [ControlType.Checkbox],
