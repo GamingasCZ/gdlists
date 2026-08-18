@@ -201,7 +201,7 @@ const settings = ref<HTMLDialogElement>()
 <template>
 	<div
 		class="flex relative flex-wrap w-full outline-none scroll-mt-24 reviewContainer min-h-4"
-		:class="{'min-w-12': !canEditText, 'min-w-64': canEditText}"
+		:class="{'min-w-12': !canEditText, 'min-w-64': canEditText && type == 'default'}"
 		:style="{ justifyContent: flexNames[align] }"
 		:data-type="type"
 		ref="textParent"
