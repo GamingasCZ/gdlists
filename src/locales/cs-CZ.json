@@ -913,7 +913,10 @@
     "updMess": "Zpráva o aktualizaci",
     "folMess1": "Tvůj příspěvek má sledující!",
     "folMess2": "Můžeš jim oznámit, co jsi provedl za změny.",
-    "folMess3": "Ze super epických změn bych mohl vyjmenovat..."
+    "folMess3": "Ze super epických změn bych mohl vyjmenovat...",
+    "listEmbedShowcase": "Vyber seznam pro zobrazení",
+    "useReviews": "Použít levely této recenze",
+    "listTable": "Vložit seznam"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

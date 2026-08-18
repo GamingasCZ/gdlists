@@ -8,6 +8,7 @@ import ReviewRatings from "./ReviewRatings.vue"
 import ReviewUsers from "./ReviewUsers.vue"
 import { i18n } from "@/locales"
 import ReviewCarousel from "./ReviewCarousel.vue"
+import ReviewTableEmbed from "./ReviewTableEmbed.vue"
 
 const success = {success: true}
 
@@ -350,7 +351,35 @@ const containers: Containers = {
             },
         ],
         errorCheck: (settings: object) => settings.components.length ? success : error(0, 3)
-    }
+    },
+    listTable: {
+        nestable: true,
+        canEditText: false,
+        additionalComponents: [ReviewTableEmbed],
+        limit: 5,
+        settings: [
+            {
+                key: "post",
+                title: i18n.global.t('other.post'),
+                type: [ControlType.Hidden],
+                required: true,
+                default: false
+            },
+            {
+                key: "pick",
+                title: i18n.global.t('reviews.pickList'),
+                type: [ControlType.Button],
+                default: 0
+            },
+            {
+                key: "useReviews",
+                title: i18n.global.t('reviews.useReviews'),
+                type: [ControlType.Checkbox],
+                default: false
+            }
+        ],
+        errorCheck: (settings: object) => settings.post ? success : error(0, 1)
+    },
 }
 
 /*
@@ -396,6 +425,7 @@ export type ContainerNames = 'default' |
 'showRating' |
 'twoColumns' |
 'showCollab' |
+'listTable' |
 'addCarousel'
 
 export type settings = cDefault & cHeading1 & cHeading2 & cHeading3 & cDivisor & cShowImage & caddVideo & cShowRating & cShowLevel & cShowList & cTwoColumns & cAddCarousel
@@ -438,6 +468,7 @@ export type caddVideo = {width: number, url: string, description: string}
 export type cShowRating = {level: number, show: number, hideUnrated: boolean}
 export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
 export type cShowList = {post: boolean, postType: number, pick: number}
+export type cListTable = {post: number, useRevies: boolean}
 export type cTwoColumns = {components: (Containers | boolean)[], gaps: boolean}
 export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
 

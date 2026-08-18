@@ -280,7 +280,7 @@ export const getReviewPreview = (postData: PostData) => {
 }
 
 export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | false = false) => {
-    let ids: number[][] = [[], [], []]
+    let ids: number[][] = [[], [], [], []]
     if (!data?.containers) return ids
     if (forceIDs === false) {
         data.containers.forEach(container => {
@@ -288,6 +288,9 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
             // 23.12.24 : fuck off
             if (container.type == "showList") {
                 ids[container.settings.postType].push(container.settings.post)
+            }
+            if (container.type == "listTable") {
+                ids[3].push(container.settings.post)
             }
             if (container.type == "twoColumns") {
                 container.settings.components.forEach(con => {
@@ -301,7 +304,7 @@ export const getEmbeds = async (data: ReviewList | null, forceIDs: number[][] | 
     } else ids = forceIDs
     if (ids.map(i => i.length).reduce((a, b) => a + b) < 1) return
 
-    let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(',')}}).then(res => res.data)
+    let postData = await axios.get(import.meta.env.VITE_API + "/getLists.php", {params: {batch: true, lists: ids[0].join(','), reviews: ids[1].join(','), levels: ids[2].join(','), listInnards: ids[3].join(',')}}).then(res => res.data)
     return postData
 }
 

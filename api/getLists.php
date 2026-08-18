@@ -323,9 +323,9 @@ if (count($_GET) <= 3 && !isset($_GET["batch"])) {
 }
 elseif (isset($_GET["batch"])) {
   $data;
-  $types = ["lists", "reviews", "levels"];
+  $types = ["lists", "reviews", "levels", "listInnards"];
   $fetchIDs = [];
-  for ($i = 0; $i < 3; $i++) {
+  for ($i = 0; $i < 4; $i++) {
     array_push($fetchIDs, array_slice(explode(",", $_GET[$types[$i]]), 0, 20));
   }
 
@@ -334,17 +334,27 @@ elseif (isset($_GET["batch"])) {
 
 function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   global $listRatings, $reviewRatings, $selRange, $selReviewRange,$mysqli;
-  $types = ["lists", "reviews", "levels"];
-  $postData = [[],[],[]];
-  for ($type=0; $type < 3; $type++) {
+  $types = ["lists", "reviews", "levels", "listInnards"];
+  $postData = [[],[],[],[]];
+  for ($type=0; $type < 4; $type++) {
     if (!isset($data[$type])) continue;
     if (!sizeof($data[$type])) continue;
 
-    $ratings = [$listRatings, $reviewRatings][$type];
-    $range = [$selRange, $selReviewRange, selLevelRange(false)][$type];
+    $ratings = [$listRatings, $reviewRatings, ''][$type];
+    $range = [$selRange, $selReviewRange, selLevelRange(false), ''][$type];
 
     $res;
-    if ($type == 2) {
+    if ($type == 3) {
+      $in = makeIn($data[3]);
+
+      $res = doRequest($mysqli,
+      "SELECT * FROM `lists` WHERE `id` IN $in[0]", $data[3], $in[1], true);
+      foreach ($res as $list) {
+        array_push($postData[$type], parseResult($list, true, noUserFetch: true, noRatingsFetch: true)[0]);
+      }
+      continue;
+    }
+    elseif ($type == 2) {
       $in = makeIN(array_map("intval", $data));
 
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders

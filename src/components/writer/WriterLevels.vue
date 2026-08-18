@@ -103,6 +103,7 @@ const openMoreDialog = (opt: number) => {
         case 0:
             dialogs.lists[0] = true
             dialogs.lists[2] = true
+            dialogs.lists[3] = false
             break;
         case 1:
             rouletteActive.value = true
