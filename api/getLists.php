@@ -344,17 +344,28 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
     $range = [$selRange, $selReviewRange, selLevelRange(false), ''][$type];
 
     $res;
-    if ($type == 3) {
-      $in = makeIn($data[3]);
+    if ($type == 3) { // fetching list innards
+      $where = [];
+      $fetchHidden = array_filter($data[$type], "isPrivate");
+      $inHidden = makeIN($fetchHidden);
+      if (strlen($inHidden[1]))
+        array_push($where, sprintf("(lists.hidden IN $inHidden[0])"));
+      
+      $fetchPublic = array_filter($data[$type], "isPublic");
+      $inPublic = makeIN($fetchPublic);
+      if (strlen($inPublic[1]))
+        array_push($where, sprintf("(lists.id IN $inPublic[0] AND `hidden` = 0)"));
+
+      $ids = implode(" OR ", $where);
 
       $res = doRequest($mysqli,
-      "SELECT * FROM `lists` WHERE `id` IN $in[0]", $data[3], $in[1], true);
+      "SELECT * FROM `lists` WHERE $ids", array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
       foreach ($res as $list) {
         array_push($postData[$type], parseResult($list, true, noUserFetch: true, noRatingsFetch: true)[0]);
       }
       continue;
     }
-    elseif ($type == 2) {
+    elseif ($type == 2) { // level fetching
       $in = makeIN(array_map("intval", $data));
 
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
@@ -364,7 +375,7 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
       GROUP BY levels_uploaders.levelID
       ", $range, $in[0]), $data, $in[1], true);
     }
-    else {
+    else { // reviews/lists fetching
       $where = [];
       $fetchHidden = array_filter($data[$type], "isPrivate");
       $inHidden = makeIN($fetchHidden);

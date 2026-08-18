@@ -7,6 +7,7 @@ import DifficultyIcon from "./DifficultyIcon.vue";
 import Dropdown from "../ui/Dropdown.vue";
 import { DEFAULT_RATINGS } from "@/Reviews";
 import LevelRatingDropdown from "./LevelRatingDropdown.vue";
+import { computed } from "vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -42,7 +43,7 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const isCollab = typeof props.creator != 'string'
+const isCollab = computed(() => typeof props.creator != 'string')
 
 </script>
 
@@ -72,7 +73,7 @@ const isCollab = typeof props.creator != 'string'
       <div class="flex gap-1">
         <img v-if="isCollab" src="@/images/collab.svg">
         <h3 v-if="!isCollab">{{ creator || $t('other.unnamesd') }}</h3>
-        <h3 @click="openCollab" :class="{'hover:underline cursor-pointer': typeof creator != 'string'}" v-else :title="creator[1][creator[0][0].role]">{{ creator[0][0].name }}</h3>
+        <h3 @click="openCollab" :class="{'hover:underline cursor-pointer': typeof creator != 'string'}" v-else :title="creator[1][creator[0][0].role]">{{ creator[0][0].name || creator[0][0] }}</h3>
       </div>
     </td>
 

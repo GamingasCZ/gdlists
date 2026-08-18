@@ -8,6 +8,7 @@ import { type cListTable } from './containers';
 import LevelCardTableTable from '../global/LevelCardTableTable.vue';
 import LevelCardTable from '../global/LevelCardTable.vue';
 import { type ListFetchResponse } from '@/interfaces.ts';
+import { modernizeList } from '@/Editor.ts';
 
 
 const emit = defineEmits<{
@@ -51,8 +52,13 @@ const getList = async () => {
     if (!embedData?.value || embedData.value == -1) return
     if (!embedData.value?.[3]) return
     
-    postData.value = embedData.value[3].filter(x => x.id == props.settings.post)[0]
-    console.log(embedData.value)
+    let list = embedData.value[3].filter(x => x.id == props.settings.post || x.hidden == props.settings.post)[0]
+    if (!list)
+        postData.value = false
+    else {
+        list.data = modernizeList(list)
+        postData.value = list
+    }
 }
 watch(embedData, getList)
 getList()
@@ -63,7 +69,7 @@ const mountedOnce = ref(false)
 
 <template>
 
-    <ContainerHelp unclickable v-if="embedData === -1" icon="showList" :help-content="$t('reviews.embedded')">
+    <ContainerHelp unclickable v-if="embedData === -1" icon="listTable" :help-content="$t('reviews.embedded')">
         <span class="text-sm leading-none opacity-50">{{ $t('reviews.embeddedHelp') }}</span>
     </ContainerHelp>
 
