@@ -46,7 +46,12 @@ $decoded = json_decode($DATA["listData"], true);
 // $listCheck = checkList($DATA["listData"]);
 // if (is_string($listCheck)) die(json_encode([-1, $listCheck]));
 
-$fuckupData = sanitizeInput(array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"], $DATA["updateMessage"]));
+$updateMessLength = strlen($DATA["updateMessage"]) > 0;
+$dataToFuckup = array($DATA["id"],$DATA["listData"],$DATA["isNowHidden"], $DATA["hidden"]);
+if ($updateMessLength)
+    array_push($dataToFuckup, $DATA["updateMessage"]);
+
+$fuckupData = sanitizeInput($dataToFuckup);
 
 // Password check
 if ($IS_LIST) {
@@ -131,7 +136,7 @@ $thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
 $diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
 $retListID = $DATA["id"];
 $updateMessage = false;
-if (!is_int($DATA["updateMessage"]))
+if (!is_int($DATA["updateMessage"]) && $updateMessLength > 0)
     $updateMessage = substr($fuckupData[4], 0, 300);
 
 // Private list settings
