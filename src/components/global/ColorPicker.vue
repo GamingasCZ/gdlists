@@ -8,6 +8,7 @@ const props = defineProps<{
   saturation?: number;
   lightness?: number;
   hex?: string;
+  full?: boolean
 }>()
 
 const emit = defineEmits(["colorsModified"]);
@@ -17,7 +18,10 @@ const colorsHex = ref(props.hex ?? chroma.hsl(props.hue, props.saturation, props
 const modColors = (ind: number, val: number) => {
   colors.value[ind] = val
   colorsHex.value = chroma.hsl(colors.value[0], colors.value[1], colors.value[2]/64).hex()
-  emit('colorsModified', props.hex ? colorsHex.value : colors.value)
+  if (props.full)
+    emit('colorsModified', [colors.value[0], colors.value[1]/100, colors.value[2]/100])
+  else
+    emit('colorsModified', props.hex ? colorsHex.value : colors.value)
 }
 
 onMounted(() => {
@@ -52,19 +56,19 @@ onMounted(() => {
       />
     </div>
 
-    <!-- <div class="flex flex-wrap gap-2">       -->
-      <!-- <div class="grow min-w-84">
+    <!-- <div class="flex flex-wrap gap-2"> -->
+      <div v-if="full" class="grow min-w-84">
         <div :style="{background: `linear-gradient(90deg, white, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <input
           type="range"
           class="w-full colorPickerSlider"
           min="0"
-          max="32"
+          :max="full ? 100 : 32"
           step="1"
           :value="colors[1]"
           @input="modColors(1, parseInt($event.target?.value))"
         />
-      </div> -->
+      </div>
   
       <div class="grow min-w-96">
         <div :style="{background: `linear-gradient(90deg, black, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
@@ -72,7 +76,7 @@ onMounted(() => {
           type="range"
           class="w-full colorPickerSlider"
           min="0"
-          max="32"
+          :max="full ? 100 : 32"
           step="1"
           :value="colors[2]"
           @input="modColors(2, parseInt($event.target?.value))"

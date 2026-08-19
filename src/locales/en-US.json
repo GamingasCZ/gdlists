@@ -531,7 +531,8 @@
     "notifUpd": " was updated!",
     "presets": "Presets",
     "activate": "Activate",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "flip": "Flip Around"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -922,12 +923,16 @@
     "listTable": "Embed List",
     "hideLink": "Hide Link",
     "palHelp1": "You haven't saved any pallets yet.",
-    "palHelp2": "To save a pallete, tap Save, when creating a custom pallete."
+    "palHelp2": "To save a pallete, tap Save, when creating a custom pallete.",
+    "gradHelp1": "You haven't picked a pallet yet.",
+    "gradHelp2": "You selected a pallete.",
+    "gradHelp3": "Pallete {0} is active."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
   },
   "review": {
-    "colorful": "Colorful"
+    "colorful": "Colorful",
+    "gradStops": "Gradient Stops"
   }
 }

@@ -506,7 +506,8 @@
     "notifUpd": " byl aktualizován",
     "presets": "Předchystané",
     "activate": "Aktivovat",
-    "deactivate": "Deaktivovat"
+    "deactivate": "Deaktivovat",
+    "flip": "Převrátit"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -923,12 +924,16 @@
     "listTable": "Vložit seznam",
     "hideLink": "Skrýt odkaz",
     "palHelp1": "Zatím jsi neuložil žádné palety.",
-    "palHelp2": "Pro uložení palety, klikni na Uložit při vytváření vlastní palety."
+    "palHelp2": "Pro uložení palety, klikni na Uložit při vytváření vlastní palety.",
+    "gradHelp1": "Zatím jsi nevybral žádnou paletu.",
+    "gradHelp2": "Vybral jsi novou paletu.",
+    "gradHelp3": "Paleta {0} je aktivní."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
   },
   "review": {
-    "colorful": "Barevná"
+    "colorful": "Barevná",
+    "gradStops": "Zarážky přechodu"
   }
 }
