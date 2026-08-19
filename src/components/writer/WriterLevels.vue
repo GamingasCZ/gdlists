@@ -8,12 +8,14 @@ import Dialog from "../global/Dialog.vue";
 import type { FavoritedLevel, Level, LevelList, ReviewDraft, ReviewList } from "@/interfaces";
 import PickerPopup from "../global/PickerPopup.vue";
 import LevelBubble from "../global/LevelBubble.vue";
+import ColorizerPopup from "./Colorizer.vue";
 import axios from "axios";
 import Dropdown from "../ui/Dropdown.vue";
 import Plus from "@/svgs/Plus.vue";
 import LevelRoulette from "./LevelRoulette.vue";
 import DraftCard from "./DraftCardSmall.vue";
 import type { Post } from "@/writers/Writer";
+import { dialog } from "../ui/sizes.ts";
 
 const props = defineProps<{
     subtext: string
@@ -86,7 +88,8 @@ const moveLevel = (from: number, to: number) => {
 
 const levelDialogs = ref({
     import: false,
-    saved: false
+    saved: false,
+    colorizer: false
 })
 
 const getSavedLevels = () => {
@@ -101,17 +104,20 @@ const moreLevOptOpen = ref(false)
 const openMoreDialog = (opt: number) => {
     switch (opt) {
         case 0:
+            levelDialogs.value.colorizer = true
+            break;
+        case 1:
             dialogs.lists[0] = true
             dialogs.lists[2] = true
             dialogs.lists[3] = false
             break;
-        case 1:
+        case 2:
             rouletteActive.value = true
             break;
-        case 2:
+        case 3:
             levelDialogs.value.saved = true
             break;
-        case 3:
+        case 4:
             levelDialogs.value.import = true
             break;
     }
@@ -133,6 +139,10 @@ const isSearching = ref(false)
         <PickerPopup v-model="savedSearch">
             <LevelBubble v-for="level in getSavedLevels()" :data="level" @pick="addLevel($event)" />
         </PickerPopup>
+    </Dialog>
+
+    <Dialog :open="levelDialogs.colorizer" @close-popup="levelDialogs.colorizer = false" :title="$t('editor.colorizor')" :width="dialog.large">
+        <ColorizerPopup />
     </Dialog>
 
     <section :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
@@ -199,7 +209,7 @@ const isSearching = ref(false)
                         </button>
                     </section>
                     <section>
-                        <button class="flex gap-4 items-center p-3 text-lg bg-black bg-opacity-0 hover:bg-opacity-60">
+                        <button @click="levelDialogs.colorizer = true" class="flex gap-4 items-center p-3 text-lg bg-black bg-opacity-0 hover:bg-opacity-60">
                             <img src="@/images/color.svg" class="w-10" alt="">
                             <span>Set Up a Color Scheme</span>
                         </button>
