@@ -336,7 +336,7 @@ export const getListPreview = (postData: PostData) => {
 export const lastUsedTags = ref<number[]>([])
 
 export var lastPostPickerTab = [0, 0]
-export const modLastPPTab = (x: [0 | 1 | 2, 0 | 1 | 2]) => lastPostPickerTab = x
+export const modLastPPTab = (x: [0 | 1 | 2 | 3, 0 | 1 | 2 | 3]) => lastPostPickerTab = x
 
 // from: https://stackoverflow.com/a/7616484
 export const generateHash = (string: string) => {

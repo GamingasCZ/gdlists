@@ -32,7 +32,7 @@ const props = defineProps<{
   isFollowed?: string[]
 
   userArray: ListCreatorInfo[];
-  disableLink?: boolean | 2
+  disableLink?: boolean | 2 | 3
   unrolledOptions: boolean
 
   isList: boolean
@@ -115,7 +115,7 @@ let background = JSON.parse(props.thumbProps || '[]')
 background.splice(0,0,thumbLink.value)
 let xPos = ["left", "center", "right"][background[3]]
 const clickReview = (opt: number) => {
-  if (props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: +(!props.isList)})
+  if (props.disableLink == 3 || props.disableLink == 2 || typeof opt == 'number') emit('clickedOption', {option: opt, postID: props.hidden != '0' ? props.hidden : props.id, postType: +(!props.isList)})
   else if (props.disableLink == 1) emit('selected')
   else emit('selectedLink', creatorData.value)
 }
@@ -144,7 +144,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
       backgroundImage: getGradient(listColor),
       borderColor: listColor.darken(2).hex(),
     }"
-    @click="clickReview"
+    @click="clickReview(disableLink == 3 ? 0 : $event)"
   >
     
     <div class="relative w-full h-36 bg-cover">
@@ -182,7 +182,7 @@ const canEdit = ref(!props.disableLink && props.uid == currentUID.value)
     </div>
 
     <section class="flex overflow-hidden flex-col justify-between items-start m-1 h-full">
-      <div class="flex items-center">
+      <div class="flex itprops.disableLink == 3ems-center">
         <h2 class="inline text-xl font-bold leading-tight">{{ decodeURIComponent(name.replaceAll("+", " ")) }}</h2>
         <img v-if="diffGuesser" class="inline ml-2 w-6" src="@/images/diffGuessSign.svg" alt="" />
         <img v-if="isFollowed && isFollowed.includes(`${isList ? 'l' : 'r'}${id}`)" :title="$t('other.followed')" src="@/images/view.svg" class="ml-2 w-5" alt="">

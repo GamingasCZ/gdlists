@@ -11,6 +11,7 @@ type ReviewContainer,
 type ViewedPinArray,
 URIHideUIOptions,
 type PostData,
+type Level,
 } from "@/interfaces";
 import CommentSection from "./levelViewer/CommentSection.vue";
 import LevelCard from "./global/LevelCard.vue";
@@ -186,6 +187,7 @@ const embedsContent = ref<[ListFetchResponse, ListFetchResponse, ListFetchRespon
 const showChecklistsUsed = ref(false)
 var originalListData: PostData
 provide("batchEmbeds", embedsContent)
+provide("postData", computed(() => LIST_DATA.value.data))
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
 
@@ -222,12 +224,12 @@ async function loadReview(loadedData: ReviewList | null) {
     LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
     LIST_CREATORDATA.value = res[1]
 
+    postFollowing.value = res[5]
+    
+    postExtrasApply()
+
     // Fetch embeds
     embedsContent.value = await getEmbeds(LIST_DATA.value.data)
-
-    postFollowing.value = res[5]
-
-    postExtrasApply()
   } catch (e) {
     listErrorLoading.value = true
   }
@@ -433,16 +435,22 @@ const collabData = ref({
   index: 0,
   levelID: 0
 })
-const openCollabTools = (ind: number, col: [number, number, number]) => {
-  if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
+const openCollabTools = (ind: number, col: [number, number, number], cData?: Level) => {
+  let data: Level;
+  if (cData)
+    data = cData
+  else
+    data = LIST_DATA.value?.data.levels[ind]
+  if (!cData && typeof data.creator == "string") return
 
-  collabData.value.levelName = LIST_DATA.value?.data.levels[ind].levelName
+  collabData.value.levelName = data.levelName
   collabData.value.levelColor = col
   collabData.value.index = ind
-  collabData.value.levelID = LIST_DATA.value?.data.levels[ind].levelID
-  collabData.value.collabData = LIST_DATA.value?.data.levels[ind].creator
-
+  collabData.value.levelID = data.levelID
+  collabData.value.collabData = data.creator
 }
+provide("openCollab", openCollabTools)
+
 const saveCollab = (ind: number) => {
   if (typeof LIST_DATA.value?.data.levels[ind].creator == "string") return
   if (!hasLocalStorage()) return
@@ -704,6 +712,17 @@ const cancelHidingOptions = () => {
   navHidden.value = false
 }
 
+const extTagData = ref()
+const openTagViewer = (ind: number, tagData?: Level, uid?: string) => {
+  if (tagData) {
+    extTagData.value = tagData
+    extTagData.value.uid = uid
+    return tagViewerOpened.value = -2
+  }
+  tagViewerOpened.value = ind
+}
+provide("openTags", openTagViewer)
+
 </script>
 
 <template> 
@@ -741,8 +760,16 @@ const cancelHidingOptions = () => {
     <DiffGuesserHelpDialog @close-popup="guessHelpOpened = false"/>
   </DialogVue>
 
-  <DialogVue :open="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
-    <TagViewerPopup v-if="tagViewerOpened > -1" @close-popup="tagViewerOpened = -1" :level-i-d="LIST_DATA.data.levels[tagViewerOpened].levelID" :video="LIST_DATA.data.levels[tagViewerOpened].video" :tags="LIST_DATA.data.levels[tagViewerOpened].tags"/>
+  <DialogVue :open="tagViewerOpened > -1 || tagViewerOpened == -2" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
+    <TagViewerPopup
+      v-if="tagViewerOpened > -1  || tagViewerOpened == -2" 
+      @close-popup="tagViewerOpened = -1"
+      :level-i-d="tagViewerOpened === -2 ? extTagData.levelID : LIST_DATA.data.levels[tagViewerOpened].levelID"
+      :video="tagViewerOpened === -2 ? extTagData.video : LIST_DATA.data.levels[tagViewerOpened].video"
+      :tags="tagViewerOpened === -2 ? extTagData.tags : LIST_DATA.data.levels[tagViewerOpened].tags"
+      :commentary="tagViewerOpened === -2 ? extTagData.commentary : LIST_DATA.data.levels[tagViewerOpened].commentary"
+      :uid="tagViewerOpened === -2 ? extTagData.uid : LIST_CREATOR"
+    />
   </DialogVue>
 
   <Teleport to="body">
@@ -860,7 +887,7 @@ const cancelHidingOptions = () => {
 
       <!-- List -->
       <div ref="postContent" v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
-        <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
+        <LevelCardTableTable :active="SETTINGS.levelViewMode == 2 && cardGuessing == -1">
           <component
             v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
             :is="[LevelCard, LevelCardCompact, LevelCardTable][cardGuessing == -1 ? SETTINGS.levelViewMode : 0]"
@@ -877,7 +904,7 @@ const cancelHidingOptions = () => {
             :diff-guess-array="LIST_DATA.data.diffGuesser ?? [false, false, false]"
             :uploader-uid="LIST_CREATORDATA?.discord_id"
             @next-guess="doNextGuess($event)"
-            @open-tags="tagViewerOpened = $event"
+            @open-tags="openTagViewer"
             @open-collab="openCollabTools"
             @error="listErrorLoading = true"
             @fullscreen-image="levelImageFullscreen($event, index)"

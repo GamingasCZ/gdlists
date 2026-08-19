@@ -24,7 +24,7 @@ const props = defineProps<{
   commentID: {type: 'list' | 'review', objectID: number, isHidden: boolean}
   refreshButton: boolean
   component: object
-  picking: false | 1 | 2
+  picking: false | 1 | 2 | 3
   displayInRows: boolean
   highlight?: number
 }>()
@@ -411,7 +411,7 @@ defineExpose({
             <h2 class="min-w-max text-2xl font-bold opacity-50">{{ $t('other.folHelp1') }}</h2>
             <p class="opacity-50">{{ $t('other.folHelp3') }} <img class="inline mr-1" src="@/images/viewLine.svg"><b>{{ $t('other.follow') }}</b>.</p>
             <p class="opacity-50">{{ $t('other.folHelp2') }}</p>
-            <RouterLink to="/random">
+            <RouterLink v-if="!hideTabs" to="/random">
               <button class="flex gap-3 items-center px-2 rounded-md button bg-greenGradient">
                 <img src="@/images/dice.svg" class="box-border p-1 w-10 text-2xl" alt="" />{{ $t('listViewer.goToRandom') }}
               </button>

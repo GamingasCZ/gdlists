@@ -29,7 +29,7 @@ watch(props, async () => {
 
     switch (props.buttonState[0]) {
         case "pick":
-            dialogs.lists = [true, props.index, 0]
+            dialogs.lists = [true, props.index, 0, false]
             break;
     }
     emit("clearButton")
@@ -79,7 +79,7 @@ const mountedOnce = ref(false)
         <span class="text-sm leading-none opacity-50">{{ $t('reviews.embeddedHelp') }}</span>
     </ContainerHelp>
 
-    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click="dialogs.lists = [true, index, 0]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
+    <ContainerHelp @vue:mounted="!mountedOnce && ($event.component?.exposed?.doFocus() || (mountedOnce = true))" @click="dialogs.lists = [true, index, 0, false]" v-else-if="settings.post === false && !postData" icon="showList" :help-content="$t('reviews.listShowcase')">
     </ContainerHelp>
 
     <ContainerHelp unclickable v-else-if="settings.post && ((postData?.[0] === undefined && typeof postData?.[1] == 'object') || !postData)" icon="view" :help-content="$t('reviews.deletedPost')">

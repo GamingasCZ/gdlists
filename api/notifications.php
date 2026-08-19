@@ -80,7 +80,8 @@ function mark_notifs_read($mysqli, $user, $after_date, $all = false) {
             INNER JOIN `groups` ON groups.id=notifications.to_group
             INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
-        WHERE `notif_id` IS NULL AND NOT `id` IS NULL", [], "");
+        WHERE `notif_id` IS NULL AND NOT `id` IS NULL
+        GROUP BY `notif_id`", [], "");
     }
     else { // only selected notifs
         doRequest($mysqli,
@@ -90,7 +91,8 @@ function mark_notifs_read($mysqli, $user, $after_date, $all = false) {
             INNER JOIN `groups` ON groups.id=notifications.to_group
             INNER JOIN `group_members` gm ON (groups.id=gm.group_id OR (groups.id=0)) AND gm.user='$user') t2
         LEFT JOIN `read_notifications` ON t2.id=`read_notifications`.`notif_id` AND `user`='$user'
-        WHERE `notif_id` IS NULL AND `time` >= '$after_date'", [], "");
+        WHERE `notif_id` IS NULL AND `time` >= '$after_date'
+        GROUP BY `notif_id`", [], "");
     }
 }
 

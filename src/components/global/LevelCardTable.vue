@@ -7,6 +7,8 @@ import DifficultyIcon from "./DifficultyIcon.vue";
 import Dropdown from "../ui/Dropdown.vue";
 import { DEFAULT_RATINGS } from "@/Reviews";
 import LevelRatingDropdown from "./LevelRatingDropdown.vue";
+import { computed } from "vue";
+import CircularRating from "../ui/CircularRating.vue";
 
 interface Extras {
   favorited: boolean | undefined;
@@ -34,7 +36,7 @@ const CARD_COL = ref<Color>(fixBrokenColors(props.color));
 const copyID = inject("idCopyTimestamp")
 
 const openCollab = () => {
-  if (!isCollab) return
+  if (!isCollab.value) return
   emit("openCollab", props.levelIndex, props.color)
 }
 
@@ -42,7 +44,7 @@ onErrorCaptured(() => {
   emit("error")
 })
 
-const isCollab = typeof props.creator != 'string'
+const isCollab = computed(() => typeof props.creator != 'string')
 
 </script>
 
@@ -72,7 +74,7 @@ const isCollab = typeof props.creator != 'string'
       <div class="flex gap-1">
         <img v-if="isCollab" src="@/images/collab.svg">
         <h3 v-if="!isCollab">{{ creator || $t('other.unnamesd') }}</h3>
-        <h3 @click="openCollab" :class="{'hover:underline cursor-pointer': typeof creator != 'string'}" v-else :title="creator[1][creator[0][0].role]">{{ creator[0][0].name }}</h3>
+        <h3 @click="openCollab" :class="{'hover:underline cursor-pointer': typeof creator != 'string'}" v-else :title="creator[1][creator[0][0].role]">{{ creator[0][0].name || creator[0][0] }}</h3>
       </div>
     </td>
 
@@ -81,15 +83,30 @@ const isCollab = typeof props.creator != 'string'
     </td>
 
     <td class="text-center">
-      <a class="mx-2" v-if="levelID" :href="`https://gdbrowser.com/${levelID}`" target="_blank">GDB</a>
-      <a class="mx-2" v-if="video" :href="`https://youtu.be/${video}`">Video</a>
+      <div class="flex gap-3 justify-center">
+        <template v-if="ratings?.[0]">
+          <CircularRating v-for="(rate, ind) in ratings[0]" v-show="rate > -1" class="!w-5 text-sm" :name="DEFAULT_RATINGS[ind].name" :min="0" :max="10" :value="rate" :color="chroma.hsl(...DEFAULT_RATINGS[ind].color).hex()" mini name="" />
+        </template>
+        <button v-if="commentary" @click="emit('openTags', levelIndex)" class="button">
+          <img src="@/images/comment.svg" class="w-5" alt="">
+        </button>
+      </div>
     </td>
-
+    
     <!-- Favorite star -->
     <td class="pr-1 w-5">
-      <button @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)" :class="{ disabled: isFavorited }" class="flex justify-center items-center w-max"
-        v-if="isFavorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars"><img class="w-5" src="../../images/star.svg">
-      </button>
+      <div class="flex gap-1 justify-center">
+        <a v-if="levelID" :title="$t('listViewer.dispOnGDB')" :href="`https://gdbrowser.com/${levelID}`" target="_blank">
+          <img src="@/images/modGDB.svg" class="w-5 min-w-5" alt="">
+        </a>
+        <a v-if="video" :title="$t('level.video')" :href="`https://youtu.be/${video}`">
+          <img src="@/images/modYT.svg" class="w-5 min-w-5" alt="">
+        </a>
+        <button @click="isFavorited = doFavoriteLevel(props, isFavorited, CARD_COL)" :class="{ disabled: isFavorited }" class="flex justify-center items-center w-max"
+          v-if="isFavorited != undefined && levelID?.toString()?.match(/^\d+$/) && !disableStars">
+          <img class="w-5 min-w-5" src="../../images/star.svg">
+        </button>
+      </div>
     </td>
   </tr>
 </template>

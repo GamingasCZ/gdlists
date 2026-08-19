@@ -173,7 +173,7 @@ const openDialogs = reactive({
     levels: false,
     tags: false,
     collabs: [false, 0],
-    lists: [false, 0, 0],
+    lists: [false, 0, 0, false],
     BGpicker: [false, 0, 0],
     ratings: false,
     bgPreview: false,
@@ -735,7 +735,7 @@ const uploadInProgress = ref(false)
 const uploadReview = () => {
     if (uploadInProgress.value) return
 
-    if (!checkForErrors()) {
+    if (!checkForErrors().success) {
         openDialogs.settings = false
         return
     }
@@ -787,7 +787,7 @@ const removeReview = () => {
 
 const updateReview = (message?: string) => {
     if (uploadInProgress.value) return
-    if (!checkForErrors()) return
+    if (!checkForErrors().success) return
 
     if (hasFollowers.value && message === undefined) {
         openDialogs.updateMessage = true
@@ -1317,7 +1317,7 @@ const modifyPostName = () => {
         <DialogVue :title="$t('help.Lists')" :open="openDialogs.lists[0]" @close-popup="openDialogs.lists[0] = false"
             :width="dialog.large">
             <ListPickerPopup @close-popup="openDialogs.lists[0] = false" :data="POST_DATA.containers"
-                :only-pick-levels="openDialogs.lists[2]" @add-level="listPickerPick" />
+                :only-pick-levels="openDialogs.lists[2]" :only-pick-lists="openDialogs.lists[3]" @add-level="listPickerPick" />
         </DialogVue>
 
         <DialogVue :open="openDialogs.BGpicker[0]" @close-popup="openDialogs.BGpicker[0] = false" disable-tap-close

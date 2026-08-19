@@ -323,9 +323,9 @@ if (count($_GET) <= 3 && !isset($_GET["batch"])) {
 }
 elseif (isset($_GET["batch"])) {
   $data;
-  $types = ["lists", "reviews", "levels"];
+  $types = ["lists", "reviews", "levels", "listInnards"];
   $fetchIDs = [];
-  for ($i = 0; $i < 3; $i++) {
+  for ($i = 0; $i < 4; $i++) {
     array_push($fetchIDs, array_slice(explode(",", $_GET[$types[$i]]), 0, 20));
   }
 
@@ -334,17 +334,38 @@ elseif (isset($_GET["batch"])) {
 
 function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
   global $listRatings, $reviewRatings, $selRange, $selReviewRange,$mysqli;
-  $types = ["lists", "reviews", "levels"];
-  $postData = [[],[],[]];
-  for ($type=0; $type < 3; $type++) {
+  $types = ["lists", "reviews", "levels", "listInnards"];
+  $postData = [[],[],[],[]];
+  for ($type=0; $type < 4; $type++) {
     if (!isset($data[$type])) continue;
     if (!sizeof($data[$type])) continue;
 
-    $ratings = [$listRatings, $reviewRatings][$type];
-    $range = [$selRange, $selReviewRange, selLevelRange(false)][$type];
+    $ratings = [$listRatings, $reviewRatings, ''][$type];
+    $range = [$selRange, $selReviewRange, selLevelRange(false), ''][$type];
 
     $res;
-    if ($type == 2) {
+    if ($type == 3) { // fetching list innards
+      $where = [];
+      $fetchHidden = array_filter($data[$type], "isPrivate");
+      $inHidden = makeIN($fetchHidden);
+      if (strlen($inHidden[1]))
+        array_push($where, sprintf("(lists.hidden IN $inHidden[0])"));
+      
+      $fetchPublic = array_filter($data[$type], "isPublic");
+      $inPublic = makeIN($fetchPublic);
+      if (strlen($inPublic[1]))
+        array_push($where, sprintf("(lists.id IN $inPublic[0] AND `hidden` = 0)"));
+
+      $ids = implode(" OR ", $where);
+
+      $res = doRequest($mysqli,
+      "SELECT `data`,`name`,`id`,`hidden` FROM `lists` WHERE $ids", array_merge($fetchHidden, $fetchPublic), $inPublic[1] . $inHidden[1], true);
+      foreach ($res as $list) {
+        array_push($postData[$type], parseResult($list, true, noUserFetch: true, noRatingsFetch: true)[0]);
+      }
+      continue;
+    }
+    elseif ($type == 2) { // level fetching
       $in = makeIN(array_map("intval", $data));
 
       $res = doRequest($mysqli, sprintf("SELECT %s FROM levels_uploaders
@@ -354,7 +375,7 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
       GROUP BY levels_uploaders.levelID
       ", $range, $in[0]), $data, $in[1], true);
     }
-    else {
+    else { // reviews/lists fetching
       $where = [];
       $fetchHidden = array_filter($data[$type], "isPrivate");
       $inHidden = makeIN($fetchHidden);
@@ -452,7 +473,7 @@ function selectBatch($data, $noUserFetch = false, $noRatingsFetch = false) {
     if ($checkFollowed == "")
       $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM %s WHERE %s `name` LIKE '%%%s%%' AND `id`<=? %s", $type, $showHidden, $_GET["searchQuery"], $addReq), [$_GET['startID']], "i");
     else
-      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(`follows`.`id`) as amount FROM $type $checkFollowed WHERE $showHidden `name` LIKE '%%%s%%' AND $type.`id`<=? $addReq", $_GET["searchQuery"]), [$_GET['startID']], "i");
+      $maxpageQuery = doRequest($mysqli, sprintf("SELECT COUNT(*) as amount FROM $type $checkFollowed WHERE $showHidden `name` LIKE '%%%s%%' AND $type.`id`<=? $addReq", $_GET["searchQuery"]), [$_GET['startID']], "i");
   }
   else {
     $query = sprintf("SELECT %s, count(levels_uploaders.reviewID) as inReviews, count(levels_uploaders.listID) as inLists FROM levels_uploaders

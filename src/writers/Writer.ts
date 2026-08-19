@@ -367,6 +367,11 @@ export const REVIEW: Writer = {
                     icon: "showList",
                     action: ["add", 'showList']
                 },
+                {
+                    tooltip: i18n.global.t('reviews.listTable'),
+                    icon: "listTable",
+                    action: ["add", 'listTable']
+                },
             ],
             right: [
                 {

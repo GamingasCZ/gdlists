@@ -56,7 +56,7 @@ if (is_string($postExtras)) die(json_encode([-1, $postExtras]));
 
 
 // Post settings
-$diffGuess = $DATA["diffGuesser"] == 1 ? 1 : 0;
+$diffGuess = ($DATA["diffGuesser"] == 1 || $DATA["diffGuesser"][0]) ? 1 : 0;
 $disableComments = $DATA["disComments"] == 1 ? 1 : 0;
 
 // Checking request

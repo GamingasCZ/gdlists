@@ -912,7 +912,10 @@
     "updMess": "Update Message",
     "folMess1": "Your post has followers!",
     "folMess2": "Feel free to tell them, what you updated.",
-    "folMess3": "I updated many great things, such as..."
+    "folMess3": "I updated many great things, such as...",
+    "listEmbedShowcase": "Pick a list to display",
+    "listTable": "Embed List",
+    "hideLink": "Hide Link"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -14,6 +14,7 @@ import { lastPostPickerTab, modLastPPTab } from "@/Editor";
 const props = defineProps<{
     data: any[]
     onlyPickLevels: boolean
+    onlyPickLists?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -23,7 +24,7 @@ const emit = defineEmits<{
 
 const query = ref("")
 const state = ref(0) // -3 - Loading, -2 - Error, -1 - No results, 0 - Nothing, 1 - Has lists
-const tab = ref(lastPostPickerTab[0])
+const tab = ref(props.onlyPickLists ? 0 : lastPostPickerTab[0])
 
 const switchTab = (newTab: number) => {
     tab.value = newTab
@@ -49,11 +50,13 @@ const pickList = (data: selectedList) => {
     if (data[0].option == 0) {
         if (props.data[selCont.value[0]].type == "twoColumns") {
             props.data[selCont.value[0]].settings.components[selNest.value[1]][selNest.value[2]].settings.post = data[0].postID
-            props.data[selCont.value[0]].settings.components[selNest.value[1]][selNest.value[2]].settings.postType = data[0].postType
+            if (!props.onlyPickLists)
+                props.data[selCont.value[0]].settings.components[selNest.value[1]][selNest.value[2]].settings.postType = data[0].postType
         }
         else {
             props.data[selCont.value[0]].settings.post = data[0].postID
-            props.data[selCont.value[0]].settings.postType = data[0].postType
+            if (!props.onlyPickLists)
+                props.data[selCont.value[0]].settings.postType = data[0].postType
         }
         
         addToInjected()
@@ -103,11 +106,12 @@ const closeLevels = () => {
             <option :value="0">{{ $t('other.all') }}</option>
             <option :value="1">{{ $t('other.mine') }}</option>
             <option :value="2">{{ $t('other.private') }}</option>
+            <option :value="3">{{ $t('other.followed2') }}</option>
         </select>
 
     </div>
 
-    <TabBar @switched-tab="switchTab" :default-tab="tab" :tab-names="[$t('help.Lists'), $t('reviews.review'), $t('editor.levels')]" />
+    <TabBar v-if="!onlyPickLists" @switched-tab="switchTab" :default-tab="tab" :tab-names="[$t('help.Lists'), $t('reviews.review'), $t('editor.levels')]" />
 
     <div
         tabindex="-1"
@@ -117,9 +121,9 @@ const closeLevels = () => {
                 online-browser
                 :component="[ReviewPreview, ReviewPreview, LevelPreview][tab]"
                 :search="query"
-                :online-type="['', 'user', 'hidden'][contentType]"
+                :online-type="['', 'user', 'hidden', 'followed'][contentType]"
                 :online-subtype="['lists', 'reviews', 'levels'][tab]"
-                hide-search hide-tabs is-logged-in :picking="1 + (+onlyPickLevels)"
+                hide-search hide-tabs is-logged-in :picking="onlyPickLists ? 3 : 1 + (+onlyPickLevels)"
                 @switch-browser="contentType = $event"
                 @selected-post-option="pickList"
             />
