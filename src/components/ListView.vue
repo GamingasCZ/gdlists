@@ -887,7 +887,7 @@ provide("openTags", openTagViewer)
 
       <!-- List -->
       <div ref="postContent" v-if="!isReview || reviewLevelsOpen" class="flex flex-col gap-4 items-center" v-show="!commentsShowing">
-        <LevelCardTableTable :active="SETTINGS.levelViewMode == 2">
+        <LevelCardTableTable :active="SETTINGS.levelViewMode == 2 && cardGuessing == -1">
           <component
             v-for="(level, index) in LIST_DATA?.data.levels.slice(0, cardGuessing == -1 ? LEVEL_COUNT : cardGuessing+1)"
             :is="[LevelCard, LevelCardCompact, LevelCardTable][cardGuessing == -1 ? SETTINGS.levelViewMode : 0]"
