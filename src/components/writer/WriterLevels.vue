@@ -198,6 +198,12 @@ const isSearching = ref(false)
                             <p>{{ $t('reviews.impGD') }}</p>
                         </button>
                     </section>
+                    <section>
+                        <button class="flex gap-4 items-center p-3 text-lg bg-black bg-opacity-0 hover:bg-opacity-60">
+                            <img src="@/images/color.svg" class="w-10" alt="">
+                            <span>Set Up a Color Scheme</span>
+                        </button>
+                    </section>
                 </div>
                 <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
@@ -249,7 +255,7 @@ const isSearching = ref(false)
                 @close="moreLevOptOpen = false"
                 @picked-option="openMoreDialog"
                 :button="moreLevOpts"
-                :options="[$t('other.searchLevels'), $t('other.randomLevel'), $t('navbar.saved'), $t('reviews.import')]"
+                :options="[$t('editor.colorizor'), $t('other.searchLevels'), $t('other.randomLevel'), $t('navbar.saved'), $t('reviews.import')]"
             />
         </main>
     </section>
