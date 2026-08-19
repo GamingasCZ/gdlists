@@ -120,7 +120,8 @@
     "cancelHL": "Remove Highlight",
     "browsePreview": "Browser Preview",
     "ratings": "Likes",
-    "colorizor": "Colorizer"
+    "colorizor": "Colorizer",
+    "setColors": "Set Up a Color Scheme"
   },
   "homepage": {
     "clear": "Clear",
@@ -527,7 +528,10 @@
     "folHelp1": "You're not following anything yet!",
     "folHelp3": "To follow a post, find one and tap",
     "folHelp2": "When you follow a post, you get notified every time it gets updated!",
-    "notifUpd": " was updated!"
+    "notifUpd": " was updated!",
+    "presets": "Presets",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -916,7 +920,9 @@
     "folMess3": "I updated many great things, such as...",
     "listEmbedShowcase": "Pick a list to display",
     "listTable": "Embed List",
-    "hideLink": "Hide Link"
+    "hideLink": "Hide Link",
+    "palHelp1": "You haven't saved any pallets yet.",
+    "palHelp2": "To save a pallete, tap Save, when creating a custom pallete."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -234,7 +234,8 @@
     "cancelHL": "Zrušit zvýraznění",
     "browsePreview": "Náhled při procházení",
     "ratings": "Lajky",
-    "colorizor": "Obarvení"
+    "colorizor": "Obarvení",
+    "setColors": "Nastavit barevné schéma"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -502,7 +503,10 @@
     "folHelp1": "Zatím nic nesleduješ!",
     "folHelp2": "Když sleduješ příspěvek, tak dostaneš notifikaci, pokaždé když je aktualizován!",
     "folHelp3": "Pro sledování, klikni v příspěvku na",
-    "notifUpd": " byl aktualizován"
+    "notifUpd": " byl aktualizován",
+    "presets": "Předchystané",
+    "activate": "Aktivovat",
+    "deactivate": "Deaktivovat"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -917,7 +921,9 @@
     "folMess3": "Ze super epických změn bych mohl vyjmenovat...",
     "listEmbedShowcase": "Vyber seznam pro zobrazení",
     "listTable": "Vložit seznam",
-    "hideLink": "Skrýt odkaz"
+    "hideLink": "Skrýt odkaz",
+    "palHelp1": "Zatím jsi neuložil žádné palety.",
+    "palHelp2": "Pro uložení palety, klikni na Uložit při vytváření vlastní palety."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

@@ -211,7 +211,7 @@ const isSearching = ref(false)
                     <section>
                         <button @click="levelDialogs.colorizer = true" class="flex gap-4 items-center p-3 text-lg bg-black bg-opacity-0 hover:bg-opacity-60">
                             <img src="@/images/color.svg" class="w-10" alt="">
-                            <span>Set Up a Color Scheme</span>
+                            <span>{{ $t('editor.setColors') }}</span>
                         </button>
                     </section>
                 </div>

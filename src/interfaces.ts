@@ -473,3 +473,8 @@ export interface OtherNotifData {
     content: string[]
     buttons: string[][]
 }
+
+export interface Stop {
+    position: number,
+    color: [number, number, number]
+}
