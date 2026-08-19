@@ -10,6 +10,7 @@ const props = defineProps<{
     value: number
     color: string
     name: string
+    mini?: boolean
 }>()
 
 const rateGradient = computed(() => `conic-gradient(${props.color} ${parseInt(props.value/props.max*100)}%, black ${parseInt(props.value/props.max*100)}%)`)
@@ -18,16 +19,16 @@ const hovering = ref(false)
 </script>
 
 <template>
-    <div @mouseenter="hovering = true" @mouseleave="hovering = false" :aria-valuenow="value" :aria-valuemin="min" :aria-valuemax="max" class="relative w-12 rounded-full aspect-square">
+    <div :title="mini ? name : undefined" @mouseenter="hovering = true" @mouseleave="hovering = false" :aria-valuenow="value" :aria-valuemin="min" :aria-valuemax="max" class="relative w-12 rounded-full aspect-square">
         <div class="absolute inset-0 bg-black bg-opacity-60 rounded-full"></div>
-        <div :style="{background: rateGradient}" class="w-full h-full rounded-full circularCutout"></div>
+        <div :style="{background: rateGradient, filter: mini ? 'brightness(0.6)' : ''}" class="w-full h-full rounded-full circularCutout"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <Transition name="fade">
-                <p class="isolate absolute top-0 left-1/2 z-10 p-1 leading-3 bg-black bg-opacity-40 rounded-sm -translate-x-1/2">{{ name }}</p>
+                <p v-if="!mini" class="isolate absolute top-0 left-1/2 z-10 p-1 leading-3 bg-black bg-opacity-40 rounded-sm -translate-x-1/2">{{ name }}</p>
             </Transition>
-            <p v-if="value != -1" class="mt-3 text-lg font-black">
+            <p v-if="value != -1" class="font-black" :class="{'mt-3 text-lg': !mini, 'text-base': mini}">
                 <span>{{ value }}</span>
-                <span class="text-xs text-white text-opacity-40">/10</span>
+                <span v-if="!mini" class="text-xs text-white text-opacity-40">/10</span>
             </p>
             <p v-else class="mt-3 text-lg font-bold text-blue-500">
                 <span>?</span>

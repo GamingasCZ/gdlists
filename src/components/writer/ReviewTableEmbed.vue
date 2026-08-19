@@ -71,7 +71,7 @@ getList()
 
 const dialogs = inject("openedDialogs")
 const openCollab = inject("openCollab", (_,_2,_3) => {})
-const openTags = inject("openTags", (_,_2) => {})
+const openTags = inject("openTags", (_,_2,_3) => {})
 const mountedOnce = ref(false)
 </script>
 
@@ -100,7 +100,7 @@ const mountedOnce = ref(false)
             :list-name="postData.name"
             :favorited="favIDs.includes(level.levelID)"
             @open-collab="openCollab(ind, level.color, postData.data.levels[ind])"
-            @open-tags="openTags(ind, level)"
+            @open-tags="openTags(ind, level, postData.uid)"
         />
 
         <!-- Post link -->

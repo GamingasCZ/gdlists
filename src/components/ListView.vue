@@ -713,9 +713,10 @@ const cancelHidingOptions = () => {
 }
 
 const extTagData = ref()
-const openTagViewer = (ind: number, tagData?: Level) => {
+const openTagViewer = (ind: number, tagData?: Level, uid?: string) => {
   if (tagData) {
     extTagData.value = tagData
+    extTagData.value.uid = uid
     return tagViewerOpened.value = -2
   }
   tagViewerOpened.value = ind
@@ -760,7 +761,15 @@ provide("openTags", openTagViewer)
   </DialogVue>
 
   <DialogVue :open="tagViewerOpened > -1 || tagViewerOpened == -2" @close-popup="tagViewerOpened = -1" :title="$t('other.information')">
-    <TagViewerPopup v-if="tagViewerOpened > -1  || tagViewerOpened == -2" @close-popup="tagViewerOpened = -1" :level-i-d="tagViewerOpened === -2 ? extTagData.levelID : LIST_DATA.data.levels[tagViewerOpened].levelID" :video="tagViewerOpened === -2 ? extTagData.video : LIST_DATA.data.levels[tagViewerOpened].video" :tags="tagViewerOpened === -2 ? extTagData.tags : LIST_DATA.data.levels[tagViewerOpened].tags"/>
+    <TagViewerPopup
+      v-if="tagViewerOpened > -1  || tagViewerOpened == -2" 
+      @close-popup="tagViewerOpened = -1"
+      :level-i-d="tagViewerOpened === -2 ? extTagData.levelID : LIST_DATA.data.levels[tagViewerOpened].levelID"
+      :video="tagViewerOpened === -2 ? extTagData.video : LIST_DATA.data.levels[tagViewerOpened].video"
+      :tags="tagViewerOpened === -2 ? extTagData.tags : LIST_DATA.data.levels[tagViewerOpened].tags"
+      :commentary="tagViewerOpened === -2 ? extTagData.commentary : LIST_DATA.data.levels[tagViewerOpened].commentary"
+      :uid="tagViewerOpened === -2 ? extTagData.uid : LIST_CREATOR"
+    />
   </DialogVue>
 
   <Teleport to="body">

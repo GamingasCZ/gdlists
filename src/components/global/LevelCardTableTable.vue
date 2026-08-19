@@ -10,7 +10,7 @@
     <th>{{ $t('other.name') }}</th>
     <th>{{ $t('level.creator') }}</th>
     <th>ID</th>
-    <th>{{ $t('other.links') }}</th>
+    <th>{{ $t('reviews.rating') }}</th>
     <th></th>
     <slot />
   </table>
