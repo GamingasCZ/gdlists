@@ -40,7 +40,7 @@ defineExpose({
 </script>
 
 <template>
-    <div ref="dropdown" @mousedown.prevent="" class="flex z-10 gap-2 p-2 w-full text-white max-w-[52.8rem] bg-black bg-opacity-70">
+    <div ref="dropdown" @mousedown.prevent="" class="flex z-30 gap-2 p-2 w-full text-white max-w-[52.8rem] bg-black bg-opacity-70">
         <div class="flex flex-col gap-1 mr-3 max-md:hidden min-w-36">
             <h3 class="text-xl text-white text-opacity-20">{{ $t('editor.lastUsed') }}</h3>
             <EditorTag
