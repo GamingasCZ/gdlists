@@ -224,12 +224,12 @@ async function loadReview(loadedData: ReviewList | null) {
     LIST_CREATOR.value = LIST_DATA.value?.creator! || res[1].username;
     LIST_CREATORDATA.value = res[1]
 
+    postFollowing.value = res[5]
+    
+    postExtrasApply()
+
     // Fetch embeds
     embedsContent.value = await getEmbeds(LIST_DATA.value.data)
-
-    postFollowing.value = res[5]
-
-    postExtrasApply()
   } catch (e) {
     listErrorLoading.value = true
   }
