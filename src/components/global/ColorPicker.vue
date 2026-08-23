@@ -8,7 +8,8 @@ const props = defineProps<{
   saturation?: number;
   lightness?: number;
   hex?: string;
-  full?: boolean
+  full?: boolean;
+  hsl?: boolean
 }>()
 
 const emit = defineEmits(["colorsModified"]);
@@ -58,7 +59,8 @@ onMounted(() => {
 
     <!-- <div class="flex flex-wrap gap-2"> -->
       <div v-if="full" class="grow min-w-84">
-        <div :style="{background: `linear-gradient(90deg, white, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <div v-if="!hsl" :style="{background: `linear-gradient(90deg, ${chroma.hsl(colors[0], 0, colors[2] / (full ? 100 : 32)).css()}, ${chroma.hsl(colors[0], 1, colors[2] / (full ? 100 : 32)).css()})`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <div v-else :style="{background: `linear-gradient(90deg, ${chroma.hsv(colors[0], 0, colors[2] / (full ? 100 : 32)).css()}, ${chroma.hsv(colors[0], 1, colors[2] / (full ? 100 : 32)).css()})`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <input
           type="range"
           class="w-full colorPickerSlider"
@@ -71,7 +73,8 @@ onMounted(() => {
       </div>
   
       <div class="grow min-w-96">
-        <div :style="{background: `linear-gradient(90deg, black, hwb(${colors[0]} 100% 100%))`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <div v-if="!hsl" :style="{background: `linear-gradient(90deg, black, ${chroma.hsv(colors[0], colors[1] / (full ? 100 : 32), 1).css()}, white)`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
+        <div v-else :style="{background: `linear-gradient(90deg, black, ${chroma.hsv(colors[0], colors[1] / (full ? 100 : 32), 1).css()})`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <input
           type="range"
           class="w-full colorPickerSlider"
