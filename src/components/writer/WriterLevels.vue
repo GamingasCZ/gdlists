@@ -142,14 +142,14 @@ const isSearching = ref(false)
         </PickerPopup>
     </Dialog>
 
-    <Dialog :side-button-text="$t('other.import')" :action="colorizerPopup?.openImport" :open="levelDialogs.colorizer" @close-popup="colorizerPopup?.close()" :title="$t('editor.colorizor')" :width="dialog.large">
+    <Dialog v-show="!disabled" :side-button-text="$t('other.import')" :action="colorizerPopup?.openImport" :open="levelDialogs.colorizer" @close-popup="colorizerPopup?.close()" :title="$t('editor.colorizor')" :width="dialog.large">
         <template #icon>
             <img src="@/images/filePreview.svg" class="w-5" alt="">
         </template>
         <ColorizerPopup ref="colorizerPopup" @close="levelDialogs.colorizer = false" />
     </Dialog>
 
-    <section :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
+    <section v-show="disabled != 2" :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
         <header class="flex p-2 text-white">
             <img src="@/images/browseMobHeader.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('editor.levels') }}</h2>

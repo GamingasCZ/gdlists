@@ -32,7 +32,7 @@ if (hasLocalStorage()) {
 
 const buttons = [
     [],
-    [i18n.global.t('other.preview'), i18n.global.t('other.activate'), ""],
+    [i18n.global.t('other.activate'), ""],
     [i18n.global.t('other.deactivate')]
 ]
 
@@ -96,12 +96,10 @@ const applyPallete = () => {
 
 const footerButtonAction = (ind: number) => {
     if (applyButtonState.value == 1) {
-        if (ind == 0)
-            ind = 0
-        if (ind == 1) {
+        if (ind == 0) {
             applyPallete()
         }
-        if (ind == 2) {
+        if (ind == 1) {
             postData.value.pallete = currentPalleteSelected
             notYetApplied.value = false
         }
@@ -133,6 +131,8 @@ const editSaved = async (key: string) => {
     tab.value = 0
     justSaved.value = true
 }
+
+const previewPallete = inject("previewPallete")
 
 const notSavedOpen = ref(0)
 const checkIfCustomPalleteSaved = () => {
@@ -455,10 +455,12 @@ const nameInput = ref<HTMLInputElement>()
                         @click="selectPreset(parseInt(key))"
                         @dblclick="selectPreset(parseInt(key)); applyPallete();"
                         @edit="editSaved(key)"
+                        @preview="selectPreset(parseInt(key)); previewPallete()"
                         @opt-picked="savedAction($event, key)"
                         :selected="key == postData?.pallete"
                         :name="saved.name"
                         :gradient="saved.gradient"
+                        :show-prev="postData.levels.length > 0"
                         show-edit show-extra
                     />
                 </div>
@@ -472,9 +474,11 @@ const nameInput = ref<HTMLInputElement>()
                         @click="selectPreset(-(ind+1))"
                         @dblclick="selectPreset(-(ind+1)); applyPallete();"
                         @edit="editPreset(preset.gradient)"
+                        @preview="selectPreset(-(ind+1)); previewPallete()"
                         show-edit
                         :selected="Math.abs(postData?.pallete)-1 == ind"
                         :gradient="preset.gradient"
+                        :show-prev="postData.levels.length > 0"
                         :name="preset.name"
                     />
                 </div>
@@ -486,10 +490,9 @@ const nameInput = ref<HTMLInputElement>()
             <img v-else src="@/images/color.svg" class="w-5" alt="">
             <span v-html="MESSAGES[applyButtonState]"></span>
             <div class="flex gap-2 justify-end grow">
-                <button v-for="(button, ind) in buttons[applyButtonState]" :disabled="applyButtonState == 1 && ind == 0 && postData?.levels.length == 0" @click="footerButtonAction(ind)" class="flex gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20">
-                    <img v-if="applyButtonState == 1 && ind == 0" src="@/images/view.svg" class="inline w-5" alt="">
-                    <img v-if="applyButtonState == 1 && ind == 1" src="@/images/checkThick.svg" class="inline w-5" alt="">
-                    <img v-if="(applyButtonState == 1 && ind == 2) || (applyButtonState == 2 && ind == 0)" src="@/images/close.svg" class="inline w-5" alt="">
+                <button v-for="(button, ind) in buttons[applyButtonState]" @click="footerButtonAction(ind)" class="flex gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md disabled:opacity-20">
+                    <img v-if="applyButtonState == 1 && ind == 0" src="@/images/checkThick.svg" class="inline w-5" alt="">
+                    <img v-if="(applyButtonState == 1 && ind == 1) || (applyButtonState == 2 && ind == 0)" src="@/images/close.svg" class="inline w-5" alt="">
                     {{ button }}
                 </button>
             </div>
