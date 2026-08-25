@@ -192,7 +192,7 @@ const colorizeViaThumb = () => {
     let thumbDom = getDominantLine(thumbImg)
 
     props.levelArray.levels[props.index].BGimage.image[1] = thumbDom
-    changeCardColors([thumbCol[0], 0, thumbCol[2]*64])
+    changeCardColors([thumbCol[0], thumbCol[1], thumbCol[2]*64])
     breakCache()
   }
 }
