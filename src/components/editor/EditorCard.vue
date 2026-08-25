@@ -179,6 +179,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 }
 
 const colorizeViaThumb = () => {
+  if (props.levelArray.pallete) return
+
   let thumbURL = props.levelArray.levels[props.index!]?.BGimage?.image?.[0]
   if (!thumbURL) return
   if (!SETTINGS.value.colorization) return
@@ -497,6 +499,22 @@ const unhighlightVideo = () => {
   imageSettingsOpen.value = -1
 }
 
+const setThumbPropsToAll = () => {
+  let currProps = props.levelArray.levels[props.index].BGimage
+  if (!currProps) return
+
+  props.levelArray.levels.forEach(x => {
+    if (x.BGimage) {
+      x.BGimage.opacity = currProps.opacity
+      x.BGimage.scrolling = currProps.scrolling
+      x.BGimage.theme = currProps.theme
+      x.BGimage.tile = currProps.tile
+    }
+  })
+  imageSettingsOpen.value = -1
+  summonNotification(i18n.global.t('editor.setApplied'), '', 'check')
+}
+
 </script>
 
 <template>
@@ -798,6 +816,13 @@ const unhighlightVideo = () => {
           <span>{{ $t('other.tiling') }}</span>
           <input type="checkbox" v-model="levelArray.levels[index].BGimage.tile" class="!m-0 button">
         </div>
+
+        <hr class="border my-3 opacity-20">
+
+        <button @click="setThumbPropsToAll()" class="flex gap-2 py-1 justify-center items-center text-center mb-2 rounded-md hover:bg-black hover:bg-opacity-40">
+          <img class="w-5" src="@/images/checkThick.svg" alt="">
+          {{ $t('other.useAll') }}
+        </button>
 
         <button @click="unsetThumb()" class="flex gap-2 justify-center items-center text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
           <img class="w-5" src="@/images/del2.svg" alt="">

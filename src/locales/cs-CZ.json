@@ -236,7 +236,8 @@
     "ratings": "Lajky",
     "colorizor": "Obarvení",
     "setColors": "Nastavit barevné schéma",
-    "palleteName": "Název palety"
+    "palleteName": "Název palety",
+    "setApplied": "Nastavení aplikována!"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -511,7 +512,8 @@
     "flip": "Převrátit",
     "randomize": "Náhodně",
     "export": "Export",
-    "new": "Nová"
+    "new": "Nová paleta",
+    "useAll": "Použít na vše"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

@@ -50,7 +50,7 @@ const currentPresetName = computed(() => {
 })
 
 const applyButtonState = computed(() => (tab.value == 0 && !customSaveID.value) ? 3 : notYetApplied.value ? 1 : (postData?.value.pallete ? 2 : 0) )
-const tab = ref(postData?.value.pallete ? 1 : 2)
+const tab = ref(postData?.value.pallete > 0 ? 1 : 2)
 
 const colorPicker = ref<HTMLDivElement & {addStop: () => void, reverseGradient: () => void}>()
 
@@ -177,7 +177,7 @@ const saveCustom = () => {
         savedPalletes.value[customSaveID.value.toString()].gradient = grad.value
     }
 
-
+    saveName.value = ""
     savingCustom.value = false
     justSaved.value = true
     localStorage.setItem("savedPalletes", JSON.stringify(savedPalletes.value))
@@ -441,6 +441,7 @@ const nameInput = ref<HTMLInputElement>()
                 <div v-else class="flex flex-wrap gap-6 justify-evenly items-start p-3 w-full h-full">
                     <ColorizerPreset
                         v-for="(saved, key) in savedPalletes"
+                        :key="saved.gradient"
                         @click="selectPreset(parseInt(key))"
                         @dblclick="selectPreset(parseInt(key)); applyPallete();"
                         @edit="editSaved(key)"

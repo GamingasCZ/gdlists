@@ -122,7 +122,8 @@
     "ratings": "Likes",
     "colorizor": "Colorizer",
     "setColors": "Set Up a Color Scheme",
-    "palleteName": "Pallete Name"
+    "palleteName": "Pallete Name",
+    "setApplied": "Settings applied!"
   },
   "homepage": {
     "clear": "Clear",
@@ -536,7 +537,8 @@
     "flip": "Flip Around",
     "randomize": "Randomize",
     "export": "Export",
-    "new": "New"
+    "new": "New Pallete",
+    "useAll": "Apply to All"
   },
   "settingsMenu": {
     "asOff": "Off",
