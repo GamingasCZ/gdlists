@@ -124,6 +124,7 @@ const openMoreDialog = (opt: number) => {
     moreLevOptOpen.value = false
 }
 
+const colorizerPopup = ref<HTMLDialogElement>()
 const rouletteActive = ref(false)
 const draftsValues = computed(() => Object.values(props.drafts ?? []).reverse().slice(0,4))
 const draftsKeys = computed(() => Object.keys(props.drafts ?? []).reverse().slice(0,4))
@@ -141,8 +142,11 @@ const isSearching = ref(false)
         </PickerPopup>
     </Dialog>
 
-    <Dialog :open="levelDialogs.colorizer" @close-popup="levelDialogs.colorizer = false" :title="$t('editor.colorizor')" :width="dialog.large">
-        <ColorizerPopup />
+    <Dialog :side-button-text="$t('other.import')" :action="colorizerPopup?.openImport" :open="levelDialogs.colorizer" @close-popup="levelDialogs.colorizer = false" :title="$t('editor.colorizor')" :width="dialog.large">
+        <template #icon>
+            <img src="@/images/filePreview.svg" class="w-5" alt="">
+        </template>
+        <ColorizerPopup ref="colorizerPopup" />
     </Dialog>
 
     <section :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
@@ -209,7 +213,7 @@ const isSearching = ref(false)
                         </button>
                     </section>
                     <section>
-                        <button @click="levelDialogs.colorizer = true" class="flex gap-4 items-center p-3 text-lg bg-black bg-opacity-0 hover:bg-opacity-60">
+                        <button @click="levelDialogs.colorizer = true" class="flex gap-4 items-center p-3 mt-2 text-lg bg-opacity-40 rounded-lg hover:bg-black">
                             <img src="@/images/color.svg" class="w-10" alt="">
                             <span>{{ $t('editor.setColors') }}</span>
                         </button>
@@ -249,15 +253,16 @@ const isSearching = ref(false)
                 </button>
 
                 <!-- Add level -->
-                <div class="flex gap-2 items-center focus-within:border-b-2 border-lof-400">
+                <div class="flex relative gap-2 items-center group border-lof-400">
                     <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels || disabled "
-                        class="flex gap-2 px-2 py-3 text-xl font-bold outline-none disabled:opacity-40 disabled:grayscale text-lof-400" id="addLevelButton">
+                        class="flex gap-2 px-2 py-3 text-xl font-bold outline-none actBorder disabled:opacity-40 disabled:grayscale text-lof-400" id="addLevelButton">
                         <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
                         {{ $t('reviews.addLevel') }}</button>
                     <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
                     <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels || disabled" ref="moreLevOpts" class="p-2 button">
                         <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
                     </button>
+                    <div class="absolute bottom-1 invisible w-full border border-dashed border-lof-400 group-focus-within:visible"></div> <!-- Highlight -->
                 </div>
             </div>
             <Dropdown
