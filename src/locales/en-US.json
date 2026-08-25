@@ -929,11 +929,15 @@
     "palHelp1": "You haven't saved any pallets yet.",
     "palHelp2": "To save a pallete, tap Save, when creating a custom pallete.",
     "gradHelp1": "You haven't picked a pallet yet.",
-    "gradHelp2": "You selected a pallete.",
+    "gradHelp2": "You selected the {0} pallete.",
     "gradHelp3": "Pallete {0} is active.",
     "pImpHelp": "Palletes are semicolon seperated and are in a & &#x7B;HEX color&#x7D;,&#x7B;stop position&#x7D; format.",
     "pimpH2": "Enter a pallete for import",
-    "example": "Example"
+    "example": "Example",
+    "cPnS2": "Would you like to save it?",
+    "cPnS1": "Custom pallete hasn't been saved.",
+    "createPallete": "Create Pallete",
+    "crPallHelp": "After you create a pallete, to the left, you can add and drag around color stops."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

@@ -142,11 +142,11 @@ const isSearching = ref(false)
         </PickerPopup>
     </Dialog>
 
-    <Dialog :side-button-text="$t('other.import')" :action="colorizerPopup?.openImport" :open="levelDialogs.colorizer" @close-popup="levelDialogs.colorizer = false" :title="$t('editor.colorizor')" :width="dialog.large">
+    <Dialog :side-button-text="$t('other.import')" :action="colorizerPopup?.openImport" :open="levelDialogs.colorizer" @close-popup="colorizerPopup?.close()" :title="$t('editor.colorizor')" :width="dialog.large">
         <template #icon>
             <img src="@/images/filePreview.svg" class="w-5" alt="">
         </template>
-        <ColorizerPopup ref="colorizerPopup" />
+        <ColorizerPopup ref="colorizerPopup" @close="levelDialogs.colorizer = false" />
     </Dialog>
 
     <section :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">

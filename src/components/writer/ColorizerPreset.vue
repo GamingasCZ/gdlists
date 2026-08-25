@@ -33,8 +33,8 @@ const moreOpened = ref(false)
         <button @click.stop="moreOpened = true" ref="moreButton" v-if="showExtra" :style="{opacity: moreOpened ? 1 : undefined}" class="absolute top-1 right-1 p-1 bg-black bg-opacity-60 rounded-md opacity-0 transition-opacity duration-75 group-hover:opacity-100 button">
             <img src="@/images/more.svg" class="w-4" alt="">
         </button>
-        <Dropdown @picked-option="emit('optPicked', $event)" v-if="moreOpened" no-teleport @close="moreOpened = false" :button="moreButton" :options="['Exportovat', $t('other.duplicate'), $t('editor.remove')]" />
+        <Dropdown @picked-option="emit('optPicked', $event)" v-if="moreOpened" no-teleport @close="moreOpened = false" :button="moreButton" :options="[$t('other.export'), $t('other.duplicate'), $t('editor.remove')]" />
     </div>
-    <span class="">{{ name }}</span>
+    <span class="">{{ name || $t('other.unnamesd') }}</span>
 </button>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
 import TabBar from '../ui/TabBar.vue';
 import ColorizerPicker from './ColorizerPicker.vue';
 import { i18n } from '@/locales.ts';
@@ -14,10 +14,14 @@ import { dialog } from '../ui/sizes.ts';
 
 const MESSAGES = computed(() => [
     i18n.global.t('reviews.gradHelp1'),
-    i18n.global.t('reviews.gradHelp2'),
+    i18n.global.t('reviews.gradHelp2', ['<strong>'+currentPresetName.value+'</strong>']),
     i18n.global.t('reviews.gradHelp3', ['<strong>'+currentPresetName.value+'</strong>']),
     "Vlastní paletu lze použít až po uložení."
 ])
+
+const emit = defineEmits<{
+    (e: "close"): void
+}>()
 
 const savedPalletes = ref<{[id: string]: {name: string, gradient: Stop[]}}>({})
 if (hasLocalStorage()) {
@@ -68,14 +72,26 @@ const confirmHexEdit = (newValue: string, ind: number) => {
 }
 
 const selectPreset = (id: number) => {
-    notYetApplied.value = true
+    notYetApplied.value = false
     postData.value.pallete = id
+    if (currentPalleteSelected == id) return
+
+    notYetApplied.value = true
 }
 
-const newGradient = () => {
+const newGradient = async () => {
+    let res = await checkIfCustomPalleteSaved()
+    if (res == 1 && res !== true) return
+
     customSaveID.value = 0
     justSaved.value = false
     grad.value = [{color: chroma.random().hsv(), position: 0}, {color: chroma.random().hsv(), position: 1}]
+}
+
+const applyPallete = () => {
+    currentPalleteSelected = postData?.value.pallete
+    applyPalleteColor(postData?.value)
+    notYetApplied.value = false
 }
 
 const footerButtonAction = (ind: number) => {
@@ -83,9 +99,7 @@ const footerButtonAction = (ind: number) => {
         if (ind == 0)
             ind = 0
         if (ind == 1) {
-            currentPalleteSelected = postData?.value.pallete
-            applyPalleteColor(postData?.value)
-            notYetApplied.value = false
+            applyPallete()
         }
         if (ind == 2) {
             postData.value.pallete = currentPalleteSelected
@@ -97,14 +111,20 @@ const footerButtonAction = (ind: number) => {
             postData.value.pallete = false
 }
 
-const editPreset = (gradient: Stop[]) => {
+const editPreset = async (gradient: Stop[]) => {
+    let res = await checkIfCustomPalleteSaved()
+    if (res == 1 && res !== true) return
+
     let newGrad: Stop[] = JSON.parse(JSON.stringify(gradient))
     grad.value = newGrad
     tab.value = 0
     justSaved.value = false
 }
 
-const editSaved = (key: string) => {
+const editSaved = async (key: string) => {
+    let res = await checkIfCustomPalleteSaved()
+    if (res == 1 && res !== true) return
+
     let newGrad: Stop[] = JSON.parse(JSON.stringify(savedPalletes.value[key].gradient))
     grad.value = newGrad
     customSaveID.value = parseInt(key)
@@ -114,11 +134,28 @@ const editSaved = (key: string) => {
     justSaved.value = true
 }
 
-const notSavedOpen = ref(false)
+const notSavedOpen = ref(0)
 const checkIfCustomPalleteSaved = () => {
-    if (customSaveID.value > 0 && !justSaved.value) {
-        notSavedOpen.value = true
+    if (grad.value.length > 0 && !justSaved.value) {
+        notSavedOpen.value = 4
+        return new Promise((res, _rej) => {
+            watch(notSavedOpen, () => {
+                let response = notSavedOpen.value
+                notSavedOpen.value = 0
+                if (response == 3) { // save
+                    if (customSaveID.value)
+                        saveCustom()
+                    else {
+                        response = 1
+                        tab.value = 0
+                        savingCustom.value = true
+                    }
+                }
+                res(response)
+            }, {once: true})
+        })
     }
+    else return true
 }
 
 const savingCustom = ref(false)
@@ -133,6 +170,8 @@ const saveCustom = () => {
             gradient: grad.value,
             name: saveName.value
         }
+        notYetApplied.value = true
+        postData.value.pallete = customSaveID.value
     }
     else {
         savedPalletes.value[customSaveID.value.toString()].gradient = grad.value
@@ -142,7 +181,7 @@ const saveCustom = () => {
     savingCustom.value = false
     justSaved.value = true
     localStorage.setItem("savedPalletes", JSON.stringify(savedPalletes.value))
-    if (postData.value.pallete == customSaveID.value)
+    if (!notYetApplied.value && postData.value.pallete == customSaveID.value)
         applyPalleteColor(postData.value)
 }
 
@@ -225,9 +264,17 @@ const savedAction = (ind: number, key: string) => {
     }
 }
 
+const close = async () => {
+    let res = await checkIfCustomPalleteSaved()
+    if (res == 1 && res !== true) return
+
+    emit('close')
+}
+
 const openImport = () => impexpOpen.value = 1
 defineExpose({
-    openImport
+    openImport,
+    close
 })
 
 const customGradEmpty = computed(() => grad.value.length == 0)
@@ -253,7 +300,7 @@ const nameInput = ref<HTMLInputElement>()
                         <blockquote v-else class="p-2 font-mono bg-gradient-to-r from-red-900 to-transparent border-l-4 border-red-500">
                             {{importError}}
                         </blockquote>
-                        <input class="px-2 py-1 mt-3 w-full bg-black bg-opacity-40 rounded-md" v-model="impTextAreaTitle" type="text" placeholder="Název palety" minlength="2" maxlength="20" required >
+                        <input autocomplete="off" class="px-2 py-1 mt-3 w-full bg-black bg-opacity-40 rounded-md" v-model="impTextAreaTitle" type="text" :placeholder="$t('editor.palleteName')" minlength="2" maxlength="20" required >
                         <textarea v-model="impTextAreaText" required ref="impTextArea" @vue:mounted="$nextTick(() => impTextArea?.focus())" :placeholder="$t('reviews.pimpH2')+'...'" class="p-2 mt-3 w-full bg-black bg-opacity-40 rounded-md resize-none"></textarea>
                         <div class="flex justify-between mt-3 font-bold">
                             <button type="button" @click="impexpOpen = 0" class="text-lof-400">{{ $t('other.cancel') }}</button>
@@ -275,6 +322,34 @@ const nameInput = ref<HTMLInputElement>()
                         </button>
                     </div>
                 </template>
+            </Dialog>
+
+            <!-- Not saved Popup -->
+            <Dialog :open="notSavedOpen" @close-popup="notSavedOpen = 1" :width="dialog.medium" :title="$t('other.save')">
+                <div>
+                    <div class="flex p-2 gap-3 items-center">
+                        <img src="@/images/symbolicSave.svg" class="w-16 opacity-20 m-3" alt="">
+                        <div>
+                            <span class="font-bold text-2xl">{{ $t('reviews.cPnS1') }}</span>
+                            <p class="mt-1">{{ $t('reviews.cPnS2') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2 justify-evenly">
+                        <button @click="notSavedOpen = 1" class="button p-2 text-xl flex gap-3 items-center bg-black bg-opacity-40 rounded-md">
+                            <img src="@/images/close.svg" class="w-6" alt="">
+                            {{ $t('other.cancel') }}
+                        </button>
+                        <button @click="notSavedOpen = 2" class="button p-2 text-xl flex gap-3 items-center bg-black bg-opacity-40 rounded-md">
+                            <img src="@/images/trash.svg" class="w-6" alt="">
+                            {{ $t('other.discard') }}
+                        </button>
+                        <button @click="notSavedOpen = 3" class="button p-2 text-xl flex gap-3 items-center bg-black bg-opacity-40 rounded-md">
+                            <img src="@/images/symbolicSave.svg" class="w-6" alt="">
+                            {{ $t('other.save') }}
+                        </button>
+                    </div>
+                </div>
+
             </Dialog>
 
             <!-- Custom -->
@@ -328,7 +403,7 @@ const nameInput = ref<HTMLInputElement>()
                             <button type="button" @click="savingCustom = false">
                                 <img src="@/images/back.svg" class="w-4 button" alt="">
                             </button>
-                            <input ref="nameInput" @vue:mounted="$nextTick(() => nameInput.focus())" class="px-2 py-1 bg-black bg-opacity-40 rounded-md grow" :placeholder="$t('editor.palleteName')" v-model="saveName" type="text">
+                            <input ref="nameInput" @vue:mounted="$nextTick(() => nameInput.focus())" required minlength="2" maxlength="20" autocomplete="off" class="px-2 py-1 bg-black bg-opacity-40 rounded-md grow" :placeholder="$t('editor.palleteName')" v-model="saveName" type="text">
                             <button type="button" class="p-1 px-1.5 bg-black bg-opacity-40 rounded-md button" @click="saveCustom">
                                 <img src="@/images/checkThick.svg" alt="" class="w-5">
                             </button>
@@ -345,11 +420,11 @@ const nameInput = ref<HTMLInputElement>()
                             <img src="@/images/flip.svg" class=" absolute top-5 -right-7 z-10 w-7 scale-y-[2]" alt="">
                         </div>
 
-                        <span class="">Po vytvoření palety můžeš nalevo přidávat barevné zarážky a hýbat s nimi taháním.</span>
+                        <span class="">{{ $t('reviews.crPallHelp') }}</span>
 
                         <button @click="newGradient" class="flex gap-2 items-center p-2 text-lg bg-black bg-opacity-40 rounded-md button">
                             <img src="@/images/plus.svg" class="w-8" alt="">
-                            Vytvořit paletu
+                            {{ $t('reviews.createPallete') }}
                         </button>
                     </div>
                 </section>
@@ -367,6 +442,7 @@ const nameInput = ref<HTMLInputElement>()
                     <ColorizerPreset
                         v-for="(saved, key) in savedPalletes"
                         @click="selectPreset(parseInt(key))"
+                        @dblclick="selectPreset(parseInt(key)); applyPallete();"
                         @edit="editSaved(key)"
                         @opt-picked="savedAction($event, key)"
                         :selected="key == postData?.pallete"
@@ -383,6 +459,7 @@ const nameInput = ref<HTMLInputElement>()
                     <ColorizerPreset
                         v-for="(preset, ind) in colorizerPresets"
                         @click="selectPreset(-(ind+1))"
+                        @dblclick="selectPreset(-(ind+1)); applyPallete();"
                         @edit="editPreset(preset.gradient)"
                         show-edit
                         :selected="Math.abs(postData?.pallete)-1 == ind"
@@ -393,7 +470,7 @@ const nameInput = ref<HTMLInputElement>()
             </template>
     
         </section>
-        <div class="flex h-8 gap-2 items-center px-2 py-1 m-2 bg-black bg-opacity-40 rounded-md">
+        <div class="flex h-10 gap-2 items-center px-2 m-2 bg-black bg-opacity-40 rounded-md">
             <img v-if="applyButtonState == 0 || applyButtonState == 3" src="@/images/info.svg" class="w-5" alt="">
             <img v-else src="@/images/color.svg" class="w-5" alt="">
             <span v-html="MESSAGES[applyButtonState]"></span>
