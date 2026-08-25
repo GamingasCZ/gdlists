@@ -11,7 +11,7 @@ import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
-import { DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
+import { applyPalleteColor, DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
 import { breakCache } from "../global/imageCache";
 import EditorCardRatingView from "./EditorCardRatingView.vue";
 import EditorTag from "./EditorTag.vue";
@@ -552,7 +552,7 @@ const unhighlightVideo = () => {
             <img class="w-6" src="../../images/color.svg" alt="" />
           </button>
           
-          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="opacity-40 mix-blend-plus-lighter button invert-[0.2]">
+          <button @click="levelArray.levels.splice(index, 1); applyPalleteColor(levelArray)" :title="$t('editor.removeTitle')" class="opacity-40 mix-blend-plus-lighter button invert-[0.2]">
             <img class="w-7" src="../../images/trash.svg" alt="" />
           </button>
         </div>
