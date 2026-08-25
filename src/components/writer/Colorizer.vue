@@ -16,7 +16,7 @@ const MESSAGES = computed(() => [
     i18n.global.t('reviews.gradHelp1'),
     i18n.global.t('reviews.gradHelp2', ['<strong>'+currentPresetName.value+'</strong>']),
     i18n.global.t('reviews.gradHelp3', ['<strong>'+currentPresetName.value+'</strong>']),
-    "Vlastní paletu lze použít až po uložení."
+    i18n.global.t('reviews.gradHelp4')
 ])
 
 const emit = defineEmits<{
@@ -211,27 +211,31 @@ const impTextAreaTitle = ref("")
 const importError = ref("")
 
 const importPallete = () => {
-    const err = (text: string) => importError.value = text
+    const err = (text: string) => {throw new Error(text)}
 
-    let sets = impTextAreaText.value.split(";")
-    let finGrad: Stop[] = []
-    if (sets.length == 0) return err("Neplatný vstup.")
-    if (sets.length > 10) return err("Paleta může mít maximálně 10 zarážek.")
+    try {
+        let sets = impTextAreaText.value.split(";")
+        let finGrad: Stop[] = []
+        if (sets.length == 0) return err(i18n.global.t('editor.impErr1'))
+        if (sets.length > 10) return err(i18n.global.t('editor.impErr2'))
 
-    sets.forEach(x => {
-        let set = x.split(",", 2)
-        let col = chroma.valid(set[0], "hex")
-        if (!col) return err("Neplatná barva!")
-        if (!set[1]) return err("Zarážka není platná!")
-        let pos = parseInt(set[1])
-        if (isNaN(pos) || pos < 0 || pos > 100) return err("Neplatná pozice zarážky.")
-        finGrad.push({color: chroma.hex(set[0]).hsv(), position: pos/100})
-    })
+        sets.forEach(x => {
+            let set = x.split(",", 2)
+            let col = chroma.valid(set[0], "hex")
+            if (!col) return err(i18n.global.t('editor.impErr3'))
+            if (!set[1]) return err(i18n.global.t('editor.impErr4'))
+            let pos = parseInt(set[1])
+            if (isNaN(pos) || pos < 0 || pos > 100) return err(i18n.global.t('editor.impErr5'))
+            finGrad.push({color: chroma.hex(set[0]).hsv(), position: pos/100})
+        })
 
-    savedPalletes.value[Date.now().toString()] = {gradient: finGrad, name: impTextAreaTitle.value}
-    savePalletes()
-    impexpOpen.value = 0
-    tab.value = 1
+        savedPalletes.value[Date.now().toString()] = {gradient: finGrad, name: impTextAreaTitle.value}
+        savePalletes()
+        impexpOpen.value = 0
+        tab.value = 1   
+    } catch (e) {
+        importError.value = e.message
+    }
 }
 
 const copyPallete = () => navigator.clipboard.writeText(exportText.value)
@@ -271,7 +275,13 @@ const close = async () => {
     emit('close')
 }
 
-const openImport = () => impexpOpen.value = 1
+const openImport = () => {
+    impTextAreaText.value = ""
+    impTextAreaTitle.value = ""
+    importError.value = ""
+    impexpOpen.value = 1
+}
+
 defineExpose({
     openImport,
     close
@@ -293,11 +303,11 @@ const nameInput = ref<HTMLInputElement>()
                 <template v-if="impexpOpen == 1">
                     <form @submit.prevent="importPallete" class="m-2">
                         <p v-html="$t('reviews.pImpHelp')"></p>
-                        <p class="mt-3 ml-2 text-lg font-bold">{{ $t('reviews.example') }}:</p>
+                        <p v-show="!importError" class="mt-3 ml-2 text-lg font-bold">{{ $t('reviews.example') }}:</p>
                         <blockquote v-if="!importError" class="p-2 font-mono bg-gradient-to-r to-transparent border-l-4 from-lof-300 border-lof-400">
                             #FF0000,0;#00FF00,50;#0000FF,100
                         </blockquote>
-                        <blockquote v-else class="p-2 font-mono bg-gradient-to-r from-red-900 to-transparent border-l-4 border-red-500">
+                        <blockquote v-else class="p-2 bg-gradient-to-r from-red-900 to-transparent border-l-4 border-red-500">
                             {{importError}}
                         </blockquote>
                         <input autocomplete="off" class="px-2 py-1 mt-3 w-full bg-black bg-opacity-40 rounded-md" v-model="impTextAreaTitle" type="text" :placeholder="$t('editor.palleteName')" minlength="2" maxlength="20" required >
@@ -314,7 +324,7 @@ const nameInput = ref<HTMLInputElement>()
                 <!-- export -->
                 <template v-else>
                     <div class="m-2">
-                        <p>Copy the pallete below.</p>
+                        <p class="text-center my-3">{{ $t('reviews.imHelp') }}</p>
                         <input type="text" class="p-2 w-full text-center bg-black bg-opacity-40 rounded-md min-h-16" @mouseover="$event.target.select()" readonly :value="exportText"></input>
                         <button @click="copyPallete" class="flex gap-2 items-center p-2 mx-auto mt-2 bg-black bg-opacity-40 rounded-md button">
                             <img src="@/images/link.svg" class="w-5" alt="">

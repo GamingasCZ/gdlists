@@ -123,7 +123,12 @@
     "colorizor": "Colorizer",
     "setColors": "Set Up a Color Scheme",
     "palleteName": "Pallete Name",
-    "setApplied": "Settings applied!"
+    "setApplied": "Settings applied!",
+    "impErr1": "Not a valid input.",
+    "impErr2": "A pallete can only have 10 colors max.",
+    "impErr3": "Invalid color.",
+    "impErr4": "Invalid stop.",
+    "impErr5": "Invalid stop position."
   },
   "homepage": {
     "clear": "Clear",
@@ -939,7 +944,9 @@
     "cPnS2": "Would you like to save it?",
     "cPnS1": "Custom pallete hasn't been saved.",
     "createPallete": "Create Pallete",
-    "crPallHelp": "After you create a pallete, to the left, you can add and drag around color stops."
+    "crPallHelp": "After you create a pallete, to the left, you can add and drag around color stops.",
+    "imHelp": "Copy the pallete code below. It can be imported anytime.",
+    "gradHelp4": "Save the custom pallete to be able to apply it."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"

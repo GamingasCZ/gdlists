@@ -237,7 +237,12 @@
     "colorizor": "Obarvení",
     "setColors": "Nastavit barevné schéma",
     "palleteName": "Název palety",
-    "setApplied": "Nastavení aplikována!"
+    "setApplied": "Nastavení aplikována!",
+    "impErr1": "Neplatný vstup.",
+    "impErr2": "Paleta může mít maximálně 10 zarážek.",
+    "impErr3": "Neplatná barva!",
+    "impErr4": "Zarážka není platná!",
+    "impErr5": "Neplatná pozice zarážky."
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -940,7 +945,9 @@
     "cPnS1": "Vlastní paleta není uložena.",
     "cPnS2": "Chtěli byste je uložit?",
     "createPallete": "Vytvořit paletu",
-    "crPallHelp": "Po vytvoření palety můžeš nalevo přidávat barevné zarážky a hýbat s nimi taháním."
+    "crPallHelp": "Po vytvoření palety můžeš nalevo přidávat barevné zarážky a hýbat s nimi taháním.",
+    "imHelp": "Zkopíruj kód palety níže. Tento kód lze kdykoliv importovat.",
+    "gradHelp4": "Vlastní paletu lze použít až po uložení."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
