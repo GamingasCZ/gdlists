@@ -273,6 +273,7 @@ const close = async () => {
     let res = await checkIfCustomPalleteSaved()
     if (res == 1 && res !== true) return
 
+    document.body.style.overflow = "auto"
     emit('close')
 }
 
