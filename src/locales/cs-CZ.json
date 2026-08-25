@@ -242,7 +242,17 @@
     "impErr2": "Paleta může mít maximálně 10 zarážek.",
     "impErr3": "Neplatná barva!",
     "impErr4": "Zarážka není platná!",
-    "impErr5": "Neplatná pozice zarážky."
+    "impErr5": "Neplatná pozice zarážky.",
+    "palPres1": "Duhová",
+    "palPres2": "Pastelová duha",
+    "palPres3": "Zlatá",
+    "palPres4": "Západ",
+    "palPres5": "Vlajka trans",
+    "palPres6": "Mátová",
+    "palPres8": "Geodeš",
+    "palPres9": "Peklo",
+    "palPres10": "Krémová",
+    "palPres7": "Synthwave"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",

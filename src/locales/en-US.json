@@ -128,7 +128,17 @@
     "impErr2": "A pallete can only have 10 colors max.",
     "impErr3": "Invalid color.",
     "impErr4": "Invalid stop.",
-    "impErr5": "Invalid stop position."
+    "impErr5": "Invalid stop position.",
+    "palPres3": "Gold",
+    "palPres4": "Sunset",
+    "palPres5": "Trans Flag",
+    "palPres6": "Mint",
+    "palPres7": "Synthwave",
+    "palPres8": "Dash",
+    "palPres9": "Hell",
+    "palPres10": "Cream",
+    "palPres1": "Rainbow",
+    "palPres2": "Pastel Rainbow"
   },
   "homepage": {
     "clear": "Clear",
