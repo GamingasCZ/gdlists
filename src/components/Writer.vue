@@ -1433,7 +1433,7 @@ provide("previewPallete", previewPallete)
             <!-- Back from draft preview -->
             <div v-if="disableEdits"
                 class="flex fixed top-14 left-1/2 z-40 flex-col p-1 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
-                <span v-if="disableEdits == 2" class="mb-2 text-xl text-center">Náhled palety</span>
+                <span v-if="disableEdits == 2" class="mb-2 text-xl text-center">{{ $t('editor.palPreview') }}</span>
                 <span v-else class="mb-2 text-xl text-center">{{ $t('reviews.preview') }}</span>
                 <div class="flex gap-1">
                     <button @click="exitPreview" class="flex grow gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/close.svg"
