@@ -1,6 +1,6 @@
 import { nextTick, type Ref, ref } from "vue"
 import { DEFAULT_LEVEL, DEFAULT_LEVELLIST, modernizeLevels } from "./Editor"
-import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewDetailsResponse, ReviewList, ReviewRating } from "./interfaces"
+import type { FavoritedLevel, Level, LevelList, ListFetchResponse, PostData, ReviewDetailsResponse, ReviewList, ReviewRating, Stop } from "./interfaces"
 import { i18n } from "./locales"
 import chroma from "chroma-js"
 import containers from "./components/writer/containers"
@@ -40,7 +40,7 @@ export const REVIEW_EXTRAS: () => ReviewList = () => ({
     whitePage: false,
     readerMode: true,
     font: 0,
-    fontTint: false,
+    fontTint: false
 })
 
 export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | FavoritedLevel, maxLevels = 10) => {
@@ -55,6 +55,10 @@ export const addReviewLevel = (postData: Ref<LevelList>, levelData?: Level | Fav
     if (levelData?.levelID) levelInfo.levelID = levelData.levelID
 
     postData.value.levels.push(levelInfo)
+
+    if (postData.value.pallete) {
+        applyPalleteColor(postData.value)
+    }
 }
 
 export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXTRAS() })
@@ -169,6 +173,53 @@ export function checkReview(post: ReviewList) {
 
     uploadTries = 0
     return { success: true, error: '', warn: error.warn }
+}
+
+export const colorizerPresets: {name: string, gradient: Stop[]}[] = [{"name":i18n.global.t('editor.palPres1'),"gradient":[{"color":[0,1,1],"position":0},{"color":[36.23529411764706,1,1],"position":0.1},{"color":[64.44444444444444,0.8513513513513513,0.8705882352941177],"position":0.2},{"color":[117.95918367346938,0.6712328767123288,0.8588235294117647],"position":0.3},{"color":[179.2207792207792,0.7096774193548387,0.8509803921568627],"position":0.4},{"color":[188.33333333333334,0.8,0.8823529411764706],"position":0.5},{"color":[211.56398104265404,0.8865546218487395,0.9333333333333333],"position":0.6},{"color":[260,0.921161825726141,0.9450980392156862],"position":0.7},{"color":[284.17021276595744,0.9475806451612904,0.9725490196078431],"position":0.8},{"color":[308.3265306122449,0.98,0.9803921568627451],"position":0.9},{"color":[0,1,1],"position":1}]},{"name":i18n.global.t('editor.palPres2'),"gradient":[{"color":[0,0.53,1],"position":0},{"color":[36.23529411764706,0.63,1],"position":0.1},{"color":[64.44444444444444,0.46,0.8705882352941177],"position":0.2},{"color":[117.95918367346938,0.35,0.8588235294117647],"position":0.3},{"color":[179.2207792207792,0.39,0.8509803921568627],"position":0.4},{"color":[188.33333333333334,0.4,0.8823529411764706],"position":0.5},{"color":[211.56398104265404,0.55,0.9333333333333332],"position":0.6},{"color":[260,0.57,0.9450980392156861],"position":0.7},{"color":[284.17021276595744,0.58,0.9725490196078431],"position":0.8},{"color":[308.3265306122449,0.56,0.9803921568627451],"position":0.9},{"color":[0,0.55,1],"position":1}]},{"name":i18n.global.t('editor.palPres3'),"gradient":[{"color":[62.49999999999999,0.09523809523809523,0.9882352941176471],"position":0},{"position":0.24305555555555555,"color":[37.9746835443038,0.7383177570093458,0.8392156862745098]},{"position":0.5092592592592593,"color":[15,0.4864864864864865,0.5803921568627451]},{"position":0.7175925925925926,"color":[15,0.4864864864864865,0.5803921568627451]},{"position":1,"color":[34.95652173913043,0.46184738955823296,0.9764705882352941]}]},{"name":i18n.global.t('editor.palPres4'),"gradient":[{"color":[214.54545454545453,0.3548387096774194,0.36470588235294116],"position":0},{"position":0.5486111111111112,"color":[39.053254437869825,0.7971698113207547,0.8313725490196079]},{"position":0.8263888888888888,"color":[24.90118577075099,0.9921568627450981,1]},{"position":1,"color":[25.5,0.9302325581395349,0.16862745098039217]}]},{"name":i18n.global.t('editor.palPres5'),"gradient":[{"color":[197.0886075949367,0.632,0.9803921568627451],"position":0},{"position":0.25,"color":[347.53246753246754,0.3142857142857143,0.9607843137254902]},{"position":0.5,"color":[null,0,1]},{"position":0.75,"color":[347.53246753246754,0.3142857142857143,0.9607843137254902]},{"color":[197.0886075949367,0.632,0.9803921568627451],"position":1}]},{"name":i18n.global.t('editor.palPres6'),"gradient":[{"color":[143.3009708737864,0.4204081632653061,0.9607843137254902],"position":0},{"color":[146.8421052631579,0.608,0.49019607843137253],"position":1}]},{"name":i18n.global.t('editor.palPres7'),"gradient":[{"color":[264,1,1],"position":0},{"position":0.4212962962962963,"color":[32.075471698113205,0.673728813559322,0.9254901960784314]},{"position":0.7291666666666666,"color":[60.86956521739131,0.552,0.9803921568627451]},{"color":[352.82608695652175,0.7215686274509804,1],"position":1}]},{"name":i18n.global.t('editor.palPres8'),"gradient":[{"color":[204,1,1],"position":0},{"position":0.42592592592592593,"color":[44.02597402597402,0.6337448559670782,0.9529411764705882]},{"color":[321.1764705882353,0.5804878048780487,0.803921568627451],"position":1}]},{"name":i18n.global.t('editor.palPres9'),"gradient":[{"color":[0,0.9710982658959537,0.6784313725490196],"position":0},{"color":[24.941176470588236,1,1],"position":0.3333333333333333},{"position":0.6064814814814815,"color":[52.99270072992701,0.5780590717299579,0.9294117647058824]},{"position":0.8055555555555556,"color":[0,0.5196850393700787,0.4980392156862745]},{"position":1,"color":[13.714285714285714,0.5555555555555556,0.24705882352941178]}]},{"name":i18n.global.t('editor.palPres10'),"gradient":[{"color":[null,0,1],"position":0},{"position":0.2962962962962963,"color":[175.78947368421052,0.2425531914893617,0.9215686274509803]},{"color":[252,0.321285140562249,0.9764705882352941],"position":0.7106481481481481},{"position":1,"color":[330.4761904761905,0.2540322580645161,0.9725490196078431]}]}]
+
+export const applyPalleteColor = (postData: PostData) => {
+    if (postData.levels.length == 0) return
+
+    let canvas = new OffscreenCanvas(postData.levels.length, 1)
+    let ctx = canvas.getContext("2d")
+    if (!ctx) return
+    let grad = ctx?.createLinearGradient(0, 0, canvas.width, canvas.height)
+
+    let gradArray: Stop[]
+    if (typeof postData.pallete == "object")
+        gradArray = postData.pallete
+    else if (typeof postData.pallete == 'number') {
+        if (postData.pallete < 0) { // preset
+            gradArray = colorizerPresets[Math.abs(postData.pallete)-1].gradient
+            if (!gradArray) return
+        }
+        else if (postData.pallete > 0) {
+            let sP = localStorage.getItem("savedPalletes")
+            if (!sP) return
+
+            let palletes = JSON.parse(sP)
+            let key = String(postData.pallete)
+            if (!palletes[key]) return
+
+            gradArray = palletes[key].gradient
+            console.log(palletes, key, gradArray)
+        }
+    }
+    else if (!postData.pallete)
+        return
+
+    for (let i = 0; i < gradArray.length; i++)
+        grad?.addColorStop(gradArray[i].position, chroma.hsv(...gradArray[i].color).hex())
+
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    let data = ctx?.getImageData(0, 0, canvas.width, canvas.height)
+
+
+    let i = 0
+    for (let i = 0; i < postData.levels.length; i++) {
+        postData.levels[i].color = chroma(data.data[i*4], data.data[i*4+1], data.data[i*4+2]).hsl().slice(0, 3)
+    }
 }
 
 export const selectedNestContainer = ref(0)

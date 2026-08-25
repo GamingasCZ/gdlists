@@ -11,7 +11,7 @@ import { hasLocalStorage, SETTINGS } from "@/siteSettings";
 import DifficultyIcon from "../global/DifficultyIcon.vue";
 import { i18n } from "@/locales";
 import Dropdown from "../ui/Dropdown.vue";
-import { DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
+import { applyPalleteColor, DEFAULT_RATINGS, getDominantColor, getDominantLine } from "@/Reviews";
 import { breakCache } from "../global/imageCache";
 import EditorCardRatingView from "./EditorCardRatingView.vue";
 import EditorTag from "./EditorTag.vue";
@@ -179,6 +179,8 @@ function searchLevel(searchingByID: boolean, userSearchPage: number = 0) {
 }
 
 const colorizeViaThumb = () => {
+  if (props.levelArray.pallete) return
+
   let thumbURL = props.levelArray.levels[props.index!]?.BGimage?.image?.[0]
   if (!thumbURL) return
   if (!SETTINGS.value.colorization) return
@@ -238,7 +240,7 @@ const pickingColor = ref(false)
 const changeCardColors = (newColors: [number, number, number]) =>
 (props.levelArray.levels[props.index!].color = [
   newColors[0],
-  0.5,
+  newColors[1],
   parseFloat((newColors[2] / 64).toFixed(2)),
 ]);
 
@@ -497,6 +499,22 @@ const unhighlightVideo = () => {
   imageSettingsOpen.value = -1
 }
 
+const setThumbPropsToAll = () => {
+  let currProps = props.levelArray.levels[props.index].BGimage
+  if (!currProps) return
+
+  props.levelArray.levels.forEach(x => {
+    if (x.BGimage) {
+      x.BGimage.opacity = currProps.opacity
+      x.BGimage.scrolling = currProps.scrolling
+      x.BGimage.theme = currProps.theme
+      x.BGimage.tile = currProps.tile
+    }
+  })
+  imageSettingsOpen.value = -1
+  summonNotification(i18n.global.t('editor.setApplied'), '', 'check')
+}
+
 </script>
 
 <template>
@@ -552,7 +570,7 @@ const unhighlightVideo = () => {
             <img class="w-6" src="../../images/color.svg" alt="" />
           </button>
           
-          <button @click="levelArray.levels.splice(index, 1)" :title="$t('editor.removeTitle')" class="opacity-40 mix-blend-plus-lighter button invert-[0.2]">
+          <button @click="levelArray.levels.splice(index, 1); applyPalleteColor(levelArray)" :title="$t('editor.removeTitle')" class="opacity-40 mix-blend-plus-lighter button invert-[0.2]">
             <img class="w-7" src="../../images/trash.svg" alt="" />
           </button>
         </div>
@@ -749,8 +767,8 @@ const unhighlightVideo = () => {
   
             </div>
   
-            <ColorPicker v-if="pickingColor" @colors-modified="changeCardColors" :hue="levelArray.levels[index!].color[0]"
-            :saturation="levelArray.levels[index!].color[1]" :lightness="levelArray.levels[index!].color[2] * 64" />
+            <ColorPicker v-if="pickingColor" @colors-modified="levelArray.levels[index!].color = $event" full :hue="levelArray.levels[index!].color[0]"
+            :saturation="levelArray.levels[index!].color[1] * 100" :lightness="levelArray.levels[index!].color[2] * 100" />
           </div>
         </div>
         
@@ -798,6 +816,13 @@ const unhighlightVideo = () => {
           <span>{{ $t('other.tiling') }}</span>
           <input type="checkbox" v-model="levelArray.levels[index].BGimage.tile" class="!m-0 button">
         </div>
+
+        <hr class="border my-3 opacity-20">
+
+        <button @click="setThumbPropsToAll()" class="flex gap-2 py-1 justify-center items-center text-center mb-2 rounded-md hover:bg-black hover:bg-opacity-40">
+          <img class="w-5" src="@/images/checkThick.svg" alt="">
+          {{ $t('other.useAll') }}
+        </button>
 
         <button @click="unsetThumb()" class="flex gap-2 justify-center items-center text-lg text-center text-red-400 rounded-md hover:bg-black hover:bg-opacity-40">
           <img class="w-5" src="@/images/del2.svg" alt="">

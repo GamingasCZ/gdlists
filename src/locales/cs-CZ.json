@@ -233,7 +233,26 @@
     "addYTLink": "Vlož odkaz na YouTube video",
     "cancelHL": "Zrušit zvýraznění",
     "browsePreview": "Náhled při procházení",
-    "ratings": "Lajky"
+    "ratings": "Lajky",
+    "colorizor": "Obarvení",
+    "setColors": "Nastavit barevné schéma",
+    "palleteName": "Název palety",
+    "setApplied": "Nastavení aplikována!",
+    "impErr1": "Neplatný vstup.",
+    "impErr2": "Paleta může mít maximálně 10 zarážek.",
+    "impErr3": "Neplatná barva!",
+    "impErr4": "Zarážka není platná!",
+    "impErr5": "Neplatná pozice zarážky.",
+    "palPres1": "Duhová",
+    "palPres2": "Pastelová duha",
+    "palPres3": "Zlatá",
+    "palPres4": "Západ",
+    "palPres5": "Vlajka trans",
+    "palPres6": "Mátová",
+    "palPres8": "Geodeš",
+    "palPres9": "Peklo",
+    "palPres10": "Krémová",
+    "palPres7": "Synthwave"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -501,7 +520,15 @@
     "folHelp1": "Zatím nic nesleduješ!",
     "folHelp2": "Když sleduješ příspěvek, tak dostaneš notifikaci, pokaždé když je aktualizován!",
     "folHelp3": "Pro sledování, klikni v příspěvku na",
-    "notifUpd": " byl aktualizován"
+    "notifUpd": " byl aktualizován",
+    "presets": "Předchystané",
+    "activate": "Aktivovat",
+    "deactivate": "Deaktivovat",
+    "flip": "Převrátit",
+    "randomize": "Náhodně",
+    "export": "Export",
+    "new": "Nová paleta",
+    "useAll": "Použít na vše"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -736,7 +763,7 @@
     "thumbnail": "Miniatura",
     "ratingName": "Název hodnocení",
     "levelNo": "{0}\\. level nemá {1}!",
-    "preview": "Náhled recenze",
+    "preview": "Náhled příspěvku",
     "imgUrl": "Adresa obrázku",
     "notFilledIn": "{0} není vyplněný!",
     "bro": "Bratře, ty jsi nic nenapsal!!",
@@ -916,12 +943,27 @@
     "folMess3": "Ze super epických změn bych mohl vyjmenovat...",
     "listEmbedShowcase": "Vyber seznam pro zobrazení",
     "listTable": "Vložit seznam",
-    "hideLink": "Skrýt odkaz"
+    "hideLink": "Skrýt odkaz",
+    "palHelp1": "Zatím jsi neuložil žádné palety.",
+    "palHelp2": "Pro uložení palety, klikni na Uložit při vytváření vlastní palety.",
+    "gradHelp1": "Zatím jsi nevybral žádnou paletu.",
+    "gradHelp2": "Vybral jsi paletu {0}.",
+    "gradHelp3": "Paleta {0} je aktivní.",
+    "example": "Příklad",
+    "pImpHelp": "Palety jsou odděleny středníkem a jsou ve formátu &#x7B;HEX barva&#x7D;,&#x7B;pozice zarážky&#x7D;.",
+    "pimpH2": "Zadej paletu pro importování",
+    "cPnS1": "Vlastní paleta není uložena.",
+    "cPnS2": "Chtěli byste je uložit?",
+    "createPallete": "Vytvořit paletu",
+    "crPallHelp": "Po vytvoření palety můžeš nalevo přidávat barevné zarážky a hýbat s nimi taháním.",
+    "imHelp": "Zkopíruj kód palety níže. Tento kód lze kdykoliv importovat.",
+    "gradHelp4": "Vlastní paletu lze použít až po uložení."
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"
   },
   "review": {
-    "colorful": "Barevná"
+    "colorful": "Barevná",
+    "gradStops": "Zarážky přechodu"
   }
 }

@@ -119,7 +119,26 @@
     "addYTLink": "Paste the YouTube link",
     "cancelHL": "Remove Highlight",
     "browsePreview": "Browser Preview",
-    "ratings": "Likes"
+    "ratings": "Likes",
+    "colorizor": "Colorizer",
+    "setColors": "Set Up a Color Scheme",
+    "palleteName": "Pallete Name",
+    "setApplied": "Settings applied!",
+    "impErr1": "Not a valid input.",
+    "impErr2": "A pallete can only have 10 colors max.",
+    "impErr3": "Invalid color.",
+    "impErr4": "Invalid stop.",
+    "impErr5": "Invalid stop position.",
+    "palPres3": "Gold",
+    "palPres4": "Sunset",
+    "palPres5": "Trans Flag",
+    "palPres6": "Mint",
+    "palPres7": "Synthwave",
+    "palPres8": "Dash",
+    "palPres9": "Hell",
+    "palPres10": "Cream",
+    "palPres1": "Rainbow",
+    "palPres2": "Pastel Rainbow"
   },
   "homepage": {
     "clear": "Clear",
@@ -526,7 +545,15 @@
     "folHelp1": "You're not following anything yet!",
     "folHelp3": "To follow a post, find one and tap",
     "folHelp2": "When you follow a post, you get notified every time it gets updated!",
-    "notifUpd": " was updated!"
+    "notifUpd": " was updated!",
+    "presets": "Presets",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "flip": "Flip Around",
+    "randomize": "Randomize",
+    "export": "Export",
+    "new": "New Pallete",
+    "useAll": "Apply to All"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -733,7 +760,7 @@
     "thumbnail": "Thumbnail",
     "font": "Font",
     "ratingName": "Rating name",
-    "preview": "Review preview",
+    "preview": "Post preview",
     "imgUrl": "Image source",
     "ratingMissingName": "A custom rating is missing a name!",
     "heading": "Heading",
@@ -915,12 +942,27 @@
     "folMess3": "I updated many great things, such as...",
     "listEmbedShowcase": "Pick a list to display",
     "listTable": "Embed List",
-    "hideLink": "Hide Link"
+    "hideLink": "Hide Link",
+    "palHelp1": "You haven't saved any pallets yet.",
+    "palHelp2": "To save a pallete, tap Save, when creating a custom pallete.",
+    "gradHelp1": "You haven't picked a pallete yet.",
+    "gradHelp2": "You selected the {0} pallete.",
+    "gradHelp3": "Pallete {0} is active.",
+    "pImpHelp": "Palletes are semicolon seperated and are in a &#x7B;HEX color&#x7D;,&#x7B;stop position&#x7D; format.",
+    "pimpH2": "Enter a pallete for import",
+    "example": "Example",
+    "cPnS2": "Would you like to save it?",
+    "cPnS1": "Custom pallete hasn't been saved.",
+    "createPallete": "Create Pallete",
+    "crPallHelp": "After you create a pallete, to the left, you can add and drag around color stops.",
+    "imHelp": "Copy the pallete code below. It can be imported anytime.",
+    "gradHelp4": "Save the custom pallete to be able to apply it."
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
   },
   "review": {
-    "colorful": "Colorful"
+    "colorful": "Colorful",
+    "gradStops": "Gradient Stops"
   }
 }

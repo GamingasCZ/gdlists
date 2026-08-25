@@ -23,7 +23,6 @@ var popper: Instance
 onMounted(() => {
     popper = createPopper(props.button, dropdown.value, {
         placement: 'bottom',
-        modifiers: [{name: 'arrow'}, {name:'offset', options: {offset: [0, 12]}}]
     })
 })
 
@@ -44,10 +43,10 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 <template>
     <Transition name="fade" >
         <Teleport to="body" :disabled="noTeleport">
-            <div ref="dropdown" role="tooltip" id="tooltip" class="z-50 shadow-drop" data-popper-placement>
+            <div ref="dropdown" role="tooltip" id="tooltip" class="z-50" data-popper-placement>
                 <div
-                class="flex flex-col max-w-max bg-opacity-90 rounded-md min-w-40 bg-lof-200" id="tooltip">
-                    <div data-popper-arrow class="bg-lof-200 -z-10" id="arrow" alt=""></div>    
+                class="flex flex-col max-w-max bg-opacity-90 rounded-md shadow-drop min-w-40 bg-lof-200">
+                    <div :style="{rotate: '45deg', translate: '-50%'}" class="absolute left-1/2 w-8 bg-lof-100 aspect-square -z-10" id="arrow" alt=""></div>    
                     <slot name="header" />
                     <button
                             v-for="(sort, index) in options"
@@ -63,6 +62,9 @@ document.body.addEventListener("click", closeDropdown, {capture: true})
 </template>
 
 <style>
-#tooltip[data-popper-placement=''] #arrow {@apply top-8; }
-#tooltip[data-popper-placement^='top'] #arrow {@apply -bottom-4; }
+#tooltip[data-popper-placement='bottom'] {translate: 0 0.5rem; }
+#tooltip[data-popper-placement='top'] {translate: 0 -1rem; }
+
+#tooltip[data-popper-placement='bottom'] #arrow {@apply -top-2; }
+#tooltip[data-popper-placement='top'] #arrow {@apply -bottom-4; }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed } from 'vue';
 
 
 const props = defineProps<{
@@ -10,7 +10,7 @@ const emit = defineEmits<{
     (e: "switchedTab", index: number)
 }>()
 
-const tabSelected = ref(props.defaultTab)
+const tabSelected = computed(() => props.defaultTab)
 const switchTab = (ind: number) => {
     tabSelected.value = ind
     emit('switchedTab', ind)

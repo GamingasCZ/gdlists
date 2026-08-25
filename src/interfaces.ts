@@ -200,6 +200,13 @@ export interface LevelBackup {
   backupID?: number
 }
 
+/**
+ * Either an array of gradient stops, or the ID of a preset
+ * (positive = saveID, negative = preset)
+ * or false if no pallete is selected
+ */
+export type PalleteData = Stop[] | number | false
+
 export interface LevelList {
   description: string;
   diffGuesser: [boolean, boolean, boolean]; // DG enabled, diffGuess, rateGuess
@@ -209,6 +216,7 @@ export interface LevelList {
   disComments: boolean;
   levels: Level[];
   titleData?: TitleData
+  pallete?: PalleteData
 }
 
 export interface LevelBackground {
@@ -472,4 +480,9 @@ export interface OtherNotifData {
     title: string[]
     content: string[]
     buttons: string[][]
+}
+
+export interface Stop {
+    position: number,
+    color: [number, number, number]
 }

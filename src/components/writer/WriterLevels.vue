@@ -8,12 +8,14 @@ import Dialog from "../global/Dialog.vue";
 import type { FavoritedLevel, Level, LevelList, ReviewDraft, ReviewList } from "@/interfaces";
 import PickerPopup from "../global/PickerPopup.vue";
 import LevelBubble from "../global/LevelBubble.vue";
+import ColorizerPopup from "./Colorizer.vue";
 import axios from "axios";
 import Dropdown from "../ui/Dropdown.vue";
 import Plus from "@/svgs/Plus.vue";
 import LevelRoulette from "./LevelRoulette.vue";
 import DraftCard from "./DraftCardSmall.vue";
 import type { Post } from "@/writers/Writer";
+import { dialog } from "../ui/sizes.ts";
 
 const props = defineProps<{
     subtext: string
@@ -86,7 +88,8 @@ const moveLevel = (from: number, to: number) => {
 
 const levelDialogs = ref({
     import: false,
-    saved: false
+    saved: false,
+    colorizer: false
 })
 
 const getSavedLevels = () => {
@@ -101,23 +104,27 @@ const moreLevOptOpen = ref(false)
 const openMoreDialog = (opt: number) => {
     switch (opt) {
         case 0:
+            levelDialogs.value.colorizer = true
+            break;
+        case 1:
             dialogs.lists[0] = true
             dialogs.lists[2] = true
             dialogs.lists[3] = false
             break;
-        case 1:
+        case 2:
             rouletteActive.value = true
             break;
-        case 2:
+        case 3:
             levelDialogs.value.saved = true
             break;
-        case 3:
+        case 4:
             levelDialogs.value.import = true
             break;
     }
     moreLevOptOpen.value = false
 }
 
+const colorizerPopup = ref<HTMLDialogElement>()
 const rouletteActive = ref(false)
 const draftsValues = computed(() => Object.values(props.drafts ?? []).reverse().slice(0,4))
 const draftsKeys = computed(() => Object.keys(props.drafts ?? []).reverse().slice(0,4))
@@ -135,7 +142,14 @@ const isSearching = ref(false)
         </PickerPopup>
     </Dialog>
 
-    <section :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
+    <Dialog v-show="!disabled" :side-button-text="$t('other.import')" :action="colorizerPopup?.openImport" :open="levelDialogs.colorizer" @close-popup="colorizerPopup?.close()" :title="$t('editor.colorizor')" :width="dialog.large">
+        <template #icon>
+            <img src="@/images/filePreview.svg" class="w-5" alt="">
+        </template>
+        <ColorizerPopup ref="colorizerPopup" @close="levelDialogs.colorizer = false" />
+    </Dialog>
+
+    <section v-show="disabled != 2" :class="{'opacity-20 pointer-events-none': disabled}" class="mx-auto !text-base text-white rounded-md bg-lof-200 shadow-drop w-[58rem] max-w-full">
         <header class="flex p-2 text-white">
             <img src="@/images/browseMobHeader.svg" class="mr-3 ml-2 w-8" alt="">
             <h2 class="text-2xl font-bold grow">{{ $t('editor.levels') }}</h2>
@@ -198,6 +212,12 @@ const isSearching = ref(false)
                             <p>{{ $t('reviews.impGD') }}</p>
                         </button>
                     </section>
+                    <section>
+                        <button @click="levelDialogs.colorizer = true" class="flex gap-4 items-center p-3 mt-2 text-lg bg-opacity-40 rounded-lg hover:bg-black">
+                            <img src="@/images/color.svg" class="w-10" alt="">
+                            <span>{{ $t('editor.setColors') }}</span>
+                        </button>
+                    </section>
                 </div>
                 <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
@@ -233,23 +253,30 @@ const isSearching = ref(false)
                 </button>
 
                 <!-- Add level -->
-                <div class="flex gap-2 items-center focus-within:border-b-2 border-lof-400">
+                <div class="flex relative gap-2 items-center group border-lof-400">
                     <button @click="addLevel()" :disabled="POST_DATA.levels.length >= maxLevels || disabled "
-                        class="flex gap-2 px-2 py-3 text-xl font-bold outline-none disabled:opacity-40 disabled:grayscale text-lof-400" id="addLevelButton">
+                        class="flex gap-2 px-2 py-3 text-xl font-bold outline-none actBorder disabled:opacity-40 disabled:grayscale text-lof-400" id="addLevelButton">
                         <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
                         {{ $t('reviews.addLevel') }}</button>
                     <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
                     <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels || disabled" ref="moreLevOpts" class="p-2 button">
                         <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
                     </button>
+                    <div class="absolute bottom-1 invisible w-full border border-dashed border-lof-400 group-focus-within:visible"></div> <!-- Highlight -->
                 </div>
+
+                <!-- Colorizer -->
+                <button v-if="POST_DATA.levels.length > 0 && !disabled && postType == 'list'" @click="openMoreDialog(0)" class="absolute right-2 max-sm:invisible p-2 pb-1 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <img src="@/images/color.svg" class="inline mr-2 mb-1 w-6" alt="">
+                    <span>{{ $t('editor.colorizor') }}</span>
+                </button>
             </div>
             <Dropdown
                 v-if="moreLevOptOpen"
                 @close="moreLevOptOpen = false"
                 @picked-option="openMoreDialog"
                 :button="moreLevOpts"
-                :options="[$t('other.searchLevels'), $t('other.randomLevel'), $t('navbar.saved'), $t('reviews.import')]"
+                :options="[$t('editor.colorizor'), $t('other.searchLevels'), $t('other.randomLevel'), $t('navbar.saved'), $t('reviews.import')]"
             />
         </main>
     </section>

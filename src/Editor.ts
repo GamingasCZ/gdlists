@@ -28,7 +28,8 @@ export const DEFAULT_LEVELLIST: () => LevelList = () => {return {
   levels: [],
   tagline: "",
   thumbnail: ["", 0, 33, 1, true],
-  titleData: DEFAULT_TITLEDATA()
+  titleData: DEFAULT_TITLEDATA(),
+  pallete: false
 }}
 
 export const DEFAULT_LEVEL: () => Level = () => ({

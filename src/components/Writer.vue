@@ -12,7 +12,7 @@ import ImageBrowser from "./global/ImageBrowser.vue";
 import type {EditorAction, FormattingAction, Level, PostData, ReviewDraft, ReviewList, TEXT_ALIGNMENTS } from "@/interfaces";
 import { DataContainerAction, LevelImage } from "@/interfaces"
 import { WriterGallery} from "@/interfaces";
-import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview, containerSettingsOpen } from "@/Reviews";
+import { pickFont, getDominantColor, getEmbeds, addReviewLevel, modernizeReview, containerSettingsOpen, applyPalleteColor } from "@/Reviews";
 import ListBackground from "./global/ListBackground.vue";
 import BackgroundImagePicker from "./global/BackgroundImagePicker.vue";
 import { dialog } from "@/components/ui/sizes";
@@ -1058,6 +1058,17 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewin
         outsideDrafts = true
 }
 const exitPreview = () => {
+    if (disableEdits.value == 2) {
+        document.body.style.overflow = "clip"
+        disableEdits.value = false
+        previewingLevels.value = false
+        let i = 0
+        prevLevelColors.map(x => {
+            POST_DATA.value.levels[i++].color = x
+        })
+        return
+    }
+
     if (!previewHold) return
 
     previewID = null
@@ -1275,6 +1286,16 @@ const modifyPostName = () => {
         titleTag.innerText = `${WRITER.value.general.tabTitle} | ${i18n.global.t("other.websiteName")}`
 }
 
+var prevLevelColors: any = []
+const previewPallete = () => {
+    prevLevelColors = POST_DATA.value.levels.map(x => x.color)
+    document.body.style.overflow = "auto"
+    previewingLevels.value = true
+    disableEdits.value = 2
+    applyPalleteColor(POST_DATA.value)
+}
+provide("previewPallete", previewPallete)
+
 </script>
 
 <template>
@@ -1412,11 +1433,12 @@ const modifyPostName = () => {
             <!-- Back from draft preview -->
             <div v-if="disableEdits"
                 class="flex fixed top-14 left-1/2 z-40 flex-col p-1 w-96 text-white rounded-md -translate-x-1/2 bg-greenGradient">
-                <span class="mb-2 text-xl text-center">{{ $t('reviews.preview') }}</span>
-                <div class="grid grid-cols-2 gap-1">
-                    <button @click="exitPreview" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/close.svg"
+                <span v-if="disableEdits == 2" class="mb-2 text-xl text-center">Náhled palety</span>
+                <span v-else class="mb-2 text-xl text-center">{{ $t('reviews.preview') }}</span>
+                <div class="flex gap-1">
+                    <button @click="exitPreview" class="flex grow gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/close.svg"
                             class="w-5" alt="">{{ $t('other.close') }}</button>
-                    <button @click="previewApply" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg"
+                    <button v-if="disableEdits != 2" @click="previewApply" class="flex grow gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg"
                             class="w-5" alt="">{{ $t('other.use') }}</button>
                 </div>
             </div>
