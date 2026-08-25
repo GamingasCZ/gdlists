@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Stop } from '@/interfaces';
-import chroma from 'chroma-js';
+import chroma, { type Color } from 'chroma-js';
 import { computed, ref } from 'vue';
 
 
@@ -59,11 +59,23 @@ const addStop = (e?: MouseEvent) => {
             stopTop = 1-Math.round(sLen)
     }
 
-    let col = chroma.random().hsv()
-    props.gradient.push({position: stopTop, color: col})
+    props.gradient.push({position: stopTop, color: null})
     props.gradient.sort((a,b) => a.position - b.position)
+    let newInd = props.gradient.findIndex(x => x.color == null)
+    let lower = Math.max(0, newInd-1)
+    if (newInd == lower) lower++
+    let higher = Math.min(props.gradient.length-1, newInd+1)
+    if (newInd == higher) higher--
+
+    let newCol: [number, number, number]
+    if (lower == higher) // this shouldn't ever happen
+        newCol = chroma.random().hsv()
+    else
+        newCol = chroma.mix(chroma.hsv(...props.gradient[lower].color), chroma.hsv(...props.gradient[higher].color), stopTop, 'rgb').hsv()
+    props.gradient[newInd].color = newCol
+
     emit('madeChanges')
-    emit('openColor', props.gradient.findIndex(x => x.color.join() == col.join()))
+    emit('openColor', newInd)
 }
 
 const reverseGradient = () => {
@@ -99,7 +111,7 @@ defineExpose({
 <div ref="gradElement" class="relative my-4 ml-8 w-32">
     <div @click="addStop" ref="gradElementInner" @mousemove="moveStopPreview" class="h-full rounded-md border-2 border-black ring-2 ring-white group" :style="{background: gradientCSS}">
         <!-- Previewer -->
-        <div v-if="gradient.length < 10" class="absolute -left-0.5 w-full h-2 bg-transparent border-2 border-black ring-4 ring-white opacity-0 transition-opacity duration-75 -translate-y-1 group-hover:opacity-100" :style="{top: stopPreviewerY}">
+        <div v-if="gradient.length < 10" class="absolute -left-0.5 w-full h-2 bg-transparent border-2 border-black ring-4 ring-white opacity-0 transition-opacity duration-75 translate-x-0.5 -translate-y-1 group-hover:opacity-100" :style="{top: stopPreviewerY}">
         </div>
     </div>
 

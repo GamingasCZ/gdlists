@@ -67,6 +67,7 @@ var editing = ref(-1)
 var editingHex = ref(-1)
 
 const confirmHexEdit = (newValue: string, ind: number) => {
+    if (!chroma.valid(newValue, 'hex')) return editingHex.value = -1
     grad.value[ind].color = chroma(newValue).hsv()
     editingHex.value = -1
 }
@@ -214,7 +215,7 @@ const importPallete = () => {
     const err = (text: string) => {throw new Error(text)}
 
     try {
-        let sets = impTextAreaText.value.split(";")
+        let sets = impTextAreaText.value.trim().split(";")
         let finGrad: Stop[] = []
         if (sets.length == 0) return err(i18n.global.t('editor.impErr1'))
         if (sets.length > 10) return err(i18n.global.t('editor.impErr2'))
