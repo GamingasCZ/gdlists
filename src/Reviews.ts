@@ -204,8 +204,11 @@ export const applyPalleteColor = (postData: PostData) => {
             gradArray = palletes[key].gradient
             console.log(palletes, key, gradArray)
         }
+        else {
+            return
+        }
     }
-    else if (!postData.pallete)
+    if (!postData.pallete)
         return
 
     for (let i = 0; i < gradArray.length; i++)
