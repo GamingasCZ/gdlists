@@ -9,25 +9,27 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (e: "addedStop", pos: number): void
+    (e: "openColor", ind: number): void
+    (e: "madeChanges"): void
 }>()
 
 const gradientCSS = computed(() => {
-    return `linear-gradient(180deg, ${props.gradient.map(x => chroma.hsl(...x.color).hex()+` ${x.position*100}%`).join(",")})`
+    return `linear-gradient(180deg, ${props.gradient.map(x => chroma.hsv(...x.color).hex()+` ${x.position*100}%`).join(",")})`
 })
 
-const gradElement = ref<HTMLDivElement>()
+const gradElementInner = ref<HTMLDivElement>()
 const dragging = ref<Stop | null>(null)
 const startDragging = (ind: Stop) => {
     dragging.value = ind
     document.body.addEventListener("mouseup", stopDrag, {once: true})
     document.body.addEventListener("mousemove", moveDragger)
+    emit('openColor', props.gradient.indexOf(ind))
     // document.body.addEventListener("mouseleave", stopDrag, {once: true})
 }
 
 const getDistFromTop = (y: number) => {
-    if (!gradElement.value) return 0
-    let rect = gradElement.value.getBoundingClientRect()
+    if (!gradElementInner.value) return 0
+    let rect = gradElementInner.value.getBoundingClientRect()
     return Math.max(0, Math.min(1, (y-rect.top)/rect.height))
 }
 
@@ -41,6 +43,7 @@ const moveDragger = (e: MouseEvent) => {
 const stopDrag = () => {
     dragging.value = null
     document.body.removeEventListener("mousemove", moveDragger)
+    emit('madeChanges')
 }
 
 const addStop = (e?: MouseEvent) => {
@@ -56,8 +59,11 @@ const addStop = (e?: MouseEvent) => {
             stopTop = 1-Math.round(sLen)
     }
 
-    props.gradient.push({position: stopTop, color: chroma.random().hsl()})
+    let col = chroma.random().hsv()
+    props.gradient.push({position: stopTop, color: col})
     props.gradient.sort((a,b) => a.position - b.position)
+    emit('madeChanges')
+    emit('openColor', props.gradient.findIndex(x => x.color.join() == col.join()))
 }
 
 const reverseGradient = () => {
@@ -67,6 +73,7 @@ const reverseGradient = () => {
         el.color = colors[i]
         i++
     }
+    emit('madeChanges')
 
 }
 
@@ -75,16 +82,22 @@ const moveStopPreview = (e: MouseEvent) => {
     stopPreviewerY.value = `${getDistFromTop(e.pageY)*100}%`
 }
 
+const randomize = () => {
+    props.gradient.forEach(x => x.color = chroma.random().hsv())
+    emit('madeChanges')
+}
+
 defineExpose({
     addStop,
-    reverseGradient
+    reverseGradient,
+    randomize
 })
 
 </script>
 
 <template>
-<div class="relative my-4 ml-8 w-32">
-    <div ref="gradElement" @click="addStop" @mousemove="moveStopPreview" class="h-full rounded-md border-2 border-black ring-2 ring-white group" :style="{background: gradientCSS}">
+<div ref="gradElement" class="relative my-4 ml-8 w-32">
+    <div @click="addStop" ref="gradElementInner" @mousemove="moveStopPreview" class="h-full rounded-md border-2 border-black ring-2 ring-white group" :style="{background: gradientCSS}">
         <!-- Previewer -->
         <div v-if="gradient.length < 10" class="absolute -left-0.5 w-full h-2 bg-transparent border-2 border-black ring-4 ring-white opacity-0 transition-opacity duration-75 -translate-y-1 group-hover:opacity-100" :style="{top: stopPreviewerY}">
         </div>
@@ -93,10 +106,11 @@ defineExpose({
     <button
         v-for="(stop, ind) in gradient"
         @mousedown="startDragging(stop)"
+        @click="emit('openColor', ind)"
         :style="{top: `${stop.position*100}%`}"
         class="absolute -right-10 p-1 pl-6 bg-white rounded-md -translate-y-3.5 cursor-move stopCutout"
     >
-        <div :key="stop.position" class="w-5 rounded-full aspect-square button" :style="{background: chroma.hsl(...stop.color).hex()}"></div>
+        <div :key="stop.position" class="w-5 rounded-full aspect-square button" :style="{background: chroma.hsv(...stop.color).hex()}"></div>
     </button>
 </div>
 

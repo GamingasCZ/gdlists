@@ -235,7 +235,8 @@
     "browsePreview": "Náhled při procházení",
     "ratings": "Lajky",
     "colorizor": "Obarvení",
-    "setColors": "Nastavit barevné schéma"
+    "setColors": "Nastavit barevné schéma",
+    "palleteName": "Název palety"
   },
   "other": {
     "404": "Tady se bohužel nic nenachází...",
@@ -507,7 +508,10 @@
     "presets": "Předchystané",
     "activate": "Aktivovat",
     "deactivate": "Deaktivovat",
-    "flip": "Převrátit"
+    "flip": "Převrátit",
+    "randomize": "Náhodně",
+    "export": "Export",
+    "new": "Nová"
   },
   "listViewer": {
     "jumpTo": "Skočit na",
@@ -927,7 +931,10 @@
     "palHelp2": "Pro uložení palety, klikni na Uložit při vytváření vlastní palety.",
     "gradHelp1": "Zatím jsi nevybral žádnou paletu.",
     "gradHelp2": "Vybral jsi novou paletu.",
-    "gradHelp3": "Paleta {0} je aktivní."
+    "gradHelp3": "Paleta {0} je aktivní.",
+    "example": "Příklad",
+    "pImpHelp": "Palety jsou odděleny středníkem a jsou ve formátu &#x7B;HEX barva&#x7D;,&#x7B;pozice zarážky&#x7D;.",
+    "pimpH2": "Zadej paletu pro importování"
   },
   "images": {
     "imgMoveDel": "Přesunout obrázky výše, pak smazat"

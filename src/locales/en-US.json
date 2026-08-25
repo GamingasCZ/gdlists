@@ -121,7 +121,8 @@
     "browsePreview": "Browser Preview",
     "ratings": "Likes",
     "colorizor": "Colorizer",
-    "setColors": "Set Up a Color Scheme"
+    "setColors": "Set Up a Color Scheme",
+    "palleteName": "Pallete Name"
   },
   "homepage": {
     "clear": "Clear",
@@ -532,7 +533,10 @@
     "presets": "Presets",
     "activate": "Activate",
     "deactivate": "Deactivate",
-    "flip": "Flip Around"
+    "flip": "Flip Around",
+    "randomize": "Randomize",
+    "export": "Export",
+    "new": "New"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -926,7 +930,10 @@
     "palHelp2": "To save a pallete, tap Save, when creating a custom pallete.",
     "gradHelp1": "You haven't picked a pallet yet.",
     "gradHelp2": "You selected a pallete.",
-    "gradHelp3": "Pallete {0} is active."
+    "gradHelp3": "Pallete {0} is active.",
+    "pImpHelp": "Palletes are semicolon seperated and are in a & &#x7B;HEX color&#x7D;,&#x7B;stop position&#x7D; format.",
+    "pimpH2": "Enter a pallete for import",
+    "example": "Example"
   },
   "images": {
     "imgMoveDel": "Move images up, then delete"
