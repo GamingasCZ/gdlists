@@ -68,8 +68,8 @@ const addStop = (e?: MouseEvent) => {
     if (newInd == higher) higher--
 
     let newCol: [number, number, number]
-    if (lower == higher) // this shouldn't ever happen
-        newCol = chroma.random().hsv()
+    if (lower == higher) // happens when creating stop before first, or after last
+        newCol = JSON.parse(JSON.stringify(props.gradient[lower].color))
     else
         newCol = chroma.mix(chroma.hsv(...props.gradient[lower].color), chroma.hsv(...props.gradient[higher].color), stopTop, 'rgb').hsv()
     props.gradient[newInd].color = newCol
