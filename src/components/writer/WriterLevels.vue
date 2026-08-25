@@ -264,6 +264,12 @@ const isSearching = ref(false)
                     </button>
                     <div class="absolute bottom-1 invisible w-full border border-dashed border-lof-400 group-focus-within:visible"></div> <!-- Highlight -->
                 </div>
+
+                <!-- Colorizer -->
+                <button v-if="POST_DATA.levels.length > 0 && !disabled && postType == 'list'" @click="openMoreDialog(0)" class="absolute right-2 max-sm:invisible p-2 pb-1 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                    <img src="@/images/color.svg" class="inline mr-2 mb-1 w-6" alt="">
+                    <span>{{ $t('editor.colorizor') }}</span>
+                </button>
             </div>
             <Dropdown
                 v-if="moreLevOptOpen"
