@@ -449,7 +449,7 @@ const nameInput = ref<HTMLInputElement>()
                     <span>{{ $t('reviews.palHelp2') }}</span>
                 </div>
 
-                <div v-else class="flex flex-wrap gap-6 justify-evenly items-start p-3 w-full h-full">
+                <div v-else class="flex overflow-auto flex-wrap gap-6 justify-evenly items-start p-3 w-full h-full">
                     <ColorizerPreset
                         v-for="(saved, key) in savedPalletes"
                         :key="saved.gradient"
@@ -469,7 +469,7 @@ const nameInput = ref<HTMLInputElement>()
 
             <!-- Presets -->
             <template v-else-if="tab == 2">
-                <div class="flex flex-wrap gap-6 justify-evenly items-start p-3 w-full h-full">
+                <div class="flex overflow-auto flex-wrap gap-6 justify-evenly items-start p-3 w-full h-full">
                     <ColorizerPreset
                         v-for="(preset, ind) in colorizerPresets"
                         @click="selectPreset(-(ind+1))"
