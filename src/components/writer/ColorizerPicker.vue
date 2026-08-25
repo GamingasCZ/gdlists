@@ -35,7 +35,7 @@ const getDistFromTop = (y: number) => {
 
 const moveDragger = (e: MouseEvent) => {
     if (!dragging.value) return
-    let draggerTop = getDistFromTop(e.pageY)
+    let draggerTop = getDistFromTop(e.clientY)
     dragging.value.position = draggerTop;
     props.gradient.sort((a,b) => a.position - b.position)
 }
@@ -50,7 +50,7 @@ const addStop = (e?: MouseEvent) => {
     if (props.gradient.length >= 10) return
     let stopTop: number;
     if (e)
-        stopTop = getDistFromTop(e.pageY)
+        stopTop = getDistFromTop(e.clientY)
     else {
         let sLen = props.gradient.length
         if (sLen >= 2)
@@ -91,7 +91,7 @@ const reverseGradient = () => {
 
 const stopPreviewerY = ref("0%")
 const moveStopPreview = (e: MouseEvent) => {
-    stopPreviewerY.value = `${getDistFromTop(e.pageY)*100}%`
+    stopPreviewerY.value = `${getDistFromTop(e.clientY)*100}%`
 }
 
 const randomize = () => {
