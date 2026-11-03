@@ -45,6 +45,7 @@ import WriterViewer from "./writer/WriterViewer.vue";
 import TemporaryList from "./global/TemporaryList.vue";
 import ShareSection from "./levelViewer/ShareSection.vue";
 import { nextTick } from "vue";
+import LoginButton from "./global/LoginButton.vue";
 
 const props = defineProps<{
   listID?: string
@@ -123,6 +124,7 @@ const LIST_COL = ref<number[]>([0, 0, 0]);
 const LEVEL_COUNT = ref(0)
 const LIST_RATING = ref([0,0]);
 const listErrorLoading = ref(false)
+const needsLogin = ref(false)
 
 const backToReview = ref()
 
@@ -142,6 +144,10 @@ async function loadList(loadedData: LevelList | null) {
     if (res == 2) {
       nonexistentList.value = true
       return
+    }
+    // Needs login
+    else if (res?.[0] === false && res?.[6] === true) {
+      return needsLogin.value = true
     }
 
     LIST_DATA.value = res[0];
@@ -202,6 +208,10 @@ async function loadReview(loadedData: ReviewList | null) {
     if (res == 2) {
       nonexistentList.value = true
       return
+    }
+    // Needs login
+    else if (res?.[0] === false && res?.[6] === true) {
+      return needsLogin.value = true
     }
 
     let indicies = [0,0,0,0,0,0]
@@ -834,6 +844,7 @@ provide("openTags", openTagViewer)
       </div>
     </section>
 
+    <!-- Loading failed -->
     <section v-if="listErrorLoading" class="flex flex-col items-center my-20 text-white">
       <img src="@/images/listError.svg" class="w-56 opacity-60" alt="">
       <h2 class="mt-2 text-2xl font-bold opacity-60">{{ $t('listViewer.failLoad') }}</h2>
@@ -842,6 +853,15 @@ provide("openTags", openTagViewer)
           <button class="p-2 w-full text-left rounded-md bg-greenGradient button"><img src="@/images/browseMobHeader.svg"
               class="inline mr-3 w-8" alt="">{{ $t('listViewer.goHome') }}</button>
         </RouterLink>
+      </div>
+    </section>
+
+    <!-- Needs to be logged in -->
+    <section v-if="needsLogin" class="flex flex-col items-center my-20 text-white">
+      <img src="@/images/view.svg" class="w-56 opacity-60" alt="">
+      <h2 class="text-2xl font-bold opacity-60">{{ $t('listViewer.loginView') }}</h2>
+      <div class="mt-4 scale-125">
+        <LoginButton />
       </div>
     </section>
 

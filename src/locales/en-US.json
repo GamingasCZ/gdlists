@@ -270,7 +270,8 @@
     "changes4": "You've made changes to this post before.",
     "viewingNew": "You're viewing the original post.",
     "manyCompErr": "You're updating too many components at once!",
-    "watchFail": "Failed to start following the post!"
+    "watchFail": "Failed to start following the post!",
+    "loginView": "You need to be logged in, to view this post!"
   },
   "navbar": {
     "lists": "Browse",

@@ -122,6 +122,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
   $users = [];
   $allIDs = [];
   $isFollowed = false;
+  $loginView = false;
   if (!$singleList) {
     // No results when searching / No lists to load
     if (count($rows) == 0) {
@@ -154,6 +155,14 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
       $isFollowed = isFollowed($mysqli, $allIDs, $review, $uid);
   } else {
     // Single list
+
+    // Check whether user needs to be logged in
+    $loginView = (bool)$rows["loginView"];
+    if ($loginView) {
+      if (!getLocalUserID()) //should be good for basic needs
+        return array(false,[],[],[],[],false, true);
+    }
+
     $decoded = base64_decode($rows["data"], true);
     if ($decoded) {
       $rows["data"] = json_decode(htmlspecialchars_decode(gzuncompress($decoded)));
@@ -180,7 +189,7 @@ function parseResult($rows, $singleList = false, $maxpage = -1, $search = "", $p
     $ratings = getRatings($mysqli, $uid, $review ? "review_id" : "list_id", $rows["id"], true);
   }
 
-  return array($rows, $users, $dbInfo, $ratings, $reviewDetails, $isFollowed);
+  return array($rows, $users, $dbInfo, $ratings, $reviewDetails, $isFollowed, $loginView);
 }
 
 function getHomepage($lists, $reviews, $user) {

@@ -612,7 +612,8 @@
     "viewingNew": "Takto vypadá původní příspěvek.",
     "highlighted": "Zvýrazněný komentář",
     "manyCompErr": "Aktualizuješ až moc prvků zaráz!",
-    "watchFail": "Nepovedlo se začít sledovat příspěvěk!"
+    "watchFail": "Nepovedlo se začít sledovat příspěvěk!",
+    "loginView": "Pro zobrazení příspěvku musíš být přihlášen!"
   },
   "level": {
     "levelID": "ID levelu",

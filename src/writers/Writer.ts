@@ -306,6 +306,7 @@ export const REVIEW: Writer = {
         },
         {
             name: i18n.global.t('other.loginView'),
+            desc: i18n.global.t('other.loginViewHelp'),
             control: "cbox",
             affects: "loginView",
         },
