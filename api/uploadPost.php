@@ -57,6 +57,7 @@ if (is_string($postExtras)) die(json_encode([-1, $postExtras]));
 
 // Post settings
 $diffGuess = ($DATA["diffGuesser"] == 1 || $DATA["diffGuesser"][0]) ? 1 : 0;
+$loginToView =  isset($DATA["loginView"]) ? intval($DATA["loginView"]) : 0;
 $disableComments = $DATA["disComments"] == 1 ? 1 : 0;
 
 // Checking request
@@ -70,14 +71,14 @@ $compressedData = base64_encode(gzcompress(json_encode($DATA)));
 $template; $values; $types;
 switch ($post["postType"]) {
   case 'list':
-    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`,`tagline`, `thumbnail`, `thumbProps`) VALUES (?,'',?,?,?,?,?,?,?,?,?)";
-    $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments, $DATA["tagline"], $postExtras["thumb"], $postExtras["thumbProps"]);
-    $types = "ssssssisss";
+    $template = "INSERT INTO `lists`(`name`,`creator`, `data`,`timestamp`,`hidden`,`uid`,`diffGuesser`,`commDisabled`,`tagline`, `thumbnail`, `thumbProps`, `loginView`) VALUES (?,'',?,?,?,?,?,?,?,?,?,?)";
+    $values = array($post["postName"], $compressedData, $timestamp, $hidden, $user_id, $diffGuess, $disableComments, $DATA["tagline"], $postExtras["thumb"], $postExtras["thumbProps"], $loginToView);
+    $types = "ssssssisssi";
     break;
   case 'review':
-    $template = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`) VALUES (?,?,?,?,?,?,?,?,?)";
-    $values = array($post["postName"], $user_id, $compressedData, $DATA["tagline"], $hidden, $disableComments, $postExtras["thumb"], $postExtras["thumbProps"], $DATA["language"]);
-    $types = "sisssisss";
+    $template = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`, `loginView`) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    $values = array($post["postName"], $user_id, $compressedData, $DATA["tagline"], $hidden, $disableComments, $postExtras["thumb"], $postExtras["thumbProps"], $DATA["language"], $loginToView);
+    $types = "sisssisssi";
     break;
   
   default:

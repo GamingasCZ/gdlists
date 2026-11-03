@@ -130,6 +130,7 @@ if ($changingComponents) {
     else die("8");
 }
 
+$loginToView =  isset($decoded["loginView"]) ? intval($decoded["loginView"]) : 0;
 $disableComments = intval($DATA["disComments"]);
 $doHide = intval($DATA["hidden"]) == 1;
 $thumbdata = json_encode(array_slice($decoded["thumbnail"], 1));
@@ -144,11 +145,11 @@ $compressedData = base64_encode(gzcompress($fuckupData[1]));
 $hiddenID = privateIDGenerator($listData["name"], $listData["uid"], $listData["timestamp"]);
 $hidden = $doHide ? $hiddenID : '0';
 if ($IS_LIST) {
-    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ?, `tagline` = ?, `thumbnail` = ?, `thumbProps` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $decoded["tagline"], $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $DATA["id"]], "sssssssi");
+    $res = doRequest($mysqli, "UPDATE `lists` SET `data` = ?, `hidden` = ?, `diffGuesser` = ?, `commDisabled` = ?, `tagline` = ?, `thumbnail` = ?, `thumbProps` = ?, `loginView` = ? WHERE `id` = ?", [$compressedData, $hidden, $diffGuess, $disableComments, $decoded["tagline"], $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $loginToView, $DATA["id"]], "sssssssii");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
 }
 else {
-    $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ?, `lang` = ? WHERE id = ?", [$compressedData, $hidden, $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $decoded["language"], $DATA["id"]], "sssissss");
+    $res = doRequest($mysqli, "UPDATE `reviews` SET `data` = ?, `hidden`= ?, `tagline` = ?, `commDisabled` = ?, `thumbnail` = ?, `thumbProps` = ?, `lang` = ?, `loginView` = ? WHERE id = ?", [$compressedData, $hidden, $decoded["tagline"], $disableComments, $decoded["thumbnail"][0] ? $decoded["thumbnail"][0] : null, $thumbdata, $decoded["language"], $loginToView, $DATA["id"]], "sssisssis");
     if (array_key_exists("error", $res)) die(json_encode([-1, 7]));
 }
 
