@@ -554,7 +554,9 @@
     "randomize": "Randomize",
     "export": "Export",
     "new": "New Pallete",
-    "useAll": "Apply to All"
+    "useAll": "Apply to All",
+    "loginView": "Log In to View",
+    "loginViewHelp": "The post will only be readable to those, who are logged in."
   },
   "settingsMenu": {
     "asOff": "Off",

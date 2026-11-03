@@ -217,6 +217,7 @@ export interface LevelList {
   levels: Level[];
   titleData?: TitleData
   pallete?: PalleteData
+  loginView?: boolean
 }
 
 export interface LevelBackground {

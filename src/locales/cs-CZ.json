@@ -529,7 +529,9 @@
     "randomize": "Náhodně",
     "export": "Export",
     "new": "Nová paleta",
-    "useAll": "Použít na vše"
+    "useAll": "Použít na vše",
+    "loginView": "Jen pro přihlášené",
+    "loginViewHelp": "Příspěvěk bude přístupný jen pro přihlášené uživatele."
   },
   "listViewer": {
     "jumpTo": "Skočit na",

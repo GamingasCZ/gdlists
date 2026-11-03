@@ -225,6 +225,12 @@ export const LIST: Writer = {
             control: "cbox",
             affects: "disComments",
         },
+        {
+            name: i18n.global.t('other.loginView'),
+            desc: i18n.global.t('other.loginViewHelp'),
+            control: "cbox",
+            affects: "loginView",
+        },
         i18n.global.t('other.list'),
         {
             name: i18n.global.t('help.listGuessing'),
@@ -297,6 +303,11 @@ export const REVIEW: Writer = {
             control: "dropdown",
             controlOptions: LANGUAGES,
             affects: "language",
+        },
+        {
+            name: i18n.global.t('other.loginView'),
+            control: "cbox",
+            affects: "loginView",
         },
     ],
     dialogs: [
