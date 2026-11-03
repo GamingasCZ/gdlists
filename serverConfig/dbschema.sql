@@ -135,6 +135,7 @@ CREATE TABLE IF NOT EXISTS `lists` (
   `tagline` tinytext NOT NULL,
   `thumbnail` varchar(40) DEFAULT NULL,
   `thumbProps` tinytext,
+  `loginView` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `uid` (`uid`),
   KEY `List Thumbnail` (`thumbnail`)
@@ -200,6 +201,7 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `thumbnail` varchar(40) DEFAULT NULL,
   `thumbProps` tinytext,
   `lang` enum('cs','en','de','es','ko','ru','ot') NOT NULL DEFAULT 'ot',
+  `loginView` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `Review uploader` (`uid`),
   KEY `Review Thumbnail` (`thumbnail`)
