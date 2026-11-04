@@ -202,7 +202,7 @@ function getHomepage($lists, $reviews, $user) {
       GROUP BY `name`
       ORDER BY lists.id DESC LIMIT 4", $selRange, $listRatings), [], "", true);
   
-    $home["lists"] = parseResult($res, false, -1, "", 0, false, false, true, true);
+    $home["lists"] = parseResult($res, false, -1, "", 0, false, true, true, true);
   }
   if ($reviews) {
     $res = doRequest($mysqli, sprintf("SELECT %s, %s
@@ -211,7 +211,7 @@ function getHomepage($lists, $reviews, $user) {
       GROUP BY `name`
       ORDER BY reviews.id DESC LIMIT 4", $selReviewRange, $reviewRatings), [], "", true);
     
-    $home["reviews"] = parseResult($res, false, -1, "", 0, true, false, true, true);
+    $home["reviews"] = parseResult($res, false, -1, "", 0, true, true, true, true);
   }
   if ($user) {
     $account = getLocalUserID();
@@ -224,7 +224,7 @@ function getHomepage($lists, $reviews, $user) {
         WHERE uid=%s AND `hidden` LIKE 0
         ORDER BY timestamp DESC LIMIT 4", selConcatRange, $account, selConcatRangeRev, $account), [], "", true);
 
-      $home["user"] = parseResult($res, noUserFetch: true, noRatingsFetch: true);
+      $home["user"] = parseResult($res, noUserFetch: true, noRatingsFetch: true, noDeathOnEmpty: true);
     }
   }
 
