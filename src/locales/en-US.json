@@ -175,7 +175,8 @@
     "loginHelp2": "Use common sense and keep all your posts civil.",
     "loginHelp3": "If something isn't working as it should, please",
     "loginHelp4": "report the issue",
-    "loginHelp5": "You can change your profile picture!"
+    "loginHelp5": "You can change your profile picture!",
+    "logVia": "Login via..."
   },
   "level": {
     "comments": "Comments",

@@ -121,7 +121,8 @@
     "loginHelp2": "Používej selský rozum a udržuj své příspěvky slušné.",
     "loginHelp3": "Pokud něco nefuguje jak má,",
     "loginHelp4": "nahlaš mi prosím chybu",
-    "loginHelp5": "Můžeš si vybrat vlastní profilovou fotku!"
+    "loginHelp5": "Můžeš si vybrat vlastní profilovou fotku!",
+    "logVia": "Přihlásit se přes"
   },
   "editor": {
     "tags": [

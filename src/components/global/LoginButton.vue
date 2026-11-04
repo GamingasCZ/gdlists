@@ -2,6 +2,10 @@
 import router from '@/router';
 import cookier from "cookier";
 
+defineProps<{
+  rowLayout?: boolean
+}>()
+
 const state = () => {
   let chars: string[] = []
   for (let i = 0; i < 20; i++)
@@ -33,22 +37,24 @@ const goToDiscord = (isGoogle: boolean) => {
 
 <template>
   <div class="flex flex-col">
-    <caption class="mb-1 leading-none opacity-40">Login via...</caption>
-    <button
-      class="flex gap-3 items-center p-2 text-sm text-white bg-black bg-opacity-50 rounded-t-md"
-      @click="goToDiscord(false)"
-    >
-      <img src="../../images/socials/discord.svg" alt="" class="w-5" />{{
-        'Discord'
-      }}
-    </button>
-    <button
-      class="flex gap-3 items-center p-2 text-sm text-white bg-black bg-opacity-50 rounded-b-md"
-      @click="goToDiscord(true)"
-    >
-      <img src="../../images/socials/google.svg" alt="" class="w-5" />{{
-        'Google'
-      }}
-    </button>
+    <caption class="mb-2 leading-none opacity-40">{{ $t('homepage.logVia') }}</caption>
+    <div class="flex gap-2" :class="{'flex-col': !rowLayout}">
+      <button
+        class="flex gap-3 items-center p-2 text-sm text-white font-bold bg-[#5865F2] rounded-md"
+        @click="goToDiscord(false)"
+      >
+        <img src="../../images/socials/discord.svg" alt="" class="w-6" />{{
+          'Discord'
+        }}
+      </button>
+      <button
+        class="flex gap-3 items-center px-2 py-1 text-sm font-bold text-black bg-white rounded-md"
+        @click="goToDiscord(true)"
+      >
+        <img src="../../images/socials/google.svg" alt="" class="w-6" />{{
+          'Google'
+        }}
+      </button>
+    </div>
   </div>
 </template>

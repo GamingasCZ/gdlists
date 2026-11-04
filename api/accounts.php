@@ -5,6 +5,11 @@ Return codes:
 1 - Account already created
 */
 
+enum Account: string {
+    case Discord = 'discord';
+    case Google = 'google';
+}
+
 $https = strstr($_SERVER["HTTP_HOST"], "localhost") ? 'http://' : 'https://';
 $local = strstr($_SERVER["HTTP_HOST"], "localhost") ? "localhost:5173" : $_SERVER["HTTP_HOST"];
 
@@ -92,15 +97,31 @@ if (sizeof($_GET) > 0) {
 
     if (!isset($_GET["code"])) die("0");
 
+    switch ($_GET["iss"]) {
+        case 'https://accounts.google.com':
+            $accountType  = Account::Google;
+            $clientID     = $GOOGLE_CLIENT_ID;
+            $clientSecret = $GOOGLE_CLIENT_SECRET;
+            $baseURL      = "https://oauth2.googleapis.com/token";
+            $userDataURL  = "https://www.googleapis.com/oauth2/v2/userinfo";
+            break;
+        default:
+            $accountType  = Account::Discord;
+            $clientID     = $DISCORD_CLIENT_ID;
+            $clientSecret = $DISCORD_CLIENT_SECRET;
+            $baseURL      = "https://discord.com/api/v10/oauth2/token";
+            $userDataURL  = "https://discord.com/api/v10/users/@me";
+            break;
+    }
+
     // Get the access token from the authorization code
     $tokenUrl =  array(
-        "client_id" => $DISCORD_CLIENT_ID,
-        "client_secret" => $DISCORD_CLIENT_SECRET,
+        "client_id" => $clientID,
+        "client_secret" => $clientSecret,
         "grant_type" => "authorization_code",
         "code" => $_GET["code"],
     );
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
-    $baseURL = "https://discord.com/api/v10/oauth2/token";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 1), true);
     if (array_key_exists("error", $accessInfo)) {
         header("Location: " . $https . $local . '/gdlists/?loginerr');
@@ -108,14 +129,35 @@ if (sizeof($_GET) > 0) {
 
     // Get user data
     $tokenHeaders = array('Authorization: Bearer ' . $accessInfo["access_token"]);
-    $baseURL = "https://discord.com/api/v10/users/@me";
-    $dcApiResponse = json_decode(post($baseURL, array(), $tokenHeaders), true);
+    $dcApiResponse = json_decode(post($userDataURL, array(), $tokenHeaders), true);
+
+    switch ($accountType) {
+        case Account::Discord: $username = $dcApiResponse["username"]; break;
+        case Account::Google: $username = $dcApiResponse["name"]; break;
+    }
 
     // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
     $fistTimeUser = is_null(doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$dcApiResponse["id"]], "s"));
-    doRequest($mysqli, "INSERT INTO `users` (`username`,`discord_id`,`refresh_token`,`access_token`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `discord_id` = ?, `refresh_token` = ?, `access_token` = ?", [$dcApiResponse["username"], $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"], $dcApiResponse["id"],  $accessInfo["refresh_token"], $accessInfo["access_token"]], "sssssss");
 
-    $userInfo = json_encode(array($dcApiResponse["username"], $dcApiResponse["id"], $fistTimeUser));
+    // google doesn't return refresh token on subsequent auth, so ig we keep the old one??
+    // first time users will HOPEFULLY always return a refresh token
+    if (isset($accessInfo["refreshToken"])) {
+        doRequest($mysqli, "INSERT INTO `users` (`username`,`origin`,`discord_id`,`refresh_token`,`access_token`)
+                            VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY
+                            UPDATE `refresh_token` = ?, `access_token` = ?",
+                    [$username, $accountType->value, $dcApiResponse["id"], $accessInfo["refresh_token"], $accessInfo["access_token"],
+                     $accessInfo["refresh_token"], $accessInfo["access_token"]], "sssssss");
+    }
+    else {
+        doRequest($mysqli, "INSERT INTO `users` (`username`,`origin`,`discord_id`,`access_token`)
+                            VALUES (?, ?, ?, ?) ON DUPLICATE KEY
+                            UPDATE `access_token` = ?",
+                    [$username, $accountType->value, $dcApiResponse["id"], $accessInfo["access_token"],
+                     $accessInfo["access_token"]], "sssss");
+
+    }
+
+    $userInfo = json_encode(array($username, $dcApiResponse["id"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
 
     // Encrypt and save access token into a cookie
@@ -123,15 +165,18 @@ if (sizeof($_GET) > 0) {
 
     // Save profile pic
     if (!file_exists(getUserPath($dcApiResponse["id"]) . "/pfp.webp")) {
-        $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
+        if ($accountType == Account::Discord)
+            $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $dcApiResponse["id"], $dcApiResponse["avatar"]));
+        else
+            $pfp = file_get_contents($dcApiResponse["picture"]);
         if ($pfp !== false)
             saveImage($pfp, $dcApiResponse["id"], $mysqli, "pfp", false, false, true);
     }
 
     // Save username add to notif group
     if ($fistTimeUser) {
-        saveUsername($mysqli, $dcApiResponse["username"], $dcApiResponse["id"], true);
-        add_to_group($mysqli, group_single_user($dcApiResponse["id"])); // hopefully this doesn't return false :)
+        saveUsername($mysqli, $username, $dcApiResponse["id"], true);
+        add_to_group($mysqli, $dcApiResponse["id"], group_single_user($dcApiResponse["id"])); // hopefully this doesn't return false :)
     }
 
     $mysqli -> close();

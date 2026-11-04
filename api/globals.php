@@ -8,6 +8,8 @@ $debugMode = true;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
+$GOOGLE_CLIENT_ID = getenv("G_CLIENT_ID");
+$GOOGLE_CLIENT_SECRET = getenv("G_CLIENT_SECRET");
 $SECRET = getenv("SECRET"); // Use a random string :)
 
 define('PRIV_ID_LEN', 10);
@@ -261,6 +263,9 @@ function getLocalUserID() {
     return $auth[2]; // User ID
 }
 
+// FIXME: Due to introduction of google accs, OUTPUT WILL BE DIFFERENT
+// D: username/avatar
+// G: name/image
 function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     global $DO_REFRESH;
     $auth = getAuthorization();
@@ -277,17 +282,20 @@ function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
             if ($momentToken) return ["id" => $token[2]];
         }
     }
-
-    if ($token[1]-time() < 86400) {
+    // Used to be a day (86400s), but google's token expires in an hour D:
+    if ($token[1]-time() <= 0) {
         $refresh_token = refreshToken($token);
         if ($refresh_token === false) return false;
 
         $token[0] = $refresh_token[0];
     }
 
-    $res = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE `discord_id`=?", [$token[2]], "s");
+    $res = doRequest($mysqli, "SELECT `access_token`, `origin` FROM `users` WHERE `discord_id`=?", [$token[2]], "s");
     $tokenHeaders = array('Authorization: Bearer ' . $res["access_token"]);
-    $baseURL = "https://discord.com/api/v10/users/@me";
+    if ($res["origin"] == "discord")
+        $baseURL = "https://discord.com/api/v10/users/@me";
+    else
+        $baseURL = "https://www.googleapis.com/oauth2/v2/userinfo";
     $ok = post($baseURL, array(), $tokenHeaders);
     $json = json_decode($ok, true);
 
