@@ -487,3 +487,8 @@ export interface Stop {
     position: number,
     color: [number, number, number]
 }
+
+export const enum Origins {
+  Discord,
+  Google
+}

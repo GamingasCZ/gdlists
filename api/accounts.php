@@ -75,14 +75,15 @@ if (sizeof($_GET) > 0) {
         $accCheck = checkAccount($mysqli);
         if (!$accCheck) die("0");
 
-        $username = doRequest($mysqli, "SELECT `username` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
+        $username = doRequest($mysqli, "SELECT `username`, `origin` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
         $unread = getUnread($mysqli, $accCheck["id"]);
         $profileData = ["status" => "logged_in",
                         "account_name" => $username["username"],
                         "account_id" => $accCheck["id"],
                         "cutout" => is_null($pfpCutout) ? 0 : $pfpCutout["pfp_cutout"],
-                        "unread_notif" => $unread["amount_unread"]];
+                        "unread_notif" => $unread["amount_unread"],
+                        "origin" => intval($username["origin"] == "google")];
         
         if ($debugMode) $profileData["debug"] = true;
 

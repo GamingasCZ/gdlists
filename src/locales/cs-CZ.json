@@ -48,7 +48,7 @@
     "editPhoto": "Úprava fotky",
     "dragPhoto": "Přetáhni nebo vyber novou fotku",
     "pickFromGallery": "Vybrat z galerie",
-    "pickDiscord": "Použít z Discordu",
+    "pickDiscord": "Použít {0} jméno",
     "cutoutHelp": "Změní tvar profilové fotky",
     "pfpSet": "Profilová fotka byla nastavena",
     "closeDialog": "Klikni pro zavření dialogu!",

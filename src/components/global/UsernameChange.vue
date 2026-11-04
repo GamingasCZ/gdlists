@@ -2,11 +2,12 @@
 import axios from 'axios';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import ProfilePicture from './ProfilePicture.vue';
-import { currentCutout, currentUID } from '@/Editor';
+import { currentCutout, currentOrigin, currentUID } from '@/Editor';
 import { i18n } from '@/locales.ts';
 import { summonNotification } from '../imageUpload.ts';
 import { hasLocalStorage } from '@/siteSettings.ts';
 import Tooltip from '../ui/Tooltip.vue';
+import { Origins } from '@/interfaces.ts';
 
 interface response {
     available_in: number
@@ -142,6 +143,7 @@ const changeDisabled = computed(() =>
 
 const discButton = ref<HTMLButtonElement>()
 const dcHovering = ref(false)
+const socialName = ["Discord", "Google"][currentOrigin.value]
 
 </script>
 
@@ -177,8 +179,9 @@ const dcHovering = ref(false)
                 :minlength="minUsernameLen"
             >
             <button :disabled="changeDisabled" @mouseover="!changeDisabled && (dcHovering = true)" @mouseout="dcHovering = false" ref="discButton" type="button" @click="changeName(true)"  :class="{'disabled': changeDisabled}" class="relative z-10 px-2 bg-black bg-opacity-40 rounded-md button hover:bg-opacity-60">
-                <Tooltip v-if="dcHovering" :button="discButton" :text="$t('settingsMenu.pickDiscord')" no-teleport />
-                <img src="@/images/socials/discord.svg" class="w-6" alt="">
+                <Tooltip v-if="dcHovering" :button="discButton" :text="$t('settingsMenu.pickDiscord', [socialName])" no-teleport />
+                <img v-if="currentOrigin == Origins.Discord" src="@/images/socials/discord.svg" class="w-6" alt="">
+                <img v-else src="@/images/socials/google.svg" class="w-6" alt="">
             </button>
             <button type="submit" :disabled="changeDisabled" :class="{'disabled': changeDisabled}" class="flex gap-2 items-center px-2 text-xl text-black rounded-md button bg-lof-400">
                 <img src="@/images/check.svg" class="w-5" alt="">

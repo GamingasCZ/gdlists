@@ -308,6 +308,7 @@ function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
 
     $mt = createMomentToken($token[2]);
     setcookie("momentToken", $mt, time() + 1800, "/");
+    $json["origin"] = $res["origin"];
 
     return $json;
 }

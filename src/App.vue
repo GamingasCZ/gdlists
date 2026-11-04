@@ -8,7 +8,7 @@ import { SETTINGS, hasLocalStorage, loggedIn } from "./siteSettings";
 import NoConnection from "./components/global/NoConnection.vue";
 import router from "./router";
 import { i18n, setLanguage } from "./locales";
-import { currentCutout, currentUID } from "./Editor";
+import { currentCutout, currentOrigin, currentUID } from "./Editor";
 import NotificationStack from "./components/global/NotificationStack.vue";
 import { summonNotification } from "./components/imageUpload";
 import { dialog } from "./components/ui/sizes";
@@ -90,6 +90,7 @@ else {
           JSON.stringify(Object.values(res.data))
         );
         currentUID.value = res.data.account_id
+        currentOrigin.value = res.data.origin
         currentCutout.value = res.data.cutout
         currentUnread.value = res.data.unread_notif
         if (res.data.debug) debugModeEnabled.value = true

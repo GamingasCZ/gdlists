@@ -600,7 +600,7 @@
     "cutout": "Cutout",
     "cutoutHelp": "Modifies the shape of the picture",
     "pickFromGallery": "Pick from Gallery",
-    "pickDiscord": "Use from Discord",
+    "pickDiscord": "Use from {0}",
     "dragPhoto": "Drag in or choose a new photo",
     "editPhoto": "Edit Photo",
     "pfpSet": "Profile Picture has been set!",

@@ -124,7 +124,12 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 $user = checkAccount($mysqli, skipMomentToken: true);
                 if (!$user) die("-2");
 
-                $res = saveUsername($mysqli, $user["username"], $user["id"]);
+                if ($user["origin"] == "discord")
+                    $username = $user["username"];
+                else
+                    $username = $user["name"];
+                
+                $res = saveUsername($mysqli, $username, $user["id"]);
             }
             else {
                 $user = checkAccount($mysqli);
