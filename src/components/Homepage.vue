@@ -131,7 +131,7 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
 
   <section class="relative left-1/2 w-max -translate-x-1/2">
     <div v-if="!isLoggedIn && localStorg"
-      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
+      class="flex gap-3 justify-center items-center p-2 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
         <p class="text-xl font-bold leading-tight max-sm:text-xs">{{ $t("homepage.welcomeToGDL") }}</p>

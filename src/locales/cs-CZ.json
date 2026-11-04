@@ -85,13 +85,14 @@
     "zenFS": "Celoobrazovkový mód Zen",
     "zenFSHelp": "Zda-li se prohlížeč se přepne do režimu celé obrazovky v módu Zen.",
     "rClWriter": "Pravé kliknutí otevře menu prvku",
-    "rClWriterHelp": "Mění, zda pravé kliknutí otevře nabídku prohlížeče, nebo menu prvku v editoru. CTRL zvolí druhou možnost."
+    "rClWriterHelp": "Mění, zda pravé kliknutí otevře nabídku prohlížeče, nebo menu prvku v editoru. CTRL zvolí druhou možnost.",
+    "pickDiscordPFP": "Použít {0} profilovku"
   },
   "homepage": {
     "searchLists": "Hledat v GD Seznamech...",
     "createList": "Vytvořit seznam",
     "welcomeToGDL": "Vítej v GD Seznamech!",
-    "connectDiscord": " Připoj svůj Discord účet pro vytváření seznamů, hodnocení a komentování!",
+    "connectDiscord": "Zaregistruj se pro možnost přispívat, hodnotit a komentovat!",
     "logIn": "Přihlásit se",
     "newest": "Nové seznamy",
     "pinned": "Připnuté",
@@ -532,7 +533,8 @@
     "new": "Nová paleta",
     "useAll": "Použít na vše",
     "loginView": "Jen pro přihlášené",
-    "loginViewHelp": "Příspěvěk bude přístupný jen pro přihlášené uživatele."
+    "loginViewHelp": "Příspěvěk bude přístupný jen pro přihlášené uživatele.",
+    "current": "Stávající"
   },
   "listViewer": {
     "jumpTo": "Skočit na",

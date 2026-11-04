@@ -43,7 +43,10 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
     if (!$acc) die();
 
     if ($DATA == -1) {
-        $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $acc["id"], $acc["avatar"]));
+        if ($acc["origin"] == "discord")
+            $pfp = file_get_contents(sprintf("https://cdn.discordapp.com/avatars/%s/%s.png?size=128", $acc["id"], $acc["avatar"]));
+        else
+            $pfp = file_get_contents($acc["picture"]);
         if ($pfp !== false)
             saveImage($pfp, $acc["id"], $mysqli, "pfp", false, false, true);
     }

@@ -860,8 +860,8 @@ provide("openTags", openTagViewer)
     <section v-if="needsLogin" class="flex flex-col items-center my-20 text-white">
       <img src="@/images/view.svg" class="w-56 opacity-60" alt="">
       <h2 class="text-2xl font-bold opacity-60">{{ $t('listViewer.loginView') }}</h2>
-      <div class="mt-4 scale-125">
-        <LoginButton />
+      <div class="mt-8 scale-125">
+        <LoginButton row-layout />
       </div>
     </section>
 

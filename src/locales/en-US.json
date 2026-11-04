@@ -143,7 +143,7 @@
   },
   "homepage": {
     "clear": "Clear",
-    "connectDiscord": "Hook up your Discord account to create lists, rate and comment!",
+    "connectDiscord": "Create an account to make posts, rate and comment!",
     "createList": "Create a list",
     "listsNonexistent": "There are no such lists!",
     "listsUnavailable": "No {0} available!",
@@ -558,7 +558,8 @@
     "new": "New Pallete",
     "useAll": "Apply to All",
     "loginView": "Log In to View",
-    "loginViewHelp": "The post will only be readable to those, who are logged in."
+    "loginViewHelp": "The post will only be readable to those, who are logged in.",
+    "current": "Current"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -638,7 +639,8 @@
     "zenFS": "Fullscreen Zen Mode",
     "zenFSHelp": "If enabled, the browser will fullscreen itself in Zen Mode.",
     "rClWriter": "Right-click Element Menu",
-    "rClWriterHelp": "Modifies, if right-clicking opens the browser menu, or highlighted element's settings. CTRL to use other option."
+    "rClWriterHelp": "Modifies, if right-clicking opens the browser menu, or highlighted element's settings. CTRL to use other option.",
+    "pickDiscordPFP": "Use from {0}"
   },
   "help": {
     "Lists": "Lists",

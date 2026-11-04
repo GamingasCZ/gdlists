@@ -9,8 +9,9 @@ import ImageBrowser from './ImageBrowser.vue';
 import { getDominantColor } from '@/Reviews';
 import chroma from 'chroma-js';
 import ProfilePicture from './ProfilePicture.vue';
-import { currentCutout, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
+import { currentCutout, currentOrigin, currentUID, lastPFPchange, profileCutouts } from '@/Editor';
 import { ImgFail, notifyError } from '../imageUpload';
+import { Origins } from '@/interfaces.ts';
 
 const openEditPopup = ref(false)
 const discordLoading = ref(false)
@@ -197,6 +198,7 @@ const clickUploader = () => {
 
 
 const editFinished = ref(false)
+const socialName = ["Discord", "Google"][currentOrigin.value]
 
 </script>
 
@@ -247,7 +249,7 @@ const editFinished = ref(false)
                 <hr class="w-1 h-full bg-white rounded-full border-none opacity-20 max-sm:hidden">
                 <div class="pointer-events-none">
                     <ProfilePicture class="w-24 aspect-square" :uid="currentUID" :cutout="currentCutout" />
-                    <p class="text-xl opacity-20 max-sm:mb-4">Current</p>
+                    <p class="text-xl opacity-20 max-sm:mb-4">{{ $t('other.current') }}</p>
                 </div>
             </div>
             
@@ -262,8 +264,12 @@ const editFinished = ref(false)
                 </button>
                 <button @click="useDiscord" :disabled="discordLoading" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md disabled:opacity-40 button">
                     <img v-if="discordLoading" src="@/images/loading.webp" class="w-6 animate-spin" alt="">
-                    <img v-else src="@/images/socials/discord.svg" class="w-6" alt="">
-                    {{ $t('settingsMenu.pickDiscord') }}
+                    <template v-else>
+                        <img v-if="currentOrigin == Origins.Discord" src="@/images/socials/discord.svg" class="w-6" alt="">
+                        <img v-else src="@/images/socials/google.svg" class="w-6" alt="">
+
+                    </template>
+                    {{ $t('settingsMenu.pickDiscordPFP', [socialName]) }}
                 </button>
             </div>
         </div>
