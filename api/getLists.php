@@ -218,11 +218,11 @@ function getHomepage($lists, $reviews, $user) {
     if ($account) {
       $res = doRequest($mysqli, sprintf("SELECT %s
         FROM `lists`
-        WHERE uid=%s AND `hidden` LIKE 0
+        WHERE `uid`=? AND `hidden` LIKE 0
         UNION SELECT %s
         FROM `reviews`
-        WHERE uid=%s AND `hidden` LIKE 0
-        ORDER BY timestamp DESC LIMIT 4", selConcatRange, $account, selConcatRangeRev, $account), [], "", true);
+        WHERE `uid`=? AND `hidden` LIKE 0
+        ORDER BY timestamp DESC LIMIT 4", selConcatRange, selConcatRangeRev), [$account, $account], "ss", true);
 
       $home["user"] = parseResult($res, noUserFetch: true, noRatingsFetch: true, noDeathOnEmpty: true);
     }

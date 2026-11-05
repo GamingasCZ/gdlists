@@ -299,6 +299,11 @@ function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     $ok = post($baseURL, array(), $tokenHeaders);
     $json = json_decode($ok, true);
 
+    $idPrefix = ""; // discord no prefix
+    if ($res["origin"] == "google")
+        $idPrefix = "g";
+    $json["id"] = $idPrefix . $json["id"];
+
     if ((isset($json["message"]) && strstr($json["message"], "401"))) { // Invalid token, logout
         $res = refreshToken($token);
         if ($res === false) return false;

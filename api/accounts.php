@@ -136,8 +136,13 @@ if (sizeof($_GET) > 0) {
     $dcApiResponse = json_decode(post($userDataURL, array(), $tokenHeaders), true);
 
     switch ($accountType) {
-        case Account::Discord: $username = $dcApiResponse["username"]; break;
-        case Account::Google: $username = $dcApiResponse["name"]; break;
+        case Account::Discord:
+            $username = $dcApiResponse["username"];
+            break;
+        case Account::Google:
+            $username = $dcApiResponse["name"];
+            $dcApiResponse["id"] = "g" . $dcApiResponse["id"];
+            break;
     }
 
     // Database does not allow duplicate values (already registered), do not die in that case, else ye, commit die :D
