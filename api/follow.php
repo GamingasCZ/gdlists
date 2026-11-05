@@ -27,15 +27,15 @@ function isFollowed($mysqli, $postID, $postType, $uid) {
     if ($isPostList) {
         $in = makeIN($postID);
         if ($postType == 0)
-            $res = doRequest($mysqli, sprintf("SELECT `list_id` FROM `follows` WHERE `list_id` IN %s AND `user`=?", $in[0]), [...$postID, $uid], $in[1]."i", true);
+            $res = doRequest($mysqli, sprintf("SELECT `list_id` FROM `follows` WHERE `list_id` IN %s AND `user`=?", $in[0]), [...$postID, $uid], $in[1]."s", true);
         else
-            $res = doRequest($mysqli, sprintf("SELECT `review_id` FROM `follows` WHERE `review_id` IN %s AND `user`=?", $in[0]), [...$postID, $uid], $in[1]."i", true);
+            $res = doRequest($mysqli, sprintf("SELECT `review_id` FROM `follows` WHERE `review_id` IN %s AND `user`=?", $in[0]), [...$postID, $uid], $in[1]."s", true);
     }
     else {
         if ($postType == 0)
-            $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $uid], "ii");
+            $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $uid], "is");
         else
-            $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $uid], "ii");
+            $res = doRequest($mysqli, "SELECT * FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $uid], "is");
     }
     if (!is_null($res) && array_key_exists("error", $res))
         return false;
@@ -92,17 +92,17 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
             if (isFollowed($mysqli, $postID, $postType, $user["id"])) {
                 $resp = "5";
                 if ($postType == 0)
-                    $res = doRequest($mysqli, "DELETE FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $user["id"]], "ii");
+                    $res = doRequest($mysqli, "DELETE FROM `follows` WHERE `list_id`=? AND `user`=?", [$postID, $user["id"]], "is");
                 else
-                    $res = doRequest($mysqli, "DELETE FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $user["id"]], "ii");
+                    $res = doRequest($mysqli, "DELETE FROM `follows` WHERE `review_id`=? AND `user`=?", [$postID, $user["id"]], "is");
                 remove_from_group($mysqli, $user["id"], group_post_follow(!$postType, $postID));
             }
             else {
                 $resp = "6";
                 if ($postType == 0)
-                    $res = doRequest($mysqli, "INSERT INTO `follows`(list_id, user) VALUES (?,?)", [$postID, $user["id"]], "ii");
+                    $res = doRequest($mysqli, "INSERT INTO `follows`(list_id, user) VALUES (?,?)", [$postID, $user["id"]], "is");
                 else
-                    $res = doRequest($mysqli, "INSERT INTO `follows`(review_id, user) VALUES (?,?)", [$postID, $user["id"]], "ii");
+                    $res = doRequest($mysqli, "INSERT INTO `follows`(review_id, user) VALUES (?,?)", [$postID, $user["id"]], "is");
                 add_to_group($mysqli, $user["id"], group_post_follow(!$postType, $postID));
             }
             
