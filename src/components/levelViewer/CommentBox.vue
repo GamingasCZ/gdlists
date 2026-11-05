@@ -88,7 +88,10 @@ onMounted(() => {
     })
 })
 
-const keyboardSend = (e: KeyboardEvent) => e.ctrlKey && e.key == "Enter"
+const keyboardSend = (e: KeyboardEvent) => {
+    if (cannotSendComment.value) return false
+    return e.ctrlKey && e.key == "Enter"
+}
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
