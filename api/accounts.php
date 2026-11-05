@@ -145,7 +145,7 @@ if (sizeof($_GET) > 0) {
 
     // google doesn't return refresh token on subsequent auth, so ig we keep the old one??
     // first time users will HOPEFULLY always return a refresh token
-    if (isset($accessInfo["refreshToken"])) {
+    if (isset($accessInfo["refresh_token"])) {
         doRequest($mysqli, "INSERT INTO `users` (`username`,`origin`,`discord_id`,`refresh_token`,`access_token`)
                             VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY
                             UPDATE `refresh_token` = ?, `access_token` = ?",
