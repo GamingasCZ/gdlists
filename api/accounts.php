@@ -76,7 +76,10 @@ if (sizeof($_GET) > 0) {
             removeCookie("momentToken");
 
         $accCheck = checkAccount($mysqli);
-        if (!$accCheck) die("0");
+        if (!$accCheck) {
+            removeCookie("access_token");
+            die(json_encode(["status" => "logged_out"]));
+        };
 
         $username = doRequest($mysqli, "SELECT `username`, `origin` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
         $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");

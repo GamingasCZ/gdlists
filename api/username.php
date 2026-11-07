@@ -59,7 +59,7 @@ function saveUsername($mysqli, $username, $currentUID, $noCheck = false) {
     
     // we just kinda registering the current username if noCheck is true
     if (!$noCheck) {
-        $req = doRequest($mysqli, "UPDATE `users` SET `username`=? WHERE `discord_id`=?", [$username, $currentUID], "si");
+        $req = doRequest($mysqli, "UPDATE `users` SET `username`=? WHERE `discord_id`=?", [$username, $currentUID], "ss");
         if (array_key_exists("error", $req)) return -4;
     }
 
