@@ -175,25 +175,42 @@ function verifyMomentToken($token) {
 }
 
 function refreshToken() {
-    global $hostname, $username, $password, $database, $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
+    global $hostname, $username, $password, $database, $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET, $GOOGLE_CLIENT_ID, $GOOGLE_CLIENT_SECRET;
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) die("0");
     error_log("refreshing token...");
 
     $loginData = getAuthorization();
     if (!$loginData) return false;
-    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `users` WHERE discord_id=?", [$loginData[2]], "s");
+    $refresh_token = doRequest($mysqli, "SELECT refresh_token, origin FROM `users` WHERE discord_id=?", [$loginData[2]], "s");
     if (!is_array($refresh_token) || array_key_exists("error", $refresh_token)) return false;
 
     // Get the new token details
+    switch ($refresh_token["origin"] == "google") {
+        case 'https://accounts.google.com':
+            $accountType  = Account::Google;
+            $clientID     = $GOOGLE_CLIENT_ID;
+            $clientSecret = $GOOGLE_CLIENT_SECRET;
+            $baseURL      = "https://oauth2.googleapis.com/token";
+            $userDataURL  = "https://www.googleapis.com/oauth2/v2/userinfo";
+            $idPrefix = "g";
+            break;
+        default:
+            $accountType  = Account::Discord;
+            $clientID     = $DISCORD_CLIENT_ID;
+            $clientSecret = $DISCORD_CLIENT_SECRET;
+            $baseURL      = "https://discord.com/api/v10/oauth2/token";
+            $userDataURL  = "https://discord.com/api/v10/users/@me";
+            $idPrefix = "";
+            break;
+    }
     $tokenUrl = array(
-        "client_id" => $DISCORD_CLIENT_ID,
-        "client_secret" => $DISCORD_CLIENT_SECRET,
+        "client_id" => $clientID,
+        "client_secret" => $clientSecret,
         "grant_type" => "refresh_token",
         "refresh_token" => $refresh_token["refresh_token"],
     );
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
-    $baseURL = "https://discord.com/api/v10/oauth2/token";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
     if (array_key_exists("error", $accessInfo)) {
         removeCookie("access_token");
@@ -203,8 +220,8 @@ function refreshToken() {
 
     // Get user data
     $tokenHeaders = array('Authorization: Bearer ' . $accessInfo["access_token"]);
-    $baseURL = "https://discord.com/api/v10/users/@me";
-    $ok = json_decode(post($baseURL, array(), $tokenHeaders), true);
+    $ok = json_decode(post($userDataURL, array(), $tokenHeaders), true);
+    $ok["id"] = $idPrefix . $ok["id"];
 
     // Encrypt and save access token into a cookie
     
@@ -299,17 +316,17 @@ function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     $ok = post($baseURL, array(), $tokenHeaders);
     $json = json_decode($ok, true);
 
-    $idPrefix = ""; // discord no prefix
-    if ($res["origin"] == "google")
-        $idPrefix = "g";
-    $json["id"] = $idPrefix . $json["id"];
-
-    if ((isset($json["message"]) && strstr($json["message"], "401"))) { // Invalid token, logout
+    if ((isset($json["message"]) && (strstr($json["message"], "401")) || isset($json["error"]))) { // Invalid token, logout
         $res = refreshToken($token);
         if ($res === false) return false;
 
         return checkAccount($mysqli, $res);
     }
+
+    $idPrefix = ""; // discord no prefix
+    if ($res["origin"] == "google")
+        $idPrefix = "g";
+    $json["id"] = $idPrefix . $json["id"];
 
     $mt = createMomentToken($token[2]);
     setcookie("momentToken", $mt, time() + 1800, "/");
