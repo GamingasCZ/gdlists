@@ -131,7 +131,7 @@ if (sizeof($_GET) > 0) {
     // Save username add to notif group
     if ($fistTimeUser) {
         saveUsername($mysqli, $dcApiResponse["username"], $dcApiResponse["id"], true);
-        add_to_group($mysqli, group_single_user($dcApiResponse["id"])); // hopefully this doesn't return false :)
+        add_to_group($mysqli, $dcApiResponse["id"], group_single_user($dcApiResponse["id"])); // hopefully this doesn't return false :)
     }
 
     $mysqli -> close();
