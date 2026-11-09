@@ -30,6 +30,8 @@ const settingsShown = ref(false);
 const notifDropdownShown = ref(false);
 const showSettings = (e: MouseEvent) => {
   if (e.target.id == "settingsOpener") return
+  if (notifDropdownShown.value) closeNotifs2()
+  if (settingsShown.value) return closeSettings2()
   
   settingsShown.value = true
   // closeNotifs2()
@@ -37,6 +39,7 @@ const showSettings = (e: MouseEvent) => {
 };
 const showNotifs = () => {
   if (notifDropdownShown.value) return closeNotifs2()
+  if (settingsShown.value) return closeSettings2()
 
   if (SETTINGS.value.notifBehaviour) {
     router.push("/notifications")
@@ -48,7 +51,7 @@ const showNotifs = () => {
   }
 };
 
-const closeSettings2 = (e: MouseEvent) => {
+const closeSettings2 = () => {
   settingsShown.value = false
   document.body.removeEventListener("click", closeSettings, { capture: true })
 }
