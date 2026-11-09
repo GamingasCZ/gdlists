@@ -57,8 +57,8 @@ onMounted(() => {
       />
     </div>
 
-    <!-- <div class="flex flex-wrap gap-2"> -->
-      <div v-if="full" class="grow min-w-84">
+    <div class="flex flex-wrap gap-2">
+      <div v-if="full" class="grow min-w-48">
         <div v-if="!hsl" :style="{background: `linear-gradient(90deg, ${chroma.hsl(colors[0], 0, colors[2] / (full ? 100 : 32)).css()}, ${chroma.hsl(colors[0], 1, colors[2] / (full ? 100 : 32)).css()})`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <div v-else :style="{background: `linear-gradient(90deg, ${chroma.hsv(colors[0], 0, colors[2] / (full ? 100 : 32)).css()}, ${chroma.hsv(colors[0], 1, colors[2] / (full ? 100 : 32)).css()})`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <input
@@ -72,7 +72,7 @@ onMounted(() => {
         />
       </div>
   
-      <div class="grow min-w-96">
+      <div class="grow min-w-48">
         <div v-if="!hsl" :style="{background: `linear-gradient(90deg, black, ${chroma.hsv(colors[0], colors[1] / (full ? 100 : 32), 1).css()}, white)`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <div v-else :style="{background: `linear-gradient(90deg, black, ${chroma.hsv(colors[0], colors[1] / (full ? 100 : 32), 1).css()})`}" alt="" class="w-full h-6 rounded-md pointer-events-none"></div>
         <input
@@ -85,7 +85,7 @@ onMounted(() => {
           @input="modColors(2, parseInt($event.target?.value))"
         />
       </div>
-    <!-- </div> -->
+    </div>
 
     <div class="flex gap-2" v-if="SETTINGS.disableColors">
       <div :style="{background: colorsHex}" class="w-10 h-10 rounded-full"></div>
