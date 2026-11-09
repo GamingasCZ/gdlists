@@ -69,13 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] == "PATCH") {
 if (sizeof($_GET) > 0) {
 
     if (array_keys($_GET)[0] == "check") { // Check login validity
-        $accCheck = checkAccount($mysqli);
-        if (!$accCheck) die(json_encode(["status" => "logged_out"])); // Not logged in
+        $accCheck = checkAccount($mysqli, skipMomentToken: true);
 
-        if (isset($_COOKIE["momentToken"]))
-            removeCookie("momentToken");
-
-        $accCheck = checkAccount($mysqli);
         if (!$accCheck) {
             removeCookie("access_token");
             die(json_encode(["status" => "logged_out"]));

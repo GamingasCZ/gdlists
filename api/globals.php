@@ -228,7 +228,12 @@ function refreshToken() {
     removeCookie("access_token");
     saveAccessToken($accessInfo, $ok["id"]);
 
-    doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
+    if (isset($accessInfo["refresh_token"]))
+        doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
+    else {
+        // umm... i guess we don't need a new token?? (google)
+        $res = doRequest($mysqli, 'UPDATE `users` SET `access_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $ok["id"]], "ss");
+    }
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
