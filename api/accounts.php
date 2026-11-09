@@ -162,12 +162,13 @@ if (sizeof($_GET) > 0) {
                      $accessInfo["refresh_token"], $accessInfo["access_token"]], "sssssss");
     }
     else {
-        doRequest($mysqli, "INSERT INTO `users` (`username`,`origin`,`discord_id`,`access_token`)
-                            VALUES (?, ?, ?, ?) ON DUPLICATE KEY
+        // This insert is probably unnecessary, it shouldn't be possible
+        // for an account to not be created at this point
+        doRequest($mysqli, "INSERT INTO `users` (`username`,`origin`,`discord_id`,`access_token`,`refresh_token`)
+                            VALUES (?, ?, ?, ?, '0') ON DUPLICATE KEY
                             UPDATE `access_token` = ?",
                     [$username, $accountType->value, $dcApiResponse["id"], $accessInfo["access_token"],
                      $accessInfo["access_token"]], "sssss");
-
     }
 
     $userInfo = json_encode(array($username, $dcApiResponse["id"], $fistTimeUser));
