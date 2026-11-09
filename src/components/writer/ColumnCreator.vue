@@ -208,8 +208,8 @@ const textColCreateError = computed(() => {
 
                 </p>
             </form>
-            <p v-else @click.stop.capture="" class="relative py-2 pl-8 mt-4 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
-                <img src="@/images/info.svg" class="absolute top-2 left-2 w-4 opacity-50" alt="">
+            <p v-else @click.stop.capture="" class="flex gap-1 items-center p-2 mt-4 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
+                <img src="@/images/info.svg" class="w-4 opacity-50" alt="">
                 {{ $t('reviews.colHelp') }}
             </p>
         </div>
@@ -248,7 +248,7 @@ const textColCreateError = computed(() => {
                 {{ $t('other.add') }}
             </button>
             <div class="relative py-2 pr-2 pl-8 mt-8 text-sm bg-white bg-opacity-5 rounded-md text-balanced">
-                <img src="@/images/info.svg" class="absolute top-2 left-2 w-4 opacity-50" alt="">
+                <img src="@/images/info.svg" class="absolute left-2 top-2.5 w-4 opacity-50" alt="">
                 <span v-html="$t('reviews.cHelp1')"></span>
                 <table class="mt-2 w-full">
                     <tr>
