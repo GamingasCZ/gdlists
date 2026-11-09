@@ -81,15 +81,16 @@ if (sizeof($_GET) > 0) {
             die(json_encode(["status" => "logged_out"]));
         };
 
-        $username = doRequest($mysqli, "SELECT `username`, `origin` FROM `users` WHERE `discord_id`=?", [$accCheck["id"]], "s");
-        $pfpCutout = doRequest($mysqli, "SELECT `pfp_cutout` FROM `profiles` WHERE `uid`=?", [$accCheck["id"]], "s");
+        $profile = doRequest($mysqli, "SELECT `username`, `origin`, `pfp_cutout`
+                                       FROM `users` LEFT JOIN `profiles` ON `discord_id`=`uid`
+                                       WHERE `discord_id`=?", [$accCheck["id"]], "s");
         $unread = getUnread($mysqli, $accCheck["id"]);
         $profileData = ["status" => "logged_in",
-                        "account_name" => $username["username"],
+                        "account_name" => $profile["username"],
                         "account_id" => $accCheck["id"],
-                        "cutout" => is_null($pfpCutout) ? 0 : $pfpCutout["pfp_cutout"],
+                        "cutout" => is_null($profile) ? 0 : $profile["pfp_cutout"],
                         "unread_notif" => $unread["amount_unread"],
-                        "origin" => intval($username["origin"] == "google")];
+                        "origin" => intval($profile["origin"] == "google")];
         
         if ($debugMode) $profileData["debug"] = true;
 
