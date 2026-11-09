@@ -166,6 +166,8 @@ if (sizeof($_GET) > 0) {
                      $accessInfo["access_token"]], "sssss");
     }
 
+    // FIXME: this is used for the "welcome back" notif, but if the user
+    //        has renamed themselves, it doesn't show the renamed username!!
     $userInfo = json_encode(array($username, $dcApiResponse["id"], $fistTimeUser));
     setcookie("logindata", $userInfo, time()+30, "/");
 

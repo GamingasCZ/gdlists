@@ -239,6 +239,8 @@ function refreshToken() {
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
 }
 
+// this is unused for some reason
+// if you'd like to add this, add a REST DELETE check into accounts.php
 function revokeToken($token, $mysqli, $uid) {
     global $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
     // Revoke token
