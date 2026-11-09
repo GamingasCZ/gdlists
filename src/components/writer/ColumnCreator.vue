@@ -168,10 +168,10 @@ const textColCreateError = computed(() => {
     <section class="p-2 w-80 text-white">
         
         <div v-if="!pickedColumns">
-            <h2 v-if="colText.length" class="mb-2 text-2xl opacity-40">{{ $t('reviews.colPrev') }}</h2>
-            <h2 v-else-if="highlightedCreateColumns == -1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols') }}</h2>
-            <h2 v-else-if="highlightedCreateColumns <= 1" class="mb-2 text-2xl opacity-40">{{ $t('reviews.pickCols1') }}</h2>
-            <h2 v-else class="mb-2 text-2xl opacity-80">{{ $t('reviews.colsSelected', highlightedCreateColumns) }}</h2>
+            <h2 v-if="colText.length" class="py-1 mb-1 text-2xl opacity-40">{{ $t('reviews.colPrev') }}</h2>
+            <h2 v-else-if="highlightedCreateColumns == -1" class="py-1 mb-1 text-2xl opacity-40">{{ $t('reviews.pickCols') }}</h2>
+            <h2 v-else-if="highlightedCreateColumns <= 1" class="py-1 mb-1 text-2xl opacity-40">{{ $t('reviews.pickCols1') }}</h2>
+            <h2 v-else class="py-1 mb-1 text-2xl opacity-80">{{ $t('reviews.colsSelected', highlightedCreateColumns) }}</h2>
             <button class="w-full overflow-clip rounded-lg bg-lof-100">
                 <div class="flex p-2" :class="{'justify-center': colAlign == 'center', 'justify-end': colAlign == 'right'}">
                     <span v-if="textColCreateError" class="my-1 w-full text-center">{{ textColCreateError }}</span>
@@ -215,11 +215,11 @@ const textColCreateError = computed(() => {
         </div>
         
         <div v-if="pickedColumns">
-            <div class="mb-2 text-2xl">
-                <button @click="stepBack"><img src="@/images/back.svg" class="mx-2 w-4 opacity-60 hover:opacity-100 button" alt=""></button>
-                <span v-if="movingContentStage" class="opacity-40">{{ $t('reviews.moveCont') }}</span>
-                <span v-else class="opacity-40">{{ $t('reviews.colWTitle') }}</span>
-            </div>
+            <button @click="stepBack" class="flex py-1 mb-1 w-full text-2xl rounded-md opacity-60 hover:bg-white hover:bg-opacity-10">
+                <img src="@/images/back.svg" class="mx-2 w-4 alt="">
+                <span v-if="movingContentStage" class="">{{ $t('reviews.moveCont') }}</span>
+                <span v-else class="">{{ $t('reviews.colWTitle') }}</span>
+            </button>
             <div class="w-full overflow-clip rounded-lg bg-lof-100 border-lof-400">
                 <div class="flex p-2" :class="{'justify-center': highlightedAlign == 1, 'justify-end': highlightedAlign == 2}">
                     <ColumnPreview clickable :shrink="highlightedAlign != -1 && highlightedAlign != 3" @changed-width="clickColumn" :spread="highlightedAlign == 3" :fixed-amount="highlightedCreateColumns" :col-amount="highlightedCreateColumns" :no-wchange="movingContentStage" />
