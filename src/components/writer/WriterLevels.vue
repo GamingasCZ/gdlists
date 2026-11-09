@@ -243,10 +243,10 @@ const isSearching = ref(false)
                     />
                 </template>
             </div>
-            <div class="flex sticky bottom-0 z-20 gap-2 justify-end justify-center items-center rounded-b-md bg-lof-200">
+            <div class="flex sticky bottom-0 z-20 gap-2 justify-center items-center px-2 rounded-b-md max-sm:justify-end bg-lof-200">
 
                 <!-- Save draft -->
-                <button v-if="POST_DATA.levels.length && drafts !== null && !disabled" @click="emit('saveDraft')" class="absolute left-2 p-2 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                <button v-if="POST_DATA.levels.length && drafts !== null && !disabled" @click="emit('saveDraft')" class="absolute left-0 p-2 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/symbolicSave.svg" class="inline mr-4 w-6" alt="">
                     <span v-if="lastSaved[0] == 0">{{ $t('other.save') }}</span>
                     <span v-else>{{ lastSaved[1] }}</span>
@@ -266,7 +266,7 @@ const isSearching = ref(false)
                 </div>
 
                 <!-- Colorizer -->
-                <button v-if="POST_DATA.levels.length > 0 && !disabled && postType == 'list'" @click="openMoreDialog(0)" class="absolute right-2 max-sm:invisible p-2 pb-1 text-base text-white rounded-md opacity-40 transition-opacity hover:opacity-80 hover:bg-white hover:bg-opacity-10">
+                <button v-if="POST_DATA.levels.length > 0 && !disabled && postType == 'list'" @click="openMoreDialog(0)" class="absolute right-2 p-2 pb-1 text-base text-white rounded-md opacity-40 transition-opacity max-sm:invisible hover:opacity-80 hover:bg-white hover:bg-opacity-10">
                     <img src="@/images/color.svg" class="inline mr-2 mb-1 w-6" alt="">
                     <span>{{ $t('editor.colorizor') }}</span>
                 </button>
