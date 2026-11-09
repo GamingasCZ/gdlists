@@ -108,7 +108,7 @@ defineExpose({
 </script>
 
 <template>
-<div ref="gradElement" class="relative my-4 ml-8 w-32">
+<div ref="gradElement" class="relative my-4 max-sm:w-24 sm:w-32 sm:ml-8">
     <div @click="addStop" ref="gradElementInner" @mousemove="moveStopPreview" class="h-full rounded-md border-2 border-black ring-2 ring-white group" :style="{background: gradientCSS}">
         <!-- Previewer -->
         <div v-if="gradient.length < 10" class="absolute -left-0.5 w-full h-2 bg-transparent border-2 border-black ring-4 ring-white opacity-0 transition-opacity duration-75 translate-x-0.5 -translate-y-1 group-hover:opacity-100" :style="{top: stopPreviewerY}">

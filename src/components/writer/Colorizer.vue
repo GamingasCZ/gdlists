@@ -326,7 +326,7 @@ const nameInput = ref<HTMLInputElement>()
                 <!-- export -->
                 <template v-else>
                     <div class="m-2">
-                        <p class="text-center my-3">{{ $t('reviews.imHelp') }}</p>
+                        <p class="my-3 text-center">{{ $t('reviews.imHelp') }}</p>
                         <input type="text" class="p-2 w-full text-center bg-black bg-opacity-40 rounded-md min-h-16" @mouseover="$event.target.select()" readonly :value="exportText"></input>
                         <button @click="copyPallete" class="flex gap-2 items-center p-2 mx-auto mt-2 bg-black bg-opacity-40 rounded-md button">
                             <img src="@/images/link.svg" class="w-5" alt="">
@@ -339,23 +339,23 @@ const nameInput = ref<HTMLInputElement>()
             <!-- Not saved Popup -->
             <Dialog :open="notSavedOpen" @close-popup="notSavedOpen = 1" :width="dialog.medium" :title="$t('other.save')">
                 <div>
-                    <div class="flex p-2 gap-3 items-center">
-                        <img src="@/images/symbolicSave.svg" class="w-16 opacity-20 m-3" alt="">
+                    <div class="flex gap-3 items-center p-2">
+                        <img src="@/images/symbolicSave.svg" class="m-3 w-16 opacity-20" alt="">
                         <div>
-                            <span class="font-bold text-2xl">{{ $t('reviews.cPnS1') }}</span>
+                            <span class="text-2xl font-bold">{{ $t('reviews.cPnS1') }}</span>
                             <p class="mt-1">{{ $t('reviews.cPnS2') }}</p>
                         </div>
                     </div>
-                    <div class="flex mb-2 justify-evenly">
-                        <button @click="notSavedOpen = 1" class="button p-2 text-xl flex gap-3 items-center bg-black bg-opacity-40 rounded-md">
+                    <div class="flex justify-evenly mb-2">
+                        <button @click="notSavedOpen = 1" class="flex gap-3 items-center p-2 text-xl bg-black bg-opacity-40 rounded-md button">
                             <img src="@/images/close.svg" class="w-6" alt="">
                             {{ $t('other.cancel') }}
                         </button>
-                        <button @click="notSavedOpen = 2" class="button p-2 text-xl flex gap-3 items-center bg-black bg-opacity-40 rounded-md">
+                        <button @click="notSavedOpen = 2" class="flex gap-3 items-center p-2 text-xl bg-black bg-opacity-40 rounded-md button">
                             <img src="@/images/trash.svg" class="w-6" alt="">
                             {{ $t('other.discard') }}
                         </button>
-                        <button @click="notSavedOpen = 3" class="button p-2 text-xl flex gap-3 items-center bg-black bg-opacity-40 rounded-md">
+                        <button @click="notSavedOpen = 3" class="flex gap-3 items-center p-2 text-xl bg-black bg-opacity-40 rounded-md button">
                             <img src="@/images/symbolicSave.svg" class="w-6" alt="">
                             {{ $t('other.save') }}
                         </button>
@@ -374,9 +374,9 @@ const nameInput = ref<HTMLInputElement>()
                     :class="{'pointer-events-none opacity-50': customGradEmpty}"
 
                 />
-                <section class="flex absolute top-0 right-0 bottom-0 flex-col w-3/5 bg-greenGradient">
-                    <div v-show="!customGradEmpty" class="flex items-center p-3">
-                        <span class="text-xl grow">{{ $t('review.gradStops') }}</span>
+                <section class="flex absolute top-0 right-0 bottom-0 flex-col max-sm:w-44 sm:w-3/5 bg-greenGradient">
+                    <div v-show="!customGradEmpty" class="flex flex-wrap gap-2 justify-center items-center p-3">
+                        <span class="text-xl max-sm:hidden grow">{{ $t('review.gradStops') }}</span>
                         <button @click="colorPicker?.randomize()" :title="$t('other.randomize')" class="flex gap-2 p-1 mr-2 bg-black bg-opacity-40 rounded-md button"><img src="@/images/dice.svg" class="w-6" alt=""></button>
                         <button @click="colorPicker?.reverseGradient()" :title="$t('other.flip')" class="flex gap-2 p-1 mr-2 bg-black bg-opacity-40 rounded-md button"><img src="@/images/flip.svg" class="w-6" alt=""></button>
                         <button :disabled="grad.length >= 10" @click="colorPicker?.addStop()" class="flex gap-2 px-2 py-1 bg-black bg-opacity-40 rounded-md button"><img src="@/images/plus.svg" class="w-5" alt="">{{ $t('other.add') }}</button>
@@ -386,7 +386,7 @@ const nameInput = ref<HTMLInputElement>()
                         <div v-for="(stop, ind) in grad" class="p-2 odd:bg-black odd:bg-opacity-20">
                             <div class="flex">
                                 <button @click="editing = editing == ind ? -1 : ind" class="w-7 rounded-full border-2 border-black ring-2 ring-white button aspect-square" :style="{background: chroma.hsv(...stop.color).hex()}"></button>
-                                <span v-if="editingHex != ind" @click="editingHex = ind" class="ml-3 text-xl button">{{ chroma.hsv(...stop.color).hex() }}</span>
+                                <span v-if="editingHex != ind" @click="editingHex = ind" class="ml-3 text-xl max-sm:hidden button">{{ chroma.hsv(...stop.color).hex() }}</span>
                                 <input v-else @blur="confirmHexEdit($event.target.value, ind)" @mouseover="$event.target.select()" type="text" size="5" class="ml-2 w-max bg-transparent border-b-2 outline-none focus-within:bg-white/10" :value="chroma.hsv(...stop.color).hex()">
                                 <span class="ml-2 opacity-40">{{ Math.round(stop.position*100) }}%</span>
                                 <div class="flex gap-2 ml-auto">
@@ -407,7 +407,7 @@ const nameInput = ref<HTMLInputElement>()
                         </div>
                     </div>
                     <div v-show="!customGradEmpty" class="p-2">
-                        <div v-if="!savingCustom" class="flex gap-2 justify-around">
+                        <div v-if="!savingCustom" class="flex gap-2 justify-around max-sm:flex-wrap">
                             <button @click="newGradient" class="flex gap-2 justify-center py-1 bg-white bg-opacity-0 rounded-md duration-75 transition-color hover:bg-opacity-10 grow"><img src="@/images/plus.svg" class="w-5">{{ $t('other.new') }}</button>
                             <button :disabled="justSaved" @click="customSaveID ? saveCustom() : savingCustom = true" class="flex gap-2 justify-center py-1 bg-white bg-opacity-0 rounded-md duration-75 disabled:opacity-20 transition-color hover:bg-opacity-10 grow"><img src="@/images/symbolicSave.svg" class="w-5">{{ justSaved ? $t('reviews.saved') : $t('other.save') }}</button>
                         </div>
@@ -487,7 +487,7 @@ const nameInput = ref<HTMLInputElement>()
             </template>
     
         </section>
-        <div class="flex h-10 gap-2 items-center px-2 m-2 bg-black bg-opacity-40 rounded-md">
+        <div class="flex gap-2 items-center px-2 m-2 h-10 bg-black bg-opacity-40 rounded-md">
             <img v-if="applyButtonState == 0 || applyButtonState == 3" src="@/images/info.svg" class="w-5" alt="">
             <img v-else src="@/images/color.svg" class="w-5" alt="">
             <span v-html="MESSAGES[applyButtonState]"></span>
