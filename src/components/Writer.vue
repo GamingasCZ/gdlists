@@ -1436,9 +1436,9 @@ provide("previewPallete", previewPallete)
                 <span v-if="disableEdits == 2" class="mb-2 text-xl text-center">{{ $t('editor.palPreview') }}</span>
                 <span v-else class="mb-2 text-xl text-center">{{ $t('reviews.preview') }}</span>
                 <div class="flex gap-1">
-                    <button @click="exitPreview" class="flex grow gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/close.svg"
+                    <button @click="exitPreview" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md grow"><img src="@/images/close.svg"
                             class="w-5" alt="">{{ $t('other.close') }}</button>
-                    <button v-if="disableEdits != 2" @click="previewApply" class="flex grow gap-2 p-1 bg-black bg-opacity-40 rounded-md"><img src="@/images/checkThick.svg"
+                    <button v-if="disableEdits != 2" @click="previewApply" class="flex gap-2 p-1 bg-black bg-opacity-40 rounded-md grow"><img src="@/images/checkThick.svg"
                             class="w-5" alt="">{{ $t('other.use') }}</button>
                 </div>
             </div>
@@ -1508,6 +1508,7 @@ provide("previewPallete", previewPallete)
                         :inverted="POST_DATA.whitePage"
                         :writer="WRITER"
                         :post="POST_DATA"
+                        :show-drafts="reviewSave.backupID == 0"
                         :drafts="drafts"
                     />
                 </template>

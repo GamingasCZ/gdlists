@@ -10,6 +10,7 @@ const props = defineProps<{
 	writer: Writer
 	drafts: {[draftKey: string]: ReviewDraft}
 	post: PostData
+	showDrafts: boolean
 }>()
 const emit = defineEmits<{
 	(e: "loadDraft", key: string): void
@@ -29,7 +30,7 @@ const base = import.meta.env.BASE_URL
 <template>
 	<div class="grid text-white text-base thinScrollbar font-[poppins] py-4 w-full gap-y-5">
 
-		<section v-if="drafts && draftsValues.length">
+		<section v-if="drafts && draftsValues.length && showDrafts">
 			<h2 class="ml-2 text-3xl font-black text-lof-400">{{ $t('reviews.drafts2') }}</h2>
 			<div class="grid">
 				<section class="flex overflow-auto gap-4 px-2 mt-2">
