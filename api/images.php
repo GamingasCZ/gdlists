@@ -172,9 +172,9 @@ function getCreateAttributedFolderID($attribute, $uid, $mysqli) {
     $folderExists = doRequest($mysqli, "SELECT id FROM `images_folders` WHERE `attributes`=? AND `uid`=?", [$att, $uid], "ss");
     if (!$folderExists) {
         $folderCreate = doRequest($mysqli,
-        "INSERT INTO `images_folders`(`name`, `color`, `uid`, `attributes`)
-        VALUES (?,?,?,?)",
-        ['/'.$att, "#1A1C3C", $uid, $att], "ssss");
+        "INSERT INTO `images_folders`(`name`, `color`, `base_path`, `uid`, `attributes`)
+        VALUES (?,?,?,?,?)",
+        ['/'.$att, "#1A1C3C", NULL, $uid, $att], "ssiss");
         if (array_key_exists("success", $folderCreate)) {
             $fID = doRequest($mysqli, "SELECT LAST_INSERT_ID() as id",[],"");
             return $fID["id"];
