@@ -88,7 +88,7 @@ if (sizeof($_GET) > 0) {
         $profileData = ["status" => "logged_in",
                         "account_name" => $profile["username"],
                         "account_id" => $accCheck["id"],
-                        "cutout" => is_null($profile) ? 0 : $profile["pfp_cutout"],
+                        "cutout" => is_null($profile["pfp_cutout"]) ? 0 : $profile["pfp_cutout"],
                         "unread_notif" => $unread["amount_unread"],
                         "origin" => intval($profile["origin"] == "google")];
         
