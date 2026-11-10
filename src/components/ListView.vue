@@ -194,6 +194,7 @@ const showChecklistsUsed = ref(false)
 var originalListData: PostData
 provide("batchEmbeds", embedsContent)
 provide("postData", computed(() => LIST_DATA.value.data))
+provide("creatorData", LIST_CREATORDATA)
 async function loadReview(loadedData: ReviewList | null) {
   nonexistentList.value = false
 
