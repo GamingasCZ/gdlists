@@ -197,7 +197,7 @@ const isSearching = ref(false)
 
                     <h2 v-else class="text-2xl max-sm:mt-8">{{ subtext }}</h2>
                     <section class="flex gap-3 px-2 mt-8 w-full sm:items-center max-sm:flex-col">
-                        <button :disabled="disabled" @click="openMoreDialog(0)" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
+                        <button :disabled="disabled" @click="openMoreDialog(1)" class="flex gap-3 items-center px-2 py-3 text-lg bg-opacity-40 rounded-lg sm:flex-col grow hover:bg-black">
                             <img src="@/images/searchOpaque.svg" class="w-10" alt="">
                             <p>{{ $t('reviews.browseLevels') }}</p>
                         </button>
@@ -213,7 +213,7 @@ const isSearching = ref(false)
                         </button>
                     </section>
                     <section>
-                        <button @click="levelDialogs.colorizer = true" class="flex gap-4 items-center p-3 mt-2 text-lg bg-opacity-40 rounded-lg hover:bg-black">
+                        <button @click="openMoreDialog(0)" class="flex gap-4 items-center p-3 mt-2 text-lg bg-opacity-40 rounded-lg hover:bg-black">
                             <img src="@/images/color.svg" class="w-10" alt="">
                             <span>{{ $t('editor.setColors') }}</span>
                         </button>
