@@ -82,6 +82,13 @@ export function listenForNotifications() {
 
     var offset = HALF_MINUTE
     const startNotifRead = async () => {
+
+        // Unfocusing the browser should disable notif fetching
+        if (document.hidden) {
+            notifTimeout = setTimeout(startNotifRead, HALF_MINUTE+offset)
+            return
+        }
+
         let newNotifsArrived = await fetchNotifications(true, 0, -1, true)
 
         if (!newNotifsArrived)
