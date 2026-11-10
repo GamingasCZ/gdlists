@@ -27,6 +27,7 @@ const props = defineProps<{
   picking: false | 1 | 2 | 3
   displayInRows: boolean
   highlight?: number
+  fetchCount?: number
 }>()
 
 // Page title
@@ -51,7 +52,7 @@ const searchNoResults = ref<boolean>(false);
 const loading = ref<boolean>(false)
 const unrolled = ref<boolean>(-1)
 
-const LISTS_ON_PAGE = 9;
+const LISTS_ON_PAGE = props.fetchCount ?? 9;
 const PAGE = ref<number>((parseInt(new URLSearchParams(window.location.search).get("p")!) || 1) - 1);
 const maxPages = ref<number>(1);
 const pagesArray = ref<number[]>(listScroll());
@@ -130,14 +131,13 @@ function refreshBrowser() {
   let fetchURI: string
   let fetchQuery: Object
   if (props?.onlineType != 'comments') {
-    let listsMod = props.onlineSubtype == 'list' ? LISTS_ON_PAGE : 9
     fetchURI = `${import.meta.env.VITE_API}/getLists.php`
     fetchQuery = {
       startID: 999999,
       searchQuery: SEARCH_QUERY.value,
       page: PAGE.value,
       path: "/getLists.php",
-      fetchAmount: listsMod,
+      fetchAmount: LISTS_ON_PAGE,
       sort: 0,
       type: props.onlineSubtype
     }

@@ -124,6 +124,7 @@ const closeLevels = () => {
                 :online-type="['', 'user', 'hidden', 'followed'][contentType]"
                 :online-subtype="['lists', 'reviews', 'levels'][tab]"
                 hide-search hide-tabs is-logged-in :picking="onlyPickLists ? 3 : 1 + (+onlyPickLevels)"
+                :fetch-count="8"
                 @switch-browser="contentType = $event"
                 @selected-post-option="pickList"
             />
