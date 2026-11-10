@@ -10,6 +10,7 @@ const emit = defineEmits<{
   (e: "switchBrowser", browser: "" | "user" | "hidden" | "collabs"): void;
   (e: "refreshedBrowser", objectAmount: number): void;
   (e: "selectedPostOption", data: [selectedList, string]): void;
+  (e: "switchedPage"): void;
 }>();
 
 const props = defineProps<{
@@ -73,6 +74,7 @@ function switchPage(setPage: number) {
     window.scrollTo({top: main.value?.offsetTop-100, behavior: "instant"})
   }
   
+  emit('switchedPage')
   pagesArray.value = listScroll();
   refreshBrowser();
 }

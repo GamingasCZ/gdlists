@@ -37,6 +37,7 @@ const switchTab = (newTab: number) => {
 const contentType = ref(lastPostPickerTab[1])
 const listingLevels = ref<boolean | 2>(false)
 const levelsFetched = ref([])
+const mainContainer = ref<HTMLDivElement>()
 
 const addToInjected = inject<() => void>("addToInjected")!
 const selNest = inject<Ref<[number, number, number]>>("selectedNestContainer")!
@@ -73,6 +74,10 @@ const pickList = (data: selectedList) => {
             }
         })
     }
+}
+
+const scrollToTop = () => {
+    mainContainer.value?.scrollTo({behavior: 'smooth', top: 0})
 }
 
 let adjustID = -1
@@ -115,6 +120,7 @@ const closeLevels = () => {
 
     <div
         tabindex="-1"
+        ref="mainContainer"
         class="bg-[url(@/images/fade.svg)] bg-repeat-x h-[40rem] relative p-2 pt-0 overflow-y-auto flex flex-col gap-2">    
         <div v-show="!listingLevels">
             <ListBrowser
@@ -127,6 +133,7 @@ const closeLevels = () => {
                 :fetch-count="8"
                 @switch-browser="contentType = $event"
                 @selected-post-option="pickList"
+                @switched-page="scrollToTop"
             />
         </div>
         <div v-show="listingLevels" class="relative mt-2 h-full">
