@@ -259,7 +259,7 @@ const isSearching = ref(false)
                         <Plus :style="{fill: 'var(--brightGreen)'}" class="w-7 h-7" />
                         {{ $t('reviews.addLevel') }}</button>
                     <hr class="w-0.5 h-4 bg-white bg-opacity-20 border-none">
-                    <button @click="moreLevOptOpen = true" :disabled="POST_DATA.levels.length >= maxLevels || disabled" ref="moreLevOpts" class="p-2 button">
+                    <button @click="moreLevOptOpen = true" ref="moreLevOpts" class="p-2 button">
                         <img src="@/images/genericRate.svg" class="w-2 rotate-180 disabled:opacity-40" alt="">
                     </button>
                     <div class="absolute bottom-1 invisible w-full border border-dashed border-lof-400 group-focus-within:visible"></div> <!-- Highlight -->
