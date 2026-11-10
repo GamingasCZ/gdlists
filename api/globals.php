@@ -8,6 +8,8 @@ $debugMode = true;
 
 $DISCORD_CLIENT_ID = getenv("DC_CLIENT_ID");
 $DISCORD_CLIENT_SECRET = getenv("DC_CLIENT_SECRET");
+$GOOGLE_CLIENT_ID = getenv("G_CLIENT_ID");
+$GOOGLE_CLIENT_SECRET = getenv("G_CLIENT_SECRET");
 $SECRET = getenv("SECRET"); // Use a random string :)
 
 define('PRIV_ID_LEN', 10);
@@ -173,25 +175,42 @@ function verifyMomentToken($token) {
 }
 
 function refreshToken() {
-    global $hostname, $username, $password, $database, $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
+    global $hostname, $username, $password, $database, $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET, $GOOGLE_CLIENT_ID, $GOOGLE_CLIENT_SECRET;
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) die("0");
     error_log("refreshing token...");
 
     $loginData = getAuthorization();
     if (!$loginData) return false;
-    $refresh_token = doRequest($mysqli, "SELECT refresh_token FROM `users` WHERE discord_id=?", [$loginData[2]], "s");
+    $refresh_token = doRequest($mysqli, "SELECT refresh_token, origin FROM `users` WHERE discord_id=?", [$loginData[2]], "s");
     if (!is_array($refresh_token) || array_key_exists("error", $refresh_token)) return false;
 
     // Get the new token details
+    switch ($refresh_token["origin"] == "google") {
+        case 'https://accounts.google.com':
+            $accountType  = Account::Google;
+            $clientID     = $GOOGLE_CLIENT_ID;
+            $clientSecret = $GOOGLE_CLIENT_SECRET;
+            $baseURL      = "https://oauth2.googleapis.com/token";
+            $userDataURL  = "https://www.googleapis.com/oauth2/v2/userinfo";
+            $idPrefix = "g";
+            break;
+        default:
+            $accountType  = Account::Discord;
+            $clientID     = $DISCORD_CLIENT_ID;
+            $clientSecret = $DISCORD_CLIENT_SECRET;
+            $baseURL      = "https://discord.com/api/v10/oauth2/token";
+            $userDataURL  = "https://discord.com/api/v10/users/@me";
+            $idPrefix = "";
+            break;
+    }
     $tokenUrl = array(
-        "client_id" => $DISCORD_CLIENT_ID,
-        "client_secret" => $DISCORD_CLIENT_SECRET,
+        "client_id" => $clientID,
+        "client_secret" => $clientSecret,
         "grant_type" => "refresh_token",
         "refresh_token" => $refresh_token["refresh_token"],
     );
     $tokenHeaders = array('Content-Type: application/x-www-form-urlencoded');
-    $baseURL = "https://discord.com/api/v10/oauth2/token";
     $accessInfo = json_decode(post($baseURL, $tokenUrl, $tokenHeaders, 0), true);
     if (array_key_exists("error", $accessInfo)) {
         removeCookie("access_token");
@@ -201,20 +220,27 @@ function refreshToken() {
 
     // Get user data
     $tokenHeaders = array('Authorization: Bearer ' . $accessInfo["access_token"]);
-    $baseURL = "https://discord.com/api/v10/users/@me";
-    $ok = json_decode(post($baseURL, array(), $tokenHeaders), true);
+    $ok = json_decode(post($userDataURL, array(), $tokenHeaders), true);
+    $ok["id"] = $idPrefix . $ok["id"];
 
     // Encrypt and save access token into a cookie
     
     removeCookie("access_token");
     saveAccessToken($accessInfo, $ok["id"]);
 
-    doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
+    if (isset($accessInfo["refresh_token"]))
+        doRequest($mysqli, 'UPDATE `users` SET `access_token`=?, `refresh_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $accessInfo["refresh_token"], $ok["id"]], "sss");
+    else {
+        // umm... i guess we don't need a new token?? (google)
+        $res = doRequest($mysqli, 'UPDATE `users` SET `access_token`=? WHERE `discord_id`=?', [$accessInfo["access_token"], $ok["id"]], "ss");
+    }
     $mysqli -> close();
 
     return [$accessInfo["access_token"], time()+$accessInfo["expires_in"], $ok["id"]];
 }
 
+// this is unused for some reason
+// if you'd like to add this, add a REST DELETE check into accounts.php
 function revokeToken($token, $mysqli, $uid) {
     global $DISCORD_CLIENT_ID, $DISCORD_CLIENT_SECRET;
     // Revoke token
@@ -261,6 +287,9 @@ function getLocalUserID() {
     return $auth[2]; // User ID
 }
 
+// FIXME: Due to introduction of google accs, OUTPUT WILL BE DIFFERENT
+// D: username/avatar
+// G: name/image
 function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
     global $DO_REFRESH;
     $auth = getAuthorization();
@@ -277,29 +306,38 @@ function checkAccount($mysqli, $forceToken = false, $skipMomentToken = false) {
             if ($momentToken) return ["id" => $token[2]];
         }
     }
-
-    if ($token[1]-time() < 86400) {
+    // Used to be a day (86400s), but google's token expires in an hour D:
+    if ($token[1]-time() <= 0) {
         $refresh_token = refreshToken($token);
         if ($refresh_token === false) return false;
 
         $token[0] = $refresh_token[0];
     }
 
-    $res = doRequest($mysqli, "SELECT `access_token` FROM `users` WHERE `discord_id`=?", [$token[2]], "s");
+    $res = doRequest($mysqli, "SELECT `access_token`, `origin` FROM `users` WHERE `discord_id`=?", [$token[2]], "s");
     $tokenHeaders = array('Authorization: Bearer ' . $res["access_token"]);
-    $baseURL = "https://discord.com/api/v10/users/@me";
+    if ($res["origin"] == "discord")
+        $baseURL = "https://discord.com/api/v10/users/@me";
+    else
+        $baseURL = "https://www.googleapis.com/oauth2/v2/userinfo";
     $ok = post($baseURL, array(), $tokenHeaders);
     $json = json_decode($ok, true);
 
-    if ((isset($json["message"]) && strstr($json["message"], "401"))) { // Invalid token, logout
+    if ((isset($json["message"]) && (strstr($json["message"], "401")) || isset($json["error"]))) { // Invalid token, logout
         $res = refreshToken($token);
         if ($res === false) return false;
 
         return checkAccount($mysqli, $res);
     }
 
+    $idPrefix = ""; // discord no prefix
+    if ($res["origin"] == "google")
+        $idPrefix = "g";
+    $json["id"] = $idPrefix . $json["id"];
+
     $mt = createMomentToken($token[2]);
     setcookie("momentToken", $mt, time() + 1800, "/");
+    $json["origin"] = $res["origin"];
 
     return $json;
 }

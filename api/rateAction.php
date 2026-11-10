@@ -50,7 +50,7 @@ switch ($method) {
             if (is_array($rowQuery) && array_key_exists("error", $rowQuery)) $result["result"] = "error";
             else {
                 $result["result"] = "added";
-                if ($creator["uid"])
+                if ($creator["uid"] && $creator["uid"] != $accountCheck)
                     createNotification($mysqli, $accountCheck, group_single_user($creator["uid"]), 2, intval(isset($DATA["review_id"]))+1, $objectID);
             };
         }

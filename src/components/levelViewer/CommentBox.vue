@@ -88,7 +88,10 @@ onMounted(() => {
     })
 })
 
-const keyboardSend = (e: KeyboardEvent) => e.ctrlKey && e.key == "Enter"
+const keyboardSend = (e: KeyboardEvent) => {
+    if (cannotSendComment.value) return false
+    return e.ctrlKey && e.key == "Enter"
+}
 
 const placeholderActive = ref<boolean>(true)
 const placeholder = ref<string>("")
@@ -198,11 +201,11 @@ const cannotSendComment = computed(() => (commentLength.value < MIN_COMMENT_LEN 
 
         <!-- Not logged in notification -->
         <section v-if="!loggedIn" class="flex absolute top-5 left-1/2 z-20 flex-col gap-1 items-center w-full text-white -translate-x-1/2">
-            <div class="flex gap-2 items-center">
+            <div class="flex gap-2 items-center mb-2">
                 <img src="@/images/info.svg" alt="" class="w-6">
                 <p>{{ $t('listViewer.commentLogin') }}</p>
             </div>
-            <LoginButton />
+            <LoginButton row-layout />
         </section>
 
         <!-- Comment send error -->

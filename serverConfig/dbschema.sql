@@ -239,9 +239,10 @@ CREATE TABLE IF NOT EXISTS `username_change` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `username` tinytext NOT NULL,
+  `origin` enum('discord','google') NOT NULL DEFAULT 'discord',
   `discord_id` varchar(40) NOT NULL,
-  `refresh_token` tinytext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
-  `access_token` tinytext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci,
+  `refresh_token` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `access_token` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci,
   `id` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`),
   UNIQUE KEY `discord_id` (`discord_id`)

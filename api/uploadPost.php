@@ -78,7 +78,7 @@ switch ($post["postType"]) {
   case 'review':
     $template = "INSERT INTO `reviews`(`name`,`uid`,`data`,`tagline`,`hidden`,`commDisabled`,`thumbnail`, `thumbProps`, `lang`, `loginView`) VALUES (?,?,?,?,?,?,?,?,?,?)";
     $values = array($post["postName"], $user_id, $compressedData, $DATA["tagline"], $hidden, $disableComments, $postExtras["thumb"], $postExtras["thumbProps"], $DATA["language"], $loginToView);
-    $types = "sisssisssi";
+    $types = "sssssisssi";
     break;
   
   default:

@@ -8,6 +8,10 @@ import axios from "axios";
 import { i18n } from "@/locales";
 import type { HomepageFetchResponse, ViewedPinArray } from "@/interfaces";
 
+defineProps<{
+  isLoggedIn: boolean
+}>()
+
 document.title = `${i18n.global.t('other.homepage')} | ${i18n.global.t("other.websiteName")}`;
 
 const localStorg = ref(hasLocalStorage())
@@ -126,14 +130,14 @@ watch(loggedIn, () => getFeeds().then(e => feeds.value = e), {once: true})
   </header>
 
   <section class="relative left-1/2 w-max -translate-x-1/2">
-    <div v-if="isLoggedIn == false && localStorg"
-      class="flex gap-3 justify-center items-center px-2 py-1 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
+    <div v-if="!isLoggedIn && localStorg"
+      class="flex gap-3 justify-center items-center p-2 mx-4 mt-6 max-w-4xl text-white rounded-md bg-greenGradient">
       <img src="../images/info.svg" alt="" class="w-6" />
       <div>
         <p class="text-xl font-bold leading-tight max-sm:text-xs">{{ $t("homepage.welcomeToGDL") }}</p>
         <p class="mr-4 text-sm max-md:hidden">{{ $t("homepage.connectDiscord") }}</p>
       </div>
-      <LoginButton class="ml-auto" />
+      <LoginButton row-layout class="ml-auto" />
     </div>
     <div v-if="!localStorg"
       class="flex gap-3 justify-center items-center px-2 py-1 mt-6 w-max text-white rounded-md -translate-x-7 mx bg-greenGradient">

@@ -2,6 +2,10 @@
 import router from '@/router';
 import cookier from "cookier";
 
+defineProps<{
+  rowLayout?: boolean
+}>()
+
 const state = () => {
   let chars: string[] = []
   for (let i = 0; i < 20; i++)
@@ -10,29 +14,47 @@ const state = () => {
   return chars.join('')
 }
 
-const goToDiscord = () => {
+const goToDiscord = (isGoogle: boolean) => {
   let currRoute = router.currentRoute.value.fullPath
   let lState = state()
   cookier("state").set(lState)
 
   sessionStorage.setItem("loginRoute", currRoute)
 
-  window.location.replace(
-    `https://discord.com/api/oauth2/authorize?client_id=989511463360139264&state=${lState}&prompt=none&redirect_uri=${encodeURIComponent(
-      import.meta.env.VITE_DC_RETURNURI + "/accounts.php"
-      )}&response_type=code&scope=identify`
-  );
+  if (isGoogle)
+    window.location.replace(
+      `https://accounts.google.com/o/oauth2/v2/auth?client_id=951385406857-45v047a1p1vcbjl37h3t4hv324d5odop.apps.googleusercontent.com&redirect_uri=${encodeURIComponent(import.meta.env.VITE_DC_RETURNURI+'/accounts.php')}&response_type=code&scope=openid%20profile&state=${lState}&access_type=offline`
+    );
+  else
+    window.location.replace(
+      `https://discord.com/api/oauth2/authorize?client_id=989511463360139264&state=${lState}&prompt=none&redirect_uri=${encodeURIComponent(
+        import.meta.env.VITE_DC_RETURNURI + "/accounts.php"
+        )}&response_type=code&scope=identify`
+    );
 }
 
 </script>
 
 <template>
-  <button
-    class="flex gap-3 items-center p-2 text-sm text-white bg-black bg-opacity-50 rounded-md button"
-    @click="goToDiscord"
-  >
-    <img src="../../images/socials/discord.svg" alt="" class="w-6" />{{
-      $t("homepage.logIn")
-    }}
-  </button>
+  <div class="flex flex-col">
+    <caption class="mb-2 leading-none opacity-40">{{ $t('homepage.logVia') }}</caption>
+    <div class="flex gap-2" :class="{'flex-col': !rowLayout}">
+      <button
+        class="flex gap-3 items-center p-2 text-sm text-white font-bold bg-[#5865F2] rounded-md"
+        @click="goToDiscord(false)"
+      >
+        <img src="../../images/socials/discord.svg" alt="" class="w-6" />{{
+          'Discord'
+        }}
+      </button>
+      <button
+        class="flex gap-3 items-center px-2 py-1 text-sm font-bold text-black bg-white rounded-md"
+        @click="goToDiscord(true)"
+      >
+        <img src="../../images/socials/google.svg" alt="" class="w-6" />{{
+          'Google'
+        }}
+      </button>
+    </div>
+  </div>
 </template>

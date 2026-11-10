@@ -25,6 +25,6 @@ const emojiPath = `${import.meta.env.BASE_URL}/emoji/${faces[pick]}.webp`
       >
     </div>
     <span>{{ mess }}</span>
-    <LoginButton />
+    <LoginButton row-layout />
   </section>
 </template>

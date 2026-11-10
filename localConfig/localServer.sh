@@ -10,6 +10,10 @@ export DB_NAME=""
 export DC_CLIENT_ID=""
 export DC_CLIENT_SECRET=""
 
+# set up a client in google auth platform
+export G_CLIENT_ID=""
+export G_CLIENT_SECRET=""
+
 # use a random string
 export SECRET=""
 

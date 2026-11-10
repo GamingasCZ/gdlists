@@ -59,7 +59,7 @@ function saveUsername($mysqli, $username, $currentUID, $noCheck = false) {
     
     // we just kinda registering the current username if noCheck is true
     if (!$noCheck) {
-        $req = doRequest($mysqli, "UPDATE `users` SET `username`=? WHERE `discord_id`=?", [$username, $currentUID], "si");
+        $req = doRequest($mysqli, "UPDATE `users` SET `username`=? WHERE `discord_id`=?", [$username, $currentUID], "ss");
         if (array_key_exists("error", $req)) return -4;
     }
 
@@ -124,7 +124,12 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                 $user = checkAccount($mysqli, skipMomentToken: true);
                 if (!$user) die("-2");
 
-                $res = saveUsername($mysqli, $user["username"], $user["id"]);
+                if ($user["origin"] == "discord")
+                    $username = $user["username"];
+                else
+                    $username = $user["name"];
+                
+                $res = saveUsername($mysqli, $username, $user["id"]);
             }
             else {
                 $user = checkAccount($mysqli);

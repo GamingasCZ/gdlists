@@ -20,5 +20,9 @@ SetEnv DB_NAME
 SetEnv DC_CLIENT_ID
 SetEnv DC_CLIENT_SECRET
 
+# set up a client in google auth platform
+SetEnv G_CLIENT_ID
+SetEnv G_CLIENT_SECRET
+
 # can be a random string
 SetEnv SECRET

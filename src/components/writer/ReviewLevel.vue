@@ -29,6 +29,7 @@ watch(props, () => {
 const postData = inject<() => [Level[], ReviewRating[]]>("levelsRatingsData")!()
 const doFullscreen = inject<() => void>("fullscreenLevel", () => {})
 const levelHashes = inject("levelHashes", 0)!
+const creatorData = inject("creatorData", {discord_id: currentUID.value})!
 let indPicked = ref(0)
 const mountedOnce = ref(false)
 
@@ -47,7 +48,7 @@ const mountedOnce = ref(false)
     </ContainerHelp>
     
     <figure class="flex flex-col p-2 w-full" style="justify-content: inherit" v-else>
-        <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" hide-ratings v-bind="postData[0][settings.pickedIndex]" :disable-stars="true" :uploader-uid="currentUID" @fullscreen-image="doFullscreen" />
+        <LevelCard :key="levelHashes?.[settings.pickedIndex] ?? 0" hide-ratings v-bind="postData[0][settings.pickedIndex]" :disable-stars="true" :uploader-uid="creatorData.discord_id" @fullscreen-image="doFullscreen" />
         <figcaption class="text-[90%] text-inherit mt-1">{{ settings.description }}</figcaption>
     </figure>
 </template>

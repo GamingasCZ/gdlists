@@ -143,7 +143,7 @@
   },
   "homepage": {
     "clear": "Clear",
-    "connectDiscord": "Hook up your Discord account to create lists, rate and comment!",
+    "connectDiscord": "Create an account to make posts, rate and comment!",
     "createList": "Create a list",
     "listsNonexistent": "There are no such lists!",
     "listsUnavailable": "No {0} available!",
@@ -175,7 +175,8 @@
     "loginHelp2": "Use common sense and keep all your posts civil.",
     "loginHelp3": "If something isn't working as it should, please",
     "loginHelp4": "report the issue",
-    "loginHelp5": "You can change your profile picture!"
+    "loginHelp5": "You can change your profile picture!",
+    "logVia": "Login via..."
   },
   "level": {
     "comments": "Comments",
@@ -557,7 +558,8 @@
     "new": "New Pallete",
     "useAll": "Apply to All",
     "loginView": "Log In to View",
-    "loginViewHelp": "The post will only be readable to those, who are logged in."
+    "loginViewHelp": "The post will only be readable to those, who are logged in.",
+    "current": "Current"
   },
   "settingsMenu": {
     "asOff": "Off",
@@ -599,7 +601,7 @@
     "cutout": "Cutout",
     "cutoutHelp": "Modifies the shape of the picture",
     "pickFromGallery": "Pick from Gallery",
-    "pickDiscord": "Use from Discord",
+    "pickDiscord": "Use from {0}",
     "dragPhoto": "Drag in or choose a new photo",
     "editPhoto": "Edit Photo",
     "pfpSet": "Profile Picture has been set!",
@@ -637,7 +639,8 @@
     "zenFS": "Fullscreen Zen Mode",
     "zenFSHelp": "If enabled, the browser will fullscreen itself in Zen Mode.",
     "rClWriter": "Right-click Element Menu",
-    "rClWriterHelp": "Modifies, if right-clicking opens the browser menu, or highlighted element's settings. CTRL to use other option."
+    "rClWriterHelp": "Modifies, if right-clicking opens the browser menu, or highlighted element's settings. CTRL to use other option.",
+    "pickDiscordPFP": "Use from {0}"
   },
   "help": {
     "Lists": "Lists",

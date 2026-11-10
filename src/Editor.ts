@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { ref } from "vue";
-import type { LevelList, Level, CollabData, PostData, ListFetchResponse, LevelBackground, ReviewDraft } from "./interfaces";
+import { type LevelList, type Level, type CollabData, type PostData, type ListFetchResponse, type LevelBackground, type ReviewDraft, Origins } from "./interfaces";
 import { hasLocalStorage, SETTINGS } from "./siteSettings";
 import { i18n } from "./locales";
 import { changeTheme } from "./themes";
@@ -305,6 +305,7 @@ export const shortenYTLink = (link: string, disableParams = false) => {
 export const lastPFPchange = ref(Date.now())
 export const currentCutout = ref(0)
 export const currentUID = ref("0")
+export const currentOrigin = ref(Origins.Discord)
 
 export const profileCutouts = [
   'circle()',
