@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import { ControlType, type Containers, type ContainerSettings } from './containers';
 import containersBlueprint from './containers';
 import type { PostData } from '@/interfaces';
@@ -43,6 +43,7 @@ watch(shortcut, () => {
 
 const containerSettings = ref<HTMLFormElement>()
 const settingsShown = ref(false)
+const isNestable = computed(() => !props.nest && containersBlueprint[props.type].nestable)
 
 const showSettings = () => {
     nextTick(() => {
@@ -55,7 +56,12 @@ const showSettings = () => {
                 window.addEventListener("resize", positionFloating)
                 positionFloating()
             }
-            nextTick(() => containerSettings.value?.[4]?.focus())
+            nextTick(() => {
+                if (isNestable.value)
+                    containerSettings.value?.[5]?.focus()
+                else
+                    containerSettings.value?.[4]?.focus()
+            })
         })
     })
 }
@@ -125,7 +131,7 @@ const doColumnize = () => {
                 <button type="button" @click="emit('move', 1)" class="p-1 mb-auto button aspect-square">
                     <img src="@/images/moveDown.svg" class="w-6" alt="">
                 </button>
-                <button v-if="!nest && containersBlueprint[type].nestable" type="button" @click="doColumnize" ref="columnizeButton" @mouseover="tCTooltip = true" @mouseleave="tCTooltip = false" class="p-1 mx-auto button">
+                <button v-if="isNestable" type="button" @click="doColumnize" ref="columnizeButton" @mouseover="tCTooltip = true" @mouseleave="tCTooltip = false" class="p-1 mx-auto button">
                     <img src="@/images/twoColumns.svg" alt="" class="w-5">
                     <Tooltip v-if="tCTooltip" :button="columnizeButton" :text="$t('reviews.moveToCol')" />
                 </button>
