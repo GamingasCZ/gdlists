@@ -103,8 +103,9 @@ const useLevel = () => {
                     translate: `-${cardWidth}px`,
                     backgroundColor: cardColors[i-1]
                 }"
-                :class="{'!opacity-10': levelShowing && i != 3, '!opacity-50': levelShowing && i == 3}"
-                class="h-40 bg-white rounded-lg opacity-40 transition-opacity duration-150">
+                :class="{'opacity-10': levelShowing && i != 3, 'opacity-50': levelShowing && i == 3}"
+                class="h-40 bg-white rounded-lg transition-opacity duration-150">
+                <span v-if="levelShowing && i == 3" @click.stop="copyLevelID" style="text-shadow: 0px 0px 5px black;" class="absolute bottom-0 left-1/2 text-center text-white brightness-200 -translate-x-1/2 cursor-pointer hover:underline">ID: {{ levelQueue[queuePos].levelID }}</span>
             </div>
         </div>
         
@@ -127,9 +128,9 @@ const useLevel = () => {
         </Transition>
         
         <Transition name="fade">
-            <button v-if="levelShowing" @click="useLevel()" class="flex absolute top-1/2 left-1/2 flex-col items-center -translate-x-1/2 -translate-y-1/2 max-md:pb-12 group">
+            <button v-if="levelShowing" @click="useLevel()" class="flex absolute top-1/2 left-1/2 flex-col items-center -translate-x-1/2 -translate-y-1/2 button max-md:pb-12">
                 <DifficultyIcon class="w-16 pointer-events-none" :difficulty="levelQueue[queuePos].difficulty" :rating="levelQueue[queuePos].rating" />
-                <h3 @click.stop="copyLevelID" class="text-2xl font-black leading-5 cursor-pointer group-hover:underline">{{ levelQueue[queuePos].levelName}}</h3>
+                <h3 class="text-2xl font-black leading-5 cursor-pointer">{{ levelQueue[queuePos].levelName}}</h3>
                 <p class="font-bold">{{ levelQueue[queuePos].creator }}</p>
             </button>
         </Transition>

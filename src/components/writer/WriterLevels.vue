@@ -36,6 +36,9 @@ const emit = defineEmits<{
 
 const POST_DATA = inject<Ref<ReviewList & LevelList>>("postData")!
 const addLevel = (levelData?: Level | FavoritedLevel) => {
+    if (rouletteActive.value)
+        rouletteActive.value = false
+
     addReviewLevel(POST_DATA, levelData, props.maxLevels)
 
     openedCard.value = POST_DATA.value.levels.length - 1
@@ -221,26 +224,28 @@ const isSearching = ref(false)
                 </div>
                 <LevelRoulette v-if="rouletteActive" @use-level="addLevel" @exit="rouletteActive = false" />
         
-                <template v-show="!rouletteActive" v-for="(level, index) in POST_DATA.levels" :key="level">
-                    <EditorCardHeader v-if="openedCard != index || disabled"
-                        @do-move="moveLevel"
-                        @update-opened-card="!isSearching && (openedCard = index)"
-                        :data="level"
-                        :updating-positions="updatingPosition"
-                        :index="index"
-                    />
-                    <LevelCard v-else
-                        @open-collab-tools="dialogs.collabs = true"
-                        @open-tag-popup="dialogs.tags = true"
-                        @do-move="moveLevel"
-                        @move-controls="enableMoveControls"
-                        v-model="isSearching"
-                        :updating-positions="updatingPosition"
-                        :level-array="POST_DATA"
-                        :data="level"
-                        :index="index"
-                        :is-in-list="postType == 'list'"
-                    />
+                <template v-if="!rouletteActive">
+                    <template v-for="(level, index) in POST_DATA.levels" :key="level">
+                        <EditorCardHeader v-if="openedCard != index || disabled"
+                            @do-move="moveLevel"
+                            @update-opened-card="!isSearching && (openedCard = index)"
+                            :data="level"
+                            :updating-positions="updatingPosition"
+                            :index="index"
+                        />
+                        <LevelCard v-else
+                            @open-collab-tools="dialogs.collabs = true"
+                            @open-tag-popup="dialogs.tags = true"
+                            @do-move="moveLevel"
+                            @move-controls="enableMoveControls"
+                            v-model="isSearching"
+                            :updating-positions="updatingPosition"
+                            :level-array="POST_DATA"
+                            :data="level"
+                            :index="index"
+                            :is-in-list="postType == 'list'"
+                        />
+                    </template>
                 </template>
             </div>
             <div class="flex sticky bottom-0 z-20 gap-2 justify-center items-center px-2 rounded-b-md max-sm:justify-end bg-lof-200">
