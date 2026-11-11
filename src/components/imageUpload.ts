@@ -54,6 +54,26 @@ export const notifyError = (ind: ImgFail) => {
     return ind
 }
 
+const compressImage: (file: File) => Promise<File> = async (file: File) =>
+    new Promise((res,rej) => {
+        let data = URL.createObjectURL(file)
+        let image = new Image()
+        
+        image.src = data
+        image.onload = async e => {
+            let w = image.naturalWidth
+            let h = image.naturalHeight
+            let maxSize = [1920, (1920/w)*h]
+            if (h > w)
+                maxSize = [(1920/h)*w, 1920]
+            let compressCanvas = new OffscreenCanvas(maxSize[0], maxSize[1])
+            let ctx = compressCanvas.getContext("2d")
+            ctx?.drawImage(image, 0, 0, maxSize[0], maxSize[1])
+            res(new File([await compressCanvas.convertToBlob({type: 'image/webp'})], 'compImage'))
+        }
+        image.onerror = rej
+    })
+
 var maxSize = 99999
 export const setMaxSize = (to: number) => maxSize = to
 export const uploadImages = async (e: FileList | string, singleFile: boolean, folder = -1) => {
@@ -66,18 +86,32 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
     if (singleFile) {
         if (!e?.item(0)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
 
-        let size = e.item(0)?.size
+        let size = e.item(0)?.size!
+        let image = e.item(0)
         if (size <= 2048) return notifyError(ImgFail.TOO_SMALL)
-        if (size > maxSize) return notifyError(ImgFail.TOO_BIG)
-        imageData.append('image_0', e.item(0))
+        if (size > maxSize) {
+            let error = false
+            image = await compressImage(e.item(0)!).catch(_ => error = true)
+            if (error) return notifyError(ImgFail.BAD_FORMAT)
+            if (image.size > maxSize)
+                return notifyError(ImgFail.TOO_BIG)
+        }
+        imageData.append('image_0', image)
     }
     else {
         for (let i = 0; i < e.length; i++) {
-            let size = e.item(i)?.size
+            let size = e.item(i)?.size!
+            let image = e?.item(i)
             if (size <= 2048) return notifyError(ImgFail.TOO_SMALL)
-            if (size > maxSize) return notifyError(ImgFail.TOO_BIG)
+            if (size > maxSize) {
+                let error = false
+                image = await compressImage(e.item(i)!).catch(_ => error = true)
+                if (error) return notifyError(ImgFail.BAD_FORMAT)
+                if (image.size > maxSize)
+                    return notifyError(ImgFail.TOO_BIG)
+            }
             if (!e?.item(i)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
-            imageData.append(`image_${i}`, e?.item(i))
+            imageData.append(`image_${i}`, image)
         }
     }
 
