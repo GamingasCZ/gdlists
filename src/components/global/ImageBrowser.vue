@@ -8,7 +8,7 @@ import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath
 import Dropdown from "../ui/Dropdown.vue";
 import Dialog from "./Dialog.vue";
 import { onBeforeUnmount } from "vue";
-import { ImgFail, notifyError, uploadImages } from "../imageUpload";
+import { ImgFail, notifyError, setMaxSize, uploadImages } from "../imageUpload";
 import HiddenFileUploader from "../ui/HiddenFileUploader.vue";
 import UploadIndicator from './UploadIndicator.vue'
 import ColorPicker from "./ColorPicker.vue";
@@ -375,6 +375,7 @@ const refreshContent = async (currPath: [string, number] | object, external: boo
     images.value = hasCache ? content[1][currPath[1]].images : content[1]
     folders.value = hasCache ? content[1][currPath[1]].folders : content[2]
     storage.value = content[0]
+    setMaxSize(storage.value.maxUploadSize)
     nextTick(() => mediaContent.value?.children?.[0]?.focus())
     
     if (hasCache)

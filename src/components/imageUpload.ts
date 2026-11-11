@@ -50,6 +50,8 @@ export const notifyError = (ind: ImgFail) => {
     return ind
 }
 
+var maxSize = 99999
+export const setMaxSize = (to: number) => maxSize = to
 export const uploadImages = async (e: FileList | string, singleFile: boolean, folder = -1) => {
     if (typeof e == 'string') return e // Youtube link
 
@@ -59,12 +61,17 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
 
     if (singleFile) {
         if (!e?.item(0)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
-        if (e.item(0)?.size <= 2048) return notifyError(ImgFail.TOO_SMALL)
+
+        let size = e.item(0)?.size
+        if (size <= 2048) return notifyError(ImgFail.TOO_SMALL)
+        if (size > maxSize) return notifyError(ImgFail.TOO_BIG)
         imageData.append('image_0', e.item(0))
     }
     else {
         for (let i = 0; i < e.length; i++) {
-            if (e.item(i)?.size <= 2048) return notifyError(ImgFail.TOO_SMALL)
+            let size = e.item(i)?.size
+            if (size <= 2048) return notifyError(ImgFail.TOO_SMALL)
+            if (size > maxSize) return notifyError(ImgFail.TOO_BIG)
             if (!e?.item(i)?.type.match(/image\/(?!svg\+xml)/)) return notifyError(ImgFail.BAD_FORMAT)
             imageData.append(`image_${i}`, e?.item(i))
         }
