@@ -58,7 +58,6 @@ else {
   }
   
   let loginCookie = cookier("logindata").get();
-  let ft = loginCookie?.[2];
   if (loginCookie != null) {
     returnedFromLogin.value = true;
   
@@ -76,10 +75,14 @@ else {
     cookier("logindata").remove();
   }
 
+  let accessToken = cookier("access_token").get();
+  if (accessToken)
+    loggedIn.value = true // prevents flicker of not-logged-in dialog
+
   // Logging in
   axios
     .get(import.meta.env.VITE_API + "/accounts.php?check", {
-      headers: { Authorization: cookier("access_token").get() },
+      headers: { Authorization: accessToken },
     })
     .then((res: AxiosResponse) => {
       loggedIn.value = res.data.status == "logged_in";
