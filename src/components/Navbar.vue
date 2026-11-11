@@ -34,6 +34,7 @@ const showSettings = (e: MouseEvent) => {
   if (settingsShown.value) return closeSettings2()
   
   settingsShown.value = true
+  updateName()
   // closeNotifs2()
   document.body.addEventListener("click", closeSettings, { capture: true })
 };
@@ -89,8 +90,6 @@ const updateName = () => {
     loginInfo.value = JSON.parse(localStorage.getItem("account_info")!);
   }
 }
-
-watch(props, updateName)
 
 enum NAV_SEL {
   Home,
