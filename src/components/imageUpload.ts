@@ -28,6 +28,8 @@ export enum ImgFail {
     TOO_MANY_IMG = 10,
     MOVE_ERROR = 11,
     CAROUSEL_FULL = 12,
+    WAY_TOO_BIG = 13,
+    BAD_ASPECT_RATIO = 14
 }
 const errorMessages = [
     'reviews.imgError',
@@ -43,6 +45,8 @@ const errorMessages = [
     'other.tooManyImg',
     'other.moveError',
     'other.carouselFull',
+    'other.wayTooBig',
+    'other.badAspectRatio',
 ]
 
 export const notifyError = (ind: ImgFail) => {
@@ -92,6 +96,8 @@ export const uploadImages = async (e: FileList | string, singleFile: boolean, fo
         if (res.data == -4) notifyError(ImgFail.TOO_BIG)
         if (res.data == -11) notifyError(ImgFail.TOO_SMALL)
         if (res.data == -3) notifyError(ImgFail.LOAD_FAILED)
+        if (res.data == -12) notifyError(ImgFail.WAY_TOO_BIG)
+        if (res.data == -13) notifyError(ImgFail.BAD_ASPECT_RATIO)
         response = res.data
     })
     .catch(() => {

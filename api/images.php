@@ -111,11 +111,25 @@ function saveImage($binaryData, $uid, $mysqli, $filename = null, $makeThumb = tr
     $img = imagecreatefromstring($binaryData);
     if (!$img) die("-5");
 
+    $imW = imagesx($img);
+    $imH = imagesy($img);
+    $ratio = $imW/$imH;
+    if ($imW >= 10000 || $imH >= 10000) // Don't even try to compress this bitch
+        die("-12");
+    if ($ratio >= 15 || $ratio <= 1/15) // No ratio over (1/10)
+        die("-13");
+    $imOverW = $imW > 1920;
+    $imOverH = $imH > 1920;
+
     $maxsize;
-    if ($resize)
-        $maxsize = imagescale($img, min($resize, 1920));
-    elseif (imagesx($img) > 1920)
-        $maxsize = imagescale($img, 1920);
+    // min later below will never return resize
+    if (!$resize) $resize = 9999;
+    if ($imOverW || $imOverH) {
+        if ($imW >= $imH)
+            $maxsize = imagescale($img, min($resize, 1920));
+        else
+            $maxsize = imagescale($img, round((min($resize, 1920)/$imH)*$imW), min($resize, 1920));
+    }
     else
         $maxsize = &$img; // reference
 

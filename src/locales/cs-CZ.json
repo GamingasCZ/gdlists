@@ -347,6 +347,8 @@
     "imgInUse": "Obrázek se někde používá, nelze smazat.",
     "tooManyImg": "Naráz můžeš nahrát jen 10 obrázků!",
     "carouselFull": "V karuseli není na některé položky místo!",
+    "wayTooBig": "Obrázek je příliš kulervoucně velký!",
+    "badAspectRatio": "Obrázek má až moc velký poměr stran!",
     "folderNameShort": "Jméno je moc krátké!",
     "folderNameExists": "Už existuje složka s tímto jménem!",
     "folderInvChar": "Jméno složky nemůže obsahovat speciální znaky!",
