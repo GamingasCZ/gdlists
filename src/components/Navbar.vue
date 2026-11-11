@@ -38,9 +38,9 @@ const showSettings = (e: MouseEvent) => {
   // closeNotifs2()
   document.body.addEventListener("click", closeSettings, { capture: true })
 };
-const showNotifs = () => {
+const showNotifs = (isMobile?: boolean) => {
   if (notifDropdownShown.value) return closeNotifs2()
-  if (settingsShown.value) return closeSettings2()
+  if (settingsShown.value && !isMobile) return closeSettings2()
 
   if (SETTINGS.value.notifBehaviour) {
     router.push("/notifications")
@@ -310,7 +310,7 @@ const settingsMenu = ref<HTMLElement>()
           :open="settingsShown"
           :username="loginInfo ? loginInfo[0] : ''" 
           :is-logged-in="isLoggedIn" 
-          @open-notifs="showNotifs()"
+          @open-notifs="showNotifs(true)"
           @update-name="updateName()"
         />
       </Transition>
