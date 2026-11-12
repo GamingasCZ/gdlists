@@ -109,6 +109,7 @@ const removeImage = (hash: string, external: boolean) => {
         let hashesSelected = selectedImages.value.map(h => images.value[h])
         axios.delete(import.meta.env.VITE_API + "/images.php", { params: { hash: hash ? [hash] : hashesSelected } }).then(res => {
             uploadingImage.value = 0
+            loadingImages.value = false
             if (res.data == "-3") return notifyError(ImgFail.DELETE_FAIL)
             if (res.data == "-5") return notifyError(ImgFail.IMAGE_IN_USE)
 
@@ -119,7 +120,6 @@ const removeImage = (hash: string, external: boolean) => {
                 images.value = images.value.filter(x => !hashesSelected.includes(x))
 
             selectedImages.value = []
-            loadingImages.value = false
             setImgCache(images.value, folders.value, thumbnails.value, currentFolder.value, subfolderLevel.value)
             setStorageCache(storage.value)
             previewImage.value = false
