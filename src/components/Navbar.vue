@@ -274,7 +274,7 @@ const settingsMenu = ref<HTMLElement>()
           class="px-1 w-10 h-10 button" />
     
         <!-- Loading response from accounts.php -->
-        <img v-else-if="isLoggedIn == null && localStorg" src="../images/loading.webp" alt=""
+        <img v-else-if="(isLoggedIn == null || currentUID == '0') && localStorg" src="../images/loading.webp" alt=""
           class="mr-1 w-6 animate-spin aspect-square" />
         
         <!-- Logged in, settings -->
