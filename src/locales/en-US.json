@@ -561,7 +561,8 @@
     "loginViewHelp": "The post will only be readable to those, who are logged in.",
     "current": "Current",
     "wayTooBig": "The image is ludicrously large!",
-    "badAspectRatio": "The image's aspect ratio is too large!"
+    "badAspectRatio": "The image's aspect ratio is too large!",
+    "dArchive": "Download Archive"
   },
   "settingsMenu": {
     "asOff": "Off",

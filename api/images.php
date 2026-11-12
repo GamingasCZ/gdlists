@@ -232,12 +232,58 @@ function createFolder($mysqli, $uid, $name, $base = -1, $color = "#1A1C3C", $att
     return true;
 }
 
+function makeArchive($mysqli, $acc, $fromFolder) {
+    $zip = new ZipArchive();
+    if (!$zip->open("gdlBackup.zip", ZipArchive::CREATE))
+        die("-2");
+
+    $folderStructure = [];
+    $folderStructure2 = [];
+    $folders = doRequest($mysqli, "SELECT `id`, `name`, `base_path` FROM `images_folders` WHERE `uid`=?", [$acc["id"]], "s", true);
+
+    foreach ($folders as $folder)
+        $folderStructure[$folder["id"]] = [substr($folder["name"], 1), $folder["base_path"]];
+
+    foreach ($folders as $folder) {
+        $finalName = "";
+        $currentFolder = $folderStructure[$folder["id"]];
+        $finDepth = 0;
+        while (!is_null($currentFolder[1]) && ($finDepth++) < 1) {
+            $finalName = '/' . $currentFolder[0] . $finalName;
+            $currentFolder = $folderStructure[$currentFolder[1]];
+        }
+
+        $folderStructure2[$folder["id"]] = '/' . $currentFolder[0] . $finalName . '/';
+    }
+
+    if ($fromFolder == -1) { // Root folder
+        $images = doRequest($mysqli, "SELECT `hash`, `folder` FROM `images` WHERE `uploaderID`=?", [$acc["id"]], "s", true);
+        $path = getUserPath($acc["id"]);
+        foreach ($images as $image) {
+            $imPath = $path . "/" . $image["hash"] . ".webp";
+            if (is_file($imPath)) {
+                $outName = $image["hash"] . ".webp";
+                if (strlen($outName) == 45) // 45 = length of checksum+extension, doesn't look pretty
+                    $outName = date("\I\M\G_Ymd_His", filemtime($imPath)) . '_' . substr($image["hash"], 0, 5) . ".webp";
+                if (!is_null($image["folder"]))
+                    $outName = $folderStructure2[$image["folder"]] . $outName;
+                $zip->addFile($imPath, $outName);
+            }
+        }
+        
+    }
+    else { // Subfolder
+
+    }
+    $zip->close();
+}
+
 if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $mysqli = new mysqli($hostname, $username, $password, $database);
     if ($mysqli -> connect_errno) die("0");
     
     $user = checkAccount($mysqli);
-    if (!$user) die(-2);
+    if (!$user) die("-2");
     
     $mysqli->query("SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
     $method = $_SERVER["REQUEST_METHOD"];
@@ -334,6 +380,11 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                         die(getAll($user["id"], $mysqli, $addToFolder));
                     }
                     
+                    break;
+                case 'archive':
+                    if (!isset($DATA["fromFolder"]))
+                        die("-1");
+                    makeArchive($mysqli, $user, $DATA["fromFolder"]);
                     break;
                 
                 default:

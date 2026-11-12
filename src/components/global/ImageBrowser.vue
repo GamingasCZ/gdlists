@@ -652,6 +652,39 @@ const removeCurrentFolder = (keepImages: boolean) => {
         removeFolder(currentExtFolder.value[subfolderExtLevel.value][1], keepImages)
 }
 
+const enum DownloadState {
+    Closed,
+    InRoot,
+    InFolder,
+    InEmpty,
+    HasDownloaded,
+    Downloading
+}
+
+const downloadDialogOpen = ref(DownloadState.InRoot)
+const imageDropdAction = (opt: number) => {
+    switch (opt) {
+        case 0:
+            goToTab(1)
+            break;
+        case 1:
+            if (images.value.length && folders.value.length == 0)
+                downloadDialogOpen.value = DownloadState.InEmpty
+            else if (subfolderLevel.value == 0)
+                downloadDialogOpen.value = DownloadState.InRoot
+    
+        default:
+            break;
+    }
+}
+
+const downloadArchive = (fromFolder: number) => {
+    downloadDialogOpen.value = DownloadState.Downloading
+    axios.put(import.meta.env.VITE_API+"/images.php", {action: 'archive', fromFolder: fromFolder}).then(res => {
+        downloadDialogOpen.value = DownloadState.Closed
+    })
+}
+
 const folderAction = (opt: number) => {
     switch (opt) {
         case 0: editFolder(); break;
@@ -954,6 +987,34 @@ onMounted(() => {
             :url-array="currentTab ? externalImages : undefined" :hash-array="!currentTab ? images : undefined"
             v-model="imageIndex" :uid="currentUID" />
 
+        <!-- Export confirmation -->
+        <Dialog :title="$t('other.dArchive')" @close-popup="downloadDialogOpen = DownloadState.Closed"
+            :open="downloadDialogOpen != DownloadState.Closed">
+            <div>
+                <div class="flex gap-2 items-center px-2 py-4 max-sm:flex-col">
+                    <img src="@/images/archive.svg" class="mr-2 opacity-10 min-w-28" alt="">
+                    <div>
+                        <h2 class="text-xl font-black">Opravdu chceš stáhnout kopii obrázků?</h2>
+                        <!-- <p v-if="currentTab == Tabs.External">
+    
+                        </p> -->
+                        <p>
+                            Archivy lze stahovat jen jednou za 24 hodin.
+                        </p>
+                        <div class="flex flex-wrap gap-2 justify-center mt-6">
+                            <button :disabled="[DownloadState.Downloading, DownloadState.HasDownloaded, DownloadState.InRoot, DownloadState.InEmpty].includes(downloadDialogOpen)" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button disabled:opacity-20"><img src="@/images/more.svg" alt="" class="w-5">
+                                Jen z této složky</button>
+                            <button @click="downloadArchive(-1)" :disabled="[DownloadState.Downloading, DownloadState.HasDownloaded].includes(downloadDialogOpen)" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button disabled:opacity-20">
+                                <img src="@/images/loading.webp" alt="" v-if="downloadDialogOpen == DownloadState.Downloading" class="mt-0.5 w-5 h-5 animate-spin">
+                                <img src="@/images/dragArea.svg" alt="" v-else class="w-5">
+                                Všechny obrázky</button>
+                        </div>
+                        <p v-if="downloadDialogOpen == downloadDialogOpen.HasDownloaded" class="mt-1 text-sm text-center opacity-40">V předešlých 24 hodinách už jsi stahoval archiv.</p>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+
         <!-- Remove confirmation -->
         <Dialog :title="$t('other.removal')" @close-popup="removeConfirmationOpen = -1"
             :open="removeConfirmationOpen > -1">
@@ -1088,8 +1149,8 @@ onMounted(() => {
             :icons="[fEdit, fRemove]" :options="[$t('level.edit'), $t('editor.remove')]" :button="folderEditButton" no-teleport />
 
         <!-- Image Add options -->
-        <Dropdown v-if="imgAddOptsOpen" @picked-option="goToTab(1)" @close="imgAddOptsOpen = false" :icons="[fLink]"
-            :options="[$t('other.addExternal')]" :button="imageAddButton" no-teleport />
+        <Dropdown v-if="imgAddOptsOpen" @picked-option="imageDropdAction" @close="imgAddOptsOpen = false" :icons="[fLink]"
+            :options="[$t('other.addExternal'), $t('other.dArchive')]" :button="imageAddButton" no-teleport />
 
         <div class="flex gap-10 justify-between">
             <!-- External image input -->
