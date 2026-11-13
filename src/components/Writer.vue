@@ -541,6 +541,7 @@ function doAction(action: FormattingAction | EditorAction, param: any, holdingSh
                 && containerSettingsOpen.value == false
             ) {
                 selectedContainer.value = [-1]
+                selectedNestContainer.value = [-1, -1, -1]
                 document?.activeElement?.blur()
             }
             break;
