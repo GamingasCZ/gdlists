@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, reactive, ref, watch } from "vue";
 import { computed } from "vue";
-import axios from "axios";
+import axios, { type AxiosStatic } from "axios";
 import type { ImageFolder, ImageStorage } from "@/interfaces";
 import { hasLocalStorage } from "@/siteSettings";
 import { imageCache, storageCache, setImgCache, setStorageCache, lastVisitedPath, breakCache, lastOpenedTab, setLastOpenedTab, lastVisitedExternalPath, setExtCache, lastColor, setLastColor } from "./imageCache";
@@ -655,23 +655,27 @@ const removeCurrentFolder = (keepImages: boolean) => {
 const enum DownloadState {
     Closed,
     InRoot,
-    InFolder,
     InEmpty,
     HasDownloaded,
     Downloading
 }
 
-const downloadDialogOpen = ref(DownloadState.InRoot)
-const imageDropdAction = (opt: number) => {
+const downloadDialogOpen = ref(DownloadState.Closed)
+var archiveCheck = null
+const imageDropdAction = async (opt: number) => {
     switch (opt) {
         case 0:
             goToTab(1)
             break;
         case 1:
-            if (images.value.length && folders.value.length == 0)
-                downloadDialogOpen.value = DownloadState.InEmpty
-            else if (subfolderLevel.value == 0)
+            // Gets cached, so it will not show as available, even if it technically were
+            if (archiveCheck == null)
+                archiveCheck = await axios.put(import.meta.env.VITE_API+"/images.php", {action: "archiveCheck"})
+            if (archiveCheck?.data == 0)
+                downloadDialogOpen.value = DownloadState.HasDownloaded
+            else
                 downloadDialogOpen.value = DownloadState.InRoot
+
     
         default:
             break;
@@ -679,7 +683,10 @@ const imageDropdAction = (opt: number) => {
 }
 
 const downloadArchive = (fromFolder: number) => {
+    if (downloadDialogOpen.value == DownloadState.HasDownloaded) return
+    
     downloadDialogOpen.value = DownloadState.Downloading
+    archiveCheck = null
     axios.put(import.meta.env.VITE_API+"/images.php", {action: 'archive', fromFolder: fromFolder}).then(res => {
         downloadDialogOpen.value = DownloadState.Closed
     })
@@ -994,22 +1001,15 @@ onMounted(() => {
                 <div class="flex gap-2 items-center px-2 py-4 max-sm:flex-col">
                     <img src="@/images/archive.svg" class="mr-2 opacity-10 min-w-28" alt="">
                     <div>
-                        <h2 class="text-xl font-black">Opravdu chceš stáhnout kopii obrázků?</h2>
-                        <!-- <p v-if="currentTab == Tabs.External">
-    
-                        </p> -->
-                        <p>
-                            Archivy lze stahovat jen jednou za 24 hodin.
-                        </p>
+                        <h2 class="text-xl font-black">{{ $t('other.imAr1') }}</h2>
+                        <p>{{ $t('other.imAr2') }}</p>
                         <div class="flex flex-wrap gap-2 justify-center mt-6">
-                            <button :disabled="[DownloadState.Downloading, DownloadState.HasDownloaded, DownloadState.InRoot, DownloadState.InEmpty].includes(downloadDialogOpen)" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button disabled:opacity-20"><img src="@/images/more.svg" alt="" class="w-5">
-                                Jen z této složky</button>
-                            <button @click="downloadArchive(-1)" :disabled="[DownloadState.Downloading, DownloadState.HasDownloaded].includes(downloadDialogOpen)" class="flex gap-2 p-2 bg-black bg-opacity-40 rounded-md button disabled:opacity-20">
+                            <button @click="downloadArchive(-1)" :disabled="[DownloadState.Downloading, DownloadState.HasDownloaded].includes(downloadDialogOpen)" class="flex gap-2 p-2 text-black rounded-md bg-lof-400 button disabled:opacity-20">
                                 <img src="@/images/loading.webp" alt="" v-if="downloadDialogOpen == DownloadState.Downloading" class="mt-0.5 w-5 h-5 animate-spin">
-                                <img src="@/images/dragArea.svg" alt="" v-else class="w-5">
-                                Všechny obrázky</button>
+                                <img src="@/images/check.svg" alt="" v-else class="w-5">
+                                {{ $t('other.download') }}</button>
                         </div>
-                        <p v-if="downloadDialogOpen == downloadDialogOpen.HasDownloaded" class="mt-1 text-sm text-center opacity-40">V předešlých 24 hodinách už jsi stahoval archiv.</p>
+                        <p v-if="downloadDialogOpen == DownloadState.HasDownloaded" class="mt-1 text-sm text-center opacity-40">{{ $t('other.imArNo') }}</p>
                     </div>
                 </div>
             </div>

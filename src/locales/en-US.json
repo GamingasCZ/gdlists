@@ -562,7 +562,10 @@
     "current": "Current",
     "wayTooBig": "The image is ludicrously large!",
     "badAspectRatio": "The image's aspect ratio is too large!",
-    "dArchive": "Download Archive"
+    "dArchive": "Download Archive",
+    "imArNo": "You've already archived images in the past 24 hours.",
+    "imAr2": "You can only do this once per 24 hours.",
+    "imAr1": "Download an archive of your images?"
   },
   "settingsMenu": {
     "asOff": "Off",

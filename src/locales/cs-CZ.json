@@ -537,7 +537,10 @@
     "loginView": "Jen pro přihlášené",
     "loginViewHelp": "Příspěvěk bude přístupný jen pro přihlášené uživatele.",
     "current": "Stávající",
-    "dArchive": "Stáhnout archiv"
+    "dArchive": "Stáhnout archiv",
+    "imAr1": "Opravdu chceš stáhnout kopii obrázků?",
+    "imAr2": "Archivy lze stahovat jen jednou za 24 hodin.",
+    "imArNo": "V předešlých 24 hodinách už jsi stahoval archiv."
   },
   "listViewer": {
     "jumpTo": "Skočit na",

@@ -232,7 +232,18 @@ function createFolder($mysqli, $uid, $name, $base = -1, $color = "#1A1C3C", $att
     return true;
 }
 
+function checkArchive($mysqli, $acc) {
+    $isTime = doRequest($mysqli, "SELECT UNIX_TIMESTAMP(`until`) as 'left' FROM `timed_events` WHERE `uid`=? AND `event`='archival'", [$acc["id"]], "s");
+    if (is_null($isTime)) return true;
+    if (array_key_exists("error", $isTime)) return false;
+    if (time() - $isTime["left"] < 0) return false;
+    return true;
+}
+
 function makeArchive($mysqli, $acc, $fromFolder) {
+    $check = checkArchive($mysqli, $acc);
+    if (!$check) die("-3");
+
     $zip = new ZipArchive();
     if (!$zip->open("gdlBackup.zip", ZipArchive::CREATE))
         die("-2");
@@ -275,6 +286,9 @@ function makeArchive($mysqli, $acc, $fromFolder) {
     else { // Subfolder
 
     }
+
+    $until = date("Y-m-d H:i:s", time() + 86400); // one day
+    doRequest($mysqli, "INSERT INTO `timed_events`(`uid`, `until`, `event`) VALUES (?,?,'archival')", [$acc["id"], $until], "ss");
     $zip->close();
 }
 
@@ -385,6 +399,10 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                     if (!isset($DATA["fromFolder"]))
                         die("-1");
                     makeArchive($mysqli, $user, $DATA["fromFolder"]);
+                    break;
+                case 'archiveCheck':
+                    $check = checkArchive($mysqli, $user);
+                    die($check ? "1" : "0");
                     break;
                 
                 default:
