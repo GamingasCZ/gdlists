@@ -687,7 +687,16 @@ const downloadArchive = (fromFolder: number) => {
     
     downloadDialogOpen.value = DownloadState.Downloading
     archiveCheck = null
-    axios.put(import.meta.env.VITE_API+"/images.php", {action: 'archive', fromFolder: fromFolder}).then(res => {
+    axios.get(import.meta.env.VITE_API+"/images.php?fromFolder=-1").then(res => {
+        let objectUrl = URL.createObjectURL(res.data);
+
+        let a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = "gdlGallery";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
         downloadDialogOpen.value = DownloadState.Closed
     })
 }

@@ -240,12 +240,12 @@ function checkArchive($mysqli, $acc) {
     return true;
 }
 
-function makeArchive($mysqli, $acc, $fromFolder) {
+function makeArchive($mysqli, $acc, $name, $fromFolder) {
     $check = checkArchive($mysqli, $acc);
     if (!$check) die("-3");
 
     $zip = new ZipArchive();
-    if (!$zip->open("gdlBackup.zip", ZipArchive::CREATE))
+    if (!$zip->open($name, ZipArchive::CREATE))
         die("-2");
 
     $folderStructure = [];
@@ -303,6 +303,18 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
     $method = $_SERVER["REQUEST_METHOD"];
     switch ($method) {
         case 'GET':
+            if (isset($_GET['fromFolder'])) {
+                $name = sha1($user["id"]).'.zip';
+                makeArchive($mysqli, $user, $name, $_GET["fromFolder"]);
+                
+                header('Content-Type: application/zip');
+                header('Content-disposition: attachment; filename=gdlGallery.zip');
+                header('Content-Length: ' . filesize($name));
+                readfile($name);
+                unlink($name);
+                return;
+            }
+
             if (isset($_GET["storage"])) {
                 die(getStorage($mysqli, $user["id"]));
             }
@@ -394,11 +406,6 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
                         die(getAll($user["id"], $mysqli, $addToFolder));
                     }
                     
-                    break;
-                case 'archive':
-                    if (!isset($DATA["fromFolder"]))
-                        die("-1");
-                    makeArchive($mysqli, $user, $DATA["fromFolder"]);
                     break;
                 case 'archiveCheck':
                     $check = checkArchive($mysqli, $user);
