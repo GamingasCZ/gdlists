@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, type Ref, ref, watch } from 'vue';
 import { ControlType, type Containers, type ContainerSettings } from './containers';
 import containersBlueprint from './containers';
 import type { PostData } from '@/interfaces';
@@ -51,6 +51,24 @@ const showSettings = () => {
         settingsShown.value = true
         document.body.addEventListener("mousedown", closeSettings, { capture: true })
         document.body.addEventListener("contextmenu", closeSettings, { capture: true })
+
+        nextTick(() => {
+            document.querySelector("#cSFocusStart").onfocus = e => {
+                let sib = document.querySelector("#cSFocusEnd")?.previousElementSibling
+                if (sib?.nodeName == 'BUTTON')
+                    sib?.focus()
+                else
+                    sib?.querySelector("input")?.focus()
+            }
+            document.querySelector("#cSFocusEnd").onfocus = e => {
+                let sib = document.querySelector("#cSFocusStart")?.nextElementSibling
+                if (sib?.nodeName == 'BUTTON')
+                    sib?.focus()
+                else
+                    sib?.querySelector("input")?.focus()
+            }
+        })
+
         nextTick(() => {
             if (props.mousePos[0]) {
                 window.addEventListener("resize", positionFloating)
@@ -140,6 +158,8 @@ const doColumnize = () => {
                 </button>
             </div>
             <div class="flex flex-col gap-2 p-2 text-base text-left min-w-56 min-h-40">
+                <a tabindex="0" id="cSFocusStart" class="-m-1 outline-none"></a>
+
                 <div v-if="!containers[type].settings.length" class="flex flex-col gap-2 justify-center items-center h-full text-base text-xl opacity-20">
                     <img src="@/images/gear.svg" class="w-16" alt="">
                     {{ $t('reviews.noSettings') }}
@@ -212,6 +232,8 @@ const doColumnize = () => {
                     </div>
         
                 </template>
+
+                <a tabindex="0" id="cSFocusEnd" class="-m-1 outline-none"></a>
             </div>
         </form>
     </Teleport>
