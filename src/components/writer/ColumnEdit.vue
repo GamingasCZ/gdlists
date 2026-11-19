@@ -71,13 +71,13 @@ const hasGaps = computed(() =>
                     </div>
                     <div class="flex flex-col gap-1 mt-2">
                         <button @click="columnCommand(11)" class="box-border p-1 w-20 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60">
-                            <img src="@/images/moveUp.svg" :class="{'opacity-40': postData.containers[selectedNest[0]].settings.components[selectedNest[1]][11]}" class="mx-auto w-5 button" alt="">
+                            <img src="@/images/moveUp.svg" :class="{'opacity-40': postData.containers[selectedNest[0]].settings.align[selectedNest[1]] != 0}" class="mx-auto w-5 button" alt="">
                         </button>
                         <button @click="columnCommand(12)" class="box-border p-1 w-20 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60">
-                            <img src="@/images/moveMiddle.svg" :class="{'opacity-40': !postData.containers[selectedNest[0]].settings.components[selectedNest[1]].includes(1)}" class="mx-auto w-5 rotate-180 button" alt="">
+                            <img src="@/images/moveMiddle.svg" :class="{'opacity-40': postData.containers[selectedNest[0]].settings.align[selectedNest[1]] != 1}" class="mx-auto w-5 rotate-180 button" alt="">
                         </button>
                         <button @click="columnCommand(13)" class="box-border p-1 w-20 bg-black bg-opacity-40 rounded-md hover:bg-opacity-60">
-                            <img src="@/images/moveUp.svg" :class="{'opacity-40': !postData.containers[selectedNest[0]].settings.components[selectedNest[1]].includes(2)}" class="mx-auto w-5 rotate-180 button" alt="">
+                            <img src="@/images/moveUp.svg" :class="{'opacity-40': postData.containers[selectedNest[0]].settings.align[selectedNest[1]] != 2}" class="mx-auto w-5 rotate-180 button" alt="">
                         </button>
                     </div>
                 </div>

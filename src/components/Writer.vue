@@ -285,9 +285,11 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
         if (key == "twoColumns" && addTo) {
             containerData.extraComponents = addTo[0]-2
             
-            containerData.settings.components = Array(addTo[0]).fill([])
+            containerData.settings.components = []
             for (let i = 0; i < addTo[0]; i++) {
+                containerData.settings.components.push([])
                 containerData.settings.fill.push(addTo[1][i])
+                containerData.settings.align.push(0)
             }
 
             containerData.align = addTo[2]
@@ -330,6 +332,7 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
             POST_DATA.value.containers[selectedNestContainer.value[0]].extraComponents += 1
             POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
             POST_DATA.value.containers[selectedNestContainer.value[0]].settings.fill.splice(selectedNestContainer.value[1] + addTo, 0, false)
+            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.align.splice(selectedNestContainer.value[1] + addTo, 0, 0)
         }
         else {
             if (selectedContainer.value[2] == -1) {
@@ -373,7 +376,7 @@ const setAlignment = (index: number, alignment: TEXT_ALIGNMENTS) => {
         POST_DATA.value.containers[index].align = alignment
     }
     else {
-        let nestComp = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.filter(x => typeof x != 'boolean')
+        let nestComp = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components
         nestComp[selectedNestContainer.value[1]][selectedNestContainer.value[2]].align = alignment
     }
 
@@ -415,6 +418,7 @@ const columnCommand = (index: number) => {
             }
 
             nest.settings.fill.splice(selectedNestContainer.value[1] + (index - 3), 0, nest.settings.fill[selectedNestContainer.value[1]])
+            nest.settings.align.splice(selectedNestContainer.value[1] + (index - 3), 0, nest.settings.align[selectedNestContainer.value[1]])
             nest.settings.components
                 .splice(selectedNestContainer.value[1] + (index - 3), 0, duplicate)
             nest.extraComponents += 1
@@ -432,6 +436,7 @@ const columnCommand = (index: number) => {
                 nest.extraComponents -= 1
                 nest.settings.components.splice(selectedNestContainer.value[1], 1);
                 nest.settings.fill.splice(selectedNestContainer.value[1], 1);
+                nest.settings.align.splice(selectedNestContainer.value[1], 1);
             }
             break;
         case 8: moveContainer(selectedNestContainer.value[0], -1); break;
@@ -440,9 +445,9 @@ const columnCommand = (index: number) => {
             removeContainer(selectedNestContainer.value[0], true);
             nextTick(() => selectedNestContainer.value = [-1,-1,-1])
             break;
-        case 11: column[11] = 0; break;
-        case 12: column[11] = 1; break;
-        case 13: column[11] = 2; break;
+        case 11: nest.settings.align[selectedNestContainer.value[1]] = 0; break;
+        case 12: nest.settings.align[selectedNestContainer.value[1]] = 1; break;
+        case 13: nest.settings.align[selectedNestContainer.value[1]] = 2; break;
         case 14: // gaps
             let settings = POST_DATA.value.containers[selectedNestContainer.value[0]].settings
             settings.gaps = !settings.gaps

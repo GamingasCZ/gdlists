@@ -104,7 +104,7 @@ const keyboardCreate = () => {
     if (amount <= 1 || amount > 10) return
     if (textColCreateError.value !== false) return
     let moveIndex = colText.value.indexOf("$")
-    if (moveIndex == -1)
+    if (moveIndex == -1 && props.movingAnElement)
         return
 
     if (props.movingAnElement)
