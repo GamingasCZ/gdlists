@@ -75,7 +75,7 @@ const forceHide = () => {
     document.body.removeEventListener("mousedown", closeSettings, { capture: true })
     document.body.removeEventListener("contextmenu", closeSettings, { capture: true })
     emit('hidSettings')
-    containerSettingsOpen.value = false // not good
+    setTimeout(() => containerSettingsOpen.value = false, 100) // not good
 }
 
 const closeSettings = (m: MouseEvent) => {
@@ -121,7 +121,7 @@ const doColumnize = () => {
 
 <template>
     <Teleport :disabled="shown != 2" to="body">
-        <form ref="containerSettings" @keydown.prevent.esc="forceHide()" @submit.prevent="forceHide()" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] -right-1 z-20 rounded-md rounded-tr-none bg-greenGradient">
+        <form ref="containerSettings" @keyup.prevent.esc="forceHide()" @submit.prevent="forceHide()" v-if="settingsShown" :style="{left: shown == 2 ? `${float[0]}px` : '', top: shown == 2 ? `${float[1]}px` : '-4px'}" class="flex w-max absolute text-white font-[poppins] -right-1 z-20 rounded-md rounded-tr-none bg-greenGradient">
             <button type="submit" class="hidden"></button>
 
             <div class="flex flex-col gap-1 p-1 mr-1 bg-black bg-opacity-40 rounded-l-md">
