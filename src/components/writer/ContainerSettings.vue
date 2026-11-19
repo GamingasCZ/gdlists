@@ -58,14 +58,14 @@ const showSettings = () => {
                 if (sib?.nodeName == 'BUTTON')
                     sib?.focus()
                 else
-                    sib?.querySelector("input")?.focus()
+                    sib?.querySelector("input,select")?.focus()
             }
             document.querySelector("#cSFocusEnd").onfocus = e => {
                 let sib = document.querySelector("#cSFocusStart")?.nextElementSibling
                 if (sib?.nodeName == 'BUTTON')
                     sib?.focus()
                 else
-                    sib?.querySelector("input")?.focus()
+                    sib?.querySelector("input,select")?.focus()
             }
         })
 
