@@ -75,7 +75,7 @@ const forceHide = () => {
     document.body.removeEventListener("mousedown", closeSettings, { capture: true })
     document.body.removeEventListener("contextmenu", closeSettings, { capture: true })
     emit('hidSettings')
-    setTimeout(() => containerSettingsOpen.value = false, 20) // not good
+    containerSettingsOpen.value = false // not good
 }
 
 const closeSettings = (m: MouseEvent) => {
