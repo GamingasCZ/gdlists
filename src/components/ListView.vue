@@ -32,7 +32,7 @@ import CollabViewer from "./editor/CollabViewer.vue";
 import DialogVue from "./global/Dialog.vue";
 import CONTAINERS, { type Container } from "./writer/containers";
 import { dialog } from "./ui/sizes";
-import { getEmbeds, parseReviewContainers, resetIndentation } from "@/Reviews";
+import { getEmbeds, modernizeReview, parseReviewContainers, resetIndentation } from "@/Reviews";
 import LevelBubble from "./global/LevelBubble.vue";
 import FormattingBubble from "./global/FormattingBubble.vue";
 import LevelCardTable from "./global/LevelCardTable.vue";
@@ -216,6 +216,7 @@ async function loadReview(loadedData: ReviewList | null) {
     }
 
     let indicies = [0,0,0,0,0,0]
+    res[0].data = modernizeReview(res[0])
     LIST_DATA.value = res[0];
     originalListData = structuredClone(res[0].data)
     showChecklistsUsed.value = loadLocalChecklists(LIST_DATA.value.data)

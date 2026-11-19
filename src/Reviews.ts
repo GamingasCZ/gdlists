@@ -66,6 +66,18 @@ export const DEFAULT_REVIEWDATA = () => ({ ...DEFAULT_LEVELLIST(), ...REVIEW_EXT
 export const modernizeReview = (serverResponse: ListFetchResponse) => {
     // Modernize levels
     modernizeLevels(serverResponse.data.levels)
+    let data = serverResponse.data
+    data.containers.forEach(c => {
+        if (c.type == "twoColumns" && !c.settings.fill) {
+            c.settings.fill = []
+            for (let i = 0; i < c.settings.components.length; i++) {
+                c.settings.fill.push(c.settings.components[i].find(y => typeof y == 'boolean') ?? false)
+                c.settings.components[i] = c.settings.components[i].filter(y => typeof y != 'boolean') // remove old fill flag
+                
+            }
+        }
+    })
+
     return serverResponse.data
 }
 

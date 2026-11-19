@@ -19,7 +19,7 @@ const delButton = ref<HTMLButtonElement>()
 const dupButtonTooltip = ref(0)
 
 const isFillColumn = computed(() =>
-    !postData.value.containers?.[selectedNest.value[0]]?.settings?.components?.[selectedNest.value[1]]?.includes(true))
+    !postData.value.containers?.[selectedNest.value[0]]?.settings?.fill?.[selectedNest.value[1]])
 
 const hasGaps = computed(() =>
     !postData.value.containers?.[selectedNest.value[0]]?.settings?.gaps)

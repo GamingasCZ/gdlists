@@ -285,9 +285,10 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
         if (key == "twoColumns" && addTo) {
             containerData.extraComponents = addTo[0]-2
             
-            containerData.settings.components = []
-            for (let i = 0; i < addTo[0]; i++)
-                containerData.settings.components.push([addTo[1][i]])
+            containerData.settings.components = Array(addTo[0]).fill([])
+            for (let i = 0; i < addTo[0]; i++) {
+                containerData.settings.fill.push(addTo[1][i])
+            }
 
             containerData.align = addTo[2]
 
@@ -327,7 +328,8 @@ const addContainer = (key: ContainerNames, addTo?: number | number[], returnOnly
     else {
         if (key == "twoColumns") { // Adding a column to a nest container
             POST_DATA.value.containers[selectedNestContainer.value[0]].extraComponents += 1
-            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [false])
+            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components.splice(selectedNestContainer.value[1] + addTo, 0, [])
+            POST_DATA.value.containers[selectedNestContainer.value[0]].settings.fill.splice(selectedNestContainer.value[1] + addTo, 0, false)
         }
         else {
             if (selectedContainer.value[2] == -1) {
@@ -412,13 +414,13 @@ const columnCommand = (index: number) => {
                     duplicate[i].id = newID(i)
             }
 
+            nest.settings.fill.splice(selectedNestContainer.value[1] + (index - 3), 0, nest.settings.fill[selectedNestContainer.value[1]])
             nest.settings.components
                 .splice(selectedNestContainer.value[1] + (index - 3), 0, duplicate)
             nest.extraComponents += 1
             break;
         case 6: // fit width / fill space
-            let flagIndex = column.findIndex(x => typeof x == 'boolean')
-            column[flagIndex] = !column[flagIndex]
+            nest.settings.fill[selectedNestContainer.value[1]] = !nest.settings.fill[selectedNestContainer.value[1]]
             break;
         case 7:
             if (nest.settings.components.length == 2) {
@@ -429,6 +431,7 @@ const columnCommand = (index: number) => {
             else {
                 nest.extraComponents -= 1
                 nest.settings.components.splice(selectedNestContainer.value[1], 1);
+                nest.settings.fill.splice(selectedNestContainer.value[1], 1);
             }
             break;
         case 8: moveContainer(selectedNestContainer.value[0], -1); break;
@@ -696,7 +699,7 @@ const modifyImageURL = (newUrl: string) => {
     // Image container in nested container
     else {
         let link = typeof newUrl == 'object' ? newUrl[0] : newUrl
-        let comps = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]].filter(x => typeof x != 'boolean')
+        let comps = POST_DATA.value.containers[selectedNestContainer.value[0]].settings.components[selectedNestContainer.value[1]]
         comps[selectedNestContainer.value[2]].settings.url = link
     }
 }
@@ -1019,8 +1022,14 @@ const loadDraft = (draft: ReviewDraft, noEditCheck = false) => {
 
     // fixes text not being updated, when loading draft of the same post
     let data = JSON.parse(JSON.stringify(draft.reviewData))
-    if (WRITER.value.general.postType == 'review')
+    if (WRITER.value.general.postType == 'review') {
         POST_DATA.value.containers = []
+        data = modernizeReview({data: data})
+    }
+    else
+        // modernizeList also sets reviewName, but all list drafts should
+        // have reviewName, since it was added at the same time as list drafts
+        data = modernizeList({data: data})
 
     nextTick(() => {
         containerLastAdded.value = Date.now()
@@ -1045,6 +1054,11 @@ const previewDraft = (previewData: ReviewList, previewIDSaved: string, previewin
         errorText.value = i18n.global.t('reviews.draftFailLoad')
         return
     }
+
+    if (WRITER.value.general.postType == 'list')
+        previewData = modernizeList({data: previewData})
+    else
+        previewData = modernizeReview({data: previewData})
 
     previewHold = [POST_DATA.value, embedsContent.value]
     POST_DATA.value = JSON.parse(JSON.stringify(previewData))

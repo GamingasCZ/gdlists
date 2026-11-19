@@ -302,6 +302,12 @@ const containers: Containers = {
             title: "gaps",
             type: [-1],
             default: false
+        },
+        {
+            key: "fill",
+            title: "fill",
+            type: [-1],
+            default: []
         }],
         errorCheck: (settings: object) => {
             let len = 0
@@ -469,6 +475,6 @@ export type cShowRating = {level: number, show: number, hideUnrated: boolean}
 export type cShowLevel = {pickedIndex: number, pickLevel: number, showCollab: boolean, description: string}
 export type cShowList = {post: boolean, postType: number, pick: number}
 export type cListTable = {post: number, useReviews: boolean, hideLink: boolean}
-export type cTwoColumns = {components: (Containers | boolean)[], gaps: boolean}
+export type cTwoColumns = {components: (Containers | boolean)[], gaps: boolean, fill?: boolean[]}
 export type cAddCarousel = {components: any[], height: number, pick: number, overflow: boolean, crop: boolean}
 
