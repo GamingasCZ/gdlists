@@ -8,8 +8,13 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "vite": "^2.9.9"
+    "vite": "^8.3.8"
   },
-  "keywords": ["editor", "text-editor"],
-  "maintainers": ["happy-little-one"]
+  "keywords": [
+    "editor",
+    "text-editor"
+  ],
+  "maintainers": [
+    "happy-little-one"
+  ]
 }
