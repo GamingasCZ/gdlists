@@ -35,9 +35,8 @@ const editingName = ref(-1)
 const query = ref("")
 
 const filteredDrafts = computed(() => {
-    let filtered: {[key: string]: ReviewDraft}
+    let filtered: {[key: string]: ReviewDraft} = {}
     if (query.value.length) {
-        let filtered = {}
         for (const [key, draft] of Object.entries(props.drafts)) {
             if (draft.name.toLowerCase().includes(query.value.toLowerCase())) filtered[key] = draft
         }
@@ -84,7 +83,7 @@ onMounted(() => {
 
 <template>
     <header class="flex gap-2 items-center px-2 my-2 mt-1">
-        <input type="text" v-model="query" :placeholder="$t('other.search')" class="px-2 py-1.5 bg-black bg-opacity-40 rounded-md p grow">
+        <input type="text" v-model="query" :placeholder="$t('other.search')" class="px-2 py-1.5 bg-black bg-opacity-40 rounded-md grow">
 
         <button v-if="!inUseID" @click="doAction(DraftAction.Save)" class="flex gap-3 justify-center items-center px-2 py-1.5 w-max font-bold bg-black bg-opacity-40 rounded-md button">
             <img src="@/images/symbolicSave.svg" class="w-6" alt="">
