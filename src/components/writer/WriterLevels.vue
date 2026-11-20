@@ -215,7 +215,7 @@ const isSearching = ref(false)
                             <p>{{ $t('reviews.impGD') }}</p>
                         </button>
                     </section>
-                    <section>
+                    <section class="max-sm:w-full">
                         <button @click="openMoreDialog(0)" class="flex gap-4 items-center p-3 mt-2 text-lg bg-opacity-40 rounded-lg hover:bg-black">
                             <img src="@/images/color.svg" class="w-10" alt="">
                             <span>{{ $t('editor.setColors') }}</span>
