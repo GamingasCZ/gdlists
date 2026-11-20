@@ -233,7 +233,7 @@ function createFolder($mysqli, $uid, $name, $base = -1, $color = "#1A1C3C", $att
 }
 
 function checkArchive($mysqli, $acc) {
-    $isTime = doRequest($mysqli, "SELECT UNIX_TIMESTAMP(`until`) as 'left' FROM `timed_events` WHERE `uid`=? AND `event`='archival'", [$acc["id"]], "s");
+    $isTime = doRequest($mysqli, "SELECT UNIX_TIMESTAMP(`until`) as 'left' FROM `timed_events` WHERE `uid`=? AND `event`='archival' ORDER BY `left` DESC", [$acc["id"]], "s");
     if (is_null($isTime)) return true;
     if (array_key_exists("error", $isTime)) return false;
     if (time() - $isTime["left"] < 0) return false;
@@ -259,7 +259,7 @@ function makeArchive($mysqli, $acc, $name, $fromFolder) {
         $finalName = "";
         $currentFolder = $folderStructure[$folder["id"]];
         $finDepth = 0;
-        while (!is_null($currentFolder[1]) && ($finDepth++) < 1) {
+        while (!is_null($currentFolder[1]) && ($finDepth++) < 3) {
             $finalName = '/' . $currentFolder[0] . $finalName;
             $currentFolder = $folderStructure[$currentFolder[1]];
         }
@@ -267,25 +267,22 @@ function makeArchive($mysqli, $acc, $name, $fromFolder) {
         $folderStructure2[$folder["id"]] = '/' . $currentFolder[0] . $finalName . '/';
     }
 
-    if ($fromFolder == -1) { // Root folder
-        $images = doRequest($mysqli, "SELECT `hash`, `folder` FROM `images` WHERE `uploaderID`=?", [$acc["id"]], "s", true);
-        $path = getUserPath($acc["id"]);
-        foreach ($images as $image) {
-            $imPath = $path . "/" . $image["hash"] . ".webp";
-            if (is_file($imPath)) {
-                $outName = $image["hash"] . ".webp";
-                if (strlen($outName) == 45) // 45 = length of checksum+extension, doesn't look pretty
-                    $outName = date("\I\M\G_Ymd_His", filemtime($imPath)) . '_' . substr($image["hash"], 0, 5) . ".webp";
-                if (!is_null($image["folder"]))
-                    $outName = $folderStructure2[$image["folder"]] . $outName;
-                $zip->addFile($imPath, $outName);
-            }
+    // if ($fromFolder == -1) { // Root folder
+    $images = doRequest($mysqli, "SELECT `hash`, `folder` FROM `images` WHERE `uploaderID`=?", [$acc["id"]], "s", true);
+    $path = getUserPath($acc["id"]);
+    foreach ($images as $image) {
+        $imPath = $path . "/" . $image["hash"] . ".webp";
+        if (is_file($imPath)) {
+            $outName = $image["hash"] . ".webp";
+            if (strlen($outName) == 45) // 45 = length of checksum+extension, doesn't look pretty
+                $outName = date("\I\M\G_Ymd_His", filemtime($imPath)) . '_' . substr($image["hash"], 0, 5) . ".webp";
+            if (!is_null($image["folder"]))
+                $outName = $folderStructure2[$image["folder"]] . $outName;
+            $zip->addFile($imPath, $outName);
         }
-        
     }
-    else { // Subfolder
-
-    }
+    
+    // }
 
     $until = date("Y-m-d H:i:s", time() + 86400); // one day
     doRequest($mysqli, "INSERT INTO `timed_events`(`uid`, `until`, `event`) VALUES (?,?,'archival')", [$acc["id"], $until], "ss");
